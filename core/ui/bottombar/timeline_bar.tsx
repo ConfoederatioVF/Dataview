@@ -498,7 +498,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="text-xs font-medium text-foreground">{t.timeline.snap}</div>
-                            <div className="text-[10px] text-muted-foreground">Scrub only genuine raster dates</div>
+                            <div className="text-[10px] text-muted-foreground">{t.timeline.snapDescription}</div>
                           </div>
                           <button
                             type="button"
@@ -517,7 +517,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="text-xs font-medium text-foreground">{t.timeline.loop}</div>
-                            <div className="text-[10px] text-muted-foreground">Restart from beginning at end</div>
+                            <div className="text-[10px] text-muted-foreground">{t.timeline.loopDescription}</div>
                           </div>
                           <button
                             type="button"

@@ -52,6 +52,9 @@ export interface UseRasterPipelineResult {
   rasterVersion: number
   rawBytesA: Uint8Array | null
   rawBytesB: Uint8Array | null
+  setActiveFileName: React.Dispatch<React.SetStateAction<string>>
+  setDiffNameA: React.Dispatch<React.SetStateAction<string>>
+  setDiffNameB: React.Dispatch<React.SetStateAction<string>>
   setRasterA: React.Dispatch<React.SetStateAction<DecodedRaster | null>>
   setRasterB: React.Dispatch<React.SetStateAction<DecodedRaster | null>>
   setRasterVersion: React.Dispatch<React.SetStateAction<number>>
@@ -87,6 +90,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
   let active_layer_id_ref = useRef<string | null>(active_layer_id)
   let clear_cache: () => void
   let diff_name_a: string
+  let current_interp_years_ref = useRef<{ next_year: number; prev_year: number } | null>(null)
   let diff_name_b: string
   let display_raster: DecodedRaster | null
   let displayed_year_ref = useRef<number | null>(null)
@@ -127,6 +131,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
 
   clear_cache = useCallback(() => {
     raster_cache_ref.current.clear()
+    current_interp_years_ref.current = null
     last_interp_pair_ref.current = null
     last_interp_raster_ref.current = null
   }, [])
@@ -134,6 +139,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
   //Clear cache when performant mode is toggled
   useEffect(() => {
     raster_cache_ref.current.clear()
+    current_interp_years_ref.current = null
     last_interp_pair_ref.current = null
     last_interp_raster_ref.current = null
   }, [performant_mode])
@@ -150,6 +156,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           cache.delete(k)
       }
     }
+    current_interp_years_ref.current = null
     last_interp_pair_ref.current = null
     last_interp_raster_ref.current = null
   }, [active_layer_id])
@@ -242,10 +249,11 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
       let has_b = raster_cache_ref.current.has(cache_key_b)
 
       if (has_a && has_b) {
+        current_interp_years_ref.current = { next_year, prev_year }
         displayed_year_ref.current = timeline_year
         set_raster_a(raster_cache_ref.current.get(cache_key_a)!)
         set_raster_b(raster_cache_ref.current.get(cache_key_b)!)
-        set_active_file_name(`${requested_layer_id}_${timeline_year}.png`)
+        set_active_file_name('')
         set_raster_version((arg0_v) => arg0_v + 1)
         set_is_loading_raster(false)
         cullRasterCache(raster_cache_ref.current, performant_mode, [cache_key_a, cache_key_b], is_playing)
@@ -266,11 +274,12 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
               return
 
             if (arg0_primary) {
+              current_interp_years_ref.current = { next_year, prev_year }
               displayed_year_ref.current = timeline_year
               set_raster_a(arg0_primary)
               if (arg0_secondary)
                 set_raster_b(arg0_secondary)
-              set_active_file_name(`${requested_layer_id}_${timeline_year}.png`)
+              set_active_file_name('')
               set_raster_version((arg0_v) => arg0_v + 1)
               cullRasterCache(raster_cache_ref.current, performant_mode, [cache_key_a, cache_key_b], is_playing)
             }
@@ -284,12 +293,13 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           })
       }
     } else {
+      current_interp_years_ref.current = null
       if (raster_cache_ref.current.has(cache_key_a)) {
         let cached = raster_cache_ref.current.get(cache_key_a)!
         displayed_year_ref.current = primary_year
         set_raster_a(cached)
         set_raster_b(null)
-        set_active_file_name(`${requested_layer_id}_${primary_year}.png`)
+        set_active_file_name('')
         set_raster_version((arg0_v) => arg0_v + 1)
         set_is_loading_raster(false)
       } else {
@@ -320,7 +330,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
               displayed_year_ref.current = primary_year
               set_raster_a(arg0_primary)
               set_raster_b(null)
-              set_active_file_name(`${requested_layer_id}_${primary_year}.png`)
+              set_active_file_name('')
               set_raster_version((arg0_v) => arg0_v + 1)
               cullRasterCache(raster_cache_ref.current, performant_mode, cache_key_a, is_playing)
             }
@@ -334,6 +344,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           })
       }
     }
+
 
     //Prefetch upcoming keyframe only when performant mode is OFF and not playing to conserve RAM
     if (!performant_mode && !is_headless_export && !is_playing) {
@@ -397,7 +408,14 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           break
         }
       }
-      if (p_yr !== n_yr && timeline_year > p_yr && timeline_year < n_yr) {
+      if (
+        p_yr !== n_yr &&
+        timeline_year > p_yr &&
+        timeline_year < n_yr &&
+        current_interp_years_ref.current &&
+        current_interp_years_ref.current.prev_year === p_yr &&
+        current_interp_years_ref.current.next_year === n_yr
+      ) {
         let t = (timeline_year - p_yr)/(n_yr - p_yr)
         let last_interp = last_interp_pair_ref.current
 
@@ -442,6 +460,9 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
     rasterVersion: raster_version,
     rawBytesA: raw_bytes_a,
     rawBytesB: raw_bytes_b,
+    setActiveFileName: set_active_file_name,
+    setDiffNameA: set_diff_name_a,
+    setDiffNameB: set_diff_name_b,
     setRasterA: set_raster_a,
     setRasterB: set_raster_b,
     setRasterVersion: set_raster_version,

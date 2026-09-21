@@ -5,7 +5,7 @@
   // Comments and trailing commas are fully supported.
   // =========================================================================
   root_folders: {
-    age_sex: "${h3}/age_sex/4.composite_cohorts/",
+    age_sex: "${h3}/age_sex_counterfactuals/age_sex_GAM/4.composite_cohorts/",
     alcc: "${h2}/population_KK10LUH2/rasters_KK10LUH2/",
     h1: "${nwm}/histmap/1.data_raw/",
     h2: "${nwm}/histmap/2.data_cleaning/",

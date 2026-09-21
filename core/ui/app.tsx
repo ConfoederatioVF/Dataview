@@ -296,6 +296,9 @@ export let App: React.FC = function () {
     rasterVersion: raster_version,
     rawBytesA: raw_bytes_a,
     rawBytesB: raw_bytes_b,
+    setActiveFileName: set_active_file_name,
+    setDiffNameA: set_diff_name_a,
+    setDiffNameB: set_diff_name_b,
     setRasterA: set_raster_a,
     setRasterB: set_raster_b,
     setRasterVersion: set_raster_version,
@@ -469,14 +472,20 @@ export let App: React.FC = function () {
     if (target_layer?.type === 'vector.basemap' || layer_id === 'default_basemap' || layer_id === 'basemap_only')
       set_raster_a(null)
 
+    set_active_file_name('')
+    set_diff_name_a('')
+    set_diff_name_b('')
     set_max_val_override('')
     set_min_val_override('')
     set_raster_version((arg0_v: number) => arg0_v + 1)
   }, [
     active_variable_selectors,
     layers,
+    set_active_file_name,
     set_color_palette,
     set_data_format,
+    set_diff_name_a,
+    set_diff_name_b,
     set_historical_borders_config,
     set_invert_palette,
     set_legend_subtitle,
@@ -671,12 +680,15 @@ export let App: React.FC = function () {
         let decoded = await decodeRawGeoPngBufferAsync(uint8, data_format)
 
         if (target === 'single') {
+          set_active_file_name(file.name)
           set_raw_bytes_a(uint8)
           set_raster_a(decoded)
         } else if (target === 'diff_a') {
+          set_diff_name_a(file.name)
           set_raw_bytes_a(uint8)
           set_raster_a(decoded)
         } else if (target === 'diff_b') {
+          set_diff_name_b(file.name)
           set_raw_bytes_b(uint8)
           set_raster_b(decoded)
         }
@@ -685,7 +697,27 @@ export let App: React.FC = function () {
         console.error('Failed to load GeoPNG file:', arg0_err)
       }
     },
-    [data_format, set_raster_a, set_raster_b, set_raster_version, set_raw_bytes_a, set_raw_bytes_b]
+    [data_format, set_active_file_name, set_diff_name_a, set_diff_name_b, set_raster_a, set_raster_b, set_raster_version, set_raw_bytes_a, set_raw_bytes_b]
+  )
+
+  let handle_toggle_snap_to_keyframes = useCallback(
+    function (arg0_snap: boolean) {
+      let snap = arg0_snap
+      set_snap_to_keyframes(snap)
+      if (snap && available_keyframes.length > 0) {
+        let closest = available_keyframes[0]
+        let min_dist = Math.abs(timeline_year - closest)
+        for (let i = 1; i < available_keyframes.length; i++) {
+          let dist = Math.abs(timeline_year - available_keyframes[i])
+          if (dist < min_dist) {
+            min_dist = dist
+            closest = available_keyframes[i]
+          }
+        }
+        set_timeline_year(closest)
+      }
+    },
+    [available_keyframes, timeline_year]
   )
 
   let handle_force_refresh_analytics = useCallback(() => {
@@ -1098,8 +1130,9 @@ export let App: React.FC = function () {
           onChangeYear={set_timeline_year}
           onClose={() => set_active_mobile_tab(null)}
           onTogglePlay={() => set_is_playing((arg0_prev) => !arg0_prev)}
-          onToggleSnapToKeyframes={set_snap_to_keyframes}
+          onToggleSnapToKeyframes={handle_toggle_snap_to_keyframes}
           playbackSpeed={playback_speed}
+          snapToKeyframes={snap_to_keyframes}
           style={is_mobile ? {
             left: '8px',
             right: '8px',

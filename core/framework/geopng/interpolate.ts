@@ -63,13 +63,6 @@ export let interpolateRasters = function (
       continue
     }
 
-    if (filter_uninhabited) {
-      if (v_a <= 0 && v_b <= 0) {
-        out_data[i] = NaN
-        continue
-      }
-    }
-
     v_interp = v_a*weight_a + v_b*weight_b
     out_data[i] = v_interp
     valid_count++

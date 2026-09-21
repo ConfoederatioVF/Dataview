@@ -3,7 +3,7 @@
     synthetic_by_default: true,
     age_sex: {
         name: "Age/Sex",
-        filepath: "${age_sex}/${gender}_${age}_${year}.png",
+        filepath: "${age_sex}/global_${gender}_${age}_${year}.png",
         type: "raster.age_sex", //This needs to be displayed as a population pyramid in tooltips/raster analysis somehow
         unit: "Total",
         synthetic_by_default: true,

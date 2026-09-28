@@ -1,0 +1,26 @@
+{
+  "0": {
+    "agriculture": 52.2,
+    "informal_labour": 2.1,
+    "manufacturing": 29.9,
+    "services": 15.8,
+    "not_in_work": 24.3,
+    "lastModified": 1790631248614.782
+  },
+  "1750": {
+    "agriculture": 60.5,
+    "informal_labour": 3.3,
+    "manufacturing": 28.2,
+    "services": 8,
+    "not_in_work": 29.8,
+    "lastModified": 1790627516140.3528
+  },
+  "1800": {
+    "agriculture": 54.4,
+    "informal_labour": 5.1,
+    "manufacturing": 27.4,
+    "services": 13.2,
+    "not_in_work": 29.6,
+    "lastModified": 1790627548255.2073
+  }
+}

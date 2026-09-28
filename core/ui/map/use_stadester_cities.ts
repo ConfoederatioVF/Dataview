@@ -32,7 +32,7 @@ let in_flight_city_fetches = new Map<string, Promise<CityPoint[]>>()
  *
  * @param {string} arg0_dataset
  * @param {number} arg1_year
- * @param {number} [arg2_min_pop=0]
+ * @param {number} [arg2_min_pop=0.01]
  * @param {number} [arg3_max_cities=4000]
  * @param {string} [arg4_color_mode='growth']
  * @param {Map<string, CityPoint[]>} [arg5_cache]
@@ -54,7 +54,7 @@ export async function fetchStadesterCitiesAsync (
   //Convert from parameters
   let dataset = arg0_dataset || 'stadester_1.1'
   let year = Math.round(arg1_year)
-  let min_pop = (arg2_min_pop !== undefined) ? arg2_min_pop : 0
+  let min_pop = (arg2_min_pop !== undefined) ? Math.max(0.01, arg2_min_pop) : 0.01
   let max_cities = (arg3_max_cities !== undefined) ? arg3_max_cities : 4000
   let color_mode = arg4_color_mode || 'growth'
   let cache = arg5_cache
@@ -94,6 +94,8 @@ export async function fetchStadesterCitiesAsync (
       if (data.coords && data.keys) {
         let count = data.count || data.keys.length
         for (let i = 0; i < count; i++) {
+          if (data.pops[i] < 0.01)
+            continue
           city_list.push({
             coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
             country: data.countries ? data.countries[i] : undefined,
@@ -106,7 +108,7 @@ export async function fetchStadesterCitiesAsync (
           })
         }
       } else if (Array.isArray(data.cities)) {
-        city_list = data.cities
+        city_list = data.cities.filter((arg0_c: CityPoint) => arg0_c && arg0_c.population >= 0.01)
       }
 
       if (cache) {
@@ -152,7 +154,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
   let enabled = (cfg !== undefined) ? cfg.enabled : Boolean(options.enabled)
   let is_playing = Boolean(options.isPlaying)
   let max_cities = (cfg?.maxCities !== undefined) ? cfg.maxCities : ((options.maxCities !== undefined) ? options.maxCities : 4000)
-  let min_pop = (cfg?.minPop !== undefined) ? cfg.minPop : ((options.minPop !== undefined) ? options.minPop : 0)
+  let min_pop = (cfg?.minPop !== undefined) ? Math.max(0.01, cfg.minPop) : ((options.minPop !== undefined) ? Math.max(0.01, options.minPop) : 0.01)
   let performant_mode = Boolean(options.performantMode)
   let year = (options.year !== undefined) ? options.year : 1950
 

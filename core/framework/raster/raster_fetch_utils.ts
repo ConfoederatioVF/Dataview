@@ -277,7 +277,13 @@ export async function fetchSingleDecodedRasterAsync (
 
       let buf = await resp.arrayBuffer()
       let uint8 = new Uint8Array(buf)
-      let decoded = await decodeRawGeoPngBufferAsync(uint8, format)
+      let is_stadester_layer = layer_id === 'population_total' ||
+        layer_id === 'population_rural' ||
+        layer_id === 'population_urban' ||
+        layer_id === 'population_density' ||
+        layer_id.includes('stadester')
+      let min_threshold = is_stadester_layer ? 0.01 : undefined
+      let decoded = await decodeRawGeoPngBufferAsync(uint8, format, min_threshold)
 
       //Apply pixel offset if configured
       if (typeof pixel_offset === 'number' && pixel_offset !== 0) {
@@ -295,7 +301,13 @@ export async function fetchSingleDecodedRasterAsync (
             let cov_resp = await fetch(`/api/raster/file?layer=${covariate_id}&year=${year.toString()}`, { signal })
             if (cov_resp.ok) {
               let cov_buf = await cov_resp.arrayBuffer()
-              raw_covariate = await decodeRawGeoPngBufferAsync(new Uint8Array(cov_buf), format)
+              let is_cov_stadester = covariate_id === 'population_total' ||
+                covariate_id === 'population_rural' ||
+                covariate_id === 'population_urban' ||
+                covariate_id === 'population_density' ||
+                covariate_id.includes('stadester')
+              let cov_threshold = is_cov_stadester ? 0.01 : undefined
+              raw_covariate = await decodeRawGeoPngBufferAsync(new Uint8Array(cov_buf), format, cov_threshold)
               if (!performant_mode)
                 cache.set(raw_key, raw_covariate)
             }
@@ -326,7 +338,7 @@ export async function fetchSingleDecodedRasterAsync (
 
               let rural = Math.max(0, (Number.isNaN(t_val) ? 0 : t_val) - (Number.isNaN(c_val) ? 0 : c_val))
 
-              if ((rural <= 0 || Number.isNaN(rural)) && !Number.isNaN(c_val) && c_val > 0 && Number.isNaN(sc_val)) {
+              if ((rural < 0.01 || Number.isNaN(rural)) && !Number.isNaN(c_val) && c_val >= 0.01 && Number.isNaN(sc_val)) {
                 let count = 0
                 let sum = 0
                 for (let dr = -2; dr <= 2; dr++) {
@@ -339,7 +351,7 @@ export async function fetchSingleDecodedRasterAsync (
                         let ni = n_row_offset + nc
                         let nu = cov_data[ni]
                         let nt = tot_data[ni]
-                        if (Number.isNaN(nu) && !Number.isNaN(nt) && nt > 0) {
+                        if (Number.isNaN(nu) && !Number.isNaN(nt) && nt >= 0.01) {
                           sum += nt
                           count++
                         }
@@ -352,7 +364,7 @@ export async function fetchSingleDecodedRasterAsync (
               }
 
               let tot = rural + (Number.isNaN(sc_val) ? 0 : sc_val)
-              if (tot > 0)
+              if (tot >= 0.01)
                 new_total[i] = tot
             }
           }
@@ -360,13 +372,40 @@ export async function fetchSingleDecodedRasterAsync (
         }
       }
 
+      //Mask uninhabited cells (<0.01) in Stadestér population rasters
+      if (is_stadester_layer) {
+        let d = decoded.data
+        let len = d.length
+        let has_under_threshold = false
+        for (let i = 0; i < len; i++) {
+          let p = d[i]
+          if (!Number.isNaN(p) && p < 0.01) {
+            d[i] = NaN
+            has_under_threshold = true
+          }
+        }
+        if (has_under_threshold)
+          decoded = buildDecodedRasterResult(d, decoded.width, decoded.height)
+      }
+
+      let is_pop_layer = (
+        layer_id === 'population_total' ||
+        layer_id.endsWith('.population_total') ||
+        layer_id === 'population_rural' ||
+        layer_id.endsWith('.population_rural') ||
+        layer_id === 'population_urban' ||
+        layer_id.endsWith('.population_urban') ||
+        layer_id === 'population_density' ||
+        layer_id.endsWith('.population_density')
+      )
+
       //Mask uninhabited cells as NaN if layer requires human habitation
-      if (!can_be_uninhabited && layer_id !== 'population_total' && !layer_id.endsWith('.population_total')) {
+      if (!can_be_uninhabited && !is_pop_layer) {
         let pop_raster = await fetchSingleDecodedRasterAsync(
           'population_total',
           year,
           {},
-          'int32',
+          'float32',
           cache,
           false,
           undefined,
@@ -380,7 +419,7 @@ export async function fetchSingleDecodedRasterAsync (
           let len = d.length
           for (let i = 0; i < len; i++) {
             let p = pop_data[i]
-            if (p <= 0 || Number.isNaN(p))
+            if (p < 0.01 || Number.isNaN(p))
               d[i] = NaN
           }
           decoded = buildDecodedRasterResult(d, decoded.width, decoded.height)

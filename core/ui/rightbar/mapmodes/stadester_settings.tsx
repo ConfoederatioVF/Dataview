@@ -12,7 +12,7 @@ export interface StadesterSettingsProps {
 }
 
 let MIN_POP_PRESETS = [
-  { label: 'All', value: 0 },
+  { label: 'All', value: 0.01 },
   { label: '5k+', value: 5000 },
   { label: '10k+', value: 10000 },
   { label: '50k+', value: 50000 },
@@ -227,12 +227,12 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           <div className="flex items-center gap-1 font-mono">
             <input
               type="number"
-              min={0}
+              min={0.01}
               max={10000000}
               step={1000}
-              value={min_pop}
+              value={min_pop <= 0.01 ? 0.01 : min_pop}
               onChange={(arg0_e) => {
-                let v = Math.max(0, parseInt(arg0_e.target.value, 10) || 0)
+                let v = Math.max(0.01, parseFloat(arg0_e.target.value) || 0.01)
                 on_change_config((arg0_prev) => ({ ...arg0_prev, minPop: v }))
               }}
               className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-xs font-mono text-foreground"
@@ -240,18 +240,19 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           </div>
         </div>
         <Slider
-          value={[Math.min(1000000, min_pop)]}
+          value={[Math.min(1000000, Math.max(0, min_pop))]}
           min={0}
           max={500000}
           step={5000}
           onValueChange={(arg0_vals: number[]) => {
-            on_change_config((arg0_prev) => ({ ...arg0_prev, minPop: arg0_vals[0] }))
+            let next_val = arg0_vals[0] <= 0 ? 0.01 : arg0_vals[0]
+            on_change_config((arg0_prev) => ({ ...arg0_prev, minPop: next_val }))
           }}
         />
         {/* Preset chips for Min Pop */}
         <div className="flex items-center gap-1 flex-wrap pt-0.5">
           {MIN_POP_PRESETS.map((arg0_preset) => {
-            let is_sel = min_pop === arg0_preset.value
+            let is_sel = (arg0_preset.value === 0.01 && (min_pop === 0 || min_pop <= 0.01)) || min_pop === arg0_preset.value
             return (
               <button
                 key={arg0_preset.value}

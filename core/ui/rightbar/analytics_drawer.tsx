@@ -432,6 +432,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                       currentYear={current_year}
                       activeVariableSelectors={active_variable_selectors}
                       inspectData={inspect_data}
+                      isMobile={is_mobile}
                       usePlaceholder={use_placeholder_pyramid}
                       onTogglePlaceholder={set_use_placeholder_pyramid}
                       syntheticByDefault={active_layer?.synthetic_by_default}

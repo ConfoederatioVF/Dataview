@@ -251,11 +251,13 @@ export function computeRasterDifference (
  */
 export function decodeRawGeoPngBuffer (
   arg0_buffer: ArrayBuffer | Uint8Array,
-  arg1_format: DataFormat
+  arg1_format: DataFormat,
+  arg2_min_threshold?: number
 ): DecodedRaster {
   //Convert from parameters
   let buffer = arg0_buffer
   let format = arg1_format
+  let min_threshold = arg2_min_threshold
 
   //Declare local instance variables
   let can_use_fast_u32: boolean
@@ -304,7 +306,7 @@ export function decodeRawGeoPngBuffer (
         output_u32[i] = ((raw & 0xff) << 24) | ((raw & 0xff00) << 8) | ((raw >>> 8) & 0xff00) | (raw >>> 24)
         let val = output[i]
 
-        if (!Number.isNaN(val) && val !== 0 && Number.isFinite(val)) {
+        if (!Number.isNaN(val) && val !== 0 && (min_threshold === undefined || val >= min_threshold) && Number.isFinite(val)) {
           if (val < min)
             min = val
           if (val > max)
@@ -347,7 +349,7 @@ export function decodeRawGeoPngBuffer (
       if (channels >= 4) {
         if (format === 'float32') {
           val = dv.getFloat32(byte_offset, false)
-          if (Number.isNaN(val) || val === 0)
+          if (Number.isNaN(val) || val === 0 || (min_threshold !== undefined && val < min_threshold))
             val = Number.NaN
         } else {
           let a = pixel_bytes[byte_offset + 3]
@@ -368,7 +370,7 @@ export function decodeRawGeoPngBuffer (
           shared_view.setUint8(2, b)
           shared_view.setUint8(3, 0)
           val = shared_view.getFloat32(0, false)
-          if (Number.isNaN(val) || val === 0)
+          if (Number.isNaN(val) || val === 0 || (min_threshold !== undefined && val < min_threshold))
             val = Number.NaN
         } else {
           val = ((r << 16) | (g << 8) | b) >>> 0
@@ -426,11 +428,13 @@ export function decodeRawGeoPngBuffer (
  */
 export async function decodeRawGeoPngBufferAsync (
   arg0_buffer: ArrayBuffer | Uint8Array,
-  arg1_format: DataFormat
+  arg1_format: DataFormat,
+  arg2_min_threshold?: number
 ): Promise<DecodedRaster> {
   //Convert from parameters
   let buffer = arg0_buffer
   let format = arg1_format
+  let min_threshold = arg2_min_threshold
 
   //Declare local instance variables
   let worker = getDecoderWorker()
@@ -446,18 +450,18 @@ export async function decodeRawGeoPngBufferAsync (
     return new Promise<DecodedRaster>((arg0_resolve, arg1_reject) => {
       pending_decoder_requests.set(req_id, { reject: arg1_reject, resolve: arg0_resolve })
       try {
-        worker.postMessage({ buffer: array_buf, format, reqId: req_id }, [array_buf])
+        worker.postMessage({ buffer: array_buf, format, minThreshold: min_threshold, reqId: req_id }, [array_buf])
       } catch {
-        worker.postMessage({ buffer: array_buf, format, reqId: req_id })
+        worker.postMessage({ buffer: array_buf, format, minThreshold: min_threshold, reqId: req_id })
       }
     }).catch((arg0_err) => {
       console.warn('Worker decoding failed, falling back to sync:', arg0_err)
-      return decodeRawGeoPngBuffer(buffer, format)
+      return decodeRawGeoPngBuffer(buffer, format, min_threshold)
     })
   }
 
   //Return statement
-  return decodeRawGeoPngBuffer(buffer, format)
+  return decodeRawGeoPngBuffer(buffer, format, min_threshold)
 }
 
 /**

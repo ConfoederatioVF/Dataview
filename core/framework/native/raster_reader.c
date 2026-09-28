@@ -290,11 +290,12 @@ int main(int argc, char* argv[]) {
         total_male = round1(total_male);
         double total_pop = youth_count + working_count + old_count;
         double sex_ratio = total_female > 0.0 ? round1((total_male / total_female) * 1000.0) / 1000.0 : 1.0;
-        double dependency_ratio = total_pop > 0.0 ? round1(((youth_count + old_count) / total_pop) * 1000.0) / 10.0 : 35.0;
+        double old_age_dependency_ratio = working_count > 0.0 ? round1((old_count / working_count) * 1000.0) / 10.0 : 15.0;
 
         printf("{\n");
         printf("  \"country\": \"%s\",\n", is_global ? "Global" : country);
-        printf("  \"dependencyRatio\": %.1f,\n", dependency_ratio);
+        printf("  \"dependencyRatio\": %.1f,\n", old_age_dependency_ratio);
+        printf("  \"oldAgeDependencyRatio\": %.1f,\n", old_age_dependency_ratio);
         printf("  \"female\": {");
         for (int i = 0; i < NUM_COHORTS; i++) {
             printf("\"%s\":%.1f%s", AGE_COHORTS[i], f_thousands[i], (i < NUM_COHORTS - 1) ? "," : "");

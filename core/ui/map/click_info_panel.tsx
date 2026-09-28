@@ -301,7 +301,7 @@ export let ClickInfoPanel: React.FC<ClickInfoPanelProps> = React.memo(function (
       )}
 
       {/* 2. Appended Stadestér City Section */}
-      {has_stadester && hovered_city && (
+      {has_stadester && hovered_city && hovered_city.population >= 0.01 && (
         <div className={has_raster ? 'pt-1.5 mt-1.5 border-t border-border/60' : ''}>
           <div className="font-semibold text-white flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-primary shrink-0" />

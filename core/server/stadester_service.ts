@@ -316,7 +316,7 @@ export let StadesterService = {
     let all_city_keys: string[]
     let indexed = StadesterService.loadDataset(dataset_name)
     let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
-    let min_pop = options.min_pop !== undefined ? options.min_pop : 0
+    let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
     let result_cities: CityRenderPoint[] = []
 
     //Guard clauses
@@ -384,14 +384,17 @@ export let StadesterService = {
         let p0 = city.population ? (city.population[String(prev_yr)] || 0) : 0
         let p1 = city.population ? (city.population[String(next_yr)] || 0) : 0
 
-        if (p0 > 0 && p1 > 0 && next_yr > prev_yr) {
+        if (p0 >= 0.01 && p1 >= 0.01 && next_yr > prev_yr) {
           let t = (target_year - prev_yr)/(next_yr - prev_yr)
           let log_val = Math.log10(p0) + t*(Math.log10(p1) - Math.log10(p0))
-          pop = Math.round(Math.pow(10, log_val))
-        } else if (p1 > 0) {
+          let calc_pop = Math.pow(10, log_val)
+          pop = calc_pop >= 1 ? Math.round(calc_pop) : Math.round(calc_pop * 1000) / 1000
+        } else if (p1 >= 0.01) {
           pop = p1
-        } else {
+        } else if (p0 >= 0.01) {
           pop = p0
+        } else {
+          pop = 0
         }
       }
 
@@ -419,12 +422,12 @@ export let StadesterService = {
         let gp0 = city.population[String(g_prev_yr)] || 0
         let gp1 = city.population[String(g_next_yr)] || 0
 
-        if (gp0 > 0 && gp1 > 0 && g_next_yr > g_prev_yr) {
+        if (gp0 >= 0.01 && gp1 >= 0.01 && g_next_yr > g_prev_yr) {
           growth_rate = Math.pow(gp1/gp0, 1/(g_next_yr - g_prev_yr)) - 1
         }
       }
 
-      if (pop < min_pop || pop <= 0)
+      if (pop < min_pop || pop < 0.01)
         continue
 
       //Resolve area and density at target year if available
@@ -557,7 +560,7 @@ export let StadesterService = {
     let year = arg1_year !== undefined ? arg1_year : 1950
 
     //Declare local instance variables
-    let raw_cities = StadesterService.getCitiesAtYear(dataset_name, year, { max_cities: limit, min_pop: 0 })
+    let raw_cities = StadesterService.getCitiesAtYear(dataset_name, year, { max_cities: limit, min_pop: 0.01 })
 
     //Function body
     for (let i = 0; i < raw_cities.length; i++) {

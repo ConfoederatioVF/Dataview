@@ -234,6 +234,8 @@ export interface LocalisationConfig {
     noRasterDesc: string
     noRasterLoaded: string
     noSettlementsRecorded: string
+    oldAgeDependencyRatio: string
+    oldAgeDependencyTooltip: string
     polygonCells: string
     population: string
     pyramid: string

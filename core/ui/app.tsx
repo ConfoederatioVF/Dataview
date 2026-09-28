@@ -174,7 +174,7 @@ export let App: React.FC = function () {
     halo: false,
     labelCollision: true,
     maxCities: 4000,
-    minPop: 0,
+    minPop: 0.01,
     opacity: 0.7,
     showLabels: true,
   })

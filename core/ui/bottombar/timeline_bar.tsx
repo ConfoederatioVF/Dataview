@@ -403,7 +403,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
       }}
       className={`${is_mobile ? 'fixed' : 'absolute'} z-30 pointer-events-auto select-none font-sans`}
     >
-      <div className="bg-card/95 backdrop-blur-md border border-border shadow-2xl p-2.5 transition-all">
+      <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl p-2.5 transition-all">
         {/* Top Header Row: Date Badge, Controls, & Settings */}
         {is_mobile ? (
           <div className="flex flex-col gap-2 pb-2 border-b border-border/60">
@@ -441,11 +441,11 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                 </button>
 
                 {/* Settings Pop-out Toggle */}
-                <div className="relative shrink-0" ref={settings_popover_ref}>
+                <div className="shrink-0" ref={settings_popover_ref}>
                   <button
                     type="button"
                     onClick={() => set_is_settings_open((arg0_prev) => !arg0_prev)}
-                    className={`h-7 w-7 flex items-center justify-center border transition-colors cursor-pointer ${
+                    className={`h-7 w-7 flex items-center justify-center border transition-colors cursor-pointer shrink-0 ${
                       is_settings_open
                         ? 'bg-primary text-primary-foreground border-primary'
                         : 'bg-muted/60 hover:bg-muted text-foreground border border-border'
@@ -457,7 +457,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
                   {/* Settings Pop-out Dialog */}
                   {is_settings_open && (
-                    <div className="absolute bottom-9 left-0 z-50 w-72 bg-card/95 backdrop-blur-md border border-border p-3 shadow-2xl space-y-3">
+                    <div className="absolute bottom-full mb-2 left-0 right-0 mx-auto w-full max-w-sm z-50 bg-card/95 backdrop-blur-md border border-border p-3 shadow-2xl space-y-3">
                       <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
                         <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                           <Icon name="settings" className="text-sm text-primary" />
@@ -466,7 +466,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                         <button
                           type="button"
                           onClick={() => set_is_settings_open(false)}
-                          className="text-muted-foreground hover:text-foreground text-xs cursor-pointer"
+                          className="text-muted-foreground hover:text-foreground text-xs cursor-pointer p-0.5"
                         >
                           <Icon name="close" className="text-xs" />
                         </button>
@@ -495,15 +495,15 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
                       {/* Keyframe Snapping */}
                       <div className="pt-2 border-t border-border/40">
-                        <div className="flex items-center justify-between">
-                          <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 pr-2">
                             <div className="text-xs font-medium text-foreground">{t.timeline.snap}</div>
-                            <div className="text-[10px] text-muted-foreground">{t.timeline.snapDescription}</div>
+                            <div className="text-[10px] text-muted-foreground leading-tight">{t.timeline.snapDescription}</div>
                           </div>
                           <button
                             type="button"
                             onClick={() => on_toggle_snap_to_keyframes && on_toggle_snap_to_keyframes(!snap_to_keyframes)}
-                            className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer ${
+                            className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
                               snap_to_keyframes ? 'bg-primary justify-end' : 'bg-muted justify-start border border-border'
                             }`}
                           >
@@ -514,15 +514,15 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
                       {/* Loop Playback */}
                       <div className="pt-2 border-t border-border/40">
-                        <div className="flex items-center justify-between">
-                          <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0 pr-2">
                             <div className="text-xs font-medium text-foreground">{t.timeline.loop}</div>
-                            <div className="text-[10px] text-muted-foreground">{t.timeline.loopDescription}</div>
+                            <div className="text-[10px] text-muted-foreground leading-tight">{t.timeline.loopDescription}</div>
                           </div>
                           <button
                             type="button"
                             onClick={() => set_is_looping((arg0_prev) => !arg0_prev)}
-                            className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer ${
+                            className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
                               is_looping ? 'bg-primary justify-end' : 'bg-muted justify-start border border-border'
                             }`}
                           >
@@ -536,7 +536,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
                 {/* Loading Indicator */}
                 {loading_visible && (
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/15 border border-primary/40 text-primary text-[10px] font-mono shadow-xs truncate">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/15 border border-primary/40 text-primary text-[10px] font-mono shadow-xs truncate shrink min-w-0">
                     <Icon name="sync" className={`text-xs ${is_loading ? 'animate-spin' : ''}`} />
                     <span>{loading_pct >= 100 ? t.timeline.rasterReady : `${loading_pct}%`}</span>
                   </div>
@@ -647,7 +647,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
                 {/* Settings Pop-out Dialog */}
                 {is_settings_open && (
-                  <div className="absolute bottom-9 left-0 z-50 w-72 bg-card/95 backdrop-blur-md border border-border p-3 shadow-2xl space-y-3">
+                  <div className="absolute bottom-9 left-0 z-50 w-72 max-w-[calc(100vw-32px)] bg-card/95 backdrop-blur-md border border-border p-3 shadow-2xl space-y-3">
                     <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
                       <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                         <Icon name="settings" className="text-sm text-primary" />

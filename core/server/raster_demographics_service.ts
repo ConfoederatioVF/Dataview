@@ -29,6 +29,7 @@ export interface DemographicCohortResult {
   female: Record<string, number>
   lastModified?: number
   male: Record<string, number>
+  oldAgeDependencyRatio?: number
   sexRatio: number
   totalFemale: number
   totalMale: number
@@ -630,12 +631,12 @@ export function calculateDemographicPyramid (arg0_options: {
 
   //Declare local instance variables
   let baked: DemographicCohortResult | undefined
-  let dependency_ratio: number
   let female_map: Record<string, number> = {}
   let is_global: boolean
   let keyframe_year: number
   let male_map: Record<string, number> = {}
   let native_res: any
+  let old_age_dependency_ratio: number
   let old_count = 0
   let rasters: { f: Record<string, Float32Array>; m: Record<string, Float32Array> } | null
   let result_payload: DemographicCohortResult
@@ -644,7 +645,6 @@ export function calculateDemographicPyramid (arg0_options: {
   let spans: ScanlineSpan[] = []
   let total_female = 0
   let total_male = 0
-  let total_pop: number
   let working_count = 0
   let youth_count = 0
   let yr_str: string
@@ -670,12 +670,14 @@ export function calculateDemographicPyramid (arg0_options: {
   //Check baked global cache first
   if (is_global && baked_global_demographics[yr_str]) {
     baked = baked_global_demographics[yr_str]
+    let baked_oadr = baked.oldAgeDependencyRatio !== undefined ? baked.oldAgeDependencyRatio : baked.dependencyRatio
     return {
       country: 'Global',
-      dependencyRatio: baked.dependencyRatio,
+      dependencyRatio: baked_oadr,
       female: baked.female,
       lastModified: baked.lastModified,
       male: baked.male,
+      oldAgeDependencyRatio: baked_oadr,
       sexRatio: baked.sexRatio,
       totalFemale: baked.totalFemale,
       totalMale: baked.totalMale,
@@ -697,12 +699,14 @@ export function calculateDemographicPyramid (arg0_options: {
   })
 
   if (native_res && native_res.female && native_res.male) {
+    let native_oadr = native_res.oldAgeDependencyRatio !== undefined ? native_res.oldAgeDependencyRatio : native_res.dependencyRatio
     result_payload = {
       country: is_global ? 'Global' : country_name,
-      dependencyRatio: native_res.dependencyRatio,
+      dependencyRatio: native_oadr,
       female: native_res.female,
       lastModified: source_max_mtime,
       male: native_res.male,
+      oldAgeDependencyRatio: native_oadr,
       sexRatio: native_res.sexRatio,
       totalFemale: native_res.totalFemale,
       totalMale: native_res.totalMale,
@@ -757,16 +761,16 @@ export function calculateDemographicPyramid (arg0_options: {
     }
   }
 
-  total_pop = youth_count + working_count + old_count
   sex_ratio = total_female > 0 ? Math.round((total_male/total_female)*1000)/1000 : 1.0
-  dependency_ratio = total_pop > 0 ? Math.round(((youth_count + old_count)/total_pop)*1000)/10 : 35.0
+  old_age_dependency_ratio = working_count > 0 ? Math.round((old_count/working_count)*1000)/10 : 15.0
 
   result_payload = {
     country: is_global ? 'Global' : country_name,
-    dependencyRatio: dependency_ratio,
+    dependencyRatio: old_age_dependency_ratio,
     female: female_map,
     lastModified: source_max_mtime,
     male: male_map,
+    oldAgeDependencyRatio: old_age_dependency_ratio,
     sexRatio: sex_ratio,
     totalFemale: Math.round(total_female*10)/10,
     totalMale: Math.round(total_male*10)/10,

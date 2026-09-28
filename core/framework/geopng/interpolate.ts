@@ -20,7 +20,6 @@ export let interpolateRasters = function (
   arg4_target_buffer?: Float32Array
 ): DecodedRaster {
   //Convert from parameters
-  let filter_uninhabited = Boolean(arg3_filter_uninhabited)
   let r_a = arg0_raster_a
   let r_b = arg1_raster_b
   let t = Math.max(0, Math.min(1, arg2_t))
@@ -58,7 +57,7 @@ export let interpolateRasters = function (
     v_a = a_data[i]
     v_b = b_data[i]
 
-    if (Number.isNaN(v_a) || Number.isNaN(v_b) || v_a <= -9999 || v_b <= -9999) {
+    if (Number.isNaN(v_a) || Number.isNaN(v_b)) {
       out_data[i] = NaN
       continue
     }

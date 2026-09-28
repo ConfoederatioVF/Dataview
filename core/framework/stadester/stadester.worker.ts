@@ -255,7 +255,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let thresholds = getZoomPopulationThreshold(zoom, projection)
       let era_floor = getEraDisplayFloor(current_year)
       let norm_zoom = (is_cartesian) ? (zoom - 1.2) : ((is_globe) ? (zoom - 1.65) : zoom)
-      let effective_min_pop = (norm_zoom >= 4.5) ? 0 : Math.max(thresholds.bubbleMinPop, era_floor)
+      let effective_min_pop = Math.max(0.01, (norm_zoom >= 4.5) ? 0.01 : Math.max(thresholds.bubbleMinPop, era_floor))
       let bbox = computeViewportBoundingBox(view_state, projection, window_w, window_h)
       let [w, s, east_bound, n] = bbox
 
@@ -287,7 +287,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           }
         }
 
-        if (c.population < effective_min_pop)
+        if (c.population < effective_min_pop || c.population < 0.01)
           continue
 
         let fill_color: [number, number, number, number] = [255, 255, 255, 220]

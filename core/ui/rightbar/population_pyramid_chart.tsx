@@ -19,6 +19,7 @@ export interface PopulationPyramidChartProps {
     pixelY: number
     value: number | null
   } | null
+  isMobile?: boolean
   onTogglePlaceholder?: (arg0_val: boolean) => void
   raster: DecodedRaster | null
   selectedCountries?: CountryFeature[]
@@ -70,6 +71,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     countryStats: country_stats,
     currentYear: current_year,
     inspectData: inspect_data,
+    isMobile: is_mobile_prop = false,
     onTogglePlaceholder: on_toggle_placeholder,
     raster,
     selectedCountries: selected_countries = [],
@@ -81,7 +83,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   //Declare local instance variables
   let active_country_name: string | null
   let container_ref = useRef<HTMLDivElement>(null)
-  let dependency_ratio: number
+  let container_width: number
   let echart_ref = useRef<any>(null)
   let effective_countries: CountryFeature[]
   let effective_use_placeholder: boolean
@@ -89,22 +91,26 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let format: ReturnType<typeof useLocalisation>['format']
   let handle_toggle_placeholder: (arg0_val: boolean) => void
   let is_loading: boolean
+  let is_narrow: boolean
   let is_refining: boolean
   let is_use_placeholder: boolean
   let localisation: ReturnType<typeof useLocalisation>
   let male_values: number[]
+  let old_age_dependency_ratio: number
   let option: any
   let pyramid_data: { female: Record<string, number>; male: Record<string, number> } | null
+  let raw_old_age_dependency_ratio: number
   let refine_duration_estimate_ref = useRef<number>(3.5)
   let refine_start_time_ref = useRef<number>(0)
   let refining_pct: number
   let refining_time_remaining: number
   let set_active_country_name: React.Dispatch<React.SetStateAction<string | null>>
-  let set_dependency_ratio: React.Dispatch<React.SetStateAction<number>>
+  let set_container_width: React.Dispatch<React.SetStateAction<number>>
   let set_internal_use_placeholder: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_loading: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_refining: React.Dispatch<React.SetStateAction<boolean>>
   let set_pyramid_data: React.Dispatch<React.SetStateAction<{ female: Record<string, number>; male: Record<string, number> } | null>>
+  let set_raw_old_age_dependency_ratio: React.Dispatch<React.SetStateAction<number>>
   let set_refining_pct: React.Dispatch<React.SetStateAction<number>>
   let set_refining_time_remaining: React.Dispatch<React.SetStateAction<number>>
   let set_sex_ratio: React.Dispatch<React.SetStateAction<number>>
@@ -112,15 +118,13 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let set_total_male: React.Dispatch<React.SetStateAction<number>>
   let sex_ratio: number
   let t: ReturnType<typeof useLocalisation>['t']
+  let total_female: number
+  let total_male: number
 
   //Function body
   localisation = useLocalisation()
   format = localisation.format
   t = localisation.t
-  let total_female: number
-  let total_male: number
-
-  //Function body
   effective_countries = useMemo(() => {
     if (selected_countries && selected_countries.length > 0)
       return selected_countries
@@ -132,6 +136,11 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     ;[active_country_name, set_active_country_name] = useState<string | null>(
       effective_countries.length > 0 ? getFeatureEntityName(effective_countries[effective_countries.length - 1]) : null
     )
+    ;[container_width, set_container_width] = useState<number>(() => {
+      if (typeof window !== 'undefined')
+        return window.innerWidth < 768 ? window.innerWidth : 640
+      return 640
+    })
     ;[is_use_placeholder, set_internal_use_placeholder] = useState<boolean>(
       controlled_use_placeholder !== undefined ? controlled_use_placeholder : synthetic_by_default
     )
@@ -143,9 +152,10 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     ;[total_male, set_total_male] = useState<number>(0)
     ;[total_female, set_total_female] = useState<number>(0)
     ;[sex_ratio, set_sex_ratio] = useState<number>(1.0)
-    ;[dependency_ratio, set_dependency_ratio] = useState<number>(50.0)
+    ;[raw_old_age_dependency_ratio, set_raw_old_age_dependency_ratio] = useState<number>(15.0)
 
   effective_use_placeholder = controlled_use_placeholder !== undefined ? controlled_use_placeholder : is_use_placeholder
+  is_narrow = Boolean(is_mobile_prop || container_width < 500)
 
   handle_toggle_placeholder = function (arg0_val: boolean) {
     if (on_toggle_placeholder)
@@ -177,7 +187,11 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     set_total_male(synthetic.totalMale)
     set_total_female(synthetic.totalFemale)
     set_sex_ratio(synthetic.sexRatio)
-    set_dependency_ratio(synthetic.dependencyRatio)
+    set_raw_old_age_dependency_ratio(
+      synthetic.oldAgeDependencyRatio !== undefined
+        ? synthetic.oldAgeDependencyRatio
+        : synthetic.dependencyRatio
+    )
 
     //If placeholder is enabled, do not query the backend API
     if (effective_use_placeholder) {
@@ -255,8 +269,11 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
             set_total_female(arg0_json.totalFemale)
           if (arg0_json.sexRatio !== undefined)
             set_sex_ratio(arg0_json.sexRatio)
-          if (arg0_json.dependencyRatio !== undefined)
-            set_dependency_ratio(arg0_json.dependencyRatio)
+          if (arg0_json.oldAgeDependencyRatio !== undefined) {
+            set_raw_old_age_dependency_ratio(arg0_json.oldAgeDependencyRatio)
+          } else if (arg0_json.dependencyRatio !== undefined) {
+            set_raw_old_age_dependency_ratio(arg0_json.dependencyRatio)
+          }
         }
         set_refining_pct(100)
         set_refining_time_remaining(0)
@@ -293,19 +310,34 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       }
     }
 
-    let observer = new ResizeObserver(() => {
+    let observer = new ResizeObserver((arg0_entries) => {
+      for (let i = 0; i < arg0_entries.length; i++) {
+        let entry = arg0_entries[i]
+        let width = entry.contentRect.width
+        if (width > 0)
+          set_container_width(Math.round(width))
+      }
       requestAnimationFrame(trigger_resize)
     })
     observer.observe(container)
+
+    if (container.clientWidth > 0)
+      set_container_width(container.clientWidth)
 
     trigger_resize()
     let t1 = setTimeout(trigger_resize, 100)
     let t2 = setTimeout(trigger_resize, 300)
 
-    window.addEventListener('resize', trigger_resize)
+    let handle_window_resize = function () {
+      if (container_ref.current && container_ref.current.clientWidth > 0)
+        set_container_width(container_ref.current.clientWidth)
+      trigger_resize()
+    }
+
+    window.addEventListener('resize', handle_window_resize)
     return () => {
       observer.disconnect()
-      window.removeEventListener('resize', trigger_resize)
+      window.removeEventListener('resize', handle_window_resize)
       clearTimeout(t1)
       clearTimeout(t2)
     }
@@ -323,11 +355,40 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     return AGE_COHORTS.map((arg0_c) => pyramid_data!.female[arg0_c.id] || 0)
   }, [pyramid_data])
 
+  old_age_dependency_ratio = useMemo(() => {
+    if (pyramid_data?.male && pyramid_data?.female) {
+      let old_count = 0
+      let working_count = 0
+
+      for (let i = 0; i < AGE_COHORTS.length; i++) {
+        let cid = AGE_COHORTS[i].id
+        let cohort_total = (pyramid_data.male[cid] || 0) + (pyramid_data.female[cid] || 0)
+
+        if (i >= 14) {
+          old_count += cohort_total
+        } else if (i >= 4) {
+          working_count += cohort_total
+        }
+      }
+
+      if (working_count > 0)
+        return Math.round((old_count/working_count)*1000)/10
+    }
+    return raw_old_age_dependency_ratio
+  }, [pyramid_data, raw_old_age_dependency_ratio])
+
   option = useMemo(() => {
     let active_gender = Array.isArray(active_variable_selectors.gender)
       ? active_variable_selectors.gender[0] || 't'
       : active_variable_selectors.gender || 't'
+    let axis_limit: number
+    let effective_width = container_width > 0 ? container_width : (typeof window !== 'undefined' ? (window.innerWidth < 768 ? window.innerWidth : 640) : 640)
+    let grid_bottom = 30
+    let grid_inset_x = is_narrow ? 14 : '4%'
+    let label_margin = Math.max(16, Math.round(effective_width * 0.07))
     let max_abs_val = 1
+    let y_labels = AGE_COHORTS.map((arg0_c) => arg0_c.label)
+
     for (let i = 0; i < AGE_COHORTS.length; i++) {
       let m = Math.abs(male_values[i] || 0)
       let f = female_values[i] || 0
@@ -336,25 +397,24 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       if (f > max_abs_val)
         max_abs_val = f
     }
-    let axis_limit = Math.ceil(max_abs_val * 1.15)
-    let y_labels = AGE_COHORTS.map((arg0_c) => arg0_c.label)
+    axis_limit = Math.ceil(max_abs_val * 1.15)
 
     return {
       animationDuration: 250,
       backgroundColor: 'transparent',
       grid: [
         {
-          bottom: '12%',
+          bottom: grid_bottom,
           containLabel: false,
-          left: '4%',
-          right: '58%',
+          left: grid_inset_x,
+          right: '57%',
           top: effective_countries.length > 0 ? '34px' : '28px',
         },
         {
-          bottom: '12%',
+          bottom: grid_bottom,
           containLabel: false,
-          left: '58%',
-          right: '4%',
+          left: '57%',
+          right: grid_inset_x,
           top: effective_countries.length > 0 ? '34px' : '28px',
         },
       ],
@@ -456,7 +516,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
         {
           axisLabel: {
             color: '#71717a',
-            fontSize: 9,
+            fontSize: is_narrow ? 8.5 : 9,
             formatter: (arg0_val: number) => {
               if (arg0_val === 0)
                 return '0'
@@ -469,16 +529,17 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           max: axis_limit,
           min: 0,
           name: 'Thousands',
-          nameGap: 18,
+          nameGap: 14,
           nameLocation: 'middle',
-          nameTextStyle: { color: '#71717a', fontSize: 9 },
+          nameTextStyle: { color: '#71717a', fontSize: is_narrow ? 8.5 : 9 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          splitNumber: is_narrow ? 3 : 4,
           type: 'value',
         },
         {
           axisLabel: {
             color: '#71717a',
-            fontSize: 9,
+            fontSize: is_narrow ? 8.5 : 9,
             formatter: (arg0_val: number) => {
               if (arg0_val === 0)
                 return '0'
@@ -490,10 +551,11 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           max: axis_limit,
           min: 0,
           name: 'Thousands',
-          nameGap: 18,
+          nameGap: 14,
           nameLocation: 'middle',
-          nameTextStyle: { color: '#71717a', fontSize: 9 },
+          nameTextStyle: { color: '#71717a', fontSize: is_narrow ? 8.5 : 9 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+          splitNumber: is_narrow ? 3 : 4,
           type: 'value',
         },
       ],
@@ -512,12 +574,12 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
             align: 'center',
             color: '#e4e4e7',
             fontFamily: 'sans-serif',
-            fontSize: 9.5,
+            fontSize: is_narrow ? 9 : 9.5,
             formatter: (arg0_val: string, arg1_idx: number) => {
               let cohort = AGE_COHORTS[arg1_idx]
               return cohort ? (cohort.compactLabel || cohort.label) : arg0_val
             },
-            margin: 50,
+            margin: label_margin,
           },
           axisLine: { lineStyle: { color: '#3f3f46' } },
           axisTick: { show: false },
@@ -531,8 +593,10 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   }, [
     active_country_name,
     active_variable_selectors.gender,
+    container_width,
     effective_countries.length,
     female_values,
+    is_narrow,
     male_values,
     t,
   ])
@@ -541,26 +605,26 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   return (
     <div ref={container_ref} className="h-full w-full flex flex-col min-h-0 select-none">
       {/* Header bar with demographic summary metrics */}
-      <div className="flex items-center justify-between px-2 pt-1 pb-1 border-b border-border/40 text-[11px] bg-muted/20">
-        <div className="flex items-center gap-2 truncate">
-          <span className="font-bold text-foreground flex items-center gap-1">
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2 pt-1 pb-1 border-b border-border/40 text-[11px] bg-muted/20 gap-x-2 gap-y-1">
+        <div className="flex items-center gap-2 truncate min-w-0">
+          <span className="font-bold text-foreground flex items-center gap-1 shrink-0">
             <Icon name="people" className="text-primary text-xs" />
-            <span>{format(t.analytics.pyramidTitle, active_country_name || t.analytics.global)}</span>
+            <span className="truncate">{format(t.analytics.pyramidTitle, active_country_name || t.analytics.global)}</span>
           </span>
-          <span className="text-muted-foreground font-mono">
+          <span className="text-muted-foreground font-mono shrink-0">
             ({current_year < 0 ? `${Math.abs(current_year)}BC` : `${current_year}AD`})
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground shrink-0">
+        <div className="flex items-center gap-2.5 text-[10px] font-mono text-muted-foreground shrink-0 flex-wrap">
           <span>
             {t.analytics.totalLabel} <b className="text-foreground">{formatLegendValue((total_male + total_female)*1000)}</b>
           </span>
           <span>
             {t.analytics.sexRatio} <b className="text-foreground">{sex_ratio.toFixed(2)}</b> M/F
           </span>
-          <span>
-            {t.analytics.dependencyRatio} <b className="text-foreground">{dependency_ratio.toFixed(1)}%</b>
+          <span title={t.analytics.oldAgeDependencyTooltip}>
+            {t.analytics.oldAgeDependencyRatio} <b className="text-foreground">{old_age_dependency_ratio.toFixed(1)}%</b>
           </span>
         </div>
       </div>

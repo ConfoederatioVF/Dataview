@@ -8,6 +8,7 @@ export interface SyntheticDemographicResult {
   dependencyRatio: number
   female: Record<string, number>
   male: Record<string, number>
+  oldAgeDependencyRatio?: number
   sexRatio: number
   totalFemale: number
   totalMale: number
@@ -278,7 +279,6 @@ export function computeSyntheticDemographicPyramid (
   let bulge_shift: number
   let clean_name = country.toLowerCase().trim()
   let cohort_densities: number[] = []
-  let dependency_ratio: number
   let female_map: Record<string, number> = {}
   let get_country_hash: (arg0_str: string) => number
   let h: number
@@ -289,6 +289,7 @@ export function computeSyntheticDemographicPyramid (
   let is_transition: boolean
   let life_exp_mod: number
   let male_map: Record<string, number> = {}
+  let old_age_dependency_ratio: number
   let old_dep_count = 0
   let sex_bias_mod: number
   let sex_ratio: number
@@ -465,14 +466,15 @@ export function computeSyntheticDemographicPyramid (
   }
 
   sex_ratio = total_female > 0 ? Math.round((total_male/total_female)*1000)/1000 : 1.0
-  dependency_ratio = working_count > 0 ? Math.round(((youth_dep_count + old_dep_count)/working_count)*1000)/10 : 50.0
+  old_age_dependency_ratio = working_count > 0 ? Math.round((old_dep_count/working_count)*1000)/10 : 15.0
 
   //Return statement
   return {
     country,
-    dependencyRatio: dependency_ratio,
+    dependencyRatio: old_age_dependency_ratio,
     female: female_map,
     male: male_map,
+    oldAgeDependencyRatio: old_age_dependency_ratio,
     sexRatio: sex_ratio,
     totalFemale: Math.round(total_female*10)/10,
     totalMale: Math.round(total_male*10)/10,

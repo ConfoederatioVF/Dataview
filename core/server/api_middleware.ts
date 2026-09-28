@@ -375,6 +375,7 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
             lastModified: demo_res.lastModified,
             layer,
             male: demo_res.male,
+            oldAgeDependencyRatio: demo_res.oldAgeDependencyRatio !== undefined ? demo_res.oldAgeDependencyRatio : demo_res.dependencyRatio,
             sexRatio: demo_res.sexRatio,
             totalFemale: demo_res.totalFemale,
             totalMale: demo_res.totalMale,
@@ -755,7 +756,7 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
       let format = (query.format as string) || 'standard'
       let is_streaming = query.stream === '1' || query.stream === 'true'
       let max_cities = query.maxCities !== undefined ? parseInt(query.maxCities as string, 10) : 4000
-      let min_pop = query.minPop !== undefined ? parseFloat(query.minPop as string) : 0
+      let min_pop = query.minPop !== undefined ? Math.max(0.01, parseFloat(query.minPop as string)) : 0.01
       let raw_year = parseFloat(query.year as string)
       let year = Number.isNaN(raw_year) ? 1950 : raw_year
 

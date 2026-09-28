@@ -4,6 +4,7 @@ import { DataFormat, DecodedRaster } from './types.ts'
 export type PngDecoderInMessage = {
   buffer: ArrayBuffer
   format: DataFormat
+  minThreshold?: number
   reqId: number
 }
 
@@ -24,11 +25,11 @@ self.onmessage = function (arg0_e: MessageEvent<PngDecoderInMessage>) {
   let e = arg0_e
 
   //Declare local instance variables
-  let { buffer, format, reqId: req_id } = e.data
+  let { buffer, format, minThreshold: min_threshold, reqId: req_id } = e.data
 
   //Function body
   try {
-    let raster = decodeRawGeoPngBuffer(buffer, format)
+    let raster = decodeRawGeoPngBuffer(buffer, format, min_threshold)
     //Transfer output Float32Array buffer back with zero-copy
     ;(self as any).postMessage(
       {

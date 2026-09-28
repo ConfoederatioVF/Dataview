@@ -22,7 +22,7 @@ export function getEraDisplayFloor (arg0_year: number): number {
 
   //Guard clauses
   if (year <= 600)
-    return 0
+    return 0.01
   if (year <= 1500)
     return 500
 
@@ -100,8 +100,8 @@ export function getZoomPopulationThreshold (
   //4. Local View (norm_zoom >= 5.0)
   //Return statement
   return {
-    bubbleMinPop: 0,
-    labelMinPop: 0,
+    bubbleMinPop: 0.01,
+    labelMinPop: 0.01,
     maxBubbles: 30000,
     maxLabels: 800,
   }

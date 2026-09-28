@@ -166,7 +166,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   }
 
   //Fallback: Calculate density from population and area if density is missing
-  if ((density_at_year === undefined || Number.isNaN(density_at_year)) && pop_at_year > 0 && area_at_year && area_at_year > 0) {
+  if ((density_at_year === undefined || Number.isNaN(density_at_year)) && pop_at_year >= 0.01 && area_at_year && area_at_year > 0) {
     density_at_year = pop_at_year / area_at_year
   }
 
@@ -197,7 +197,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
     for (let i = 0; i < p_keys.length; i++) {
       let yr = Number(p_keys[i])
       let p_val = full_record.population[p_keys[i]]
-      if (typeof p_val === 'number' && p_val > peak_pop) {
+      if (typeof p_val === 'number' && p_val >= 0.01 && p_val > peak_pop) {
         peak_pop = p_val
         peak_year = yr
       }
@@ -483,7 +483,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
         <div className="bg-muted/30 border border-border/50 p-1.5 text-center">
           <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t.mapPanels.cityDetails.population}</div>
           <div className="text-xs font-bold font-mono text-white truncate mt-0.5">
-            {pop_at_year > 0 ? Math.round(pop_at_year).toLocaleString('de-DE') : '–'}
+            {pop_at_year >= 0.01 ? Math.round(pop_at_year).toLocaleString('de-DE') : '–'}
           </div>
           <div className="text-[9px] text-muted-foreground/70 mt-0.2">{formatted_current_year}</div>
         </div>
@@ -510,7 +510,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       </div>
 
       {/* Historical Peak & Records */}
-      {peak_pop > 0 && peak_year !== null && (
+      {peak_pop >= 0.01 && peak_year !== null && (
         <div className="flex items-center justify-between text-[10px] text-muted-foreground px-1 pb-1">
           <span>{t.mapPanels.cityDetails.historicalPeak}</span>
           <span className="font-mono text-white">

@@ -11,7 +11,7 @@ console.log(`[Test] Completed in ${(t1 - t0).toFixed(1)}ms:`)
 console.log(`  Country: ${demo.country}`)
 console.log(`  Total Female (thousands): ${demo.totalFemale.toLocaleString()}`)
 console.log(`  Total Male (thousands): ${demo.totalMale.toLocaleString()}`)
-console.log(`  Dependency Ratio: ${demo.dependencyRatio}%`)
+console.log(`  Old-Age Dependency Ratio: ${demo.oldAgeDependencyRatio ?? demo.dependencyRatio}%`)
 console.log(`  Sex Ratio: ${demo.sexRatio}`)
 
 console.log('[Test] 2. Calculating sector breakdown for 1950...')

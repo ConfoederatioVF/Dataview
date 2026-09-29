@@ -406,7 +406,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                 {t.analytics.noRasterDesc ?? 'Select a mapmode or upload a GeoPNG file in the sidebar to inspect statistics & distributions.'}
               </span>
             </div>
-          ) : is_calculating_stats && !country_stats ? (
+          ) : is_calculating_stats && effective_countries.length > 0 && !country_stats ? (
             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground text-[var(--body-font-size)] space-y-2 px-4">
               <div className="flex items-center gap-2 text-amber-400 font-medium font-mono text-xs">
                 <Icon name="sync" className="text-amber-400 text-sm animate-spin" />
@@ -418,15 +418,18 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
             </div>
           ) : (
             (() => {
-              let country_id_str = effective_countries.map((arg0_c) => arg0_c.properties.name).join('_') || (country_stats ? country_stats.name : 'all')
+              let country_id_str = effective_countries.length > 0
+                ? effective_countries.map((arg0_c) => arg0_c.properties.name).join('_')
+                : 'all'
               let derived_key = `${raster_key ?? ''}-${raster ? `${raster.width}x${raster.height}-${raster.min}-${raster.max}` : 'none'}-${country_id_str}-${active_layer?.id ?? 'default'}`
+              let effective_country_stats = effective_countries.length > 0 ? country_stats : null
               return (
                 <>
                   {active_tab === 'pyramid' && (
                     <PopulationPyramidChart
                       key={`pyramid-${derived_key}`}
                       raster={raster}
-                      countryStats={country_stats}
+                      countryStats={effective_country_stats}
                       selectedCountries={effective_countries}
                       selectedCountry={selected_country}
                       currentYear={current_year}
@@ -443,7 +446,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                     <CategoryBreakdownChart
                       key={`breakdown-${derived_key}`}
                       raster={raster}
-                      countryStats={country_stats}
+                      countryStats={effective_country_stats}
                       selectedCountries={effective_countries}
                       selectedCountry={selected_country}
                       currentYear={current_year}
@@ -464,13 +467,13 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                       logSigma={log_sigma}
                       minOverride={min_override}
                       maxOverride={max_override}
-                      countryStats={country_stats}
+                      countryStats={effective_country_stats}
                     />
                   )}
 
                   {active_tab === 'stats' && (
                     <div className="h-full w-full p-[var(--padding)] overflow-y-auto">
-                      <StatsSummary key={`stats-${derived_key}`} raster={raster} countryStats={country_stats} />
+                      <StatsSummary key={`stats-${derived_key}`} raster={raster} countryStats={effective_country_stats} />
                     </div>
                   )}
                 </>

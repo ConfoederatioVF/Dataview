@@ -493,12 +493,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       if (unprojected_coord) {
         insp = sample_raster_at(unprojected_coord[0], unprojected_coord[1])
         set_inspect_data(insp)
-        if (on_inspect)
-          on_inspect(insp)
       } else {
         set_inspect_data(null)
-        if (on_inspect)
-          on_inspect(null)
       }
 
       pick_info = deck_ref.current.pickObject({ x, y })
@@ -506,8 +502,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         if (pick_info.coordinate && !unprojected_coord) {
           insp = sample_raster_at(pick_info.coordinate[0], pick_info.coordinate[1])
           set_inspect_data(insp)
-          if (on_inspect)
-            on_inspect(insp)
         }
         if (pick_info.layer?.id?.includes('historical-borders') || (pick_info.object && (pick_info.object.properties?.gwcode !== undefined || pick_info.object.properties?.keyframes !== undefined))) {
           set_hovered_historical_feature(pick_info.object || null)
@@ -529,7 +523,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }
     },
-    [sample_raster_at, on_inspect, countries_mode, is_historical_borders_active, effective_country_features, on_hover_country]
+    [countries_mode, effective_country_features, is_historical_borders_active, on_hover_country, sample_raster_at]
   )
 
   sample_touch_at = sample_pointer_at
@@ -823,8 +817,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         last_hovered_country_code_ref.current = null
         if (countries_mode && on_hover_country)
           on_hover_country(null)
-        if (on_inspect)
-          on_inspect(null)
       }}
       onPointerMove={(e) => {
         let rect = e.currentTarget.getBoundingClientRect()
@@ -846,8 +838,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           set_hovered_city_pos(null)
           set_hovered_historical_feature(null)
           set_inspect_data(null)
-          if (on_inspect)
-            on_inspect(null)
           return
         }
 

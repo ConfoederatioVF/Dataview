@@ -817,6 +817,7 @@ export let App: React.FC = function () {
 
   let handle_clear_countries = useCallback(() => {
     set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
+    set_inspect_data(null)
   }, [])
 
   let handle_select_country = useCallback(
@@ -824,6 +825,7 @@ export let App: React.FC = function () {
       let c = arg0_c
       if (!c) {
         set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
+        set_inspect_data(null)
       } else {
         set_selected_countries((arg0_prev) => {
           if (
@@ -897,17 +899,13 @@ export let App: React.FC = function () {
   let active_countries = useMemo<CountryFeature[]>(() => {
     if (selected_countries.length > 0)
       return selected_countries
-    if (countries_mode && hovered_country)
-      return [hovered_country]
     return []
-  }, [countries_mode, selected_countries, hovered_country])
-
-  let is_hover_only = selected_countries.length === 0 && Boolean(hovered_country)
+  }, [selected_countries])
 
   let { countryStats: country_stats, isCalculatingStats: is_calculating_stats } = useCountryStatsAsync({
     activeCountries: active_countries,
     activeRaster: display_raster || active_raster,
-    isHoverOnly: is_hover_only,
+    isHoverOnly: false,
   })
 
   //Raster GPU-backed Canvas renderer hook with explicit texture release
@@ -1097,8 +1095,8 @@ export let App: React.FC = function () {
           selectedCountries={selected_countries}
           onSelectCountry={handle_select_country}
           onClearCountries={handle_clear_countries}
-          countryStats={country_stats}
-          isCalculatingStats={is_calculating_stats}
+          countryStats={selected_countries.length > 0 ? country_stats : null}
+          isCalculatingStats={selected_countries.length > 0 && is_calculating_stats}
           isSettingsDrawerOpen={settings_drawer_open}
           rasterKey={raster_version}
           onForceRefresh={handle_force_refresh_analytics}

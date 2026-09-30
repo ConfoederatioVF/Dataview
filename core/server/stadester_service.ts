@@ -214,8 +214,8 @@ export let StadesterService = {
                   let other_key_lower = (other.key || '').toLowerCase()
                   let other_name_lower = (other.name || '').toLowerCase()
                   let is_name_match =
-                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name))) ||
-                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower)))
+                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name) || (other.other_names || []).some((arg0_o: string) => arg0_o.toLowerCase().includes(base_name)))) ||
+                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower) || (other.other_names || []).some((arg0_o: string) => arg0_o.toLowerCase().includes(meta_name_lower))))
                   let is_era_counterpart =
                     ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                     (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&

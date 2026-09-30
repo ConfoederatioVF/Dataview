@@ -88018,16 +88018,24 @@
     ],
     "historical_names": [
       {
-        "date": "1820.1.1",
+        "date": "1701.7.24",
         "name": "Fort Pontchartrain du Détroit"
+      },
+      {
+        "date": "1760.11.29",
+        "name": "Detroit"
       }
     ],
     "key": "stadester-Detroit-Michigan",
-    "name": "Fort Pontchartrain du Détroit",
+    "name": "Detroit",
     "hist": [
       {
-        "date": "1820.1.1",
+        "date": "1701.7.24",
         "name": "Fort Pontchartrain du Détroit"
+      },
+      {
+        "date": "1760.11.29",
+        "name": "Detroit"
       }
     ]
   },
@@ -248438,16 +248446,52 @@
     ],
     "historical_names": [
       {
-        "date": "1928.1.1",
+        "date": "1278.1.1",
         "name": "Jiulong"
+      },
+      {
+        "date": "1860.10.24",
+        "name": "Kowloon"
       }
     ],
     "key": "stadester-Jiulong-Hong Kong",
-    "name": "Jiulong",
+    "name": "Kowloon",
     "hist": [
       {
-        "date": "1928.1.1",
+        "date": "1278.1.1",
         "name": "Jiulong"
+      },
+      {
+        "date": "1860.10.24",
+        "name": "Kowloon"
+      }
+    ]
+  },
+  {
+    "coords": [
+      114.17961,
+      22.31848
+    ],
+    "historical_names": [
+      {
+        "date": "1278.1.1",
+        "name": "Jiulong"
+      },
+      {
+        "date": "1860.10.24",
+        "name": "Kowloon"
+      }
+    ],
+    "key": "stadester-Jiulong (agglomeration)-Hong Kong",
+    "name": "Kowloon",
+    "hist": [
+      {
+        "date": "1278.1.1",
+        "name": "Jiulong"
+      },
+      {
+        "date": "1860.10.24",
+        "name": "Kowloon"
       }
     ]
   },
@@ -412786,7 +412830,11 @@
     ],
     "historical_names": [
       {
-        "date": "1975.1.1",
+        "date": "1701.7.24",
+        "name": "Fort Pontchartrain du Détroit"
+      },
+      {
+        "date": "1760.11.29",
         "name": "Detroit"
       }
     ],
@@ -412794,7 +412842,11 @@
     "name": "Detroit",
     "hist": [
       {
-        "date": "1975.1.1",
+        "date": "1701.7.24",
+        "name": "Fort Pontchartrain du Détroit"
+      },
+      {
+        "date": "1760.11.29",
         "name": "Detroit"
       }
     ]

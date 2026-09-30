@@ -255,7 +255,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let thresholds = getZoomPopulationThreshold(zoom, projection)
       let era_floor = getEraDisplayFloor(current_year)
       let norm_zoom = (is_cartesian) ? (zoom - 1.2) : ((is_globe) ? (zoom - 1.65) : zoom)
-      let effective_min_pop = Math.max(0.01, (norm_zoom >= 4.5) ? 0.01 : Math.max(thresholds.bubbleMinPop, era_floor))
+      let effective_min_pop = 0.01
       let bbox = computeViewportBoundingBox(view_state, projection, window_w, window_h)
       let [w, s, east_bound, n] = bbox
 
@@ -266,6 +266,9 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
 
       for (let i = 0; i < current_cities.length; i++) {
         let c = current_cities[i]
+        if (!c || !c.coords || !Number.isFinite(c.coords[0]) || !Number.isFinite(c.coords[1]))
+          continue
+
         let c_lat = c.coords[0]
         let c_lon = c.coords[1]
 
@@ -287,7 +290,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           }
         }
 
-        if (c.population < effective_min_pop || c.population < 0.01)
+        if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
           continue
 
         let fill_color: [number, number, number, number] = [255, 255, 255, 220]
@@ -335,9 +338,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         }
 
         processed_points.push(pt)
-
-        if (c.population >= thresholds.labelMinPop)
-          label_candidates.push(pt)
+        label_candidates.push(pt)
 
         if (processed_points.length >= thresholds.maxBubbles)
           break

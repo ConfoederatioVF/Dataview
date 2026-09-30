@@ -3,6 +3,7 @@ import ReactECharts from 'echarts-for-react'
 import { CityFullRecord, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { UfDate } from '@framework/utils/uf_date'
+import { resolveHistoricalCityName } from '@framework/stadester/city_metadata_framework.ts'
 import { useLocalisation } from '@localisation'
 
 export interface CityDetailsPanelProps {
@@ -91,7 +92,13 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   full_record = city ? (city as CityFullRecord) : null
   formatted_current_year = UfDate.formatYear(current_year)
-  display_city_name = city ? formatPanelCityName(city.name) : ''
+  display_city_name = city
+    ? formatPanelCityName(
+        city.historical_names && city.historical_names.length > 0
+          ? resolveHistoricalCityName(city as any, current_year)
+          : city.name
+      )
+    : ''
 
   //Extract population for current year (safely handle primitive vs dictionary)
   pop_at_year = 0
@@ -466,6 +473,16 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
         <div className="pb-1 text-[11px] text-muted-foreground border-b border-border/60">
           {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
           {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+        </div>
+      )}
+
+      {/* Historical Name Changes */}
+      {city && (city as any).historical_names && (city as any).historical_names.length > 0 && (
+        <div className="py-1 text-[10px] text-muted-foreground/90 border-b border-border/30">
+          <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.historicalNames} </span>
+          <span className="text-white/90">
+            {((city as any).historical_names as Array<{ date: string; name: string }>).map((arg0_h) => `${arg0_h.name} (${arg0_h.date})`).join(' • ')}
+          </span>
         </div>
       )}
 

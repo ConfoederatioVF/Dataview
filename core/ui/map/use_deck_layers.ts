@@ -798,7 +798,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               depthMask: false,
               depthTest: false,
             },
-            extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension()] : [],
           })
         )
       } else {
@@ -867,7 +866,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               depthMask: false,
               depthTest: false,
             },
-            extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension()] : [],
           })
         )
       }
@@ -900,7 +898,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                   depthMask: false,
                   depthTest: false,
                 },
-                extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension()] : [],
                 pickable: false,
               })
             )
@@ -924,7 +921,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                   depthMask: false,
                   depthTest: false,
                 },
-                extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension()] : [],
                 pickable: false,
               })
             )
@@ -993,7 +989,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 depthMask: false,
                 depthTest: false,
               },
-              extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension()] : [],
             })
           )
         }

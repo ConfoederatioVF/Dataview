@@ -293,6 +293,7 @@
       density: "Dichte",
       densityPeopleKm2: "Dichte (Einwohner/km²)",
       estimated: "Geschätzt",
+      historicalNames: "Historische Namen:",
       historicalPeak: "Historischer Höchststand:",
       historicalPeakIn: "im Jahr",
       historicalTrajectory: "Historischer Verlauf",

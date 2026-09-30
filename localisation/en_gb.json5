@@ -293,6 +293,7 @@
       density: "Density",
       densityPeopleKm2: "Density (people/km²)",
       estimated: "Estimated",
+      historicalNames: "Historical names:",
       historicalPeak: "Historical Peak:",
       historicalPeakIn: "in",
       historicalTrajectory: "Historical Trajectory",

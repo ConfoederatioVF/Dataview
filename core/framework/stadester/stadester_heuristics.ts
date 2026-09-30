@@ -20,14 +20,8 @@ export function getEraDisplayFloor (arg0_year: number): number {
   //Convert from parameters
   let year = arg0_year
 
-  //Guard clauses
-  if (year <= 600)
-    return 0.01
-  if (year <= 1500)
-    return 500
-
   //Return statement
-  return 1000
+  return 0.01
 }
 
 export interface ZoomThresholds {
@@ -67,43 +61,12 @@ export function getZoomPopulationThreshold (
     norm_zoom = zoom
   }
 
-  //1. World View (norm_zoom < 2.0)
-  if (norm_zoom < 2.0) {
-    return {
-      bubbleMinPop: 15000,
-      labelMinPop: 250000,
-      maxBubbles: 1500,
-      maxLabels: 40,
-    }
-  }
-
-  //2. Continental View (2.0 <= norm_zoom < 3.5)
-  if (norm_zoom < 3.5) {
-    return {
-      bubbleMinPop: 4000,
-      labelMinPop: 50000,
-      maxBubbles: 3500,
-      maxLabels: 90,
-    }
-  }
-
-  //3. Regional View (3.5 <= norm_zoom < 5.0)
-  if (norm_zoom < 5.0) {
-    return {
-      bubbleMinPop: 500,
-      labelMinPop: 5000,
-      maxBubbles: 10000,
-      maxLabels: 250,
-    }
-  }
-
-  //4. Local View (norm_zoom >= 5.0)
   //Return statement
   return {
     bubbleMinPop: 0.01,
     labelMinPop: 0.01,
-    maxBubbles: 30000,
-    maxLabels: 800,
+    maxBubbles: 50000,
+    maxLabels: (norm_zoom < 2.0) ? 150 : (norm_zoom < 3.5 ? 350 : 800),
   }
 }
 

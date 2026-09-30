@@ -257,12 +257,14 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     if (!key)
       return null
 
-    let full_cache_key = `${dataset}:${key}`
+    let full_cache_key = `${dataset}:${key}:${year}`
     if (full_city_cache_ref.current.has(full_cache_key))
       return full_city_cache_ref.current.get(full_cache_key)!
 
     try {
-      let resp = await fetch(`/api/stadester/city?dataset=${encodeURIComponent(dataset)}&key=${encodeURIComponent(key)}`)
+      let resp = await fetch(
+        `/api/stadester/city?dataset=${encodeURIComponent(dataset)}&key=${encodeURIComponent(key)}&year=${encodeURIComponent(String(year))}`
+      )
       if (!resp.ok)
         return null
       let data: CityFullRecord = await resp.json()
@@ -277,7 +279,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
       console.error('[useStadesterCities] Failed to fetch full city record:', arg0_e)
       return null
     }
-  }, [dataset])
+  }, [dataset, year])
 
   useEffect(() => {
     if (!effective_city_key) {

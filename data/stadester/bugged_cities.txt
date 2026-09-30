@@ -1,0 +1,2 @@
+# Stadestér Bugged Cities Configuration; list city names to exclude from Stadestér rendering and queries (one per line).
+To`skent

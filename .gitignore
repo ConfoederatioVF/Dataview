@@ -11,6 +11,14 @@ node_modules
 bin
 data/*
 !data/baked_global_*.json
+!data/stadester/
+data/stadester/*.csv
+data/stadester/cache/
+data/stadester/stadester_*.json
+!data/stadester/city_metadata.json
+!data/stadester/all_cities_coords.json
+!data/stadester/cities_temp.json
+!data/stadester/bugged_cities.txt
 dist
 dist-ssr
 docs

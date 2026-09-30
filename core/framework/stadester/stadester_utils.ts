@@ -2,7 +2,7 @@ import { StadesterDisplayOptions } from '@framework/geopng/types.ts'
 import { getPrimaryCityName, isCorruptedCityName } from './city_name_framework.ts'
 
 /**
- * Counts the number of diacritical combining marks in a given string.
+ * Counts the number of diacritical or non-ASCII characters in a given string.
  *
  * @param {string} arg0_str
  *
@@ -12,26 +12,51 @@ export let countDiacritics = function (arg0_str: string): number {
   //Convert from parameters
   let str = arg0_str
 
-  //Declare local instance variables
-  let diacritics: RegExpMatchArray | null
-  let normalized: string
-
   //Guard clauses
   if (!str)
     return 0
 
   //Function body
-  normalized = str.normalize('NFD')
-  diacritics = normalized.match(/[\u0300-\u036f]/g)
+  let matches = str.match(/[^\u0000-\u007F]/g)
 
   //Return statement
-  return diacritics ? diacritics.length : 0
+  return matches ? matches.length : 0
+}
+
+/**
+ * Normalises a city name for phonetic and root comparison, stripping articles, stroke letters, and combining accents.
+ *
+ * @param {string} arg0_str
+ *
+ * @returns {string}
+ */
+export let normalizeForComparison = function (arg0_str: string): string {
+  //Convert from parameters
+  let str = arg0_str
+
+  //Guard clauses
+  if (!str)
+    return ''
+
+  //Function body
+  let res = str.toLowerCase()
+  res = res.replace(/ł/g, 'l').replace(/đ/g, 'd').replace(/ø/g, 'o').replace(/ß/g, 'ss')
+  res = res.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  res = res.replace(/['’‘`´^]/g, '')
+  res = res.replace(/[-_,.]/g, ' ')
+  res = res.trim()
+  res = res.replace(/^(al|el|ad|ar|as|at|az|an|ash|esh|ed|en|ez)\s+/i, '')
+  res = res.replace(/iyah$/, 'iya').replace(/iyyah$/, 'iya').replace(/ah$/, 'a')
+  res = res.replace(/\s+/g, ' ').trim()
+
+  //Return statement
+  return res
 }
 
 /**
  * Picks the optimal candidate city display name based on dataset display options.
  * Disqualifies unknown unicode characters (\uFFFD), removes parenthetical notes,
- * and prioritises candidates with the lowest diacritic count.
+ * and prioritises authentic native diacritics unless prefer_least_diacritics is true.
  *
  * @param {string} arg0_name
  * @param {string | string[]} [arg1_other_names]
@@ -52,7 +77,9 @@ export let pickBestCityDisplayName = function (
   //Declare local instance variables
   let candidates: string[] = []
   let clean_candidates: string[]
-  let prefer_least_diacritics = options.prefer_least_diacritics !== false
+  let clean_direct_name: string
+  let has_other_names: boolean
+  let prefer_least_diacritics = options.prefer_least_diacritics === true
   let raw_candidates: string[] = []
   let skip_unknown_unicode = options.skip_unknown_unicode !== false
   let strip_parentheses = options.strip_parentheses !== false
@@ -60,6 +87,12 @@ export let pickBestCityDisplayName = function (
   //Guard clauses
   if (!name)
     return ''
+
+  clean_direct_name = strip_parentheses ? name.replace(/\s*\([^)]*\)/g, '').trim() : name.trim()
+  has_other_names = (Array.isArray(other_names) && other_names.length > 0) || (typeof other_names === 'string' && other_names.trim().length > 0)
+
+  if (!name.includes(';') && !has_other_names && clean_direct_name && !isCorruptedCityName(clean_direct_name))
+    return clean_direct_name
 
   //Function body
   //1. Extract all semicolon-delimited names from primary name string
@@ -108,15 +141,42 @@ export let pickBestCityDisplayName = function (
       candidates = clean_candidates
   }
 
-  //5. Select candidate with fewest diacritics if enabled
-  if (prefer_least_diacritics && candidates.length > 1) {
-    candidates.sort((arg0_a, arg0_b) => {
-      let count_a = countDiacritics(arg0_a)
-      let count_b = countDiacritics(arg0_b)
-      if (count_a !== count_b)
-        return count_a - count_b
-      return arg0_a.length - arg0_b.length
-    })
+  //5. Select candidate: if prefer_least_diacritics is explicitly enabled, sort by fewest diacritics.
+  // Otherwise, prioritize authentic native accented candidates matching the base name over stripped ASCII.
+  if (candidates.length > 1) {
+    if (prefer_least_diacritics) {
+      candidates.sort((arg0_a, arg0_b) => {
+        let count_a = countDiacritics(arg0_a)
+        let count_b = countDiacritics(arg0_b)
+        if (count_a !== count_b)
+          return count_a - count_b
+        return arg0_a.length - arg0_b.length
+      })
+    } else {
+      let base_norm = normalizeForComparison(candidates[0])
+      let best_candidate = candidates[0]
+      let best_score = countDiacritics(best_candidate)
+
+      for (let i = 1; i < candidates.length; i++) {
+        let cand = candidates[i]
+        let cand_norm = normalizeForComparison(cand)
+        if (cand_norm === base_norm || cand_norm.includes(base_norm) || base_norm.includes(cand_norm)) {
+          let score = countDiacritics(cand)
+          if (score > best_score) {
+            best_score = score
+            best_candidate = cand
+          }
+        }
+      }
+
+      if (best_candidate !== candidates[0]) {
+        let idx = candidates.indexOf(best_candidate)
+        if (idx > 0) {
+          candidates.splice(idx, 1)
+          candidates.unshift(best_candidate)
+        }
+      }
+    }
   }
 
   //Return statement

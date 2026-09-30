@@ -286,6 +286,7 @@ export interface LocalisationConfig {
       density: string
       densityPeopleKm2: string
       estimated: string
+      historicalNames: string
       historicalPeak: string
       historicalPeakIn: string
       historicalTrajectory: string

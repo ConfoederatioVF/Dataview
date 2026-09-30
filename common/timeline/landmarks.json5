@@ -7,7 +7,7 @@
     },
     description: "Arab Winter, CRINK, start of modern OSINT | Contemporary Climate Change",
     id: "modern",
-    label: "Second Cold War",
+    label: "22 February 2014AD",
   },
   {
     date: {
@@ -17,7 +17,7 @@
     },
     description: "Post-Cold War | End of Widespread Nuclear Testing",
     id: "v_start",
-    label: "5.Era"
+    label: "26 December 1991AD"
   },
   {
     date: {
@@ -27,7 +27,7 @@
     },
     description: "Congress of Europe | Industrial Revolution",
     id: "iv_start",
-    label: "4.Era"
+    label: "9 June 1815AD"
   },
   {
     date: {
@@ -37,7 +37,7 @@
     },
     description: "Golden Bull of 1356 | End of Mediaeval Warm Period",
     id: "iii_start",
-    label: "3.Era"
+    label: "10 January 1356AD"
   },
   {
     date: {
@@ -47,7 +47,7 @@
     },
     description: "Assumption of Odoacer | End of Roman Warm Period to LALIA",
     id: "ii_start",
-    label: "2.Era"
+    label: "9 September 476AD"
   },
   {
     date: {
@@ -57,6 +57,6 @@
     },
     description: "Beginning of the Holocene | End of Last Glacial Maximum",
     id: "i_start",
-    label: "1.Era"
+    label: "1 January 10000BC"
   }
 ]

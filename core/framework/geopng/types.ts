@@ -111,6 +111,7 @@ export interface CityPoint {
   country?: string
   density?: number
   growthRate?: number
+  historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id: number | string
   key: string
   lat?: number
@@ -133,6 +134,7 @@ export interface CityFullRecord {
   country?: string
   density?: Record<string, number>
   elevation?: number
+  historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id?: number | string
   key: string
   name: string

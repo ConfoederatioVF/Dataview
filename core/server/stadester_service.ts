@@ -2,6 +2,13 @@ import fs from 'fs'
 import path from 'path'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
 import { getPrimaryCityName, isCorruptedCityName, isBuggedCityName } from '../framework/stadester/city_name_framework.ts'
+import {
+  computeHaversineDistanceKm,
+  normalizeMetadataEntry,
+  resolveHistoricalCityName,
+  type CityMetadataEntry,
+  type HistoricalNameRecord,
+} from '../framework/stadester/city_metadata_framework.ts'
 
 let bugged_cities_set: Set<string> | null = null
 let bugged_cities_mtime = 0
@@ -53,10 +60,12 @@ export interface CityIndexEntry {
   country?: string
   density?: Record<string, number>
   elevation?: number
+  historical_names?: HistoricalNameRecord[]
   id: number | string
   key: string
   max_pop: number
   max_year: number
+  metadata_name?: string
   min_year: number
   name: string
   original_names?: string | string[]
@@ -91,8 +100,10 @@ export interface CityRenderPoint {
   country?: string
   density?: number
   growthRate?: number
+  historical_names?: HistoricalNameRecord[]
   id: number | string
   key: string
+  metadata_name?: string
   name: string
   other_names?: string | string[]
   population: number
@@ -100,8 +111,206 @@ export interface CityRenderPoint {
 }
 
 export let StadesterService = {
+  city_metadata: null as CityMetadataEntry[] | null,
+  city_metadata_mtime: 0,
   datasets: new Map<string, Record<string, CityIndexEntry>>(),
   lite_cache_paths: new Map<string, string>(),
+
+  /**
+   * Applies metadata from data/stadester/city_metadata.json to indexed cities.
+   * Finds the nearest Stadestér city to each specified [lng, lat] point and inherits metadata.
+   * Also binds to agglomeration counterparts within 25 km sharing the city name.
+   *
+   * @param {Record<string, CityIndexEntry>} arg0_indexed_record
+   */
+  applyCityMetadata: function (arg0_indexed_record: Record<string, CityIndexEntry>): void {
+    //Convert from parameters
+    let indexed = arg0_indexed_record
+
+    //Declare local instance variables
+    let all_keys = Object.keys(indexed)
+    let meta_list = StadesterService.loadCityMetadata()
+    let spatial_grid: Record<string, CityIndexEntry[]> = {}
+
+    //Guard clauses
+    if (!meta_list || meta_list.length === 0 || all_keys.length === 0)
+      return
+
+    //Function body
+    //1. Construct spatial grid with 1-degree bins (~111km) for fast local lookup
+    for (let x = 0; x < all_keys.length; x++) {
+      let city = indexed[all_keys[x]]
+      if (city.coords && Array.isArray(city.coords)) {
+        let bin_lat = Math.floor(city.coords[0])
+        let bin_lng = Math.floor(city.coords[1])
+        let bin_key = `${bin_lat},${bin_lng}`
+        if (!spatial_grid[bin_key])
+          spatial_grid[bin_key] = []
+        spatial_grid[bin_key].push(city)
+      }
+    }
+
+    //2. Bind metadata to matching cities and counterparts
+    for (let i = 0; i < meta_list.length; i++) {
+      let best_city: CityIndexEntry | null = null
+      let meta = meta_list[i]
+      let min_dist = 999999
+      let target_lat = meta.coords[1]
+      let target_lng = meta.coords[0]
+
+      //A. Check direct key match if specified
+      if (meta.key && indexed[meta.key]) {
+        best_city = indexed[meta.key]
+        min_dist = 0
+      }
+
+      //B. Fast spatial grid search in 3x3 surrounding cells
+      if (!best_city) {
+        let center_lat = Math.floor(target_lat)
+        let center_lng = Math.floor(target_lng)
+
+        for (let d_lat = -1; d_lat <= 1; d_lat++) {
+          for (let d_lng = -1; d_lng <= 1; d_lng++) {
+            let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+            if (cell) {
+              for (let c = 0; c < cell.length; c++) {
+                let candidate = cell[c]
+                let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
+                if (dist < min_dist) {
+                  min_dist = dist
+                  best_city = candidate
+                }
+              }
+            }
+          }
+        }
+      }
+
+      //C. Inherit metadata if nearest city is within 50 km threshold
+      if (best_city && min_dist <= 50) {
+        best_city.historical_names = meta.historical_names
+        if (meta.name) {
+          best_city.metadata_name = meta.name
+          best_city.name = meta.name
+        }
+
+        //Also associate related agglomeration or pre/post-1975 counterpart cities in local grid cells
+        let base_name = (best_city.name || meta.name || '').toLowerCase()
+        let center_lat = Math.floor(target_lat)
+        let center_lng = Math.floor(target_lng)
+        let meta_name_lower = (meta.name || '').toLowerCase()
+
+        for (let d_lat = -1; d_lat <= 1; d_lat++) {
+          for (let d_lng = -1; d_lng <= 1; d_lng++) {
+            let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+            if (cell) {
+              for (let c = 0; c < cell.length; c++) {
+                let other = cell[c]
+                if (other.key === best_city.key)
+                  continue
+
+                let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
+                if (dist <= 60) {
+                  let other_key_lower = (other.key || '').toLowerCase()
+                  let other_name_lower = (other.name || '').toLowerCase()
+                  let is_name_match =
+                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name))) ||
+                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower)))
+                  let is_era_counterpart =
+                    ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
+                    (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
+                    (is_name_match || dist <= 15)
+
+                  if (is_name_match || is_era_counterpart) {
+                    if (!other.historical_names || other.historical_names.length === 0)
+                      other.historical_names = meta.historical_names
+                    if (meta.name && !other.metadata_name) {
+                      other.metadata_name = meta.name
+                      other.name = meta.name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    console.log(`[StadesterService] Successfully bound ${meta_list.length} historical city metadata entries.`)
+  },
+
+  /**
+   * Loads and normalises city metadata from data/stadester/city_metadata.json into memory.
+   *
+   * @returns {CityMetadataEntry[]}
+   */
+  loadCityMetadata: function (): CityMetadataEntry[] {
+    //Declare local instance variables
+    let file_path = path.resolve(process.cwd(), 'data/stadester/city_metadata.json')
+    let normalized_list: CityMetadataEntry[] = []
+
+    //Guard clauses
+    if (!fs.existsSync(file_path))
+      return []
+
+    try {
+      let stats = fs.statSync(file_path)
+      if (StadesterService.city_metadata && stats.mtimeMs <= StadesterService.city_metadata_mtime)
+        return StadesterService.city_metadata
+
+      //Function body
+      let content = fs.readFileSync(file_path, 'utf-8')
+      let raw_json = JSON.parse(content)
+
+      if (Array.isArray(raw_json)) {
+        for (let i = 0; i < raw_json.length; i++) {
+          let item = normalizeMetadataEntry(raw_json[i])
+          if (item)
+            normalized_list.push(item)
+        }
+      } else if (raw_json && typeof raw_json === 'object') {
+        let keys = Object.keys(raw_json)
+        for (let i = 0; i < keys.length; i++) {
+          let item = normalizeMetadataEntry(raw_json[keys[i]], keys[i])
+          if (item)
+            normalized_list.push(item)
+        }
+      }
+
+      StadesterService.city_metadata = normalized_list
+      StadesterService.city_metadata_mtime = stats.mtimeMs
+      console.log(`[StadesterService] Loaded ${normalized_list.length} city metadata entries from ${file_path}`)
+      return normalized_list
+    } catch (arg0_err) {
+      console.warn('[StadesterService] Failed to load city_metadata.json:', arg0_err)
+      return StadesterService.city_metadata || []
+    }
+  },
+
+  /**
+   * Resolves a city's historical name at the specified year or date.
+   *
+   * @param {CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[] }} arg0_city
+   * @param {number | string} [arg1_year]
+   *
+   * @returns {string}
+   */
+  resolveCityNameAtYear: function (
+    arg0_city: CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[] },
+    arg1_year?: number | string
+  ): string {
+    //Convert from parameters
+    let city = arg0_city
+    let year = arg1_year
+
+    //Guard clauses
+    if (!city)
+      return ''
+
+    //Return statement
+    return resolveHistoricalCityName(city, year)
+  },
 
   /**
    * Resolves the absolute path to a Stadestér JSON dataset file.
@@ -223,6 +432,7 @@ export let StadesterService = {
     }
 
     raw_data = {} as any
+    StadesterService.applyCityMetadata(indexed_record)
     StadesterService.datasets.set(dataset_name, indexed_record)
     console.log(`[StadesterService] Successfully indexed ${all_city_keys.length} cities for ${dataset_name}.`)
 
@@ -254,10 +464,19 @@ export let StadesterService = {
     let source_file_path = StadesterService.getDatasetFilePath(dataset_name)
 
     //Guard clauses
+    let meta_file_path = path.resolve(process.cwd(), 'data/stadester/city_metadata.json')
     if (fs.existsSync(lite_file_path) && fs.existsSync(source_file_path)) {
+      let is_meta_newer = false
       let lite_stat = fs.statSync(lite_file_path)
       let src_stat = fs.statSync(source_file_path)
-      if (lite_stat.mtimeMs >= src_stat.mtimeMs && lite_stat.size > 1000)
+
+      if (fs.existsSync(meta_file_path)) {
+        let meta_stat = fs.statSync(meta_file_path)
+        if (meta_stat.mtimeMs > lite_stat.mtimeMs)
+          is_meta_newer = true
+      }
+
+      if (!is_meta_newer && lite_stat.mtimeMs >= src_stat.mtimeMs && lite_stat.size > 1000)
         return lite_file_path
     }
 
@@ -275,10 +494,12 @@ export let StadesterService = {
         colour: c.colour,
         coords: c.coords,
         country: c.country,
+        historical_names: c.historical_names,
         id: c.id,
         key: c.key,
         max_pop: c.max_pop,
         max_year: c.max_year,
+        metadata_name: c.metadata_name,
         min_year: c.min_year,
         name: c.name,
         other_names: c.other_names,
@@ -466,6 +687,8 @@ export let StadesterService = {
         }
       }
 
+      let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
+
       result_cities.push({
         area: area_val,
         colour: city.colour,
@@ -473,9 +696,11 @@ export let StadesterService = {
         country: city.country,
         density: density_val,
         growthRate: growth_rate,
+        historical_names: city.historical_names,
         id: city.id,
         key: city.key,
-        name: city.name,
+        metadata_name: city.metadata_name,
+        name: resolved_name,
         other_names: city.other_names,
         population: pop,
         region: city.region,
@@ -497,14 +722,20 @@ export let StadesterService = {
    * Retrieves full historical information and timeseries for a given city key.
    *
    * @param {string} [arg0_dataset_name='stadester_1.1']
-   * @param {string} arg1_city_key
+   * @param {string} [arg1_city_key]
+   * @param {number | string} [arg2_year]
    *
    * @returns {CityIndexEntry | null}
    */
-  getCityByKey: function (arg0_dataset_name?: string, arg1_city_key?: string): CityIndexEntry | null {
+  getCityByKey: function (
+    arg0_dataset_name?: string,
+    arg1_city_key?: string,
+    arg2_year?: number | string
+  ): CityIndexEntry | null {
     //Convert from parameters
     let city_key = arg1_city_key || ''
     let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+    let year = arg2_year
 
     //Declare local instance variables
     let bugged_set = getBuggedCitiesSet()
@@ -522,6 +753,13 @@ export let StadesterService = {
     if (found) {
       if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
         return null
+
+      if (year !== undefined && year !== null) {
+        return {
+          ...found,
+          name: StadesterService.resolveCityNameAtYear(found, year),
+        }
+      }
       return found
     }
 
@@ -532,6 +770,13 @@ export let StadesterService = {
       if (entry.key === city_key || String(entry.id) === city_key || entry.name === city_key) {
         if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
           return null
+
+        if (year !== undefined && year !== null) {
+          return {
+            ...entry,
+            name: StadesterService.resolveCityNameAtYear(entry, year),
+          }
+        }
         return entry
       }
     }

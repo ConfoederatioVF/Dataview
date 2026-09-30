@@ -421,7 +421,6 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
                       <TooltipContent side="top" className="max-w-[260px] z-[60]">
                         <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-1 mb-1">
                           <span className="font-semibold text-foreground text-xs font-mono">{arg0_preset.label}</span>
-                          <span className="text-[10px] text-primary font-mono shrink-0">{formatted_date}</span>
                         </div>
                         {arg0_preset.description ? (
                           <div className="text-muted-foreground text-[11px] font-sans leading-snug whitespace-normal">

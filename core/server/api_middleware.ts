@@ -824,8 +824,10 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
         return
       }
 
+      let year = query.year !== undefined ? (typeof query.year === 'string' && !isNaN(Number(query.year)) ? parseFloat(query.year) : query.year as string) : undefined
+
       try {
-        let city = StadesterService.getCityByKey(dataset, city_key)
+        let city = StadesterService.getCityByKey(dataset, city_key, year)
         if (!city) {
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json')

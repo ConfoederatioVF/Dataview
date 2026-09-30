@@ -179,11 +179,6 @@ export let indexHistoricalCities = function (arg0_raw_data: Record<string, any>)
         let max_p = pop_vals.length > 0 ? Math.max(...pop_vals) : 0
         let clean_name = cleanCandidateCityString(name)
 
-        //Normalize ASCII diacritic artifacts (e.g. Nam -Dinh -> Nam Dinh, So'n Tây -> Son Tay)
-        clean_name = clean_name.replace(/[-~'`^]/g, ' ').replace(/\s+/g, ' ').trim()
-        clean_name = clean_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        clean_name = clean_name.replace(/Đ/g, 'D').replace(/đ/g, 'd')
-
         if (clean_name && !isCorruptedCityName(clean_name)) {
           historical_cities_index.push({
             coords: [item.coords[0], item.coords[1]],

@@ -1,4 +1,12 @@
 {
+  "1400": {
+    "agriculture": 81,
+    "informal_labour": 4.4,
+    "manufacturing": 6.2,
+    "services": 8.5,
+    "not_in_work": 29.7,
+    "lastModified": 1790633942430.9202
+  },
   "1820": {
     "agriculture": 61.9,
     "informal_labour": 4.4,

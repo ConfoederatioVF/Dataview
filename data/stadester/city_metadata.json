@@ -1111,10 +1111,6 @@
       {
         "date": "1425.1.1",
         "name": "İzmir"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Izmir"
       }
     ],
     "key": "stadester-Izmir-Turkey",
@@ -1579,11 +1575,7 @@
       },
       {
         "date": "640.1.1",
-        "name": "Al-Uqsur"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Uqsur, Al-"
+        "name": "Al-Uqṣur"
       }
     ],
     "key": "stadester-Uqsur, Al--Egypt",
@@ -1643,11 +1635,7 @@
       },
       {
         "date": "637.1.1",
-        "name": "Al-Mawsil"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Mosul"
+        "name": "Al-Mawṣil"
       }
     ],
     "key": "stadester-Mosul-Iraq",
@@ -2311,15 +2299,11 @@
       },
       {
         "date": "-300.1.1",
-        "name": "Laodicea ad Mare"
+        "name": "Laodicea"
       },
       {
         "date": "640.1.1",
         "name": "Al-Ladhiqiyah"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Latakia"
       }
     ],
     "key": "stadester-Latakia-Syria",
@@ -4044,10 +4028,6 @@
       {
         "date": "-753.4.21",
         "name": "Roma"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Rome"
       }
     ],
     "key": "stadester-Roma-Italy",
@@ -30311,7 +30291,7 @@
     ],
     "historical_names": [
       {
-        "date": "50.1.1",
+        "date": "15.1.1",
         "name": "Vindobona"
       },
       {
@@ -30319,7 +30299,7 @@
         "name": "Wenia"
       },
       {
-        "date": "1137.1.1",
+        "date": "1156.9.17",
         "name": "Wien"
       }
     ],
@@ -35265,7 +35245,7 @@
     ],
     "historical_names": [
       {
-        "date": "800.1.1",
+        "date": "1252.1.1",
         "name": "Stockholm"
       }
     ],
@@ -41148,7 +41128,7 @@
         "name": "Brussel"
       },
       {
-        "date": "1800.1.1",
+        "date": "1500.1.1",
         "name": "Brussels"
       }
     ],
@@ -41523,8 +41503,8 @@
         "name": "Købmandshavn"
       },
       {
-        "date": "1800.1.1",
-        "name": "Copenhagen"
+        "date": "1443.1.1",
+        "name": "København"
       }
     ],
     "key": "stadester-Copenhagen-Denmark",
@@ -51078,11 +51058,15 @@
         "name": "Áslo"
       },
       {
-        "date": "1624.1.1",
+        "date": "1624.8.17",
         "name": "Christiania"
       },
       {
-        "date": "1800.1.1",
+        "date": "1877.1.1",
+        "name": "Kristiania"
+      },
+      {
+        "date": "1925.1.1",
         "name": "Oslo"
       }
     ],
@@ -53741,7 +53725,11 @@
         "name": "Aemstelredam"
       },
       {
-        "date": "1800.1.1",
+        "date": "1342.1.1",
+        "name": "Amsteldam"
+      },
+      {
+        "date": "1400.1.1",
         "name": "Amsterdam"
       }
     ],
@@ -398320,7 +398308,11 @@
         "name": "Aemstelredam"
       },
       {
-        "date": "1975.1.1",
+        "date": "1342.1.1",
+        "name": "Amsteldam"
+      },
+      {
+        "date": "1400.1.1",
         "name": "Amsterdam"
       }
     ],
@@ -409148,7 +409140,15 @@
     ],
     "historical_names": [
       {
-        "date": "1975.1.1",
+        "date": "979.1.1",
+        "name": "Bruocsella"
+      },
+      {
+        "date": "1200.1.1",
+        "name": "Brussel"
+      },
+      {
+        "date": "1500.1.1",
         "name": "Brussels"
       }
     ],
@@ -415281,8 +415281,8 @@
         "name": "Købmandshavn"
       },
       {
-        "date": "1975.1.1",
-        "name": "Copenhagen"
+        "date": "1443.1.1",
+        "name": "København"
       }
     ],
     "key": "ghsl-Copenhagen-Denmark",
@@ -462334,11 +462334,15 @@
         "name": "Áslo"
       },
       {
-        "date": "1624.1.1",
+        "date": "1624.8.17",
         "name": "Christiania"
       },
       {
-        "date": "1975.1.1",
+        "date": "1877.1.1",
+        "name": "Kristiania"
+      },
+      {
+        "date": "1925.1.1",
         "name": "Oslo"
       }
     ],
@@ -481500,7 +481504,7 @@
     ],
     "historical_names": [
       {
-        "date": "800.1.1",
+        "date": "1252.1.1",
         "name": "Stockholm"
       }
     ],

@@ -4,8 +4,11 @@ import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from 
 import { getPrimaryCityName, isCorruptedCityName, isBuggedCityName } from '../framework/stadester/city_name_framework.ts'
 import {
   computeHaversineDistanceKm,
+  getCityActiveCapitalRecord,
+  isCityCapitalAtYear,
   normalizeMetadataEntry,
   resolveHistoricalCityName,
+  type CapitalRecord,
   type CityMetadataEntry,
   type HistoricalNameRecord,
 } from '../framework/stadester/city_metadata_framework.ts'
@@ -55,6 +58,8 @@ export function getBuggedCitiesSet (): Set<string> {
 
 export interface CityIndexEntry {
   area?: Record<string, number>
+  capital?: Record<string, number | string>
+  capital_records?: CapitalRecord[]
   colour?: [number, number, number]
   coords: [number, number]
   country?: string
@@ -83,6 +88,8 @@ export interface StadesterQueryOptions {
 }
 
 export interface CompactCitiesPayload {
+  capitals?: number[]
+  capital_colors?: (string | null)[]
   coords: number[] // [lat0, lon0, lat1, lon1, ...]
   count: number
   countries: (string | undefined)[]
@@ -95,6 +102,7 @@ export interface CompactCitiesPayload {
 
 export interface CityRenderPoint {
   area?: number
+  capital_color?: string
   colour?: [number, number, number]
   coords: [number, number]
   country?: string
@@ -102,6 +110,7 @@ export interface CityRenderPoint {
   growthRate?: number
   historical_names?: HistoricalNameRecord[]
   id: number | string
+  is_capital?: boolean
   key: string
   metadata_name?: string
   name: string
@@ -115,6 +124,112 @@ export let StadesterService = {
   city_metadata_mtime: 0,
   datasets: new Map<string, Record<string, CityIndexEntry>>(),
   lite_cache_paths: new Map<string, string>(),
+  states_by_id: null as Map<string | number, any> | null,
+
+  /**
+   * Retrieves state metadata by state ID from the cached data/atlas/temp/states.json registry.
+   *
+   * @param {string | number} arg0_state_id
+   *
+   * @returns {any | null}
+   */
+  getStateById: function (arg0_state_id: string | number): any {
+    //Convert from parameters
+    let state_id = arg0_state_id
+
+    //Guard clauses
+    if (state_id === undefined || state_id === null)
+      return null
+
+    //Function body
+    if (!StadesterService.states_by_id) {
+      StadesterService.states_by_id = new Map()
+      let states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+      if (fs.existsSync(states_path)) {
+        try {
+          let list = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
+          if (Array.isArray(list)) {
+            for (let i = 0; i < list.length; i++) {
+              let s = list[i]
+              StadesterService.states_by_id.set(s.state_id, s)
+              StadesterService.states_by_id.set(String(s.state_id), s)
+            }
+          }
+        } catch (arg0_err) {
+          console.warn('[StadesterService] Failed to load states.json:', arg0_err)
+        }
+      }
+    }
+
+    //Return statement
+    return StadesterService.states_by_id.get(state_id) || StadesterService.states_by_id.get(String(state_id)) || null
+  },
+
+  /**
+   * Evaluates whether a city was a capital at target historical year, validating state existence.
+   *
+   * @param {any} arg0_city
+   * @param {number | string} [arg1_year]
+   *
+   * @returns {boolean}
+   */
+  isCityCapitalAtYear: function (
+    arg0_city: any,
+    arg1_year?: number | string
+  ): boolean {
+    //Convert from parameters
+    let city = arg0_city
+    let year = arg1_year
+
+    //Guard clauses
+    if (!city)
+      return false
+
+    //Return statement
+    return isCityCapitalAtYear(city, year, (arg0_sid, arg0_y_frac) => {
+      let state = StadesterService.getStateById(arg0_sid)
+      if (!state)
+        return true
+      return arg0_y_frac >= state.start_year && arg0_y_frac <= state.stop_year
+    })
+  },
+
+  /**
+   * Resolves the fill colour of the corresponding state for a capital city.
+   *
+   * @param {any} arg0_city
+   * @param {number | string} [arg1_year]
+   *
+   * @returns {string | null} Hex fill colour or null
+   */
+  getCityCapitalColorAtYear: function (
+    arg0_city: any,
+    arg1_year?: number | string
+  ): string | null {
+    //Convert from parameters
+    let city = arg0_city
+    let year = arg1_year
+
+    //Guard clauses
+    if (!city)
+      return null
+
+    //Declare local instance variables
+    let cap_rec = getCityActiveCapitalRecord(city, year, (arg0_sid, arg0_y_frac) => {
+      let state = StadesterService.getStateById(arg0_sid)
+      if (!state)
+        return true
+      return arg0_y_frac >= state.start_year && arg0_y_frac <= state.stop_year
+    })
+
+    if (!cap_rec || !cap_rec.state_id)
+      return null
+
+    let state = StadesterService.getStateById(cap_rec.state_id)
+
+    //Return statement
+    return state?.fill_color || null
+  },
 
   /**
    * Applies metadata from data/stadester/city_metadata.json to indexed cities.
@@ -189,6 +304,10 @@ export let StadesterService = {
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
         best_city.historical_names = meta.historical_names
+        if (meta.capital_records && meta.capital_records.length > 0) {
+          best_city.capital = meta.capital as any
+          best_city.capital_records = meta.capital_records
+        }
         if (meta.name) {
           best_city.metadata_name = meta.name
           best_city.name = meta.name
@@ -213,13 +332,17 @@ export let StadesterService = {
                 if (dist <= 60) {
                   let other_key_lower = (other.key || '').toLowerCase()
                   let other_name_lower = (other.name || '').toLowerCase()
+                  let other_names_list = Array.isArray(other.other_names)
+                    ? other.other_names
+                    : (typeof other.other_names === 'string' ? [other.other_names] : [])
                   let is_name_match =
-                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name) || (other.other_names || []).some((arg0_o: string) => arg0_o.toLowerCase().includes(base_name)))) ||
-                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower) || (other.other_names || []).some((arg0_o: string) => arg0_o.toLowerCase().includes(meta_name_lower))))
+                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name) || other_names_list.some((arg0_o: string) => arg0_o.toLowerCase().includes(base_name)))) ||
+                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower) || other_names_list.some((arg0_o: string) => arg0_o.toLowerCase().includes(meta_name_lower))))
                   let is_era_counterpart =
                     ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                     (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
-                    (is_name_match || dist <= 15)
+                    is_name_match &&
+                    dist <= 25
 
                   if (is_name_match || is_era_counterpart) {
                     if (!other.historical_names || other.historical_names.length === 0)
@@ -350,6 +473,14 @@ export let StadesterService = {
     let raw_text: string
 
     //Guard clauses
+    let meta_file_path = path.resolve(process.cwd(), 'data/stadester/city_metadata.json')
+    if (fs.existsSync(meta_file_path)) {
+      let meta_stat = fs.statSync(meta_file_path)
+      if (meta_stat.mtimeMs > StadesterService.city_metadata_mtime) {
+        StadesterService.datasets.delete(dataset_name)
+      }
+    }
+
     if (StadesterService.datasets.has(dataset_name))
       return StadesterService.datasets.get(dataset_name)!
 
@@ -687,10 +818,13 @@ export let StadesterService = {
         }
       }
 
+      let cap_color_val = StadesterService.getCityCapitalColorAtYear(city, target_year)
+      let is_capital_val = Boolean(cap_color_val !== null || StadesterService.isCityCapitalAtYear(city, target_year))
       let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
 
       result_cities.push({
         area: area_val,
+        capital_color: cap_color_val || undefined,
         colour: city.colour,
         coords: city.coords,
         country: city.country,
@@ -698,6 +832,7 @@ export let StadesterService = {
         growthRate: growth_rate,
         historical_names: city.historical_names,
         id: city.id,
+        is_capital: is_capital_val,
         key: city.key,
         metadata_name: city.metadata_name,
         name: resolved_name,
@@ -838,6 +973,8 @@ export let StadesterService = {
     //Declare local instance variables
     let cities = StadesterService.getCitiesAtYear(dataset_name, year, options)
     let len = cities.length
+    let capitals: number[] = new Array(len)
+    let capital_colors: (string | null)[] = new Array(len)
     let coords: number[] = new Array(len * 2)
     let countries: (string | undefined)[] = new Array(len)
     let growth: number[] = new Array(len)
@@ -857,10 +994,14 @@ export let StadesterService = {
       pops[i] = c.population
       growth[i] = c.growthRate !== undefined ? Math.round(c.growthRate * 10000) / 10000 : 0
       regions[i] = c.region
+      capitals[i] = c.is_capital ? 1 : 0
+      capital_colors[i] = c.capital_color || null
     }
 
     //Return statement
     return {
+      capitals,
+      capital_colors,
       coords,
       count: len,
       countries,

@@ -48,6 +48,7 @@ import {
   REGION_COLOR_MAP,
   resolveRegionColorHex,
   hexToRgb,
+  ensureContrastAgainstDark,
 } from './deck_layer_palette_utils'
 
 function getShortCityLabel (arg0_name: string): string {
@@ -958,10 +959,23 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               getSize: (d: any) => Math.max(10, Math.min(15, 9 + Math.log10(Math.max(1000, d.population))*0.9)),
               sizeUnits: 'pixels',
               sizeMinPixels: 9,
-              sizeMaxPixels: 20,
-              getColor: [255, 255, 255, 255],
+              getColor: (d: any) => {
+                if (!d.isCapital)
+                  return [255, 255, 255, 255]
+                let cap_rgb: [number, number, number] = [255, 220, 0]
+                if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
+                  cap_rgb = [d.capitalColor[0], d.capitalColor[1], d.capitalColor[2]]
+                } else if (typeof d.capitalColor === 'string' && d.capitalColor.startsWith('#')) {
+                  cap_rgb = hexToRgb(d.capitalColor)
+                }
+                let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
+                return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
+              },
               getTextAnchor: 'start',
               getAlignmentBaseline: 'center',
+              updateTriggers: {
+                getColor: [visible_label_cities],
+              },
               getPixelOffset: (d: any) => [d.pixelRadius + 8, 0],
               background: true,
               getBackgroundColor: [10, 15, 25, 220],

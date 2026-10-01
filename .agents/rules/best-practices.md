@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-Prioritise long-term human maintainability.
+Prioritise long-term human maintainability. DO NOT USE /scratch/. Always use /tests/.
 
 ## File Management.
 

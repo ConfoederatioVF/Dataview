@@ -22,6 +22,49 @@ export let REGION_COLOR_MAP: Record<string, string> = {
 }
 
 /**
+ * Ensures an RGB colour meets a minimum luminance threshold against dark backgrounds
+ * by smoothly tinting towards white whilst preserving the original hue.
+ *
+ * @param {[number, number, number]} arg0_rgb
+ * @param {number} [arg1_min_luminance=155]
+ *
+ * @returns {[number, number, number]}
+ */
+export function ensureContrastAgainstDark (
+  arg0_rgb: [number, number, number],
+  arg1_min_luminance?: number
+): [number, number, number] {
+  //Convert from parameters
+  let min_luminance = (arg1_min_luminance !== undefined) ? arg1_min_luminance : 155
+  let rgb = arg0_rgb
+
+  //Declare local instance variables
+  let b = rgb[2]
+  let current_lum: number
+  let g = rgb[1]
+  let r = rgb[0]
+  let t: number
+
+  //Guard clauses
+  if (!rgb || rgb.length < 3)
+    return [255, 220, 0]
+
+  //Function body
+  current_lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  if (current_lum >= min_luminance)
+    return [r, g, b]
+
+  t = Math.max(0, Math.min(1, (min_luminance - current_lum) / (255 - current_lum)))
+
+  r = Math.round(r + (255 - r) * t)
+  g = Math.round(g + (255 - g) * t)
+  b = Math.round(b + (255 - b) * t)
+
+  //Return statement
+  return [r, g, b]
+}
+
+/**
  * Resolves regional color hex for a given world region and coordinate pair.
  *
  * @param {string} [arg0_region]

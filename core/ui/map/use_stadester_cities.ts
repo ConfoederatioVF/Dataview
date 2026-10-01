@@ -97,10 +97,12 @@ export async function fetchStadesterCitiesAsync (
           if (data.pops[i] < 0.01)
             continue
           city_list.push({
+            capitalColor: data.capital_colors ? data.capital_colors[i] : undefined,
             coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
             country: data.countries ? data.countries[i] : undefined,
             growthRate: data.growth ? data.growth[i] : 0,
             id: data.keys[i],
+            isCapital: data.capitals ? Boolean(data.capitals[i]) : false,
             key: data.keys[i],
             name: data.names[i],
             population: data.pops[i],
@@ -108,7 +110,13 @@ export async function fetchStadesterCitiesAsync (
           })
         }
       } else if (Array.isArray(data.cities)) {
-        city_list = data.cities.filter((arg0_c: CityPoint) => arg0_c && arg0_c.population >= 0.01)
+        city_list = data.cities
+          .filter((arg0_c: any) => arg0_c && arg0_c.population >= 0.01)
+          .map((arg0_c: any) => ({
+            ...arg0_c,
+            capitalColor: arg0_c.capital_color || arg0_c.capitalColor || undefined,
+            isCapital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
+          }))
       }
 
       if (cache) {

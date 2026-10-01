@@ -7,7 +7,9 @@
         icon: "location_city",
         description: [
             "### Stadestér Settlements",
-            "A global historical database of 34,400+ cities and urban settlements from 3300BC to the present."
+            "A global historical database of 34,400+ cities and urban settlements from 3300BC to the present.",
+            "",
+            "Historical names and capital cities are currently being worked on."
         ],
         filepath: "${l_stad}/stadester_1.1.json",
         permissions: [

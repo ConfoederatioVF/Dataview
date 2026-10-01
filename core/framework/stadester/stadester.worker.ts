@@ -11,12 +11,14 @@ import {
 
 export interface WorkerCityInput {
   area?: number
+  capitalColor?: [number, number, number, number] | string
   colour?: [number, number, number]
   coords: [number, number] // [lat, lon]
   country?: string
   density?: number
   growthRate?: number
   id: number | string
+  isCapital?: boolean
   key: string
   name: string
   other_names?: string | string[]
@@ -25,9 +27,11 @@ export interface WorkerCityInput {
 }
 
 export interface WorkerProcessedPoint {
+  capitalColor?: [number, number, number, number]
   color: [number, number, number, number]
   country?: string
   growthRate?: number
+  isCapital?: boolean
   key: string
   name: string
   pixelRadius: number
@@ -39,6 +43,8 @@ export interface WorkerProcessedPoint {
 }
 
 export interface WorkerPlacedLabel {
+  capitalColor?: [number, number, number, number]
+  isCapital?: boolean
   key: string
   name: string
   pixelRadius: number
@@ -86,6 +92,32 @@ export type WorkerOutMessage =
 
 let current_cities: WorkerCityInput[] = []
 let current_year = 1950
+
+let parseHexColorToRgba = function (
+  arg0_hex?: string | [number, number, number, number],
+  arg1_alpha = 255
+): [number, number, number, number] | undefined {
+  if (!arg0_hex)
+    return undefined
+  if (Array.isArray(arg0_hex))
+    return arg0_hex
+  if (typeof arg0_hex !== 'string')
+    return undefined
+
+  let clean = arg0_hex.replace('#', '').trim()
+  if (clean.length === 3)
+    clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2]
+
+  if (clean.length >= 6) {
+    let r = parseInt(clean.substring(0, 2), 16)
+    let g = parseInt(clean.substring(2, 4), 16)
+    let b = parseInt(clean.substring(4, 6), 16)
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b))
+      return [r, g, b, arg1_alpha]
+  }
+
+  return undefined
+}
 
 let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
   [0.08, [232, 121, 249]],
@@ -323,10 +355,14 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           fill_color = [reg_rgb[0], reg_rgb[1], reg_rgb[2], 220]
         }
 
+        let resolved_cap_color = parseHexColorToRgba(c.capitalColor)
+
         let pt: WorkerProcessedPoint = {
+          capitalColor: resolved_cap_color,
           color: fill_color,
           country: c.country,
           growthRate: c.growthRate,
+          isCapital: Boolean(c.isCapital),
           key: c.key,
           name: c.name,
           pixelRadius: pixel_radius,
@@ -348,7 +384,13 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let placed_labels: WorkerPlacedLabel[] = []
 
       if (is_labels_visible && label_candidates.length > 0) {
-        label_candidates.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
+        label_candidates.sort((arg0_a, arg0_b) => {
+          if (arg0_a.isCapital && !arg0_b.isCapital)
+            return -1
+          if (!arg0_a.isCapital && arg0_b.isCapital)
+            return 1
+          return arg0_b.population - arg0_a.population
+        })
 
         let placed_boxes: Array<[number, number, number, number]> = []
         let scale = Math.pow(2, zoom)
@@ -414,6 +456,8 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
 
           placed_boxes.push([box_x1, box_y1, box_x2, box_y2])
           placed_labels.push({
+            capitalColor: cand.capitalColor,
+            isCapital: cand.isCapital,
             key: cand.key,
             name: cand.name,
             pixelRadius: cand.pixelRadius,

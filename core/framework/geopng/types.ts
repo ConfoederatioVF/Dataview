@@ -113,6 +113,8 @@ export interface CityPoint {
   growthRate?: number
   historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id: number | string
+  isCapital?: boolean
+  capitalColor?: [number, number, number, number] | string
   key: string
   lat?: number
   lon?: number
@@ -127,6 +129,8 @@ export interface CityPoint {
 export interface CityFullRecord {
   angel_region?: string
   area?: Record<string, number>
+  capital?: Record<string, number | string>
+  capitalColor?: [number, number, number, number] | string
   centre_density?: Record<string, number>
   clark_region?: string
   colour?: [number, number, number]
@@ -136,6 +140,7 @@ export interface CityFullRecord {
   elevation?: number
   historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id?: number | string
+  isCapital?: boolean
   key: string
   name: string
   name_coords?: Record<string, [number, number]>

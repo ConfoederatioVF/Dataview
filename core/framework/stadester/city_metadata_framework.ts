@@ -1,5 +1,11 @@
 import { UfDate } from '../utils/uf_date.ts'
 
+export interface CapitalRecord {
+  date: string
+  state_id: number | string | null
+  year_frac: number
+}
+
 export interface HistoricalNameRecord {
   date: string
   name: string
@@ -7,6 +13,9 @@ export interface HistoricalNameRecord {
 }
 
 export interface CityMetadataEntry {
+  capital?: Record<string, number | string | null>
+  capitals?: Record<string, number | string | null>
+  capital_records?: CapitalRecord[]
   coords: [number, number] // [lng, lat] as per specification
   historical_names: HistoricalNameRecord[]
   key?: string
@@ -80,8 +89,11 @@ export let normalizeMetadataEntry = function (
 
   //Declare local instance variables
   let candidate_coords: [number, number] | null = null
+  let capital_dict: Record<string, number | string> = {}
+  let capital_records: CapitalRecord[] = []
   let entry_name: string = ''
   let hist_names: HistoricalNameRecord[] = []
+  let raw_capital: any
   let raw_hist: any
 
   //Guard clauses
@@ -148,14 +160,57 @@ export let normalizeMetadataEntry = function (
     }
   }
 
+  //4. Extract capital dictionary
+  raw_capital = raw.capital || raw.capitals
+
+  if (Array.isArray(raw_capital)) {
+    for (let i = 0; i < raw_capital.length; i++) {
+      let item = raw_capital[i]
+      if (item && typeof item === 'object') {
+        let date_str = item.date || item.from || item.year || ''
+        let state_val = item.state_id !== undefined ? item.state_id : item.state
+        if (date_str) {
+          let parsed_date = parseYearMonthDay(date_str)
+          let date_clean = String(date_str).trim()
+          let state_target = (state_val !== undefined && state_val !== null) ? state_val : null
+          capital_dict[date_clean] = state_target
+          capital_records.push({
+            date: date_clean,
+            state_id: state_target,
+            year_frac: parsed_date.year_frac,
+          })
+        }
+      }
+    }
+  } else if (raw_capital && typeof raw_capital === 'object') {
+    let cap_keys = Object.keys(raw_capital)
+    for (let i = 0; i < cap_keys.length; i++) {
+      let d_key = cap_keys[i]
+      let s_val = raw_capital[d_key]
+      let parsed_date = parseYearMonthDay(d_key)
+      let date_clean = d_key.trim()
+      let state_target = (s_val !== undefined && s_val !== null) ? s_val : null
+      capital_dict[date_clean] = state_target
+      capital_records.push({
+        date: date_clean,
+        state_id: state_target,
+        year_frac: parsed_date.year_frac,
+      })
+    }
+  }
+
   //Sort historical name transitions chronologically by fractional year
   hist_names.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+  capital_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
 
   //Return statement
   return {
+    capital: capital_dict,
+    capitals: capital_dict,
+    capital_records: capital_records,
     coords: candidate_coords,
     historical_names: hist_names,
-    key: raw.key,
+    key: raw.key || entry_key,
     name: entry_name,
   }
 }
@@ -294,3 +349,108 @@ export let resolveHistoricalCityName = function (
   //Return statement
   return city.name
 }
+
+/**
+ * Resolves the active capital record for a city at a given year or date, validating state existence.
+ *
+ * @param {any} arg0_city - City metadata or index record
+ * @param {number | string} [arg1_year_or_date] - Target year or date string (year.month.day)
+ * @param {(arg0_state_id: number | string, arg1_year_frac: number) => boolean} [arg2_state_validator] - Optional state existence check
+ *
+ * @returns {CapitalRecord | null} Active capital record or null
+ */
+export let getCityActiveCapitalRecord = function (
+  arg0_city: any,
+  arg1_year_or_date?: number | string,
+  arg2_state_validator?: (arg0_state_id: number | string, arg1_year_frac: number) => boolean
+): CapitalRecord | null {
+  //Convert from parameters
+  let city = arg0_city
+  let state_validator = arg2_state_validator
+  let year_or_date = arg1_year_or_date
+
+  //Declare local instance variables
+  let records: CapitalRecord[] | undefined
+  let target_frac: number
+
+  //Guard clauses
+  if (!city)
+    return null
+
+  //Function body
+  records = city.capital_records
+  if (!records && (city.capital || city.capitals)) {
+    let raw_cap = city.capital || city.capitals
+    records = []
+    let cap_keys = Object.keys(raw_cap)
+    for (let i = 0; i < cap_keys.length; i++) {
+      let d_key = cap_keys[i]
+      let s_val = raw_cap[d_key]
+      let parsed = parseYearMonthDay(d_key)
+      records.push({
+        date: d_key.trim(),
+        state_id: (s_val !== undefined && s_val !== null) ? s_val : null,
+        year_frac: parsed.year_frac,
+      })
+    }
+    records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+  }
+
+  if (!records || records.length === 0)
+    return null
+
+  if (year_or_date !== undefined && year_or_date !== null) {
+    if (typeof year_or_date === 'number') {
+      target_frac = year_or_date
+    } else {
+      let parsed = parseYearMonthDay(year_or_date)
+      target_frac = parsed.year_frac
+    }
+  } else {
+    target_frac = 1950
+  }
+
+  //Find the latest capital transition on or before target_frac
+  for (let i = records.length - 1; i >= 0; i--) {
+    if (target_frac >= records[i].year_frac) {
+      let active_state_id = records[i].state_id
+      if (!active_state_id)
+        return null
+
+      if (state_validator) {
+        if (!state_validator(active_state_id, target_frac))
+          return null
+      }
+
+      //Return statement
+      return records[i]
+    }
+  }
+
+  //Return statement
+  return null
+}
+
+/**
+ * Checks whether a city is a capital at the specified year or date.
+ *
+ * @param {any} arg0_city - City metadata or index record
+ * @param {number | string} [arg1_year_or_date] - Target year or date string (year.month.day)
+ * @param {(arg0_state_id: number | string, arg1_year_frac: number) => boolean} [arg2_state_validator] - Optional state existence check
+ *
+ * @returns {boolean} Whether the city is a capital at target year
+ */
+export let isCityCapitalAtYear = function (
+  arg0_city: any,
+  arg1_year_or_date?: number | string,
+  arg2_state_validator?: (arg0_state_id: number | string, arg1_year_frac: number) => boolean
+): boolean {
+  //Convert from parameters
+  let city = arg0_city
+  let state_validator = arg2_state_validator
+  let year_or_date = arg1_year_or_date
+
+  //Return statement
+  return Boolean(getCityActiveCapitalRecord(city, year_or_date, state_validator))
+}
+

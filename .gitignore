@@ -25,6 +25,7 @@ docs
 exports
 scratch
 tests
+!tests/capitals/chunks
 *.local
 
 # Editor directories and files

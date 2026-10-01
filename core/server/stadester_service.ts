@@ -189,8 +189,10 @@ export let StadesterService = {
     return isCityCapitalAtYear(city, year, (arg0_sid, arg0_y_frac) => {
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
-        return true
-      return arg0_y_frac >= state.start_year && arg0_y_frac <= state.stop_year
+        return false
+      let start_bound = state.start_year !== undefined ? state.start_year : -99999
+      let stop_bound = state.stop_year !== undefined ? state.stop_year : 99999
+      return arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound
     })
   },
 
@@ -218,8 +220,10 @@ export let StadesterService = {
     let cap_rec = getCityActiveCapitalRecord(city, year, (arg0_sid, arg0_y_frac) => {
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
-        return true
-      return arg0_y_frac >= state.start_year && arg0_y_frac <= state.stop_year
+        return false
+      let start_bound = state.start_year !== undefined ? state.start_year : -99999
+      let stop_bound = state.stop_year !== undefined ? state.stop_year : 99999
+      return arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound
     })
 
     if (!cap_rec || !cap_rec.state_id)

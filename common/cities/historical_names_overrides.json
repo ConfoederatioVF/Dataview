@@ -1,0 +1,120 @@
+{
+  "budapest": [
+    { "date": "89.1.1", "name": "Aquincum" },
+    { "date": "895.1.1", "name": "Buda" },
+    { "date": "1873.11.17", "name": "Budapest" }
+  ],
+  "perpignan": [
+    { "date": "927.1.1", "name": "Villa Perpinianum" },
+    { "date": "990.1.1", "name": "Perpignan" }
+  ],
+  "castres": [
+    { "date": "810.1.1", "name": "Castrum Albi" },
+    { "date": "1000.1.1", "name": "Castres" }
+  ],
+  "chatellerault": [
+    { "date": "952.1.1", "name": "Castrum Heraldi" },
+    { "date": "1150.1.1", "name": "Châtellerault" }
+  ],
+  "ciudadreal": [
+    { "date": "1255.1.1", "name": "Villa Real" },
+    { "date": "1420.1.1", "name": "Ciudad Real" }
+  ],
+  "clujnapoca": [
+    { "date": "124.1.1", "name": "Napoca" },
+    { "date": "1000.1.1", "name": "Castrum Clus" },
+    { "date": "1316.1.1", "name": "Kolozsvár" },
+    { "date": "1918.12.24", "name": "Cluj" },
+    { "date": "1940.8.30", "name": "Kolozsvár" },
+    { "date": "1944.10.11", "name": "Cluj" },
+    { "date": "1974.10.16", "name": "Cluj-Napoca" }
+  ],
+  "duren": [
+    { "date": "747.1.1", "name": "Villa Duria" },
+    { "date": "1000.1.1", "name": "Düren" }
+  ],
+  "eisenstadt": [
+    { "date": "1118.1.1", "name": "Castrum Ferreum" },
+    { "date": "1373.1.1", "name": "Eisenstadt" }
+  ],
+  "heerlen": [
+    { "date": "100.1.1", "name": "Coriovallum" },
+    { "date": "1050.1.1", "name": "Heerlen" }
+  ],
+  "medias": [
+    { "date": "1200.1.1", "name": "villa Medgyes" },
+    { "date": "1437.1.1", "name": "Medgyes" },
+    { "date": "1918.12.1", "name": "Mediaș" }
+  ],
+  "morondelafrontera": [
+    { "date": "-100.1.1", "name": "Arunci" },
+    { "date": "711.1.1", "name": "Mawrur" },
+    { "date": "1240.1.1", "name": "Morón" },
+    { "date": "1800.1.1", "name": "Morón de la Frontera" }
+  ],
+  "nicosia": [
+    { "date": "300.1.1", "name": "Ledra" },
+    { "date": "965.1.1", "name": "Lefkosia" },
+    { "date": "1192.1.1", "name": "Nicosia" }
+  ],
+  "osijek": [
+    { "date": "131.1.1", "name": "Mursa" },
+    { "date": "900.1.1", "name": "Osijek" },
+    { "date": "1526.1.1", "name": "Ösek" },
+    { "date": "1687.1.1", "name": "Esseg" },
+    { "date": "1918.10.29", "name": "Osijek" }
+  ],
+  "pontevedra": [
+    { "date": "50.1.1", "name": "Ad Duos Pontes" },
+    { "date": "800.1.1", "name": "Pontevedra" }
+  ],
+  "silistra": [
+    { "date": "106.1.1", "name": "Durostorum" },
+    { "date": "681.1.1", "name": "Drastar" },
+    { "date": "1388.1.1", "name": "Silistre" },
+    { "date": "1878.7.13", "name": "Silistra" }
+  ],
+  "sopron": [
+    { "date": "100.1.1", "name": "Scarbantia" },
+    { "date": "1000.1.1", "name": "Sopron" },
+    { "date": "1150.1.1", "name": "Ödenburg" },
+    { "date": "1921.1.1", "name": "Sopron" }
+  ],
+  "split": [
+    { "date": "305.1.1", "name": "Spalatum" },
+    { "date": "800.1.1", "name": "Spalato" },
+    { "date": "1918.10.29", "name": "Split" },
+    { "date": "1941.4.17", "name": "Spalato" },
+    { "date": "1944.10.26", "name": "Split" }
+  ],
+  "tulle": [
+    { "date": "300.1.1", "name": "Tutela" },
+    { "date": "1000.1.1", "name": "Tulle" }
+  ],
+  "vesoul": [
+    { "date": "899.1.1", "name": "Castrum Vesulium" },
+    { "date": "1000.1.1", "name": "Vesoul" }
+  ],
+  "villefranchesursaone": [
+    { "date": "1140.1.1", "name": "Villa Franca" },
+    { "date": "1400.1.1", "name": "Villefranche-sur-Saône" }
+  ],
+  "villeurbanne": [
+    { "date": "134.1.1", "name": "Villa Urbana" },
+    { "date": "1300.1.1", "name": "Villeurbanne" }
+  ],
+  "viterbo": [
+    { "date": "-300.1.1", "name": "Surrena" },
+    { "date": "773.1.1", "name": "Castrum Viterbii" },
+    { "date": "1090.1.1", "name": "Viterbo" }
+  ],
+  "xanten": [
+    { "date": "100.1.1", "name": "Colonia Ulpia Traiana" },
+    { "date": "700.1.1", "name": "Xanten" }
+  ],
+  "zadar": [
+    { "date": "-50.1.1", "name": "Iader" },
+    { "date": "800.1.1", "name": "Zara" },
+    { "date": "1944.10.31", "name": "Zadar" }
+  ]
+}

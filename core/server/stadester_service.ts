@@ -124,6 +124,66 @@ export interface CityRenderPoint {
   region?: string
 }
 
+/**
+ * Checks whether a city coordinate is spatially contained within or proximate to a state's bounding box.
+ *
+ * @param {any} arg0_city
+ * @param {any} arg1_state
+ * @param {number} [arg2_tolerance_deg=2.0]
+ *
+ * @returns {boolean}
+ */
+export function isCityInsideStateBBox (
+  arg0_city: any,
+  arg1_state: any,
+  arg2_tolerance_deg: number = 2.0
+): boolean {
+  //Convert from parameters
+  let city = arg0_city
+  let state = arg1_state
+  let tol = arg2_tolerance_deg
+
+  //Guard clauses
+  if (!city || !state)
+    return false
+
+  if (!state.bbox || !Array.isArray(state.bbox) || state.bbox.length < 4)
+    return true
+
+  //Declare local instance variables
+  let c_lat: number | null = null
+  let c_lng: number | null = null
+
+  //Function body
+  if (city.lat !== undefined && city.lon !== undefined) {
+    c_lat = Number(city.lat)
+    c_lng = Number(city.lon)
+  } else if (city.lat !== undefined && city.lng !== undefined) {
+    c_lat = Number(city.lat)
+    c_lng = Number(city.lng)
+  } else if (Array.isArray(city.coords) && city.coords.length >= 2) {
+    if (city.key || city.population !== undefined || city.country !== undefined) {
+      // Indexed Stadester city: [lat, lon]
+      c_lat = Number(city.coords[0])
+      c_lng = Number(city.coords[1])
+    } else {
+      // Metadata entry: [lng, lat]
+      c_lat = Number(city.coords[1])
+      c_lng = Number(city.coords[0])
+    }
+  }
+
+  if (c_lat === null || c_lng === null || isNaN(c_lat) || isNaN(c_lng))
+    return true
+
+  let [minX, minY, maxX, maxY] = state.bbox
+  if (c_lng < minX - tol || c_lng > maxX + tol || c_lat < minY - tol || c_lat > maxY + tol)
+    return false
+
+  //Return statement
+  return true
+}
+
 export let StadesterService = {
   city_metadata: null as CityMetadataEntry[] | null,
   city_metadata_mtime: 0,
@@ -221,6 +281,8 @@ export let StadesterService = {
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
         return false
+      if (!isCityInsideStateBBox(city, state))
+        return false
       let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
       let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
       return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
@@ -267,6 +329,8 @@ export let StadesterService = {
       }
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
+        return false
+      if (!isCityInsideStateBBox(city, state))
         return false
       let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
       let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
@@ -918,6 +982,8 @@ export let StadesterService = {
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
           return false
+        if (!isCityInsideStateBBox(city, state))
+          return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
         return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
@@ -1019,6 +1085,8 @@ export let StadesterService = {
         }
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
+          return false
+        if (!isCityInsideStateBBox(entry, state))
           return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)

@@ -1184,7 +1184,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     }
 
     //8c. Finalized User-Drawn Measurement Polygon
-    if (drawn_polygon_feature) {
+    if (drawn_polygon_feature && !is_drawing) {
       let drawn_data = (projection === 'EqualEarth')
         ? [{
             ...drawn_polygon_feature,

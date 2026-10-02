@@ -53,7 +53,7 @@ export function useMapClearance (arg0_options?: MapClearanceOptions): MapClearan
   let [mapmodes_taken_right, set_mapmodes_taken_right] = useState<number>(0)
   let [mapmodes_width, set_mapmodes_width] = useState<number>(340)
   let [timeline_bounds, set_timeline_bounds] = useState<{ left: number; right: number; top: number } | null>(null)
-  let [timeline_clearance, set_timeline_clearance] = useState<number>(UI_LAYOUT.margin)
+  let [timeline_clearance, set_timeline_clearance] = useState<number>(128)
   let [top_right_taken, set_top_right_taken] = useState<number>(0)
   let [topbar_clearance, set_topbar_clearance] = useState<number>(112)
 

@@ -217,7 +217,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
     ? window.visualViewport.width
     : (typeof window !== 'undefined' ? window.innerWidth : 1920)
 
-  is_topbar_active = !hide_colourbar && legend_title !== 'None' && ((Boolean(raster) || Boolean(has_canvas)) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open))
+  is_topbar_active = Boolean(is_drawing) || (!hide_colourbar && legend_title !== 'None' && ((Boolean(raster) || Boolean(has_canvas)) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open)))
   is_top_right_occupied = is_topbar_active && legend_position === 'top-center'
 
   effective_topbar_clearance = (topbar_clearance_prop !== undefined && topbar_clearance_prop > 40)
@@ -321,20 +321,91 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
     container_style.width = `${Math.min(current_colourbar_width, max_allowed_width)}px`
   }
 
+  let effective_max_height = is_bottom
+    ? `calc(100dvh - ${Math.max(timeline_clearance, 120) + (topbar_clearance || UI_LAYOUT.margin) + UI_LAYOUT.gap}px)`
+    : `calc(100dvh - ${UI_LAYOUT.margin + Math.max(timeline_clearance, 120) + UI_LAYOUT.gap}px)`
+
+  if (!container_style.maxHeight)
+    container_style.maxHeight = effective_max_height
+
   //Return statement
   return (
     <>
       {/* Floating Legend Container */}
-      {!is_timelapse_exporting && ui_visible && ((!hide_colourbar && (Boolean(raster) || Boolean(has_canvas))) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open)) && (
+      {!is_timelapse_exporting && ui_visible && ((!hide_colourbar && (Boolean(raster) || Boolean(has_canvas))) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open) || Boolean(is_drawing)) && (
         <div
           id="dataview-legend-card-container"
           style={container_style}
-          className={`absolute z-30 pointer-events-none flex flex-col gap-2 ${is_bottom ? 'justify-end' : 'justify-start'
+          className={`absolute z-30 pointer-events-none flex flex-col gap-2 min-h-0 overflow-hidden ${is_bottom ? 'justify-end' : 'justify-start'
             }`}
         >
+          {/* Drawing Mode Measurement Toast */}
+          {is_drawing && (
+            <div className="pointer-events-auto w-full flex justify-center shrink-0">
+              <div
+                style={{
+                  width:
+                    is_mobile || is_center_pos || legend_position === 'bottom-right'
+                      ? '100%'
+                      : `${current_colourbar_width}px`,
+                }}
+                className="relative rounded-none border border-[rgb(200,40,40)] bg-card/95 backdrop-blur-md py-1.5 px-3 shadow-lg text-[var(--body-font-size)] font-sans flex items-center justify-between gap-2.5 whitespace-nowrap min-w-0"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                    <Icon name="edit" className="text-sm text-[rgb(200,40,40)]" />
+                  </div>
+                  {draw_points_count < 3 && (
+                    <span className="font-semibold text-foreground whitespace-nowrap truncate text-xs">
+                      {draw_points_count === 0
+                        ? t.hud.drawStartPrompt
+                        : `${draw_points_count} ${t.mapPanels.historicalBorders.vertices || 'vertices'}`}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {draw_points_count >= 3 && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={on_finish_draw}
+                      className="h-6 px-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-none cursor-pointer whitespace-nowrap shrink-0"
+                    >
+                      <Icon name="check" className="text-xs mr-1" />
+                      <span>{t.hud.finishDraw}</span>
+                    </Button>
+                  )}
+                  {draw_points_count > 0 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={on_delete_last_draw_point}
+                      className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground rounded-none cursor-pointer whitespace-nowrap shrink-0"
+                      title={t.hud.deleteLastPoint}
+                    >
+                      <Icon name="undo" className="text-xs mr-1" />
+                      <span>{t.hud.undo}</span>
+                    </Button>
+                  )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={on_cancel_draw}
+                    className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-none cursor-pointer flex items-center justify-center shrink-0"
+                    title={t.hud.cancel}
+                    aria-label={t.hud.cancel}
+                  >
+                    <Icon name="close" className="text-xs" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Main Raster ColourBar Legend */}
           {!hide_colourbar && legend_title !== 'None' && (Boolean(raster) || Boolean(has_canvas)) && (
-            <div className="pointer-events-auto w-full flex justify-center">
+            <div className="pointer-events-auto w-full flex justify-center shrink-0">
               <ColorBarLegend
                 key={`colorbar-${active_layer_id ?? 'layer'}-${raster_version}-${legend_title}-${legend_subtitle}-${color_palette}`}
                 palette={color_palette}
@@ -358,7 +429,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
 
           {/* Stadestér Settlements Legend Card */}
           {stadester_config?.enabled && (
-            <div className="pointer-events-auto w-full flex justify-center">
+            <div className="pointer-events-auto w-full flex justify-center shrink-0">
               <StadesterLegendCard
                 config={stadester_config}
                 hoveredCity={hovered_city}
@@ -370,7 +441,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
 
           {/* Information & Controls Flyout Panel */}
           {info_panel_open && !is_mobile && (
-            <div className="pointer-events-auto">
+            <div className="pointer-events-auto flex-1 min-h-0 flex flex-col overflow-hidden">
               <InfoFlyoutPanel
                 isOpen={info_panel_open}
                 onClose={on_close_info_panel || (() => { })}
@@ -381,58 +452,10 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 projection={projection}
                 cameraTilt={camera_tilt}
                 width={current_colourbar_width}
+                className="flex-1 min-h-0"
               />
             </div>
           )}
-        </div>
-      )}
-
-      {/* Drawing Mode Floating Action Banner */}
-      {ui_visible && is_drawing && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-card/95 backdrop-blur-md border border-[rgb(200,40,40)] shadow-2xl p-2 px-3.5 flex items-center gap-3.5 text-[var(--body-font-size)] font-sans">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[rgb(200,40,40)] animate-pulse" />
-            <span className="font-semibold text-foreground">
-              {draw_points_count === 0
-                ? t.hud.drawStartPrompt
-                : formatString(t.hud.drawPointsPrompt, draw_points_count)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 border-l border-border pl-3">
-            {draw_points_count >= 3 && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={on_finish_draw}
-                className="h-6 px-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-none cursor-pointer"
-              >
-                <Icon name="check" className="text-xs mr-1" />
-                <span>{t.hud.finishDraw}</span>
-              </Button>
-            )}
-            {draw_points_count > 0 && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={on_delete_last_draw_point}
-                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground rounded-none cursor-pointer"
-                title={t.hud.deleteLastPoint}
-              >
-                <Icon name="undo" className="text-xs mr-1" />
-                <span>{t.hud.undo}</span>
-              </Button>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={on_cancel_draw}
-              className="h-6 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-none cursor-pointer"
-            >
-              <Icon name="close" className="text-xs mr-1" />
-              <span>{t.hud.cancel}</span>
-            </Button>
-          </div>
         </div>
       )}
 
@@ -487,47 +510,48 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 </TooltipContent>
               </Tooltip>
 
-              {/* Toggle Polygon Draw Measurement Tool */}
+              {/* Toggle Polygon Draw Measurement Tool / Delete Drawn Polygon */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant={is_drawing ? 'secondary' : 'ghost'}
                     size="icon"
-                    onClick={on_toggle_draw}
+                    onClick={has_drawn_polygon && !is_drawing ? on_clear_drawn_polygon : on_toggle_draw}
                     className={`h-7 w-7 rounded-none cursor-pointer transition-colors ${
                       is_drawing
                         ? 'bg-[rgb(200,40,40)] hover:bg-[rgb(220,50,50)] text-white shadow-md'
-                        : 'text-white'
+                        : has_drawn_polygon
+                          ? 'text-red-400 hover:text-red-300 hover:bg-red-500/20'
+                          : 'text-white'
                     }`}
-                    aria-label={t.hud.drawPolygon}
+                    aria-label={
+                      is_drawing
+                        ? t.hud.cancelDraw
+                        : has_drawn_polygon
+                          ? t.hud.clearDrawnPolygon
+                          : t.hud.drawPolygon
+                    }
                   >
-                    <Icon name="polyline" className="text-white" />
+                    <Icon
+                      name={
+                        has_drawn_polygon && !is_drawing
+                          ? 'delete_sweep'
+                          : 'polyline'
+                      }
+                      className={has_drawn_polygon && !is_drawing ? 'text-red-400' : 'text-white'}
+                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="left">
-                  <span>{is_drawing ? t.hud.cancelDraw : t.hud.drawPolygon}</span>
+                  <span>
+                    {is_drawing
+                      ? t.hud.cancelDraw
+                      : has_drawn_polygon
+                        ? t.hud.clearDrawnPolygon
+                        : t.hud.drawPolygon}
+                  </span>
                 </TooltipContent>
               </Tooltip>
-
-              {/* Clear Drawn Polygon (when present) */}
-              {has_drawn_polygon && !is_drawing && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={on_clear_drawn_polygon}
-                      className="h-7 w-7 rounded-none text-red-400 hover:text-red-300 hover:bg-red-500/20 cursor-pointer"
-                      aria-label={t.hud.clearDrawnPolygon}
-                    >
-                      <Icon name="delete_sweep" className="text-red-400" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left">
-                    <span>{t.hud.clearDrawnPolygon}</span>
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </div>
 
             {/* View Options Container */}

@@ -480,9 +480,11 @@ export interface LocalisationConfig {
       calculatingArea: string
       capital: string
       cells: string
+      clearPolygon?: string
       closeHistoricalDetails: string
       computing: string
       computingStats: string
+      editPolygon?: string
       estimated: string
       fullCalculator: string
       historicalEntity: string
@@ -492,11 +494,13 @@ export interface LocalisationConfig {
       jumpTimelineTo: string
       keyframes: string
       mean: string
+      measurementPolygon?: string
       median: string
       minMax: string
       noData: string
       noKeyframeEvents: string
       noRasterData: string
+      polygonActions?: string
       rasterSum: string
       statisticsAt: string
       stdDev: string
@@ -504,6 +508,7 @@ export interface LocalisationConfig {
       territorial: string
       unrecorded: string
       validCells: string
+      vertices?: string
     }
     clickInfo: {
       agriculture: string

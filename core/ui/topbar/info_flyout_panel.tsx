@@ -335,7 +335,7 @@ export let InfoFlyoutPanel: React.FC<InfoFlyoutPanelProps> = function (arg0_prop
       defaultPinned={default_pinned}
       onTogglePin={on_toggle_pin}
       defaultWidth={width}
-      className={class_name}
+      className={`flex-1 min-h-0 max-h-full ${class_name || ''}`}
     >
       {tabs_element}
     </Window>

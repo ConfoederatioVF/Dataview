@@ -942,12 +942,13 @@ export let App: React.FC = function () {
     set_is_drawing((arg0_prev) => {
       let next = !arg0_prev
       if (next) {
-        set_draw_points([])
         set_cursor_lng_lat(null)
-        set_selected_city_key(null)
+        set_draw_points([])
+        set_drawn_polygon_feature(null)
         set_hovered_country(null)
-        set_selected_countries([])
         set_inspect_data(null)
+        set_selected_city_key(null)
+        set_selected_countries([])
       }
       return next
     })
@@ -955,9 +956,9 @@ export let App: React.FC = function () {
 
   let handle_cancel_draw = useCallback(() => {
     //Function body
-    set_is_drawing(false)
-    set_draw_points([])
     set_cursor_lng_lat(null)
+    set_draw_points([])
+    set_is_drawing(false)
   }, [])
 
   let handle_add_draw_point = useCallback((arg0_pt: [number, number]) => {
@@ -972,6 +973,34 @@ export let App: React.FC = function () {
     //Function body
     set_draw_points((arg0_prev) => arg0_prev.slice(0, -1))
   }, [])
+
+  let handle_edit_drawn_polygon = useCallback((arg0_feature?: CountryFeature) => {
+    //Convert from parameters
+    let feat = arg0_feature || drawn_polygon_feature
+
+    //Guard clauses
+    if (!feat || !feat.geometry)
+      return
+
+    //Declare local instance variables
+    let coords: [number, number][] = []
+    let geom: any = feat.geometry
+
+    //Function body
+    if (geom.type === 'Polygon' && Array.isArray(geom.coordinates) && geom.coordinates[0]) {
+      let ring = geom.coordinates[0] as [number, number][]
+      if (ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1]) {
+        coords = ring.slice(0, -1)
+      } else {
+        coords = ring.slice()
+      }
+    }
+
+    set_draw_points(coords)
+    set_drawn_polygon_feature(null)
+    set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
+    set_is_drawing(true)
+  }, [drawn_polygon_feature])
 
   let handle_finish_draw = useCallback(() => {
     //Guard clauses
@@ -1177,6 +1206,7 @@ export let App: React.FC = function () {
           onCancelDraw={handle_cancel_draw}
           onClearDrawnPolygon={handle_clear_drawn_polygon}
           onDeleteLastDrawPoint={handle_delete_last_draw_point}
+          onEditPolygon={handle_edit_drawn_polygon}
           onFinishDraw={handle_finish_draw}
           onSetCursorLngLat={set_cursor_lng_lat}
           onToggleDraw={handle_toggle_draw}

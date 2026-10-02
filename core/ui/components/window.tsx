@@ -425,7 +425,7 @@ export let Window: React.FC<WindowProps> = function (arg0_props) {
         onMouseDownCapture={bring_to_front}
         style={
           is_pinned
-            ? { width: '100%' }
+            ? { maxHeight: '100%', width: '100%' }
             : {
                 height: size.height ? `${size.height}px` : undefined,
                 left: `${pos.x}px`,
@@ -437,7 +437,7 @@ export let Window: React.FC<WindowProps> = function (arg0_props) {
         }
         className={
           is_pinned
-            ? `relative z-30 flex flex-col bg-card/98 backdrop-blur-md border border-border shadow-2xl p-[var(--padding)] text-[var(--body-font-size)] font-sans select-none pointer-events-auto max-h-[calc(100vh-160px)] ${className}`
+            ? `relative z-30 flex flex-col bg-card/98 backdrop-blur-md border border-border shadow-2xl p-[var(--padding)] text-[var(--body-font-size)] font-sans select-none pointer-events-auto max-h-full flex-1 min-h-0 ${className}`
             : `flex flex-col bg-card/98 backdrop-blur-md border border-border shadow-2xl p-[var(--padding)] text-[var(--body-font-size)] font-sans select-none pointer-events-auto max-h-[calc(100vh-32px)] ${className}`
         }
       >

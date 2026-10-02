@@ -100,6 +100,7 @@ export interface MapViewerProps {
   onClearCountries?: () => void
   onClearDrawnPolygon?: () => void
   onDeleteLastDrawPoint?: () => void
+  onEditPolygon?: (arg0_feature: CountryFeature) => void
   onFinishDraw?: () => void
   onHoverCountry?: (country: CountryFeature | null) => void
   onInspect?: (data: InspectionData | null) => void
@@ -201,6 +202,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let on_close_city_details = props.onCloseCityDetails
   let on_close_info_panel = props.onCloseInfoPanel
   let on_delete_last_draw_point = props.onDeleteLastDrawPoint
+  let on_edit_polygon = props.onEditPolygon
   let on_finish_draw = props.onFinishDraw
   let on_hover_city = props.onHoverCity
   let on_hover_country = props.onHoverCountry
@@ -336,6 +338,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       set_active_panel_type(null)
     }
   }, [selected_historical_feature, active_panel_type, nav_history.length])
+
+  useEffect(() => {
+    if (is_drawing) {
+      set_selected_historical_feature(null)
+      set_active_panel_type(null)
+    }
+  }, [is_drawing])
 
   useEffect(() => {
     if (selected_historical_feature && historical_borders_result.bordersData) {
@@ -1131,6 +1140,20 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     }
   }, [on_close_city_details, on_clear_countries, on_select_country])
 
+  let handle_clear_polygon = useCallback(() => {
+    //Function body
+    if (on_clear_drawn_polygon)
+      on_clear_drawn_polygon()
+    handle_close_all_details()
+  }, [on_clear_drawn_polygon, handle_close_all_details])
+
+  let handle_edit_polygon = useCallback((arg0_feat: CountryFeature) => {
+    //Function body
+    if (on_edit_polygon)
+      on_edit_polygon(arg0_feat)
+    handle_close_all_details()
+  }, [on_edit_polygon, handle_close_all_details])
+
   handle_nav_back = useCallback(() => {
     //Guard clauses
     if (nav_history.length === 0)
@@ -1484,6 +1507,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           feature={selected_historical_feature}
           isCalculatingStats={is_calculating_stats}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}
+          onClearPolygon={handle_clear_polygon}
+          onEditPolygon={handle_edit_polygon}
           onSelectCity={handle_select_city_from_country}
           raster={raster}
           onClose={handle_close_all_details}
@@ -1621,8 +1646,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           onChangeVariableSelector={props.onChangeVariableSelector}
           raster={raster}
           onClearCountries={on_clear_countries || NOOP_FN}
+          onClearPolygon={handle_clear_polygon}
           onCloseCity={handle_close_all_details}
           onCloseHistoricalFeature={handle_close_all_details}
+          onEditPolygon={handle_edit_polygon}
           onJumpToYear={(yr) => {
             if (props.onChangeYear)
               props.onChangeYear(yr)

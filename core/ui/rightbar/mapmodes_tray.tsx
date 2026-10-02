@@ -59,8 +59,10 @@ export interface MapmodesTrayProps {
   mapModes: MapModeItem[]
   onChangeVariableSelector?: (arg0_key: string, arg1_option: string | string[]) => void
   onClearCountries: () => void
+  onClearPolygon?: () => void
   onCloseCity?: () => void
   onCloseHistoricalFeature?: () => void
+  onEditPolygon?: (arg0_feature: CountryFeature) => void
   onJumpToYear?: (arg0_year: number) => void
   onReorderMapModes: (newModes: MapModeItem[]) => void
   onSelectCity?: (city: CityPoint) => void
@@ -116,8 +118,10 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     mapModes: map_modes,
     onChangeVariableSelector: on_change_variable_selector,
     onClearCountries: on_clear_countries,
+    onClearPolygon: on_clear_polygon,
     onCloseCity: on_close_city,
     onCloseHistoricalFeature: on_close_historical_feature,
+    onEditPolygon: on_edit_polygon,
     onJumpToYear: on_jump_to_year,
     onReorderMapModes: on_reorder_map_modes,
     onSelectCity: on_select_city,
@@ -565,7 +569,9 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 embedded={true}
                 feature={selected_historical_feature}
                 isCalculatingStats={is_calculating_stats}
+                onClearPolygon={on_clear_polygon}
                 onClose={on_close_historical_feature || (() => {})}
+                onEditPolygon={on_edit_polygon}
                 onJumpToYear={on_jump_to_year}
                 onSelectCity={on_select_city}
                 raster={raster}

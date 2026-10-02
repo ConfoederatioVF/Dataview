@@ -16,7 +16,9 @@ export interface HistoricalBorderDetailsPanelProps {
   feature: HistoricalBorderFeature | null
   isCalculatingStats?: boolean
   onBack?: () => void
+  onClearPolygon?: () => void
   onClose: () => void
+  onEditPolygon?: (arg0_feature: CountryFeature) => void
   onJumpToYear?: (arg0_year: number) => void
   onOpenAnalytics?: () => void
   onSelectCity?: (city: CityPoint) => void
@@ -44,7 +46,9 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let feature = props.feature
   let is_calculating_stats = props.isCalculatingStats
   let on_back = props.onBack
+  let on_clear_polygon = props.onClearPolygon
   let on_close = props.onClose
+  let on_edit_polygon = props.onEditPolygon
   let on_jump_to_year = props.onJumpToYear
   let on_open_analytics = props.onOpenAnalytics
   let on_select_city = props.onSelectCity
@@ -99,6 +103,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let handle_capital_click: (arg0_e: React.MouseEvent) => void
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
   let is_acapital = false
+  let is_drawn_feature = Boolean(feature?.properties?.is_drawn)
   let keyframes_list: any[]
   let max_x: number
   let max_y: number
@@ -480,13 +485,15 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         {/* Metric 3: Keyframes or Span */}
         <div className="border border-border/60 bg-muted/20 p-2 text-center">
           <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
-            {t.mapPanels.historicalBorders.keyframes}
+            {is_drawn_feature ? (t.mapPanels.historicalBorders.vertices || 'Vertices') : t.mapPanels.historicalBorders.keyframes}
           </div>
           <div className="text-sm font-bold text-foreground font-mono mt-0.5">
-            {keyframes_list.length > 0 ? keyframes_list.length : 1}
+            {is_drawn_feature
+              ? (feature?.geometry?.type === 'Polygon' ? Math.max(0, (feature.geometry.coordinates?.[0]?.length || 1) - 1) : 0)
+              : (keyframes_list.length > 0 ? keyframes_list.length : 1)}
           </div>
           <div className="text-[9px] text-muted-foreground/70 truncate mt-0.5">
-            {t.mapPanels.historicalBorders.historicalRecords}
+            {is_drawn_feature ? (t.mapPanels.historicalBorders.measurementPolygon || 'Measurement') : t.mapPanels.historicalBorders.historicalRecords}
           </div>
         </div>
       </div>
@@ -555,13 +562,17 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         </div>
       ) : null}
 
-      {/* Keyframe Timeline Trajectory Header */}
+      {/* Keyframe Timeline Trajectory Header OR Drawn Polygon Actions */}
       <div className="flex items-center justify-between text-[11px] font-semibold text-foreground mb-1.5 border-t border-border/50 pt-2">
         <span className="flex items-center gap-1.5">
-          <Icon name="timeline" className="text-xs text-white" />
-          <span className="uppercase tracking-wider font-mono text-[10px]">{t.mapPanels.historicalBorders.historicalTrajectory}</span>
+          <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-xs text-white" />
+          <span className="uppercase tracking-wider font-mono text-[10px]">
+            {is_drawn_feature
+              ? (t.mapPanels.historicalBorders.polygonActions || 'Polygon Actions')
+              : t.mapPanels.historicalBorders.historicalTrajectory}
+          </span>
         </span>
-        {on_open_analytics && !effective_stats && (
+        {on_open_analytics && !effective_stats && !is_drawn_feature && (
           <button
             type="button"
             onClick={on_open_analytics}
@@ -572,8 +583,35 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         )}
       </div>
 
-      {/* Interactive Keyframes List */}
-      {keyframes_list.length > 0 ? (
+      {/* Interactive Keyframes List OR Polygon Actions */}
+      {is_drawn_feature ? (
+        <div className="grid grid-cols-2 gap-2 pt-0.5">
+          <button
+            type="button"
+            onClick={() => {
+              if (on_edit_polygon && feature)
+                on_edit_polygon(feature as unknown as CountryFeature)
+            }}
+            className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-muted/60 hover:bg-muted text-foreground border border-border transition-colors cursor-pointer rounded-none"
+            title={t.mapPanels.historicalBorders.editPolygon}
+          >
+            <Icon name="edit" className="text-xs text-[rgb(200,40,40)]" />
+            <span>{t.mapPanels.historicalBorders.editPolygon || 'Edit Polygon'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (on_clear_polygon)
+                on_clear_polygon()
+            }}
+            className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/40 transition-colors cursor-pointer rounded-none"
+            title={t.mapPanels.historicalBorders.clearPolygon}
+          >
+            <Icon name="delete_sweep" className="text-xs text-red-400" />
+            <span>{t.mapPanels.historicalBorders.clearPolygon || 'Clear Polygon'}</span>
+          </button>
+        </div>
+      ) : keyframes_list.length > 0 ? (
         <div className="max-h-44 overflow-y-auto custom-scrollbar space-y-1 pr-0.5">
           {keyframes_list.map((arg0_kf: any, arg1_idx: number) => {
             let is_curr = arg1_idx === active_kf_index

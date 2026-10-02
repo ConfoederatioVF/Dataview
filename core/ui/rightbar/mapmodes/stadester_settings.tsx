@@ -209,7 +209,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* D3 Growth Colour Palette Selector (active when Growth Rate is selected) */}
       {color_mode === 'growth' && (
         <D3ColorPaletteSelector
-          label="Growth D3 Palette"
+          label="Colourscheme"
           value={config.growthPalette || 'Rainbow'}
           onChange={(arg0_pal: any) =>
             on_change_config((arg0_prev) => ({
@@ -437,7 +437,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                     : 'bg-background hover:bg-muted text-muted-foreground border-border'
                   }`}
               >
-                Inherit State Colour
+                Use Country Colour
               </button>
               <button
                 type="button"
@@ -489,9 +489,9 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 <div className="flex items-center gap-1 pt-0.5 flex-wrap">
                   {[
                     { label: 'Yellow', value: '#FFDC00' },
-                    { label: 'Amber', value: '#FFB700' },
+                    { label: 'Green', value: '#5b8a5a' },
                     { label: 'Red', value: '#FF4136' },
-                    { label: 'White', value: '#FFFFFF' },
+                    { label: 'Grey', value: '#969696' },
                     { label: 'Cyan', value: '#7FDBFF' },
                   ].map((arg0_preset) => {
                     let is_active = (config.capitalConstantColor || '#FFDC00').toLowerCase() === arg0_preset.value.toLowerCase()

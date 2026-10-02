@@ -1160,9 +1160,41 @@ export let StadesterService = {
     //Fallback linear search by key, id or name
     let all_keys = Object.keys(indexed)
     let city_key_lower = city_key.toLowerCase().trim()
+    let stripped_key = city_key_lower.replace(/^(stadester-|ghsl-|oxford-)/, '')
+    let stripped_key_nfd = stripped_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
     for (let i = 0; i < all_keys.length; i++) {
       let entry = indexed[all_keys[i]]
-      if (entry.key === city_key || String(entry.id) === city_key || entry.name === city_key || (entry.name && entry.name.toLowerCase() === city_key_lower)) {
+      let e_name_lower = entry.name ? entry.name.toLowerCase().trim() : ''
+      let e_meta_lower = entry.metadata_name ? entry.metadata_name.toLowerCase().trim() : ''
+      let is_match = false
+
+      if (
+        entry.key === city_key ||
+        String(entry.id) === city_key ||
+        entry.name === city_key ||
+        e_name_lower === city_key_lower ||
+        e_name_lower === stripped_key ||
+        e_meta_lower === city_key_lower ||
+        e_meta_lower === stripped_key
+      ) {
+        is_match = true
+      } else if (entry.other_names && Array.isArray(entry.other_names)) {
+        if (entry.other_names.some((arg0_on: string) => {
+          let on_lower = arg0_on.toLowerCase().trim()
+          return on_lower === city_key_lower || on_lower === stripped_key
+        })) {
+          is_match = true
+        }
+      }
+
+      if (!is_match && stripped_key_nfd && entry.name) {
+        let e_name_nfd = entry.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+        if (e_name_nfd === stripped_key_nfd)
+          is_match = true
+      }
+
+      if (is_match) {
         if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
           return null
 

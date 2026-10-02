@@ -160,18 +160,32 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       if ((window as any).setSelectedCityKey)
         (window as any).setSelectedCityKey(target_city.key)
     } else {
-      let cap_key = `stadester-${single_name}`
-      fetch(`/api/stadester/city?key=${encodeURIComponent(cap_key)}&name=${encodeURIComponent(single_name)}&year=${current_year}`)
+      let cap_key = feature.properties?.capkey || ''
+      let query_params = new URLSearchParams()
+      if (cap_key)
+        query_params.set('key', cap_key)
+      query_params.set('name', single_name)
+      query_params.set('year', String(current_year))
+
+      fetch(`/api/stadester/city?${query_params.toString()}`)
         .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))
         .then((arg0_data) => {
           if (arg0_data && arg0_data.key) {
             let synth_city: CityPoint = {
+              area: arg0_data.area ? (typeof arg0_data.area === 'object' ? Object.values(arg0_data.area)[0] as number : arg0_data.area) : undefined,
+              capitalOf: arg0_data.capitalOf || feature.properties?.name,
+              capital_state_id: arg0_data.capital_state_id || state_id,
               coords: arg0_data.coords || [0, 0],
+              country: arg0_data.country || feature.properties?.name,
               id: arg0_data.key,
               isCapital: true,
               key: arg0_data.key,
               name: arg0_data.name || single_name,
-              population: typeof arg0_data.population === 'number' ? arg0_data.population : 0,
+              population: typeof arg0_data.population === 'number'
+                ? arg0_data.population
+                : (arg0_data.population && typeof arg0_data.population === 'object'
+                  ? (arg0_data.population[String(current_year)] || Object.values(arg0_data.population)[0] || 0)
+                  : 0),
             }
             if (on_select_city)
               on_select_city(synth_city)
@@ -179,34 +193,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
               (window as any).setSelectedCityKey(arg0_data.key)
             if ((window as any).selectedCityRecord !== undefined)
               (window as any).selectedCityRecord = arg0_data
-          } else {
-            let fallback_city: CityPoint = {
-              coords: [0, 0],
-              id: cap_key,
-              isCapital: true,
-              key: cap_key,
-              name: single_name,
-              population: 0,
-            }
-            if (on_select_city)
-              on_select_city(fallback_city)
-            if ((window as any).setSelectedCityKey)
-              (window as any).setSelectedCityKey(cap_key)
           }
         })
-        .catch(() => {
-          let fallback_city: CityPoint = {
-            coords: [0, 0],
-            id: cap_key,
-            isCapital: true,
-            key: cap_key,
-            name: single_name,
-            population: 0,
-          }
-          if (on_select_city)
-            on_select_city(fallback_city)
-          if ((window as any).setSelectedCityKey)
-            (window as any).setSelectedCityKey(cap_key)
+        .catch((arg0_err) => {
+          console.error('[HistoricalBorderDetailsPanel] Failed to fetch city details:', arg0_err)
         })
     }
   }

@@ -82,9 +82,38 @@ export interface MapModeItem {
 export type StadesterColorMode = 'growth' | 'population' | 'region' | 'continent'
 
 export interface StadesterDisplayOptions {
+  bubble_size?: number
+  bubbleSize?: number
+  capital_color_mode?: 'state' | 'constant'
+  capitalColorMode?: 'state' | 'constant'
+  capital_constant_color?: string
+  capitalConstantColor?: string
+  color_mode?: StadesterColorMode
+  colorMode?: StadesterColorMode
+  dataset?: 'stadester_1.1' | 'stadester_1.0'
+  filled?: boolean
+  growth_palette?: string
+  growthPalette?: string
+  halo?: boolean
+  label_collision?: boolean
+  labelCollision?: boolean
+  large_city_contrast?: number
+  largeCityContrast?: number
+  max_cities?: number
+  maxCities?: number
+  min_pop?: number
+  minPop?: number
+  opacity?: number
   prefer_least_diacritics?: boolean
+  show_capitals?: boolean
+  showCapitals?: boolean
+  show_capital_underlines?: boolean
+  showCapitalUnderlines?: boolean
+  show_labels?: boolean
+  showLabels?: boolean
   skip_unknown_unicode?: boolean
   strip_parentheses?: boolean
+  [key: string]: any
 }
 
 export interface StadesterConfig {

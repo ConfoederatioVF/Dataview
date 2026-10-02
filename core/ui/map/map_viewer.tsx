@@ -795,43 +795,82 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   let handle_select_country_from_city = useCallback(
     (arg0_state_id?: number | string, arg0_country_name?: string) => {
+      //Convert from parameters
+      let country_name = arg0_country_name
+      let state_id = arg0_state_id
+
+      //Declare local instance variables
+      let applyTargetFeature = function (arg0_feat: any) {
+        set_selected_historical_feature(arg0_feat)
+        if (selected_city_anchor)
+          set_selected_historical_anchor_screen(selected_city_anchor)
+        if (selected_city && (selected_city as any).coords)
+          set_selected_historical_anchor_coord([(selected_city as any).coords[1], (selected_city as any).coords[0]])
+        if (on_select_country) {
+          on_select_country(arg0_feat as unknown as CountryFeature)
+        } else if (on_toggle_country) {
+          on_toggle_country(arg0_feat as unknown as CountryFeature)
+        }
+      }
       let features = historical_borders_result?.bordersData?.features
       let target_feat: any = null
 
+      //Function body
       if (features && features.length > 0) {
         target_feat = features.find((arg0_f: any) => {
-          if (arg0_state_id !== undefined && arg0_state_id !== null) {
-            let sid_str = String(arg0_state_id)
+          if (state_id !== undefined && state_id !== null) {
+            let sid_str = String(state_id)
             if (String(arg0_f.id) === sid_str ||
                 String(arg0_f.properties?.id) === sid_str ||
                 String(arg0_f.properties?.state_id) === sid_str) {
               return true
             }
           }
-          if (arg0_country_name && arg0_f.properties?.name) {
+          if (country_name && arg0_f.properties?.name) {
             let fn = arg0_f.properties.name.toLowerCase().trim()
-            let cn = arg0_country_name.toLowerCase().trim()
-            if (fn === cn || fn.includes(cn) || cn.includes(fn))
+            let cn = country_name.toLowerCase().trim()
+            if (fn === cn)
               return true
           }
           return false
         })
+        if (!target_feat && country_name) {
+          let cn = country_name.toLowerCase().trim()
+          target_feat = features.find((arg0_f: any) => {
+            if (arg0_f.properties?.name) {
+              let fn = arg0_f.properties.name.toLowerCase().trim()
+              if (fn.includes(cn) || cn.includes(fn))
+                return true
+            }
+            return false
+          })
+        }
       }
 
       if (target_feat) {
-        set_selected_historical_feature(target_feat)
-        if (selected_city_anchor)
-          set_selected_historical_anchor_screen(selected_city_anchor)
-        if (selected_city && (selected_city as any).coords)
-          set_selected_historical_anchor_coord([(selected_city as any).coords[1], (selected_city as any).coords[0]])
-        if (on_select_country) {
-          on_select_country(target_feat as unknown as CountryFeature)
-        } else if (on_toggle_country) {
-          on_toggle_country(target_feat as unknown as CountryFeature)
-        }
+        applyTargetFeature(target_feat)
+      } else {
+        //Asynchronously request border info from the server when detailed borders are not active
+        let params = new URLSearchParams()
+        params.set('year', String(timeline_year || 1950))
+        params.set('dataset', 'detailed_borders')
+        if (state_id !== undefined && state_id !== null)
+          params.set('state_id', String(state_id))
+        if (country_name)
+          params.set('name', country_name)
+
+        fetch(`/api/atlas/border?${params.toString()}`)
+          .then((arg0_res) => (arg0_res.ok ? arg0_res.json() : null))
+          .then((arg0_data) => {
+            if (arg0_data && (arg0_data.geometry || arg0_data.properties))
+              applyTargetFeature(arg0_data)
+          })
+          .catch((arg0_err) => {
+            console.error('[MapViewer] Failed to request border info:', arg0_err)
+          })
       }
     },
-    [historical_borders_result, selected_city, selected_city_anchor, on_select_country, on_toggle_country]
+    [historical_borders_result, selected_city, selected_city_anchor, timeline_year, on_select_country, on_toggle_country]
   )
 
   //Return statement

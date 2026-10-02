@@ -712,6 +712,168 @@ export class AtlasBordersService {
   }
 
   /**
+   * Retrieves a single historical border feature by state_id, gwcode, or name at a given year.
+   * Searches detailed_borders first, then statistical_borders, and finally falls back to states.json.
+   *
+   * @param {number} arg0_year
+   * @param {number | string} [arg1_state_id]
+   * @param {string} [arg2_name]
+   * @param {Object} [arg3_options]
+   * @param {string} [arg3_options.dataset]
+   * @param {number} [arg3_options.day]
+   * @param {number} [arg3_options.month]
+   *
+   * @returns {HistoricalBorderFeature | null}
+   */
+  static getBorderFeature (
+    arg0_year: number,
+    arg1_state_id?: number | string,
+    arg2_name?: string,
+    arg3_options?: {
+      dataset?: string
+      day?: number
+      month?: number
+    }
+  ): HistoricalBorderFeature | null {
+    //Convert from parameters
+    let name = arg2_name ? arg2_name.trim() : undefined
+    let options = arg3_options || {}
+    let state_id = arg1_state_id !== undefined && arg1_state_id !== null && String(arg1_state_id).trim() !== ''
+      ? String(arg1_state_id).trim()
+      : undefined
+    let target_year = arg0_year
+
+    //Guard clauses
+    if (state_id === undefined && !name)
+      return null
+
+    //Declare local instance variables
+    let datasets_to_search: string[] = []
+    let primary_dataset = options.dataset || 'detailed_borders'
+    let q_name_lower = name ? name.toLowerCase() : ''
+    let target_feature: HistoricalBorderFeature | null = null
+
+    //Function body
+    datasets_to_search.push(primary_dataset)
+    if (primary_dataset !== 'detailed_borders')
+      datasets_to_search.push('detailed_borders')
+    if (primary_dataset !== 'statistical_borders')
+      datasets_to_search.push('statistical_borders')
+
+    let matchFeature = function (arg0_feat: HistoricalBorderFeature): boolean {
+      let f = arg0_feat
+      if (state_id !== undefined) {
+        if (
+          String(f.id) === state_id ||
+          String(f.id).replace('detailed_', '') === state_id ||
+          String(f.id).replace('cshapes_', '') === state_id ||
+          String(f.properties?.id) === state_id ||
+          String(f.properties?.state_id) === state_id ||
+          String(f.properties?.gwcode) === state_id
+        ) {
+          return true
+        }
+      }
+      if (q_name_lower && f.properties?.name) {
+        let fn = f.properties.name.toLowerCase().trim()
+        if (fn === q_name_lower)
+          return true
+      }
+      if (q_name_lower && f.properties?.name_long) {
+        let fl = f.properties.name_long.toLowerCase().trim()
+        if (fl === q_name_lower)
+          return true
+      }
+      return false
+    }
+
+    for (let i = 0; i < datasets_to_search.length; i++) {
+      let ds = datasets_to_search[i]
+      try {
+        let borders_res = AtlasBordersService.getBordersAtYear(target_year, {
+          dataset: ds,
+          day: options.day,
+          month: options.month,
+        })
+        if (borders_res && Array.isArray(borders_res.features)) {
+          //1. Exact match pass
+          for (let x = 0; x < borders_res.features.length; x++) {
+            if (matchFeature(borders_res.features[x])) {
+              target_feature = borders_res.features[x]
+              break
+            }
+          }
+          if (target_feature)
+            break
+
+          //2. Substring/alias match pass if name was provided
+          if (q_name_lower) {
+            for (let y = 0; y < borders_res.features.length; y++) {
+              let feat = borders_res.features[y]
+              let fn = (feat.properties?.name || '').toLowerCase()
+              let fl = (feat.properties?.name_long || '').toLowerCase()
+              if ((fn && (fn.includes(q_name_lower) || q_name_lower.includes(fn))) ||
+                  (fl && (fl.includes(q_name_lower) || q_name_lower.includes(fl)))) {
+                target_feature = feat
+                break
+              }
+            }
+            if (target_feature)
+              break
+          }
+        }
+      } catch (arg0_err) {
+        //Continue search
+      }
+    }
+
+    if (target_feature)
+      return target_feature
+
+    //3. Fallback to states.json if not found in sliced border geometries
+    if (state_id !== undefined) {
+      let state = AtlasBordersService.getStateById(state_id)
+      if (state) {
+        let synth_feat: HistoricalBorderFeature = {
+          geometry: state.bbox ? {
+            coordinates: [[
+              [state.bbox[0], state.bbox[1]],
+              [state.bbox[2], state.bbox[1]],
+              [state.bbox[2], state.bbox[3]],
+              [state.bbox[0], state.bbox[3]],
+              [state.bbox[0], state.bbox[1]],
+            ]],
+            type: 'Polygon',
+          } : {
+            coordinates: [],
+            type: 'Polygon',
+          },
+          id: String(state.state_id),
+          properties: {
+            area: 0,
+            bbox: state.bbox,
+            endDate: state.stop_date,
+            endYear: state.stop_year,
+            fill_color: state.fill_color,
+            id: state.state_id,
+            is_contemporary: state.is_contemporary,
+            name: state.name,
+            name_long: state.name,
+            startDate: state.start_date,
+            startYear: state.start_year,
+            state_id: state.state_id,
+          },
+          type: 'Feature',
+        }
+        return synth_feat
+      }
+    }
+
+    //Return statement
+    return null
+  }
+
+  /**
    * Slices active historical borders for a given year and dataset.
    * Supports sub-yearly continuous GMT timestamps and capped LRU caching.
    *
@@ -1238,6 +1400,47 @@ export class AtlasBordersService {
 
     //Return statement
     return null
+  }
+
+  static states_by_id: Map<string | number, any> | null = null
+
+  /**
+   * Retrieves state metadata by state ID from data/atlas/temp/states.json.
+   *
+   * @param {string | number} arg0_state_id
+   *
+   * @returns {any | null}
+   */
+  static getStateById (arg0_state_id: string | number): any {
+    //Convert from parameters
+    let state_id = arg0_state_id
+
+    //Guard clauses
+    if (state_id === undefined || state_id === null)
+      return null
+
+    //Function body
+    if (!AtlasBordersService.states_by_id) {
+      AtlasBordersService.states_by_id = new Map()
+      let states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+      if (fs.existsSync(states_path)) {
+        try {
+          let list = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
+          if (Array.isArray(list)) {
+            for (let i = 0; i < list.length; i++) {
+              let s = list[i]
+              AtlasBordersService.states_by_id.set(s.state_id, s)
+              AtlasBordersService.states_by_id.set(String(s.state_id), s)
+            }
+          }
+        } catch (arg0_err) {
+          console.warn('[AtlasBordersService] Failed to load states.json:', arg0_err)
+        }
+      }
+    }
+
+    //Return statement
+    return AtlasBordersService.states_by_id.get(state_id) || AtlasBordersService.states_by_id.get(String(state_id)) || null
   }
 
   /**

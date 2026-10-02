@@ -564,18 +564,23 @@ export let App: React.FC = function () {
               let opts = stadester_layer.display_options
               set_stadester_config((arg0_prev) => ({
                 ...arg0_prev,
-                bubbleSize: opts.bubble_size ?? arg0_prev.bubbleSize,
-                colorMode: opts.color_mode ?? arg0_prev.colorMode,
+                bubbleSize: opts.bubble_size ?? opts.bubbleSize ?? arg0_prev.bubbleSize,
+                capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
+                capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
+                colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
                 dataset: opts.dataset ?? arg0_prev.dataset,
                 display_options: opts,
                 filled: opts.filled ?? arg0_prev.filled,
-                growthPalette: opts.growth_palette ?? arg0_prev.growthPalette,
+                growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
                 halo: opts.halo ?? arg0_prev.halo,
-                labelCollision: opts.label_collision ?? arg0_prev.labelCollision,
-                maxCities: opts.max_cities ?? arg0_prev.maxCities,
-                minPop: opts.min_pop ?? arg0_prev.minPop,
+                labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
+                largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
+                maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
+                minPop: opts.min_pop ?? opts.minPop ?? arg0_prev.minPop,
                 opacity: opts.opacity ?? arg0_prev.opacity,
-                showLabels: opts.show_labels ?? arg0_prev.showLabels,
+                showCapitals: opts.show_capitals ?? opts.showCapitals ?? arg0_prev.showCapitals,
+                showCapitalUnderlines: opts.show_capital_underlines ?? opts.showCapitalUnderlines ?? arg0_prev.showCapitalUnderlines,
+                showLabels: opts.show_labels ?? opts.showLabels ?? arg0_prev.showLabels,
               }))
             }
             if (layer_keys.length > 0) {
@@ -607,18 +612,23 @@ export let App: React.FC = function () {
           let opts = stadester_layer.display_options
           set_stadester_config((arg0_prev) => ({
             ...arg0_prev,
-            bubbleSize: opts.bubble_size ?? arg0_prev.bubbleSize,
-            colorMode: opts.color_mode ?? arg0_prev.colorMode,
+            bubbleSize: opts.bubble_size ?? opts.bubbleSize ?? arg0_prev.bubbleSize,
+            capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
+            capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
+            colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
             dataset: opts.dataset ?? arg0_prev.dataset,
             display_options: opts,
             filled: opts.filled ?? arg0_prev.filled,
-            growthPalette: opts.growth_palette ?? arg0_prev.growthPalette,
+            growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
             halo: opts.halo ?? arg0_prev.halo,
-            labelCollision: opts.label_collision ?? arg0_prev.labelCollision,
-            maxCities: opts.max_cities ?? arg0_prev.maxCities,
-            minPop: opts.min_pop ?? arg0_prev.minPop,
+            labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
+            largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
+            maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
+            minPop: opts.min_pop ?? opts.minPop ?? arg0_prev.minPop,
             opacity: opts.opacity ?? arg0_prev.opacity,
-            showLabels: opts.show_labels ?? arg0_prev.showLabels,
+            showCapitals: opts.show_capitals ?? opts.showCapitals ?? arg0_prev.showCapitals,
+            showCapitalUnderlines: opts.show_capital_underlines ?? opts.showCapitalUnderlines ?? arg0_prev.showCapitalUnderlines,
+            showLabels: opts.show_labels ?? opts.showLabels ?? arg0_prev.showLabels,
           }))
         }
       }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import {
   AppMode,
   DataFormat,
@@ -188,8 +188,11 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
   let handle_resize_mouse_down: (arg0_e: React.MouseEvent) => void
   let is_full_width: boolean
   let is_sidebar_collapsed: boolean
+  let manual_upload_tab: 'raster' | 'vector'
   let open_folders: Record<string, boolean>
+  let scroll_container_ref = useRef<HTMLDivElement>(null)
   let set_is_sidebar_collapsed: React.Dispatch<React.SetStateAction<boolean>>
+  let set_manual_upload_tab: React.Dispatch<React.SetStateAction<'raster' | 'vector'>>
   let set_open_folders: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
   let set_viewport_width: React.Dispatch<React.SetStateAction<number>>
   let toggle_folder: (arg0_folder_key: string) => void
@@ -197,9 +200,9 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
 
   //Function body
   ;[is_sidebar_collapsed, set_is_sidebar_collapsed] = useState<boolean>(false)
+  ;[manual_upload_tab, set_manual_upload_tab] = useState<'raster' | 'vector'>('raster')
   ;[open_folders, set_open_folders] = useState<Record<string, boolean>>({
     binning: false,
-    custom_vector: true,
     description: true,
     manual: false,
     visual: true,
@@ -379,7 +382,11 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
         {!is_mobile && !is_sidebar_collapsed && (
           <div
             onMouseDown={handle_resize_mouse_down}
-            className="absolute top-0 right-0 bottom-0 w-3 cursor-col-resize hover:bg-primary/50 active:bg-primary transition-colors z-30 group"
+            onWheel={(arg0_e) => {
+              if (scroll_container_ref.current)
+                scroll_container_ref.current.scrollTop += arg0_e.deltaY
+            }}
+            className="absolute top-0 right-0 bottom-0 w-2.5 cursor-col-resize hover:bg-primary/50 active:bg-primary transition-colors z-30 group"
             title="Drag right border to resize sidebar"
           >
             <div className="w-[2px] h-8 bg-border group-hover:bg-primary absolute top-1/2 -translate-y-1/2 right-0.5" />
@@ -535,7 +542,10 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
             />
           </div>
         ) : (
-          <div className="flex-1 p-[var(--padding)] space-y-[var(--padding)] overflow-y-auto">
+          <div
+            ref={scroll_container_ref}
+            className="flex-1 p-[var(--padding)] space-y-[var(--padding)] overflow-y-auto mr-2.5 custom-scrollbar"
+          >
         {/* ========================================================================= */}
         {/* SECTION 0: MAPMODE DESCRIPTION(S) */}
         {/* ========================================================================= */}
@@ -946,7 +956,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
         </div>
 
         {/* ========================================================================= */}
-        {/* SECTION 3: MANUAL FILE PREVIEW */}
+        {/* SECTION 3: MANUAL FILE UPLOAD */}
         {/* ========================================================================= */}
         <div className="border border-border bg-card/50">
           <button
@@ -958,157 +968,6 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
               <Icon name="upload_file" />
               <span>{t.sidebar.folders.manualUpload}</span>
             </div>
-            <Icon
-              name={open_folders.manual ? 'expand_less' : 'expand_more'}
-            />
-          </button>
-
-          {open_folders.manual && (
-            <div className="p-[var(--padding)] space-y-[var(--padding)] text-[var(--body-font-size)] border-t border-border">
-              {/* Mode Selector */}
-              <div className="space-y-1">
-                <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.mode}</Label>
-                <div className="grid grid-cols-2 gap-1 bg-muted/50 p-0.5 border border-border">
-                  <button
-                    type="button"
-                    onClick={() => set_app_mode('Single Image')}
-                    className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${app_mode === 'Single Image'
-                      ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    <Icon name="image" className="text-xs" />
-                    <span>{t.sidebar.upload.single}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => set_app_mode('Image Difference')}
-                    className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${app_mode === 'Image Difference'
-                      ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                  >
-                    <Icon name="compare_arrows" className="text-xs" />
-                    <span>{t.sidebar.upload.difference}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* File Inputs */}
-              {app_mode === 'Single Image' ? (
-                <div className="space-y-1">
-                  <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.selectSingle}</Label>
-                  <input
-                    type="file"
-                    accept=".png"
-                    id="single-file-upload"
-                    className="hidden"
-                    onClick={(arg0_e) => {
-                      ; (arg0_e.target as HTMLInputElement).value = ''
-                    }}
-                    onChange={(arg0_e) => {
-                      let file = arg0_e.target.files?.[0]
-                      if (file)
-                        on_file_upload(file, 'single')
-                      arg0_e.target.value = ''
-                    }}
-                  />
-                  <label
-                    htmlFor="single-file-upload"
-                    className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
-                  >
-                    <span className="truncate text-[var(--body-font-size)]">
-                      {active_file_name || t.sidebar.upload.singlePlaceholder}
-                    </span>
-                    <Icon name="folder_open" className="text-muted-foreground shrink-0 ml-1" />
-                  </label>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.firstImage}</Label>
-                    <input
-                      type="file"
-                      accept=".png"
-                      id="diff-file-a"
-                      className="hidden"
-                      onClick={(arg0_e) => {
-                        ; (arg0_e.target as HTMLInputElement).value = ''
-                      }}
-                      onChange={(arg0_e) => {
-                        let file = arg0_e.target.files?.[0]
-                        if (file)
-                          on_file_upload(file, 'diff_a')
-                        arg0_e.target.value = ''
-                      }}
-                    />
-                    <label
-                      htmlFor="diff-file-a"
-                      className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
-                    >
-                      <span className="truncate text-[var(--body-font-size)]">{diff_name_a || t.sidebar.upload.firstPlaceholder}</span>
-                      <Icon name="file_upload" className="text-muted-foreground shrink-0 ml-1" />
-                    </label>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.secondImage}</Label>
-                    <input
-                      type="file"
-                      accept=".png"
-                      id="diff-file-b"
-                      className="hidden"
-                      onClick={(arg0_e) => {
-                        ; (arg0_e.target as HTMLInputElement).value = ''
-                      }}
-                      onChange={(arg0_e) => {
-                        let file = arg0_e.target.files?.[0]
-                        if (file)
-                          on_file_upload(file, 'diff_b')
-                        arg0_e.target.value = ''
-                      }}
-                    />
-                    <label
-                      htmlFor="diff-file-b"
-                      className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
-                    >
-                      <span className="truncate text-[var(--body-font-size)]">{diff_name_b || t.sidebar.upload.secondPlaceholder}</span>
-                      <Icon name="file_upload" className="text-muted-foreground shrink-0 ml-1" />
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {/* Encoding Format */}
-              <div className="space-y-1">
-                <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.encodingFormat}</Label>
-                <Select value={data_format} onValueChange={(arg0_v) => set_data_format(arg0_v as DataFormat)}>
-                  <SelectTrigger className="rounded-none h-7 text-[var(--body-font-size)]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none">
-                    <SelectItem value="float32" className="rounded-none text-[var(--body-font-size)]">float32 (IEEE 754)</SelectItem>
-                    <SelectItem value="int32" className="rounded-none text-[var(--body-font-size)]">int32 (Signed Integer)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ========================================================================= */}
-        {/* SECTION 4: CUSTOM VECTOR BOUNDARIES (.naissance / .geojson) */}
-        {/* ========================================================================= */}
-        <div className="border border-border bg-card/50">
-          <button
-            type="button"
-            onClick={() => toggle_folder('custom_vector')}
-            className="w-full h-8 px-[var(--padding)] flex items-center justify-between text-[var(--body-font-size)] font-bold text-foreground bg-muted/40 hover:bg-muted/70 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Icon name="layers" />
-              <span>{t.sidebar.folders.customVector}</span>
-            </div>
             <div className="flex items-center gap-1.5">
               {custom_vector_dataset && (
                 <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary border border-primary/40 font-medium uppercase">
@@ -1116,105 +975,265 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                 </span>
               )}
               <Icon
-                name={open_folders.custom_vector ? 'expand_less' : 'expand_more'}
+                name={open_folders.manual ? 'expand_less' : 'expand_more'}
               />
             </div>
           </button>
 
-          {open_folders.custom_vector && (
+          {open_folders.manual && (
             <div className="p-[var(--padding)] space-y-[var(--padding)] text-[var(--body-font-size)] border-t border-border">
-              <p className="text-xs text-muted-foreground leading-normal">
-                {t.sidebar.vectorUpload.description}
-              </p>
-
-              {/* Upload Input */}
-              <div className="space-y-1">
-                <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">
-                  {t.sidebar.vectorUpload.selectFile}
-                </Label>
-                <input
-                  type="file"
-                  accept=".geojson,.naissance,.json"
-                  id="custom-vector-file-upload"
-                  className="hidden"
-                  onClick={(arg0_e) => {
-                    ;(arg0_e.target as HTMLInputElement).value = ''
-                  }}
-                  onChange={(arg0_e) => {
-                    let file = arg0_e.target.files?.[0]
-                    if (file && on_upload_custom_vector)
-                      on_upload_custom_vector(file)
-                    arg0_e.target.value = ''
-                  }}
-                />
-                <label
-                  htmlFor="custom-vector-file-upload"
-                  className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+              {/* Raster / Vector Tab Switcher */}
+              <div className="grid grid-cols-2 gap-1 bg-muted/50 p-0.5 border border-border">
+                <button
+                  type="button"
+                  onClick={() => set_manual_upload_tab('raster')}
+                  className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${manual_upload_tab === 'raster'
+                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
-                  <span className="truncate text-[var(--body-font-size)]">
-                    {custom_vector_dataset?.fileName || t.sidebar.vectorUpload.placeholder}
-                  </span>
-                  <Icon name="upload_file" className="text-muted-foreground shrink-0 ml-1" />
-                </label>
+                  <Icon name="image" className="text-xs" />
+                  <span>{t.sidebar.upload.rasterTab || 'Raster Upload'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => set_manual_upload_tab('vector')}
+                  className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${manual_upload_tab === 'vector'
+                    ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                  <Icon name="layers" className="text-xs" />
+                  <span>{t.sidebar.upload.vectorTab || 'Vector Upload'}</span>
+                </button>
               </div>
 
-              {/* Dataset Details & Toggles */}
-              {custom_vector_dataset && (
-                <div className="space-y-2 pt-2 border-t border-border/60">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-foreground">
-                      {custom_vector_dataset.fileType === 'naissance'
-                        ? t.sidebar.vectorUpload.temporalNaissance
-                        : t.sidebar.vectorUpload.staticGeoJson}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      {formatString(t.sidebar.vectorUpload.entitiesCount, custom_vector_dataset.totalCount)}
-                    </span>
+              {manual_upload_tab === 'raster' ? (
+                <>
+                  {/* Mode Selector */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.mode}</Label>
+                    <div className="grid grid-cols-2 gap-1 bg-muted/50 p-0.5 border border-border">
+                      <button
+                        type="button"
+                        onClick={() => set_app_mode('Single Image')}
+                        className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${app_mode === 'Single Image'
+                          ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                      >
+                        <Icon name="image" className="text-xs" />
+                        <span>{t.sidebar.upload.single}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => set_app_mode('Image Difference')}
+                        className={`h-7 text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${app_mode === 'Image Difference'
+                          ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                      >
+                        <Icon name="compare_arrows" className="text-xs" />
+                        <span>{t.sidebar.upload.difference}</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {custom_vector_dataset.fileType === 'naissance' && (
-                    <p className="text-[10px] text-muted-foreground/90 italic leading-snug">
-                      {t.sidebar.vectorUpload.temporalDynamicNote}
-                    </p>
+                  {/* File Inputs */}
+                  {app_mode === 'Single Image' ? (
+                    <div className="space-y-1">
+                      <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.selectSingle}</Label>
+                      <input
+                        type="file"
+                        accept=".png"
+                        id="single-file-upload"
+                        className="hidden"
+                        onClick={(arg0_e) => {
+                          ; (arg0_e.target as HTMLInputElement).value = ''
+                        }}
+                        onChange={(arg0_e) => {
+                          let file = arg0_e.target.files?.[0]
+                          if (file)
+                            on_file_upload(file, 'single')
+                          arg0_e.target.value = ''
+                        }}
+                      />
+                      <label
+                        htmlFor="single-file-upload"
+                        className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+                      >
+                        <span className="truncate text-[var(--body-font-size)]">
+                          {active_file_name || t.sidebar.upload.singlePlaceholder}
+                        </span>
+                        <Icon name="folder_open" className="text-muted-foreground shrink-0 ml-1" />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.firstImage}</Label>
+                        <input
+                          type="file"
+                          accept=".png"
+                          id="diff-file-a"
+                          className="hidden"
+                          onClick={(arg0_e) => {
+                            ; (arg0_e.target as HTMLInputElement).value = ''
+                          }}
+                          onChange={(arg0_e) => {
+                            let file = arg0_e.target.files?.[0]
+                            if (file)
+                              on_file_upload(file, 'diff_a')
+                            arg0_e.target.value = ''
+                          }}
+                        />
+                        <label
+                          htmlFor="diff-file-a"
+                          className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+                        >
+                          <span className="truncate text-[var(--body-font-size)]">{diff_name_a || t.sidebar.upload.firstPlaceholder}</span>
+                          <Icon name="file_upload" className="text-muted-foreground shrink-0 ml-1" />
+                        </label>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.secondImage}</Label>
+                        <input
+                          type="file"
+                          accept=".png"
+                          id="diff-file-b"
+                          className="hidden"
+                          onClick={(arg0_e) => {
+                            ; (arg0_e.target as HTMLInputElement).value = ''
+                          }}
+                          onChange={(arg0_e) => {
+                            let file = arg0_e.target.files?.[0]
+                            if (file)
+                              on_file_upload(file, 'diff_b')
+                            arg0_e.target.value = ''
+                          }}
+                        />
+                        <label
+                          htmlFor="diff-file-b"
+                          className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+                        >
+                          <span className="truncate text-[var(--body-font-size)]">{diff_name_b || t.sidebar.upload.secondPlaceholder}</span>
+                          <Icon name="file_upload" className="text-muted-foreground shrink-0 ml-1" />
+                        </label>
+                      </div>
+                    </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[var(--body-font-size)] text-muted-foreground">
-                      {t.sidebar.vectorUpload.showLayer}
-                    </span>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={custom_vector_visible}
-                        onChange={(arg0_e) => {
-                          if (on_toggle_custom_vector_visible)
-                            on_toggle_custom_vector_visible(arg0_e.target.checked)
-                        }}
-                        className="w-3.5 h-3.5 rounded-none accent-emerald-500 cursor-pointer"
-                      />
-                      <span
-                        className={`text-xs font-bold uppercase ${
-                          custom_vector_visible ? 'text-emerald-400 font-bold' : 'text-muted-foreground'
-                        }`}
-                      >
-                        {custom_vector_visible ? t.sidebar.binning.on : t.sidebar.binning.off}
+                  {/* Encoding Format */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.upload.encodingFormat}</Label>
+                    <Select value={data_format} onValueChange={(arg0_v) => set_data_format(arg0_v as DataFormat)}>
+                      <SelectTrigger className="rounded-none h-7 text-[var(--body-font-size)]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-none">
+                        <SelectItem value="float32" className="rounded-none text-[var(--body-font-size)]">float32 (IEEE 754)</SelectItem>
+                        <SelectItem value="int32" className="rounded-none text-[var(--body-font-size)]">int32 (Signed Integer)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    {t.sidebar.vectorUpload.description}
+                  </p>
+
+                  {/* Upload Input */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">
+                      {t.sidebar.vectorUpload.selectFile}
+                    </Label>
+                    <input
+                      type="file"
+                      accept=".geojson,.naissance,.json"
+                      id="custom-vector-file-upload"
+                      className="hidden"
+                      onClick={(arg0_e) => {
+                        ;(arg0_e.target as HTMLInputElement).value = ''
+                      }}
+                      onChange={(arg0_e) => {
+                        let file = arg0_e.target.files?.[0]
+                        if (file && on_upload_custom_vector)
+                          on_upload_custom_vector(file)
+                        arg0_e.target.value = ''
+                      }}
+                    />
+                    <label
+                      htmlFor="custom-vector-file-upload"
+                      className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+                    >
+                      <span className="truncate text-[var(--body-font-size)]">
+                        {custom_vector_dataset?.fileName || t.sidebar.vectorUpload.placeholder}
                       </span>
+                      <Icon name="upload_file" className="text-muted-foreground shrink-0 ml-1" />
                     </label>
                   </div>
 
-                  <div className="pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (on_remove_custom_vector)
-                          on_remove_custom_vector()
-                      }}
-                      className="w-full h-7 px-2 text-xs font-medium border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <Icon name="delete" className="text-xs" />
-                      <span>{t.sidebar.vectorUpload.removeVector}</span>
-                    </button>
-                  </div>
+                  {/* Dataset Details & Toggles */}
+                  {custom_vector_dataset && (
+                    <div className="space-y-2 pt-2 border-t border-border/60">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground">
+                          {custom_vector_dataset.fileType === 'naissance'
+                            ? t.sidebar.vectorUpload.temporalNaissance
+                            : t.sidebar.vectorUpload.staticGeoJson}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {formatString(t.sidebar.vectorUpload.entitiesCount, custom_vector_dataset.totalCount)}
+                        </span>
+                      </div>
+
+                      {custom_vector_dataset.fileType === 'naissance' && (
+                        <p className="text-[10px] text-muted-foreground/90 italic leading-snug">
+                          {t.sidebar.vectorUpload.temporalDynamicNote}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[var(--body-font-size)] text-muted-foreground">
+                          {t.sidebar.vectorUpload.showLayer}
+                        </span>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={custom_vector_visible}
+                            onChange={(arg0_e) => {
+                              if (on_toggle_custom_vector_visible)
+                                on_toggle_custom_vector_visible(arg0_e.target.checked)
+                            }}
+                            className="w-3.5 h-3.5 rounded-none accent-emerald-500 cursor-pointer"
+                          />
+                          <span
+                            className={`text-xs font-bold uppercase ${
+                              custom_vector_visible ? 'text-emerald-400 font-bold' : 'text-muted-foreground'
+                            }`}
+                          >
+                            {custom_vector_visible ? t.sidebar.binning.on : t.sidebar.binning.off}
+                          </span>
+                        </label>
+                      </div>
+
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (on_remove_custom_vector)
+                              on_remove_custom_vector()
+                          }}
+                          className="w-full h-7 px-2 text-xs font-medium border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Icon name="delete" className="text-xs" />
+                          <span>{t.sidebar.vectorUpload.removeVector}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

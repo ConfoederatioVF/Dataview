@@ -1,5 +1,6 @@
 {
     name: "Velkscala (Land Use)",
+    open: false,
     can_be_uninhabited: true,
     expressions: {
         hs: "${(year < 0) ? 'BC' : 'AD'}_number" //HYDE suffix

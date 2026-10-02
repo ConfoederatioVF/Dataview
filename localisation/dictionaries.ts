@@ -24,6 +24,8 @@ export interface LocalisationConfig {
     colourbarPosition: string
     disabled: string
     enabled: string
+    graticules?: string
+    graticulesDesc?: string
     language: string
     performantDesc: string
     performantMode: string
@@ -43,6 +45,8 @@ export interface LocalisationConfig {
       mercator: string
     }
     title: string
+    tooltips?: string
+    tooltipsDesc?: string
   }
   sidebar: {
     binning: {
@@ -105,11 +109,13 @@ export interface LocalisationConfig {
       firstImage: string
       firstPlaceholder: string
       mode: string
+      rasterTab?: string
       secondImage: string
       secondPlaceholder: string
       selectSingle: string
       single: string
       singlePlaceholder: string
+      vectorTab?: string
     }
     vectorUpload: {
       description: string

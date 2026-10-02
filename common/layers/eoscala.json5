@@ -1,5 +1,6 @@
 {
     name: "Eoscala (Economics)",
+    open: false,
     synthetic_by_default: true,
     GDP_nominal: {
         name: "GDP (Nominal)",

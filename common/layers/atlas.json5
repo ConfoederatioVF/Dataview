@@ -1,5 +1,6 @@
 {
     name: "Atlas (Historical Borders)",
+    open: false,
     category_type: "discrete",
     "simplified_borders": {
         name: "Simplified Borders",

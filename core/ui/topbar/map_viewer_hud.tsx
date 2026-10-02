@@ -447,160 +447,127 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 ? (is_top_right_occupied ? `${Math.max(54, top_right_clearance)}px` : '54px')
                 : `${top_right_clearance}px`,
             }}
-            className="absolute z-30 flex flex-col gap-[var(--cell-padding)] bg-card/95 backdrop-blur-md p-[var(--cell-padding)] rounded-none border border-border shadow-md"
+            className="absolute z-30 flex flex-col gap-2"
           >
-            {/* Map Display Settings Toggle */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={flyout_open ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => set_flyout_open(!flyout_open)}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={t.settings.title}
-                >
-                  <Icon name="settings" className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{t.settings.title}</span>
-              </TooltipContent>
-            </Tooltip>
+            {/* Tools Container */}
+            <div className="flex flex-col gap-[var(--cell-padding)] bg-card/95 backdrop-blur-md p-[var(--cell-padding)] rounded-none border border-border shadow-md">
+              {/* Map Display Settings Toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={flyout_open ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => set_flyout_open(!flyout_open)}
+                    className="h-7 w-7 rounded-none text-white cursor-pointer"
+                    aria-label={t.settings.title}
+                  >
+                    <Icon name="settings" className="text-white" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>{t.settings.title}</span>
+                </TooltipContent>
+              </Tooltip>
 
-            {/* Toggle Raster Calculator View Panel */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={analytics_open ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={on_toggle_analytics}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={t.analytics.title}
-                >
-                  <Icon name="analytics" className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{t.analytics.title}</span>
-              </TooltipContent>
-            </Tooltip>
+              {/* Toggle Raster Calculator View Panel */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={analytics_open ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={on_toggle_analytics}
+                    className="h-7 w-7 rounded-none text-white cursor-pointer"
+                    aria-label={t.analytics.title}
+                  >
+                    <Icon name="analytics" className="text-white" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>{t.analytics.title}</span>
+                </TooltipContent>
+              </Tooltip>
 
-            {/* Toggle Polygon Draw Measurement Tool */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={is_drawing ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={on_toggle_draw}
-                  className={`h-7 w-7 rounded-none cursor-pointer transition-colors ${
-                    is_drawing
-                      ? 'bg-[rgb(200,40,40)] hover:bg-[rgb(220,50,50)] text-white shadow-md'
-                      : 'text-white'
-                  }`}
-                  aria-label={t.hud.drawPolygon}
-                >
-                  <Icon name="polyline" className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{is_drawing ? t.hud.cancelDraw : t.hud.drawPolygon}</span>
-              </TooltipContent>
-            </Tooltip>
+              {/* Toggle Polygon Draw Measurement Tool */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={is_drawing ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={on_toggle_draw}
+                    className={`h-7 w-7 rounded-none cursor-pointer transition-colors ${
+                      is_drawing
+                        ? 'bg-[rgb(200,40,40)] hover:bg-[rgb(220,50,50)] text-white shadow-md'
+                        : 'text-white'
+                    }`}
+                    aria-label={t.hud.drawPolygon}
+                  >
+                    <Icon name="polyline" className="text-white" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>{is_drawing ? t.hud.cancelDraw : t.hud.drawPolygon}</span>
+                </TooltipContent>
+              </Tooltip>
 
-            {/* Clear Drawn Polygon (when present) */}
-            {has_drawn_polygon && !is_drawing && (
+              {/* Clear Drawn Polygon (when present) */}
+              {has_drawn_polygon && !is_drawing && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={on_clear_drawn_polygon}
+                      className="h-7 w-7 rounded-none text-red-400 hover:text-red-300 hover:bg-red-500/20 cursor-pointer"
+                      aria-label={t.hud.clearDrawnPolygon}
+                    >
+                      <Icon name="delete_sweep" className="text-red-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <span>{t.hud.clearDrawnPolygon}</span>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+
+            {/* View Options Container */}
+            <div className="flex flex-col gap-[var(--cell-padding)] bg-card/95 backdrop-blur-md p-[var(--cell-padding)] rounded-none border border-border shadow-md">
+              {/* Reset Map View */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={on_clear_drawn_polygon}
-                    className="h-7 w-7 rounded-none text-red-400 hover:text-red-300 hover:bg-red-500/20 cursor-pointer"
-                    aria-label={t.hud.clearDrawnPolygon}
+                    onClick={on_double_click}
+                    className="h-7 w-7 rounded-none text-white cursor-pointer"
+                    aria-label={t.hud.resetView}
                   >
-                    <Icon name="delete_sweep" className="text-red-400" />
+                    <Icon name="restart_alt" className="text-white" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="left">
-                  <span>{t.hud.clearDrawnPolygon}</span>
+                  <span>{t.hud.resetView}</span>
                 </TooltipContent>
               </Tooltip>
-            )}
 
-            {/* Toggle Graticule Grid Lines */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={show_graticule ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => set_show_graticule(!show_graticule)}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={t.hud.graticule}
-                >
-                  <Icon name="grid_on" className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{t.hud.graticule}</span>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Reset Map View */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={on_double_click}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={t.hud.resetView}
-                >
-                  <Icon name="restart_alt" className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{t.hud.resetView}</span>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Toggle On-Map Inspection Tooltips */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={show_tooltips ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={on_toggle_tooltips}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={show_tooltips ? (t.hud.hideTooltips || 'Disable Tooltips') : (t.hud.showTooltips || 'Enable Tooltips')}
-                >
-                  <Icon
-                    name={show_tooltips ? 'chat_bubble' : 'chat_bubble_outline'}
-                    className={show_tooltips ? 'text-white' : 'text-muted-foreground'}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{show_tooltips ? (t.hud.hideTooltips || 'Disable Tooltips') : (t.hud.showTooltips || 'Enable Tooltips')}</span>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Toggle Fullscreen / UI Visibility */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={ui_visible ? 'ghost' : 'secondary'}
-                  size="icon"
-                  onClick={on_toggle_ui}
-                  className="h-7 w-7 rounded-none text-white cursor-pointer"
-                  aria-label={ui_visible ? t.hud.hideUi : t.hud.showUi}
-                >
-                  <Icon name={ui_visible ? 'visibility' : 'visibility_off'} className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <span>{ui_visible ? t.hud.hideUi : t.hud.showUi}</span>
-              </TooltipContent>
-            </Tooltip>
+              {/* Toggle Fullscreen / UI Visibility */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={ui_visible ? 'ghost' : 'secondary'}
+                    size="icon"
+                    onClick={on_toggle_ui}
+                    className="h-7 w-7 rounded-none text-white cursor-pointer"
+                    aria-label={ui_visible ? t.hud.hideUi : t.hud.showUi}
+                  >
+                    <Icon name={ui_visible ? 'visibility' : 'visibility_off'} className="text-white" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>{ui_visible ? t.hud.hideUi : t.hud.showUi}</span>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
 
           {/* Map Display Settings Flyout Panel */}
@@ -746,6 +713,50 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                   </div>
                   <span className="text-[10px] text-muted-foreground block leading-normal">
                     {t.settings.performantDesc}
+                  </span>
+                </div>
+
+                {/* Graticule Grid Lines */}
+                <div className="space-y-1.5 pt-1 border-t border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--body-font-size)] font-bold text-foreground flex items-center gap-1.5">
+                      <span>{t.settings.graticules || t.hud.graticule}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => set_show_graticule(!show_graticule)}
+                      className={`px-2 py-0.5 rounded-none text-[10px] font-mono font-bold cursor-pointer transition-colors ${show_graticule
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        : 'bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      {show_graticule ? t.settings.enabled : t.settings.disabled}
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block leading-normal">
+                    {t.settings.graticulesDesc || t.hud.graticule}
+                  </span>
+                </div>
+
+                {/* On-Map Inspection Tooltips */}
+                <div className="space-y-1.5 pt-1 border-t border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--body-font-size)] font-bold text-foreground flex items-center gap-1.5">
+                      <span>{t.settings.tooltips || t.hud.tooltips}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={on_toggle_tooltips}
+                      className={`px-2 py-0.5 rounded-none text-[10px] font-mono font-bold cursor-pointer transition-colors ${show_tooltips
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs'
+                        : 'bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      {show_tooltips ? t.settings.enabled : t.settings.disabled}
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block leading-normal">
+                    {t.settings.tooltipsDesc || (t.hud.hideTooltips || 'Disable Tooltips')}
                   </span>
                 </div>
               </div>

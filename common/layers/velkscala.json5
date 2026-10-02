@@ -1,5 +1,6 @@
 {
     name: "Velkscala (Demographics)",
+    open: false,
     synthetic_by_default: true,
     age_sex: {
         name: "Age/Sex",

@@ -30,6 +30,7 @@ export interface ParsedDataLayer {
   available_years: number[]
   can_be_uninhabited?: boolean
   category?: string
+  category_open?: boolean
   category_type?: 'continuous' | 'discrete'
   description?: string
   display_options?: Record<string, any>
@@ -479,8 +480,9 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
     }
 
     //Iterate over layer definitions
+    let category_open = parsed_json.open !== undefined ? Boolean(parsed_json.open) : undefined
     let layer_keys = Object.keys(parsed_json).filter(
-      (arg0_k) => !['root_folders', 'name', 'expressions'].includes(arg0_k)
+      (arg0_k) => !['root_folders', 'name', 'expressions', 'open'].includes(arg0_k)
     )
     let metadata_keys = [
       'category_type',
@@ -492,6 +494,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'hide_colorbar',
       'legend',
       'name',
+      'open',
       'permissions',
       'pixel_offset',
       'root_folders',
@@ -699,6 +702,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             available_years: sub_years,
             can_be_uninhabited: Boolean(sub_item.can_be_uninhabited ?? item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
             category: dataset_name,
+            category_open: sub_item.open !== undefined ? Boolean(sub_item.open) : category_open,
             category_type: (sub_item.category_type || item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
             description: sub_desc_text,
             encoding: sub_item.encoding || 'float32',
@@ -738,6 +742,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           available_years: years,
           can_be_uninhabited: Boolean(item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
           category: dataset_name,
+          category_open: item.open !== undefined ? Boolean(item.open) : category_open,
           category_type: (item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
           description: desc_text,
           display_options: item.display_options || parsed_json.display_options,

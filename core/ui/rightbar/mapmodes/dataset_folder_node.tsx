@@ -20,7 +20,7 @@ export interface dataset_folder_nodeProps {
   setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
-  toggleNode: (arg0_id: string) => void
+  toggleNode: (arg0_id: string, arg1_current_open?: boolean) => void
 }
 
 /**
@@ -49,19 +49,23 @@ export let dataset_folder_node: React.FC<dataset_folder_nodeProps> = function (a
   let toggle_node = arg0_props.toggleNode
 
   //Declare local instance variables
+  let default_open: boolean
   let is_open: boolean
   let is_searching = Boolean(search_query.trim())
   let node_id = `dataset_${folder_name}`
   let { t } = useLocalisation()
 
   //Function body
-  is_open = is_searching || (expanded_nodes[node_id] !== undefined ? expanded_nodes[node_id] : true)
+  default_open = folder_layers.length > 0 && folder_layers[0].category_open !== undefined
+    ? Boolean(folder_layers[0].category_open)
+    : false
+  is_open = is_searching || (expanded_nodes[node_id] !== undefined ? expanded_nodes[node_id] : default_open)
 
   //Return statement
   return (
     <div key={node_id} className="border border-border/60 bg-muted/10 mb-1">
       <div
-        onClick={() => toggle_node(node_id)}
+        onClick={() => toggle_node(node_id, is_open)}
         className="flex items-center justify-between px-2.5 py-1.5 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors border-b border-border/40"
       >
         <div className="flex items-center gap-2 min-w-0">

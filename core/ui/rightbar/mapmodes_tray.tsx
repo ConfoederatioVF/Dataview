@@ -167,7 +167,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
   let set_tray_height: React.Dispatch<React.SetStateAction<number>>
   let set_tray_width: React.Dispatch<React.SetStateAction<number>>
   let t: ReturnType<typeof useLocalisation>['t']
-  let toggle_node: (arg0_id: string) => void
+  let toggle_node: (arg0_id: string, arg1_current_open?: boolean) => void
   let tray_height: number
   let tray_width: number
 
@@ -178,7 +178,6 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     ;[is_tray_collapsed, set_is_tray_collapsed] = useState<boolean>(false)
     ;[search_query, set_search_query] = useState<string>('')
     ;[expanded_nodes, set_expanded_nodes] = useState<Record<string, boolean>>({
-      'dataset_Atlas (Historical Borders)': true,
       overlays: true,
     })
     ;[tray_width, set_tray_width] = useState<number>(() => {
@@ -270,12 +269,18 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     window.addEventListener('mouseup', on_mouse_up)
   }
 
-  toggle_node = function (arg0_id: string) {
+  toggle_node = function (arg0_id: string, arg1_current_open?: boolean) {
+    let current_open = arg1_current_open
     let id = arg0_id
-    set_expanded_nodes((arg0_prev) => ({
-      ...arg0_prev,
-      [id]: !arg0_prev[id],
-    }))
+    set_expanded_nodes((arg0_prev) => {
+      let is_open_now = (arg0_prev[id] !== undefined)
+        ? arg0_prev[id]
+        : (current_open ?? false)
+      return {
+        ...arg0_prev,
+        [id]: !is_open_now,
+      }
+    })
   }
 
   is_layer_accessible = useCallback(

@@ -183,7 +183,7 @@
   hud: {
     cancel: "Annuler",
     cancelDraw: "Annuler le tracé",
-    clearDrawnPolygon: "Effacer le polygone tracé",
+    clearDrawnPolygon: "Effacer la sélection",
     coordinate: "Coordonnées",
     value: "Valeur",
     inspect: "Inspecter la valeur du pixel",
@@ -198,12 +198,12 @@
     hideTooltips: "Désactiver les infobulles",
     showTooltips: "Activer les infobulles",
     tooltips: "Infobulles",
-    drawPolygon: "Dessiner un polygone de mesure",
-    finishDraw: "Terminer le polygone",
+    drawPolygon: "Dessiner une sélection",
+    finishDraw: "Terminer la sélection",
     deleteLastPoint: "Supprimer le dernier point",
     drawStartPrompt: "Cliquez sur la carte pour dessiner la sélection",
     drawPointsPrompt: "£1£ sommets placés. Cliquez pour le sommet suivant ou sur le premier point pour fermer",
-    drawClosingPrompt: "Cliquez pour fermer le polygone",
+    drawClosingPrompt: "Cliquez pour fermer la sélection",
     undo: "Annuler",
   },
   infoPanel: {
@@ -513,7 +513,7 @@
       territorial: "Territorial",
       unrecorded: "Non enregistré",
       validCells: "Cellules valides :",
-      vertices: "Sommets",
+      vertices: "Points",
     },
     clickInfo: {
       agriculture: "Agriculture",

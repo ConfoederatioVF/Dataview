@@ -822,6 +822,7 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
     if (pathname === '/stadester/city' || pathname === '/api/stadester/city') {
       let city_key = (query.key as string) || ''
       let city_name = (query.name as string) || ''
+      let country = (query.country as string) || ''
       let dataset = (query.dataset as string) || 'stadester_1.1'
 
       if (!city_key && !city_name) {
@@ -833,12 +834,14 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
 
       let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
       let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
+      let state_id = query.state_id !== undefined ? (typeof query.state_id === 'string' && !isNaN(Number(query.state_id)) ? Number(query.state_id) : query.state_id as string) : undefined
       let year = query.year !== undefined ? (typeof query.year === 'string' && !isNaN(Number(query.year)) ? parseFloat(query.year) : query.year as string) : undefined
 
       try {
-        let city = city_key ? StadesterService.getCityByKey(dataset, city_key, year, month, day) : null
+        let city_options = { country, state_id }
+        let city = city_key ? StadesterService.getCityByKey(dataset, city_key, year, month, day, city_options) : null
         if (!city && city_name) {
-          city = StadesterService.getCityByKey(dataset, city_name, year, month, day)
+          city = StadesterService.getCityByKey(dataset, city_name, year, month, day, city_options)
         }
         if (!city) {
           res.statusCode = 404

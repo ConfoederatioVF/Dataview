@@ -183,7 +183,7 @@
   hud: {
     cancel: "Abbrechen",
     cancelDraw: "Zeichnen abbrechen",
-    clearDrawnPolygon: "Gezeichnetes Polygon löschen",
+    clearDrawnPolygon: "Auswahl aufheben",
     coordinate: "Koordinaten",
     value: "Wert",
     inspect: "Pixelwert inspizieren",
@@ -198,12 +198,12 @@
     hideTooltips: "Tooltips deaktivieren",
     showTooltips: "Tooltips aktivieren",
     tooltips: "Tooltips",
-    drawPolygon: "Messpolygon zeichnen",
-    finishDraw: "Polygon abschließen",
+    drawPolygon: "Auswahl zeichnen",
+    finishDraw: "Auswahl abschließen",
     deleteLastPoint: "Letzten Punkt löschen",
     drawStartPrompt: "Klicken Sie auf die Karte, um die Auswahl zu zeichnen",
     drawPointsPrompt: "£1£ Eckpunkte gesetzt. Klicken Sie für den nächsten Punkt oder auf den ersten Punkt zum Schließen",
-    drawClosingPrompt: "Klicken zum Schließen des Polygons",
+    drawClosingPrompt: "Klicken zum Schließen der Auswahl",
     undo: "Rückgängig",
   },
   infoPanel: {
@@ -513,7 +513,7 @@
       territorial: "Territorial",
       unrecorded: "Nicht verzeichnet",
       validCells: "Gültige Zellen:",
-      vertices: "Eckpunkte",
+      vertices: "Punkte",
     },
     clickInfo: {
       agriculture: "Landwirtschaft",

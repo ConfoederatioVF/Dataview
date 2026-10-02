@@ -154,11 +154,44 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
     let target_city: CityPoint | null = null
     if (cities && cities.length > 0) {
-      target_city = cities.find((arg0_c) =>
-        (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
-        (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase()) ||
-        (state_id !== undefined && arg0_c.capitalStateId === state_id && arg0_c.name && arg0_c.name.toLowerCase().includes(single_name.toLowerCase()))
-      ) || null
+      //1. Check for active capital matching state_id
+      if (state_id !== undefined) {
+        target_city = cities.find((arg0_c) =>
+          Boolean(arg0_c.isCapital || (arg0_c as any).is_capital) &&
+          (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id) || (arg0_c as any).capital_state_id === state_id || (arg0_c as any).capital_state_id === Number(state_id))
+        ) || null
+      }
+
+      //2. Check any city matching state_id
+      if (!target_city && state_id !== undefined) {
+        target_city = cities.find((arg0_c) =>
+          (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id) || (arg0_c as any).capital_state_id === state_id || (arg0_c as any).capital_state_id === Number(state_id))
+        ) || null
+      }
+
+      //3. Check matching country and name/alias
+      if (!target_city && country_name) {
+        let c_norm = country_name.toLowerCase().trim()
+        target_city = cities.find((arg0_c) => {
+          let city_country = (arg0_c.country || '').toLowerCase().trim()
+          let is_country_match = city_country && (city_country === c_norm || c_norm.includes(city_country) || city_country.includes(c_norm))
+          if (!is_country_match)
+            return false
+          return (
+            (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
+            (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase()) ||
+            ((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => arg0_o.toLowerCase() === single_name.toLowerCase()))
+          )
+        }) || null
+      }
+
+      //4. Fallback: match by name or shortName
+      if (!target_city) {
+        target_city = cities.find((arg0_c) =>
+          (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
+          (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase())
+        ) || null
+      }
     }
 
     if (target_city) {
@@ -173,6 +206,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         query_params.set('key', cap_key)
       query_params.set('name', single_name)
       query_params.set('year', String(current_year))
+      if (country_name)
+        query_params.set('country', country_name)
+      if (state_id !== undefined)
+        query_params.set('state_id', String(state_id))
 
       fetch(`/api/stadester/city?${query_params.toString()}`)
         .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))

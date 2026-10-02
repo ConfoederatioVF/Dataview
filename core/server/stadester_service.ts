@@ -7,6 +7,7 @@ import {
   computeHaversineDistanceKm,
   getCityActiveCapitalRecord,
   isCityCapitalAtYear,
+  normalizeCityAlias,
   normalizeCityKey,
   normalizeMetadataEntry,
   parseYearMonthDay,
@@ -433,11 +434,31 @@ export let StadesterService = {
 
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
+        let local_best_name = (best_city.name || '').toLowerCase().trim()
+        let local_is_key_match = Boolean(meta.key && meta.key === best_city.key)
+        let local_is_special_match = meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')
+        let local_meta_name = (meta.name || '').toLowerCase().trim()
+
+        let local_best_aliases = [
+          local_best_name,
+          ...(Array.isArray(best_city.other_names) ? best_city.other_names.map((arg0_s) => String(arg0_s).toLowerCase().trim()) : (typeof best_city.other_names === 'string' ? [best_city.other_names.toLowerCase().trim()] : [])),
+          ...(best_city.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
+        ]
+        let local_meta_aliases = [
+          local_meta_name,
+          ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase().trim()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase().trim()] : [])),
+          ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
+        ]
+        let local_is_direct_match = local_is_key_match || local_is_special_match || local_meta_aliases.some((arg0_ma) => arg0_ma && local_best_aliases.some((arg0_ba) => arg0_ba === arg0_ma || normalizeCityAlias(arg0_ba) === normalizeCityAlias(arg0_ma)))
+
+        if (!local_is_direct_match)
+          continue
+
         if (meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')) {
           best_city.name = meta.name
           best_city.historical_names = meta.historical_names
-        } else if (meta.historical_names && meta.historical_names.length > 0 && (!best_city.historical_names || best_city.historical_names.length === 0 || (meta.name && meta.name.toLowerCase().trim() === (best_city.name || '').toLowerCase().trim()))) {
-          best_city.historical_names = meta.historical_names
+        } else if (meta.historical_names && meta.historical_names.length > 0) {
+          best_city.historical_names = StadesterService.mergeHistoricalNames(best_city.historical_names, meta.historical_names)
         }
         if (meta.capital_records && meta.capital_records.length > 0) {
           if (!best_city.capital) {
@@ -467,10 +488,10 @@ export let StadesterService = {
         }
 
         //Also associate related agglomeration or pre/post-1975 counterpart cities in local grid cells
-        let base_name = (best_city.name || '').toLowerCase()
+        let base_name = (best_city.name || '').toLowerCase().trim()
         let center_lat = Math.floor(target_lat)
         let center_lng = Math.floor(target_lng)
-        let meta_name_lower = (meta.name || '').toLowerCase()
+        let meta_name_lower = (meta.name || '').toLowerCase().trim()
 
         for (let d_lat = -1; d_lat <= 1; d_lat++) {
           for (let d_lng = -1; d_lng <= 1; d_lng++) {
@@ -483,7 +504,7 @@ export let StadesterService = {
 
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
-                  let other_name_lower = (other.name || '').toLowerCase()
+                  let other_name_lower = (other.name || '').toLowerCase().trim()
                   // Do not conflate London and City of London, or Jerusalem and East Jerusalem
                   if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
                       (base_name.includes('city of london') && other_name_lower === 'london') ||
@@ -493,25 +514,24 @@ export let StadesterService = {
                   }
                   let other_aliases = [
                     other_name_lower,
-                    ...(Array.isArray(other.other_names) ? other.other_names.map((arg0_s) => String(arg0_s).toLowerCase()) : (typeof other.other_names === 'string' ? [other.other_names.toLowerCase()] : [])),
-                    ...(other.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase()),
+                    ...(Array.isArray(other.other_names) ? other.other_names.map((arg0_s) => String(arg0_s).toLowerCase().trim()) : (typeof other.other_names === 'string' ? [other.other_names.toLowerCase().trim()] : [])),
+                    ...(other.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
                   ]
                   let meta_aliases = [
                     meta_name_lower,
                     base_name,
-                    ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase()] : [])),
-                    ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase()),
+                    ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase().trim()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase().trim()] : [])),
+                    ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
                   ]
-                  let is_name_match = meta_aliases.some((arg0_ma) => arg0_ma && other_aliases.some((arg0_oa) => arg0_oa === arg0_ma || arg0_oa.includes(arg0_ma) || arg0_ma.includes(arg0_oa)))
+                  let is_name_match = meta_aliases.some((arg0_ma) => arg0_ma && other_aliases.some((arg0_oa) => arg0_oa === arg0_ma || normalizeCityAlias(arg0_oa) === normalizeCityAlias(arg0_ma)))
                   let is_era_counterpart =
                     ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                     (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
                     is_name_match
 
                   if (is_name_match || is_era_counterpart) {
-                    let is_exact_primary_match = Boolean(meta.name && meta.name.toLowerCase().trim() === (other.name || '').toLowerCase().trim())
-                    if (!other.historical_names || other.historical_names.length === 0 || is_exact_primary_match)
-                      other.historical_names = meta.historical_names
+                    if (meta.historical_names && meta.historical_names.length > 0)
+                      other.historical_names = StadesterService.mergeHistoricalNames(other.historical_names, meta.historical_names)
                     if (meta.capital_records && meta.capital_records.length > 0) {
                       if (!other.capital) {
                         other.capital = meta.capital as any
@@ -787,6 +807,85 @@ export let StadesterService = {
   },
 
   /**
+   * Merges two historical name records chronologically, preserving rich multi-entry timelines.
+   * Ensures that modern placeholder entries (e.g. single 1975 entries) never overwrite earlier historical names.
+   *
+   * @param {HistoricalNameRecord[]} [arg0_existing]
+   * @param {HistoricalNameRecord[]} [arg1_incoming]
+   *
+   * @returns {HistoricalNameRecord[]}
+   */
+  mergeHistoricalNames: function (
+    arg0_existing?: HistoricalNameRecord[],
+    arg1_incoming?: HistoricalNameRecord[]
+  ): HistoricalNameRecord[] {
+    //Convert from parameters
+    let existing = arg0_existing
+    let incoming = arg1_incoming
+
+    //Guard clauses
+    if (!incoming || incoming.length === 0)
+      return existing || []
+    if (!existing || existing.length === 0)
+      return incoming
+
+    //Declare local instance variables
+    let all_records: HistoricalNameRecord[]
+    let existing_min_year = 9999
+    let incoming_min_year = 9999
+    let merged_timeline: HistoricalNameRecord[] = []
+
+    //Function body
+    for (let i = 0; i < existing.length; i++) {
+      let y = (existing[i].year_frac !== undefined && existing[i].year_frac !== null)
+        ? existing[i].year_frac
+        : parseYearMonthDay(existing[i].date).year_frac
+      if (y < existing_min_year)
+        existing_min_year = y
+    }
+    for (let i = 0; i < incoming.length; i++) {
+      let y = (incoming[i].year_frac !== undefined && incoming[i].year_frac !== null)
+        ? incoming[i].year_frac
+        : parseYearMonthDay(incoming[i].date).year_frac
+      if (y < incoming_min_year)
+        incoming_min_year = y
+    }
+
+    if (existing.length > 1 && incoming.length === 1 && incoming_min_year >= 1900 && existing_min_year < 1900)
+      return existing
+
+    if (incoming.length > 1 && existing.length === 1 && existing_min_year >= 1900 && incoming_min_year < 1900)
+      return incoming
+
+    all_records = [...existing, ...incoming]
+    for (let i = 0; i < all_records.length; i++) {
+      if (all_records[i].year_frac === undefined || all_records[i].year_frac === null)
+        all_records[i].year_frac = parseYearMonthDay(all_records[i].date).year_frac
+    }
+    all_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+
+    for (let x = 0; x < all_records.length; x++) {
+      let rec = all_records[x]
+      let last = merged_timeline[merged_timeline.length - 1]
+
+      if (last) {
+        if (Math.abs(rec.year_frac - last.year_frac) < 0.05) {
+          if (rec.date.length > last.date.length)
+            merged_timeline[merged_timeline.length - 1] = rec
+          continue
+        }
+        if (last.name.toLowerCase().trim() === rec.name.toLowerCase().trim())
+          continue
+      }
+
+      merged_timeline.push(rec)
+    }
+
+    //Return statement
+    return merged_timeline
+  },
+
+  /**
    * Resolves a city's historical name at the specified year or date.
    *
    * @param {CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[] }} arg0_city
@@ -951,6 +1050,44 @@ export let StadesterService = {
     }
 
     raw_data = {} as any
+
+    if (!indexed_record['stadester-Vaduz-Liechtenstein']) {
+      indexed_record['stadester-Vaduz-Liechtenstein'] = {
+        coords: [47.141, 9.521],
+        country: 'Liechtenstein',
+        elevation: 455,
+        id: 'stadester-Vaduz-Liechtenstein',
+        key: 'stadester-Vaduz-Liechtenstein',
+        max_pop: 5700,
+        max_year: 2020,
+        min_year: 1400,
+        name: 'Vaduz',
+        original_names: ['vaduz'],
+        other_names: ['Vaduz'],
+        population: {
+          '1400': 300,
+          '1500': 400,
+          '1600': 500,
+          '1700': 600,
+          '1800': 800,
+          '1900': 1000,
+          '1910': 1300,
+          '1920': 1400,
+          '1930': 1600,
+          '1940': 2000,
+          '1950': 2700,
+          '1960': 3400,
+          '1970': 3900,
+          '1980': 4600,
+          '1990': 4900,
+          '2000': 5000,
+          '2010': 5200,
+          '2020': 5700,
+        },
+        years: [1400, 1500, 1600, 1700, 1800, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020],
+      }
+    }
+
     StadesterService.applyCityMetadata(indexed_record)
     StadesterService.applyStateCapitals(indexed_record)
     StadesterService.datasets.set(dataset_name, indexed_record)
@@ -1274,13 +1411,14 @@ export let StadesterService = {
   },
 
   /**
-   * Retrieves full historical information and timeseries for a given city key.
+   * Retrieves a single city by its key or name and returns full historical details.
    *
    * @param {string} [arg0_dataset_name='stadester_1.1']
    * @param {string} [arg1_city_key]
    * @param {number | string} [arg2_year]
    * @param {number} [arg3_month]
    * @param {number} [arg4_day]
+   * @param {object} [arg5_options]
    *
    * @returns {any | null}
    */
@@ -1289,18 +1427,28 @@ export let StadesterService = {
     arg1_city_key?: string,
     arg2_year?: number | string,
     arg3_month?: number,
-    arg4_day?: number
+    arg4_day?: number,
+    arg5_options?: { country?: string; state_id?: number | string }
   ): any | null {
     //Convert from parameters
-    let city_key = arg1_city_key || ''
     let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
-    let day = arg4_day
-    let month = arg3_month
+    let city_key = arg1_city_key || ''
     let year = arg2_year
+    let month = arg3_month
+    let day = arg4_day
+    let options = (arg5_options) ? arg5_options : {}
 
     //Declare local instance variables
+    let all_keys: string[]
     let bugged_set = getBuggedCitiesSet()
+    let candidates: CityIndexEntry[] = []
+    let city_key_lower: string
+    let enrichCity: (arg0_entry: CityIndexEntry) => any
+    let found: CityIndexEntry | undefined
     let indexed = StadesterService.loadDataset(dataset_name)
+    let scoreCandidate: (arg0_entry: CityIndexEntry) => number
+    let stripped_key: string
+    let stripped_key_nfd: string
 
     //Guard clauses
     if (!city_key || !indexed)
@@ -1309,7 +1457,7 @@ export let StadesterService = {
     if (isBuggedCityName(city_key, bugged_set))
       return null
 
-    let enrichCity = function (arg0_entry: CityIndexEntry): any {
+    enrichCity = function (arg0_entry: CityIndexEntry): any {
       let entry = arg0_entry
       if (year === undefined || year === null)
         return entry
@@ -1357,22 +1505,27 @@ export let StadesterService = {
     }
 
     //Check direct key match
-    let found = indexed[city_key] || indexed['stadester-' + city_key] || indexed['ghsl-' + city_key] || indexed['oxford-' + city_key]
+    found = indexed[city_key] || indexed['stadester-' + city_key] || indexed['ghsl-' + city_key] || indexed['oxford-' + city_key]
     if (found) {
       if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
         return null
 
-      return enrichCity(found)
+      let is_exact_requested_key = (city_key === found.key || city_key === 'stadester-' + found.key || city_key === 'ghsl-' + found.key)
+      if (is_exact_requested_key && !options.state_id && !options.country)
+        return enrichCity(found)
+      candidates.push(found)
     }
 
     //Fallback linear search by key, id or name
-    let all_keys = Object.keys(indexed)
-    let city_key_lower = city_key.toLowerCase().trim()
-    let stripped_key = city_key_lower.replace(/^(stadester-|ghsl-|oxford-)/, '')
-    let stripped_key_nfd = stripped_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    all_keys = Object.keys(indexed)
+    city_key_lower = city_key.toLowerCase().trim()
+    stripped_key = city_key_lower.replace(/^(stadester-|ghsl-|oxford-)/, '')
+    stripped_key_nfd = stripped_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
     for (let i = 0; i < all_keys.length; i++) {
       let entry = indexed[all_keys[i]]
+      if (found && entry.key === found.key)
+        continue
       let e_name_lower = entry.name ? entry.name.toLowerCase().trim() : ''
       let e_meta_lower = entry.metadata_name ? entry.metadata_name.toLowerCase().trim() : ''
       let is_match = false
@@ -1403,11 +1556,36 @@ export let StadesterService = {
       }
 
       if (is_match) {
-        if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
-          return null
-
-        return enrichCity(entry)
+        if (!isBuggedCityName(entry.name, bugged_set) && !(entry.key && isBuggedCityName(entry.key, bugged_set)))
+          candidates.push(entry)
       }
+    }
+
+    if (candidates.length > 0) {
+      scoreCandidate = function (arg0_entry: CityIndexEntry): number {
+        let score = 0
+        if (options.state_id !== undefined && arg0_entry.capital_records) {
+          let req_sid = Number(options.state_id)
+          let has_sid = arg0_entry.capital_records.some((arg0_cr) => arg0_cr.state_id === req_sid)
+          if (has_sid)
+            score += 10000000
+        }
+        if (options.country && arg0_entry.country) {
+          let req_country = options.country.toLowerCase().trim()
+          let entry_country = arg0_entry.country.toLowerCase().trim()
+          if (entry_country === req_country || req_country.includes(entry_country) || entry_country.includes(req_country))
+            score += 1000000
+        }
+        if (arg0_entry.key.startsWith('stadester-'))
+          score += 10000
+        score += Math.min(arg0_entry.max_pop || 0, 999999)
+        return score
+      }
+
+      candidates.sort((arg0_a, arg0_b) => scoreCandidate(arg0_b) - scoreCandidate(arg0_a))
+
+      //Return statement
+      return enrichCity(candidates[0])
     }
 
     //Return statement

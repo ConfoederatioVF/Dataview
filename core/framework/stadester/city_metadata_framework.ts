@@ -484,3 +484,31 @@ export let normalizeCityKey = function (arg0_key: string): string {
     .replace(/[^a-z0-9]/g, '')
 }
 
+/**
+ * Normalises a city alias or name for fuzzy counterpart matching by stripping diacritics, punctuation, parenthetical qualifiers, and standardising prefixes.
+ *
+ * @param {string} arg0_name - City alias or name string
+ *
+ * @returns {string} Normalised city alias string
+ */
+export let normalizeCityAlias = function (arg0_name: string): string {
+  //Convert from parameters
+  let name = arg0_name
+
+  //Guard clauses
+  if (!name)
+    return ''
+
+  //Return statement
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/[\.-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\bsaint\b/g, 'st')
+    .replace(/\bfort\b/g, 'ft')
+}
+

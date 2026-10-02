@@ -309,7 +309,7 @@
     historicalBorders: {
       activeAt: "Active at £1£",
       alsoRecordedAs: "Also recorded as:",
-      analyticsDrawer: "Analytics Drawer",
+      analyticsDrawer: "Statistics",
       areaKm2: "Area (km²)",
       boundaryUpdated: "Boundary updated",
       calculateArea: "Calculate Exact",

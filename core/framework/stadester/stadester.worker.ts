@@ -11,7 +11,6 @@ import {
 
 export interface WorkerCityInput {
   area?: number
-  capitalColor?: [number, number, number, number] | string
   colour?: [number, number, number]
   coords: [number, number] // [lat, lon]
   country?: string
@@ -19,6 +18,10 @@ export interface WorkerCityInput {
   growthRate?: number
   id: number | string
   isCapital?: boolean
+  capitalColor?: [number, number, number, number] | string
+  capitalOf?: string
+  capitalStateId?: number | string
+  capital_state_name?: string
   key: string
   name: string
   other_names?: string | string[]
@@ -28,6 +31,8 @@ export interface WorkerCityInput {
 
 export interface WorkerProcessedPoint {
   capitalColor?: [number, number, number, number]
+  capitalOf?: string
+  capitalStateId?: number | string
   color: [number, number, number, number]
   country?: string
   growthRate?: number
@@ -38,12 +43,15 @@ export interface WorkerProcessedPoint {
   population: number
   position: [number, number, number]
   projection?: string
+  rawCoords?: [number, number]
   region?: string
   shortName: string
 }
 
 export interface WorkerPlacedLabel {
   capitalColor?: [number, number, number, number]
+  capitalOf?: string
+  capitalStateId?: number | string
   isCapital?: boolean
   key: string
   name: string
@@ -51,6 +59,7 @@ export interface WorkerPlacedLabel {
   population: number
   position: [number, number, number]
   projection?: string
+  rawCoords?: [number, number]
   shortName: string
 }
 
@@ -359,6 +368,8 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
 
         let pt: WorkerProcessedPoint = {
           capitalColor: resolved_cap_color,
+          capitalOf: c.capitalOf || c.capital_state_name,
+          capitalStateId: c.capitalStateId,
           color: fill_color,
           country: c.country,
           growthRate: c.growthRate,
@@ -369,6 +380,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           population: c.population,
           position: [px, py, 0],
           projection: projection,
+          rawCoords: [c_lon, c_lat],
           region: c.region,
           shortName: pickBestCityDisplayName(c.name, c.other_names, display_options),
         }
@@ -457,6 +469,8 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           placed_boxes.push([box_x1, box_y1, box_x2, box_y2])
           placed_labels.push({
             capitalColor: cand.capitalColor,
+            capitalOf: cand.capitalOf,
+            capitalStateId: cand.capitalStateId,
             isCapital: cand.isCapital,
             key: cand.key,
             name: cand.name,
@@ -464,6 +478,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             population: cand.population,
             position: cand.position,
             projection: projection,
+            rawCoords: cand.rawCoords,
             shortName: cand.shortName,
           })
 

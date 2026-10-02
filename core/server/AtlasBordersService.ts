@@ -21,6 +21,7 @@ export interface HistoricalBorderFeature {
   id: string
   properties: {
     area?: number
+    capkey?: string
     caplat?: number
     caplong?: number
     capname?: string
@@ -29,10 +30,12 @@ export interface HistoricalBorderFeature {
     endYear?: number
     gwcode?: number
     id: string | number
+    is_acapital?: boolean
     keyframes?: HistoricalBorderKeyframe[]
     name: string
     startDate?: string
     startYear?: number
+    state_id?: number
     symbol?: Record<string, any>
     timestamp?: number
     [key: string]: any
@@ -348,6 +351,72 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
 
   //Return statement
   return geometry
+}
+
+let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
+
+/**
+ * Resolves the capital information for a state at a specific fractional year.
+ *
+ * @param {number} arg0_state_id
+ * @param {number} arg1_year_frac
+ *
+ * @returns {{ is_acapital: boolean; capname?: string; capkey?: string }}
+ */
+let getStateCapitalInfo = function (
+  arg0_state_id: number,
+  arg1_year_frac: number
+): { capkey?: string; capname?: string; is_acapital: boolean } {
+  //Convert from parameters
+  let state_id = arg0_state_id
+  let year_frac = arg1_year_frac
+
+  //Declare local instance variables
+  let file_path: string
+
+  //Function body
+  if (!state_capitals_data) {
+    file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+    if (fs.existsSync(file_path)) {
+      try {
+        state_capitals_data = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
+      } catch {
+        state_capitals_data = {}
+      }
+    } else {
+      state_capitals_data = {}
+    }
+  }
+
+  let info = state_capitals_data ? state_capitals_data[state_id] : undefined
+  if (!info)
+    return { is_acapital: false }
+
+  if (info.acapital)
+    return { is_acapital: true }
+
+  if (info.timeline && info.timeline.length > 0) {
+    for (let i = 0; i < info.timeline.length; i++) {
+      let iv = info.timeline[i]
+      if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac)
+        return { capkey: iv.key, capname: iv.city, is_acapital: false }
+    }
+
+    let best_iv = info.timeline[0]
+    let best_diff = Math.abs(year_frac - (best_iv.start_frac + best_iv.stop_frac) / 2)
+    for (let i = 1; i < info.timeline.length; i++) {
+      let iv = info.timeline[i]
+      let diff = Math.abs(year_frac - (iv.start_frac + iv.stop_frac) / 2)
+      if (diff < best_diff) {
+        best_diff = diff
+        best_iv = iv
+      }
+    }
+    return { capkey: best_iv.key, capname: best_iv.city, is_acapital: false }
+  }
+
+  //Return statement
+  return { is_acapital: false }
 }
 
 /**
@@ -740,7 +809,7 @@ export class AtlasBordersService {
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
-        if (Array.isArray(cached_json.features)) {
+        if (Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
@@ -824,6 +893,8 @@ export class AtlasBordersService {
         let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
+        let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
+        let cap_info = getStateCapitalInfo(num_sid, target_year)
 
         features.push({
           bbox: geom_bbox,
@@ -832,16 +903,19 @@ export class AtlasBordersService {
           properties: {
             adm0_a3: entity_name,
             area: current_props.area,
+            capkey: cap_info.capkey,
+            capname: cap_info.capname,
             date: UfDate.formatDate(resolved_date_obj),
             flags: current_props.flags,
             id: ent_id,
+            is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: ent.keyframes_summary || [],
             label: current_props.label,
             link: current_props.link,
             name: entity_name,
             name_long: entity_name,
-            state_id: current_props.state_id,
+            state_id: num_sid,
             symbol: current_symbol,
             timestamp: resolved_ts,
           },
@@ -957,6 +1031,8 @@ export class AtlasBordersService {
         let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
+        let num_sid = Number(ent_id)
+        let cap_info = getStateCapitalInfo(num_sid, target_year)
 
         features.push({
           bbox: geom_bbox,
@@ -964,12 +1040,16 @@ export class AtlasBordersService {
           id: `naissance_${ent_id}`,
           properties: {
             adm0_a3: entity_name,
+            capkey: cap_info.capkey,
+            capname: cap_info.capname,
             date: UfDate.formatDate(resolved_date_obj),
             id: ent_id,
+            is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: ent.keyframes_summary || [],
             name: entity_name,
             name_long: entity_name,
+            state_id: num_sid,
             symbol: current_symbol,
             timestamp: resolved_ts,
           },

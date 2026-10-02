@@ -166,6 +166,8 @@ export let App: React.FC = function () {
   })
   let [stadester_config, set_stadester_config] = useState<StadesterConfig>({
     bubbleSize: 0.4,
+    capitalColorMode: 'state',
+    capitalConstantColor: '#FFDC00',
     colorMode: 'growth',
     dataset: 'stadester_1.1',
     enabled: false,
@@ -176,6 +178,8 @@ export let App: React.FC = function () {
     maxCities: 4000,
     minPop: 0.01,
     opacity: 0.7,
+    showCapitals: true,
+    showCapitalUnderlines: true,
     showLabels: true,
   })
   let [selected_city_key, set_selected_city_key] = useState<string | null>(null)

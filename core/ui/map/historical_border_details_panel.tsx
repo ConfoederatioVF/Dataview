@@ -2,13 +2,14 @@ import React, { useMemo } from 'react'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import type { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { calculateFeatureArea } from '@framework/geopng/polygon_area.ts'
-import type { DecodedRaster } from '@framework/geopng/types.ts'
+import type { DecodedRaster, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { UfDate } from '@framework/utils/uf_date'
 import { useLocalisation } from '@localisation'
 
 export interface HistoricalBorderDetailsPanelProps {
   anchorPos?: { x: number; y: number } | null
+  cities?: CityPoint[]
   countryStats?: CountryStats | null
   currentYear: number
   embedded?: boolean
@@ -17,6 +18,7 @@ export interface HistoricalBorderDetailsPanelProps {
   onClose: () => void
   onJumpToYear?: (arg0_year: number) => void
   onOpenAnalytics?: () => void
+  onSelectCity?: (city: CityPoint) => void
   raster?: DecodedRaster | null
   sidebarWidth?: number
 }
@@ -34,6 +36,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   //Convert from parameters
   let props = arg0_props
   let anchor_pos = props.anchorPos
+  let cities = props.cities
   let country_stats = props.countryStats
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
@@ -42,6 +45,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let on_close = props.onClose
   let on_jump_to_year = props.onJumpToYear
   let on_open_analytics = props.onOpenAnalytics
+  let on_select_city = props.onSelectCity
   let raster = props.raster
   let sidebar_width = props.sidebarWidth
 
@@ -83,12 +87,16 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let alt_names_str: string | undefined
   let area_val_str: string
   let cap_name: string | undefined
+  let cap_names: string[] = []
   let country_name: string
   let current_date: { day: number; month: number; year: number }
   let current_ts: number
   let display_year: string
   let end_year: number | undefined
   let format = localisation.format
+  let handle_capital_click: (arg0_e: React.MouseEvent) => void
+  let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
+  let is_acapital = false
   let keyframes_list: any[]
   let max_x: number
   let max_y: number
@@ -100,6 +108,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let raster_metric_tooltip: string
   let source_label: string
   let start_year: number | undefined
+  let state_id: number | undefined
   let t = localisation.t
   let target_x: number
   let target_y: number
@@ -114,8 +123,99 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     ? UfDate.formatDate(current_date)
     : UfDate.formatYear(current_year)
   end_year = feature.properties?.endYear
+  is_acapital = Boolean(feature.properties?.is_acapital)
   keyframes_list = feature.properties?.keyframes || []
   start_year = feature.properties?.startYear
+  state_id = (feature.properties?.state_id !== undefined && feature.properties?.state_id !== null)
+    ? Number(feature.properties.state_id)
+    : (feature.properties?.id !== undefined && !feature.id?.toString().startsWith('cshapes') ? Number(feature.properties.id) : undefined)
+
+  if (cap_name) {
+    cap_names = cap_name.split(/[,/]/).map((arg0_s) => arg0_s.trim()).filter(Boolean)
+  } else if (!is_acapital && state_id !== undefined && cities && cities.length > 0) {
+    let matching_cities = cities.filter((arg0_c) => arg0_c.isCapital && (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id)))
+    if (matching_cities.length > 0) {
+      cap_names = Array.from(new Set(matching_cities.map((arg0_c) => arg0_c.name).filter(Boolean)))
+    }
+  }
+
+  handle_single_capital_click = (arg0_cap_name: string, arg0_e: React.MouseEvent) => {
+    arg0_e.stopPropagation()
+    let single_name = arg0_cap_name.trim()
+    if (!single_name)
+      return
+
+    let target_city: CityPoint | null = null
+    if (cities && cities.length > 0) {
+      target_city = cities.find((arg0_c) =>
+        (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
+        (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase()) ||
+        (state_id !== undefined && arg0_c.capitalStateId === state_id && arg0_c.name && arg0_c.name.toLowerCase().includes(single_name.toLowerCase()))
+      ) || null
+    }
+
+    if (target_city) {
+      if (on_select_city)
+        on_select_city(target_city)
+      if ((window as any).setSelectedCityKey)
+        (window as any).setSelectedCityKey(target_city.key)
+    } else {
+      let cap_key = `stadester-${single_name}`
+      fetch(`/api/stadester/city?key=${encodeURIComponent(cap_key)}&name=${encodeURIComponent(single_name)}&year=${current_year}`)
+        .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))
+        .then((arg0_data) => {
+          if (arg0_data && arg0_data.key) {
+            let synth_city: CityPoint = {
+              coords: arg0_data.coords || [0, 0],
+              id: arg0_data.key,
+              isCapital: true,
+              key: arg0_data.key,
+              name: arg0_data.name || single_name,
+              population: typeof arg0_data.population === 'number' ? arg0_data.population : 0,
+            }
+            if (on_select_city)
+              on_select_city(synth_city)
+            if ((window as any).setSelectedCityKey)
+              (window as any).setSelectedCityKey(arg0_data.key)
+            if ((window as any).selectedCityRecord !== undefined)
+              (window as any).selectedCityRecord = arg0_data
+          } else {
+            let fallback_city: CityPoint = {
+              coords: [0, 0],
+              id: cap_key,
+              isCapital: true,
+              key: cap_key,
+              name: single_name,
+              population: 0,
+            }
+            if (on_select_city)
+              on_select_city(fallback_city)
+            if ((window as any).setSelectedCityKey)
+              (window as any).setSelectedCityKey(cap_key)
+          }
+        })
+        .catch(() => {
+          let fallback_city: CityPoint = {
+            coords: [0, 0],
+            id: cap_key,
+            isCapital: true,
+            key: cap_key,
+            name: single_name,
+            population: 0,
+          }
+          if (on_select_city)
+            on_select_city(fallback_city)
+          if ((window as any).setSelectedCityKey)
+            (window as any).setSelectedCityKey(cap_key)
+        })
+    }
+  }
+
+  handle_capital_click = (arg0_e: React.MouseEvent) => {
+    if (cap_names.length > 0) {
+      handle_single_capital_click(cap_names[0], arg0_e)
+    }
+  }
 
   //Determine the single active keyframe index for current timeline timestamp
   active_kf_index = -1
@@ -255,7 +355,30 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
                 {country_name}
               </h3>
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono">
-                <span className="text-foreground font-semibold">{source_label}</span>
+                {state_id !== undefined ? (
+                  is_acapital || cap_names.length === 0 ? (
+                    <span className="text-foreground font-semibold">Capital: None</span>
+                  ) : (
+                    <span className="text-foreground font-semibold">
+                      {cap_names.length > 1 ? 'Capitals: ' : 'Capital: '}
+                      {cap_names.map((single_cap, idx) => (
+                        <React.Fragment key={single_cap}>
+                          {idx > 0 && <span className="text-muted-foreground font-normal">, </span>}
+                          <button
+                            type="button"
+                            onClick={(arg0_e) => handle_single_capital_click(single_cap, arg0_e)}
+                            className="underline text-foreground hover:text-white cursor-pointer transition-colors"
+                            title={single_cap}
+                          >
+                            {single_cap}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                    </span>
+                  )
+                ) : (
+                  <span className="text-foreground font-semibold">{source_label}</span>
+                )}
                 <span>•</span>
                 <span className="truncate">{validity_str}</span>
               </div>
@@ -275,26 +398,42 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {embedded && (
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 pb-1.5">
-          <span className="text-foreground font-semibold">{source_label}</span>
+          {state_id !== undefined ? (
+            is_acapital || cap_names.length === 0 ? (
+              <span className="text-foreground font-semibold">Capital: None</span>
+            ) : (
+              <span className="text-foreground font-semibold">
+                {cap_names.length > 1 ? 'Capitals: ' : 'Capital: '}
+                {cap_names.map((single_cap, idx) => (
+                  <React.Fragment key={single_cap}>
+                    {idx > 0 && <span className="text-muted-foreground font-normal">, </span>}
+                    <button
+                      type="button"
+                      onClick={(arg0_e) => handle_single_capital_click(single_cap, arg0_e)}
+                      className="underline text-foreground hover:text-white cursor-pointer transition-colors"
+                      title={single_cap}
+                    >
+                      {single_cap}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </span>
+            )
+          ) : (
+            <span className="text-foreground font-semibold">{source_label}</span>
+          )}
           <span>•</span>
           <span className="truncate">{validity_str}</span>
         </div>
       )}
 
       {/* Alternate names & Capital info */}
-      {(alt_names_str || cap_name) && (
+      {(alt_names_str || cap_names.length > 0) && (
         <div className="text-[11px] text-muted-foreground mb-2.5 space-y-0.5">
           {alt_names_str && (
             <div>
               <span className="text-muted-foreground/80">{t.mapPanels.historicalBorders.alsoRecordedAs} </span>
               <span className="text-foreground font-medium">{alt_names_str}</span>
-            </div>
-          )}
-          {cap_name && (
-            <div className="flex items-center gap-1">
-              <Icon name="location_city" className="text-xs text-white" />
-              <span>{t.mapPanels.historicalBorders.capital} </span>
-              <span className="text-foreground font-semibold">{cap_name}</span>
             </div>
           )}
         </div>

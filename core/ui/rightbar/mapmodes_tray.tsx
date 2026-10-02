@@ -63,6 +63,8 @@ export interface MapmodesTrayProps {
   onCloseHistoricalFeature?: () => void
   onJumpToYear?: (arg0_year: number) => void
   onReorderMapModes: (newModes: MapModeItem[]) => void
+  onSelectCity?: (city: CityPoint) => void
+  onSelectCountry?: (arg0_state_id?: number | string, arg0_country_name?: string) => void
   onSelectLayer?: (arg0_layer_id: string) => void
   onSetCameraTilt?: (tilt: number) => void
   onToggleCountriesMode?: (enabled: boolean) => void
@@ -77,6 +79,7 @@ export interface MapmodesTrayProps {
   setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
   setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
   settingsOpen?: boolean
+  stadesterCities?: CityPoint[]
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
   timelineYear?: number
@@ -117,6 +120,8 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     onCloseHistoricalFeature: on_close_historical_feature,
     onJumpToYear: on_jump_to_year,
     onReorderMapModes: on_reorder_map_modes,
+    onSelectCity: on_select_city,
+    onSelectCountry: on_select_country,
     onSelectLayer: on_select_layer,
     onSetCameraTilt: on_set_camera_tilt,
     onToggleCountriesMode: on_toggle_countries_mode,
@@ -131,6 +136,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     setHistoricalBordersConfig: set_historical_borders_config,
     setStadesterConfig: set_stadester_config,
     settingsOpen: settings_open = false,
+    stadesterCities: stadester_cities,
     stadesterCityCount: stadester_city_count = 0,
     stadesterConfig: stadester_config,
     timelineYear: timeline_year = 2025,
@@ -543,10 +549,12 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 currentYear={timeline_year}
                 embedded={true}
                 onClose={on_close_city || (() => {})}
+                onSelectCountry={on_select_country}
               />
             )}
             {selected_historical_feature && (
               <HistoricalBorderDetailsPanel
+                cities={stadester_cities}
                 countryStats={country_stats}
                 currentYear={timeline_year}
                 embedded={true}
@@ -554,6 +562,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 isCalculatingStats={is_calculating_stats}
                 onClose={on_close_historical_feature || (() => {})}
                 onJumpToYear={on_jump_to_year}
+                onSelectCity={on_select_city}
                 raster={raster}
               />
             )}

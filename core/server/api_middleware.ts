@@ -820,13 +820,13 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
 
     //Route 14: GET /api/stadester/city (Full historical details for one city)
     if (pathname === '/stadester/city' || pathname === '/api/stadester/city') {
-      let city_key = (query.key as string) || ''
+      let city_key = (query.key as string) || (query.name as string) || ''
       let dataset = (query.dataset as string) || 'stadester_1.1'
 
       if (!city_key) {
         res.statusCode = 400
         res.setHeader('Content-Type', 'application/json')
-        res.end(JSON.stringify({ error: 'Missing city key parameter' }))
+        res.end(JSON.stringify({ error: 'Missing city key or name parameter' }))
         return
       }
 

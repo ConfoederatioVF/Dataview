@@ -89,6 +89,8 @@ export interface StadesterDisplayOptions {
 
 export interface StadesterConfig {
   bubbleSize: number
+  capitalColorMode?: 'state' | 'constant'
+  capitalConstantColor?: string
   colorMode: StadesterColorMode
   dataset: 'stadester_1.1' | 'stadester_1.0'
   display_options?: StadesterDisplayOptions
@@ -101,6 +103,8 @@ export interface StadesterConfig {
   maxCities: number
   minPop: number
   opacity?: number
+  showCapitals?: boolean
+  showCapitalUnderlines?: boolean
   showLabels: boolean
 }
 
@@ -118,6 +122,7 @@ export interface CityPoint {
   capitalColor?: [number, number, number, number] | string
   capital_color?: string
   capitalOf?: string
+  capitalStateId?: number | string
   capital_state_name?: string
   capital_state_id?: number | string
   key: string

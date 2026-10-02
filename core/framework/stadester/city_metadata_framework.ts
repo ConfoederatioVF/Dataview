@@ -20,6 +20,7 @@ export interface CityMetadataEntry {
   historical_names: HistoricalNameRecord[]
   key?: string
   name?: string
+  other_names?: string | string[]
 }
 
 export interface ParsedDateRecord {
@@ -212,6 +213,7 @@ export let normalizeMetadataEntry = function (
     historical_names: hist_names,
     key: raw.key || entry_key,
     name: entry_name,
+    other_names: raw.other_names || raw.names_other,
   }
 }
 

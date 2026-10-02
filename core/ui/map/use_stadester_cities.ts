@@ -100,6 +100,9 @@ export async function fetchStadesterCitiesAsync (
             continue
           city_list.push({
             capitalColor: data.capital_colors ? data.capital_colors[i] : undefined,
+            capitalOf: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
+            capitalStateId: data.capital_state_ids ? (data.capital_state_ids[i] || undefined) : undefined,
+            capital_state_name: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
             coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
             country: data.countries ? data.countries[i] : undefined,
             growthRate: data.growth ? data.growth[i] : 0,
@@ -117,6 +120,9 @@ export async function fetchStadesterCitiesAsync (
           .map((arg0_c: any) => ({
             ...arg0_c,
             capitalColor: arg0_c.capital_color || arg0_c.capitalColor || undefined,
+            capitalOf: arg0_c.capitalOf || arg0_c.capital_state_name || undefined,
+            capitalStateId: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
+            capital_state_name: arg0_c.capital_state_name || arg0_c.capitalOf || undefined,
             isCapital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
           }))
       }

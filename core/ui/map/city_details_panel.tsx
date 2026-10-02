@@ -12,6 +12,7 @@ export interface CityDetailsPanelProps {
   currentYear: number
   embedded?: boolean
   onClose: () => void
+  onSelectCountry?: (arg0_state_id?: number | string, arg0_country_name?: string) => void
 }
 
 /**
@@ -63,6 +64,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
   let on_close = props.onClose
+  let on_select_country = props.onSelectCountry
 
   //Declare local instance variables
   let active_metric_tab: 'population' | 'area' | 'density'
@@ -489,26 +491,39 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       {is_capital && polity_name && (
         <div className="py-1 text-[11px] text-muted-foreground/90 border-b border-border/30 flex items-center gap-1.5">
           <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.capitalOf || 'Capital of:'}</span>
-          <span className="text-white font-medium">{polity_name}</span>
+          {on_select_country ? (
+            <button
+              type="button"
+              onClick={() => on_select_country((city as any)?.capital_state_id || (city as any)?.capitalStateId, polity_name)}
+              className="text-white font-medium underline hover:text-primary cursor-pointer transition-colors"
+              title={`View ${polity_name} details`}
+            >
+              {polity_name}
+            </button>
+          ) : (
+            <span className="text-white font-medium">{polity_name}</span>
+          )}
         </div>
       )}
 
-      {/* Historical Name Changes */}
-      {city && (city as any).historical_names && (city as any).historical_names.length > 0 && (
-        <div className="py-1 text-[10px] text-muted-foreground/90 border-b border-border/30">
-          <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.historicalNames} </span>
-          <span className="text-white/90">
-            {((city as any).historical_names as Array<{ date: string; name: string }>).map((arg0_h) => `${arg0_h.name} (${arg0_h.date})`).join(' • ')}
-          </span>
-        </div>
-      )}
-
-      {/* Other Recorded / Native Names */}
-      {other_names_list.length > 0 && (
-        <div className="py-1 text-[10px] text-muted-foreground/90 truncate border-b border-border/30">
-          <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.alsoRecordedAs} </span>
-          <span>{other_names_list.slice(0, 4).join(', ')}</span>
-          {other_names_list.length > 4 && <span> (+{other_names_list.length - 4} more)</span>}
+      {/* Historical & Also Recorded Names */}
+      {((city && (city as any).historical_names && (city as any).historical_names.length > 0) || other_names_list.length > 0) && (
+        <div className="py-1 text-[10px] text-muted-foreground/90 border-b border-border/30 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          {city && (city as any).historical_names && (city as any).historical_names.length > 0 && (
+            <div>
+              <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.historicalNames} </span>
+              <span className="text-white/90">
+                {((city as any).historical_names as Array<{ date: string; name: string }>).map((arg0_h) => `${arg0_h.name} (${arg0_h.date})`).join(' • ')}
+              </span>
+            </div>
+          )}
+          {other_names_list.length > 0 && (
+            <div>
+              <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.alsoRecordedAs} </span>
+              <span>{other_names_list.slice(0, 4).join(', ')}</span>
+              {other_names_list.length > 4 && <span> (+{other_names_list.length - 4} more)</span>}
+            </div>
+          )}
         </div>
       )}
 

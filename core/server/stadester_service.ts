@@ -95,6 +95,8 @@ export interface StadesterQueryOptions {
 export interface CompactCitiesPayload {
   capitals?: number[]
   capital_colors?: (string | null)[]
+  capital_names?: (string | null)[]
+  capital_state_ids?: (number | null)[]
   coords: number[] // [lat0, lon0, lat1, lon1, ...]
   count: number
   countries: (string | undefined)[]
@@ -278,19 +280,22 @@ export let StadesterService = {
     //Return statement
     return isCityCapitalAtYear(city, year, (arg0_sid, arg0_y_frac) => {
       let sid_num = Number(arg0_sid)
-      if (active_state_ids && active_state_ids.size > 0) {
-        if (!active_state_ids.has(sid_num))
-          return false
-      }
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
         return false
-      if (!isCityInsideStateBBox(city, state))
-        return false
       let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
       let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-      return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+      let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
         (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+      if (!is_time_valid)
+        return false
+      if (active_state_ids && active_state_ids.size > 0) {
+        if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
+          return false
+      }
+      if (!isCityInsideStateBBox(city, state, 3.5))
+        return false
+      return true
     })
   },
 
@@ -327,19 +332,22 @@ export let StadesterService = {
 
     let cap_rec = getCityActiveCapitalRecord(city, year, (arg0_sid, arg0_y_frac) => {
       let sid_num = Number(arg0_sid)
-      if (active_state_ids && active_state_ids.size > 0) {
-        if (!active_state_ids.has(sid_num))
-          return false
-      }
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
         return false
-      if (!isCityInsideStateBBox(city, state))
-        return false
       let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
       let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-      return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+      let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
         (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+      if (!is_time_valid)
+        return false
+      if (active_state_ids && active_state_ids.size > 0) {
+        if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
+          return false
+      }
+      if (!isCityInsideStateBBox(city, state, 3.5))
+        return false
+      return true
     })
 
     if (!cap_rec || !cap_rec.state_id)
@@ -423,21 +431,22 @@ export let StadesterService = {
 
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
-        if (meta.historical_names && meta.historical_names.length > 0 && (!best_city.historical_names || best_city.historical_names.length === 0)) {
+        if (meta.name === 'City of London') {
+          best_city.name = 'City of London'
+          best_city.historical_names = meta.historical_names
+        } else if (meta.historical_names && meta.historical_names.length > 0 && (!best_city.historical_names || best_city.historical_names.length === 0 || (meta.name && meta.name.toLowerCase().trim() === (best_city.name || '').toLowerCase().trim()))) {
           best_city.historical_names = meta.historical_names
         }
         if (meta.capital_records && meta.capital_records.length > 0) {
           if (!best_city.capital) {
             best_city.capital = meta.capital as any
             best_city.capital_records = meta.capital_records
-          } else {
             let existing_cap: Record<string, string | number | null> = { ...(best_city.capital || {}) }
             let raw_meta_cap = meta.capital || {}
             let all_meta_keys = Object.keys(raw_meta_cap)
             for (let m = 0; m < all_meta_keys.length; m++) {
               let d_key = all_meta_keys[m]
-              if (existing_cap[d_key] === undefined)
-                existing_cap[d_key] = raw_meta_cap[d_key]
+              existing_cap[d_key] = raw_meta_cap[d_key]
             }
             best_city.capital = existing_cap
             best_city.capital_records = Object.keys(existing_cap).map((arg0_d) => {
@@ -469,17 +478,31 @@ export let StadesterService = {
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
                   let other_name_lower = (other.name || '').toLowerCase()
-                  let is_name_match =
-                    (base_name && other_name_lower === base_name) ||
-                    (meta_name_lower && other_name_lower === meta_name_lower)
+                  // Do not conflate London and City of London
+                  if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
+                      (base_name.includes('city of london') && other_name_lower === 'london')) {
+                    continue
+                  }
+                  let other_aliases = [
+                    other_name_lower,
+                    ...(Array.isArray(other.other_names) ? other.other_names.map((arg0_s) => String(arg0_s).toLowerCase()) : (typeof other.other_names === 'string' ? [other.other_names.toLowerCase()] : [])),
+                    ...(other.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase()),
+                  ]
+                  let meta_aliases = [
+                    meta_name_lower,
+                    base_name,
+                    ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase()] : [])),
+                    ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase()),
+                  ]
+                  let is_name_match = meta_aliases.some((arg0_ma) => arg0_ma && other_aliases.some((arg0_oa) => arg0_oa === arg0_ma || arg0_oa.includes(arg0_ma) || arg0_ma.includes(arg0_oa)))
                   let is_era_counterpart =
                     ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                     (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
-                    is_name_match &&
-                    dist <= 25
+                    is_name_match
 
                   if (is_name_match || is_era_counterpart) {
-                    if (!other.historical_names || other.historical_names.length === 0)
+                    let is_exact_primary_match = Boolean(meta.name && meta.name.toLowerCase().trim() === (other.name || '').toLowerCase().trim())
+                    if (!other.historical_names || other.historical_names.length === 0 || is_exact_primary_match)
                       other.historical_names = meta.historical_names
                     if (meta.capital_records && meta.capital_records.length > 0) {
                       if (!other.capital) {
@@ -491,8 +514,7 @@ export let StadesterService = {
                         let all_m_keys = Object.keys(raw_meta_cap)
                         for (let m = 0; m < all_m_keys.length; m++) {
                           let d_key = all_m_keys[m]
-                          if (existing_other_cap[d_key] === undefined)
-                            existing_other_cap[d_key] = raw_meta_cap[d_key]
+                          existing_other_cap[d_key] = raw_meta_cap[d_key]
                         }
                         other.capital = existing_other_cap
                         other.capital_records = Object.keys(existing_other_cap).map((arg0_d) => {
@@ -693,6 +715,11 @@ export let StadesterService = {
       let clean_display_name = (cached_name && !isCorruptedCityName(cached_name))
         ? cached_name
         : resolveCityDisplayName(key, c.name || key, c.coords, max_p, c.id)
+
+      if (key === 'stadester-London (Greater London)-United Kingdom' ||
+          (c.coords && Math.abs(c.coords[0] - 51.5134) < 0.01 && Math.abs(c.coords[1] - (-0.08925)) < 0.01)) {
+        clean_display_name = 'City of London'
+      }
 
       indexed_record[key] = {
         area: c.area,
@@ -979,19 +1006,22 @@ export let StadesterService = {
 
       let cap_rec = getCityActiveCapitalRecord(city, target_year, (arg0_sid, arg0_y_frac) => {
         let sid_num = Number(arg0_sid)
-        if (active_state_ids && active_state_ids.size > 0) {
-          if (!active_state_ids.has(sid_num))
-            return false
-        }
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
           return false
-        if (!isCityInsideStateBBox(city, state))
-          return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-        return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+        let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
           (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+        if (!is_time_valid)
+          return false
+        if (active_state_ids && active_state_ids.size > 0) {
+          if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
+            return false
+        }
+        if (!isCityInsideStateBBox(city, state, 3.5))
+          return false
+        return true
       })
 
       let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
@@ -1083,19 +1113,22 @@ export let StadesterService = {
 
       let cap_rec = getCityActiveCapitalRecord(entry, year, (arg0_sid, arg0_y_frac) => {
         let sid_num = Number(arg0_sid)
-        if (active_state_ids && active_state_ids.size > 0) {
-          if (!active_state_ids.has(sid_num))
-            return false
-        }
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
           return false
-        if (!isCityInsideStateBBox(entry, state))
-          return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-        return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+        let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
           (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+        if (!is_time_valid)
+          return false
+        if (active_state_ids && active_state_ids.size > 0) {
+          if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
+            return false
+        }
+        if (!isCityInsideStateBBox(entry, state, 3.5))
+          return false
+        return true
       })
 
       let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
@@ -1126,9 +1159,10 @@ export let StadesterService = {
 
     //Fallback linear search by key, id or name
     let all_keys = Object.keys(indexed)
+    let city_key_lower = city_key.toLowerCase().trim()
     for (let i = 0; i < all_keys.length; i++) {
       let entry = indexed[all_keys[i]]
-      if (entry.key === city_key || String(entry.id) === city_key || entry.name === city_key) {
+      if (entry.key === city_key || String(entry.id) === city_key || entry.name === city_key || (entry.name && entry.name.toLowerCase() === city_key_lower)) {
         if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
           return null
 
@@ -1193,8 +1227,10 @@ export let StadesterService = {
     //Declare local instance variables
     let cities = StadesterService.getCitiesAtYear(dataset_name, year, options)
     let len = cities.length
-    let capitals: number[] = new Array(len)
     let capital_colors: (string | null)[] = new Array(len)
+    let capital_names: (string | null)[] = new Array(len)
+    let capital_state_ids: (number | null)[] = new Array(len)
+    let capitals: number[] = new Array(len)
     let coords: number[] = new Array(len * 2)
     let countries: (string | undefined)[] = new Array(len)
     let growth: number[] = new Array(len)
@@ -1216,12 +1252,16 @@ export let StadesterService = {
       regions[i] = c.region
       capitals[i] = c.is_capital ? 1 : 0
       capital_colors[i] = c.capital_color || null
+      capital_names[i] = c.capitalOf || c.capital_state_name || null
+      capital_state_ids[i] = (c.capital_state_id !== undefined && c.capital_state_id !== null) ? Number(c.capital_state_id) : null
     }
 
     //Return statement
     return {
       capitals,
       capital_colors,
+      capital_names,
+      capital_state_ids,
       coords,
       count: len,
       countries,

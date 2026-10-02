@@ -622,8 +622,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     []
   )
 
-
-
   elevation_spikes_data = useElevationSpikes({
     heightmapConfig: heightmap_config,
     raster,
@@ -794,6 +792,47 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     }
     return selected_historical_anchor_screen || null
   }, [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, projection, proj_view_states])
+
+  let handle_select_country_from_city = useCallback(
+    (arg0_state_id?: number | string, arg0_country_name?: string) => {
+      let features = historical_borders_result?.bordersData?.features
+      let target_feat: any = null
+
+      if (features && features.length > 0) {
+        target_feat = features.find((arg0_f: any) => {
+          if (arg0_state_id !== undefined && arg0_state_id !== null) {
+            let sid_str = String(arg0_state_id)
+            if (String(arg0_f.id) === sid_str ||
+                String(arg0_f.properties?.id) === sid_str ||
+                String(arg0_f.properties?.state_id) === sid_str) {
+              return true
+            }
+          }
+          if (arg0_country_name && arg0_f.properties?.name) {
+            let fn = arg0_f.properties.name.toLowerCase().trim()
+            let cn = arg0_country_name.toLowerCase().trim()
+            if (fn === cn || fn.includes(cn) || cn.includes(fn))
+              return true
+          }
+          return false
+        })
+      }
+
+      if (target_feat) {
+        set_selected_historical_feature(target_feat)
+        if (selected_city_anchor)
+          set_selected_historical_anchor_screen(selected_city_anchor)
+        if (selected_city && (selected_city as any).coords)
+          set_selected_historical_anchor_coord([(selected_city as any).coords[1], (selected_city as any).coords[0]])
+        if (on_select_country) {
+          on_select_country(target_feat as unknown as CountryFeature)
+        } else if (on_toggle_country) {
+          on_toggle_country(target_feat as unknown as CountryFeature)
+        }
+      }
+    },
+    [historical_borders_result, selected_city, selected_city_anchor, on_select_country, on_toggle_country]
+  )
 
   //Return statement
   return (
@@ -974,6 +1013,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           city={selected_city}
           currentYear={timeline_year || 2025}
           onClose={on_close_city_details || (() => { })}
+          onSelectCountry={handle_select_country_from_city}
         />
       )}
 
@@ -981,10 +1021,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       {ui_visible && !is_mobile && selected_historical_feature && (
         <HistoricalBorderDetailsPanel
           anchorPos={selected_historical_anchor}
+          cities={stadester_cities}
           countryStats={country_stats}
           currentYear={timeline_year || 1950}
           feature={selected_historical_feature}
           isCalculatingStats={is_calculating_stats}
+          onSelectCity={on_select_city}
           raster={raster}
           onClose={() => {
             set_selected_historical_feature(null)
@@ -1142,13 +1184,16 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           onToggleCountriesMode={on_toggle_countries_mode}
           onToggleCountry={on_toggle_country || NOOP_FN}
           onToggleMapMode={on_toggle_map_mode}
+          onSelectCountry={handle_select_country_from_city}
           selectedCity={selected_city}
           selectedCountries={selected_countries || EMPTY_ARRAY}
           selectedHistoricalFeature={selected_historical_feature}
+          onSelectCity={on_select_city}
           setCircleOverlayConfig={set_circle_overlay_config || NOOP_FN}
           setHeightmapConfig={set_heightmap_config || NOOP_FN}
           setStadesterConfig={set_stadester_config}
           settingsOpen={flyout_open}
+          stadesterCities={stadester_cities}
           stadesterCityCount={stadester_cities?.length || 0}
           stadesterConfig={stadester_config}
           timelineYear={timeline_year || 1950}

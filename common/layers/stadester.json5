@@ -27,6 +27,8 @@
             min_pop: 0.01,
             opacity: 0.7,
             prefer_least_diacritics: true,
+            show_capitals: true,
+            show_capital_underlines: true,
             show_labels: true,
             skip_unknown_unicode: true,
             strip_parentheses: true

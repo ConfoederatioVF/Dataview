@@ -27,6 +27,7 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer'
+import { UnderlinedTextLayer } from './underlined_text_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import {
@@ -65,6 +66,334 @@ function getShortCityLabel (arg0_name: string): string {
 
   //Return statement
   return first_word || before_semi
+}
+
+/**
+ * Tests whether a 2D point [lng, lat] lies within a polygon coordinate ring using ray-casting.
+ *
+ * @param {[number, number]} arg0_point - [longitude, latitude] point
+ * @param {number[][]} arg1_ring - Array of [longitude, latitude] coordinates forming the ring
+ *
+ * @returns {boolean} True if point is inside ring
+ */
+function isPointInPolygonRing (arg0_point: [number, number], arg1_ring: number[][]): boolean {
+  //Convert from parameters
+  let pt = arg0_point
+  let ring = arg1_ring
+
+  //Guard clauses
+  if (!ring || ring.length < 3 || !pt)
+    return false
+
+  //Declare local instance variables
+  let inside = false
+  let n = ring.length
+  let x = pt[0]
+  let y = pt[1]
+
+  //Function body
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    let xi = ring[i][0]
+    let yi = ring[i][1]
+    let xj = ring[j][0]
+    let yj = ring[j][1]
+
+    let intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+    if (intersect)
+      inside = !inside
+  }
+
+  //Return statement
+  return inside
+}
+
+/**
+ * Tests whether a point [lng, lat] falls within a GeoJSON Polygon or MultiPolygon geometry.
+ *
+ * @param {[number, number]} arg0_point - [longitude, latitude] point
+ * @param {any} arg1_geometry - GeoJSON geometry object
+ *
+ * @returns {boolean} True if point is inside geometry
+ */
+function isPointInHistoricalGeometry (arg0_point: [number, number], arg1_geometry: any): boolean {
+  //Convert from parameters
+  let geom = arg1_geometry
+  let pt = arg0_point
+
+  //Guard clauses
+  if (!geom || !geom.coordinates || !pt)
+    return false
+
+  //Declare local instance variables
+  let coords = geom.coordinates
+
+  //Function body
+  if (geom.type === 'Polygon') {
+    if (!isPointInPolygonRing(pt, coords[0]))
+      return false
+    for (let i = 1; i < coords.length; i++) {
+      if (isPointInPolygonRing(pt, coords[i]))
+        return false
+    }
+    return true
+  } else if (geom.type === 'MultiPolygon') {
+    for (let p = 0; p < coords.length; p++) {
+      let poly = coords[p]
+      if (isPointInPolygonRing(pt, poly[0])) {
+        let in_hole = false
+        for (let h = 1; h < poly.length; h++) {
+          if (isPointInPolygonRing(pt, poly[h])) {
+            in_hole = true
+            break
+          }
+        }
+        if (!in_hole)
+          return true
+      }
+    }
+    return false
+  }
+
+  //Return statement
+  return false
+}
+
+/**
+ * Calculates squared Euclidean distance from point (px, py) to line segment (x1, y1)-(x2, y2).
+ *
+ * @param {number} arg0_px
+ * @param {number} arg1_py
+ * @param {number} arg2_x1
+ * @param {number} arg3_y1
+ * @param {number} arg4_x2
+ * @param {number} arg5_y2
+ *
+ * @returns {number} Squared distance
+ */
+function distanceSquaredToSegment (
+  arg0_px: number,
+  arg1_py: number,
+  arg2_x1: number,
+  arg3_y1: number,
+  arg4_x2: number,
+  arg5_y2: number
+): number {
+  //Convert from parameters
+  let px = arg0_px
+  let py = arg1_py
+  let x1 = arg2_x1
+  let y1 = arg3_y1
+  let x2 = arg4_x2
+  let y2 = arg5_y2
+
+  //Declare local instance variables
+  let diff_x: number
+  let diff_y: number
+  let dpx: number
+  let dpy: number
+  let dx = x2 - x1
+  let dy = y2 - y1
+  let len_sq = dx * dx + dy * dy
+  let proj_x: number
+  let proj_y: number
+  let t: number
+
+  //Guard clauses
+  if (len_sq === 0) {
+    dpx = px - x1
+    dpy = py - y1
+    return dpx * dpx + dpy * dpy
+  }
+
+  //Function body
+  t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / len_sq))
+  proj_x = x1 + t * dx
+  proj_y = y1 + t * dy
+  diff_x = px - proj_x
+  diff_y = py - proj_y
+
+  //Return statement
+  return diff_x * diff_x + diff_y * diff_y
+}
+
+/**
+ * Tests whether a point [lng, lat] is within max_dist degrees of any segment in a polygon ring.
+ *
+ * @param {[number, number]} arg0_point
+ * @param {number[][]} arg1_ring
+ * @param {number} arg2_max_dist
+ *
+ * @returns {boolean} True if point is near ring
+ */
+function isPointNearPolygonRing (arg0_point: [number, number], arg1_ring: number[][], arg2_max_dist: number): boolean {
+  //Convert from parameters
+  let max_dist = arg2_max_dist
+  let pt = arg0_point
+  let ring = arg1_ring
+
+  //Guard clauses
+  if (!ring || ring.length < 2 || !pt)
+    return false
+
+  //Declare local instance variables
+  let max_dist_sq = max_dist * max_dist
+  let px = pt[0]
+  let py = pt[1]
+
+  //Function body
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    let d_sq = distanceSquaredToSegment(px, py, ring[i][0], ring[i][1], ring[j][0], ring[j][1])
+    if (d_sq <= max_dist_sq)
+      return true
+  }
+
+  //Return statement
+  return false
+}
+
+/**
+ * Tests whether a point [lng, lat] is within max_dist degrees of a GeoJSON Polygon / MultiPolygon geometry.
+ *
+ * @param {[number, number]} arg0_point
+ * @param {any} arg1_geometry
+ * @param {number} arg2_max_dist
+ *
+ * @returns {boolean} True if point is within max_dist
+ */
+function isPointNearHistoricalGeometry (arg0_point: [number, number], arg1_geometry: any, arg2_max_dist: number): boolean {
+  //Convert from parameters
+  let geom = arg1_geometry
+  let max_dist = arg2_max_dist
+  let pt = arg0_point
+
+  //Guard clauses
+  if (!geom || !geom.coordinates || !pt)
+    return false
+
+  //Declare local instance variables
+  let coords = geom.coordinates
+
+  //Function body
+  if (geom.type === 'Polygon') {
+    for (let r = 0; r < coords.length; r++) {
+      if (isPointNearPolygonRing(pt, coords[r], max_dist))
+        return true
+    }
+  } else if (geom.type === 'MultiPolygon') {
+    for (let p = 0; p < coords.length; p++) {
+      let poly = coords[p]
+      for (let r = 0; r < poly.length; r++) {
+        if (isPointNearPolygonRing(pt, poly[r], max_dist))
+          return true
+      }
+    }
+  }
+
+  //Return statement
+  return false
+}
+
+/**
+ * Verifies if a capital city falls within its target state's active border polygon on screen.
+ * Accommodates coastal settlements with 0.35° spatial tolerance for generalized boundary polygons.
+ * Enriches the capital city with its parent polity's rendered polygon colour.
+ *
+ * @param {any} arg0_city - City object
+ * @param {Map<string, any>} arg1_features_by_id - Map of state IDs to feature
+ * @param {Map<string, any>} arg2_features_by_name - Map of state names to feature
+ *
+ * @returns {boolean} True if the city is inside or near the target polygon
+ */
+function isCapitalInsideTargetPolygon (
+  arg0_city: any,
+  arg1_features_by_id: Map<string, any>,
+  arg2_features_by_name: Map<string, any>
+): boolean {
+  //Convert from parameters
+  let city = arg0_city
+  let features_by_id = arg1_features_by_id
+  let features_by_name = arg2_features_by_name
+
+  //Guard clauses
+  if (!city || !city.isCapital)
+    return false
+
+  //Declare local instance variables
+  let bbox: [number, number, number, number] | undefined
+  let geom: any
+  let is_inside: boolean
+  let polity_color: any
+  let pt_coords: [number, number] | undefined
+  let target_feature: any
+
+  //Function body
+  if (city.rawCoords && Array.isArray(city.rawCoords) && city.rawCoords.length >= 2) {
+    pt_coords = [city.rawCoords[0], city.rawCoords[1]]
+  } else if (city.coords && Array.isArray(city.coords) && city.coords.length >= 2) {
+    pt_coords = [city.coords[0], city.coords[1]]
+  } else if (city.position && Array.isArray(city.position) && city.position.length >= 2) {
+    pt_coords = [city.position[0], city.position[1]]
+  }
+
+  if (!pt_coords)
+    return true
+
+  if (city.capitalStateId !== undefined && city.capitalStateId !== null) {
+    target_feature = features_by_id.get(String(city.capitalStateId))
+  }
+  if (!target_feature && city.capital_state_id !== undefined && city.capital_state_id !== null) {
+    target_feature = features_by_id.get(String(city.capital_state_id))
+  }
+  if (!target_feature && city.capitalOf && typeof city.capitalOf === 'string') {
+    target_feature = features_by_name.get(city.capitalOf.toLowerCase().trim())
+  }
+  if (!target_feature && city.capital_state_name && typeof city.capital_state_name === 'string') {
+    target_feature = features_by_name.get(city.capital_state_name.toLowerCase().trim())
+  }
+  if (!target_feature && (city.capitalOf || city.capital_state_name)) {
+    let search_name = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
+    for (let [f_name, feat] of features_by_name.entries()) {
+      if (f_name === search_name || f_name.includes(search_name) || search_name.includes(f_name)) {
+        target_feature = feat
+        break
+      }
+    }
+  }
+
+  //If no target polygon feature is active on screen, retain default capital status
+  if (!target_feature)
+    return true
+
+  bbox = target_feature.bbox
+  if (bbox && bbox.length >= 4) {
+    if (pt_coords[0] < bbox[0] - 0.35 || pt_coords[0] > bbox[2] + 0.35 ||
+        pt_coords[1] < bbox[1] - 0.35 || pt_coords[1] > bbox[3] + 0.35) {
+      return false
+    }
+  }
+
+  geom = target_feature.geometry
+  if (!geom)
+    return false
+
+  is_inside = isPointInHistoricalGeometry(pt_coords, geom) || isPointNearHistoricalGeometry(pt_coords, geom, 0.35)
+  if (!is_inside)
+    return false
+
+  //Enrich capital city with the active border polygon's fill or stroke colour
+  polity_color = target_feature.properties?.symbol?.polygonFill ||
+    target_feature.properties?.symbol?.fillColor ||
+    target_feature.properties?.fillColor ||
+    target_feature.properties?.color ||
+    target_feature.properties?.symbol?.strokeColor ||
+    target_feature.properties?.strokeColor
+
+  if (polity_color && (!city.capitalColor || city.capitalColor === '#FFDC00' || Array.isArray(city.capitalColor))) {
+    city.capitalColor = polity_color
+  }
+
+  //Return statement
+  return true
 }
 
 let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
@@ -310,6 +639,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         pixelRadius: pixel_radius,
         position: [px, py, 0] as [number, number, number],
         projection: projection,
+        rawCoords: [c_lon, c_lat],
         shortName: short_name,
       }
     })
@@ -326,6 +656,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
   return useMemo(() => {
     //Declare local instance variables
     let basemap = options.basemap
+    let border_features_by_id = new Map<string, any>()
+    let border_features_by_name = new Map<string, any>()
     let circle_overlay_config = options.circleOverlayConfig
     let circle_pixel_data = options.circlePixelData
     let countries_mode = options.countriesMode
@@ -361,8 +693,21 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let spike_key: string
     let stroke_w: number
 
-    //Function body
     is_cartesian = (projection === 'Equirectangular' || projection === 'EqualEarth')
+
+    if (options.historicalBordersData && options.historicalBordersData.features) {
+      for (let i = 0; i < options.historicalBordersData.features.length; i++) {
+        let feat = options.historicalBordersData.features[i]
+        if (feat.properties?.id !== undefined)
+          border_features_by_id.set(String(feat.properties.id), feat)
+        if (feat.id !== undefined)
+          border_features_by_id.set(String(feat.id), feat)
+        if (feat.properties?.state_id !== undefined)
+          border_features_by_id.set(String(feat.properties.state_id), feat)
+        if (feat.properties?.name)
+          border_features_by_name.set(feat.properties.name.toLowerCase().trim(), feat)
+      }
+    }
 
     if (selected_countries && selected_countries.length > 0) {
       effective_selected_array = selected_countries
@@ -735,6 +1080,24 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       ? options.stadesterPoints!
       : stadester_points_data
 
+    //Validate capital cities against target border polygon on screen (ONLY for capital cities)
+    if (border_features_by_id.size > 0 && effective_points && effective_points.length > 0) {
+      effective_points = effective_points.map((arg0_c: any) => {
+        if (!arg0_c.isCapital)
+          return arg0_c
+
+        let is_valid = isCapitalInsideTargetPolygon(arg0_c, border_features_by_id, border_features_by_name)
+        if (!is_valid) {
+          return {
+            ...arg0_c,
+            capitalColor: undefined,
+            isCapital: false,
+          }
+        }
+        return arg0_c
+      })
+    }
+
     if (options.stadesterConfig?.enabled && effective_points.length > 0) {
       let is_collision_active = (options.stadesterConfig.labelCollision !== undefined) ? options.stadesterConfig.labelCollision : true
       let is_firefox = typeof navigator !== 'undefined' && /firefox|fxios/i.test(navigator.userAgent)
@@ -947,11 +1310,29 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             typeof arg0_c.shortName === 'string' &&
             arg0_c.shortName.trim().length > 0
           )
+
+          //Validate capital cities against target border polygon on screen (ONLY for capital cities)
+          if (border_features_by_id.size > 0) {
+            visible_label_cities = visible_label_cities.map((arg0_c: any) => {
+              if (!arg0_c.isCapital)
+                return arg0_c
+
+              let is_valid = isCapitalInsideTargetPolygon(arg0_c, border_features_by_id, border_features_by_name)
+              if (!is_valid) {
+                return {
+                  ...arg0_c,
+                  capitalColor: undefined,
+                  isCapital: false,
+                }
+              }
+              return arg0_c
+            })
+          }
         }
 
         if (visible_label_cities && visible_label_cities.length > 0) {
           layers_array.push(
-            new TextLayer({
+            new UnderlinedTextLayer({
               id: `stadester-labels-${projection}`,
               data: visible_label_cities,
               getPosition: (d: any) => d.position,
@@ -959,14 +1340,43 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               getSize: (d: any) => Math.max(10, Math.min(15, 9 + Math.log10(Math.max(1000, d.population))*0.9)),
               sizeUnits: 'pixels',
               sizeMinPixels: 9,
-              getColor: (d: any) => {
-                if (!d.isCapital)
-                  return [255, 255, 255, 255]
+              isUnderlined: (d: any) => Boolean(d.isCapital && options.stadesterConfig?.showCapitals !== false && options.stadesterConfig?.showCapitalUnderlines !== false),
+              getUnderlineColor: (d: any) => {
+                if (!d.isCapital || options.stadesterConfig?.showCapitals === false || options.stadesterConfig?.showCapitalUnderlines === false)
+                  return [0, 0, 0, 0]
+
                 let cap_rgb: [number, number, number] = [255, 220, 0]
-                if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
+                let color_mode = options.stadesterConfig?.capitalColorMode || 'state'
+                let constant_color = options.stadesterConfig?.capitalConstantColor || '#FFDC00'
+
+                if (color_mode === 'constant') {
+                  cap_rgb = hexToRgb(constant_color)
+                } else if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
                   cap_rgb = [d.capitalColor[0], d.capitalColor[1], d.capitalColor[2]]
                 } else if (typeof d.capitalColor === 'string' && d.capitalColor.startsWith('#')) {
                   cap_rgb = hexToRgb(d.capitalColor)
+                } else {
+                  cap_rgb = hexToRgb(constant_color)
+                }
+                let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
+                return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
+              },
+              getColor: (d: any) => {
+                if (!d.isCapital || options.stadesterConfig?.showCapitals === false)
+                  return [255, 255, 255, 255]
+
+                let cap_rgb: [number, number, number] = [255, 220, 0]
+                let color_mode = options.stadesterConfig?.capitalColorMode || 'state'
+                let constant_color = options.stadesterConfig?.capitalConstantColor || '#FFDC00'
+
+                if (color_mode === 'constant') {
+                  cap_rgb = hexToRgb(constant_color)
+                } else if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
+                  cap_rgb = [d.capitalColor[0], d.capitalColor[1], d.capitalColor[2]]
+                } else if (typeof d.capitalColor === 'string' && d.capitalColor.startsWith('#')) {
+                  cap_rgb = hexToRgb(d.capitalColor)
+                } else {
+                  cap_rgb = hexToRgb(constant_color)
                 }
                 let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
                 return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
@@ -974,7 +1384,24 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               getTextAnchor: 'start',
               getAlignmentBaseline: 'center',
               updateTriggers: {
-                getColor: [visible_label_cities],
+                getColor: [
+                  visible_label_cities,
+                  options.stadesterConfig?.showCapitals,
+                  options.stadesterConfig?.capitalColorMode,
+                  options.stadesterConfig?.capitalConstantColor,
+                ],
+                getUnderlineColor: [
+                  visible_label_cities,
+                  options.stadesterConfig?.showCapitals,
+                  options.stadesterConfig?.showCapitalUnderlines,
+                  options.stadesterConfig?.capitalColorMode,
+                  options.stadesterConfig?.capitalConstantColor,
+                ],
+                isUnderlined: [
+                  visible_label_cities,
+                  options.stadesterConfig?.showCapitals,
+                  options.stadesterConfig?.showCapitalUnderlines,
+                ],
               },
               getPixelOffset: (d: any) => [d.pixelRadius + 8, 0],
               background: true,

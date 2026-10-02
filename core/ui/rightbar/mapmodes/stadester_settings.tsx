@@ -378,6 +378,149 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           {show_labels ? 'ON' : 'OFF'}
         </button>
       </div>
+
+      {/* Capital Cities Display & Colour Settings */}
+      <div className="space-y-1.5 pt-1.5 border-t border-border/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-foreground text-[11px] font-medium">Show Capitals</span>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              on_change_config((arg0_prev) => ({
+                ...arg0_prev,
+                showCapitals: arg0_prev.showCapitals === false ? true : false,
+              }))
+            }
+            className={`px-2 py-0.5 text-[10px] rounded-none border transition-colors cursor-pointer font-bold ${config.showCapitals !== false
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background hover:bg-muted text-muted-foreground border-border'
+              }`}
+          >
+            {config.showCapitals !== false ? 'ON' : 'OFF'}
+          </button>
+        </div>
+
+        {config.showCapitals !== false && (
+          <div className="space-y-1.5 pt-0.5">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-[11px]">Underline Capitals</span>
+              <button
+                type="button"
+                onClick={() =>
+                  on_change_config((arg0_prev) => ({
+                    ...arg0_prev,
+                    showCapitalUnderlines: arg0_prev.showCapitalUnderlines === false ? true : false,
+                  }))
+                }
+                className={`px-2 py-0.5 text-[10px] rounded-none border transition-colors cursor-pointer font-bold ${config.showCapitalUnderlines !== false
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                  }`}
+              >
+                {config.showCapitalUnderlines !== false ? 'ON' : 'OFF'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() =>
+                  on_change_config((arg0_prev) => ({
+                    ...arg0_prev,
+                    capitalColorMode: 'state',
+                  }))
+                }
+                className={`px-1.5 py-1 text-[11px] rounded-none border text-center transition-colors cursor-pointer ${config.capitalColorMode !== 'constant'
+                    ? 'bg-primary/20 text-primary border-primary font-bold shadow-xs'
+                    : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                  }`}
+              >
+                Inherit State Colour
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  on_change_config((arg0_prev) => ({
+                    ...arg0_prev,
+                    capitalColorMode: 'constant',
+                  }))
+                }
+                className={`px-1.5 py-1 text-[11px] rounded-none border text-center transition-colors cursor-pointer ${config.capitalColorMode === 'constant'
+                    ? 'bg-primary/20 text-primary border-primary font-bold shadow-xs'
+                    : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                  }`}
+              >
+                Constant Colour
+              </button>
+            </div>
+
+            {config.capitalColorMode === 'constant' && (
+              <div className="space-y-1 pt-1">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-muted-foreground">Custom Colour</span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      value={config.capitalConstantColor || '#FFDC00'}
+                      onChange={(arg0_e) =>
+                        on_change_config((arg0_prev) => ({
+                          ...arg0_prev,
+                          capitalConstantColor: arg0_e.target.value,
+                        }))
+                      }
+                      className="w-5 h-5 p-0 border border-border cursor-pointer bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={config.capitalConstantColor || '#FFDC00'}
+                      onChange={(arg0_e) =>
+                        on_change_config((arg0_prev) => ({
+                          ...arg0_prev,
+                          capitalConstantColor: arg0_e.target.value,
+                        }))
+                      }
+                      className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-[10px] font-mono text-foreground"
+                    />
+                  </div>
+                </div>
+                {/* Preset Chips */}
+                <div className="flex items-center gap-1 pt-0.5 flex-wrap">
+                  {[
+                    { label: 'Yellow', value: '#FFDC00' },
+                    { label: 'Amber', value: '#FFB700' },
+                    { label: 'Red', value: '#FF4136' },
+                    { label: 'White', value: '#FFFFFF' },
+                    { label: 'Cyan', value: '#7FDBFF' },
+                  ].map((arg0_preset) => {
+                    let is_active = (config.capitalConstantColor || '#FFDC00').toLowerCase() === arg0_preset.value.toLowerCase()
+                    return (
+                      <button
+                        key={arg0_preset.value}
+                        type="button"
+                        onClick={() =>
+                          on_change_config((arg0_prev) => ({
+                            ...arg0_prev,
+                            capitalConstantColor: arg0_preset.value,
+                          }))
+                        }
+                        className={`px-1.5 py-0.5 text-[9px] rounded-none border transition-colors cursor-pointer flex items-center gap-1 ${is_active
+                            ? 'border-primary font-bold text-foreground bg-muted'
+                            : 'border-border text-muted-foreground hover:bg-muted'
+                          }`}
+                      >
+                        <span className="w-2 h-2 inline-block border border-black/30" style={{ backgroundColor: arg0_preset.value }} />
+                        {arg0_preset.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

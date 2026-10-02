@@ -16,6 +16,7 @@ export interface CountryFeature {
     coordinates: any
     type: 'Polygon' | 'MultiPolygon'
   }
+  id?: string | number
   properties: CountryProperties
   type: 'Feature'
 }

@@ -578,6 +578,7 @@ export interface UseDeckLayersParams {
   drawPoints?: [number, number][]
   drawnPolygonFeature?: CountryFeature | null
   isDrawing?: boolean
+  onFinishDraw?: () => void
   onHoverCustomVectorFeature?: (arg0_feature: CountryFeature | null, arg1_x?: number, arg2_y?: number) => void
   onSelectCustomVectorFeature?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
   onSelectDrawnPolygon?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
@@ -931,7 +932,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           opacity: 1,
           elevationScale: 1,
           coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          pickable: true,
+          pickable: !is_drawing,
           material: {
             ambient: 0.35,
             diffuse: 0.7,
@@ -978,7 +979,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           lineWidthUnits: 'pixels',
           radiusUnits: (is_cartesian) ? 'common' : 'meters',
           coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          pickable: true,
+          pickable: !is_drawing,
           parameters: { depthTest: false },
         })
       )
@@ -1039,7 +1040,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         c.properties.name === hovered_country?.properties.name
     )
 
-    if (countries_mode && hovered_country && !is_hovered_already_selected) {
+    if (!is_drawing && countries_mode && hovered_country && !is_hovered_already_selected) {
       hov_key = (hovered_country.properties.iso_a3 && hovered_country.properties.iso_a3 !== '-99')
         ? hovered_country.properties.iso_a3
         : (hovered_country.properties.adm0_a3 || hovered_country.properties.name || 'hov')
@@ -1070,6 +1071,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       config: options.historicalBordersConfig,
       historicalBordersData: options.historicalBordersData,
       hoveredHistoricalId: options.hoveredHistoricalFeature?.id || options.hoveredHistoricalFeature?.properties?.id,
+      isDrawing: is_drawing,
       onHoverHistoricalFeature: options.onHoverHistoricalFeature,
       onSelectHistoricalFeature: options.onSelectHistoricalFeature,
       projection,
@@ -1136,6 +1138,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           highlightColor: [255, 255, 255, 70],
           coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
           onClick: (arg0_info: any) => {
+            if (is_drawing)
+              return false
             if (arg0_info.object && options.onSelectCustomVectorFeature) {
               options.onSelectCustomVectorFeature(
                 arg0_info.object,
@@ -1147,6 +1151,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             return true
           },
           onHover: (arg0_info: any) => {
+            if (is_drawing)
+              return
             if (options.onHoverCustomVectorFeature) {
               options.onHoverCustomVectorFeature(arg0_info.object || null, arg0_info.x, arg0_info.y)
             }
@@ -1190,17 +1196,19 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         new GeoJsonLayer({
           id: `drawn-polygon-layer-${projection}`,
           data: drawn_data,
-          pickable: true,
+          pickable: !is_drawing,
+          autoHighlight: !is_drawing,
+          highlightColor: [255, 255, 255, 70],
           stroked: true,
           filled: true,
           getFillColor: [200, 40, 40, 45],
           getLineColor: [200, 40, 40, 255],
           getLineWidth: 2,
           lineWidthUnits: 'pixels',
-          autoHighlight: true,
-          highlightColor: [255, 255, 255, 70],
           coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
           onClick: (arg0_info: any) => {
+            if (is_drawing)
+              return false
             if (arg0_info.object && options.onSelectDrawnPolygon) {
               options.onSelectDrawnPolygon(
                 arg0_info.object,
@@ -1213,7 +1221,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           },
           _subLayerProps: {
             'polygons-fill': {
-              pickable: true,
+              pickable: !is_drawing,
               parameters: {
                 cullMode: 'none',
                 depthMask: false,
@@ -1221,7 +1229,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               },
             },
             'polygons-stroke': {
-              pickable: true,
+              pickable: !is_drawing,
               parameters: {
                 depthMask: false,
                 depthTest: false,
@@ -1295,14 +1303,22 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           id: `draw-tool-vertices-${projection}`,
           data: vertex_data,
           getPosition: (arg0_d: any) => arg0_d.position,
-          getRadius: (arg0_d: any) => (arg0_d.idx === 0 ? 8 : 5),
+          getRadius: (arg0_d: any) => (arg0_d.idx === 0 ? (draw_points.length >= 3 ? 10 : 8) : 5),
           radiusUnits: 'pixels',
           getFillColor: (arg0_d: any) => (arg0_d.idx === 0 ? [255, 220, 0, 255] : [200, 40, 40, 255]),
           stroked: true,
           getLineColor: [255, 255, 255, 255],
           getLineWidth: 2,
           lineWidthUnits: 'pixels',
-          pickable: false,
+          pickable: is_drawing,
+          onClick: (arg0_info: any) => {
+            if (is_drawing && draw_points.length >= 3 && arg0_info.object?.idx === 0) {
+              if (options.onFinishDraw)
+                options.onFinishDraw()
+              return true
+            }
+            return false
+          },
           coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
           parameters: {
             depthMask: false,
@@ -1386,16 +1402,20 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             sizeMaxPixels: 130.0,
             coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
             billboard: true,
-            pickable: true,
-            autoHighlight: true,
+            pickable: !is_drawing,
+            autoHighlight: !is_drawing,
             highlightColor: [255, 255, 255, 100],
             background: false,
             onClick: (info: any) => {
+              if (is_drawing)
+                return false
               if (info.object && options.onSelectCity)
                 options.onSelectCity(info.object)
               return true
             },
             onHover: (info: any) => {
+              if (is_drawing)
+                return
               if (options.onHoverCity)
                 options.onHoverCity(info.object || null, info.x, info.y)
             },
@@ -1455,15 +1475,19 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             radiusMaxPixels: 65.0,
             coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
             billboard: true,
-            pickable: true,
-            autoHighlight: true,
+            pickable: !is_drawing,
+            autoHighlight: !is_drawing,
             highlightColor: [255, 255, 255, 100],
             onClick: (info: any) => {
+              if (is_drawing)
+                return false
               if (info.object && options.onSelectCity)
                 options.onSelectCity(info.object)
               return true
             },
             onHover: (info: any) => {
+              if (is_drawing)
+                return
               if (options.onHoverCity)
                 options.onHoverCity(info.object || null, info.x, info.y)
             },
@@ -1655,15 +1679,19 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               billboard: true,
               coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
               characterSet: 'auto',
-              pickable: true,
-              autoHighlight: true,
+              pickable: !is_drawing,
+              autoHighlight: !is_drawing,
               highlightColor: [255, 255, 255, 60],
               onClick: (info: any) => {
+                if (is_drawing)
+                  return false
                 if (info.object && options.onSelectCity)
                   options.onSelectCity(info.object)
                 return true
               },
               onHover: (info: any) => {
+                if (is_drawing)
+                  return
                 if (options.onHoverCity)
                   options.onHoverCity(info.object || null, info.x, info.y)
               },
@@ -1726,6 +1754,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     options.isDrawing,
     options.drawPoints,
     options.cursorLngLat,
+    options.onFinishDraw,
     options.onSelectCustomVectorFeature,
     options.onHoverCustomVectorFeature,
     options.onSelectDrawnPolygon,

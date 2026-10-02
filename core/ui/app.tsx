@@ -388,13 +388,17 @@ export let App: React.FC = function () {
   }, [])
 
   let handle_select_city = useCallback((arg0_city: CityPoint | null) => {
+    //Guard clauses
+    if (is_drawing)
+      return
+
     let city = arg0_city
     if (!city) {
       set_selected_city_key(null)
     } else {
       set_selected_city_key(city.key)
     }
-  }, [])
+  }, [is_drawing])
 
   let handle_app_inspect = useCallback(
     (arg0_data: any) => {
@@ -833,6 +837,10 @@ export let App: React.FC = function () {
   }, [display_raster, active_raster, bounds_mode, percentile_list, absolute_breaks, min_val_override, max_val_override])
 
   let handle_toggle_country = useCallback((arg0_c: CountryFeature) => {
+    //Guard clauses
+    if (is_drawing)
+      return
+
     let c = arg0_c
     set_selected_countries((arg0_prev) => {
       let exists = arg0_prev.some(
@@ -851,7 +859,7 @@ export let App: React.FC = function () {
       }
       return [...arg0_prev, c]
     })
-  }, [])
+  }, [is_drawing])
 
   let handle_clear_countries = useCallback(() => {
     set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
@@ -860,6 +868,10 @@ export let App: React.FC = function () {
 
   let handle_select_country = useCallback(
     (arg0_c: CountryFeature | null) => {
+      //Guard clauses
+      if (is_drawing && arg0_c && !arg0_c.properties?.is_drawn)
+        return
+
       let c = arg0_c
       if (!c) {
         set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
@@ -879,7 +891,7 @@ export let App: React.FC = function () {
         })
       }
     },
-    []
+    [is_drawing]
   )
 
   let custom_vector_features = useMemo<CountryFeature[]>(() => {
@@ -932,6 +944,10 @@ export let App: React.FC = function () {
       if (next) {
         set_draw_points([])
         set_cursor_lng_lat(null)
+        set_selected_city_key(null)
+        set_hovered_country(null)
+        set_selected_countries([])
+        set_inspect_data(null)
       }
       return next
     })

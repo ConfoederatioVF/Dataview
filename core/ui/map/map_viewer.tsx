@@ -577,17 +577,27 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }
 
+      if (is_drawing) {
+        if (deck_ref.current) {
+          let draw_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
+          if (draw_pt && on_set_cursor_lng_lat)
+            on_set_cursor_lng_lat(draw_pt)
+        }
+        set_inspect_data(null)
+        set_hovered_city(null)
+        set_hovered_city_pos(null)
+        set_hovered_historical_feature(null)
+        last_hovered_country_code_ref.current = null
+        if (on_hover_country)
+          on_hover_country(null)
+        return
+      }
+
       if (unprojected_coord) {
         insp = sample_raster_at(unprojected_coord[0], unprojected_coord[1])
         set_inspect_data(insp)
       } else {
         set_inspect_data(null)
-      }
-
-      if (is_drawing && deck_ref.current) {
-        let draw_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
-        if (draw_pt && on_set_cursor_lng_lat)
-          on_set_cursor_lng_lat(draw_pt)
       }
 
       pick_info = deck_ref.current.pickObject({ x, y })
@@ -657,7 +667,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
           if (start_screen) {
             let dist_sq = (click_x - start_screen[0]) ** 2 + (click_y - start_screen[1]) ** 2
-            if (dist_sq <= 18 * 18) {
+            if (dist_sq <= 22 * 22) {
               if (on_finish_draw)
                 on_finish_draw()
               return
@@ -666,6 +676,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
 
         let map_pt = unprojectScreenToLngLat(click_x, click_y, deck_ref.current, projection)
+        if (!map_pt && info.coordinate) {
+          if (projection === 'EqualEarth') {
+            map_pt = invertEqualEarth(info.coordinate[0], info.coordinate[1])
+          } else {
+            map_pt = [info.coordinate[0], info.coordinate[1]]
+          }
+        }
         if (map_pt && on_add_draw_point) {
           on_add_draw_point(map_pt)
         }
@@ -825,9 +842,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       let info = arg0_info
 
       //Guard clauses
-      if (is_interacting_ref.current)
-        return
-      if (!info)
+      if (is_drawing || is_interacting_ref.current || !info)
         return
 
       //Function body
@@ -847,13 +862,17 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
       }
     },
-    []
+    [is_drawing]
   )
 
   handle_map_select_city = useCallback(
     (arg0_city: CityPoint) => {
       //Convert from parameters
       let city = arg0_city
+
+      //Guard clauses
+      if (is_drawing)
+        return
 
       //Function body
       set_nav_history([])
@@ -864,7 +883,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       if (on_select_city)
         on_select_city(city)
     },
-    [on_select_city]
+    [is_drawing, on_select_city]
   )
 
   elevation_spikes_data = useElevationSpikes({
@@ -933,6 +952,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     hoveredCountry: hovered_country,
     hoveredCity: hovered_city,
     onHoverCity: (arg0_city, arg1_x, arg2_y) => {
+      if (is_drawing)
+        return
       set_hovered_city(arg0_city)
       if (arg1_x !== undefined && arg2_y !== undefined)
         set_hovered_city_pos({ x: arg1_x, y: arg2_y })
@@ -950,6 +971,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedHistoricalFeature: selected_historical_feature,
     hoveredHistoricalFeature: hovered_historical_feature,
     onSelectHistoricalFeature: (feat, coord, x, y) => {
+      if (is_drawing)
+        return
       set_nav_history([])
       set_active_panel_type('country')
       if (on_close_city_details)
@@ -968,6 +991,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       }
     },
     onHoverHistoricalFeature: (feat) => {
+      if (is_drawing)
+        return
       set_hovered_historical_feature(feat)
     },
     cursorLngLat: cursor_lng_lat,
@@ -976,10 +1001,15 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     drawPoints: draw_points,
     drawnPolygonFeature: drawn_polygon_feature,
     isDrawing: is_drawing,
+    onFinishDraw: on_finish_draw,
     onHoverCustomVectorFeature: (feat) => {
+      if (is_drawing)
+        return
       set_hovered_historical_feature(feat as unknown as HistoricalBorderFeature | null)
     },
     onSelectCustomVectorFeature: (feat, coord, x, y) => {
+      if (is_drawing)
+        return
       let hist_feat = feat as unknown as HistoricalBorderFeature
       set_nav_history([])
       set_active_panel_type('country')
@@ -996,6 +1026,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         on_select_country(feat)
     },
     onSelectDrawnPolygon: (feat, coord, x, y) => {
+      if (is_drawing)
+        return
       let hist_feat = feat as unknown as HistoricalBorderFeature
       set_nav_history([])
       set_active_panel_type('country')
@@ -1309,7 +1341,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           set_hovered_city_pos({ x, y })
 
         //Guard clauses: do not sample during dragging/panning
-        if (e.buttons !== 0 || is_interacting_ref.current || !show_tooltips)
+        if (e.buttons !== 0 || is_interacting_ref.current || (!show_tooltips && !is_drawing))
           return
 
         pending_pointer_pos_ref.current = { x, y }
@@ -1418,7 +1450,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       />
 
       {/* Unified Floating Tooltip Container (HUD Inspector & Stadestér City) */}
-      {ui_visible && show_tooltips && !selected_city && (
+      {ui_visible && show_tooltips && !selected_city && !is_drawing && (
         <ClickInfoPanel
           activeLayer={active_layer}
           activeVariableSelectors={props.activeVariableSelectors}

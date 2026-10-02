@@ -12,6 +12,7 @@ export interface HistoricalBordersLayerOptions {
     features: HistoricalBorderFeature[]
     type: 'FeatureCollection'
   } | null
+  isDrawing?: boolean
   onHoverHistoricalFeature?: (arg0_feature: HistoricalBorderFeature | null, arg1_x?: number, arg2_y?: number) => void
   onSelectHistoricalFeature?: (arg0_feature: HistoricalBorderFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
   projection: ProjectionType
@@ -77,6 +78,7 @@ export function createHistoricalBordersDeckLayer (
   let fill_opacity: number
   let hovered_feat: any
   let is_cartesian: boolean
+  let is_drawing: boolean = Boolean(options.isDrawing)
   let layer_data: any[]
   let layer_id: string
   let layers_array: GeoJsonLayer[] = []
@@ -129,8 +131,8 @@ export function createHistoricalBordersDeckLayer (
     id: layer_id,
     data: layer_data,
     coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-    pickable: true,
-    autoHighlight: true,
+    pickable: !is_drawing,
+    autoHighlight: !is_drawing,
     highlightColor: [255, 255, 255, 50],
     stroked: true,
     filled: fill_alpha > 0,
@@ -151,6 +153,8 @@ export function createHistoricalBordersDeckLayer (
       getLineWidth: [stroke_width],
     },
     onClick: (arg0_info: any) => {
+      if (is_drawing)
+        return false
       if (arg0_info.object && on_select) {
         let coord: [number, number] | undefined = arg0_info.coordinate
           ? [arg0_info.coordinate[0], arg0_info.coordinate[1]]
@@ -162,6 +166,8 @@ export function createHistoricalBordersDeckLayer (
       return false
     },
     onHover: (arg0_info: any) => {
+      if (is_drawing)
+        return
       if (on_hover) {
         let raw_feat = arg0_info.object?.raw_feature || arg0_info.object || null
         on_hover(raw_feat, arg0_info.x, arg0_info.y)
@@ -209,7 +215,7 @@ export function createHistoricalBordersDeckLayer (
   }
 
   //3. Hovered historical feature outline overlay (single feature stroke outline)
-  if (hovered_id && hovered_id !== selected_id) {
+  if (!is_drawing && hovered_id && hovered_id !== selected_id) {
     hovered_feat = layer_data.find((arg0_d: any) =>
       arg0_d.id === hovered_id ||
       arg0_d.properties?.id === hovered_id ||

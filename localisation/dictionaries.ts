@@ -281,6 +281,8 @@ export interface LocalisationConfig {
       alsoRecordedAs: string
       area: string
       areaKm2: string
+      capitalBadge: string
+      capitalOf: string
       closeCityDetails: string
       currentYear: string
       density: string

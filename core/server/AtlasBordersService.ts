@@ -604,6 +604,45 @@ export class AtlasBordersService {
   }
 
   /**
+   * Returns a set of all active state IDs present in the detailed border slice at a specific date.
+   *
+   * @param {number} arg0_year
+   * @param {number} [arg1_month]
+   * @param {number} [arg2_day]
+   *
+   * @returns {Set<number>}
+   */
+  static getActiveStateIdsAtDate (
+    arg0_year: number,
+    arg1_month?: number,
+    arg2_day?: number
+  ): Set<number> {
+    //Convert from parameters
+    let day = arg2_day
+    let month = arg1_month
+    let year = arg0_year
+
+    //Declare local instance variables
+    let active_ids = new Set<number>()
+    let borders_res = AtlasBordersService.getBordersAtYear(year, {
+      dataset: 'detailed_borders',
+      day,
+      month,
+    })
+
+    //Function body
+    for (let i = 0; i < borders_res.features.length; i++) {
+      let feat = borders_res.features[i]
+      let sid = feat.properties?.state_id
+      if (sid !== undefined && sid !== null)
+        active_ids.add(Number(sid))
+    }
+
+    //Return statement
+    return active_ids
+  }
+
+  /**
    * Slices active historical borders for a given year and dataset.
    * Supports sub-yearly continuous GMT timestamps and capped LRU caching.
    *

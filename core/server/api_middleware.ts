@@ -759,14 +759,18 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
       let min_pop = query.minPop !== undefined ? Math.max(0.01, parseFloat(query.minPop as string)) : 0.01
       let raw_year = parseFloat(query.year as string)
       let year = Number.isNaN(raw_year) ? 1950 : raw_year
+      let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
+      let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
 
       try {
         if (format === 'compact') {
           let compact_payload = StadesterService.getCompactCitiesAtYear(dataset, year, {
             bbox,
             color_mode,
+            day,
             max_cities,
             min_pop,
+            month,
           })
           res.statusCode = 200
           res.setHeader('Content-Type', 'application/json')
@@ -777,8 +781,10 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
         let cities = StadesterService.getCitiesAtYear(dataset, year, {
           bbox,
           color_mode,
+          day,
           max_cities,
           min_pop,
+          month,
         })
 
         res.statusCode = 200
@@ -824,10 +830,12 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
         return
       }
 
+      let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
+      let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
       let year = query.year !== undefined ? (typeof query.year === 'string' && !isNaN(Number(query.year)) ? parseFloat(query.year) : query.year as string) : undefined
 
       try {
-        let city = StadesterService.getCityByKey(dataset, city_key, year)
+        let city = StadesterService.getCityByKey(dataset, city_key, year, month, day)
         if (!city) {
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json')

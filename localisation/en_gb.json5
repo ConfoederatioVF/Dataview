@@ -288,6 +288,8 @@
       alsoRecordedAs: "Also recorded as:",
       area: "Area",
       areaKm2: "Area (km²)",
+      capitalBadge: "Capital",
+      capitalOf: "Capital of:",
       closeCityDetails: "Close city details",
       currentYear: "Current Year",
       density: "Density",

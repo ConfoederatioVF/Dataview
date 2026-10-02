@@ -3,7 +3,7 @@ import ReactECharts from 'echarts-for-react'
 import { CityFullRecord, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { UfDate } from '@framework/utils/uf_date'
-import { resolveHistoricalCityName } from '@framework/stadester/city_metadata_framework.ts'
+import { isCityCapitalAtYear, resolveHistoricalCityName } from '@framework/stadester/city_metadata_framework.ts'
 import { useLocalisation } from '@localisation'
 
 export interface CityDetailsPanelProps {
@@ -73,11 +73,11 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   let format: ReturnType<typeof useLocalisation>['format']
   let formatted_current_year: string
   let full_record: CityFullRecord | null
+  let is_capital: boolean
   let localisation: ReturnType<typeof useLocalisation>
   let other_names_list: string[]
   let panel_style: React.CSSProperties
-  let peak_pop: number
-  let peak_year: number | null
+  let polity_name: string | undefined
   let pop_at_year: number
   let set_active_metric_tab: React.Dispatch<React.SetStateAction<'population' | 'area' | 'density'>>
   let t: ReturnType<typeof useLocalisation>['t']
@@ -99,6 +99,18 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
           : city.name
       )
     : ''
+
+  is_capital = Boolean(
+    (city as any)?.is_capital ||
+    (city as any)?.isCapital ||
+    ((city as any)?.capital_records && isCityCapitalAtYear(city as any, current_year)) ||
+    ((city as any)?.capital && isCityCapitalAtYear(city as any, current_year))
+  )
+
+  polity_name =
+    (city as any)?.capitalOf ||
+    (city as any)?.capital_state_name ||
+    (city as any)?.capitalStateName
 
   //Extract population for current year (safely handle primitive vs dictionary)
   pop_at_year = 0
@@ -195,21 +207,6 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   }
   if (city)
     other_names_list = Array.from(new Set(other_names_list)).filter((arg0_n) => arg0_n !== city.name)
-
-  //Extract historical peak
-  peak_pop = 0
-  peak_year = null
-  if (full_record?.population && typeof full_record.population === 'object') {
-    let p_keys = Object.keys(full_record.population)
-    for (let i = 0; i < p_keys.length; i++) {
-      let yr = Number(p_keys[i])
-      let p_val = full_record.population[p_keys[i]]
-      if (typeof p_val === 'number' && p_val >= 0.01 && p_val > peak_pop) {
-        peak_pop = p_val
-        peak_year = yr
-      }
-    }
-  }
 
   //Assemble timeseries for selected tab
   timeseries_data = useMemo(() => {
@@ -447,11 +444,16 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       {!embedded && (
         <div className="flex items-start justify-between pb-2 border-b border-border/60">
           <div className="min-w-0 pr-2">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Icon name="location_city" className="text-primary text-base shrink-0" />
               <span className="font-bold text-sm truncate text-white" title={city.name}>
                 {display_city_name}
               </span>
+              {is_capital && (
+                <span className="text-xs font-normal text-muted-foreground">
+                  ({t.mapPanels.cityDetails.capitalBadge || 'Capital'})
+                </span>
+              )}
             </div>
             <div className="text-[11px] text-muted-foreground truncate mt-0.5">
               {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
@@ -470,9 +472,24 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       )}
 
       {embedded && (
-        <div className="pb-1 text-[11px] text-muted-foreground border-b border-border/60">
-          {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
-          {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+        <div className="pb-1 text-[11px] text-muted-foreground border-b border-border/60 flex items-center justify-between">
+          <div>
+            {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
+            {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+          </div>
+          {is_capital && (
+            <span className="text-xs font-normal text-muted-foreground">
+              ({t.mapPanels.cityDetails.capitalBadge || 'Capital'})
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Capital of Polity */}
+      {is_capital && polity_name && (
+        <div className="py-1 text-[11px] text-muted-foreground/90 border-b border-border/30 flex items-center gap-1.5">
+          <span className="text-muted-foreground font-semibold">{t.mapPanels.cityDetails.capitalOf || 'Capital of:'}</span>
+          <span className="text-white font-medium">{polity_name}</span>
         </div>
       )}
 
@@ -525,16 +542,6 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
           <div className="text-[9px] text-muted-foreground/70 mt-0.2">{t.mapPanels.cityDetails.peoplePerKm2}</div>
         </div>
       </div>
-
-      {/* Historical Peak & Records */}
-      {peak_pop >= 0.01 && peak_year !== null && (
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground px-1 pb-1">
-          <span>{t.mapPanels.cityDetails.historicalPeak}</span>
-          <span className="font-mono text-white">
-            <b>{Math.round(peak_pop).toLocaleString('de-DE')}</b> {t.mapPanels.cityDetails.historicalPeakIn} {UfDate.formatYear(peak_year)}
-          </span>
-        </div>
-      )}
 
       {/* Metric Selector Tabs for ECharts Curve - Red Interactive Theme */}
       <div className="flex items-center justify-between border-b border-border/60 pb-1 mt-1">

@@ -114,7 +114,12 @@ export interface CityPoint {
   historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id: number | string
   isCapital?: boolean
+  is_capital?: boolean
   capitalColor?: [number, number, number, number] | string
+  capital_color?: string
+  capitalOf?: string
+  capital_state_name?: string
+  capital_state_id?: number | string
   key: string
   lat?: number
   lon?: number
@@ -131,6 +136,10 @@ export interface CityFullRecord {
   area?: Record<string, number>
   capital?: Record<string, number | string>
   capitalColor?: [number, number, number, number] | string
+  capital_color?: string
+  capitalOf?: string
+  capital_state_name?: string
+  capital_state_id?: number | string
   centre_density?: Record<string, number>
   clark_region?: string
   colour?: [number, number, number]
@@ -141,6 +150,7 @@ export interface CityFullRecord {
   historical_names?: Array<{ date: string; name: string; year_frac: number }>
   id?: number | string
   isCapital?: boolean
+  is_capital?: boolean
   key: string
   name: string
   name_coords?: Record<string, [number, number]>

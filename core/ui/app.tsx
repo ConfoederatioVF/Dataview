@@ -345,7 +345,7 @@ export let App: React.FC = function () {
     isPlaying: is_playing,
     performantMode: performant_mode,
     selectedCityKey: selected_city_key,
-    year: Math.round(timeline_year),
+    year: timeline_year,
   })
   let stadester_cities: CityPoint[] = stadester_result.cities
   let selected_city_record: CityFullRecord | null = stadester_result.selectedCity

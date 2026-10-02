@@ -288,6 +288,8 @@
       alsoRecordedAs: "Auch verzeichnet als:",
       area: "Fläche",
       areaKm2: "Fläche (km²)",
+      capitalBadge: "Hauptstadt",
+      capitalOf: "Hauptstadt von:",
       closeCityDetails: "Siedlungsdetails schließen",
       currentYear: "Aktuelles Jahr",
       density: "Dichte",

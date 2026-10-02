@@ -288,6 +288,8 @@
       alsoRecordedAs: "Également enregistré sous :",
       area: "Superficie",
       areaKm2: "Superficie (km²)",
+      capitalBadge: "Capitale",
+      capitalOf: "Capitale de :",
       closeCityDetails: "Fermer les détails de la colonie",
       currentYear: "Année actuelle",
       density: "Densité",

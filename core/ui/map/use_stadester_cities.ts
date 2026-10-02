@@ -53,7 +53,7 @@ export async function fetchStadesterCitiesAsync (
 ): Promise<CityPoint[]> {
   //Convert from parameters
   let dataset = arg0_dataset || 'stadester_1.1'
-  let year = Math.round(arg1_year)
+  let year = arg1_year
   let min_pop = (arg2_min_pop !== undefined) ? Math.max(0.01, arg2_min_pop) : 0.01
   let max_cities = (arg3_max_cities !== undefined) ? arg3_max_cities : 4000
   let color_mode = arg4_color_mode || 'growth'
@@ -265,14 +265,19 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     if (!key)
       return null
 
-    let full_cache_key = `${dataset}:${key}:${year}`
+    let day = options.day
+    let month = options.month
+    let full_cache_key = `${dataset}:${key}:${year}:${month ?? ''}:${day ?? ''}`
     if (full_city_cache_ref.current.has(full_cache_key))
       return full_city_cache_ref.current.get(full_cache_key)!
 
     try {
-      let resp = await fetch(
-        `/api/stadester/city?dataset=${encodeURIComponent(dataset)}&key=${encodeURIComponent(key)}&year=${encodeURIComponent(String(year))}`
-      )
+      let url = `/api/stadester/city?dataset=${encodeURIComponent(dataset)}&key=${encodeURIComponent(key)}&year=${encodeURIComponent(String(year))}`
+      if (month !== undefined)
+        url += `&month=${encodeURIComponent(String(month))}`
+      if (day !== undefined)
+        url += `&day=${encodeURIComponent(String(day))}`
+      let resp = await fetch(url)
       if (!resp.ok)
         return null
       let data: CityFullRecord = await resp.json()
@@ -287,7 +292,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
       console.error('[useStadesterCities] Failed to fetch full city record:', arg0_e)
       return null
     }
-  }, [dataset, year])
+  }, [dataset, year, options.month, options.day])
 
   useEffect(() => {
     if (!effective_city_key) {

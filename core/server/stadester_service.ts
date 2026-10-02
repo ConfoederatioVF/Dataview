@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { AtlasBordersService } from './AtlasBordersService.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
 import { getPrimaryCityName, isCorruptedCityName, isBuggedCityName } from '../framework/stadester/city_name_framework.ts'
 import {
@@ -7,6 +8,7 @@ import {
   getCityActiveCapitalRecord,
   isCityCapitalAtYear,
   normalizeMetadataEntry,
+  parseYearMonthDay,
   resolveHistoricalCityName,
   type CapitalRecord,
   type CityMetadataEntry,
@@ -81,10 +83,13 @@ export interface CityIndexEntry {
 }
 
 export interface StadesterQueryOptions {
+  active_state_ids?: Set<number>
   bbox?: [number, number, number, number] // [west, south, east, north]
   color_mode?: 'growth' | 'population' | 'region' | 'continent'
+  day?: number
   max_cities?: number
   min_pop?: number
+  month?: number
 }
 
 export interface CompactCitiesPayload {
@@ -151,6 +156,16 @@ export let StadesterService = {
           if (Array.isArray(list)) {
             for (let i = 0; i < list.length; i++) {
               let s = list[i]
+              if (s.start_date) {
+                s._start_frac = parseYearMonthDay(s.start_date).year_frac
+              } else {
+                s._start_frac = s.start_year !== undefined ? s.start_year : -99999
+              }
+              if (s.stop_date) {
+                s._stop_frac = parseYearMonthDay(s.stop_date).year_frac
+              } else {
+                s._stop_frac = s.stop_year !== undefined ? s.stop_year : 99999
+              }
               StadesterService.states_by_id.set(s.state_id, s)
               StadesterService.states_by_id.set(String(s.state_id), s)
             }
@@ -170,14 +185,17 @@ export let StadesterService = {
    *
    * @param {any} arg0_city
    * @param {number | string} [arg1_year]
+   * @param {Set<number>} [arg2_active_state_ids]
    *
    * @returns {boolean}
    */
   isCityCapitalAtYear: function (
     arg0_city: any,
-    arg1_year?: number | string
+    arg1_year?: number | string,
+    arg2_active_state_ids?: Set<number>
   ): boolean {
     //Convert from parameters
+    let active_state_ids = arg2_active_state_ids
     let city = arg0_city
     let year = arg1_year
 
@@ -185,14 +203,28 @@ export let StadesterService = {
     if (!city)
       return false
 
+    //Declare local instance variables
+    if (!active_state_ids && (year !== undefined && year !== null)) {
+      let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
+      let num_mo = typeof year === 'string' ? parseYearMonthDay(year).month : undefined
+      let num_day = typeof year === 'string' ? parseYearMonthDay(year).day : undefined
+      active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
+    }
+
     //Return statement
     return isCityCapitalAtYear(city, year, (arg0_sid, arg0_y_frac) => {
+      let sid_num = Number(arg0_sid)
+      if (active_state_ids && active_state_ids.size > 0) {
+        if (!active_state_ids.has(sid_num))
+          return false
+      }
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
         return false
-      let start_bound = state.start_year !== undefined ? state.start_year : -99999
-      let stop_bound = state.stop_year !== undefined ? state.stop_year : 99999
-      return arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound
+      let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
+      let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
+      return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+        (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
     })
   },
 
@@ -201,14 +233,17 @@ export let StadesterService = {
    *
    * @param {any} arg0_city
    * @param {number | string} [arg1_year]
+   * @param {Set<number>} [arg2_active_state_ids]
    *
    * @returns {string | null} Hex fill colour or null
    */
   getCityCapitalColorAtYear: function (
     arg0_city: any,
-    arg1_year?: number | string
+    arg1_year?: number | string,
+    arg2_active_state_ids?: Set<number>
   ): string | null {
     //Convert from parameters
+    let active_state_ids = arg2_active_state_ids
     let city = arg0_city
     let year = arg1_year
 
@@ -217,13 +252,26 @@ export let StadesterService = {
       return null
 
     //Declare local instance variables
+    if (!active_state_ids && (year !== undefined && year !== null)) {
+      let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
+      let num_mo = typeof year === 'string' ? parseYearMonthDay(year).month : undefined
+      let num_day = typeof year === 'string' ? parseYearMonthDay(year).day : undefined
+      active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
+    }
+
     let cap_rec = getCityActiveCapitalRecord(city, year, (arg0_sid, arg0_y_frac) => {
+      let sid_num = Number(arg0_sid)
+      if (active_state_ids && active_state_ids.size > 0) {
+        if (!active_state_ids.has(sid_num))
+          return false
+      }
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
         return false
-      let start_bound = state.start_year !== undefined ? state.start_year : -99999
-      let stop_bound = state.stop_year !== undefined ? state.stop_year : 99999
-      return arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound
+      let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
+      let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
+      return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+        (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
     })
 
     if (!cap_rec || !cap_rec.state_id)
@@ -307,18 +355,36 @@ export let StadesterService = {
 
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
-        best_city.historical_names = meta.historical_names
-        if (meta.capital_records && meta.capital_records.length > 0) {
-          best_city.capital = meta.capital as any
-          best_city.capital_records = meta.capital_records
+        if (meta.historical_names && meta.historical_names.length > 0 && (!best_city.historical_names || best_city.historical_names.length === 0)) {
+          best_city.historical_names = meta.historical_names
         }
-        if (meta.name) {
-          best_city.metadata_name = meta.name
-          best_city.name = meta.name
+        if (meta.capital_records && meta.capital_records.length > 0) {
+          if (!best_city.capital) {
+            best_city.capital = meta.capital as any
+            best_city.capital_records = meta.capital_records
+          } else {
+            let existing_cap = { ...(best_city.capital || {}) }
+            let raw_meta_cap = meta.capital || {}
+            let all_meta_keys = Object.keys(raw_meta_cap)
+            for (let m = 0; m < all_meta_keys.length; m++) {
+              let d_key = all_meta_keys[m]
+              if (existing_cap[d_key] === undefined)
+                existing_cap[d_key] = raw_meta_cap[d_key]
+            }
+            best_city.capital = existing_cap
+            best_city.capital_records = Object.keys(existing_cap).map((arg0_d) => {
+              let p = parseYearMonthDay(arg0_d)
+              return {
+                date: arg0_d,
+                state_id: (existing_cap[arg0_d] !== undefined && existing_cap[arg0_d] !== null) ? Number(existing_cap[arg0_d]) : null,
+                year_frac: p.year_frac,
+              }
+            }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+          }
         }
 
         //Also associate related agglomeration or pre/post-1975 counterpart cities in local grid cells
-        let base_name = (best_city.name || meta.name || '').toLowerCase()
+        let base_name = (best_city.name || '').toLowerCase()
         let center_lat = Math.floor(target_lat)
         let center_lng = Math.floor(target_lng)
         let meta_name_lower = (meta.name || '').toLowerCase()
@@ -334,14 +400,10 @@ export let StadesterService = {
 
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
-                  let other_key_lower = (other.key || '').toLowerCase()
                   let other_name_lower = (other.name || '').toLowerCase()
-                  let other_names_list = Array.isArray(other.other_names)
-                    ? other.other_names
-                    : (typeof other.other_names === 'string' ? [other.other_names] : [])
                   let is_name_match =
-                    (base_name && (other_name_lower.includes(base_name) || other_key_lower.includes(base_name) || other_names_list.some((arg0_o: string) => arg0_o.toLowerCase().includes(base_name)))) ||
-                    (meta_name_lower && (other_name_lower.includes(meta_name_lower) || other_key_lower.includes(meta_name_lower) || other_names_list.some((arg0_o: string) => arg0_o.toLowerCase().includes(meta_name_lower))))
+                    (base_name && other_name_lower === base_name) ||
+                    (meta_name_lower && other_name_lower === meta_name_lower)
                   let is_era_counterpart =
                     ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                     (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
@@ -351,9 +413,29 @@ export let StadesterService = {
                   if (is_name_match || is_era_counterpart) {
                     if (!other.historical_names || other.historical_names.length === 0)
                       other.historical_names = meta.historical_names
-                    if (meta.name && !other.metadata_name) {
-                      other.metadata_name = meta.name
-                      other.name = meta.name
+                    if (meta.capital_records && meta.capital_records.length > 0) {
+                      if (!other.capital) {
+                        other.capital = meta.capital as any
+                        other.capital_records = meta.capital_records
+                      } else {
+                        let existing_other_cap = { ...(other.capital || {}) }
+                        let raw_meta_cap = meta.capital || {}
+                        let all_m_keys = Object.keys(raw_meta_cap)
+                        for (let m = 0; m < all_m_keys.length; m++) {
+                          let d_key = all_m_keys[m]
+                          if (existing_other_cap[d_key] === undefined)
+                            existing_other_cap[d_key] = raw_meta_cap[d_key]
+                        }
+                        other.capital = existing_other_cap
+                        other.capital_records = Object.keys(existing_other_cap).map((arg0_d) => {
+                          let p = parseYearMonthDay(arg0_d)
+                          return {
+                            date: arg0_d,
+                            state_id: (existing_other_cap[arg0_d] !== undefined && existing_other_cap[arg0_d] !== null) ? Number(existing_other_cap[arg0_d]) : null,
+                            year_frac: p.year_frac,
+                          }
+                        }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+                      }
                     }
                   }
                 }
@@ -669,6 +751,11 @@ export let StadesterService = {
     let target_year = arg1_year !== undefined ? arg1_year : 1950
 
     //Declare local instance variables
+    let active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
+      Math.floor(target_year),
+      options.month,
+      options.day
+    )
     let all_city_keys: string[]
     let indexed = StadesterService.loadDataset(dataset_name)
     let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
@@ -822,13 +909,33 @@ export let StadesterService = {
         }
       }
 
-      let cap_color_val = StadesterService.getCityCapitalColorAtYear(city, target_year)
-      let is_capital_val = Boolean(cap_color_val !== null || StadesterService.isCityCapitalAtYear(city, target_year))
+      let cap_rec = getCityActiveCapitalRecord(city, target_year, (arg0_sid, arg0_y_frac) => {
+        let sid_num = Number(arg0_sid)
+        if (active_state_ids && active_state_ids.size > 0) {
+          if (!active_state_ids.has(sid_num))
+            return false
+        }
+        let state = StadesterService.getStateById(arg0_sid)
+        if (!state)
+          return false
+        let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
+        let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
+        return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+          (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+      })
+
+      let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
+      let cap_color_val = cap_state?.fill_color || null
+      let is_capital_val = Boolean(cap_rec && cap_state)
+      let polity_name = cap_state?.name || undefined
       let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
 
       result_cities.push({
         area: area_val,
         capital_color: cap_color_val || undefined,
+        capital_state_id: cap_rec?.state_id || undefined,
+        capital_state_name: polity_name,
+        capitalOf: polity_name,
         colour: city.colour,
         coords: city.coords,
         country: city.country,
@@ -837,6 +944,7 @@ export let StadesterService = {
         historical_names: city.historical_names,
         id: city.id,
         is_capital: is_capital_val,
+        isCapital: is_capital_val,
         key: city.key,
         metadata_name: city.metadata_name,
         name: resolved_name,
@@ -863,17 +971,23 @@ export let StadesterService = {
    * @param {string} [arg0_dataset_name='stadester_1.1']
    * @param {string} [arg1_city_key]
    * @param {number | string} [arg2_year]
+   * @param {number} [arg3_month]
+   * @param {number} [arg4_day]
    *
-   * @returns {CityIndexEntry | null}
+   * @returns {any | null}
    */
   getCityByKey: function (
     arg0_dataset_name?: string,
     arg1_city_key?: string,
-    arg2_year?: number | string
-  ): CityIndexEntry | null {
+    arg2_year?: number | string,
+    arg3_month?: number,
+    arg4_day?: number
+  ): any | null {
     //Convert from parameters
     let city_key = arg1_city_key || ''
     let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+    let day = arg4_day
+    let month = arg3_month
     let year = arg2_year
 
     //Declare local instance variables
@@ -887,19 +1001,55 @@ export let StadesterService = {
     if (isBuggedCityName(city_key, bugged_set))
       return null
 
+    let enrichCity = function (arg0_entry: CityIndexEntry): any {
+      let entry = arg0_entry
+      if (year === undefined || year === null)
+        return entry
+
+      let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
+      let num_mo = month !== undefined ? month : (typeof year === 'string' ? parseYearMonthDay(year).month : undefined)
+      let num_day = day !== undefined ? day : (typeof year === 'string' ? parseYearMonthDay(year).day : undefined)
+      let active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
+
+      let cap_rec = getCityActiveCapitalRecord(entry, year, (arg0_sid, arg0_y_frac) => {
+        let sid_num = Number(arg0_sid)
+        if (active_state_ids && active_state_ids.size > 0) {
+          if (!active_state_ids.has(sid_num))
+            return false
+        }
+        let state = StadesterService.getStateById(arg0_sid)
+        if (!state)
+          return false
+        let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
+        let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
+        return (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
+          (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
+      })
+
+      let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
+      let is_capital = Boolean(cap_rec && cap_state)
+      let polity_name = cap_state?.name || undefined
+
+      return {
+        ...entry,
+        capital_color: cap_state?.fill_color || undefined,
+        capital_state_id: cap_rec?.state_id || undefined,
+        capital_state_name: polity_name,
+        capitalColor: cap_state?.fill_color || undefined,
+        capitalOf: polity_name,
+        is_capital: is_capital,
+        isCapital: is_capital,
+        name: StadesterService.resolveCityNameAtYear(entry, year),
+      }
+    }
+
     //Check direct key match
     let found = indexed[city_key] || indexed['stadester-' + city_key] || indexed['ghsl-' + city_key] || indexed['oxford-' + city_key]
     if (found) {
       if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
         return null
 
-      if (year !== undefined && year !== null) {
-        return {
-          ...found,
-          name: StadesterService.resolveCityNameAtYear(found, year),
-        }
-      }
-      return found
+      return enrichCity(found)
     }
 
     //Fallback linear search by key, id or name
@@ -910,13 +1060,7 @@ export let StadesterService = {
         if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
           return null
 
-        if (year !== undefined && year !== null) {
-          return {
-            ...entry,
-            name: StadesterService.resolveCityNameAtYear(entry, year),
-          }
-        }
-        return entry
+        return enrichCity(entry)
       }
     }
 

@@ -87,6 +87,17 @@ export let normaliseGeometry = function (arg0_geom: any): any | null {
   if (!geom)
     return null
 
+  //Declare local instance variables
+  let closeRing = function (arg0_ring: any[]): any[] {
+    if (!Array.isArray(arg0_ring) || arg0_ring.length === 0)
+      return arg0_ring
+    let first = arg0_ring[0]
+    let last = arg0_ring[arg0_ring.length - 1]
+    if (first && last && (first[0] !== last[0] || first[1] !== last[1]))
+      return [...arg0_ring, [first[0], first[1]]]
+    return arg0_ring
+  }
+
   //Function body
   if (geom.feature && geom.feature.geometry)
     geom = geom.feature.geometry
@@ -98,6 +109,20 @@ export let normaliseGeometry = function (arg0_geom: any): any | null {
 
   if (geom.type !== 'Polygon' && geom.type !== 'MultiPolygon')
     return null
+
+  if (geom.type === 'Polygon') {
+    return {
+      coordinates: geom.coordinates.map((arg0_r: any[]) => closeRing(arg0_r)),
+      type: 'Polygon',
+    }
+  } else if (geom.type === 'MultiPolygon') {
+    return {
+      coordinates: geom.coordinates.map((arg0_poly: any[][]) =>
+        arg0_poly.map((arg0_r: any[]) => closeRing(arg0_r))
+      ),
+      type: 'MultiPolygon',
+    }
+  }
 
   //Return statement
   return {

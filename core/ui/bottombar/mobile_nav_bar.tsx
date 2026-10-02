@@ -50,7 +50,7 @@ export function MobileNavBar (arg0_props: MobileNavBarProps) {
       label: t.mobile.timeline,
     },
     {
-      icon: 'insights',
+      icon: 'show_chart',
       id: 'analytics',
       label: t.mobile.analytics,
     },

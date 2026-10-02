@@ -1147,7 +1147,25 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               options.onHoverCustomVectorFeature(arg0_info.object || null, arg0_info.x, arg0_info.y)
             }
           },
+          _subLayerProps: {
+            'polygons-fill': {
+              pickable: true,
+              parameters: {
+                cullMode: 'none',
+                depthMask: false,
+                depthTest: false,
+              },
+            },
+            'polygons-stroke': {
+              pickable: true,
+              parameters: {
+                depthMask: false,
+                depthTest: false,
+              },
+            },
+          },
           parameters: {
+            cullMode: 'none',
             depthMask: false,
             depthTest: false,
           },
@@ -1189,7 +1207,25 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             }
             return true
           },
+          _subLayerProps: {
+            'polygons-fill': {
+              pickable: true,
+              parameters: {
+                cullMode: 'none',
+                depthMask: false,
+                depthTest: false,
+              },
+            },
+            'polygons-stroke': {
+              pickable: true,
+              parameters: {
+                depthMask: false,
+                depthTest: false,
+              },
+            },
+          },
           parameters: {
+            cullMode: 'none',
             depthMask: false,
             depthTest: false,
           },

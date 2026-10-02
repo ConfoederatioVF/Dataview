@@ -608,11 +608,23 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           ))
         ) {
           set_hovered_historical_feature(pick_info.object || null)
+        } else if (insp && custom_vector_visible && custom_vector_features.length > 0) {
+          let hover_custom = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
+          set_hovered_historical_feature(hover_custom as unknown as HistoricalBorderFeature || null)
+        } else if (insp && drawn_polygon_feature && isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
+          set_hovered_historical_feature(drawn_polygon_feature as unknown as HistoricalBorderFeature)
         } else {
           set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
         }
       } else {
-        set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
+        if (insp && custom_vector_visible && custom_vector_features.length > 0) {
+          let hover_custom = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
+          set_hovered_historical_feature(hover_custom as unknown as HistoricalBorderFeature || null)
+        } else if (insp && drawn_polygon_feature && isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
+          set_hovered_historical_feature(drawn_polygon_feature as unknown as HistoricalBorderFeature)
+        } else {
+          set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
+        }
       }
 
       if ((countries_mode || is_historical_borders_active) && on_hover_country) {
@@ -626,7 +638,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }
     },
-    [countries_mode, effective_country_features, is_drawing, is_historical_borders_active, on_hover_country, on_set_cursor_lng_lat, projection, sample_raster_at]
+    [countries_mode, custom_vector_features, custom_vector_visible, drawn_polygon_feature, effective_country_features, is_drawing, is_historical_borders_active, on_hover_country, on_set_cursor_lng_lat, projection, sample_raster_at]
   )
 
   sample_touch_at = sample_pointer_at
@@ -731,8 +743,52 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       if (on_inspect)
         on_inspect(insp)
 
-      if (insp && country_features.length > 0) {
-        let local_country = findCountryAtLngLat(insp.lng, insp.lat, country_features)
+      if (insp && custom_vector_visible && custom_vector_features.length > 0) {
+        let custom_feat = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
+        if (custom_feat) {
+          let hist_feat = custom_feat as unknown as HistoricalBorderFeature
+          set_nav_history([])
+          set_active_panel_type('country')
+          if (on_close_city_details)
+            on_close_city_details()
+          set_selected_historical_feature(hist_feat)
+          set_selected_historical_anchor_coord([insp.lng, insp.lat])
+          if (info.x !== undefined && info.y !== undefined) {
+            set_selected_historical_anchor_screen({ x: info.x, y: info.y })
+          }
+          if (on_select_country) {
+            on_select_country(custom_feat)
+          } else if (on_toggle_country) {
+            on_toggle_country(custom_feat)
+          }
+          return
+        }
+      }
+
+      if (insp && drawn_polygon_feature) {
+        if (isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
+          let hist_feat = drawn_polygon_feature as unknown as HistoricalBorderFeature
+          set_nav_history([])
+          set_active_panel_type('country')
+          if (on_close_city_details)
+            on_close_city_details()
+          set_selected_historical_feature(hist_feat)
+          set_selected_historical_anchor_coord([insp.lng, insp.lat])
+          if (info.x !== undefined && info.y !== undefined) {
+            set_selected_historical_anchor_screen({ x: info.x, y: info.y })
+          }
+          if (on_select_country) {
+            on_select_country(drawn_polygon_feature)
+          } else if (on_toggle_country) {
+            on_toggle_country(drawn_polygon_feature)
+          }
+          return
+        }
+      }
+
+      let target_countries = effective_country_features.length > 0 ? effective_country_features : country_features
+      if (insp && target_countries.length > 0) {
+        let local_country = findCountryAtLngLat(insp.lng, insp.lat, target_countries)
         if (local_country) {
           if (on_toggle_country) {
             on_toggle_country(local_country)
@@ -742,7 +798,25 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }
     },
-    [sample_raster_at, on_inspect, country_features, on_toggle_country, on_select_country, set_inspect_data, set_cursor_pos]
+    [
+      country_features,
+      custom_vector_features,
+      custom_vector_visible,
+      draw_points,
+      drawn_polygon_feature,
+      effective_country_features,
+      is_drawing,
+      on_add_draw_point,
+      on_close_city_details,
+      on_finish_draw,
+      on_inspect,
+      on_select_country,
+      on_toggle_country,
+      projection,
+      sample_raster_at,
+      set_cursor_pos,
+      set_inspect_data,
+    ]
   )
 
   handle_hover = useCallback(

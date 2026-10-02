@@ -905,6 +905,11 @@ export let App: React.FC = function () {
             let dataset = parseCustomVectorText(text, file.name)
             set_custom_vector_dataset(dataset)
             set_custom_vector_visible(true)
+            if (dataset.targetYear !== undefined) {
+              set_timeline_year(dataset.targetYear)
+            } else if (dataset.maxYear !== undefined) {
+              set_timeline_year(dataset.maxYear)
+            }
           } catch (arg0_err) {
             console.error('[CustomVector] Failed to parse file:', arg0_err)
           }

@@ -1099,20 +1099,24 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         new GeoJsonLayer({
           id: `custom-vector-layer-${projection}`,
           data: custom_vector_data,
-          pickable: true,
+          pickable: !is_drawing,
           stroked: true,
           filled: true,
           getFillColor: (arg0_d: any) => {
+            let alpha = 110
+            if (arg0_d.properties?.symbol?.polygonOpacity !== undefined) {
+              alpha = Math.round(arg0_d.properties.symbol.polygonOpacity * 255)
+            }
             if (arg0_d.properties?.color) {
               let c = arg0_d.properties.color
               if (Array.isArray(c) && c.length >= 3)
-                return [c[0], c[1], c[2], 40]
+                return [c[0], c[1], c[2], alpha]
               if (typeof c === 'string' && c.startsWith('#')) {
                 let rgb = hexToRgb(c)
-                return [rgb[0], rgb[1], rgb[2], 40]
+                return [rgb[0], rgb[1], rgb[2], alpha]
               }
             }
-            return [56, 189, 248, 35]
+            return [56, 189, 248, alpha]
           },
           getLineColor: (arg0_d: any) => {
             if (arg0_d.properties?.color) {
@@ -1149,7 +1153,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           },
           _subLayerProps: {
             'polygons-fill': {
-              pickable: true,
+              pickable: !is_drawing,
               parameters: {
                 cullMode: 'none',
                 depthMask: false,
@@ -1157,7 +1161,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               },
             },
             'polygons-stroke': {
-              pickable: true,
+              pickable: !is_drawing,
               parameters: {
                 depthMask: false,
                 depthTest: false,

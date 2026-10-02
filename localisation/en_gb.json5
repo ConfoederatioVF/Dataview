@@ -48,7 +48,7 @@
       binning: "Resolution & Binning",
       manualUpload: "Manual File Upload",
       dataLayers: "Data Layers",
-      customVector: "Custom Vector Boundaries",
+      customVector: "Custom Borders",
     },
     layers: {
       searchPlaceholder: "Search data layers...",
@@ -131,7 +131,7 @@
       encodingFormat: "Encoding Format",
     },
     vectorUpload: {
-      title: "Custom Vector Boundaries (.naissance / .geojson)",
+      title: "Custom Borders",
       description: "Upload custom vector boundary files. GeoJSON files contain static boundaries, whilst .naissance files represent boundary geometries and attributes changing over time.",
       selectFile: "Select Vector File (.naissance, .geojson)",
       placeholder: "Upload .naissance or .geojson...",

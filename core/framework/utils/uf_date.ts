@@ -248,6 +248,18 @@ export let UfDate = {
       date_obj.hour %= 24
     }
 
+    while (date_obj.month > 12) {
+      date_obj.month -= 12
+      date_obj.year++
+    }
+    while (date_obj.month < 1) {
+      date_obj.month += 12
+      date_obj.year--
+    }
+
+    if (Math.abs(date_obj.year) > 50000)
+      return date_obj.year
+
     if (date_obj.year > 0) {
       for (let i = 0; i < date_obj.year; i++)
         minutes += (UfDate.isLeapYear(i) ? 366 : 365)*24*60

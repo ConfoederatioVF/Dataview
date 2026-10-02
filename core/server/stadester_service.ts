@@ -60,7 +60,7 @@ export function getBuggedCitiesSet (): Set<string> {
 
 export interface CityIndexEntry {
   area?: Record<string, number>
-  capital?: Record<string, number | string>
+  capital?: Record<string, number | string | null>
   capital_records?: CapitalRecord[]
   colour?: [number, number, number]
   coords: [number, number]
@@ -108,6 +108,9 @@ export interface CompactCitiesPayload {
 export interface CityRenderPoint {
   area?: number
   capital_color?: string
+  capital_state_id?: number | string
+  capital_state_name?: string
+  capitalOf?: string
   colour?: [number, number, number]
   coords: [number, number]
   country?: string
@@ -116,6 +119,7 @@ export interface CityRenderPoint {
   historical_names?: HistoricalNameRecord[]
   id: number | string
   is_capital?: boolean
+  isCapital?: boolean
   key: string
   metadata_name?: string
   name: string
@@ -427,7 +431,7 @@ export let StadesterService = {
             best_city.capital = meta.capital as any
             best_city.capital_records = meta.capital_records
           } else {
-            let existing_cap = { ...(best_city.capital || {}) }
+            let existing_cap: Record<string, string | number | null> = { ...(best_city.capital || {}) }
             let raw_meta_cap = meta.capital || {}
             let all_meta_keys = Object.keys(raw_meta_cap)
             for (let m = 0; m < all_meta_keys.length; m++) {
@@ -482,7 +486,7 @@ export let StadesterService = {
                         other.capital = meta.capital as any
                         other.capital_records = meta.capital_records
                       } else {
-                        let existing_other_cap = { ...(other.capital || {}) }
+                        let existing_other_cap: Record<string, string | number | null> = { ...(other.capital || {}) }
                         let raw_meta_cap = meta.capital || {}
                         let all_m_keys = Object.keys(raw_meta_cap)
                         for (let m = 0; m < all_m_keys.length; m++) {

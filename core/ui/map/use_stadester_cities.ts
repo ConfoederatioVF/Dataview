@@ -5,10 +5,12 @@ export interface UseStadesterCitiesParams {
   colorMode?: 'growth' | 'population' | 'continent'
   config?: StadesterConfig
   dataset?: 'stadester_1.1' | 'stadester_1.0'
+  day?: number
   enabled?: boolean
   isPlaying?: boolean
   maxCities?: number
   minPop?: number
+  month?: number
   performantMode?: boolean
   selectedCityKey?: string | null
   year: number

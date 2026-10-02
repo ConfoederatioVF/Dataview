@@ -14,6 +14,10 @@ import {
   transformGeometryToEqualEarth,
   generateEqualEarthGraticule,
 } from '@framework/geopng/equal_earth.ts'
+import {
+  projectLngLatToScreen,
+  unprojectScreenToLngLat,
+} from '@framework/geopng/polygon_draw_tool.ts'
 import { isGlobePointVisible } from '@framework/stadester/stadester_heuristics'
 import {
   DecodedRaster,
@@ -77,23 +81,36 @@ export interface MapViewerProps {
   historicalBordersConfig?: HistoricalBordersConfig
   historicalBordersEnabled?: boolean
   setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
+  analyticsOpen: boolean
   circleOverlayConfig: CircleOverlayConfig
   setCircleOverlayConfig?: React.Dispatch<React.SetStateAction<CircleOverlayConfig>>
-  analyticsOpen: boolean
-  onToggleAnalytics: () => void
-  selectedCountry?: CountryFeature | null
-  selectedCountries?: CountryFeature[]
-  deferredSelectedCountries?: CountryFeature[]
-  isCalculatingStats?: boolean
-  onSelectCountry?: (country: CountryFeature | null) => void
-  onToggleCountry?: (country: CountryFeature) => void
-  onClearCountries?: () => void
   countriesMode?: boolean
-  onToggleCountriesMode?: (enabled: boolean) => void
-  hoveredCountry?: CountryFeature | null
-  onHoverCountry?: (country: CountryFeature | null) => void
   countryStats?: CountryStats | null
+  cursorLngLat?: [number, number] | null
+  customVectorFeatures?: CountryFeature[]
+  customVectorVisible?: boolean
+  deferredSelectedCountries?: CountryFeature[]
+  drawPoints?: [number, number][]
+  drawnPolygonFeature?: CountryFeature | null
+  hoveredCountry?: CountryFeature | null
+  isCalculatingStats?: boolean
+  isDrawing?: boolean
+  onAddDrawPoint?: (arg0_point: [number, number]) => void
+  onCancelDraw?: () => void
+  onClearCountries?: () => void
+  onClearDrawnPolygon?: () => void
+  onDeleteLastDrawPoint?: () => void
+  onFinishDraw?: () => void
+  onHoverCountry?: (country: CountryFeature | null) => void
   onInspect?: (data: InspectionData | null) => void
+  onSelectCountry?: (country: CountryFeature | null) => void
+  onSetCursorLngLat?: (arg0_coord: [number, number] | null) => void
+  onToggleAnalytics: () => void
+  onToggleCountriesMode?: (enabled: boolean) => void
+  onToggleCountry?: (country: CountryFeature) => void
+  onToggleDraw?: () => void
+  selectedCountries?: CountryFeature[]
+  selectedCountry?: CountryFeature | null
   settingsDrawerOpen?: boolean
   onToggleSettingsDrawer?: (open: boolean) => void
   sidebarWidth?: number
@@ -154,6 +171,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let colourbar_width = props.colourbarWidth
   let countries_mode = props.countriesMode
   let country_stats = props.countryStats
+  let cursor_lng_lat = props.cursorLngLat
+  let custom_vector_features = props.customVectorFeatures || EMPTY_ARRAY
+  let custom_vector_visible = props.customVectorVisible !== false
+  let draw_points = props.drawPoints || EMPTY_ARRAY
+  let drawn_polygon_feature = props.drawnPolygonFeature
   let heightmap_config = props.heightmapConfig
   let hide_colourbar = Boolean(props.hideColourbar)
   let historical_borders_config = props.historicalBordersConfig
@@ -161,6 +183,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let info_panel_open = props.infoPanelOpen ?? false
   let invert_palette = props.invertPalette
   let is_calculating_stats = props.isCalculatingStats
+  let is_drawing = Boolean(props.isDrawing)
   let is_mobile = props.isMobile ?? false
   let is_timelapse_exporting = props.isTimelapseExporting ?? false
   let legend_position = ((props.legendPosition || 'top-left') as string).replace('centre', 'center') as 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
@@ -170,10 +193,15 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let map_modes = props.mapModes
   let max_val = props.maxVal
   let min_val = props.minVal
+  let on_add_draw_point = props.onAddDrawPoint
+  let on_cancel_draw = props.onCancelDraw
   let on_change_legend_position = props.onChangeLegendPosition
   let on_clear_countries = props.onClearCountries
+  let on_clear_drawn_polygon = props.onClearDrawnPolygon
   let on_close_city_details = props.onCloseCityDetails
   let on_close_info_panel = props.onCloseInfoPanel
+  let on_delete_last_draw_point = props.onDeleteLastDrawPoint
+  let on_finish_draw = props.onFinishDraw
   let on_hover_city = props.onHoverCity
   let on_hover_country = props.onHoverCountry
   let on_inspect = props.onInspect
@@ -181,9 +209,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let on_resize_colourbar_width = props.onResizeColourbarWidth
   let on_select_city = props.onSelectCity
   let on_select_country = props.onSelectCountry
+  let on_set_cursor_lng_lat = props.onSetCursorLngLat
   let on_toggle_analytics = props.onToggleAnalytics
   let on_toggle_countries_mode = props.onToggleCountriesMode
   let on_toggle_country = props.onToggleCountry
+  let on_toggle_draw = props.onToggleDraw
   let on_toggle_map_mode = props.onToggleMapMode
   let on_toggle_performant_mode = props.onTogglePerformantMode
   let on_toggle_settings_drawer = props.onToggleSettingsDrawer
@@ -395,6 +425,33 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     loadCountriesGeoJson().then((feats) => set_country_features(feats))
   }, [])
 
+  useEffect(() => {
+    //Guard clauses
+    if (!is_drawing)
+      return
+
+    let handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        if (on_cancel_draw)
+          on_cancel_draw()
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault()
+        if (on_delete_last_draw_point)
+          on_delete_last_draw_point()
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (draw_points.length >= 3 && on_finish_draw)
+          on_finish_draw()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [is_drawing, draw_points.length, on_cancel_draw, on_delete_last_draw_point, on_finish_draw])
+
   handle_reset_view = useCallback(() => {
     //1. Clear smooth pinch and two-finger gesture state
     resetSmoothPinchState()
@@ -527,13 +584,29 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         set_inspect_data(null)
       }
 
+      if (is_drawing && deck_ref.current) {
+        let draw_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
+        if (draw_pt && on_set_cursor_lng_lat)
+          on_set_cursor_lng_lat(draw_pt)
+      }
+
       pick_info = deck_ref.current.pickObject({ x, y })
       if (pick_info) {
         if (pick_info.coordinate && !unprojected_coord) {
           insp = sample_raster_at(pick_info.coordinate[0], pick_info.coordinate[1])
           set_inspect_data(insp)
         }
-        if (pick_info.layer?.id?.includes('historical-borders') || (pick_info.object && (pick_info.object.properties?.gwcode !== undefined || pick_info.object.properties?.keyframes !== undefined))) {
+        if (
+          pick_info.layer?.id?.includes('historical-borders') ||
+          pick_info.layer?.id?.includes('custom-vector') ||
+          pick_info.layer?.id?.includes('drawn-polygon') ||
+          (pick_info.object && (
+            pick_info.object.properties?.gwcode !== undefined ||
+            pick_info.object.properties?.keyframes !== undefined ||
+            pick_info.object.properties?.is_custom !== undefined ||
+            pick_info.object.properties?.is_drawn !== undefined
+          ))
+        ) {
           set_hovered_historical_feature(pick_info.object || null)
         } else {
           set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
@@ -553,18 +626,55 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }
     },
-    [countries_mode, effective_country_features, is_historical_borders_active, on_hover_country, sample_raster_at]
+    [countries_mode, effective_country_features, is_drawing, is_historical_borders_active, on_hover_country, on_set_cursor_lng_lat, projection, sample_raster_at]
   )
 
   sample_touch_at = sample_pointer_at
 
   handle_click = useCallback(
     (info: any) => {
+      // 1. Drawing mode intercept
+      if (is_drawing) {
+        let click_x = info.x
+        let click_y = info.y
+        if (click_x === undefined || click_y === undefined)
+          return
+
+        // Check if clicking near start vertex to close loop (when points >= 3)
+        if (draw_points.length >= 3 && deck_ref.current) {
+          let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
+          if (start_screen) {
+            let dist_sq = (click_x - start_screen[0]) ** 2 + (click_y - start_screen[1]) ** 2
+            if (dist_sq <= 18 * 18) {
+              if (on_finish_draw)
+                on_finish_draw()
+              return
+            }
+          }
+        }
+
+        let map_pt = unprojectScreenToLngLat(click_x, click_y, deck_ref.current, projection)
+        if (map_pt && on_add_draw_point) {
+          on_add_draw_point(map_pt)
+        }
+        return
+      }
+
       // Guard clauses: if a city or higher z-index overlay was clicked, intercept and do not click the country behind it
       if (info.layer?.id?.includes('stadester') || (info.object && info.object.coords))
         return
 
-      if (info.layer?.id?.includes('historical-borders') || (info.object && (info.object.properties?.gwcode !== undefined || info.object.properties?.keyframes !== undefined))) {
+      if (
+        info.layer?.id?.includes('historical-borders') ||
+        info.layer?.id?.includes('custom-vector') ||
+        info.layer?.id?.includes('drawn-polygon') ||
+        (info.object && (
+          info.object.properties?.gwcode !== undefined ||
+          info.object.properties?.keyframes !== undefined ||
+          info.object.properties?.is_custom !== undefined ||
+          info.object.properties?.is_drawn !== undefined
+        ))
+      ) {
         let hist_feat = info.object as HistoricalBorderFeature
         set_nav_history([])
         set_active_panel_type('country')
@@ -647,7 +757,17 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         return
 
       //Function body
-      if (info.layer?.id?.includes('historical-borders') || (info.object && (info.object.properties?.gwcode !== undefined || info.object.properties?.keyframes !== undefined))) {
+      if (
+        info.layer?.id?.includes('historical-borders') ||
+        info.layer?.id?.includes('custom-vector') ||
+        info.layer?.id?.includes('drawn-polygon') ||
+        (info.object && (
+          info.object.properties?.gwcode !== undefined ||
+          info.object.properties?.keyframes !== undefined ||
+          info.object.properties?.is_custom !== undefined ||
+          info.object.properties?.is_drawn !== undefined
+        ))
+      ) {
         set_hovered_historical_feature(info.object || null)
       } else {
         set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
@@ -775,6 +895,47 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     },
     onHoverHistoricalFeature: (feat) => {
       set_hovered_historical_feature(feat)
+    },
+    cursorLngLat: cursor_lng_lat,
+    customVectorFeatures: custom_vector_features,
+    customVectorVisible: custom_vector_visible,
+    drawPoints: draw_points,
+    drawnPolygonFeature: drawn_polygon_feature,
+    isDrawing: is_drawing,
+    onHoverCustomVectorFeature: (feat) => {
+      set_hovered_historical_feature(feat as unknown as HistoricalBorderFeature | null)
+    },
+    onSelectCustomVectorFeature: (feat, coord, x, y) => {
+      let hist_feat = feat as unknown as HistoricalBorderFeature
+      set_nav_history([])
+      set_active_panel_type('country')
+      if (on_close_city_details)
+        on_close_city_details()
+      set_selected_historical_feature(hist_feat)
+      if (coord)
+        set_selected_historical_anchor_coord([coord[0], coord[1]])
+      if (x !== undefined && y !== undefined)
+        set_selected_historical_anchor_screen({ x, y })
+      if (on_toggle_country)
+        on_toggle_country(feat)
+      else if (on_select_country)
+        on_select_country(feat)
+    },
+    onSelectDrawnPolygon: (feat, coord, x, y) => {
+      let hist_feat = feat as unknown as HistoricalBorderFeature
+      set_nav_history([])
+      set_active_panel_type('country')
+      if (on_close_city_details)
+        on_close_city_details()
+      set_selected_historical_feature(hist_feat)
+      if (coord)
+        set_selected_historical_anchor_coord([coord[0], coord[1]])
+      if (x !== undefined && y !== undefined)
+        set_selected_historical_anchor_screen({ x, y })
+      if (on_toggle_country)
+        on_toggle_country(feat)
+      else if (on_select_country)
+        on_select_country(feat)
     },
     timelineYear: timeline_year || 1950,
   })
@@ -1023,6 +1184,14 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       className="relative w-full h-full overflow-hidden select-none bg-background font-sans"
       style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       onContextMenu={(e) => e.preventDefault()}
+      onDoubleClick={(e) => {
+        if (is_drawing && draw_points.length >= 3) {
+          e.preventDefault()
+          e.stopPropagation()
+          if (on_finish_draw)
+            on_finish_draw()
+        }
+      }}
       onPointerLeave={() => {
         if (hover_raf_ref.current !== null) {
           cancelAnimationFrame(hover_raf_ref.current)
@@ -1171,7 +1340,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               ; (window as any).deck = deck_ref.current
           }
         }}
-        getCursor={({ isHovering }) => ((isHovering) ? 'crosshair' : 'grab')}
+        getCursor={({ isHovering }) => (is_drawing ? 'crosshair' : ((isHovering) ? 'crosshair' : 'grab'))}
       />
 
       {/* Unified Floating Tooltip Container (HUD Inspector & Stadestér City) */}
@@ -1251,6 +1420,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
           return (
             <MapViewerHUD
+              activeLayerId={props.activeLayerId}
               analyticsOpen={analytics_open}
               basemap={basemap}
               cameraTilt={camera_tilt}
@@ -1258,14 +1428,18 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               colorPalette={palette}
               colourbarLeft={colourbar_left}
               colourbarWidth={current_colourbar_width}
+              drawPointsCount={draw_points.length}
+              effectiveMapmodesBottom={effective_mapmodes_bottom}
               flyoutOpen={flyout_open}
               hasCanvas={has_canvas}
+              hasDrawnPolygon={Boolean(drawn_polygon_feature)}
               heightmapConfig={heightmap_config}
               hideColourbar={hide_colourbar}
               hoveredCity={hovered_city}
               infoPanelOpen={info_panel_open}
               inspectData={inspect_data}
               invertPalette={invert_palette}
+              isDrawing={is_drawing}
               isMobile={is_mobile}
               isTimelapseExporting={is_timelapse_exporting}
               legendBreaks={legend_breaks}
@@ -1275,7 +1449,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               legendPosition={legend_position}
               legendSubtitle={legend_subtitle}
               legendTitle={legend_title}
-              effectiveMapmodesBottom={effective_mapmodes_bottom}
               logSigma={log_sigma}
               mapModes={map_modes}
               mapmodesBounds={mapmodes_bounds}
@@ -1283,17 +1456,24 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               mapmodesHeight={mapmodes_height}
               mapmodesTakenRight={mapmodes_taken_right}
               mapmodesWidth={mapmodes_width}
+              onCancelDraw={on_cancel_draw}
               onChangeLegendPosition={on_change_legend_position}
+              onClearDrawnPolygon={on_clear_drawn_polygon}
               onCloseInfoPanel={on_close_info_panel}
+              onDeleteLastDrawPoint={on_delete_last_draw_point}
               onDoubleClick={handle_reset_view}
+              onFinishDraw={on_finish_draw}
               onResizeColourbarWidth={on_resize_colourbar_width}
               onToggleAnalytics={on_toggle_analytics}
+              onToggleDraw={on_toggle_draw}
               onTogglePerformantMode={on_toggle_performant_mode}
+              onToggleTooltips={() => set_show_tooltips((arg0_prev) => !arg0_prev)}
               onToggleUi={on_toggle_ui}
               onUpdateBreaks={on_update_breaks}
               performantMode={performant_mode}
               projection={projection}
               raster={raster}
+              rasterVersion={raster_version}
               scaleType={scale_type}
               selectedCountries={selected_countries}
               setBasemap={set_basemap}
@@ -1302,7 +1482,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               setShowGraticule={set_show_graticule}
               showGraticule={show_graticule}
               showTooltips={show_tooltips}
-              onToggleTooltips={() => set_show_tooltips((arg0_prev) => !arg0_prev)}
               stadesterCities={stadester_cities}
               stadesterConfig={stadester_config}
               timelineBounds={timeline_bounds}
@@ -1310,8 +1489,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               topRightTaken={top_right_taken}
               topbarClearance={topbar_clearance}
               uiVisible={ui_visible}
-              activeLayerId={props.activeLayerId}
-              rasterVersion={raster_version}
             />
           )
         })()}

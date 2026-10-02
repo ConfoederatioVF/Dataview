@@ -16,6 +16,7 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { CountryFeature } from '@framework/geopng/polygon_binning'
+import { CustomVectorDataset } from '@framework/geopng/custom_vector_service.ts'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ui/components/select'
 import { Slider } from '@ui/components/slider'
 import { Input } from '@ui/components/input'
@@ -41,6 +42,8 @@ export interface SidebarControlsProps {
   cameraTilt?: number
   circleOverlayConfig?: CircleOverlayConfig
   colorPalette: ColorPalette
+  customVectorDataset?: CustomVectorDataset | null
+  customVectorVisible?: boolean
   dataFormat: DataFormat
   diffNameA?: string
   diffNameB?: string
@@ -62,9 +65,12 @@ export interface SidebarControlsProps {
   onClose?: () => void
   onFileUpload: (file: File, target: 'single' | 'diff_a' | 'diff_b') => void
   onOpenVideoExport?: () => void
+  onRemoveCustomVector?: () => void
   onSelectLayer?: (layerId: string) => void
+  onToggleCustomVectorVisible?: (arg0_visible: boolean) => void
   onToggleInfoPanel?: () => void
   onToggleMapMode?: (id: MapModeId) => void
+  onUploadCustomVector?: (arg0_file: File) => void
   onWidthChange?: (newWidth: number) => void
   opacity: number
   percentileList: string
@@ -113,6 +119,8 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
     cameraTilt: camera_tilt = 0,
     circleOverlayConfig: circle_overlay_config,
     colorPalette: color_palette,
+    customVectorDataset: custom_vector_dataset,
+    customVectorVisible: custom_vector_visible = true,
     dataFormat: data_format,
     diffNameA: diff_name_a,
     diffNameB: diff_name_b,
@@ -132,7 +140,10 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
     onClose: on_close,
     onFileUpload: on_file_upload,
     onOpenVideoExport: on_open_video_export,
+    onRemoveCustomVector: on_remove_custom_vector,
+    onToggleCustomVectorVisible: on_toggle_custom_vector_visible,
     onToggleInfoPanel: on_toggle_info_panel,
+    onUploadCustomVector: on_upload_custom_vector,
     onWidthChange: on_width_change,
     opacity,
     percentileList: percentile_list,
@@ -160,7 +171,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
     width,
   } = props
 
-  let { t } = useLocalisation()
+  let { formatString, t } = useLocalisation()
   let info_config = useInfoPanelConfig()
 
   //Declare local instance variables
@@ -188,6 +199,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
   ;[is_sidebar_collapsed, set_is_sidebar_collapsed] = useState<boolean>(false)
   ;[open_folders, set_open_folders] = useState<Record<string, boolean>>({
     binning: false,
+    custom_vector: true,
     description: true,
     manual: false,
     visual: true,
@@ -1080,6 +1092,131 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SECTION 4: CUSTOM VECTOR BOUNDARIES (.naissance / .geojson) */}
+        {/* ========================================================================= */}
+        <div className="border border-border bg-card/50">
+          <button
+            type="button"
+            onClick={() => toggle_folder('custom_vector')}
+            className="w-full h-8 px-[var(--padding)] flex items-center justify-between text-[var(--body-font-size)] font-bold text-foreground bg-muted/40 hover:bg-muted/70 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Icon name="layers" />
+              <span>{t.sidebar.folders.customVector}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {custom_vector_dataset && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-primary/20 text-primary border border-primary/40 font-medium uppercase">
+                  {custom_vector_dataset.fileType}
+                </span>
+              )}
+              <Icon
+                name={open_folders.custom_vector ? 'expand_less' : 'expand_more'}
+              />
+            </div>
+          </button>
+
+          {open_folders.custom_vector && (
+            <div className="p-[var(--padding)] space-y-[var(--padding)] text-[var(--body-font-size)] border-t border-border">
+              <p className="text-xs text-muted-foreground leading-normal">
+                {t.sidebar.vectorUpload.description}
+              </p>
+
+              {/* Upload Input */}
+              <div className="space-y-1">
+                <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">
+                  {t.sidebar.vectorUpload.selectFile}
+                </Label>
+                <input
+                  type="file"
+                  accept=".geojson,.naissance,.json"
+                  id="custom-vector-file-upload"
+                  className="hidden"
+                  onClick={(arg0_e) => {
+                    ;(arg0_e.target as HTMLInputElement).value = ''
+                  }}
+                  onChange={(arg0_e) => {
+                    let file = arg0_e.target.files?.[0]
+                    if (file && on_upload_custom_vector)
+                      on_upload_custom_vector(file)
+                    arg0_e.target.value = ''
+                  }}
+                />
+                <label
+                  htmlFor="custom-vector-file-upload"
+                  className="flex items-center justify-between w-full h-8 px-2 border border-input rounded-none bg-background text-foreground hover:bg-muted/40 cursor-pointer transition-colors"
+                >
+                  <span className="truncate text-[var(--body-font-size)]">
+                    {custom_vector_dataset?.fileName || t.sidebar.vectorUpload.placeholder}
+                  </span>
+                  <Icon name="upload_file" className="text-muted-foreground shrink-0 ml-1" />
+                </label>
+              </div>
+
+              {/* Dataset Details & Toggles */}
+              {custom_vector_dataset && (
+                <div className="space-y-2 pt-2 border-t border-border/60">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground">
+                      {custom_vector_dataset.fileType === 'naissance'
+                        ? t.sidebar.vectorUpload.temporalNaissance
+                        : t.sidebar.vectorUpload.staticGeoJson}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {formatString(t.sidebar.vectorUpload.entitiesCount, custom_vector_dataset.totalCount)}
+                    </span>
+                  </div>
+
+                  {custom_vector_dataset.fileType === 'naissance' && (
+                    <p className="text-[10px] text-muted-foreground/90 italic leading-snug">
+                      {t.sidebar.vectorUpload.temporalDynamicNote}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[var(--body-font-size)] text-muted-foreground">
+                      {t.sidebar.vectorUpload.showLayer}
+                    </span>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={custom_vector_visible}
+                        onChange={(arg0_e) => {
+                          if (on_toggle_custom_vector_visible)
+                            on_toggle_custom_vector_visible(arg0_e.target.checked)
+                        }}
+                        className="w-3.5 h-3.5 rounded-none accent-emerald-500 cursor-pointer"
+                      />
+                      <span
+                        className={`text-xs font-bold uppercase ${
+                          custom_vector_visible ? 'text-emerald-400 font-bold' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {custom_vector_visible ? t.sidebar.binning.on : t.sidebar.binning.off}
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (on_remove_custom_vector)
+                          on_remove_custom_vector()
+                      }}
+                      className="w-full h-7 px-2 text-xs font-medium border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Icon name="delete" className="text-xs" />
+                      <span>{t.sidebar.vectorUpload.removeVector}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

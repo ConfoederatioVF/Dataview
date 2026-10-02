@@ -17,6 +17,7 @@ import {
   transformGeometryToEqualEarth,
   projectEqualEarth,
 } from '@framework/geopng/equal_earth.ts'
+import { projectLngLatToLayerCoords } from '@framework/geopng/polygon_draw_tool.ts'
 import {
   DecodedRaster,
   ProjectionType,
@@ -571,6 +572,15 @@ export interface UseDeckLayersParams {
   hoveredHistoricalFeature?: HistoricalBorderFeature | null
   onSelectHistoricalFeature?: (arg0_feature: HistoricalBorderFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
   onHoverHistoricalFeature?: (arg0_feature: HistoricalBorderFeature | null, arg1_x?: number, arg2_y?: number) => void
+  customVectorFeatures?: CountryFeature[]
+  customVectorVisible?: boolean
+  cursorLngLat?: [number, number] | null
+  drawPoints?: [number, number][]
+  drawnPolygonFeature?: CountryFeature | null
+  isDrawing?: boolean
+  onHoverCustomVectorFeature?: (arg0_feature: CountryFeature | null, arg1_x?: number, arg2_y?: number) => void
+  onSelectCustomVectorFeature?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
+  onSelectDrawnPolygon?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
   timelineYear?: number
   viewport?: any
   viewState?: any
@@ -661,6 +671,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let circle_overlay_config = options.circleOverlayConfig
     let circle_pixel_data = options.circlePixelData
     let countries_mode = options.countriesMode
+    let cursor_lng_lat = options.cursorLngLat
+    let custom_vector_features = options.customVectorFeatures
+    let custom_vector_visible = options.customVectorVisible !== false
+    let draw_points = options.drawPoints || []
+    let drawn_polygon_feature = options.drawnPolygonFeature
     let effective_selected_array: CountryFeature[] = []
     let elevation_spikes_data = options.elevationSpikesData
     let equal_earth_land_geo_json = options.equalEarthLandGeoJson
@@ -672,6 +687,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let hovered_data: any
     let invert_palette = options.invertPalette
     let is_cartesian: boolean
+    let is_drawing = Boolean(options.isDrawing)
     let is_hovered_already_selected: boolean
     let is_mobile = Boolean(options.isMobile)
     let land_data: any
@@ -1068,6 +1084,192 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       } else {
         layers_array.push(historical_borders_layer)
       }
+    }
+
+    //8b. Custom Vector Layer (.naissance / .geojson)
+    if (custom_vector_features && custom_vector_features.length > 0 && custom_vector_visible) {
+      let custom_vector_data = (projection === 'EqualEarth')
+        ? custom_vector_features.map((arg0_f) => ({
+            ...arg0_f,
+            geometry: transformGeometryToEqualEarth(arg0_f.geometry),
+          }))
+        : custom_vector_features
+
+      layers_array.push(
+        new GeoJsonLayer({
+          id: `custom-vector-layer-${projection}`,
+          data: custom_vector_data,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          getFillColor: (arg0_d: any) => {
+            if (arg0_d.properties?.color) {
+              let c = arg0_d.properties.color
+              if (Array.isArray(c) && c.length >= 3)
+                return [c[0], c[1], c[2], 40]
+              if (typeof c === 'string' && c.startsWith('#')) {
+                let rgb = hexToRgb(c)
+                return [rgb[0], rgb[1], rgb[2], 40]
+              }
+            }
+            return [56, 189, 248, 35]
+          },
+          getLineColor: (arg0_d: any) => {
+            if (arg0_d.properties?.color) {
+              let c = arg0_d.properties.color
+              if (Array.isArray(c) && c.length >= 3)
+                return [c[0], c[1], c[2], 220]
+              if (typeof c === 'string' && c.startsWith('#')) {
+                let rgb = hexToRgb(c)
+                return [rgb[0], rgb[1], rgb[2], 220]
+              }
+            }
+            return [56, 189, 248, 220]
+          },
+          getLineWidth: 1.5,
+          lineWidthUnits: 'pixels',
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 70],
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          onClick: (arg0_info: any) => {
+            if (arg0_info.object && options.onSelectCustomVectorFeature) {
+              options.onSelectCustomVectorFeature(
+                arg0_info.object,
+                arg0_info.coordinate ? [arg0_info.coordinate[0], arg0_info.coordinate[1]] : undefined,
+                arg0_info.x,
+                arg0_info.y
+              )
+            }
+            return true
+          },
+          onHover: (arg0_info: any) => {
+            if (options.onHoverCustomVectorFeature) {
+              options.onHoverCustomVectorFeature(arg0_info.object || null, arg0_info.x, arg0_info.y)
+            }
+          },
+          parameters: {
+            depthMask: false,
+            depthTest: false,
+          },
+        })
+      )
+    }
+
+    //8c. Finalized User-Drawn Measurement Polygon
+    if (drawn_polygon_feature) {
+      let drawn_data = (projection === 'EqualEarth')
+        ? [{
+            ...drawn_polygon_feature,
+            geometry: transformGeometryToEqualEarth(drawn_polygon_feature.geometry),
+          }]
+        : [drawn_polygon_feature]
+
+      layers_array.push(
+        new GeoJsonLayer({
+          id: `drawn-polygon-layer-${projection}`,
+          data: drawn_data,
+          pickable: true,
+          stroked: true,
+          filled: true,
+          getFillColor: [200, 40, 40, 45],
+          getLineColor: [200, 40, 40, 255],
+          getLineWidth: 2,
+          lineWidthUnits: 'pixels',
+          autoHighlight: true,
+          highlightColor: [255, 255, 255, 70],
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          onClick: (arg0_info: any) => {
+            if (arg0_info.object && options.onSelectDrawnPolygon) {
+              options.onSelectDrawnPolygon(
+                arg0_info.object,
+                arg0_info.coordinate ? [arg0_info.coordinate[0], arg0_info.coordinate[1]] : undefined,
+                arg0_info.x,
+                arg0_info.y
+              )
+            }
+            return true
+          },
+          parameters: {
+            depthMask: false,
+            depthTest: false,
+          },
+        })
+      )
+    }
+
+    //8d. In-Progress Polygon Draw Tool (Vertices, Elastic Path, and Area Fill Preview)
+    if (is_drawing && draw_points.length > 0) {
+      let live_path_coords: [number, number][] = draw_points.map((arg0_pt) =>
+        projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
+      )
+      if (cursor_lng_lat) {
+        live_path_coords.push(projectLngLatToLayerCoords(cursor_lng_lat[0], cursor_lng_lat[1], projection))
+      }
+
+      //Preview fill
+      if (live_path_coords.length >= 3) {
+        layers_array.push(
+          new PolygonLayer({
+            id: `draw-tool-preview-${projection}`,
+            data: [{ polygon: live_path_coords }],
+            getFillColor: [200, 40, 40, 30],
+            stroked: false,
+            pickable: false,
+            coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+            parameters: {
+              depthMask: false,
+              depthTest: false,
+            },
+          })
+        )
+      }
+
+      //Elastic path
+      layers_array.push(
+        new PathLayer({
+          id: `draw-tool-path-${projection}`,
+          data: [{ path: live_path_coords }],
+          getColor: [200, 40, 40, 220],
+          getWidth: 2,
+          widthUnits: 'pixels',
+          pickable: false,
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          parameters: {
+            depthMask: false,
+            depthTest: false,
+          },
+        })
+      )
+
+      //Vertices
+      let vertex_data = draw_points.map((arg0_pt, arg1_idx) => {
+        let coords = projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
+        return {
+          idx: arg1_idx,
+          position: [coords[0], coords[1], 0],
+        }
+      })
+
+      layers_array.push(
+        new ScatterplotLayer({
+          id: `draw-tool-vertices-${projection}`,
+          data: vertex_data,
+          getPosition: (arg0_d: any) => arg0_d.position,
+          getRadius: (arg0_d: any) => (arg0_d.idx === 0 ? 8 : 5),
+          radiusUnits: 'pixels',
+          getFillColor: (arg0_d: any) => (arg0_d.idx === 0 ? [255, 220, 0, 255] : [200, 40, 40, 255]),
+          stroked: true,
+          getLineColor: [255, 255, 255, 255],
+          getLineWidth: 2,
+          lineWidthUnits: 'pixels',
+          pickable: false,
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          parameters: {
+            depthMask: false,
+            depthTest: false,
+          },
+        })
+      )
     }
 
     //9. Stadestér Historical Cities
@@ -1478,5 +1680,14 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     options.timelineYear,
     options.activeLayerId,
     options.rasterVersion,
+    options.customVectorFeatures,
+    options.customVectorVisible,
+    options.drawnPolygonFeature,
+    options.isDrawing,
+    options.drawPoints,
+    options.cursorLngLat,
+    options.onSelectCustomVectorFeature,
+    options.onHoverCustomVectorFeature,
+    options.onSelectDrawnPolygon,
   ])
 }

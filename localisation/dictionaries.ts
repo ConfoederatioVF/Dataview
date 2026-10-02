@@ -60,6 +60,7 @@ export interface LocalisationConfig {
     }
     folders: {
       binning: string
+      customVector: string
       dataLayers: string
       description: string
       manualUpload: string
@@ -110,6 +111,18 @@ export interface LocalisationConfig {
       single: string
       singlePlaceholder: string
     }
+    vectorUpload: {
+      description: string
+      entitiesCount: string
+      placeholder: string
+      removeVector: string
+      selectFile: string
+      showLayer: string
+      staticGeoJson: string
+      temporalDynamicNote: string
+      temporalNaissance: string
+      title: string
+    }
     visualisation: {
       absoluteBreaks: string
       absoluteBreaksDesc: string
@@ -154,9 +167,18 @@ export interface LocalisationConfig {
     yearPlaceholder: string
   }
   hud: {
+    cancel: string
+    cancelDraw: string
+    clearDrawnPolygon: string
     clickToSetBreak: string
     coordinate: string
+    deleteLastPoint: string
+    drawClosingPrompt: string
+    drawPointsPrompt: string
+    drawPolygon: string
+    drawStartPrompt: string
     enterAbsoluteBreak: string
+    finishDraw: string
     graticule: string
     hideTooltips: string
     hideUi: string
@@ -167,6 +189,7 @@ export interface LocalisationConfig {
     showTooltips: string
     showUi: string
     tooltips: string
+    undo: string
     value: string
   }
   infoPanel: {

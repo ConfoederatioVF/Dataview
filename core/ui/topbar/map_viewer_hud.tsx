@@ -39,14 +39,17 @@ export interface MapViewerHUDProps {
   colorPalette: any
   colourbarLeft?: number
   colourbarWidth?: number
+  drawPointsCount?: number
   flyoutOpen: boolean
   hasCanvas?: boolean
+  hasDrawnPolygon?: boolean
   heightmapConfig: HeightmapConfig
   hideColourbar?: boolean
   hoveredCity?: CityPoint | null
   infoPanelOpen?: boolean
   inspectData?: any
   invertPalette?: boolean
+  isDrawing?: boolean
   isMobile?: boolean
   isTimelapseExporting?: boolean
   effectiveMapmodesBottom?: number
@@ -65,10 +68,15 @@ export interface MapViewerHUDProps {
   mapmodesTakenRight?: number
   mapmodesWidth?: number
   onChangeLegendPosition?: (arg0_pos: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right') => void
+  onCancelDraw?: () => void
+  onClearDrawnPolygon?: () => void
   onCloseInfoPanel?: () => void
+  onDeleteLastDrawPoint?: () => void
   onDoubleClick?: () => void
+  onFinishDraw?: () => void
   onResizeColourbarWidth?: (arg0_w: number) => void
   onToggleAnalytics: () => void
+  onToggleDraw?: () => void
   onTogglePerformantMode?: (arg0_enabled: boolean) => void
   onToggleTooltips?: () => void
   onToggleUi?: () => void
@@ -117,15 +125,18 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   let current_colourbar_width = is_mobile
     ? Math.min(props.colourbarWidth ?? 336, typeof window !== 'undefined' ? window.innerWidth - 32 : 320)
     : (props.colourbarWidth ?? 336)
+  let draw_points_count = props.drawPointsCount ?? 0
   let effective_mapmodes_bottom = props.effectiveMapmodesBottom
   let flyout_open = props.flyoutOpen
   let has_canvas = Boolean(props.hasCanvas)
+  let has_drawn_polygon = Boolean(props.hasDrawnPolygon)
   let heightmap_config = props.heightmapConfig
   let hide_colourbar = Boolean(props.hideColourbar)
   let hovered_city = props.hoveredCity
   let info_panel_open = props.infoPanelOpen
   let inspect_data = props.inspectData
   let invert_palette = props.invertPalette
+  let is_drawing = Boolean(props.isDrawing)
   let is_timelapse_exporting = props.isTimelapseExporting
   let legend_breaks = props.legendBreaks
   let legend_country_name = props.legendCountryName
@@ -141,11 +152,16 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   let mapmodes_height = props.mapmodesHeight ?? 0
   let mapmodes_taken_right = props.mapmodesTakenRight ?? 352
   let mapmodes_width = props.mapmodesWidth ?? 0
+  let on_cancel_draw = props.onCancelDraw
   let on_change_legend_position = props.onChangeLegendPosition
+  let on_clear_drawn_polygon = props.onClearDrawnPolygon
   let on_close_info_panel = props.onCloseInfoPanel
+  let on_delete_last_draw_point = props.onDeleteLastDrawPoint
   let on_double_click = props.onDoubleClick
+  let on_finish_draw = props.onFinishDraw
   let on_resize_colourbar_width = props.onResizeColourbarWidth
   let on_toggle_analytics = props.onToggleAnalytics
+  let on_toggle_draw = props.onToggleDraw
   let on_toggle_performant_mode = props.onTogglePerformantMode
   let on_toggle_tooltips = props.onToggleTooltips
   let on_toggle_ui = props.onToggleUi
@@ -170,7 +186,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   let topbar_clearance_prop = props.topbarClearance
   let ui_visible = props.uiVisible
 
-  let { locale, setLocale, t } = useLocalisation()
+  let { formatString, locale, setLocale, t } = useLocalisation()
 
   //Declare local instance variables
   let available_top_width: number
@@ -371,6 +387,55 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
         </div>
       )}
 
+      {/* Drawing Mode Floating Action Banner */}
+      {ui_visible && is_drawing && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-card/95 backdrop-blur-md border border-[rgb(200,40,40)] shadow-2xl p-2 px-3.5 flex items-center gap-3.5 text-[var(--body-font-size)] font-sans">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[rgb(200,40,40)] animate-pulse" />
+            <span className="font-semibold text-foreground">
+              {draw_points_count === 0
+                ? t.hud.drawStartPrompt
+                : formatString(t.hud.drawPointsPrompt, draw_points_count)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 border-l border-border pl-3">
+            {draw_points_count >= 3 && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={on_finish_draw}
+                className="h-6 px-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-none cursor-pointer"
+              >
+                <Icon name="check" className="text-xs mr-1" />
+                <span>{t.hud.finishDraw}</span>
+              </Button>
+            )}
+            {draw_points_count > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={on_delete_last_draw_point}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground rounded-none cursor-pointer"
+                title={t.hud.deleteLastPoint}
+              >
+                <Icon name="undo" className="text-xs mr-1" />
+                <span>{t.hud.undo}</span>
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={on_cancel_draw}
+              className="h-6 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-none cursor-pointer"
+            >
+              <Icon name="close" className="text-xs mr-1" />
+              <span>{t.hud.cancel}</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Map Control Tools Toolbar (Top Right) */}
       {!is_timelapse_exporting && (
         <TooltipProvider delayDuration={150}>
@@ -419,6 +484,48 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 <span>{t.analytics.title}</span>
               </TooltipContent>
             </Tooltip>
+
+            {/* Toggle Polygon Draw Measurement Tool */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={is_drawing ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={on_toggle_draw}
+                  className={`h-7 w-7 rounded-none cursor-pointer transition-colors ${
+                    is_drawing
+                      ? 'bg-[rgb(200,40,40)] hover:bg-[rgb(220,50,50)] text-white shadow-md'
+                      : 'text-white'
+                  }`}
+                  aria-label={t.hud.drawPolygon}
+                >
+                  <Icon name="polyline" className="text-white" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <span>{is_drawing ? t.hud.cancelDraw : t.hud.drawPolygon}</span>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Clear Drawn Polygon (when present) */}
+            {has_drawn_polygon && !is_drawing && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={on_clear_drawn_polygon}
+                    className="h-7 w-7 rounded-none text-red-400 hover:text-red-300 hover:bg-red-500/20 cursor-pointer"
+                    aria-label={t.hud.clearDrawnPolygon}
+                  >
+                    <Icon name="delete_sweep" className="text-red-400" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>{t.hud.clearDrawnPolygon}</span>
+                </TooltipContent>
+              </Tooltip>
+            )}
 
             {/* Toggle Graticule Grid Lines */}
             <Tooltip>

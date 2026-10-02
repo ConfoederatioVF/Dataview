@@ -23,6 +23,12 @@ import { computeQuantiles } from '@framework/geopng/scales.ts'
 import { createBinnedRaster } from '@framework/geopng/downsampling.ts'
 import { CountryFeature } from '@framework/geopng/polygon_binning.ts'
 import { useCountryStatsAsync } from '@framework/geopng/use_country_stats_async.ts'
+import {
+  CustomVectorDataset,
+  parseCustomVectorText,
+  sliceCustomVectorDataset,
+} from '@framework/geopng/custom_vector_service.ts'
+import { createDrawnPolygonFeature } from '@framework/geopng/polygon_draw_tool.ts'
 import { MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
 import { SidebarControls } from '@ui/leftbar/sidebar_controls'
 import { MapViewer } from '@ui/map/map_viewer'
@@ -206,7 +212,13 @@ export let App: React.FC = function () {
   let [selected_countries, set_selected_countries] = useState<CountryFeature[]>([])
   let [hovered_country, set_hovered_country] = useState<CountryFeature | null>(null)
   let [countries_mode, set_countries_mode] = useState<boolean>(false)
+  let [cursor_lng_lat, set_cursor_lng_lat] = useState<[number, number] | null>(null)
+  let [custom_vector_dataset, set_custom_vector_dataset] = useState<CustomVectorDataset | null>(null)
+  let [custom_vector_visible, set_custom_vector_visible] = useState<boolean>(true)
+  let [draw_points, set_draw_points] = useState<[number, number][]>([])
+  let [drawn_polygon_feature, set_drawn_polygon_feature] = useState<CountryFeature | null>(null)
   let [inspect_data, set_inspect_data] = useState<any>(null)
+  let [is_drawing, set_is_drawing] = useState<boolean>(false)
 
   let [layers, set_layers] = useState<Record<string, ParsedDataLayer>>({})
   let [active_layer_id, set_active_layer_id] = useState<string | null>('default_basemap')
@@ -870,6 +882,96 @@ export let App: React.FC = function () {
     []
   )
 
+  let custom_vector_features = useMemo<CountryFeature[]>(() => {
+    if (!custom_vector_dataset)
+      return []
+    return sliceCustomVectorDataset(custom_vector_dataset, timeline_year)
+  }, [custom_vector_dataset, timeline_year])
+
+  let handle_upload_custom_vector = useCallback(
+    (arg0_file: File) => {
+      //Convert from parameters
+      let file = arg0_file
+
+      //Declare local instance variables
+      let reader: FileReader
+
+      //Function body
+      reader = new FileReader()
+      reader.onload = (arg0_e) => {
+        let text = arg0_e.target?.result
+        if (typeof text === 'string') {
+          try {
+            let dataset = parseCustomVectorText(text, file.name)
+            set_custom_vector_dataset(dataset)
+            set_custom_vector_visible(true)
+          } catch (arg0_err) {
+            console.error('[CustomVector] Failed to parse file:', arg0_err)
+          }
+        }
+      }
+      reader.readAsText(file)
+    },
+    []
+  )
+
+  let handle_remove_custom_vector = useCallback(() => {
+    //Function body
+    set_custom_vector_dataset(null)
+  }, [])
+
+  let handle_toggle_draw = useCallback(() => {
+    //Function body
+    set_is_drawing((arg0_prev) => {
+      let next = !arg0_prev
+      if (next) {
+        set_draw_points([])
+        set_cursor_lng_lat(null)
+      }
+      return next
+    })
+  }, [])
+
+  let handle_cancel_draw = useCallback(() => {
+    //Function body
+    set_is_drawing(false)
+    set_draw_points([])
+    set_cursor_lng_lat(null)
+  }, [])
+
+  let handle_add_draw_point = useCallback((arg0_pt: [number, number]) => {
+    //Convert from parameters
+    let pt = arg0_pt
+
+    //Function body
+    set_draw_points((arg0_prev) => [...arg0_prev, pt])
+  }, [])
+
+  let handle_delete_last_draw_point = useCallback(() => {
+    //Function body
+    set_draw_points((arg0_prev) => arg0_prev.slice(0, -1))
+  }, [])
+
+  let handle_finish_draw = useCallback(() => {
+    //Guard clauses
+    if (draw_points.length < 3)
+      return
+
+    //Function body
+    let polygon_feat = createDrawnPolygonFeature(draw_points)
+    set_drawn_polygon_feature(polygon_feat)
+    set_is_drawing(false)
+    set_draw_points([])
+    set_cursor_lng_lat(null)
+    handle_select_country(polygon_feat)
+  }, [draw_points, handle_select_country])
+
+  let handle_clear_drawn_polygon = useCallback(() => {
+    //Function body
+    set_drawn_polygon_feature(null)
+    set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
+  }, [])
+
   let handle_toggle_countries_mode = useCallback((arg0_enabled: boolean) => {
     let enabled = arg0_enabled
     set_countries_mode(enabled)
@@ -1041,9 +1143,22 @@ export let App: React.FC = function () {
           setHeightmapConfig={set_heightmap_config}
           circleOverlayConfig={circle_overlay_config}
           setCircleOverlayConfig={set_circle_overlay_config}
+          cursorLngLat={cursor_lng_lat}
+          customVectorFeatures={custom_vector_features}
+          customVectorVisible={custom_vector_visible}
+          drawPoints={draw_points}
+          drawnPolygonFeature={drawn_polygon_feature}
           historicalBordersConfig={historical_borders_config}
           setHistoricalBordersConfig={set_historical_borders_config}
+          isDrawing={is_drawing}
           isMobile={is_mobile}
+          onAddDrawPoint={handle_add_draw_point}
+          onCancelDraw={handle_cancel_draw}
+          onClearDrawnPolygon={handle_clear_drawn_polygon}
+          onDeleteLastDrawPoint={handle_delete_last_draw_point}
+          onFinishDraw={handle_finish_draw}
+          onSetCursorLngLat={set_cursor_lng_lat}
+          onToggleDraw={handle_toggle_draw}
           analyticsOpen={is_mobile ? active_mobile_tab === 'analytics' : analytics_open}
           onToggleAnalytics={() => {
             if (is_mobile) {
@@ -1184,6 +1299,8 @@ export let App: React.FC = function () {
           topClearance={sidebar_top_clearance}
           circleOverlayConfig={circle_overlay_config}
           colorPalette={color_palette}
+          customVectorDataset={custom_vector_dataset}
+          customVectorVisible={custom_vector_visible}
           dataFormat={data_format}
           diffNameA={diff_name_a}
           diffNameB={diff_name_b}
@@ -1208,9 +1325,12 @@ export let App: React.FC = function () {
             if (!isPublicBuild() && user_role === 'developer')
               set_video_export_open(true)
           }}
+          onRemoveCustomVector={handle_remove_custom_vector}
           onSelectLayer={handle_select_layer}
+          onToggleCustomVectorVisible={set_custom_vector_visible}
           onToggleInfoPanel={() => set_info_panel_open((arg0_prev) => !arg0_prev)}
           onToggleMapMode={handle_toggle_map_mode}
+          onUploadCustomVector={handle_upload_custom_vector}
           onWidthChange={set_sidebar_width}
           opacity={opacity}
           percentileList={percentile_list}

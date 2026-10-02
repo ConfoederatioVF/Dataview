@@ -183,7 +183,7 @@
   hud: {
     cancel: "Cancel",
     cancelDraw: "Cancel Drawing",
-    clearDrawnPolygon: "Clear Drawn Polygon",
+    clearDrawnPolygon: "Clear Selection",
     coordinate: "Coordinates",
     value: "Value",
     inspect: "Inspect Pixel Value",
@@ -198,12 +198,12 @@
     hideTooltips: "Disable Tooltips",
     showTooltips: "Enable Tooltips",
     tooltips: "Tooltips",
-    drawPolygon: "Draw Measurement Polygon",
-    finishDraw: "Finish Polygon",
+    drawPolygon: "Draw Selection",
+    finishDraw: "Finish Selection",
     deleteLastPoint: "Delete Last Point",
     drawStartPrompt: "Click on map to draw selection",
     drawPointsPrompt: "£1£ points placed. Click next point, or click first point to close",
-    drawClosingPrompt: "Click to close polygon",
+    drawClosingPrompt: "Click to close selection",
     undo: "Undo",
   },
   infoPanel: {
@@ -513,7 +513,7 @@
       territorial: "Territorial",
       unrecorded: "Unrecorded",
       validCells: "Valid Cells:",
-      vertices: "Vertices",
+      vertices: "Points",
     },
     clickInfo: {
       agriculture: "Agriculture",

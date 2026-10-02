@@ -123,10 +123,10 @@
       methodNear: "Plus proche voisin",
     },
     upload: {
-      rasterTab: "Téléversement matriciel",
-      vectorTab: "Téléversement vectoriel",
+      rasterTab: "Raster",
+      vectorTab: "Vectoriel",
       mode: "Mode de téléversement",
-      single: "GeoPNG unique",
+      single: "Image unique",
       difference: "Différence",
       selectSingle: "Sélectionner un fichier GeoPNG (.png)",
       singlePlaceholder: "Téléverser un GeoPNG (.png)...",

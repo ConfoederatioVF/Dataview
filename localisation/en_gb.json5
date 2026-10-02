@@ -11,8 +11,8 @@
   settings: {
     title: "Map Display Settings",
     language: "Language",
-    projectionMode: "Projection Mode",
-    basemapLayer: "Basemap Layer",
+    projectionMode: "Projection",
+    basemapLayer: "Basemap",
     basemaps: {
       none: "None",
       light: "Light",
@@ -20,7 +20,7 @@
       satellite: "Satellite",
       topo: "Topographic",
     },
-    colourbarPosition: "Colourbar Position",
+    colourbarPosition: "Legend Position",
     performantMode: "Performant Mode",
     performantDesc: "Actively culls RAM cache to 1 keyframe and disables background prefetch to cap memory usage.",
     graticules: "Graticules",
@@ -123,10 +123,10 @@
       methodNear: "Near (Nearest Neighbour)",
     },
     upload: {
-      rasterTab: "Raster Upload",
-      vectorTab: "Vector Upload",
+      rasterTab: "Raster",
+      vectorTab: "Vector",
       mode: "Upload Mode",
-      single: "Single GeoPNG",
+      single: "Single Image",
       difference: "Difference",
       selectSingle: "Select GeoPNG File (.png)",
       singlePlaceholder: "Upload GeoPNG (.png)...",
@@ -342,7 +342,7 @@
     jumpToMilestone: "Jump to £1£",
   },
   analytics: {
-    title: "Raster Calculator",
+    title: "Statistics",
     summary: "Summary",
     largestCities: "Largest Cities",
     pyramid: "Population Pyramid",

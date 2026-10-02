@@ -123,10 +123,10 @@
       methodNear: "Nächster Nachbar",
     },
     upload: {
-      rasterTab: "Raster-Upload",
-      vectorTab: "Vektor-Upload",
+      rasterTab: "Raster",
+      vectorTab: "Vektor",
       mode: "Upload-Modus",
-      single: "Einzelnes GeoPNG",
+      single: "Einzelnes Bild",
       difference: "Differenz",
       selectSingle: "GeoPNG-Datei (.png) auswählen",
       singlePlaceholder: "GeoPNG (.png) hochladen...",

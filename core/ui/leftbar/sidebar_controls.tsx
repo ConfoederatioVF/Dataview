@@ -462,7 +462,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
               {isPublicBuild() ? (
                 <div
                   className="h-6 text-[11px] bg-muted/40 border border-border px-2 flex items-center gap-1 text-muted-foreground select-none"
-                  title="Current instance role locked to Default"
+                  title={t.sidebar.toolbar.roles.lockedTooltip}
                 >
                   <Icon name="lock" className="text-[10px] text-muted-foreground" />
                   <span>{t.sidebar.toolbar.roles.default}</span>
@@ -670,7 +670,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-none">
-                    <SelectItem value="Manual" className="rounded-none text-[var(--body-font-size)]">Manual (Min / Max)</SelectItem>
+                    <SelectItem value="Manual" className="rounded-none text-[var(--body-font-size)]">{t.sidebar.visualisation.manualMinMax}</SelectItem>
                     <SelectItem value="Percentile" className="rounded-none text-[var(--body-font-size)]">{t.sidebar.visualisation.percentileBreaks}</SelectItem>
                     <SelectItem value="Absolute" className="rounded-none text-[var(--body-font-size)]">{t.sidebar.visualisation.absoluteBreaks}</SelectItem>
                   </SelectContent>
@@ -681,7 +681,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                     <div className="space-y-1">
                       <span className="text-[var(--body-font-size)] text-muted-foreground">{t.sidebar.visualisation.min}</span>
                       <NumberInput
-                        placeholder="Auto"
+                        placeholder={t.sidebar.visualisation.auto}
                         value={min_val_override}
                         step="any"
                         onChange={(arg0_val: any) => set_min_val_override(arg0_val)}
@@ -691,7 +691,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                     <div className="space-y-1">
                       <span className="text-[var(--body-font-size)] text-muted-foreground">{t.sidebar.visualisation.max}</span>
                       <NumberInput
-                        placeholder="Auto"
+                        placeholder={t.sidebar.visualisation.auto}
                         value={max_val_override}
                         step="any"
                         onChange={(arg0_val: any) => set_max_val_override(arg0_val)}
@@ -722,7 +722,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                         onClick={() => set_absolute_breaks('0, 10, 50, 100, 500, 1000')}
                         className="text-[var(--body-font-size)] text-primary hover:underline cursor-pointer"
                       >
-                        Reset Defaults
+                        {t.sidebar.visualisation.resetDefaults}
                       </button>
                     </div>
                     <Input
@@ -733,7 +733,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                       className="rounded-none h-7 text-[var(--body-font-size)]"
                     />
                     <span className="text-[var(--body-font-size)] text-muted-foreground leading-tight block">
-                      Colour ramp stretches across these discrete absolute values.
+                      {t.sidebar.visualisation.absoluteBreaksDesc}
                     </span>
                   </div>
                 )}
@@ -742,7 +742,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
               {/* Layer Opacity */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-[var(--body-font-size)]">
-                  <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">Opacity</Label>
+                  <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">{t.sidebar.visualisation.opacity}</Label>
                   <span className="text-foreground font-bold text-[var(--body-font-size)]">
                     {Math.round(opacity * 100)}%
                   </span>
@@ -762,7 +762,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                   <Label className="text-[var(--body-font-size)] text-muted-foreground font-normal">
                     {t.sidebar.visualisation.legendTitle}
                   </Label>
-                  <span className="text-[10px] text-muted-foreground/70 font-light">Supports Enter</span>
+                  <span className="text-[10px] text-muted-foreground/70 font-light">{t.sidebar.visualisation.supportsEnter}</span>
                 </div>
                 <textarea
                   value={legend_title}

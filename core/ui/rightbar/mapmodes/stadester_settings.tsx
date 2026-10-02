@@ -3,6 +3,7 @@ import { StadesterConfig, StadesterColorMode } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { Slider } from '@ui/components/slider'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ui/components/select'
+import { formatLocalisedString, useLocalisation } from '@localisation'
 import { D3ColorPaletteSelector } from '@ui/leftbar/d3_color_palette_selector'
 
 export interface StadesterSettingsProps {
@@ -52,6 +53,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   let max_cities = config.maxCities
   let min_pop = config.minPop
   let show_labels = config.showLabels
+  let { t } = useLocalisation()
 
   //Function body
   //Return statement
@@ -61,18 +63,18 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       <div className="flex items-center justify-between pb-1 border-b border-border/40">
         <div className="flex items-center gap-1.5">
           <Icon name="location_city" className="text-primary text-xs" />
-          <span className="font-semibold text-foreground">Stadestér Settlements</span>
+          <span className="font-semibold text-foreground">{t.mapmodes.stadester.title}</span>
         </div>
         {city_count !== undefined && (
           <span className="text-[10px] px-1.5 py-0.2 bg-primary/20 text-primary border border-primary/40 font-mono">
-            {city_count.toLocaleString('de-DE')} rendered
+            {formatLocalisedString(t.mapmodes.stadester.renderedCount, city_count.toLocaleString('de-DE'))}
           </span>
         )}
       </div>
 
       {/* Dataset Version Selector */}
       <div className="space-y-1">
-        <label className="text-muted-foreground block text-[11px]">Dataset Version</label>
+        <label className="text-muted-foreground block text-[11px]">{t.mapmodes.stadester.datasetVersion}</label>
         <Select
           value={dataset}
           onValueChange={(arg0_val: any) =>
@@ -83,18 +85,18 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           }
         >
           <SelectTrigger className="h-7 w-full text-xs">
-            <SelectValue placeholder="Select dataset" />
+            <SelectValue placeholder={t.mapmodes.stadester.selectDataset} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="stadester_1.1">Stadestér 1.1 (Recommended, 34,400+ cities)</SelectItem>
-            <SelectItem value="stadester_1.0">Stadestér 1.0 (41,000+ settlements)</SelectItem>
+            <SelectItem value="stadester_1.1">{t.mapmodes.stadester.stadester11}</SelectItem>
+            <SelectItem value="stadester_1.0">{t.mapmodes.stadester.stadester10}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Circle Rendering Style: Outline vs Fill */}
       <div className="space-y-1">
-        <label className="text-muted-foreground block text-[11px]">Circle Style</label>
+        <label className="text-muted-foreground block text-[11px]">{t.mapmodes.stadester.circleStyle}</label>
         <div className="grid grid-cols-2 gap-1">
           <button
             type="button"
@@ -110,7 +112,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            Fill
+            {t.mapmodes.stadester.fill}
           </button>
           <button
             type="button"
@@ -126,7 +128,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            Outline
+            {t.mapmodes.stadester.outline}
           </button>
         </div>
       </div>
@@ -156,7 +158,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
 
       {/* Colour Mode Selector */}
       <div className="space-y-1">
-        <label className="text-muted-foreground block text-[11px]">Colour By</label>
+        <label className="text-muted-foreground block text-[11px]">{t.mapmodes.stadester.colorMode}</label>
         <div className="grid grid-cols-3 gap-1">
           <button
             type="button"
@@ -360,7 +362,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Labels & Collision Filter Toggle */}
       <div className="flex items-center justify-between pt-1 border-t border-border/40">
         <div className="flex flex-col">
-          <span className="text-foreground text-[11px] font-medium">City Labels</span>
+          <span className="text-foreground text-[11px] font-medium">{t.mapmodes.stadester.cityLabels}</span>
         </div>
         <button
           type="button"
@@ -375,7 +377,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
               : 'bg-background hover:bg-muted text-muted-foreground border-border'
             }`}
         >
-          {show_labels ? 'ON' : 'OFF'}
+          {show_labels ? t.mapmodes.on : t.mapmodes.off}
         </button>
       </div>
 
@@ -383,7 +385,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       <div className="space-y-1.5 pt-1.5 border-t border-border/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-foreground text-[11px] font-medium">Show Capitals</span>
+            <span className="text-foreground text-[11px] font-medium">{t.mapmodes.stadester.capitalMarkers}</span>
           </div>
           <button
             type="button"
@@ -398,14 +400,14 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            {config.showCapitals !== false ? 'ON' : 'OFF'}
+            {config.showCapitals !== false ? t.mapmodes.on : t.mapmodes.off}
           </button>
         </div>
 
         {config.showCapitals !== false && (
           <div className="space-y-1.5 pt-0.5">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-[11px]">Underline Capitals</span>
+              <span className="text-muted-foreground text-[11px]">{t.mapmodes.stadester.capitalUnderlines}</span>
               <button
                 type="button"
                 onClick={() =>
@@ -419,7 +421,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                     : 'bg-background hover:bg-muted text-muted-foreground border-border'
                   }`}
               >
-                {config.showCapitalUnderlines !== false ? 'ON' : 'OFF'}
+                {config.showCapitalUnderlines !== false ? t.mapmodes.on : t.mapmodes.off}
               </button>
             </div>
 

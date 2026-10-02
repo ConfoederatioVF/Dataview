@@ -52,6 +52,8 @@ export interface MapDefines {
 }
 
 export interface MapConfig {
+  basemapLayers: BasemapDefinition[]
+  defaultDataLayers?: string[]
   defaultPercentileBreaks: string
   desktopPickRadius?: number
   equalEarthPixelOffset?: number
@@ -60,7 +62,6 @@ export interface MapConfig {
   mapDefines: MapDefines
   mercatorPixelOffset?: number
   touchPickRadius?: number
-  basemapLayers: BasemapDefinition[]
 }
 
 export let MAP_CONFIG: MapConfig = JSON5.parse(rawMapConfig)

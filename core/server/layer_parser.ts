@@ -14,8 +14,10 @@ export interface LayerVariableOption {
 }
 
 export interface LayerVariableSelector {
+  category_type?: 'continuous' | 'discrete'
   name: string
   options: Record<string, LayerVariableOption>
+  type?: 'continuous' | 'discrete'
 }
 
 export interface LayerFilepathItem {
@@ -28,6 +30,7 @@ export interface ParsedDataLayer {
   available_years: number[]
   can_be_uninhabited?: boolean
   category?: string
+  category_type?: 'continuous' | 'discrete'
   description?: string
   display_options?: Record<string, any>
   encoding: 'float32' | 'int32'
@@ -480,6 +483,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       (arg0_k) => !['root_folders', 'name', 'expressions'].includes(arg0_k)
     )
     let metadata_keys = [
+      'category_type',
       'description',
       'encoding',
       'filepath',
@@ -561,7 +565,8 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           for (let z = 0; z < sel_keys.length; z++) {
             let sk = sel_keys[z]
             let sel_def = item.variable_selectors[sk]
-            let opt_keys = Object.keys(sel_def).filter((arg0_opt) => arg0_opt !== 'name')
+            let cat_type = (sel_def.category_type || (sel_def.type === 'continuous' || sel_def.type === 'discrete' ? sel_def.type : undefined) || 'continuous') as 'continuous' | 'discrete'
+            let opt_keys = Object.keys(sel_def).filter((arg0_opt) => !['category_type', 'description', 'mode', 'name', 'type'].includes(arg0_opt))
             if (opt_keys.length > 0 && opt_keys.every((arg0_opt) => !Number.isNaN(parseInt(arg0_opt, 10))))
               opt_keys.sort((arg0_a, arg0_b) => parseInt(arg0_a, 10) - parseInt(arg0_b, 10))
             let options_record: Record<string, LayerVariableOption> = {}
@@ -577,8 +582,10 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             }
 
             selectors[sk] = {
+              category_type: cat_type,
               name: sel_def.name || sk,
               options: options_record,
+              type: cat_type,
             }
           }
         } else {
@@ -590,7 +597,8 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
               continue
             let candidate_sel = item[ik]
             if (typeof candidate_sel === 'object' && candidate_sel !== null && !candidate_sel.filepath) {
-              let opt_keys = Object.keys(candidate_sel).filter((arg0_opt) => arg0_opt !== 'name')
+              let cat_type = (candidate_sel.category_type || (candidate_sel.type === 'continuous' || candidate_sel.type === 'discrete' ? candidate_sel.type : undefined) || 'continuous') as 'continuous' | 'discrete'
+              let opt_keys = Object.keys(candidate_sel).filter((arg0_opt) => !['category_type', 'description', 'mode', 'name', 'type'].includes(arg0_opt))
               if (opt_keys.length > 0) {
                 if (opt_keys.every((arg0_opt) => !Number.isNaN(parseInt(arg0_opt, 10))))
                   opt_keys.sort((arg0_a, arg0_b) => parseInt(arg0_a, 10) - parseInt(arg0_b, 10))
@@ -607,8 +615,10 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
                   }
                 }
                 selectors[ik] = {
+                  category_type: cat_type,
                   name: candidate_sel.name || ik,
                   options: options_record,
+                  type: cat_type,
                 }
               }
             }
@@ -689,6 +699,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             available_years: sub_years,
             can_be_uninhabited: Boolean(sub_item.can_be_uninhabited ?? item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
             category: dataset_name,
+            category_type: (sub_item.category_type || item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
             description: sub_desc_text,
             encoding: sub_item.encoding || 'float32',
             filepath_template: sub_template,
@@ -727,6 +738,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           available_years: years,
           can_be_uninhabited: Boolean(item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
           category: dataset_name,
+          category_type: (item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
           description: desc_text,
           display_options: item.display_options || parsed_json.display_options,
           encoding: item.encoding || 'float32',

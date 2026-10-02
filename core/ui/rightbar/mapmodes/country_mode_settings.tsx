@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts';
 import { Icon } from '@ui/components/icon';
+import { formatLocalisedString, useLocalisation } from '@localisation';
 
 export interface CountryModeSettingsProps {
   allCountries: CountryFeature[];
@@ -40,6 +41,7 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
   let get_country_code: (arg0_country: CountryFeature) => string;
   let selected_country_code_set: Set<string>;
   let set_country_search: React.Dispatch<React.SetStateAction<string>>;
+  let { t } = useLocalisation();
 
   //Function body
   ;[country_search, set_country_search] = useState('');
@@ -73,13 +75,13 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       <div className="flex items-center justify-between pb-1 border-b border-border/60">
         <span className="text-[var(--body-font-size)] font-bold text-foreground flex items-center gap-1.5">
           <Icon name="flag" />
-          <span>Country Analysis Settings</span>
+          <span>{t.mapmodes.country.title}</span>
         </span>
         {selected_countries.length > 0 && (
           <div className="flex items-center gap-2">
             {is_calculating_stats && (
               <span className="text-[10px] text-amber-400 font-medium animate-pulse">
-                Calculating stats...
+                {t.mapmodes.country.calculating}
               </span>
             )}
             <button
@@ -87,7 +89,7 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
               onClick={on_clear_countries}
               className="text-[var(--body-font-size)] text-destructive hover:underline cursor-pointer"
             >
-              Clear all ({selected_countries.length})
+              {formatLocalisedString(t.mapmodes.country.clearAll, selected_countries.length)}
             </button>
           </div>
         )}
@@ -97,10 +99,10 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       <div className="flex items-center justify-between p-[var(--cell-padding)] bg-background border border-border">
         <div className="flex flex-col">
           <span className="font-bold text-foreground text-[var(--body-font-size)]">
-            Bitmap Isolation Mode
+            {t.mapmodes.country.isolationMode}
           </span>
           <span className="text-[var(--body-font-size)] text-muted-foreground font-light">
-            Clip raster pixels strictly to selected countries
+            {t.mapmodes.country.isolationDesc}
           </span>
         </div>
         <label className="flex items-center gap-1.5 cursor-pointer">
@@ -118,7 +120,7 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
               countries_mode ? 'text-emerald-400' : 'text-muted-foreground'
             }`}
           >
-            {countries_mode ? 'ON' : 'OFF'}
+            {countries_mode ? t.mapmodes.on : t.mapmodes.off}
           </span>
         </label>
       </div>
@@ -127,7 +129,7 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       <div className="relative">
         <input
           type="text"
-          placeholder="Filter country by name or ISO..."
+          placeholder={t.mapmodes.country.searchPlaceholder}
           value={country_search}
           onChange={(arg0_e) => set_country_search(arg0_e.target.value)}
           className="w-full h-7 px-2 text-[var(--body-font-size)] bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
@@ -147,7 +149,7 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       <div className="h-32 overflow-y-auto border border-border bg-background/50 divide-y divide-border/40 text-[var(--body-font-size)]">
         {filtered_countries.length === 0 ? (
           <div className="p-2 text-center text-muted-foreground text-[var(--body-font-size)]">
-            No matching countries
+            {t.mapmodes.country.noCountriesFound}
           </div>
         ) : (
           filtered_countries.map((arg0_c) => {

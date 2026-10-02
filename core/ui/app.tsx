@@ -112,7 +112,6 @@ export let App: React.FC = function () {
     setActiveMobileTab: set_active_mobile_tab,
     setColourbarWidth: set_colourbar_width,
     setLegendPosition: set_legend_position,
-    setSidebarBottomClearance: set_sidebar_bottom_clearance,
     setSidebarWidth: set_sidebar_width,
     setUiVisible: set_ui_visible,
     sidebarBottomClearance: sidebar_bottom_clearance,
@@ -157,6 +156,11 @@ export let App: React.FC = function () {
   })
 
   let [info_panel_open, set_info_panel_open] = useState<boolean>(false)
+  let default_data_layers = useMemo(() => MAP_CONFIG.defaultDataLayers ?? ['detailed_borders', 'stadester'], [])
+  let default_borders_enabled = default_data_layers.includes('detailed_borders') || default_data_layers.includes('simplified_borders') || default_data_layers.includes('historical_borders') || default_data_layers.includes('statistical_borders')
+  let default_border_dataset = default_data_layers.includes('detailed_borders') ? 'detailed_borders' : (default_data_layers.includes('simplified_borders') ? 'simplified_borders' : 'detailed_borders')
+  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_1.1')
+
   let [circle_overlay_config, set_circle_overlay_config] = useState<CircleOverlayConfig>({
     baseRadius: 1.0,
     enabled: false,
@@ -170,7 +174,7 @@ export let App: React.FC = function () {
     capitalConstantColor: '#FFDC00',
     colorMode: 'growth',
     dataset: 'stadester_1.1',
-    enabled: false,
+    enabled: default_stadester_enabled,
     filled: true,
     growthPalette: 'Rainbow',
     halo: false,
@@ -183,7 +187,11 @@ export let App: React.FC = function () {
     showLabels: true,
   })
   let [selected_city_key, set_selected_city_key] = useState<string | null>(null)
-  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>(DEFAULT_HISTORICAL_BORDERS_CONFIG)
+  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
+    ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
+    dataset: default_border_dataset,
+    enabled: default_borders_enabled,
+  })
 
   let [map_modes, set_map_modes] = useState<MapModeItem[]>(() =>
     MAPMODES_CONFIG.modes.map((arg0_m) => ({
@@ -570,6 +578,7 @@ export let App: React.FC = function () {
                 colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
                 dataset: opts.dataset ?? arg0_prev.dataset,
                 display_options: opts,
+                enabled: arg0_prev.enabled ?? default_stadester_enabled,
                 filled: opts.filled ?? arg0_prev.filled,
                 growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
                 halo: opts.halo ?? arg0_prev.halo,
@@ -584,7 +593,10 @@ export let App: React.FC = function () {
               }))
             }
             if (layer_keys.length > 0) {
-              let default_key = layer_keys.includes('GDP_nominal_pc') ? 'GDP_nominal_pc' : layer_keys[0]
+              let configured_default_raster = default_data_layers.find((arg0_k) =>
+                layer_keys.includes(arg0_k) && !arg0_k.includes('border') && !arg0_k.includes('stadester')
+              )
+              let default_key = configured_default_raster || (layer_keys.includes('GDP_nominal_pc') ? 'GDP_nominal_pc' : layer_keys[0])
               set_active_layer_id((arg0_prev) => (arg0_prev && data.layers[arg0_prev] ? arg0_prev : default_key))
             }
           }
@@ -600,7 +612,7 @@ export let App: React.FC = function () {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [default_data_layers, default_stadester_enabled])
 
   //Hot reload layers definitions and descriptions in real time without full-page reload
   useEffect(() => {

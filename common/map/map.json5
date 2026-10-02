@@ -6,6 +6,11 @@
   // Default percentile breaks for quantile scale calculation (comma-separated).
   // Can also be edited live by the user in the sidebar controls.
   defaultPercentileBreaks: "0, 1, 5, 25, 50, 75, 95, 99, 100",
+  // Default data layers to enable on startup (detailed borders and Stadestér cities)
+  defaultDataLayers: [
+    "detailed_borders",
+    "stadester"
+  ],
   // Touch & interaction picking radius in pixels (used for DeckGL layer hit testing)
   touchPickRadius: 18,
   desktopPickRadius: 2,

@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@ui/components/tooltip';
+import { useLocalisation } from '@localisation';
 import { pseudoLogTransform, inversePseudoLogTransform } from '@framework/geopng/scales.ts';
 
 let MAX_PERCENTILE_STRENGTH = 10.0;
@@ -122,20 +123,23 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
     setHeightmapConfig: set_heightmap_config,
   } = props;
 
+  //Declare local instance variables
+  let { t } = useLocalisation();
+
   //Return statement
   return (
     <div className="w-full space-y-1.5 animate-in fade-in-0 duration-100">
       <div className="flex items-center justify-between pb-1 border-b border-border/60">
         <span className="text-[var(--body-font-size)] font-bold text-foreground flex items-center gap-1.5">
           <Icon name="view_in_ar" />
-          <span>3D Spike Map Settings</span>
+          <span>{t.mapmodes.spikes.title}</span>
         </span>
       </div>
 
       {/* Spike Height Scale */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Spike Height Scale</span>
+          <span className="text-muted-foreground">{t.mapmodes.spikes.heightScale}</span>
           <span className="text-foreground font-bold">
             {(heightmap_config.elevationScale/1000).toFixed(0)} km
           </span>
@@ -154,7 +158,7 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
       {/* Spike Height Scale Mode Dropdown */}
       <div className="space-y-1">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Height Scaling Mode</span>
+          <span className="text-muted-foreground">{t.mapmodes.spikes.scalingMode}</span>
         </div>
         <Select
           value={heightmap_config.heightScaleMode ?? 'linear'}
@@ -170,13 +174,13 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
           </SelectTrigger>
           <SelectContent className="rounded-none">
             <SelectItem value="linear" className="rounded-none text-[var(--body-font-size)]">
-              Linear Scale (Colourbar)
+              {t.mapmodes.spikes.pureLinear}
             </SelectItem>
             <SelectItem value="percentile" className="rounded-none text-[var(--body-font-size)]">
-              Percentile-based
+              {t.mapmodes.spikes.purePercentile}
             </SelectItem>
             <SelectItem value="blend" className="rounded-none text-[var(--body-font-size)]">
-              Interpolated (Linear ↔ %ile)
+              {t.mapmodes.spikes.interpolated}
             </SelectItem>
           </SelectContent>
         </Select>
@@ -186,7 +190,7 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
       {heightmap_config.heightScaleMode === 'blend' && (
         <div className="space-y-1.5 p-2 bg-muted/20 border border-border/70 rounded-none animate-in fade-in duration-200">
           <div className="flex justify-between items-center text-[var(--body-font-size)]">
-            <span className="text-muted-foreground">Interpolation Blend</span>
+            <span className="text-muted-foreground">{t.mapmodes.spikes.blend}</span>
             <span className="text-foreground font-mono text-xs font-semibold">
               {Math.round((1 - (heightmap_config.blendWeight ?? 0.5))*100)}% Lin / {Math.round((heightmap_config.blendWeight ?? 0.5)*100)}% %ile
             </span>
@@ -201,9 +205,9 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
             }
           />
           <div className="flex justify-between text-[10px] text-muted-foreground font-light">
-            <span>0% (Pure Linear)</span>
-            <span>50%</span>
-            <span>100% (Pure %ile)</span>
+            <span>0% ({t.mapmodes.spikes.pureLinear})</span>
+            <span>{t.mapmodes.spikes.halfBlend}</span>
+            <span>100% ({t.mapmodes.spikes.purePercentile})</span>
           </div>
         </div>
       )}
@@ -211,7 +215,7 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
       {/* Spike Resolution */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Spike Granularity</span>
+          <span className="text-muted-foreground">{t.mapmodes.spikes.granularity}</span>
           <div className="flex items-center gap-1.5">
             <span className="text-foreground font-bold font-mono">
               {formatSpikeResolution(heightmap_config.resolutionArcmin ?? 60)}
@@ -220,14 +224,14 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help text-amber-400 text-[10px] font-semibold px-1 py-0.5 bg-amber-500/20 border border-amber-500/40 rounded-none inline-flex items-center gap-0.5 animate-in fade-in">
-                    Degraded performance
+                    {t.mapmodes.spikes.degradedPerformance}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-amber-950/95 border-amber-500/80 text-amber-200 text-xs max-w-[240px] p-2 leading-tight">
                   <div className="font-semibold text-amber-300 mb-0.5 flex items-center gap-1">
-                    <span>⚠ Performance Warning</span>
+                    <span>{t.mapmodes.spikes.performanceWarning}</span>
                   </div>
-                  5-arcmin resolution renders high-density 3D geometry and can be laggy on some systems.
+                  {t.mapmodes.spikes.performanceDesc}
                 </TooltipContent>
               </Tooltip>
             )}
@@ -252,19 +256,19 @@ export function SpikeMapSettings (arg0_props: SpikeMapSettingsProps) {
           }}
         />
         <div className="flex justify-between text-[10px] text-muted-foreground font-light">
-          <span>Coarse (120')</span>
-          <span>Standard (60')</span>
+          <span>{t.mapmodes.spikes.resolutionCoarse}</span>
+          <span>{t.mapmodes.spikes.resolutionStandard}</span>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-help text-amber-400/90 underline decoration-dotted decoration-amber-500/60 hover:text-amber-300">
-                Max (5-arcmin) ⚠
+                {t.mapmodes.spikes.resolutionMax}
               </span>
             </TooltipTrigger>
             <TooltipContent side="top" className="bg-amber-950/95 border-amber-500/80 text-amber-200 text-xs max-w-[240px] p-2 leading-tight">
               <div className="font-semibold text-amber-300 mb-0.5 flex items-center gap-1">
-                <span>⚠ Performance Warning</span>
+                <span>{t.mapmodes.spikes.performanceWarning}</span>
               </div>
-              5-arcmin resolution renders high-density 3D geometry and can be laggy on some systems.
+              {t.mapmodes.spikes.performanceDesc}
             </TooltipContent>
           </Tooltip>
         </div>

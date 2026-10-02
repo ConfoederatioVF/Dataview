@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { Icon } from '@ui/components/icon'
 import { Label } from '@ui/components/label'
+import { useLocalisation } from '@localisation'
 import { VideoExportSettingsForm } from './video_export_settings_form'
 import {
   buildIndicatorFolders,
@@ -46,6 +47,7 @@ export interface VideoExportModalProps {
 export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_props) {
   //Convert from parameters
   let props = arg0_props
+  let { formatString, t } = useLocalisation()
   let {
     activeLayerId: active_layer_id,
     availableKeyframes: available_keyframes,
@@ -390,13 +392,13 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
             <Icon name="movie" className="text-primary text-xl" />
             <div>
               <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <span>Developer Video Timelapse Export</span>
+                <span>{t.videoExport.developerTitle}</span>
                 <span className="text-[10px] px-1.5 py-0.2 bg-primary/20 text-primary border border-primary/40 font-mono">
-                  DEVELOPER ONLY
+                  {t.videoExport.developerBadge}
                 </span>
               </h2>
               <p className="text-xs text-muted-foreground">
-                Configure timelapse animation parameters and export compressed MP4 frames to exports/.
+                {t.videoExport.exportSubtitle}
               </p>
             </div>
           </div>
@@ -406,6 +408,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
             onClick={on_close}
             disabled={is_exporting}
             className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground border border-border hover:bg-muted cursor-pointer"
+            title={t.videoExport.close}
           >
             <Icon name="close" />
           </button>
@@ -415,7 +418,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
         <div className="p-4 space-y-4 overflow-y-auto flex-1 text-xs">
           {/* Export Mode */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-foreground">Export Mode</Label>
+            <Label className="text-xs font-semibold text-foreground">{t.videoExport.exportMode}</Label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -427,10 +430,10 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
               >
                 <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
                   <Icon name="view_timeline" />
-                  <span>Sequential Mode</span>
+                  <span>{t.videoExport.exportModes.sequential}</span>
                 </div>
                 <p className="text-[11px] leading-tight text-muted-foreground">
-                  Renders each selected indicator across its individual time domain from start to finish, then advances to the next indicator.
+                  {t.videoExport.sequentialDesc}
                 </p>
               </button>
 
@@ -444,10 +447,10 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
               >
                 <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
                   <Icon name="sync" />
-                  <span>Cycling Mode</span>
+                  <span>{t.videoExport.exportModes.cycling}</span>
                 </div>
                 <p className="text-[11px] leading-tight text-muted-foreground">
-                  Cycles through all active indicators per year before advancing to next keyframe year.
+                  {t.videoExport.cyclingDesc}
                 </p>
               </button>
             </div>
@@ -457,7 +460,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
           <div className="space-y-2 border border-border p-2.5 bg-muted/20">
             <div className="flex items-center justify-between">
               <Label className="text-xs font-semibold text-foreground">
-                Active Indicators & Cohorts ({selected_layers.length} selected)
+                {formatString(t.videoExport.activeIndicators, selected_layers.length)}
               </Label>
               <div className="flex items-center gap-1.5 text-[10px] font-mono">
                 <button
@@ -465,7 +468,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
                   onClick={select_all_layers}
                   className="text-primary hover:underline cursor-pointer"
                 >
-                  Select All
+                  {t.videoExport.selectAll}
                 </button>
                 <span className="text-muted-foreground/40">•</span>
                 <button
@@ -473,7 +476,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
                   onClick={clear_all_layers}
                   className="text-muted-foreground hover:underline cursor-pointer"
                 >
-                  Clear
+                  {t.videoExport.clearSelection}
                 </button>
               </div>
             </div>
@@ -710,7 +713,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
         {/* Modal Footer */}
         <div className="p-4 border-t border-border bg-card/60 flex items-center justify-between">
           <span className="text-[11px] text-muted-foreground">
-            Target Destination: <code className="text-foreground">exports/</code> on server
+            {formatString(t.videoExport.targetDestination, 'exports/')}
           </span>
 
           <div className="flex items-center gap-2">
@@ -720,7 +723,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
               disabled={is_exporting}
               className="px-3 py-1.5 border border-border hover:bg-muted text-xs font-medium cursor-pointer"
             >
-              Cancel
+              {t.videoExport.close}
             </button>
             <button
               type="button"
@@ -729,7 +732,7 @@ export let VideoExportModal: React.FC<VideoExportModalProps> = function (arg0_pr
               className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shadow-sm cursor-pointer flex items-center gap-1.5"
             >
               <Icon name="videocam" />
-              <span>{is_exporting ? 'Starting...' : 'Start Timelapse Export'}</span>
+              <span>{is_exporting ? t.videoExport.exporting : t.videoExport.startExport}</span>
             </button>
           </div>
         </div>

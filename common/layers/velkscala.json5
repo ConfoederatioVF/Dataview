@@ -3,12 +3,14 @@
     synthetic_by_default: true,
     age_sex: {
         name: "Age/Sex",
+        category_type: "continuous",
         filepath: "${age_sex}/${gender}_${age}_${year}.png",
         type: "raster.age_sex", //This needs to be displayed as a population pyramid in tooltips/raster analysis somehow
         unit: "Total",
         synthetic_by_default: true,
         gender: {
             name: "Gender",
+            category_type: "continuous",
             f: {
                 name: "Female",
                 legend: {
@@ -24,6 +26,7 @@
         },
         age: {
             name: "Age",
+            category_type: "continuous",
             "00": {
                 name: "0-1yo"
             },
@@ -95,6 +98,7 @@
         variable_selectors: {
             gender: {
                 name: "Gender",
+                category_type: "continuous",
                 female: {
                     name: "Female",
                     legend: {
@@ -119,6 +123,7 @@
         variable_selectors: {
             gender: {
                 name: "Gender",
+                category_type: "continuous",
                 female: {
                     name: "Female",
                     legend: {

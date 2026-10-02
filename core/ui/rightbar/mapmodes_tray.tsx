@@ -498,9 +498,9 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
             </button>
             <span
               className="font-bold text-foreground text-xs uppercase tracking-wider truncate max-w-[170px]"
-              title={selected_city ? (selected_city.name || 'City Details') : (selected_historical_feature?.properties?.name || 'Border Details')}
+              title={selected_city ? (selected_city.name || t.mapPanels.cityDetails.settlement) : (selected_historical_feature?.properties?.name || t.mapPanels.historicalBorders.historicalEntity)}
             >
-              {selected_city ? (selected_city.name || 'City Details') : (selected_historical_feature?.properties?.name || 'Border Details')}
+              {selected_city ? (selected_city.name || t.mapPanels.cityDetails.settlement) : (selected_historical_feature?.properties?.name || t.mapPanels.historicalBorders.historicalEntity)}
             </span>
             <button
               type="button"
@@ -512,7 +512,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 }
               }}
               className="p-1 text-muted-foreground hover:text-foreground cursor-pointer"
-              title="Close details"
+              title={selected_city ? t.mapPanels.cityDetails.closeCityDetails : t.mapPanels.historicalBorders.closeHistoricalDetails}
             >
               <Icon name="close" className="text-sm" />
             </button>

@@ -33,14 +33,14 @@ export function CircleOverlaySettings (arg0_props: CircleOverlaySettingsProps) {
       <div className="flex items-center justify-between pb-1 border-b border-border/60">
         <span className="text-[var(--body-font-size)] font-bold text-foreground flex items-center gap-1.5">
           <Icon name="scatter_plot" />
-          <span>Circle Sizing Settings</span>
+          <span>{t.mapmodes.circles.title}</span>
         </span>
       </div>
 
       {/* Custom Percentile Cutoff */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Custom Percentile Cutoff</span>
+          <span className="text-muted-foreground">{t.mapmodes.circles.percentileCutoff}</span>
           <div className="flex items-center gap-1">
             <span className="text-muted-foreground font-medium">P</span>
             <input
@@ -89,7 +89,7 @@ export function CircleOverlaySettings (arg0_props: CircleOverlaySettingsProps) {
       {/* Linear Area Expansion Scale */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Area Scale (1 ha / unit)</span>
+          <span className="text-muted-foreground">{t.mapmodes.circles.areaScale}</span>
           <span className="text-foreground font-bold">
             {(circle_overlay_config.baseRadius || 1.0).toFixed(1)} ha/unit
           </span>
@@ -111,7 +111,7 @@ export function CircleOverlaySettings (arg0_props: CircleOverlaySettingsProps) {
       {/* Outline Stroke Width */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[var(--body-font-size)]">
-          <span className="text-muted-foreground">Coloured Outline Stroke</span>
+          <span className="text-muted-foreground">{t.mapmodes.circles.outlineStroke}</span>
           <span className="text-foreground font-bold">
             {circle_overlay_config.strokeWidth || 2} px
           </span>

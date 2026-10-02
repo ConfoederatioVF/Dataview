@@ -370,13 +370,15 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                       onClick={(arg0_e) => arg0_e.stopPropagation()}
                     >
                       <input
-                        type="checkbox"
+                        type={is_borders ? 'radio' : 'checkbox'}
+                        name={is_borders ? 'historical_borders_dataset' : undefined}
                         checked={is_overlay_active}
                         onChange={() => {
                           if (is_borders && on_change_historical_borders_config) {
                             on_change_historical_borders_config((arg0_prev) => ({
                               ...arg0_prev,
-                              enabled: !arg0_prev.enabled,
+                              dataset: arg0_layer.id,
+                              enabled: true,
                             }))
                           } else if (is_stadester && on_change_stadester_config) {
                             on_change_stadester_config((arg0_prev) => ({
@@ -423,7 +425,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
               {/* Sub-layers (e.g. female / male in labourforce) */}
               {arg0_layer.sub_layers && arg0_layer.sub_layers.length > 0 && (
                 <div className="px-2.5 pb-2 pt-1 border-t border-border/40 bg-card/30 flex items-center gap-1 flex-wrap">
-                  <span className="text-[10px] text-muted-foreground font-mono mr-1">Sub-indicators:</span>
+                  <span className="text-[10px] text-muted-foreground font-mono mr-1">{t.sidebar.layers.subIndicators}</span>
                   {arg0_layer.sub_layers.map((arg0_sub: any) => {
                     let sub_active = active_layer_id === arg0_sub.id
                     return (
@@ -453,7 +455,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
           <div className="flex items-center justify-between border-b border-border pb-1.5">
             <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Icon name="tune" className="text-primary text-xs" />
-              <span>Layer Configuration</span>
+              <span>{t.sidebar.layers.layerConfig}</span>
             </span>
             <span className="text-[10px] text-muted-foreground font-mono">
               ID: {active_layer.id}
@@ -471,7 +473,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
           {active_layer.variable_selectors && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-foreground">Variable Selectors</span>
+                <span className="text-[11px] font-semibold text-foreground">{t.sidebar.layers.variableSelectors}</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
@@ -480,15 +482,19 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                         let sel_keys = Object.keys(active_layer.variable_selectors)
                         for (let i = 0; i < sel_keys.length; i++) {
                           let s_key = sel_keys[i]
-                          let all_opts = Object.keys(active_layer.variable_selectors[s_key].options)
-                          on_change_variable_selector(s_key, all_opts)
+                          let sel_item = active_layer.variable_selectors[s_key]
+                          let is_disc = sel_item.category_type === 'discrete' || sel_item.type === 'discrete'
+                          if (!is_disc) {
+                            let all_opts = Object.keys(sel_item.options)
+                            on_change_variable_selector(s_key, all_opts)
+                          }
                         }
                       }
                     }}
                     className="text-[10px] px-1.5 py-0.5 border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary transition-colors cursor-pointer"
-                    title="Select all options in all variable selectors"
+                    title={t.sidebar.layers.selectAll}
                   >
-                    Select All
+                    {t.sidebar.layers.selectAll}
                   </button>
                   <button
                     type="button"
@@ -503,9 +509,9 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                       }
                     }}
                     className="text-[10px] px-1.5 py-0.5 border border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:border-primary transition-colors cursor-pointer"
-                    title="Reset all variable selectors to default"
+                    title={t.sidebar.layers.resetAll}
                   >
-                    Reset All
+                    {t.sidebar.layers.resetAll}
                   </button>
                 </div>
               </div>
@@ -513,6 +519,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
               {Object.keys(active_layer.variable_selectors).map((arg0_sel_key) => {
                 let raw_val = active_variable_selectors[arg0_sel_key]
                 let sel = active_layer.variable_selectors![arg0_sel_key]
+                let is_discrete = sel.category_type === 'discrete' || sel.type === 'discrete'
                 let selected_vals: string[] = []
                 let valid_opt_keys = Object.keys(sel.options)
                 if (valid_opt_keys.length > 0 && valid_opt_keys.every((arg0_k) => !Number.isNaN(parseInt(arg0_k, 10))))
@@ -535,17 +542,21 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                       <span className="font-medium text-foreground">{sel.name}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="text-primary font-mono font-bold truncate max-w-[120px]">{display_label}</span>
-                        <span className="text-muted-foreground/40">•</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (on_change_variable_selector)
-                              on_change_variable_selector(arg0_sel_key, valid_opt_keys)
-                          }}
-                          className="text-[10px] text-primary hover:underline font-mono cursor-pointer"
-                        >
-                          All
-                        </button>
+                        {!is_discrete && (
+                          <>
+                            <span className="text-muted-foreground/40">•</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (on_change_variable_selector)
+                                  on_change_variable_selector(arg0_sel_key, valid_opt_keys)
+                              }}
+                              className="text-[10px] text-primary hover:underline font-mono cursor-pointer"
+                            >
+                              {t.sidebar.layers.all}
+                            </button>
+                          </>
+                        )}
                         <span className="text-muted-foreground/40">•</span>
                         <button
                           type="button"
@@ -555,7 +566,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                           }}
                           className="text-[10px] text-muted-foreground hover:underline font-mono cursor-pointer"
                         >
-                          Reset
+                          {t.sidebar.layers.reset}
                         </button>
                       </div>
                     </div>
@@ -570,39 +581,50 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                             key={arg0_opt_key}
                             type="button"
                             onClick={(arg0_e) => {
-                              let is_shift = Boolean(arg0_e.shiftKey)
-                              let next_vals: string[]
-                              if (is_shift && selected_vals.length > 0) {
-                                let last_selected_idx = valid_opt_keys.indexOf(selected_vals[selected_vals.length - 1])
-                                let target_idx = valid_opt_keys.indexOf(arg0_opt_key)
-                                if (last_selected_idx !== -1 && target_idx !== -1) {
-                                  let min_idx = Math.min(last_selected_idx, target_idx)
-                                  let max_idx = Math.max(last_selected_idx, target_idx)
-                                  let range_keys = valid_opt_keys.slice(min_idx, max_idx + 1)
-                                  next_vals = Array.from(new Set([...selected_vals, ...range_keys]))
+                              if (is_discrete) {
+                                if (on_change_variable_selector)
+                                  on_change_variable_selector(arg0_sel_key, [arg0_opt_key])
+                              } else {
+                                let is_shift = Boolean(arg0_e.shiftKey)
+                                let next_vals: string[]
+                                if (is_shift && selected_vals.length > 0) {
+                                  let last_selected_idx = valid_opt_keys.indexOf(selected_vals[selected_vals.length - 1])
+                                  let target_idx = valid_opt_keys.indexOf(arg0_opt_key)
+                                  if (last_selected_idx !== -1 && target_idx !== -1) {
+                                    let min_idx = Math.min(last_selected_idx, target_idx)
+                                    let max_idx = Math.max(last_selected_idx, target_idx)
+                                    let range_keys = valid_opt_keys.slice(min_idx, max_idx + 1)
+                                    next_vals = Array.from(new Set([...selected_vals, ...range_keys]))
+                                  } else {
+                                    next_vals = is_opt_active
+                                      ? selected_vals.filter((arg0_v) => arg0_v !== arg0_opt_key)
+                                      : [...selected_vals, arg0_opt_key]
+                                  }
                                 } else {
                                   next_vals = is_opt_active
                                     ? selected_vals.filter((arg0_v) => arg0_v !== arg0_opt_key)
                                     : [...selected_vals, arg0_opt_key]
                                 }
-                              } else {
-                                next_vals = is_opt_active
-                                  ? selected_vals.filter((arg0_v) => arg0_v !== arg0_opt_key)
-                                  : [...selected_vals, arg0_opt_key]
+                                if (next_vals.length === 0)
+                                  next_vals = [arg0_opt_key]
+                                if (on_change_variable_selector)
+                                  on_change_variable_selector(arg0_sel_key, next_vals)
                               }
-                              if (next_vals.length === 0)
-                                next_vals = [arg0_opt_key]
-                              if (on_change_variable_selector)
-                                on_change_variable_selector(arg0_sel_key, next_vals)
                             }}
                             className={`px-2 py-0.5 text-[10px] border transition-colors cursor-pointer flex items-center gap-1 ${is_opt_active
                                 ? 'bg-primary text-primary-foreground border-primary font-bold shadow-xs'
                                 : 'bg-background text-muted-foreground hover:text-foreground border-border'
                               }`}
                           >
-                            <span className={`w-2.5 h-2.5 border rounded-none flex items-center justify-center shrink-0 ${is_opt_active ? 'bg-primary-foreground/20 border-primary-foreground' : 'border-muted-foreground/60'
+                            <span className={`w-2.5 h-2.5 border ${is_discrete ? 'rounded-full' : 'rounded-none'} flex items-center justify-center shrink-0 ${is_opt_active ? (is_discrete ? 'bg-primary border-primary-foreground' : 'bg-primary-foreground/20 border-primary-foreground') : 'border-muted-foreground/60'
                               }`}>
-                              {is_opt_active && <Icon name="check" className="text-[8px] text-white" />}
+                              {is_opt_active && (
+                                is_discrete ? (
+                                  <span className="w-1 h-1 rounded-full bg-primary-foreground" />
+                                ) : (
+                                  <Icon name="check" className="text-[8px] text-white" />
+                                )
+                              )}
                             </span>
                             <span>{opt.name}</span>
                             {opt.discounted && <span className="ml-0.5 opacity-60 text-[9px]">*</span>}

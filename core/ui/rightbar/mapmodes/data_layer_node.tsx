@@ -2,6 +2,7 @@ import React from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { HistoricalBordersConfig, StadesterConfig } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
+import { formatLocalisedString, useLocalisation } from '@localisation'
 import { HistoricalBordersSettings } from './historical_borders_settings'
 import { MapmodeTooltip } from './mapmode_tooltip'
 import { StadesterSettings } from './stadester_settings'
@@ -62,6 +63,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
   let is_stadester = layer.id.includes('stadester')
   let is_stadester_dataset_match: boolean
   let is_vector_overlay = layer.type === 'vector.points' || is_stadester || is_borders
+  let { t } = useLocalisation()
 
   //Function body
   is_border_dataset_match = is_borders
@@ -131,17 +133,23 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span
-                  className={`w-3.5 h-3.5 rounded-none border flex items-center justify-center shrink-0 transition-colors ${is_overlay_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60'
+                  className={`w-3.5 h-3.5 ${is_borders ? 'rounded-full' : 'rounded-none'} border flex items-center justify-center shrink-0 transition-colors ${is_overlay_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60'
                     }`}
                 >
-                  {is_overlay_active && <Icon name="check" className="text-[10px]" />}
+                  {is_overlay_active && (
+                    is_borders ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                    ) : (
+                      <Icon name="check" className="text-[10px]" />
+                    )
+                  )}
                 </span>
                 <Icon name={is_borders ? 'flag' : 'location_city'} className="text-primary text-xs shrink-0" />
                 <span className="text-xs truncate">{layer.name}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-[10px] text-muted-foreground font-mono">
-                  {is_overlay_active ? 'OVERLAY ON' : 'OVERLAY OFF'}
+                  {is_overlay_active ? t.mapmodes.overlayOn : t.mapmodes.overlayOff}
                 </span>
                 {(is_stadester || is_borders) && (
                   <Icon
@@ -236,7 +244,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                   }}
                   className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${is_active ? 'border-primary bg-primary' : 'border-muted-foreground/60 hover:border-primary'
                     }`}
-                  title={`Select ${layer.name}`}
+                  title={formatLocalisedString(t.mapmodes.selectLayer, layer.name)}
                 >
                   {is_active && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
                 </button>
@@ -269,7 +277,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                   </span>
                 )}
                 <span className="text-[9px] px-1 py-0.2 bg-muted text-muted-foreground font-mono">
-                  {Object.keys(layer.variable_selectors!).length} vars
+                  {formatLocalisedString(t.mapmodes.varsCount, Object.keys(layer.variable_selectors!).length)}
                 </span>
                 <Icon
                   name={is_node_expanded ? 'expand_less' : 'expand_more'}
@@ -282,6 +290,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
           {is_node_expanded && (
             <div className="mt-1 space-y-1.5 border-l-2 border-primary/40 pl-1.5 ml-2">
               {Object.entries(layer.variable_selectors!).map(([arg0_var_key, arg0_sel]) => {
+                let is_discrete = arg0_sel.category_type === 'discrete' || arg0_sel.type === 'discrete'
                 let opts = Object.entries(arg0_sel.options)
                 let raw_val = active_variable_selectors[arg0_var_key]
                 let selected_vals: string[] = []
@@ -315,21 +324,25 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={(arg0_e) => {
-                            arg0_e.stopPropagation()
-                            if (!is_active && on_select_layer)
-                              on_select_layer(layer.id)
-                            let all_keys = opts.map(([k]) => k)
-                            if (on_change_variable_selector)
-                              on_change_variable_selector(arg0_var_key, all_keys)
-                          }}
-                          className="text-[9px] text-primary hover:underline font-mono cursor-pointer"
-                        >
-                          All
-                        </button>
-                        <span className="text-[9px] text-muted-foreground/40">•</span>
+                        {!is_discrete && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={(arg0_e) => {
+                                arg0_e.stopPropagation()
+                                if (!is_active && on_select_layer)
+                                  on_select_layer(layer.id)
+                                let all_keys = opts.map(([k]) => k)
+                                if (on_change_variable_selector)
+                                  on_change_variable_selector(arg0_var_key, all_keys)
+                              }}
+                              className="text-[9px] text-primary hover:underline font-mono cursor-pointer"
+                            >
+                              {t.mapmodes.all}
+                            </button>
+                            <span className="text-[9px] text-muted-foreground/40">•</span>
+                          </>
+                        )}
                         <button
                           type="button"
                           onClick={(arg0_e) => {
@@ -341,7 +354,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                           }}
                           className="text-[9px] text-muted-foreground hover:underline font-mono cursor-pointer"
                         >
-                          Reset
+                          {t.mapmodes.reset}
                         </button>
                         <Icon
                           name={is_var_open ? 'expand_less' : 'expand_more'}
@@ -362,30 +375,34 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                                 if (!is_active && on_select_layer)
                                   on_select_layer(layer.id)
                                 if (on_change_variable_selector) {
-                                  let is_shift = Boolean(arg0_e.shiftKey)
-                                  let next: string[]
-                                  if (is_shift && selected_vals.length > 0) {
-                                    let all_keys = opts.map(([k]) => k)
-                                    let last_selected_idx = all_keys.indexOf(selected_vals[selected_vals.length - 1])
-                                    let target_idx = all_keys.indexOf(arg0_opt_key)
-                                    if (last_selected_idx !== -1 && target_idx !== -1) {
-                                      let min_idx = Math.min(last_selected_idx, target_idx)
-                                      let max_idx = Math.max(last_selected_idx, target_idx)
-                                      let range_keys = all_keys.slice(min_idx, max_idx + 1)
-                                      next = Array.from(new Set([...selected_vals, ...range_keys]))
+                                  if (is_discrete) {
+                                    on_change_variable_selector(arg0_var_key, [arg0_opt_key])
+                                  } else {
+                                    let is_shift = Boolean(arg0_e.shiftKey)
+                                    let next: string[]
+                                    if (is_shift && selected_vals.length > 0) {
+                                      let all_keys = opts.map(([k]) => k)
+                                      let last_selected_idx = all_keys.indexOf(selected_vals[selected_vals.length - 1])
+                                      let target_idx = all_keys.indexOf(arg0_opt_key)
+                                      if (last_selected_idx !== -1 && target_idx !== -1) {
+                                        let min_idx = Math.min(last_selected_idx, target_idx)
+                                        let max_idx = Math.max(last_selected_idx, target_idx)
+                                        let range_keys = all_keys.slice(min_idx, max_idx + 1)
+                                        next = Array.from(new Set([...selected_vals, ...range_keys]))
+                                      } else {
+                                        next = is_opt_selected
+                                          ? selected_vals.filter((arg0_k) => arg0_k !== arg0_opt_key)
+                                          : [...selected_vals, arg0_opt_key]
+                                      }
                                     } else {
                                       next = is_opt_selected
                                         ? selected_vals.filter((arg0_k) => arg0_k !== arg0_opt_key)
                                         : [...selected_vals, arg0_opt_key]
                                     }
-                                  } else {
-                                    next = is_opt_selected
-                                      ? selected_vals.filter((arg0_k) => arg0_k !== arg0_opt_key)
-                                      : [...selected_vals, arg0_opt_key]
+                                    if (next.length === 0)
+                                      next = [arg0_opt_key]
+                                    on_change_variable_selector(arg0_var_key, next)
                                   }
-                                  if (next.length === 0)
-                                    next = [arg0_opt_key]
-                                  on_change_variable_selector(arg0_var_key, next)
                                 }
                               }}
                               className={`flex items-center justify-between px-2 py-0.5 cursor-pointer text-xs transition-colors rounded-none ${is_opt_selected
@@ -395,12 +412,18 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                             >
                               <div className="flex items-center gap-1.5 min-w-0">
                                 <span
-                                  className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 transition-colors ${is_opt_selected
+                                  className={`w-3 h-3 ${is_discrete ? 'rounded-full' : 'rounded-none'} border flex items-center justify-center shrink-0 transition-colors ${is_opt_selected
                                       ? 'border-primary bg-primary text-primary-foreground'
                                       : 'border-muted-foreground/60'
                                     }`}
                                 >
-                                  {is_opt_selected && <Icon name="check" className="text-[9px]" />}
+                                  {is_opt_selected && (
+                                    is_discrete ? (
+                                      <span className="w-1 h-1 rounded-full bg-primary-foreground" />
+                                    ) : (
+                                      <Icon name="check" className="text-[9px]" />
+                                    )
+                                  )}
                                 </span>
                                 <span className="truncate">{arg0_opt_val.name || arg0_opt_key}</span>
                               </div>

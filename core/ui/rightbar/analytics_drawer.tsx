@@ -374,7 +374,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
               {is_calculating_stats && (
                 <span className="text-[10px] text-amber-400 font-mono ml-1.5 flex items-center gap-1.5 bg-amber-500/10 px-1.5 py-0.5 border border-amber-500/30">
                   <Icon name="sync" className="text-[10px] animate-spin" />
-                  <span>Refining Calculations: {stats_progress_pct}% (~{stats_time_remaining.toFixed(1)}s)</span>
+                  <span>{format_string(t.analytics.refiningCalculations, stats_progress_pct, stats_time_remaining.toFixed(1))}</span>
                 </span>
               )}
             </div>
@@ -410,10 +410,10 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground text-[var(--body-font-size)] space-y-2 px-4">
               <div className="flex items-center gap-2 text-amber-400 font-medium font-mono text-xs">
                 <Icon name="sync" className="text-amber-400 text-sm animate-spin" />
-                <span>Refining Calculations: {stats_progress_pct}% (~{stats_time_remaining.toFixed(1)}s)</span>
+                <span>{format_string(t.analytics.refiningCalculations, stats_progress_pct, stats_time_remaining.toFixed(1))}</span>
               </div>
               <span className="text-[var(--body-font-size)] text-muted-foreground/70 text-center max-w-sm">
-                Processing raster cells in background worker.
+                {t.analytics.processingWorker}
               </span>
             </div>
           ) : (

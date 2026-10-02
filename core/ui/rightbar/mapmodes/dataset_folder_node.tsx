@@ -1,6 +1,7 @@
 import React from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { HistoricalBordersConfig, StadesterConfig } from '@framework/geopng/types.ts'
+import { formatLocalisedString, useLocalisation } from '@localisation'
 import { Icon } from '@ui/components/icon'
 import { DataLayerNode } from './data_layer_node'
 
@@ -51,6 +52,7 @@ export let dataset_folder_node: React.FC<dataset_folder_nodeProps> = function (a
   let is_open: boolean
   let is_searching = Boolean(search_query.trim())
   let node_id = `dataset_${folder_name}`
+  let { t } = useLocalisation()
 
   //Function body
   is_open = is_searching || (expanded_nodes[node_id] !== undefined ? expanded_nodes[node_id] : true)
@@ -73,7 +75,7 @@ export let dataset_folder_node: React.FC<dataset_folder_nodeProps> = function (a
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] text-muted-foreground font-mono">
-            {folder_layers.length} {folder_layers.length === 1 ? 'layer' : 'layers'}
+            {formatLocalisedString(folder_layers.length === 1 ? t.mapmodes.layerCount : t.mapmodes.layersCount, folder_layers.length)}
           </span>
           <Icon
             name={is_open ? 'expand_less' : 'expand_more'}

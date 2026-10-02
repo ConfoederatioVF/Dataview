@@ -557,20 +557,23 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 <div className="space-y-1.5">
                   <span className="text-[var(--body-font-size)] font-bold text-foreground">{t.settings.basemapLayer}</span>
                   <div className="space-y-1 bg-background/60 p-[var(--cell-padding)] rounded-none border border-border">
-                    {MAP_CONFIG.basemapLayers.map((arg0_item: { id: string; label: string }) => (
-                      <button
-                        key={arg0_item.id}
-                        type="button"
-                        onClick={() => set_basemap(arg0_item.id)}
-                        className={`w-full flex items-center justify-between px-2 py-1 rounded-none text-[var(--body-font-size)] transition-colors cursor-pointer text-left ${basemap === arg0_item.id
-                          ? 'bg-muted text-foreground font-bold'
-                          : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground font-light'
-                          }`}
-                      >
-                        <span>{arg0_item.label}</span>
-                        {basemap === arg0_item.id && <span className="w-1.5 h-1.5 rounded-none bg-primary" />}
-                      </button>
-                    ))}
+                    {MAP_CONFIG.basemapLayers.map((arg0_item: { id: string; label: string }) => {
+                      let basemap_label = (t.settings.basemaps as Record<string, string> | undefined)?.[arg0_item.id] || arg0_item.label
+                      return (
+                        <button
+                          key={arg0_item.id}
+                          type="button"
+                          onClick={() => set_basemap(arg0_item.id)}
+                          className={`w-full flex items-center justify-between px-2 py-1 rounded-none text-[var(--body-font-size)] transition-colors cursor-pointer text-left ${basemap === arg0_item.id
+                            ? 'bg-muted text-foreground font-bold'
+                            : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground font-light'
+                            }`}
+                        >
+                          <span>{basemap_label}</span>
+                          {basemap === arg0_item.id && <span className="w-1.5 h-1.5 rounded-none bg-primary" />}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 

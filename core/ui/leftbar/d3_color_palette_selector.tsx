@@ -3,6 +3,7 @@ import { ColorPalette } from '@framework/geopng/types.ts'
 import { D3_COLOR_SCHEMES, getPaletteCssGradient } from '@framework/geopng/palettes.ts'
 import { Icon } from '@ui/components/icon'
 import { Label } from '@ui/components/label'
+import { useLocalisation } from '@localisation'
 
 export interface D3ColorPaletteSelectorProps {
   className?: string
@@ -28,11 +29,12 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
 ): React.ReactElement {
   //Convert from parameters
   let props = arg0_props
+  let { t } = useLocalisation()
   let class_name = props.className || ''
   let compact = Boolean(props.compact)
   let disabled = Boolean(props.disabled)
   let invert = Boolean(props.invert)
-  let label = props.label ?? 'Colourscheme'
+  let label = props.label ?? t.sidebar.visualisation.colorPalette
   let on_change = props.onChange
   let on_invert_change = props.onInvertChange
   let show_invert = Boolean(props.showInvert)
@@ -89,7 +91,7 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
                 onChange={(arg0_e) => on_invert_change(arg0_e.target.checked)}
                 className="w-3.5 h-3.5 rounded-none border-input text-primary focus:ring-1 focus:ring-ring"
               />
-              Invert
+              {t.sidebar.visualisation.invert}
             </label>
           )}
         </div>
@@ -119,7 +121,7 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
           <div className="p-1.5 border-b border-border">
             <input
               type="text"
-              placeholder="Search palettes..."
+              placeholder={t.sidebar.visualisation.searchPalettes}
               value={search_query}
               onChange={(arg0_e) => set_search_query(arg0_e.target.value)}
               className="w-full px-2 py-1 text-xs rounded-none border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
@@ -158,7 +160,7 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
             })}
             {filtered_palettes.length === 0 && (
               <div className="p-2 text-center text-muted-foreground text-[11px]">
-                No palettes found
+                {t.mapmodes.noResults}
               </div>
             )}
           </div>

@@ -13,6 +13,13 @@ export interface LocalisationConfig {
   }
   settings: {
     basemapLayer: string
+    basemaps?: {
+      dark: string
+      light: string
+      none: string
+      satellite: string
+      topo: string
+    }
     close: string
     colourbarPosition: string
     disabled: string
@@ -60,13 +67,20 @@ export interface LocalisationConfig {
     }
     layers: {
       active: string
+      all: string
       allCategories: string
+      layerConfig: string
       loadingLayers: string
       noLayersFound: string
       overlayOff: string
       overlayOn: string
+      reset: string
+      resetAll: string
       restricted: string
       searchPlaceholder: string
+      selectAll: string
+      subIndicators: string
+      variableSelectors: string
     }
     toolbar: {
       collapseSidebar: string
@@ -76,6 +90,7 @@ export interface LocalisationConfig {
       roles: {
         default: string
         developer: string
+        lockedTooltip: string
         privileged: string
       }
       video: string
@@ -97,20 +112,27 @@ export interface LocalisationConfig {
     }
     visualisation: {
       absoluteBreaks: string
+      absoluteBreaksDesc: string
+      auto: string
       colorPalette: string
       invert: string
       legendSubtitle: string
       legendTitle: string
       linear: string
       logSigma: string
+      manualMinMax: string
       manualRange: string
       max: string
       min: string
+      opacity: string
       optional: string
       percentileBreaks: string
       pseudoLog: string
+      resetDefaults: string
       scaleTransformation: string
+      searchPalettes: string
       subtitlePlaceholder: string
+      supportsEnter: string
     }
   }
   datePicker: {
@@ -156,20 +178,111 @@ export interface LocalisationConfig {
     tilt: string
   }
   mapmodes: {
-    analyticalTools: string
     activeCount: string
+    all: string
+    analyticalTools: string
+    borders: {
+      appearance: string
+      colourPicker: string
+      colours: {
+        black: string
+        cyan: string
+        green: string
+        mauve: string
+        orange: string
+        red: string
+        white: string
+        yellow: string
+      }
+      fillOpacity: string
+      strokeColour: string
+      strokeWidth: string
+    }
+    circles: {
+      areaScale: string
+      outlineStroke: string
+      percentileCutoff: string
+      title: string
+    }
     collapse: string
+    continuous: string
+    country: {
+      allCountries: string
+      calculating: string
+      clearAll: string
+      isolationDesc: string
+      isolationMode: string
+      noCountriesFound: string
+      searchPlaceholder: string
+      selectedCount: string
+      title: string
+    }
+    discrete: string
     expand: string
     haloDescription: string
     haloThicknessLabel: string
     haloThicknessUnit: string
+    layerCount: string
     layersCount: string
     loadingRaster: string
     noResults: string
     off: string
     on: string
+    overlayOff: string
+    overlayOn: string
+    reset: string
     searchPlaceholder: string
+    selectLayer: string
+    spikes: {
+      blend: string
+      degradedPerformance: string
+      granularity: string
+      halfBlend: string
+      heightScale: string
+      interpolated: string
+      linearScale: string
+      percentileBased: string
+      performanceDesc: string
+      performanceWarning: string
+      pureLinear: string
+      purePercentile: string
+      resolutionCoarse: string
+      resolutionFine: string
+      resolutionMax: string
+      resolutionMedium: string
+      resolutionStandard: string
+      resolutionVeryFine: string
+      scalingMode: string
+      title: string
+    }
+    stadester: {
+      bubbleSize: string
+      capitalConstantColor: string
+      capitalContrast: string
+      capitalMarkers: string
+      capitalUnderlines: string
+      circleStyle: string
+      cityLabels: string
+      colorMode: string
+      constant: string
+      datasetVersion: string
+      fill: string
+      growth: string
+      growthPalette: string
+      halo: string
+      labelCollision: string
+      maxCities: string
+      minPop: string
+      outline: string
+      renderedCount: string
+      selectDataset: string
+      stadester10: string
+      stadester11: string
+      stateCapital: string
+      title: string
+    }
     title: string
+    varsCount: string
   }
   timeline: {
     ad: string
@@ -238,6 +351,7 @@ export interface LocalisationConfig {
     oldAgeDependencyTooltip: string
     polygonCells: string
     population: string
+    processingWorker: string
     pyramid: string
     pyramidTitle: string
     rankingUrbanSettlements: string
@@ -271,9 +385,34 @@ export interface LocalisationConfig {
     timeline: string
   }
   videoExport: {
+    activeIndicators: string
+    advanced: string
+    allCohorts: string
+    clearSelection: string
     close: string
+    concurrency: string
+    cyclingDesc: string
+    developerBadge: string
+    developerTitle: string
+    executionSequence: string
     export: string
+    exportMode: string
+    exportModes: {
+      cycling: string
+      sequential: string
+      stationary: string
+    }
+    exportSubtitle: string
+    exporting: string
     format: string
+    framing: string
+    reorderHelp: string
+    selectAll: string
+    selectCohort: string
+    sequentialDesc: string
+    startExport: string
+    targetDestination: string
+    timeRange: string
     title: string
   }
   mapPanels: {

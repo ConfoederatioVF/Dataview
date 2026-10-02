@@ -46,9 +46,11 @@
     },
     labourforce: {
         name: "Raw Labourforce",
+        category_type: "continuous",
         unit: "Total",
         labourforce_total: {
             name: "Raw Labourforce (Total)",
+            category_type: "continuous",
             filepath: "${h2}LFPR_OLS/4.active_labourforce/labourforce_t_${year}.png",
             unit: "Total",
             legend: {
@@ -57,6 +59,7 @@
         },
         labourforce_female: {
             name: "Labourforce (Female)",
+            category_type: "continuous",
             filepath: "${h2}LFPR_OLS/4.active_labourforce/labourforce_f_${year}.png",
             unit: "Total",
             legend: {
@@ -65,6 +68,7 @@
         },
         labourforce_male: {
             name: "Labourforce (Male)",
+            category_type: "continuous",
             filepath: "${h2}LFPR_OLS/4.active_labourforce/labourforce_m_${year}.png",
             unit: "Total",
             legend: {
@@ -74,9 +78,11 @@
     },
     lfpr: {
         name: "Labourforce Participation Rate (LFPR)",
+        category_type: "continuous",
         unit: "%",
         lfpr_female: {
             name: "Labourforce Participation Rate (LFPR, Female)",
+            category_type: "continuous",
             unit: "%",
             filepath: "${h2}LFPR_OLS/3.lfpr_rates/lfpr_f_${year}.png",
             legend: {
@@ -86,6 +92,7 @@
         },
         lfpr_male: {
             name: "Labourforce Participation Rate (LFPR, Male)",
+            category_type: "continuous",
             unit: "%",
             filepath: "${h2}LFPR_OLS/3.lfpr_rates/lfpr_m_${year}.png",
             legend: {

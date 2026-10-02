@@ -57,11 +57,13 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
   let is_active = active_layer_id === layer.id
   let is_border_dataset_match: boolean
   let is_borders = layer.id === 'statistical_borders' || layer.id === 'detailed_borders' || layer.type === 'vector.polygon' || layer.id.includes('borders')
+  let is_continuous = layer.category_type === 'continuous'
   let is_node_expanded = Boolean(search_query.trim()) || (expanded_nodes[layer.id] ?? true)
   let is_overlay_active: boolean
   let is_searching = Boolean(search_query.trim())
   let is_stadester = layer.id.includes('stadester')
   let is_stadester_dataset_match: boolean
+  let is_sub_active = Boolean(has_sub_layers && layer.sub_layers?.some((arg0_s) => arg0_s.id === active_layer_id))
   let is_vector_overlay = layer.type === 'vector.points' || is_stadester || is_borders
   let { t } = useLocalisation()
 
@@ -184,13 +186,21 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
         <div>
           <div
             onClick={() => toggle_node(layer.id)}
-            className="flex items-center justify-between px-2 py-1 cursor-pointer border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors"
+            className={`flex items-center justify-between px-2 py-1 cursor-pointer border transition-colors ${is_sub_active
+                ? 'border-primary/60 bg-primary/10'
+                : 'border-border/60 bg-muted/30 hover:bg-muted/60'
+              }`}
           >
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <Icon name={is_node_expanded ? 'folder_open' : 'folder'} className="text-primary text-xs shrink-0" />
               <span className="text-xs font-bold text-foreground truncate">{layer.name}</span>
             </div>
-            <div className="flex items-center shrink-0 p-0.5">
+            <div className="flex items-center gap-1 shrink-0 p-0.5">
+              {layer.unit && (
+                <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[110px] shrink ml-1">
+                  {layer.unit}
+                </span>
+              )}
               <Icon
                 name={is_node_expanded ? 'expand_less' : 'expand_more'}
                 className="text-xs text-muted-foreground shrink-0"
@@ -242,11 +252,17 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                     if (!is_node_expanded)
                       toggle_node(layer.id)
                   }}
-                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${is_active ? 'border-primary bg-primary' : 'border-muted-foreground/60 hover:border-primary'
+                  className={`w-3.5 h-3.5 ${is_continuous ? 'rounded-none' : 'rounded-full'} border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60 hover:border-primary'
                     }`}
                   title={formatLocalisedString(t.mapmodes.selectLayer, layer.name)}
                 >
-                  {is_active && <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                  {is_active && (
+                    is_continuous ? (
+                      <Icon name="check" className="text-[10px]" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                    )
+                  )}
                 </button>
                 <div
                   onClick={() => {
@@ -452,10 +468,16 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span
-                  className={`w-3 h-3 rounded-full border flex items-center justify-center shrink-0 ${is_active ? 'border-primary bg-primary' : 'border-muted-foreground/60'
+                  className={`w-3 h-3 ${is_continuous ? 'rounded-none' : 'rounded-full'} border flex items-center justify-center shrink-0 transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60'
                     }`}
                 >
-                  {is_active && <span className="w-1 h-1 rounded-full bg-primary-foreground" />}
+                  {is_active && (
+                    is_continuous ? (
+                      <Icon name="check" className="text-[9px]" />
+                    ) : (
+                      <span className="w-1 h-1 rounded-full bg-primary-foreground" />
+                    )
+                  )}
                 </span>
                 <span className="text-xs truncate">{layer.name}</span>
               </div>

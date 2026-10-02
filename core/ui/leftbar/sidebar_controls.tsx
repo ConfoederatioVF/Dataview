@@ -653,7 +653,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                 </div>
               )}
 
-              {/* Colour Palette (D3) */}
+              {/* Colourscheme */}
               <D3ColorPaletteSelector
                 value={color_palette}
                 onChange={set_color_palette}

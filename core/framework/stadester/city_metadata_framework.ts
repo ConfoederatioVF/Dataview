@@ -338,7 +338,11 @@ export let resolveHistoricalCityName = function (
 
   //Find the latest transition on or before target_frac
   for (let i = hist.length - 1; i >= 0; i--) {
-    if (target_frac >= hist[i].year_frac) {
+    let rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
+      ? hist[i].year_frac
+      : parseYearMonthDay(hist[i].date).year_frac
+
+    if (target_frac >= rec_frac) {
       //Return statement
       return hist[i].name
     }

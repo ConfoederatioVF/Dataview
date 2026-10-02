@@ -208,10 +208,10 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
         </div>
       </div>
 
-      {/* D3 Growth Colour Palette Selector (active when Growth Rate is selected) */}
+      {/* Growth Colourscheme Selector (active when Growth Rate is selected) */}
       {color_mode === 'growth' && (
         <D3ColorPaletteSelector
-          label="Colourscheme"
+          label={t.sidebar.visualisation.colorPalette}
           value={config.growthPalette || 'Rainbow'}
           onChange={(arg0_pal: any) =>
             on_change_config((arg0_prev) => ({

@@ -102,7 +102,7 @@
       absoluteBreaksDesc: "Colour ramp stretches across these discrete absolute values.",
       opacity: "Opacity",
       supportsEnter: "Supports Enter for line break",
-      searchPalettes: "Search palettes...",
+      searchPalettes: "Search colourschemes...",
     },
     binning: {
       downsampleGrid: "Downsample Grid",
@@ -267,7 +267,7 @@
       colorMode: "Colour Mode",
       constant: "Constant",
       growth: "Growth (%/yr)",
-      growthPalette: "Growth Rate Palette",
+      growthPalette: "Growth Rate Colourscheme",
       stateCapital: "State Capital",
       capitalMarkers: "Capital Styling & Markers",
       capitalUnderlines: "Capital Underlines",

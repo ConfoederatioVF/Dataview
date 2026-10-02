@@ -15,6 +15,7 @@ export interface HistoricalBorderDetailsPanelProps {
   embedded?: boolean
   feature: HistoricalBorderFeature | null
   isCalculatingStats?: boolean
+  onBack?: () => void
   onClose: () => void
   onJumpToYear?: (arg0_year: number) => void
   onOpenAnalytics?: () => void
@@ -42,6 +43,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let embedded = Boolean(props.embedded)
   let feature = props.feature
   let is_calculating_stats = props.isCalculatingStats
+  let on_back = props.onBack
   let on_close = props.onClose
   let on_jump_to_year = props.onJumpToYear
   let on_open_analytics = props.onOpenAnalytics
@@ -337,6 +339,16 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       {!embedded && (
         <div className="flex items-start justify-between border-b border-border/70 pb-2 mb-2.5">
           <div className="flex items-center gap-2 min-w-0">
+            {on_back && (
+              <button
+                type="button"
+                onClick={on_back}
+                className="w-8 h-8 rounded-none bg-muted/40 border border-border hover:bg-muted/80 hover:border-primary/60 flex items-center justify-center shrink-0 text-muted-foreground hover:text-white cursor-pointer transition-colors"
+                title={t.mapPanels.historicalBorders.back || 'Back'}
+              >
+                <Icon name="arrow_back" className="text-sm" />
+              </button>
+            )}
             <div className="w-8 h-8 rounded-none bg-muted/40 border border-border flex items-center justify-center shrink-0">
               <Icon name="flag" className="text-white text-base" />
             </div>
@@ -388,6 +400,16 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {embedded && (
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 pb-1.5">
+          {on_back && (
+            <button
+              type="button"
+              onClick={on_back}
+              className="p-0.5 text-muted-foreground hover:text-white cursor-pointer shrink-0 transition-colors"
+              title={t.mapPanels.historicalBorders.back || 'Back'}
+            >
+              <Icon name="arrow_back" className="text-xs" />
+            </button>
+          )}
           {state_id !== undefined ? (
             is_acapital || cap_names.length === 0 ? (
               <span className="text-foreground font-semibold">Capital: None</span>

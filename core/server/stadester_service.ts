@@ -7,6 +7,7 @@ import {
   computeHaversineDistanceKm,
   getCityActiveCapitalRecord,
   isCityCapitalAtYear,
+  normalizeCityKey,
   normalizeMetadataEntry,
   parseYearMonthDay,
   resolveHistoricalCityName,
@@ -195,6 +196,7 @@ export let StadesterService = {
   city_metadata_mtime: 0,
   datasets: new Map<string, Record<string, CityIndexEntry>>(),
   lite_cache_paths: new Map<string, string>(),
+  state_capitals_mtime: 0,
   states_by_id: null as Map<string | number, any> | null,
 
   /**
@@ -431,8 +433,8 @@ export let StadesterService = {
 
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
-        if (meta.name === 'City of London') {
-          best_city.name = 'City of London'
+        if (meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')) {
+          best_city.name = meta.name
           best_city.historical_names = meta.historical_names
         } else if (meta.historical_names && meta.historical_names.length > 0 && (!best_city.historical_names || best_city.historical_names.length === 0 || (meta.name && meta.name.toLowerCase().trim() === (best_city.name || '').toLowerCase().trim()))) {
           best_city.historical_names = meta.historical_names
@@ -441,12 +443,16 @@ export let StadesterService = {
           if (!best_city.capital) {
             best_city.capital = meta.capital as any
             best_city.capital_records = meta.capital_records
+          } else {
             let existing_cap: Record<string, string | number | null> = { ...(best_city.capital || {}) }
             let raw_meta_cap = meta.capital || {}
             let all_meta_keys = Object.keys(raw_meta_cap)
             for (let m = 0; m < all_meta_keys.length; m++) {
               let d_key = all_meta_keys[m]
-              existing_cap[d_key] = raw_meta_cap[d_key]
+              let incoming_val = raw_meta_cap[d_key]
+              if (existing_cap[d_key] === undefined || (incoming_val !== null && incoming_val !== undefined)) {
+                existing_cap[d_key] = incoming_val
+              }
             }
             best_city.capital = existing_cap
             best_city.capital_records = Object.keys(existing_cap).map((arg0_d) => {
@@ -478,9 +484,11 @@ export let StadesterService = {
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
                   let other_name_lower = (other.name || '').toLowerCase()
-                  // Do not conflate London and City of London
+                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem
                   if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
-                      (base_name.includes('city of london') && other_name_lower === 'london')) {
+                      (base_name.includes('city of london') && other_name_lower === 'london') ||
+                      (base_name === 'jerusalem' && other_name_lower.includes('east jerusalem')) ||
+                      (base_name.includes('east jerusalem') && other_name_lower === 'jerusalem')) {
                     continue
                   }
                   let other_aliases = [
@@ -514,7 +522,10 @@ export let StadesterService = {
                         let all_m_keys = Object.keys(raw_meta_cap)
                         for (let m = 0; m < all_m_keys.length; m++) {
                           let d_key = all_m_keys[m]
-                          existing_other_cap[d_key] = raw_meta_cap[d_key]
+                          let incoming_val = raw_meta_cap[d_key]
+                          if (existing_other_cap[d_key] === undefined || (incoming_val !== null && incoming_val !== undefined)) {
+                            existing_other_cap[d_key] = incoming_val
+                          }
                         }
                         other.capital = existing_other_cap
                         other.capital_records = Object.keys(existing_other_cap).map((arg0_d) => {
@@ -537,6 +548,194 @@ export let StadesterService = {
     }
 
     console.log(`[StadesterService] Successfully bound ${meta_list.length} historical city metadata entries.`)
+  },
+
+  /**
+   * Binds authoritative state capital timelines from data/stadester/state_capitals.json directly to indexed cities.
+   *
+   * @param {Record<string, CityIndexEntry>} arg0_indexed_record
+   */
+  applyStateCapitals: function (arg0_indexed_record: Record<string, CityIndexEntry>): void {
+    //Convert from parameters
+    let indexed = arg0_indexed_record
+
+    //Declare local instance variables
+    let all_city_intervals: Array<[CityIndexEntry, Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }> ]>
+    let all_keys: string[]
+    let all_state_ids: string[]
+    let city_intervals = new Map<CityIndexEntry, Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }>>()
+    let file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+    let name_country_to_city = new Map<string, CityIndexEntry[]>()
+    let norm_key_to_city = new Map<string, CityIndexEntry>()
+    let state_capitals: Record<string, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }>
+    let updated_count = 0
+
+    //Guard clauses
+    if (!fs.existsSync(file_path))
+      return
+
+    //Function body
+    try {
+      let stats = fs.statSync(file_path)
+      StadesterService.state_capitals_mtime = stats.mtimeMs
+      state_capitals = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
+    } catch (arg0_err) {
+      console.warn('[StadesterService] Failed to load state_capitals.json:', arg0_err)
+      return
+    }
+
+    all_keys = Object.keys(indexed)
+    for (let i = 0; i < all_keys.length; i++) {
+      let city = indexed[all_keys[i]]
+      let n_k = normalizeCityKey(all_keys[i])
+      norm_key_to_city.set(n_k, city)
+
+      let nc_key = `${(city.name || '').toLowerCase().trim()}|${(city.country || '').toLowerCase().trim()}`
+      if (!name_country_to_city.has(nc_key)) {
+        name_country_to_city.set(nc_key, [])
+      }
+      name_country_to_city.get(nc_key)!.push(city)
+    }
+
+    //1. Ingest existing city capital records as baseline intervals
+    for (let x = 0; x < all_keys.length; x++) {
+      let city = indexed[all_keys[x]]
+      if (city.capital_records && city.capital_records.length > 0) {
+        let ivs: Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }> = []
+        for (let y = 0; y < city.capital_records.length; y++) {
+          let rec = city.capital_records[y]
+          if (rec.state_id !== null && rec.state_id !== undefined) {
+            let next_rec = (y + 1 < city.capital_records.length) ? city.capital_records[y + 1] : null
+            let stop_date = next_rec ? next_rec.date : '2026.1.1'
+            let stop_frac = next_rec ? next_rec.year_frac : 2026
+            ivs.push({
+              is_authoritative: false,
+              start_date: rec.date,
+              start_frac: rec.year_frac,
+              state_id: Number(rec.state_id),
+              stop_date: stop_date,
+              stop_frac: stop_frac,
+            })
+          }
+        }
+        if (ivs.length > 0) {
+          city_intervals.set(city, ivs)
+        }
+      }
+    }
+
+    //2. Ingest authoritative state_capitals.json intervals
+    all_state_ids = Object.keys(state_capitals)
+    for (let z = 0; z < all_state_ids.length; z++) {
+      let state_id = all_state_ids[z]
+      let sc_entry = state_capitals[state_id]
+      if (!sc_entry || sc_entry.acapital || !sc_entry.timeline || sc_entry.timeline.length === 0)
+        continue
+
+      let s_id_num = Number(state_id)
+
+      for (let a = 0; a < sc_entry.timeline.length; a++) {
+        let tl_item = sc_entry.timeline[a]
+        if (!tl_item.start)
+          continue
+
+        let target_city: CityIndexEntry | null = null
+
+        if (tl_item.key && indexed[tl_item.key]) {
+          target_city = indexed[tl_item.key]
+        } else if (tl_item.key) {
+          let n_k = normalizeCityKey(tl_item.key)
+          target_city = norm_key_to_city.get(n_k) || null
+        }
+
+        if (!target_city && tl_item.city) {
+          let clean_c = tl_item.city.toLowerCase().trim()
+          for (let [nc, city_list] of name_country_to_city) {
+            if (nc.startsWith(`${clean_c}|`)) {
+              target_city = city_list[0]
+              break
+            }
+          }
+        }
+
+        if (target_city) {
+          if (!city_intervals.has(target_city)) {
+            city_intervals.set(target_city, [])
+          }
+          let s_p = parseYearMonthDay(tl_item.start)
+          let e_p = tl_item.stop ? parseYearMonthDay(tl_item.stop) : { date: '2026.1.1', year_frac: 2026 }
+          city_intervals.get(target_city)!.push({
+            is_authoritative: true,
+            start_date: tl_item.start.trim(),
+            start_frac: tl_item.start_frac !== undefined ? tl_item.start_frac : s_p.year_frac,
+            state_id: s_id_num,
+            stop_date: tl_item.stop ? tl_item.stop.trim() : '2026.1.1',
+            stop_frac: tl_item.stop_frac !== undefined ? tl_item.stop_frac : e_p.year_frac,
+          })
+        }
+      }
+    }
+
+    //3. Resolve discrete capital dictionary and records for each city
+    all_city_intervals = Array.from(city_intervals.entries())
+    for (let b = 0; b < all_city_intervals.length; b++) {
+      let city = all_city_intervals[b][0]
+      let intervals = all_city_intervals[b][1]
+      let pts: Array<{ date: string; year_frac: number }> = []
+      let seen_fracs = new Set<number>()
+
+      for (let c = 0; c < intervals.length; c++) {
+        let iv = intervals[c]
+        if (!seen_fracs.has(iv.start_frac)) {
+          seen_fracs.add(iv.start_frac)
+          pts.push({ date: iv.start_date, year_frac: iv.start_frac })
+        }
+        if (!seen_fracs.has(iv.stop_frac)) {
+          seen_fracs.add(iv.stop_frac)
+          pts.push({ date: iv.stop_date, year_frac: iv.stop_frac })
+        }
+      }
+
+      pts.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+
+      let cap_dict: Record<string, number | null> = {}
+      let prev_sid: number | null | undefined = undefined
+
+      for (let c = 0; c < pts.length; c++) {
+        let p = pts[c]
+        let sample_frac = p.year_frac + 0.0001
+        let matching_ivs = intervals.filter((arg0_iv) => sample_frac >= arg0_iv.start_frac && sample_frac <= arg0_iv.stop_frac)
+        let active_iv: { is_authoritative?: boolean; state_id: number } | null = null
+
+        if (matching_ivs.length > 0) {
+          let auth_ivs = matching_ivs.filter((arg0_iv) => arg0_iv.is_authoritative)
+          if (auth_ivs.length > 0) {
+            active_iv = auth_ivs[auth_ivs.length - 1]
+          } else {
+            active_iv = matching_ivs[matching_ivs.length - 1]
+          }
+        }
+
+        let sid = active_iv ? active_iv.state_id : null
+        if (sid !== prev_sid) {
+          cap_dict[p.date] = sid
+          prev_sid = sid
+        }
+      }
+
+      city.capital = cap_dict as any
+      city.capital_records = Object.keys(cap_dict).map((arg0_dk) => {
+        let parsed = parseYearMonthDay(arg0_dk)
+        return {
+          date: arg0_dk,
+          state_id: cap_dict[arg0_dk],
+          year_frac: parsed.year_frac,
+        }
+      }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+      updated_count++
+    }
+
+    console.log(`[StadesterService] Successfully bound authoritative state capitals to ${updated_count} cities.`)
   },
 
   /**
@@ -657,6 +856,14 @@ export let StadesterService = {
       }
     }
 
+    let sc_file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+    if (fs.existsSync(sc_file_path)) {
+      let sc_stat = fs.statSync(sc_file_path)
+      if (sc_stat.mtimeMs > StadesterService.state_capitals_mtime) {
+        StadesterService.datasets.delete(dataset_name)
+      }
+    }
+
     if (StadesterService.datasets.has(dataset_name))
       return StadesterService.datasets.get(dataset_name)!
 
@@ -745,6 +952,7 @@ export let StadesterService = {
 
     raw_data = {} as any
     StadesterService.applyCityMetadata(indexed_record)
+    StadesterService.applyStateCapitals(indexed_record)
     StadesterService.datasets.set(dataset_name, indexed_record)
     console.log(`[StadesterService] Successfully indexed ${all_city_keys.length} cities for ${dataset_name}.`)
 

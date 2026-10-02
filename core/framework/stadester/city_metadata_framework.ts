@@ -456,3 +456,27 @@ export let isCityCapitalAtYear = function (
   return Boolean(getCityActiveCapitalRecord(city, year_or_date, state_validator))
 }
 
+/**
+ * Normalises a city key or name by stripping dataset prefixes, diacritics, and punctuation for fuzzy matching.
+ *
+ * @param {string} arg0_key - City key or name string
+ *
+ * @returns {string} Normalised alphanumeric key
+ */
+export let normalizeCityKey = function (arg0_key: string): string {
+  //Convert from parameters
+  let key = arg0_key
+
+  //Guard clauses
+  if (!key)
+    return ''
+
+  //Return statement
+  return key
+    .replace(/^(stadester|ghsl|oxford)-/i, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+}
+

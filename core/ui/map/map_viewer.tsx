@@ -130,6 +130,15 @@ export interface MapViewerProps {
   onToggleHistoricalBorders?: (arg0_enabled: boolean) => void
 }
 
+interface MapDetailsNavEntry {
+  anchorCoord?: [number, number] | null
+  anchorScreen?: { x: number; y: number } | null
+  city?: CityPoint | CityFullRecord | null
+  cityKey?: string | null
+  countryFeature?: HistoricalBorderFeature | null
+  type: 'city' | 'country'
+}
+
 /**
  * Main map viewer component rendering multi-projection deck.gl views with 2D/3D overlays.
  *
@@ -217,8 +226,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let equal_earth_land_geo_json: any
   let graticule_paths: { path: [number, number][] }[]
   let handle_click: (info: any) => void
+  let handle_close_all_details: () => void
   let handle_hover: (info: any) => void
+  let handle_map_select_city: (arg0_city: CityPoint) => void
+  let handle_nav_back: () => void
   let handle_reset_view: () => void
+  let handle_select_city_from_country: (arg0_city: CityPoint) => void
+  let handle_select_country_from_city: (arg0_state_id?: number | string, arg0_country_name?: string) => void
   let hover_raf_ref = useRef<number | null>(null)
   let is_interacting_ref = useRef<boolean>(false)
   let last_country_ref = useRef<CountryFeature | null>(null)
@@ -240,9 +254,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let flyout_open = (props.settingsDrawerOpen !== undefined) ? props.settingsDrawerOpen : internal_flyout_open
   let set_flyout_open = on_toggle_settings_drawer || set_internal_flyout_open
 
+  let [active_panel_type, set_active_panel_type] = useState<'city' | 'country' | null>(null)
   let [hovered_city, set_hovered_city] = useState<CityPoint | null>(null)
   let [hovered_city_pos, set_hovered_city_pos] = useState<{ x: number; y: number } | null>(null)
   let [hovered_historical_feature, set_hovered_historical_feature] = useState<HistoricalBorderFeature | null>(null)
+  let [nav_history, set_nav_history] = useState<MapDetailsNavEntry[]>([])
   let [selected_historical_feature, set_selected_historical_feature] = useState<HistoricalBorderFeature | null>(null)
   let [selected_historical_anchor_coord, set_selected_historical_anchor_coord] = useState<[number, number] | null>(null)
   let [selected_historical_anchor_screen, set_selected_historical_anchor_screen] = useState<{ x: number; y: number } | null>(null)
@@ -272,10 +288,24 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   useEffect(() => {
     if (!selected_countries || selected_countries.length === 0) {
-      if (!selected_country)
+      if (!selected_country && active_panel_type !== 'country')
         set_selected_historical_feature(null)
     }
-  }, [selected_countries, selected_country])
+  }, [selected_countries, selected_country, active_panel_type])
+
+  useEffect(() => {
+    if (selected_city && !selected_historical_feature && !active_panel_type) {
+      set_active_panel_type('city')
+    } else if (!selected_city && active_panel_type === 'city' && nav_history.length === 0) {
+      set_active_panel_type(null)
+    }
+  }, [selected_city, selected_historical_feature, active_panel_type, nav_history.length])
+
+  useEffect(() => {
+    if (!selected_historical_feature && active_panel_type === 'country' && nav_history.length === 0) {
+      set_active_panel_type(null)
+    }
+  }, [selected_historical_feature, active_panel_type, nav_history.length])
 
   useEffect(() => {
     if (selected_historical_feature && historical_borders_result.bordersData) {
@@ -536,6 +566,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
       if (info.layer?.id?.includes('historical-borders') || (info.object && (info.object.properties?.gwcode !== undefined || info.object.properties?.keyframes !== undefined))) {
         let hist_feat = info.object as HistoricalBorderFeature
+        set_nav_history([])
+        set_active_panel_type('country')
+        if (on_close_city_details)
+          on_close_city_details()
         set_selected_historical_feature(hist_feat)
         if (info.coordinate) {
           set_selected_historical_anchor_coord([info.coordinate[0], info.coordinate[1]])
@@ -622,6 +656,23 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     []
   )
 
+  handle_map_select_city = useCallback(
+    (arg0_city: CityPoint) => {
+      //Convert from parameters
+      let city = arg0_city
+
+      //Function body
+      set_nav_history([])
+      set_active_panel_type('city')
+      set_selected_historical_feature(null)
+      set_selected_historical_anchor_coord(null)
+      set_selected_historical_anchor_screen(null)
+      if (on_select_city)
+        on_select_city(city)
+    },
+    [on_select_city]
+  )
+
   elevation_spikes_data = useElevationSpikes({
     heightmapConfig: heightmap_config,
     raster,
@@ -694,7 +745,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       if (on_hover_city)
         on_hover_city(arg0_city, arg1_x, arg2_y)
     },
-    onSelectCity: on_select_city,
+    onSelectCity: handle_map_select_city,
     selectedCityKey: selected_city_key,
     stadesterCities: stadester_cities,
     stadesterConfig: stadester_config,
@@ -705,6 +756,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedHistoricalFeature: selected_historical_feature,
     hoveredHistoricalFeature: hovered_historical_feature,
     onSelectHistoricalFeature: (feat, coord, x, y) => {
+      set_nav_history([])
+      set_active_panel_type('country')
+      if (on_close_city_details)
+        on_close_city_details()
       set_selected_historical_feature(feat)
       if (coord) {
         set_selected_historical_anchor_coord([coord[0], coord[1]])
@@ -793,7 +848,81 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     return selected_historical_anchor_screen || null
   }, [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, projection, proj_view_states])
 
-  let handle_select_country_from_city = useCallback(
+  handle_close_all_details = useCallback(() => {
+    //Function body
+    set_nav_history([])
+    set_active_panel_type(null)
+    set_selected_historical_feature(null)
+    set_selected_historical_anchor_coord(null)
+    set_selected_historical_anchor_screen(null)
+    if (on_close_city_details)
+      on_close_city_details()
+    if (on_clear_countries) {
+      on_clear_countries()
+    } else if (on_select_country) {
+      on_select_country(null)
+    }
+  }, [on_close_city_details, on_clear_countries, on_select_country])
+
+  handle_nav_back = useCallback(() => {
+    //Guard clauses
+    if (nav_history.length === 0)
+      return
+
+    //Function body
+    let last_index = nav_history.length - 1
+    let previous_entry = nav_history[last_index]
+    set_nav_history((arg0_prev) => arg0_prev.slice(0, -1))
+
+    if (previous_entry.type === 'city') {
+      set_selected_historical_feature(null)
+      set_selected_historical_anchor_coord(null)
+      set_selected_historical_anchor_screen(null)
+      set_active_panel_type('city')
+      if (previous_entry.city && on_select_city)
+        on_select_city(previous_entry.city as CityPoint)
+    } else if (previous_entry.type === 'country') {
+      if (on_close_city_details)
+        on_close_city_details()
+      set_active_panel_type('country')
+      if (previous_entry.countryFeature) {
+        set_selected_historical_feature(previous_entry.countryFeature)
+        set_selected_historical_anchor_coord(previous_entry.anchorCoord || null)
+        set_selected_historical_anchor_screen(previous_entry.anchorScreen || null)
+        if (on_select_country) {
+          on_select_country(previous_entry.countryFeature as unknown as CountryFeature)
+        } else if (on_toggle_country) {
+          on_toggle_country(previous_entry.countryFeature as unknown as CountryFeature)
+        }
+      }
+    }
+  }, [nav_history, on_select_city, on_close_city_details, on_select_country, on_toggle_country])
+
+  handle_select_city_from_country = useCallback(
+    (arg0_city: CityPoint) => {
+      //Convert from parameters
+      let city = arg0_city
+
+      //Function body
+      if (selected_historical_feature) {
+        set_nav_history((arg0_prev) => [
+          ...arg0_prev,
+          {
+            anchorCoord: selected_historical_anchor_coord || null,
+            anchorScreen: selected_historical_anchor_screen || null,
+            countryFeature: selected_historical_feature,
+            type: 'country',
+          },
+        ])
+      }
+      set_active_panel_type('city')
+      if (on_select_city)
+        on_select_city(city)
+    },
+    [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, on_select_city]
+  )
+
+  handle_select_country_from_city = useCallback(
     (arg0_state_id?: number | string, arg0_country_name?: string) => {
       //Convert from parameters
       let country_name = arg0_country_name
@@ -801,6 +930,19 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
       //Declare local instance variables
       let applyTargetFeature = function (arg0_feat: any) {
+        if (selected_city) {
+          set_nav_history((arg0_prev) => [
+            ...arg0_prev,
+            {
+              anchorCoord: (selected_city as any).coords ? [(selected_city as any).coords[1], (selected_city as any).coords[0]] : null,
+              anchorScreen: selected_city_anchor || null,
+              city: selected_city,
+              cityKey: selected_city_key,
+              type: 'city',
+            },
+          ])
+        }
+        set_active_panel_type('country')
         set_selected_historical_feature(arg0_feat)
         if (selected_city_anchor)
           set_selected_historical_anchor_screen(selected_city_anchor)
@@ -870,7 +1012,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           })
       }
     },
-    [historical_borders_result, selected_city, selected_city_anchor, timeline_year, on_select_country, on_toggle_country]
+    [historical_borders_result, selected_city, selected_city_anchor, selected_city_key, timeline_year, on_select_country, on_toggle_country]
   )
 
   //Return statement
@@ -1046,18 +1188,19 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       )}
 
       {/* Stadestér City Details Panel (Floating on desktop) */}
-      {ui_visible && !is_mobile && selected_city && (
+      {ui_visible && !is_mobile && selected_city && active_panel_type !== 'country' && (
         <CityDetailsPanel
           anchorPos={selected_city_anchor}
           city={selected_city}
           currentYear={timeline_year || 2025}
-          onClose={on_close_city_details || (() => { })}
+          onBack={nav_history.length > 0 ? handle_nav_back : undefined}
+          onClose={handle_close_all_details}
           onSelectCountry={handle_select_country_from_city}
         />
       )}
 
       {/* Historical Country Details Panel (Floating on desktop) */}
-      {ui_visible && !is_mobile && selected_historical_feature && (
+      {ui_visible && !is_mobile && selected_historical_feature && active_panel_type !== 'city' && (
         <HistoricalBorderDetailsPanel
           anchorPos={selected_historical_anchor}
           cities={stadester_cities}
@@ -1065,18 +1208,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           currentYear={timeline_year || 1950}
           feature={selected_historical_feature}
           isCalculatingStats={is_calculating_stats}
-          onSelectCity={on_select_city}
+          onBack={nav_history.length > 0 ? handle_nav_back : undefined}
+          onSelectCity={handle_select_city_from_country}
           raster={raster}
-          onClose={() => {
-            set_selected_historical_feature(null)
-            set_selected_historical_anchor_coord(null)
-            set_selected_historical_anchor_screen(null)
-            if (on_clear_countries) {
-              on_clear_countries()
-            } else if (on_select_country) {
-              on_select_country(null)
-            }
-          }}
+          onClose={handle_close_all_details}
           onJumpToYear={(yr) => {
             if (props.onChangeYear)
               props.onChangeYear(yr)
@@ -1203,17 +1338,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           onChangeVariableSelector={props.onChangeVariableSelector}
           raster={raster}
           onClearCountries={on_clear_countries || NOOP_FN}
-          onCloseCity={on_close_city_details || NOOP_FN}
-          onCloseHistoricalFeature={() => {
-            set_selected_historical_feature(null)
-            set_selected_historical_anchor_coord(null)
-            set_selected_historical_anchor_screen(null)
-            if (on_clear_countries) {
-              on_clear_countries()
-            } else if (on_select_country) {
-              on_select_country(null)
-            }
-          }}
+          onCloseCity={handle_close_all_details}
+          onCloseHistoricalFeature={handle_close_all_details}
           onJumpToYear={(yr) => {
             if (props.onChangeYear)
               props.onChangeYear(yr)
@@ -1224,10 +1350,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           onToggleCountry={on_toggle_country || NOOP_FN}
           onToggleMapMode={on_toggle_map_mode}
           onSelectCountry={handle_select_country_from_city}
-          selectedCity={selected_city}
+          selectedCity={active_panel_type !== 'country' ? selected_city : null}
           selectedCountries={selected_countries || EMPTY_ARRAY}
-          selectedHistoricalFeature={selected_historical_feature}
-          onSelectCity={on_select_city}
+          selectedHistoricalFeature={active_panel_type !== 'city' ? selected_historical_feature : null}
+          onSelectCity={handle_select_city_from_country}
           setCircleOverlayConfig={set_circle_overlay_config || NOOP_FN}
           setHeightmapConfig={set_heightmap_config || NOOP_FN}
           setStadesterConfig={set_stadester_config}

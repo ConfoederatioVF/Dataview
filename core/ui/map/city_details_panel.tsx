@@ -11,6 +11,7 @@ export interface CityDetailsPanelProps {
   city: CityFullRecord | CityPoint | null
   currentYear: number
   embedded?: boolean
+  onBack?: () => void
   onClose: () => void
   onSelectCountry?: (arg0_state_id?: number | string, arg0_country_name?: string) => void
 }
@@ -63,6 +64,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   let city = props.city
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
+  let on_back = props.onBack
   let on_close = props.onClose
   let on_select_country = props.onSelectCountry
 
@@ -445,21 +447,33 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       {/* Panel Header */}
       {!embedded && (
         <div className="flex items-start justify-between pb-2 border-b border-border/60">
-          <div className="min-w-0 pr-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Icon name="location_city" className="text-primary text-base shrink-0" />
-              <span className="font-bold text-sm truncate text-white" title={city.name}>
-                {display_city_name}
-              </span>
-              {is_capital && (
-                <span className="text-xs font-normal text-muted-foreground">
-                  ({t.mapPanels.cityDetails.capitalBadge || 'Capital'})
+          <div className="flex items-center gap-2 min-w-0 pr-2">
+            {on_back && (
+              <button
+                type="button"
+                onClick={on_back}
+                className="w-7 h-7 rounded-none bg-muted/40 border border-border hover:bg-muted/80 hover:border-primary/60 flex items-center justify-center shrink-0 text-muted-foreground hover:text-white cursor-pointer transition-colors"
+                title={t.mapPanels.cityDetails.back || 'Back'}
+              >
+                <Icon name="arrow_back" className="text-sm" />
+              </button>
+            )}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Icon name="location_city" className="text-primary text-base shrink-0" />
+                <span className="font-bold text-sm truncate text-white" title={city.name}>
+                  {display_city_name}
                 </span>
-              )}
-            </div>
-            <div className="text-[11px] text-muted-foreground truncate mt-0.5">
-              {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
-              {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+                {is_capital && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    ({t.mapPanels.cityDetails.capitalBadge || 'Capital'})
+                  </span>
+                )}
+              </div>
+              <div className="text-[11px] text-muted-foreground truncate mt-0.5">
+                {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
+                {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+              </div>
             </div>
           </div>
           <button
@@ -475,9 +489,21 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
       {embedded && (
         <div className="pb-1 text-[11px] text-muted-foreground border-b border-border/60 flex items-center justify-between">
-          <div>
-            {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
-            {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+          <div className="flex items-center gap-1.5 min-w-0">
+            {on_back && (
+              <button
+                type="button"
+                onClick={on_back}
+                className="p-0.5 text-muted-foreground hover:text-white cursor-pointer shrink-0 transition-colors"
+                title={t.mapPanels.cityDetails.back || 'Back'}
+              >
+                <Icon name="arrow_back" className="text-xs" />
+              </button>
+            )}
+            <div className="truncate">
+              {[city.country, city.region].filter(Boolean).join(' • ') || t.mapPanels.cityDetails.urbanSettlement}
+              {city.coords && ` [${city.coords[0].toFixed(2)}°, ${city.coords[1].toFixed(2)}°]`}
+            </div>
           </div>
           {is_capital && (
             <span className="text-xs font-normal text-muted-foreground">

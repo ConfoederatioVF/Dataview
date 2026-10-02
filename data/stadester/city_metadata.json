@@ -1570,6 +1570,14 @@
         "name": "Al-Quds"
       },
       {
+        "date": "1099.7.22",
+        "name": "Jerusalem"
+      },
+      {
+        "date": "1187.10.2",
+        "name": "Al-Quds"
+      },
+      {
         "date": "1800.1.1",
         "name": "Jerusalem"
       }
@@ -28500,7 +28508,7 @@
         "name": "Lucilinburhuc"
       },
       {
-        "date": "1800.1.1",
+        "date": "1059.1.1",
         "name": "Luxembourg"
       }
     ],
@@ -83455,7 +83463,7 @@
     ]
   },
   {
-    "name": "Yerushalayim",
+    "name": "East Jerusalem",
     "coords": [
       35.22243,
       31.77688
@@ -83463,7 +83471,7 @@
     "historical_names": [
       {
         "date": "1890.1.1",
-        "name": "Yerushalayim"
+        "name": "East Jerusalem"
       }
     ]
   },
@@ -286686,15 +286694,27 @@
     "historical_names": [
       {
         "date": "-1000.1.1",
-        "name": "Yerushalayim"
+        "name": "Jerusalem"
       },
       {
-        "date": "130.1.1",
+        "date": "135.1.1",
         "name": "Aelia Capitolina"
       },
       {
         "date": "638.1.1",
         "name": "Al-Quds"
+      },
+      {
+        "date": "1099.7.22",
+        "name": "Jerusalem"
+      },
+      {
+        "date": "1187.10.2",
+        "name": "Al-Quds"
+      },
+      {
+        "date": "1800.1.1",
+        "name": "Jerusalem"
       }
     ],
     "capital": {
@@ -296937,7 +296957,7 @@
         "name": "Lucilinburhuc"
       },
       {
-        "date": "1975.1.1",
+        "date": "1059.1.1",
         "name": "Luxembourg"
       }
     ],
@@ -331353,7 +331373,7 @@
         "name": "Zwickaw"
       },
       {
-        "date": "1975.1.1",
+        "date": "1800.1.1",
         "name": "Zwickau"
       }
     ]
@@ -386356,16 +386376,8 @@
     ],
     "historical_names": [
       {
-        "date": "-1000.1.1",
-        "name": "Yerushalayim"
-      },
-      {
-        "date": "130.1.1",
-        "name": "Aelia Capitolina"
-      },
-      {
-        "date": "638.1.1",
-        "name": "Al-Quds"
+        "date": "1975.1.1",
+        "name": "Jerusalem"
       }
     ]
   },

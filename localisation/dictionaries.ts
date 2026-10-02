@@ -281,6 +281,7 @@ export interface LocalisationConfig {
       alsoRecordedAs: string
       area: string
       areaKm2: string
+      back: string
       capitalBadge: string
       capitalOf: string
       closeCityDetails: string
@@ -304,6 +305,7 @@ export interface LocalisationConfig {
       alsoRecordedAs: string
       analyticsDrawer: string
       areaKm2: string
+      back: string
       boundaryUpdated: string
       calculateArea: string
       calculated: string

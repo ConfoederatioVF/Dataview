@@ -139,8 +139,20 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
   if (cap_name) {
     cap_names = cap_name.split(/[,/]/).map((arg0_s) => arg0_s.trim()).filter(Boolean)
-  } else if (!is_acapital && state_id !== undefined && cities && cities.length > 0) {
-    let matching_cities = cities.filter((arg0_c) => arg0_c.isCapital && (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id)))
+  } else if (!is_acapital && cities && cities.length > 0) {
+    let c_norm = (country_name || '').toLowerCase().trim()
+    let matching_cities = cities.filter((arg0_c) => {
+      if (!arg0_c.isCapital)
+        return false
+      if (state_id !== undefined && (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id)))
+        return true
+      if (c_norm) {
+        let cap_of = (arg0_c.capitalOf || arg0_c.capital_state_name || '').toLowerCase().trim()
+        if (cap_of && (cap_of === c_norm || cap_of.includes(c_norm) || c_norm.includes(cap_of)))
+          return true
+      }
+      return false
+    })
     if (matching_cities.length > 0) {
       cap_names = Array.from(new Set(matching_cities.map((arg0_c) => arg0_c.name).filter(Boolean)))
     }

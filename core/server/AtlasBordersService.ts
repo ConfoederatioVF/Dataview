@@ -354,25 +354,33 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
 }
 
 let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
+let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
 
 /**
  * Resolves the capital information for a state at a specific fractional year.
  *
  * @param {number} arg0_state_id
  * @param {number} arg1_year_frac
+ * @param {string} [arg2_entity_name]
  *
  * @returns {{ is_acapital: boolean; capname?: string; capkey?: string }}
  */
 let getStateCapitalInfo = function (
   arg0_state_id: number,
-  arg1_year_frac: number
+  arg1_year_frac: number,
+  arg2_entity_name?: string
 ): { capkey?: string; capname?: string; is_acapital: boolean } {
   //Convert from parameters
+  let entity_name = arg2_entity_name
   let state_id = arg0_state_id
   let year_frac = arg1_year_frac
 
   //Declare local instance variables
+  let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
+  let clean_e: string
   let file_path: string
+  let info: { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
+  let states_path: string
 
   //Function body
   if (!state_capitals_data) {
@@ -388,7 +396,70 @@ let getStateCapitalInfo = function (
     }
   }
 
-  let info = state_capitals_data ? state_capitals_data[state_id] : undefined
+  info = state_capitals_data ? state_capitals_data[state_id] : undefined
+
+  //Fallback to match by entity name if state_id has no direct capital record
+  if (!info && entity_name) {
+    if (!states_name_map) {
+      states_name_map = new Map()
+      states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+      if (fs.existsSync(states_path)) {
+        try {
+          let raw_states = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
+          let all_keys = Object.keys(raw_states)
+          for (let i = 0; i < all_keys.length; i++) {
+            let s = raw_states[all_keys[i]]
+            if (s && s.state_id !== undefined) {
+              let s_name = (s.name || '').toLowerCase().trim()
+              if (!states_name_map.has(s_name))
+                states_name_map.set(s_name, [])
+              states_name_map.get(s_name)!.push({
+                start_year: s.start_year ?? -99999,
+                state_id: Number(s.state_id),
+                stop_year: s.stop_year ?? 99999,
+              })
+            }
+          }
+        } catch {
+          //Ignore parsing error
+        }
+      }
+    }
+
+    clean_e = entity_name.toLowerCase().trim()
+    candidates = []
+
+    for (let [s_name, list] of states_name_map.entries()) {
+      let base_s = s_name.replace(/\(.*?\)/g, '').trim()
+      let is_match = (base_s === clean_e) ||
+        (clean_e.length >= 4 && (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' ')))
+      if (is_match) {
+        for (let j = 0; j < list.length; j++) {
+          if (year_frac >= list[j].start_year && year_frac <= list[j].stop_year)
+            candidates.push(list[j])
+        }
+      }
+    }
+
+    if (candidates.length > 0 && state_capitals_data) {
+      candidates.sort((arg0_a, arg0_b) => {
+        let a_info = state_capitals_data![arg0_a.state_id]
+        let a_has_tl = a_info && !a_info.acapital && a_info.timeline && a_info.timeline.length > 0 ? 1 : 0
+        let b_info = state_capitals_data![arg0_b.state_id]
+        let b_has_tl = b_info && !b_info.acapital && b_info.timeline && b_info.timeline.length > 0 ? 1 : 0
+        return b_has_tl - a_has_tl
+      })
+
+      for (let k = 0; k < candidates.length; k++) {
+        let candidate_info = state_capitals_data[candidates[k].state_id]
+        if (candidate_info) {
+          info = candidate_info
+          break
+        }
+      }
+    }
+  }
+
   if (!info)
     return { is_acapital: false }
 
@@ -1056,7 +1127,7 @@ export class AtlasBordersService {
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year)
+        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
 
         features.push({
           bbox: geom_bbox,
@@ -1194,7 +1265,7 @@ export class AtlasBordersService {
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year)
+        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
 
         features.push({
           bbox: geom_bbox,

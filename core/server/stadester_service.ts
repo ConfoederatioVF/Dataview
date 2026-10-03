@@ -454,6 +454,15 @@ export let StadesterService = {
         if (!local_is_direct_match)
           continue
 
+        //Do not conflate Kathmandu and Patan/Lalitpur
+        if ((local_meta_name.includes('kathmandu') || local_meta_name.includes('kantipur')) &&
+            (local_best_name.includes('patan') || local_best_name.includes('lalitpur')))
+          continue
+
+        if ((local_meta_name.includes('patan') || local_meta_name.includes('lalitpur')) &&
+            (local_best_name.includes('kathmandu') || local_best_name.includes('kantipur')))
+          continue
+
         if (meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')) {
           best_city.name = meta.name
           best_city.historical_names = meta.historical_names
@@ -505,11 +514,13 @@ export let StadesterService = {
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
                   let other_name_lower = (other.name || '').toLowerCase().trim()
-                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem
+                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem, or Kathmandu and Patan/Lalitpur
                   if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
                       (base_name.includes('city of london') && other_name_lower === 'london') ||
                       (base_name === 'jerusalem' && other_name_lower.includes('east jerusalem')) ||
-                      (base_name.includes('east jerusalem') && other_name_lower === 'jerusalem')) {
+                      (base_name.includes('east jerusalem') && other_name_lower === 'jerusalem') ||
+                      ((base_name.includes('kathmandu') || base_name.includes('kantipur')) && (other_name_lower.includes('patan') || other_name_lower.includes('lalitpur'))) ||
+                      ((base_name.includes('patan') || base_name.includes('lalitpur')) && (other_name_lower.includes('kathmandu') || other_name_lower.includes('kantipur')))) {
                     continue
                   }
                   let other_aliases = [
@@ -723,8 +734,8 @@ export let StadesterService = {
 
       for (let c = 0; c < pts.length; c++) {
         let p = pts[c]
-        let sample_frac = p.year_frac + 0.0001
-        let matching_ivs = intervals.filter((arg0_iv) => sample_frac >= arg0_iv.start_frac && sample_frac <= arg0_iv.stop_frac)
+        let sample_frac = p.year_frac >= 2026 ? 2026 : p.year_frac + 0.0001
+        let matching_ivs = intervals.filter((arg0_iv) => sample_frac >= arg0_iv.start_frac && (sample_frac <= arg0_iv.stop_frac || (arg0_iv.stop_frac >= 2026 && p.year_frac >= 2026)))
         let active_iv: { is_authoritative?: boolean; state_id: number } | null = null
 
         if (matching_ivs.length > 0) {
@@ -1238,7 +1249,7 @@ export let StadesterService = {
 
       //Allow cities alive at target_year (with 1975+ extension for modern metropolitan entries)
       let is_in_range = (target_year >= start_yr && target_year <= end_yr) ||
-        (end_yr >= 1975 && target_year >= 1975 && target_year <= 2025)
+        (end_yr >= 1975 && target_year >= 1975 && target_year <= 2026)
 
       if (!is_in_range)
         continue

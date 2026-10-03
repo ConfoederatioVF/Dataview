@@ -668,6 +668,10 @@ export let StadesterService = {
         }
 
         if (target_city) {
+          let state = StadesterService.getStateById(s_id_num)
+          if (state && !isCityInsideStateBBox(target_city, state, 3.5))
+            continue
+
           if (!city_intervals.has(target_city)) {
             city_intervals.set(target_city, [])
           }
@@ -714,15 +718,25 @@ export let StadesterService = {
         let p = pts[c]
         let sample_frac = p.year_frac >= 2026 ? 2026 : p.year_frac + 0.0001
         let matching_ivs = intervals.filter((arg0_iv) => sample_frac >= arg0_iv.start_frac && (sample_frac <= arg0_iv.stop_frac || (arg0_iv.stop_frac >= 2026 && p.year_frac >= 2026)))
-        let active_iv: { is_authoritative?: boolean; state_id: number } | null = null
+        let active_iv: { is_authoritative?: boolean; start_frac?: number; state_id: number; stop_frac?: number } | null = null
 
         if (matching_ivs.length > 0) {
           let auth_ivs = matching_ivs.filter((arg0_iv) => arg0_iv.is_authoritative)
-          if (auth_ivs.length > 0) {
-            active_iv = auth_ivs[auth_ivs.length - 1]
-          } else {
-            active_iv = matching_ivs[matching_ivs.length - 1]
-          }
+          let candidates = auth_ivs.length > 0 ? auth_ivs : matching_ivs
+
+          candidates.sort((arg0_a, arg0_b) => {
+            let state_a = StadesterService.getStateById(arg0_a.state_id)
+            let state_b = StadesterService.getStateById(arg0_b.state_id)
+            let inside_a = state_a ? (isCityInsideStateBBox(city, state_a, 3.5) ? 1 : 0) : 1
+            let inside_b = state_b ? (isCityInsideStateBBox(city, state_b, 3.5) ? 1 : 0) : 1
+            if (inside_a !== inside_b)
+              return inside_b - inside_a
+
+            let dur_a = (arg0_a.stop_frac !== undefined && arg0_a.start_frac !== undefined) ? (arg0_a.stop_frac - arg0_a.start_frac) : 99999
+            let dur_b = (arg0_b.stop_frac !== undefined && arg0_b.start_frac !== undefined) ? (arg0_b.stop_frac - arg0_b.start_frac) : 99999
+            return dur_a - dur_b
+          })
+          active_iv = candidates[0]
         }
 
         let sid = active_iv ? active_iv.state_id : null

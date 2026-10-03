@@ -331,8 +331,12 @@ function isCapitalInsideTargetPolygon (
   if (city.rawCoords && Array.isArray(city.rawCoords) && city.rawCoords.length >= 2) {
     pt_coords = [city.rawCoords[0], city.rawCoords[1]]
   } else if (city.coords && Array.isArray(city.coords) && city.coords.length >= 2) {
-    pt_coords = [city.coords[0], city.coords[1]]
-  } else if (city.position && Array.isArray(city.position) && city.position.length >= 2) {
+    pt_coords = [city.coords[1], city.coords[0]]
+  } else if (city.lon !== undefined && city.lat !== undefined) {
+    pt_coords = [Number(city.lon), Number(city.lat)]
+  } else if (city.lng !== undefined && city.lat !== undefined) {
+    pt_coords = [Number(city.lng), Number(city.lat)]
+  } else if (city.position && Array.isArray(city.position) && city.position.length >= 2 && (!city.projection || city.projection !== 'EqualEarth')) {
     pt_coords = [city.position[0], city.position[1]]
   }
 
@@ -345,6 +349,15 @@ function isCapitalInsideTargetPolygon (
   if (!target_feature && city.capital_state_id !== undefined && city.capital_state_id !== null) {
     target_feature = features_by_id.get(String(city.capital_state_id))
   }
+  if (!target_feature && (city.key || city.id)) {
+    let c_key = String(city.key || city.id)
+    for (let feat of features_by_id.values()) {
+      if (feat.properties?.capkey === c_key) {
+        target_feature = feat
+        break
+      }
+    }
+  }
   if (!target_feature && city.capitalOf && typeof city.capitalOf === 'string') {
     target_feature = features_by_name.get(city.capitalOf.toLowerCase().trim())
   }
@@ -355,6 +368,15 @@ function isCapitalInsideTargetPolygon (
     let search_name = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
     for (let [f_name, feat] of features_by_name.entries()) {
       if (f_name === search_name || f_name.includes(search_name) || search_name.includes(f_name)) {
+        target_feature = feat
+        break
+      }
+    }
+  }
+  if (!target_feature && city.country && typeof city.country === 'string') {
+    let country_norm = city.country.toLowerCase().trim()
+    for (let [f_name, feat] of features_by_name.entries()) {
+      if (f_name === country_norm || f_name.includes(country_norm) || country_norm.includes(f_name)) {
         target_feature = feat
         break
       }

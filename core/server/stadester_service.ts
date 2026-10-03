@@ -1200,6 +1200,7 @@ export let StadesterService = {
       options.day
     )
     let all_city_keys: string[]
+    let cshapes_capitals_by_city_key = new Map<string, { color?: string; name: string; state_id?: number | string }>()
     let indexed = StadesterService.loadDataset(dataset_name)
     let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
     let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
@@ -1212,6 +1213,102 @@ export let StadesterService = {
     //Function body
     let bugged_set = getBuggedCitiesSet()
     all_city_keys = Object.keys(indexed)
+
+    //Pre-resolve CShapes border capitals by coordinate proximity when target_year >= 1886
+    if (target_year >= 1886) {
+      try {
+        let cshapes_borders = AtlasBordersService.getBordersAtYear(target_year)
+        if (cshapes_borders && cshapes_borders.features) {
+          for (let feat of cshapes_borders.features) {
+            let p = feat.properties
+            if (!p || p.is_acapital)
+              continue
+            let cap_lat = p.caplat
+            let cap_lon = p.caplong
+            if (cap_lat === undefined || cap_lon === undefined)
+              continue
+
+            let best_city: CityIndexEntry | null = null
+            let best_score = -1
+
+            for (let j = 0; j < all_city_keys.length; j++) {
+              let c = indexed[all_city_keys[j]]
+              if (!c.coords)
+                continue
+
+              let is_alive = (target_year >= (c.min_year ?? -99999) && target_year <= (c.max_year ?? 99999)) ||
+                (c.max_year !== undefined && c.max_year >= 1975 && target_year >= 1975)
+              if (!is_alive)
+                continue
+
+              let c_lat = c.coords[0]
+              let c_lon = c.coords[1]
+              let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
+              if (dist > 0.45)
+                continue
+
+              if (feat.bbox) {
+                let pad = 1.0
+                if (c_lon < feat.bbox[0] - pad || c_lon > feat.bbox[2] + pad || c_lat < feat.bbox[1] - pad || c_lat > feat.bbox[3] + pad)
+                  continue
+              }
+
+              let score = 0
+              let c_name_lower = (c.name || '').toLowerCase().trim()
+              let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+              let cap_name_lower = (p.capname || '').toLowerCase().trim()
+              let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+              let is_name_match = false
+              if (cap_name_lower) {
+                let clean_c_name = c_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+                let clean_cap_name = cap_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+                if (
+                  c_name_lower === cap_name_lower ||
+                  c_name_nfd === cap_name_nfd ||
+                  clean_c_name === clean_cap_name ||
+                  clean_c_name.startsWith(clean_cap_name) ||
+                  clean_cap_name.startsWith(clean_c_name)
+                ) {
+                  is_name_match = true
+                } else if (c.other_names && Array.isArray(c.other_names)) {
+                  is_name_match = c.other_names.some((arg0_on: string) => {
+                    let on_lower = arg0_on.toLowerCase().trim()
+                    let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+                    return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
+                  })
+                }
+              }
+
+              if (is_name_match)
+                score += 50000
+              if (c.capital_records && c.capital_records.length > 0)
+                score += 10000
+              if (c.key && !c.key.includes('agglomeration'))
+                score += 5000
+              score += Math.max(0, Math.round((0.5 - dist) * 2000))
+              score += Math.min(1000, Math.round((c.max_pop || 0) / 1000))
+
+              if (score > best_score) {
+                best_score = score
+                best_city = c
+              }
+            }
+
+            if (best_city) {
+              cshapes_capitals_by_city_key.set(best_city.key, {
+                color: p.color || p.fillColor || '#FFDC00',
+                name: p.name,
+                state_id: p.state_id || p.gwcode,
+              })
+            }
+          }
+        }
+      } catch (arg0_err) {
+        console.error('[StadesterService] Error resolving CShapes capitals by coordinate:', arg0_err)
+      }
+    }
 
     for (let i = 0; i < all_city_keys.length; i++) {
       let city = indexed[all_city_keys[i]]
@@ -1372,21 +1469,23 @@ export let StadesterService = {
         return true
       })
 
+      let cs_cap = cshapes_capitals_by_city_key.get(city.key)
       let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
-      let is_capital_val = Boolean(cap_rec && cap_state)
+      let is_capital_val = Boolean(cs_cap || (cap_rec && cap_state))
 
       //Protect active capitals from population threshold culling
       if (!is_capital_val && pop < min_pop)
         continue
 
-      let cap_color_val = cap_state?.fill_color || null
-      let polity_name = cap_state?.name || undefined
+      let cap_color_val = cs_cap?.color || cap_state?.fill_color || null
+      let cap_state_id = cs_cap?.state_id || cap_rec?.state_id || undefined
+      let polity_name = cs_cap?.name || cap_state?.name || undefined
       let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
 
       result_cities.push({
         area: area_val,
         capital_color: cap_color_val || undefined,
-        capital_state_id: cap_rec?.state_id || undefined,
+        capital_state_id: cap_state_id,
         capital_state_name: polity_name,
         capitalOf: polity_name,
         colour: city.colour,
@@ -1514,15 +1613,42 @@ export let StadesterService = {
       })
 
       let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
+      let cap_color: string | undefined = cap_state?.fill_color || undefined
+      let cap_sid: number | string | undefined = cap_rec?.state_id || undefined
       let is_capital = Boolean(cap_rec && cap_state)
       let polity_name = cap_state?.name || undefined
 
+      if (num_yr >= 1886 && entry.coords) {
+        try {
+          let cshapes_borders = AtlasBordersService.getBordersAtYear(num_yr)
+          if (cshapes_borders && cshapes_borders.features) {
+            let c_lat = entry.coords[0]
+            let c_lon = entry.coords[1]
+            for (let feat of cshapes_borders.features) {
+              let p = feat.properties
+              if (!p || p.is_acapital || p.caplat === undefined || p.caplong === undefined)
+                continue
+              let dist = Math.hypot(c_lon - p.caplong, c_lat - p.caplat)
+              if (dist <= 0.45) {
+                cap_color = p.color || p.fillColor || '#FFDC00'
+                cap_sid = p.state_id || p.gwcode
+                is_capital = true
+                polity_name = p.name
+                break
+              }
+            }
+          }
+        } catch {
+          //Ignore CShapes lookup error
+        }
+      }
+
       return {
         ...entry,
-        capital_color: cap_state?.fill_color || undefined,
-        capital_state_id: cap_rec?.state_id || undefined,
+        capital_color: cap_color,
+        capital_state_id: cap_sid,
         capital_state_name: polity_name,
-        capitalColor: cap_state?.fill_color || undefined,
+        capitalColor: cap_color,
         capitalOf: polity_name,
         is_capital: is_capital,
         isCapital: is_capital,

@@ -73,6 +73,8 @@ function getShortCityLabel (arg0_name: string): string {
  * @param {Map<string, { capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
  * @param {Set<string>} [arg5_active_state_ids] - State IDs active in current historical borders
  * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
+ * @param {Map<string, any>} [arg7_authoritative_capitals_by_city] - Pre-matched authoritative capitals by city key/id
+ * @param {Array<any>} [arg8_active_capitals_list] - Authoritative active capitals list with coordinates
  *
  * @returns {any} Reconciled city object
  */
@@ -83,12 +85,16 @@ function reconcileCapitalWithAuthoritativeBorders (
   arg3_acapital_state_ids: Set<string>,
   arg4_state_capitals_by_sid: Map<string, { capkey?: string; capname?: string }>,
   arg5_active_state_ids?: Set<string>,
-  arg6_active_polity_names?: Set<string>
+  arg6_active_polity_names?: Set<string>,
+  arg7_authoritative_capitals_by_city?: Map<string, any>,
+  arg8_active_capitals_list?: Array<any>
 ): any {
   //Convert from parameters
   let acapital_state_ids = arg3_acapital_state_ids
+  let active_capitals_list = arg8_active_capitals_list
   let active_polity_names = arg6_active_polity_names
   let active_state_ids = arg5_active_state_ids
+  let authoritative_capitals_by_city = arg7_authoritative_capitals_by_city
   let capitals_by_key = arg1_capitals_by_key
   let capitals_by_name = arg2_capitals_by_name
   let city = arg0_city
@@ -100,12 +106,16 @@ function reconcileCapitalWithAuthoritativeBorders (
 
   //Declare local instance variables
   let active_cap: { capkey?: string; capname?: string } | undefined
+  let best_cap: any = null
+  let best_dist: number = 999
   let c_id = city.id ? String(city.id) : undefined
   let c_key = city.key ? String(city.key) : undefined
   let c_lat = city.rawCoords ? city.rawCoords[1] : (city.lat !== undefined ? city.lat : (city.coords ? city.coords[0] : undefined))
   let c_lon = city.rawCoords ? city.rawCoords[0] : (city.lon !== undefined ? city.lon : (city.coords ? city.coords[1] : undefined))
   let c_name = (city.name || '').toLowerCase().trim()
+  let c_name_nfd = c_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   let c_short = (city.shortName || getShortCityLabel(city.name || '')).toLowerCase().trim()
+  let c_short_nfd = c_short.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   let has_polity_by_id: boolean
   let has_polity_by_name: boolean
   let is_same_key: boolean
@@ -117,15 +127,26 @@ function reconcileCapitalWithAuthoritativeBorders (
   let sid_str = city.capitalStateId !== undefined ? String(city.capitalStateId) : (city.capital_state_id !== undefined ? String(city.capital_state_id) : undefined)
 
   //Function body
+  //0. Match by pre-computed authoritative capital
+  if (authoritative_capitals_by_city) {
+    if (c_key && authoritative_capitals_by_city.has(c_key)) {
+      match = authoritative_capitals_by_city.get(c_key)
+    } else if (c_id && authoritative_capitals_by_city.has(c_id)) {
+      match = authoritative_capitals_by_city.get(c_id)
+    }
+  }
+
   //1. Match by authoritative capital key
-  if (c_key && capitals_by_key.has(c_key)) {
-    match = capitals_by_key.get(c_key)
-  } else if (c_key && capitals_by_key.has(c_key.toLowerCase().trim())) {
-    match = capitals_by_key.get(c_key.toLowerCase().trim())
-  } else if (c_id && capitals_by_key.has(c_id)) {
-    match = capitals_by_key.get(c_id)
-  } else if (c_id && capitals_by_key.has(c_id.toLowerCase().trim())) {
-    match = capitals_by_key.get(c_id.toLowerCase().trim())
+  if (!match) {
+    if (c_key && capitals_by_key.has(c_key)) {
+      match = capitals_by_key.get(c_key)
+    } else if (c_key && capitals_by_key.has(c_key.toLowerCase().trim())) {
+      match = capitals_by_key.get(c_key.toLowerCase().trim())
+    } else if (c_id && capitals_by_key.has(c_id)) {
+      match = capitals_by_key.get(c_id)
+    } else if (c_id && capitals_by_key.has(c_id.toLowerCase().trim())) {
+      match = capitals_by_key.get(c_id.toLowerCase().trim())
+    }
   }
 
   //2. Match by city name if no key match
@@ -134,7 +155,44 @@ function reconcileCapitalWithAuthoritativeBorders (
       match = capitals_by_name.get(c_name)
     } else if (c_short && capitals_by_name.has(c_short)) {
       match = capitals_by_name.get(c_short)
+    } else if (capitals_by_name.has(c_name_nfd)) {
+      match = capitals_by_name.get(c_name_nfd)
+    } else if (c_short_nfd && capitals_by_name.has(c_short_nfd)) {
+      match = capitals_by_name.get(c_short_nfd)
+    } else if (city.other_names && Array.isArray(city.other_names)) {
+      for (let on of city.other_names) {
+        let on_lower = on.toLowerCase().trim()
+        let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        if (capitals_by_name.has(on_lower)) {
+          match = capitals_by_name.get(on_lower)
+          break
+        } else if (capitals_by_name.has(on_nfd)) {
+          match = capitals_by_name.get(on_nfd)
+          break
+        }
+      }
     }
+  }
+
+  //2b. Coordinate proximity match against active capitals list
+  if (!match && c_lon !== undefined && c_lat !== undefined && active_capitals_list && active_capitals_list.length > 0) {
+    for (let k = 0; k < active_capitals_list.length; k++) {
+      let cap = active_capitals_list[k]
+      if (!cap.cap_coords)
+        continue
+      let dist = Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1])
+      if (dist <= 0.45 && dist < best_dist) {
+        if (cap.bbox) {
+          let b_pad = 1.0
+          if (c_lon < cap.bbox[0] - b_pad || c_lon > cap.bbox[2] + b_pad || c_lat < cap.bbox[1] - b_pad || c_lat > cap.bbox[3] + b_pad)
+            continue
+        }
+        best_dist = dist
+        best_cap = cap
+      }
+    }
+    if (best_cap)
+      match = best_cap
   }
 
   //3. If candidate match found, verify spatial plausibility against match.bbox
@@ -433,9 +491,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let acapital_state_ids = new Set<string>()
     let active_capitals_by_key = new Map<string, any>()
     let active_capitals_by_name = new Map<string, any>()
+    let active_capitals_list: any[] = []
     let active_polity_names = new Set<string>()
     let active_state_capitals_by_sid = new Map<string, { capkey?: string; capname?: string }>()
     let active_state_ids = new Set<string>()
+    let authoritative_capitals_by_city = new Map<string, any>()
     let basemap = options.basemap
     let border_features_by_id = new Map<string, any>()
     let border_features_by_name = new Map<string, any>()
@@ -514,7 +574,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         if (p.is_acapital) {
           if (s_id)
             acapital_state_ids.add(s_id)
-        } else if (p.capname || p.capkey) {
+        } else if (p.capname || p.capkey || p.cap_coords || (p.caplong !== undefined && p.caplat !== undefined)) {
           let polity_color = p.symbol?.polygonFill ||
             p.symbol?.fillColor ||
             p.fillColor ||
@@ -522,14 +582,27 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             p.symbol?.strokeColor ||
             p.strokeColor
 
+          let cap_lat: number | undefined
+          let cap_lon: number | undefined
+          if (p.cap_coords && Array.isArray(p.cap_coords) && p.cap_coords.length >= 2) {
+            cap_lon = p.cap_coords[0]
+            cap_lat = p.cap_coords[1]
+          } else if (p.caplong !== undefined && p.caplat !== undefined) {
+            cap_lon = Number(p.caplong)
+            cap_lat = Number(p.caplat)
+          }
+
           let cap_entry = {
             bbox: (feat as any).bbox || p.bbox,
+            cap_coords: (cap_lon !== undefined && cap_lat !== undefined) ? [cap_lon, cap_lat] as [number, number] : undefined,
             capkey: p.capkey,
             capname: p.capname,
             color: polity_color,
             polity_name: p.name,
             state_id: p.state_id,
           }
+
+          active_capitals_list.push(cap_entry)
 
           if (s_id)
             active_state_capitals_by_sid.set(s_id, { capkey: p.capkey, capname: p.capname })
@@ -1160,8 +1233,90 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       ? options.stadesterPoints!
       : stadester_points_data
 
+    //Pre-match active capitals to cities by coordinate proximity and key
+    if (active_capitals_list.length > 0 && effective_points && effective_points.length > 0) {
+      for (let k = 0; k < active_capitals_list.length; k++) {
+        let cap = active_capitals_list[k]
+        let best_city: any = null
+        let best_score = -1
+
+        for (let j = 0; j < effective_points.length; j++) {
+          let c = effective_points[j]
+          let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
+          let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : undefined))
+          if (c_lat === undefined || c_lon === undefined)
+            continue
+
+          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey)) {
+            best_city = c
+            best_score = 1000000
+            break
+          }
+
+          let dist = cap.cap_coords ? Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) : 999
+          if (dist > 0.45)
+            continue
+
+          if (cap.bbox) {
+            let pad = 1.0
+            if (c_lon < cap.bbox[0] - pad || c_lon > cap.bbox[2] + pad || c_lat < cap.bbox[1] - pad || c_lat > cap.bbox[3] + pad)
+              continue
+          }
+
+          let score = 0
+          let c_name_lower = (c.name || '').toLowerCase().trim()
+          let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          let cap_name_lower = (cap.capname || '').toLowerCase().trim()
+          let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+          let is_name_match = false
+          if (cap_name_lower) {
+            let clean_c_name = c_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+            let clean_cap_name = cap_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+            if (
+              c_name_lower === cap_name_lower ||
+              c_name_nfd === cap_name_nfd ||
+              clean_c_name === clean_cap_name ||
+              clean_c_name.startsWith(clean_cap_name) ||
+              clean_cap_name.startsWith(clean_c_name)
+            ) {
+              is_name_match = true
+            } else if (c.other_names && Array.isArray(c.other_names)) {
+              is_name_match = c.other_names.some((arg0_on: string) => {
+                let on_lower = arg0_on.toLowerCase().trim()
+                let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+                return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
+              })
+            }
+          }
+
+          if (is_name_match)
+            score += 50000
+          if (c.isCapital || c.is_capital)
+            score += 10000
+          if (c.key && !c.key.includes('agglomeration'))
+            score += 5000
+          score += Math.max(0, Math.round((0.5 - dist) * 2000))
+          score += Math.min(1000, Math.round((c.population || 0) / 1000))
+
+          if (score > best_score) {
+            best_score = score
+            best_city = c
+          }
+        }
+
+        if (best_city) {
+          if (best_city.key)
+            authoritative_capitals_by_city.set(best_city.key, cap)
+          if (best_city.id)
+            authoritative_capitals_by_city.set(String(best_city.id), cap)
+        }
+      }
+    }
+
     //Reconcile capital cities isomorphically with authoritative historical border features
-    if ((active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) && effective_points && effective_points.length > 0) {
+    if ((active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) && effective_points && effective_points.length > 0) {
       effective_points = effective_points.map((arg0_c: any) =>
         reconcileCapitalWithAuthoritativeBorders(
           arg0_c,
@@ -1170,7 +1325,9 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           acapital_state_ids,
           active_state_capitals_by_sid,
           active_state_ids,
-          active_polity_names
+          active_polity_names,
+          authoritative_capitals_by_city,
+          active_capitals_list
         )
       )
     }
@@ -1396,7 +1553,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           )
 
           //Reconcile capital cities isomorphically with authoritative historical border features
-          if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
+          if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
             visible_label_cities = visible_label_cities.map((arg0_c: any) =>
               reconcileCapitalWithAuthoritativeBorders(
                 arg0_c,
@@ -1405,7 +1562,9 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 acapital_state_ids,
                 active_state_capitals_by_sid,
                 active_state_ids,
-                active_polity_names
+                active_polity_names,
+                authoritative_capitals_by_city,
+                active_capitals_list
               )
             )
           }

@@ -1,9 +1,9 @@
 import { projectEqualEarth } from '../geopng/equal_earth'
 import { SmoothGlobeViewport } from './SmoothGlobeViewport'
 import {
+  computeScreenCityCapacity,
   computeViewportBoundingBox,
   getZoomPopulationThreshold,
-  getEraDisplayFloor,
   isGlobePointVisible,
   projectGlobeCoordinates,
   projectMercatorCoordinates,
@@ -297,20 +297,18 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             zoom,
           })
         : null
-      let thresholds = getZoomPopulationThreshold(zoom, projection)
-      let era_floor = getEraDisplayFloor(current_year)
-      let norm_zoom = (is_cartesian) ? (zoom - 1.2) : ((is_globe) ? (zoom - 1.65) : zoom)
-      let effective_min_pop = is_heuristic_culling
-        ? ((norm_zoom >= 4.5) ? 0.01 : Math.max(thresholds.bubbleMinPop, era_floor))
-        : 0.01
+      let thresholds = getZoomPopulationThreshold(zoom, projection, window_w, window_h)
       let bbox = computeViewportBoundingBox(view_state, projection, window_w, window_h)
       let [w, s, east_bound, n] = bbox
 
-      let processed_points: WorkerProcessedPoint[] = []
-      let label_candidates: WorkerProcessedPoint[] = []
       let contrast = (large_city_contrast !== undefined) ? large_city_contrast : 1.0
+      let label_candidates: WorkerProcessedPoint[] = []
+      let processed_points: WorkerProcessedPoint[] = []
+      let selected_cities: WorkerCityInput[]
+      let visible_cities: WorkerCityInput[] = []
       let zoom_factor = Math.max(1.0, Math.min(1.8, 1.0 + (is_cartesian ? (zoom - 2.8) * 0.12 : (is_globe ? (zoom - 3.0) * 0.08 : (zoom - 1.2) * 0.08))))
 
+      // 1. Gather all cities physically within the visible camera viewport
       for (let i = 0; i < current_cities.length; i++) {
         let c = current_cities[i]
         if (!c || !c.coords || !Number.isFinite(c.coords[0]) || !Number.isFinite(c.coords[1]))
@@ -319,31 +317,59 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         let c_lat = c.coords[0]
         let c_lon = c.coords[1]
 
-        //1. Globe horizon culling (eliminates antipodal cities completely)
+        // Globe horizon culling (eliminates antipodal cities completely)
         if (is_globe) {
           if (!isGlobePointVisible(c_lon, c_lat, view_state, -0.005, globe_viewport))
             continue
         }
 
-        //2. Viewport bounding box culling (Mercator and Cartesian 2D planes)
+        // Viewport bounding box culling (Mercator and Cartesian 2D planes)
         if (!is_globe) {
           if (w <= east_bound) {
             if (c_lon < w || c_lon > east_bound || c_lat < s || c_lat > n)
               continue
           } else {
-            //Wraparound dateline
+            // Wraparound dateline
             if ((c_lon < w && c_lon > east_bound) || c_lat < s || c_lat > n)
               continue
           }
         }
 
-        let is_cap = Boolean(c.isCapital)
-
         if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
           continue
 
-        if (is_heuristic_culling && !is_cap && c.population < effective_min_pop)
-          continue
+        visible_cities.push(c)
+      }
+
+      // 2. Capacity-based heuristic culling: screen width and zoom level determine total count;
+      //    cities are weighted by 1) whether they are a capital (top of queue), 2) by population size
+      selected_cities = visible_cities
+
+      if (is_heuristic_culling) {
+        let max_capacity = computeScreenCityCapacity(zoom, window_w, projection, window_h)
+
+        if (visible_cities.length > max_capacity) {
+          visible_cities.sort((arg0_a, arg0_b) => {
+            let a_cap = arg0_a.isCapital ? 1 : 0
+            let b_cap = arg0_b.isCapital ? 1 : 0
+            if (a_cap !== b_cap)
+              return b_cap - a_cap // Capitals at top of queue
+
+            let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+            let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+            return b_pop - a_pop // Population size descending
+          })
+
+          selected_cities = visible_cities.slice(0, max_capacity)
+        }
+      }
+
+      // 3. Process Deck.gl point data for the selected cities
+      for (let i = 0; i < selected_cities.length; i++) {
+        let c = selected_cities[i]
+        let c_lat = c.coords[0]
+        let c_lon = c.coords[1]
+        let is_cap = Boolean(c.isCapital)
 
         let fill_color: [number, number, number, number] = [255, 255, 255, 220]
         let px = c_lon
@@ -399,9 +425,6 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
 
         processed_points.push(pt)
         label_candidates.push(pt)
-
-        if (is_heuristic_culling && !is_cap && processed_points.length >= thresholds.maxBubbles)
-          continue
       }
 
       //Place labels
@@ -527,7 +550,9 @@ self.onmessage = function (arg0_e: MessageEvent<WorkerInMessage>) {
 
   //Function body
   if (msg.type === 'SET_DATA') {
-    current_cities = Array.isArray(msg.cities) ? msg.cities : []
+    let cities_arr = Array.isArray(msg.cities) ? msg.cities : []
+    cities_arr.sort((arg0_a, arg0_b) => (arg0_b.population || 0) - (arg0_a.population || 0))
+    current_cities = cities_arr
     current_year = msg.year
     if (latest_viewport_msg)
       processViewportLayout(latest_viewport_msg)

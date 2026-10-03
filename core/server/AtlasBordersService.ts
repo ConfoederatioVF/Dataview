@@ -21,6 +21,7 @@ export interface HistoricalBorderFeature {
   id: string
   properties: {
     area?: number
+    cap_coords?: [number, number]
     capkey?: string
     caplat?: number
     caplong?: number
@@ -420,13 +421,13 @@ let isCityCoordsInsideBbox = function (
  * @param {number} arg1_year_frac
  * @param {string} [arg2_entity_name]
  *
- * @returns {{ is_acapital: boolean; capname?: string; capkey?: string }}
+ * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }}
  */
 let getStateCapitalInfo = function (
   arg0_state_id: number,
   arg1_year_frac: number,
   arg2_entity_name?: string
-): { capkey?: string; capname?: string; is_acapital: boolean } {
+): { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean } {
   //Convert from parameters
   let entity_name = arg2_entity_name
   let state_id = arg0_state_id
@@ -550,8 +551,10 @@ let getStateCapitalInfo = function (
 
     for (let i = 0; i < valid_timeline.length; i++) {
       let iv = valid_timeline[i]
-      if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac)
-        return { capkey: iv.key, capname: iv.city, is_acapital: false }
+      if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac) {
+        let c_coords = iv.key ? getCityCoordsByKey(iv.key) : undefined
+        return { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: iv.key, capname: iv.city, is_acapital: false }
+      }
     }
 
     best_iv = valid_timeline[0]
@@ -564,7 +567,8 @@ let getStateCapitalInfo = function (
         best_iv = iv
       }
     }
-    return { capkey: best_iv.key, capname: best_iv.city, is_acapital: false }
+    let best_coords = best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined
+    return { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: best_iv.key, capname: best_iv.city, is_acapital: false }
   }
 
   //Return statement
@@ -1268,6 +1272,7 @@ export class AtlasBordersService {
           properties: {
             adm0_a3: p.cntry_name,
             area: p.area,
+            cap_coords: (p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] : undefined,
             caplat: p.caplat,
             caplong: p.caplong,
             capname: p.capname,
@@ -1354,6 +1359,7 @@ export class AtlasBordersService {
           id: `naissance_${ent_id}`,
           properties: {
             adm0_a3: entity_name,
+            cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
             capname: cap_info.capname,
             date: UfDate.formatDate(resolved_date_obj),

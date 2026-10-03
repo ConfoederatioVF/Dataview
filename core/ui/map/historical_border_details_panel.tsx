@@ -166,8 +166,30 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
     let target_city: CityPoint | null = null
     if (cities && cities.length > 0) {
+      //0. Coordinate proximity match if cap_coords or caplat/caplong available on feature
+      let cap_coords: [number, number] | undefined
+      if (feature.properties?.cap_coords && Array.isArray(feature.properties.cap_coords) && feature.properties.cap_coords.length >= 2) {
+        cap_coords = feature.properties.cap_coords as [number, number]
+      } else if (feature.properties?.caplong !== undefined && feature.properties?.caplat !== undefined) {
+        cap_coords = [Number(feature.properties.caplong), Number(feature.properties.caplat)]
+      }
+      if (cap_coords) {
+        let best_dist = 999
+        for (let arg0_c of cities) {
+          let c_lat = arg0_c.rawCoords ? arg0_c.rawCoords[1] : (arg0_c.lat !== undefined ? arg0_c.lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
+          let c_lon = arg0_c.rawCoords ? arg0_c.rawCoords[0] : (arg0_c.lon !== undefined ? arg0_c.lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
+          if (c_lat === undefined || c_lon === undefined)
+            continue
+          let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
+          if (dist <= 0.45 && dist < best_dist) {
+            best_dist = dist
+            target_city = arg0_c
+          }
+        }
+      }
+
       //1. Check for active capital matching state_id
-      if (state_id !== undefined) {
+      if (!target_city && state_id !== undefined) {
         target_city = cities.find((arg0_c) =>
           Boolean(arg0_c.isCapital || (arg0_c as any).is_capital) &&
           (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id) || (arg0_c as any).capital_state_id === state_id || (arg0_c as any).capital_state_id === Number(state_id))

@@ -1,5 +1,5 @@
-import { projectEqualEarth, invertEqualEarth } from '../geopng/equal_earth'
-import { SmoothGlobeViewport } from './SmoothGlobeViewport'
+import { projectEqualEarth, invertEqualEarth } from '../geopng/equal_earth.ts'
+import { SmoothGlobeViewport } from './SmoothGlobeViewport.ts'
 
 let FLOOR_KNOTS: Array<[number, number]> = [
   [600, 5000],
@@ -38,25 +38,67 @@ export interface ZoomThresholds {
 }
 
 /**
- * Returns calibrated population thresholds and maximum label counts for a given camera zoom.
+ * Calculates demographic era scaling factor based on historical world population benchmarks.
+ *
+ * @param {number} arg0_year - Historical calendar year
+ *
+ * @returns {number} Era scaling factor between 0.02 and 1.0
+ */
+export function getEraScale (arg0_year: number): number {
+  //Convert from parameters
+  let year = arg0_year
+
+  //Guard clauses
+  if (year >= 1950)
+    return 1.0
+  if (year >= 1900)
+    return 0.50 + ((year - 1900)/50)*0.50
+  if (year >= 1800)
+    return 0.25 + ((year - 1800)/100)*0.25
+  if (year >= 1500)
+    return 0.15 + ((year - 1500)/300)*0.10
+  if (year >= 1000)
+    return 0.08 + ((year - 1000)/500)*0.07
+  if (year >= 0)
+    return 0.05 + (year/1000)*0.03
+  if (year >= -1000)
+    return 0.03 + ((year + 1000)/1000)*0.02
+
+  //Return statement
+  return 0.02
+}
+
+/**
+ * Computes the maximum number of cities that can feasibly render cleanly on screen
+ * based on screen width, height, camera zoom level, and map projection.
  *
  * @param {number} arg0_zoom
- * @param {string} [arg1_projection='Mercator']
+ * @param {number} arg1_window_w
+ * @param {string} [arg2_projection='Mercator']
+ * @param {number} [arg3_window_h=1080]
  *
- * @returns {ZoomThresholds}
+ * @returns {number} Maximum city count capacity for clean viewport rendering
  */
-export function getZoomPopulationThreshold (
+export function computeScreenCityCapacity (
   arg0_zoom: number,
-  arg1_projection?: string
-): ZoomThresholds {
+  arg1_window_w: number,
+  arg2_projection?: string,
+  arg3_window_h?: number
+): number {
   //Convert from parameters
-  let projection = (arg1_projection) ? arg1_projection : 'Mercator'
+  let projection = (arg2_projection) ? arg2_projection : 'Mercator'
+  let window_h = (arg3_window_h !== undefined) ? arg3_window_h : 1080
+  let window_w = arg1_window_w
   let zoom = arg0_zoom
 
   //Declare local instance variables
+  let base_capacity: number
+  let height_ratio: number
   let is_cartesian = (projection === 'EqualEarth' || projection === 'Equirectangular')
   let is_globe = (projection === 'Globe')
   let norm_zoom: number
+  let screen_scale: number
+  let width_ratio: number
 
   //Function body
   if (is_cartesian) {
@@ -67,46 +109,64 @@ export function getZoomPopulationThreshold (
     norm_zoom = zoom
   }
 
-  //1. World View (norm_zoom < 2.0)
-  if (norm_zoom < 2.0) {
-    //Return statement
-    return {
-      bubbleMinPop: 15000,
-      labelMinPop: 250000,
-      maxBubbles: 1500,
-      maxLabels: 40,
-    }
+  //Feasible city density curve based on camera zoom level
+  if (norm_zoom <= 1.2) {
+    base_capacity = 360
+  } else if (norm_zoom <= 2.2) {
+    base_capacity = 360 + (norm_zoom - 1.2) * 340 // 360 -> 700
+  } else if (norm_zoom <= 3.5) {
+    base_capacity = 700 + (norm_zoom - 2.2) * 600 // 700 -> 1480
+  } else if (norm_zoom <= 5.0) {
+    base_capacity = 1480 + (norm_zoom - 3.5) * 1200 // 1480 -> 3280
+  } else if (norm_zoom <= 6.5) {
+    base_capacity = 3280 + (norm_zoom - 5.0) * 2400 // 3280 -> 6880
+  } else if (norm_zoom <= 8.0) {
+    base_capacity = 6880 + (norm_zoom - 6.5) * 4500 // 6880 -> 13630
+  } else {
+    base_capacity = 35000
   }
 
-  //2. Continental View (2.0 <= norm_zoom < 3.5)
-  if (norm_zoom < 3.5) {
-    //Return statement
-    return {
-      bubbleMinPop: 4000,
-      labelMinPop: 50000,
-      maxBubbles: 3500,
-      maxLabels: 90,
-    }
-  }
+  //Screen size scaling factor relative to reference 1600x900 viewport
+  width_ratio = window_w / 1600
+  height_ratio = window_h / 900
+  screen_scale = Math.max(0.20, Math.min(2.5, Math.sqrt(width_ratio * height_ratio)))
 
-  //3. Regional View (3.5 <= norm_zoom < 5.0)
-  if (norm_zoom < 5.0) {
-    //Return statement
-    return {
-      bubbleMinPop: 500,
-      labelMinPop: 5000,
-      maxBubbles: 10000,
-      maxLabels: 250,
-    }
-  }
+  //Return statement
+  return Math.round(base_capacity * screen_scale)
+}
 
-  //4. Local View (norm_zoom >= 5.0)
+/**
+ * Returns calibrated capacity and maximum label counts for a given camera zoom and screen size.
+ *
+ * @param {number} arg0_zoom
+ * @param {string} [arg1_projection='Mercator']
+ * @param {number} [arg2_window_w=1920]
+ * @param {number} [arg3_window_h=1080]
+ *
+ * @returns {ZoomThresholds}
+ */
+export function getZoomPopulationThreshold (
+  arg0_zoom: number,
+  arg1_projection?: string,
+  arg2_window_w?: number,
+  arg3_window_h?: number
+): ZoomThresholds {
+  //Convert from parameters
+  let projection = (arg1_projection) ? arg1_projection : 'Mercator'
+  let window_h = (arg3_window_h !== undefined) ? arg3_window_h : 1080
+  let window_w = (arg2_window_w !== undefined) ? arg2_window_w : 1920
+  let zoom = arg0_zoom
+
+  //Declare local instance variables
+  let max_bubbles = computeScreenCityCapacity(zoom, window_w, projection, window_h)
+  let max_labels = Math.min(500, Math.max(20, Math.round(max_bubbles * 0.10)))
+
   //Return statement
   return {
     bubbleMinPop: 0.01,
     labelMinPop: 0.01,
-    maxBubbles: 30000,
-    maxLabels: 800,
+    maxBubbles: max_bubbles,
+    maxLabels: max_labels,
   }
 }
 

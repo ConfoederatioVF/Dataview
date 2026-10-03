@@ -292,6 +292,8 @@
       outline: "Contour",
       fill: "Remplissage",
       cityLabels: "Noms des villes",
+      heuristicCulling: "Filtrage heuristique du zoom",
+      heuristicCullingDesc: "Allège dynamiquement les établissements à faible niveau de zoom pour éviter l'encombrement.",
       labelCollision: "Suppression des chevauchements d'étiquettes",
       colorMode: "Mode de couleur",
       constant: "Constante",

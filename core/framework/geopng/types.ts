@@ -95,6 +95,8 @@ export interface StadesterDisplayOptions {
   growth_palette?: string
   growthPalette?: string
   halo?: boolean
+  heuristic_culling?: boolean
+  heuristicCulling?: boolean
   label_collision?: boolean
   labelCollision?: boolean
   large_city_contrast?: number
@@ -127,6 +129,7 @@ export interface StadesterConfig {
   filled?: boolean
   growthPalette?: string
   halo?: boolean
+  heuristicCulling?: boolean
   labelCollision: boolean
   largeCityContrast?: number
   maxCities: number

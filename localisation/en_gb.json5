@@ -292,6 +292,8 @@
       outline: "Outline",
       fill: "Fill",
       cityLabels: "City Labels (Names)",
+      heuristicCulling: "Zoom Heuristic Culling",
+      heuristicCullingDesc: "Dynamically thins settlements at low zoom levels to prevent screen overcrowding.",
       labelCollision: "Label Collision Culling",
       colorMode: "Colour Mode",
       constant: "Constant",

@@ -25,6 +25,7 @@
             filled: true,
             growth_palette: "Rainbow",
             halo: false,
+            heuristic_culling: false,
             label_collision: true,
             large_city_contrast: 1.0,
             max_cities: 4000,

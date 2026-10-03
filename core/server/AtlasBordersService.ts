@@ -353,8 +353,65 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
   return geometry
 }
 
+let city_coords_cache: Map<string, [number, number]> | null = null
 let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
 let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
+
+let getCityCoordsByKey = function (arg0_key: string): [number, number] | null {
+  //Convert from parameters
+  let key = arg0_key
+
+  //Function body
+  if (!city_coords_cache) {
+    city_coords_cache = new Map()
+    let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
+    if (fs.existsSync(coords_path)) {
+      try {
+        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
+        let list = Object.values(raw) as any[]
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i]
+          if (item && item.key && Array.isArray(item.coords) && item.coords.length >= 2) {
+            city_coords_cache.set(item.key, item.coords as [number, number])
+            city_coords_cache.set(item.key.toLowerCase().trim(), item.coords as [number, number])
+          }
+        }
+      } catch {
+        //Ignore parsing error
+      }
+    }
+  }
+
+  //Return statement
+  return city_coords_cache.get(key) || city_coords_cache.get(key.toLowerCase().trim()) || null
+}
+
+let isCityCoordsInsideBbox = function (
+  arg0_coords: [number, number],
+  arg1_bbox: [number, number, number, number],
+  arg2_pad: number = 3.5
+): boolean {
+  //Convert from parameters
+  let bbox = arg1_bbox
+  let coords = arg0_coords
+  let pad = arg2_pad
+
+  //Declare local instance variables
+  let c_lat = coords[1]
+  let c_lng = coords[0]
+  let max_lat = bbox[3]
+  let max_lng = bbox[2]
+  let min_lat = bbox[1]
+  let min_lng = bbox[0]
+
+  //Return statement
+  return (
+    c_lng >= min_lng - pad &&
+    c_lng <= max_lng + pad &&
+    c_lat >= min_lat - pad &&
+    c_lat <= max_lat + pad
+  )
+}
 
 /**
  * Resolves the capital information for a state at a specific fractional year.
@@ -376,11 +433,17 @@ let getStateCapitalInfo = function (
   let year_frac = arg1_year_frac
 
   //Declare local instance variables
+  let best_diff: number
+  let best_iv: any
   let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
   let clean_e: string
+  let diff: number
   let file_path: string
   let info: { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
+  let state: any
+  let state_bbox: [number, number, number, number] | undefined
   let states_path: string
+  let valid_timeline: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }>
 
   //Function body
   if (!state_capitals_data) {
@@ -467,17 +530,35 @@ let getStateCapitalInfo = function (
     return { is_acapital: true }
 
   if (info.timeline && info.timeline.length > 0) {
+    state = AtlasBordersService.getStateById(state_id)
+    state_bbox = state?.bbox
+
+    //Filter out timeline items whose cities are geographically impossible for this state
+    valid_timeline = []
     for (let i = 0; i < info.timeline.length; i++) {
       let iv = info.timeline[i]
+      if (state_bbox && iv.key) {
+        let c_coords = getCityCoordsByKey(iv.key)
+        if (c_coords && !isCityCoordsInsideBbox(c_coords, state_bbox, 3.5))
+          continue
+      }
+      valid_timeline.push(iv)
+    }
+
+    if (valid_timeline.length === 0)
+      return { is_acapital: false }
+
+    for (let i = 0; i < valid_timeline.length; i++) {
+      let iv = valid_timeline[i]
       if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac)
         return { capkey: iv.key, capname: iv.city, is_acapital: false }
     }
 
-    let best_iv = info.timeline[0]
-    let best_diff = Math.abs(year_frac - (best_iv.start_frac + best_iv.stop_frac) / 2)
-    for (let i = 1; i < info.timeline.length; i++) {
-      let iv = info.timeline[i]
-      let diff = Math.abs(year_frac - (iv.start_frac + iv.stop_frac) / 2)
+    best_iv = valid_timeline[0]
+    best_diff = Math.abs(year_frac - (best_iv.start_frac + best_iv.stop_frac) / 2)
+    for (let i = 1; i < valid_timeline.length; i++) {
+      let iv = valid_timeline[i]
+      diff = Math.abs(year_frac - (iv.start_frac + iv.stop_frac) / 2)
       if (diff < best_diff) {
         best_diff = diff
         best_iv = iv
@@ -1512,6 +1593,23 @@ export class AtlasBordersService {
 
     //Return statement
     return AtlasBordersService.states_by_id.get(state_id) || AtlasBordersService.states_by_id.get(String(state_id)) || null
+  }
+
+  /**
+   * Retrieves authoritative capital city info for a state at a fractional year.
+   *
+   * @param {number} arg0_state_id
+   * @param {number} arg1_year_frac
+   * @param {string} [arg2_entity_name]
+   *
+   * @returns {{ capkey?: string; capname?: string; is_acapital: boolean }}
+   */
+  static getStateCapitalInfo (
+    arg0_state_id: number,
+    arg1_year_frac: number,
+    arg2_entity_name?: string
+  ): { capkey?: string; capname?: string; is_acapital: boolean } {
+    return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name)
   }
 
   /**

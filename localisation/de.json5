@@ -292,6 +292,8 @@
       outline: "Kontur",
       fill: "Füllung",
       cityLabels: "Stadtnamen",
+      heuristicCulling: "Zoom-Heuristik-Culling",
+      heuristicCullingDesc: "Reduziert Siedlungen bei niedrigen Zoomstufen dynamisch, um Bildschirmüberfüllung zu vermeiden.",
       labelCollision: "Kollisionsausblendung von Beschriftungen",
       colorMode: "Farbmodus",
       constant: "Konstant",

@@ -49,6 +49,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   let bubble_size = config.bubbleSize
   let color_mode = config.colorMode
   let dataset = config.dataset || 'stadester_1.1'
+  let heuristic_culling = Boolean(config.heuristicCulling)
   let large_city_contrast = (config.largeCityContrast !== undefined) ? config.largeCityContrast : 1.0
   let max_cities = config.maxCities
   let min_pop = config.minPop
@@ -378,6 +379,31 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
             }`}
         >
           {show_labels ? t.mapmodes.on : t.mapmodes.off}
+        </button>
+      </div>
+
+      {/* Zoom Heuristic Culling Toggle */}
+      <div className="flex items-center justify-between pt-1 border-t border-border/40">
+        <div className="flex flex-col">
+          <span className="text-foreground text-[11px] font-medium">{t.mapmodes.stadester.heuristicCulling}</span>
+          {t.mapmodes.stadester.heuristicCullingDesc && (
+            <span className="text-[10px] text-muted-foreground">{t.mapmodes.stadester.heuristicCullingDesc}</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            on_change_config((arg0_prev) => ({
+              ...arg0_prev,
+              heuristicCulling: !arg0_prev.heuristicCulling,
+            }))
+          }
+          className={`px-2 py-0.5 text-[10px] rounded-none border transition-colors cursor-pointer font-bold ${heuristic_culling
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-background hover:bg-muted text-muted-foreground border-border'
+            }`}
+        >
+          {heuristic_culling ? t.mapmodes.on : t.mapmodes.off}
         </button>
       </div>
 

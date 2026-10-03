@@ -74,7 +74,9 @@ export type WorkerInMessage =
       colorMode: 'growth' | 'population' | 'region' | 'continent'
       displayOptions?: StadesterDisplayOptions
       growthPalette: string
+      heuristicCulling?: boolean
       isHalo: boolean
+      isMobile?: boolean
       labelCollision: boolean
       largeCityContrast?: number
       projection: string
@@ -267,7 +269,9 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
     bubbleSize: b_scale,
     colorMode: color_mode,
     displayOptions: display_options,
+    heuristicCulling: is_heuristic_culling,
     isHalo: is_halo,
+    isMobile: is_mobile,
     labelCollision: is_collision_active,
     largeCityContrast: large_city_contrast,
     projection,
@@ -296,7 +300,9 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let thresholds = getZoomPopulationThreshold(zoom, projection)
       let era_floor = getEraDisplayFloor(current_year)
       let norm_zoom = (is_cartesian) ? (zoom - 1.2) : ((is_globe) ? (zoom - 1.65) : zoom)
-      let effective_min_pop = 0.01
+      let effective_min_pop = is_heuristic_culling
+        ? ((norm_zoom >= 4.5) ? 0.01 : Math.max(thresholds.bubbleMinPop, era_floor))
+        : 0.01
       let bbox = computeViewportBoundingBox(view_state, projection, window_w, window_h)
       let [w, s, east_bound, n] = bbox
 
@@ -331,7 +337,12 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           }
         }
 
+        let is_cap = Boolean(c.isCapital)
+
         if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
+          continue
+
+        if (is_heuristic_culling && !is_cap && c.population < effective_min_pop)
           continue
 
         let fill_color: [number, number, number, number] = [255, 255, 255, 220]
@@ -348,9 +359,10 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         if (!Number.isFinite(px) || !Number.isFinite(py))
           continue
 
-        let min_radius = 3.25 * b_scale * Math.min(1.4, zoom_factor)
-        let pop_scaled = Math.pow(Math.max(0, c.population) / 100000, 0.5 * contrast) * 3.6 * b_scale
-        let pixel_radius = Math.max(min_radius, Math.min(65.0, (min_radius + pop_scaled) * zoom_factor))
+        let mobile_scale = is_mobile ? 0.70 : 1.0
+        let min_radius = (is_mobile ? 2.0 : 3.25) * b_scale * Math.min(1.4, zoom_factor)
+        let pop_scaled = Math.pow(Math.max(0, c.population) / 100000, 0.5 * contrast) * 3.6 * b_scale * mobile_scale
+        let pixel_radius = Math.max(min_radius, Math.min(is_mobile ? 32.0 : 65.0, (min_radius + pop_scaled) * zoom_factor))
 
         if (color_mode === 'growth') {
           let g_rate = (c.growthRate !== undefined) ? c.growthRate : 0
@@ -373,7 +385,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           color: fill_color,
           country: c.country,
           growthRate: c.growthRate,
-          isCapital: Boolean(c.isCapital),
+          isCapital: is_cap,
           key: c.key,
           name: c.name,
           pixelRadius: pixel_radius,
@@ -388,8 +400,8 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         processed_points.push(pt)
         label_candidates.push(pt)
 
-        if (processed_points.length >= thresholds.maxBubbles)
-          break
+        if (is_heuristic_culling && !is_cap && processed_points.length >= thresholds.maxBubbles)
+          continue
       }
 
       //Place labels

@@ -299,6 +299,8 @@ export interface LocalisationConfig {
       growth: string
       growthPalette: string
       halo: string
+      heuristicCulling: string
+      heuristicCullingDesc?: string
       labelCollision: string
       maxCities: string
       minPop: string

@@ -1,16 +1,14 @@
 import { useMemo } from 'react'
-import { COORDINATE_SYSTEM, WebMercatorViewport } from '@deck.gl/core'
+import { COORDINATE_SYSTEM } from '@deck.gl/core'
 import {
   BitmapLayer,
   GeoJsonLayer,
-  IconLayer,
   PathLayer,
   PolygonLayer,
   ScatterplotLayer,
   SolidPolygonLayer,
   TextLayer,
 } from '@deck.gl/layers'
-import { CollisionFilterExtension } from '@deck.gl/extensions'
 import { TileLayer } from '@deck.gl/geo-layers'
 import { CountryFeature } from '@framework/geopng/polygon_binning.ts'
 import {
@@ -31,10 +29,6 @@ import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
-import {
-  isGlobePointVisible,
-  projectGlobeCoordinates,
-} from '@framework/stadester/stadester_heuristics.ts'
 import { MAP_CONFIG } from '@common'
 import {
   EquirectangularTileset2D,
@@ -47,7 +41,6 @@ import { CirclePixelPoint } from './use_circle_overlay'
 import * as d3Chromatic from 'd3-scale-chromatic'
 
 import {
-  REGION_COLOR_MAP,
   resolveRegionColorHex,
   hexToRgb,
   ensureContrastAgainstDark,
@@ -70,354 +63,159 @@ function getShortCityLabel (arg0_name: string): string {
 }
 
 /**
- * Tests whether a 2D point [lng, lat] lies within a polygon coordinate ring using ray-casting.
+ * Reconciles a city's capital status against authoritative active historical borders features.
+ * Historical borders (state_capitals.json via AtlasBordersService) are the single source of truth.
  *
- * @param {[number, number]} arg0_point - [longitude, latitude] point
- * @param {number[][]} arg1_ring - Array of [longitude, latitude] coordinates forming the ring
+ * @param {any} arg0_city - City point object
+ * @param {Map<string, any>} arg1_capitals_by_key - Authoritative active capitals indexed by key
+ * @param {Map<string, any>} arg2_capitals_by_name - Authoritative active capitals indexed by name
+ * @param {Set<string>} arg3_acapital_state_ids - State IDs explicitly marked as acapital
+ * @param {Map<string, { capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
+ * @param {Set<string>} [arg5_active_state_ids] - State IDs active in current historical borders
+ * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
  *
- * @returns {boolean} True if point is inside ring
+ * @returns {any} Reconciled city object
  */
-function isPointInPolygonRing (arg0_point: [number, number], arg1_ring: number[][]): boolean {
+function reconcileCapitalWithAuthoritativeBorders (
+  arg0_city: any,
+  arg1_capitals_by_key: Map<string, any>,
+  arg2_capitals_by_name: Map<string, any>,
+  arg3_acapital_state_ids: Set<string>,
+  arg4_state_capitals_by_sid: Map<string, { capkey?: string; capname?: string }>,
+  arg5_active_state_ids?: Set<string>,
+  arg6_active_polity_names?: Set<string>
+): any {
   //Convert from parameters
-  let pt = arg0_point
-  let ring = arg1_ring
+  let acapital_state_ids = arg3_acapital_state_ids
+  let active_polity_names = arg6_active_polity_names
+  let active_state_ids = arg5_active_state_ids
+  let capitals_by_key = arg1_capitals_by_key
+  let capitals_by_name = arg2_capitals_by_name
+  let city = arg0_city
+  let state_capitals_by_sid = arg4_state_capitals_by_sid
 
   //Guard clauses
-  if (!ring || ring.length < 3 || !pt)
-    return false
+  if (!city)
+    return city
 
   //Declare local instance variables
-  let inside = false
-  let n = ring.length
-  let x = pt[0]
-  let y = pt[1]
+  let active_cap: { capkey?: string; capname?: string } | undefined
+  let c_id = city.id ? String(city.id) : undefined
+  let c_key = city.key ? String(city.key) : undefined
+  let c_lat = city.rawCoords ? city.rawCoords[1] : (city.lat !== undefined ? city.lat : (city.coords ? city.coords[0] : undefined))
+  let c_lon = city.rawCoords ? city.rawCoords[0] : (city.lon !== undefined ? city.lon : (city.coords ? city.coords[1] : undefined))
+  let c_name = (city.name || '').toLowerCase().trim()
+  let c_short = (city.shortName || getShortCityLabel(city.name || '')).toLowerCase().trim()
+  let has_polity_by_id: boolean
+  let has_polity_by_name: boolean
+  let is_same_key: boolean
+  let is_same_name: boolean
+  let match: any = null
+  let pad: number = 3.5
+  let polity_name_lower: string
+  let resolved_color: any
+  let sid_str = city.capitalStateId !== undefined ? String(city.capitalStateId) : (city.capital_state_id !== undefined ? String(city.capital_state_id) : undefined)
 
   //Function body
-  for (let i = 0, j = n - 1; i < n; j = i++) {
-    let xi = ring[i][0]
-    let yi = ring[i][1]
-    let xj = ring[j][0]
-    let yj = ring[j][1]
-
-    let intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)
-    if (intersect)
-      inside = !inside
+  //1. Match by authoritative capital key
+  if (c_key && capitals_by_key.has(c_key)) {
+    match = capitals_by_key.get(c_key)
+  } else if (c_key && capitals_by_key.has(c_key.toLowerCase().trim())) {
+    match = capitals_by_key.get(c_key.toLowerCase().trim())
+  } else if (c_id && capitals_by_key.has(c_id)) {
+    match = capitals_by_key.get(c_id)
+  } else if (c_id && capitals_by_key.has(c_id.toLowerCase().trim())) {
+    match = capitals_by_key.get(c_id.toLowerCase().trim())
   }
 
-  //Return statement
-  return inside
-}
-
-/**
- * Tests whether a point [lng, lat] falls within a GeoJSON Polygon or MultiPolygon geometry.
- *
- * @param {[number, number]} arg0_point - [longitude, latitude] point
- * @param {any} arg1_geometry - GeoJSON geometry object
- *
- * @returns {boolean} True if point is inside geometry
- */
-function isPointInHistoricalGeometry (arg0_point: [number, number], arg1_geometry: any): boolean {
-  //Convert from parameters
-  let geom = arg1_geometry
-  let pt = arg0_point
-
-  //Guard clauses
-  if (!geom || !geom.coordinates || !pt)
-    return false
-
-  //Declare local instance variables
-  let coords = geom.coordinates
-
-  //Function body
-  if (geom.type === 'Polygon') {
-    if (!isPointInPolygonRing(pt, coords[0]))
-      return false
-    for (let i = 1; i < coords.length; i++) {
-      if (isPointInPolygonRing(pt, coords[i]))
-        return false
+  //2. Match by city name if no key match
+  if (!match && c_name) {
+    if (capitals_by_name.has(c_name)) {
+      match = capitals_by_name.get(c_name)
+    } else if (c_short && capitals_by_name.has(c_short)) {
+      match = capitals_by_name.get(c_short)
     }
-    return true
-  } else if (geom.type === 'MultiPolygon') {
-    for (let p = 0; p < coords.length; p++) {
-      let poly = coords[p]
-      if (isPointInPolygonRing(pt, poly[0])) {
-        let in_hole = false
-        for (let h = 1; h < poly.length; h++) {
-          if (isPointInPolygonRing(pt, poly[h])) {
-            in_hole = true
-            break
+  }
+
+  //3. If candidate match found, verify spatial plausibility against match.bbox
+  if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
+    if (
+      c_lon < match.bbox[0] - pad ||
+      c_lon > match.bbox[2] + pad ||
+      c_lat < match.bbox[1] - pad ||
+      c_lat > match.bbox[3] + pad
+    ) {
+      match = null
+    }
+  }
+
+  //4. If matched with authoritative capital, ensure isCapital is true with enriched metadata
+  if (match) {
+    resolved_color = match.color || city.capitalColor || city.capital_color || '#FFDC00'
+    return {
+      ...city,
+      capitalColor: resolved_color,
+      capital_color: resolved_color,
+      capitalOf: match.polity_name || city.capitalOf || city.capital_state_name,
+      capitalStateId: match.state_id !== undefined ? match.state_id : city.capitalStateId,
+      capital_state_id: match.state_id !== undefined ? match.state_id : city.capital_state_id,
+      capital_state_name: match.polity_name || city.capital_state_name || city.capitalOf,
+      isCapital: true,
+      is_capital: true,
+    }
+  }
+
+  //5. If city claims isCapital but its polity no longer exists or has another authoritative capital:
+  if (city.isCapital || city.is_capital) {
+    //Verify that the claimed polity exists at this point in time
+    if (active_state_ids && active_state_ids.size > 0) {
+      polity_name_lower = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
+      has_polity_by_id = Boolean(sid_str && active_state_ids.has(sid_str))
+      has_polity_by_name = Boolean(polity_name_lower && active_polity_names && active_polity_names.has(polity_name_lower))
+
+      if (!has_polity_by_id && !has_polity_by_name) {
+        return {
+          ...city,
+          capitalColor: undefined,
+          capital_color: undefined,
+          isCapital: false,
+          is_capital: false,
+        }
+      }
+    }
+
+    if (sid_str) {
+      if (acapital_state_ids.has(sid_str)) {
+        return {
+          ...city,
+          capitalColor: undefined,
+          capital_color: undefined,
+          isCapital: false,
+          is_capital: false,
+        }
+      }
+
+      active_cap = state_capitals_by_sid.get(sid_str)
+      if (active_cap && (active_cap.capkey || active_cap.capname)) {
+        is_same_key = Boolean(active_cap.capkey && (active_cap.capkey === c_key || active_cap.capkey === c_id))
+        is_same_name = Boolean(active_cap.capname && (active_cap.capname.toLowerCase().trim() === c_name || active_cap.capname.toLowerCase().trim() === c_short))
+        if (!is_same_key && !is_same_name) {
+          return {
+            ...city,
+            capitalColor: undefined,
+            capital_color: undefined,
+            isCapital: false,
+            is_capital: false,
           }
         }
-        if (!in_hole)
-          return true
-      }
-    }
-    return false
-  }
-
-  //Return statement
-  return false
-}
-
-/**
- * Calculates squared Euclidean distance from point (px, py) to line segment (x1, y1)-(x2, y2).
- *
- * @param {number} arg0_px
- * @param {number} arg1_py
- * @param {number} arg2_x1
- * @param {number} arg3_y1
- * @param {number} arg4_x2
- * @param {number} arg5_y2
- *
- * @returns {number} Squared distance
- */
-function distanceSquaredToSegment (
-  arg0_px: number,
-  arg1_py: number,
-  arg2_x1: number,
-  arg3_y1: number,
-  arg4_x2: number,
-  arg5_y2: number
-): number {
-  //Convert from parameters
-  let px = arg0_px
-  let py = arg1_py
-  let x1 = arg2_x1
-  let y1 = arg3_y1
-  let x2 = arg4_x2
-  let y2 = arg5_y2
-
-  //Declare local instance variables
-  let diff_x: number
-  let diff_y: number
-  let dpx: number
-  let dpy: number
-  let dx = x2 - x1
-  let dy = y2 - y1
-  let len_sq = dx * dx + dy * dy
-  let proj_x: number
-  let proj_y: number
-  let t: number
-
-  //Guard clauses
-  if (len_sq === 0) {
-    dpx = px - x1
-    dpy = py - y1
-    return dpx * dpx + dpy * dpy
-  }
-
-  //Function body
-  t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / len_sq))
-  proj_x = x1 + t * dx
-  proj_y = y1 + t * dy
-  diff_x = px - proj_x
-  diff_y = py - proj_y
-
-  //Return statement
-  return diff_x * diff_x + diff_y * diff_y
-}
-
-/**
- * Tests whether a point [lng, lat] is within max_dist degrees of any segment in a polygon ring.
- *
- * @param {[number, number]} arg0_point
- * @param {number[][]} arg1_ring
- * @param {number} arg2_max_dist
- *
- * @returns {boolean} True if point is near ring
- */
-function isPointNearPolygonRing (arg0_point: [number, number], arg1_ring: number[][], arg2_max_dist: number): boolean {
-  //Convert from parameters
-  let max_dist = arg2_max_dist
-  let pt = arg0_point
-  let ring = arg1_ring
-
-  //Guard clauses
-  if (!ring || ring.length < 2 || !pt)
-    return false
-
-  //Declare local instance variables
-  let max_dist_sq = max_dist * max_dist
-  let px = pt[0]
-  let py = pt[1]
-
-  //Function body
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    let d_sq = distanceSquaredToSegment(px, py, ring[i][0], ring[i][1], ring[j][0], ring[j][1])
-    if (d_sq <= max_dist_sq)
-      return true
-  }
-
-  //Return statement
-  return false
-}
-
-/**
- * Tests whether a point [lng, lat] is within max_dist degrees of a GeoJSON Polygon / MultiPolygon geometry.
- *
- * @param {[number, number]} arg0_point
- * @param {any} arg1_geometry
- * @param {number} arg2_max_dist
- *
- * @returns {boolean} True if point is within max_dist
- */
-function isPointNearHistoricalGeometry (arg0_point: [number, number], arg1_geometry: any, arg2_max_dist: number): boolean {
-  //Convert from parameters
-  let geom = arg1_geometry
-  let max_dist = arg2_max_dist
-  let pt = arg0_point
-
-  //Guard clauses
-  if (!geom || !geom.coordinates || !pt)
-    return false
-
-  //Declare local instance variables
-  let coords = geom.coordinates
-
-  //Function body
-  if (geom.type === 'Polygon') {
-    for (let r = 0; r < coords.length; r++) {
-      if (isPointNearPolygonRing(pt, coords[r], max_dist))
-        return true
-    }
-  } else if (geom.type === 'MultiPolygon') {
-    for (let p = 0; p < coords.length; p++) {
-      let poly = coords[p]
-      for (let r = 0; r < poly.length; r++) {
-        if (isPointNearPolygonRing(pt, poly[r], max_dist))
-          return true
       }
     }
   }
 
   //Return statement
-  return false
+  return city
 }
 
-/**
- * Verifies if a capital city falls within its target state's active border polygon on screen.
- * Accommodates coastal settlements with 0.35° spatial tolerance for generalized boundary polygons.
- * Enriches the capital city with its parent polity's rendered polygon colour.
- *
- * @param {any} arg0_city - City object
- * @param {Map<string, any>} arg1_features_by_id - Map of state IDs to feature
- * @param {Map<string, any>} arg2_features_by_name - Map of state names to feature
- *
- * @returns {boolean} True if the city is inside or near the target polygon
- */
-function isCapitalInsideTargetPolygon (
-  arg0_city: any,
-  arg1_features_by_id: Map<string, any>,
-  arg2_features_by_name: Map<string, any>
-): boolean {
-  //Convert from parameters
-  let city = arg0_city
-  let features_by_id = arg1_features_by_id
-  let features_by_name = arg2_features_by_name
-
-  //Guard clauses
-  if (!city || !city.isCapital)
-    return false
-
-  //Declare local instance variables
-  let bbox: [number, number, number, number] | undefined
-  let geom: any
-  let is_inside: boolean
-  let polity_color: any
-  let pt_coords: [number, number] | undefined
-  let target_feature: any
-
-  //Function body
-  if (city.rawCoords && Array.isArray(city.rawCoords) && city.rawCoords.length >= 2) {
-    pt_coords = [city.rawCoords[0], city.rawCoords[1]]
-  } else if (city.coords && Array.isArray(city.coords) && city.coords.length >= 2) {
-    pt_coords = [city.coords[1], city.coords[0]]
-  } else if (city.lon !== undefined && city.lat !== undefined) {
-    pt_coords = [Number(city.lon), Number(city.lat)]
-  } else if (city.lng !== undefined && city.lat !== undefined) {
-    pt_coords = [Number(city.lng), Number(city.lat)]
-  } else if (city.position && Array.isArray(city.position) && city.position.length >= 2 && (!city.projection || city.projection !== 'EqualEarth')) {
-    pt_coords = [city.position[0], city.position[1]]
-  }
-
-  if (!pt_coords)
-    return true
-
-  if (city.capitalStateId !== undefined && city.capitalStateId !== null) {
-    target_feature = features_by_id.get(String(city.capitalStateId))
-  }
-  if (!target_feature && city.capital_state_id !== undefined && city.capital_state_id !== null) {
-    target_feature = features_by_id.get(String(city.capital_state_id))
-  }
-  if (!target_feature && (city.key || city.id)) {
-    let c_key = String(city.key || city.id)
-    for (let feat of features_by_id.values()) {
-      if (feat.properties?.capkey === c_key) {
-        target_feature = feat
-        break
-      }
-    }
-  }
-  if (!target_feature && city.capitalOf && typeof city.capitalOf === 'string') {
-    target_feature = features_by_name.get(city.capitalOf.toLowerCase().trim())
-  }
-  if (!target_feature && city.capital_state_name && typeof city.capital_state_name === 'string') {
-    target_feature = features_by_name.get(city.capital_state_name.toLowerCase().trim())
-  }
-  if (!target_feature && (city.capitalOf || city.capital_state_name)) {
-    let search_name = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
-    for (let [f_name, feat] of features_by_name.entries()) {
-      if (f_name === search_name || f_name.includes(search_name) || search_name.includes(f_name)) {
-        target_feature = feat
-        break
-      }
-    }
-  }
-  if (!target_feature && city.country && typeof city.country === 'string') {
-    let country_norm = city.country.toLowerCase().trim()
-    for (let [f_name, feat] of features_by_name.entries()) {
-      if (f_name === country_norm || f_name.includes(country_norm) || country_norm.includes(f_name)) {
-        target_feature = feat
-        break
-      }
-    }
-  }
-
-  //If no target polygon feature is active on screen, retain default capital status
-  if (!target_feature)
-    return true
-
-  bbox = target_feature.bbox
-  if (bbox && bbox.length >= 4) {
-    if (pt_coords[0] < bbox[0] - 0.35 || pt_coords[0] > bbox[2] + 0.35 ||
-        pt_coords[1] < bbox[1] - 0.35 || pt_coords[1] > bbox[3] + 0.35) {
-      return false
-    }
-  }
-
-  geom = target_feature.geometry
-  if (!geom)
-    return false
-
-  is_inside = isPointInHistoricalGeometry(pt_coords, geom) || isPointNearHistoricalGeometry(pt_coords, geom, 0.35)
-  if (!is_inside)
-    return false
-
-  //Enrich capital city with the active border polygon's fill or stroke colour
-  polity_color = target_feature.properties?.symbol?.polygonFill ||
-    target_feature.properties?.symbol?.fillColor ||
-    target_feature.properties?.fillColor ||
-    target_feature.properties?.color ||
-    target_feature.properties?.symbol?.strokeColor ||
-    target_feature.properties?.strokeColor
-
-  if (polity_color && (!city.capitalColor || city.capitalColor === '#FFDC00' || Array.isArray(city.capitalColor))) {
-    city.capitalColor = polity_color
-  }
-
-  //Return statement
-  return true
-}
 
 let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
   [0.08, [232, 121, 249]],
@@ -430,67 +228,7 @@ let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
   [-0.05, [93, 96, 226]],
 ]
 
-let circle_atlas_url: string | null = null
 
-let CIRCLE_ICON_MAPPING = {
-  circle: {
-    height: 128,
-    mask: true,
-    width: 128,
-    x: 0,
-    y: 0,
-  },
-  halo: {
-    height: 128,
-    mask: true,
-    width: 128,
-    x: 128,
-    y: 0,
-  },
-}
-
-/**
- * Creates or retrieves a cached base64 PNG data URL containing masked circular textures for city points.
- *
- * @returns {string}
- */
-function getCircleAtlasUrl (): string {
-  //Guard clauses
-  if (typeof document === 'undefined')
-    return ''
-
-  if (circle_atlas_url)
-    return circle_atlas_url
-
-  //Declare local instance variables
-  let c = document.createElement('canvas')
-  let ctx: CanvasRenderingContext2D | null
-
-  //Function body
-  c.width = 256
-  c.height = 128
-  ctx = c.getContext('2d')
-  if (!ctx)
-    return ''
-
-  //1. Filled circular dot at (0, 0)
-  ctx.fillStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(64, 64, 60, 0, Math.PI * 2)
-  ctx.fill()
-
-  //2. Halo circular ring at (128, 0)
-  ctx.lineWidth = 14
-  ctx.strokeStyle = '#ffffff'
-  ctx.beginPath()
-  ctx.arc(192, 64, 54, 0, Math.PI * 2)
-  ctx.stroke()
-
-  circle_atlas_url = c.toDataURL('image/png')
-
-  //Return statement
-  return circle_atlas_url
-}
 
 function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
   //Convert from parameters
@@ -625,6 +363,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
   let color_mode = options.stadesterConfig?.colorMode || 'growth'
   let growth_palette = options.stadesterConfig?.growthPalette || 'Rainbow'
   let is_cities_enabled = Boolean(options.stadesterConfig?.enabled)
+  let is_mobile = Boolean(options.isMobile)
   let projection = options.projection
   let stadester_cities = options.stadesterCities
 
@@ -645,10 +384,12 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         py = projected[1]
       }
 
-      // Equal-area pixel radius scaled by sqrt(population) with guaranteed minimum bubble size for smaller settlements:
-      let min_radius = 3.25 * b_scale
-      let pop_radius = Math.sqrt(Math.max(0, city.population)) * 0.0115 * b_scale
-      let pixel_radius = Math.max(min_radius, Math.min(65.0, min_radius + pop_radius))
+      // Equal-area pixel radius scaled by sqrt(population) with calibrated minimum bubble size for mobile / desktop
+      let min_radius = (is_mobile ? 2.0 : 3.25) * b_scale
+      let pop_scaled = (is_mobile ? 0.70 : 1.0) * b_scale
+      let pop_radius = Math.sqrt(Math.max(0, city.population)) * 0.0115 * pop_scaled
+      let max_radius = is_mobile ? 32.0 : 65.0
+      let pixel_radius = Math.max(min_radius, Math.min(max_radius, min_radius + pop_radius))
 
       if (color_mode === 'growth') {
         let growth_rate = (city.growthRate !== undefined) ? city.growthRate : 0
@@ -682,12 +423,19 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     b_scale,
     color_mode,
     growth_palette,
+    is_mobile,
     projection,
   ])
 
   //Return statement
   return useMemo(() => {
     //Declare local instance variables
+    let acapital_state_ids = new Set<string>()
+    let active_capitals_by_key = new Map<string, any>()
+    let active_capitals_by_name = new Map<string, any>()
+    let active_polity_names = new Set<string>()
+    let active_state_capitals_by_sid = new Map<string, { capkey?: string; capname?: string }>()
+    let active_state_ids = new Set<string>()
     let basemap = options.basemap
     let border_features_by_id = new Map<string, any>()
     let border_features_by_name = new Map<string, any>()
@@ -737,14 +485,66 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     if (options.historicalBordersData && options.historicalBordersData.features) {
       for (let i = 0; i < options.historicalBordersData.features.length; i++) {
         let feat = options.historicalBordersData.features[i]
-        if (feat.properties?.id !== undefined)
-          border_features_by_id.set(String(feat.properties.id), feat)
+        let p = feat.properties
+        if (!p)
+          continue
+
+        let s_id = p.state_id !== undefined ? String(p.state_id) : (p.id !== undefined ? String(p.id) : undefined)
+
+        if (p.id !== undefined)
+          border_features_by_id.set(String(p.id), feat)
         if (feat.id !== undefined)
           border_features_by_id.set(String(feat.id), feat)
-        if (feat.properties?.state_id !== undefined)
-          border_features_by_id.set(String(feat.properties.state_id), feat)
-        if (feat.properties?.name)
-          border_features_by_name.set(feat.properties.name.toLowerCase().trim(), feat)
+        if (p.state_id !== undefined)
+          border_features_by_id.set(String(p.state_id), feat)
+        if (p.name)
+          border_features_by_name.set(p.name.toLowerCase().trim(), feat)
+
+        if (s_id)
+          active_state_ids.add(s_id)
+        if (p.state_id !== undefined)
+          active_state_ids.add(String(p.state_id))
+        if (p.id !== undefined)
+          active_state_ids.add(String(p.id))
+        if (p.name)
+          active_polity_names.add(p.name.toLowerCase().trim())
+        if (p.name_long)
+          active_polity_names.add(p.name_long.toLowerCase().trim())
+
+        if (p.is_acapital) {
+          if (s_id)
+            acapital_state_ids.add(s_id)
+        } else if (p.capname || p.capkey) {
+          let polity_color = p.symbol?.polygonFill ||
+            p.symbol?.fillColor ||
+            p.fillColor ||
+            p.color ||
+            p.symbol?.strokeColor ||
+            p.strokeColor
+
+          let cap_entry = {
+            bbox: (feat as any).bbox || p.bbox,
+            capkey: p.capkey,
+            capname: p.capname,
+            color: polity_color,
+            polity_name: p.name,
+            state_id: p.state_id,
+          }
+
+          if (s_id)
+            active_state_capitals_by_sid.set(s_id, { capkey: p.capkey, capname: p.capname })
+
+          if (p.capkey) {
+            active_capitals_by_key.set(p.capkey, cap_entry)
+            active_capitals_by_key.set(p.capkey.toLowerCase().trim(), cap_entry)
+          }
+          if (p.capname) {
+            let names = p.capname.split(/[,/]/).map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+            for (let n of names) {
+              active_capitals_by_name.set(n, cap_entry)
+            }
+          }
+        }
       }
     }
 
@@ -1360,26 +1160,22 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       ? options.stadesterPoints!
       : stadester_points_data
 
-    //Validate capital cities against target border polygon on screen (ONLY for capital cities)
-    if (border_features_by_id.size > 0 && effective_points && effective_points.length > 0) {
-      effective_points = effective_points.map((arg0_c: any) => {
-        if (!arg0_c.isCapital)
-          return arg0_c
-
-        let is_valid = isCapitalInsideTargetPolygon(arg0_c, border_features_by_id, border_features_by_name)
-        if (!is_valid) {
-          return {
-            ...arg0_c,
-            capitalColor: undefined,
-            isCapital: false,
-          }
-        }
-        return arg0_c
-      })
+    //Reconcile capital cities isomorphically with authoritative historical border features
+    if ((active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) && effective_points && effective_points.length > 0) {
+      effective_points = effective_points.map((arg0_c: any) =>
+        reconcileCapitalWithAuthoritativeBorders(
+          arg0_c,
+          active_capitals_by_key,
+          active_capitals_by_name,
+          acapital_state_ids,
+          active_state_capitals_by_sid,
+          active_state_ids,
+          active_polity_names
+        )
+      )
     }
 
     if (options.stadesterConfig?.enabled && effective_points.length > 0) {
-      let is_collision_active = (options.stadesterConfig.labelCollision !== undefined) ? options.stadesterConfig.labelCollision : true
       let is_firefox = typeof navigator !== 'undefined' && /firefox|fxios/i.test(navigator.userAgent)
       let is_halo = options.stadesterConfig.halo !== false && !options.stadesterConfig.filled
       let is_labels_visible = (options.stadesterConfig.showLabels !== undefined) ? options.stadesterConfig.showLabels : true
@@ -1420,8 +1216,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             getAlignmentBaseline: 'center',
             sizeUnits: 'pixels',
             sizeScale: 1,
-            sizeMinPixels: is_mobile ? 12.0 : 6.5,
-            sizeMaxPixels: 130.0,
+            sizeMinPixels: is_mobile ? 4.5 : 6.5,
+            sizeMaxPixels: is_mobile ? 65.0 : 130.0,
             coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
             billboard: true,
             pickable: !is_drawing,
@@ -1493,8 +1289,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             stroked: is_halo,
             filled: !is_halo,
             radiusUnits: 'pixels',
-            radiusMinPixels: is_mobile ? 6.5 : 3.25,
-            radiusMaxPixels: 65.0,
+            radiusMinPixels: is_mobile ? 2.0 : 3.25,
+            radiusMaxPixels: is_mobile ? 32.0 : 65.0,
             coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
             billboard: true,
             pickable: !is_drawing,
@@ -1536,7 +1332,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 fontFamily: 'Segoe UI Symbol, Arial, sans-serif',
                 fontSettings: { buffer: 8, fontSize: 128, sdf: true },
                 getPosition: (d: any) => d.position,
-                getSize: (d: any) => (d.pixelRadius + 4) * 2,
+                getSize: (d: any) => (is_mobile ? (d.pixelRadius * 0.70 + 2.5) : (d.pixelRadius + 4)) * 2,
                 getColor: [239, 68, 68, 255],
                 getTextAnchor: 'middle',
                 getAlignmentBaseline: 'center',
@@ -1559,7 +1355,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 id: `stadester-selected-ring-${projection}`,
                 data: [selected_city_item],
                 getPosition: (d: any) => d.position,
-                getRadius: (d: any) => d.pixelRadius + 4,
+                getRadius: (d: any) => is_mobile ? (d.pixelRadius * 0.70 + 2.5) : (d.pixelRadius + 4),
                 stroked: true,
                 filled: false,
                 getLineColor: [239, 68, 68, 255],
@@ -1599,22 +1395,19 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             arg0_c.shortName.trim().length > 0
           )
 
-          //Validate capital cities against target border polygon on screen (ONLY for capital cities)
-          if (border_features_by_id.size > 0) {
-            visible_label_cities = visible_label_cities.map((arg0_c: any) => {
-              if (!arg0_c.isCapital)
-                return arg0_c
-
-              let is_valid = isCapitalInsideTargetPolygon(arg0_c, border_features_by_id, border_features_by_name)
-              if (!is_valid) {
-                return {
-                  ...arg0_c,
-                  capitalColor: undefined,
-                  isCapital: false,
-                }
-              }
-              return arg0_c
-            })
+          //Reconcile capital cities isomorphically with authoritative historical border features
+          if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
+            visible_label_cities = visible_label_cities.map((arg0_c: any) =>
+              reconcileCapitalWithAuthoritativeBorders(
+                arg0_c,
+                active_capitals_by_key,
+                active_capitals_by_name,
+                acapital_state_ids,
+                active_state_capitals_by_sid,
+                active_state_ids,
+                active_polity_names
+              )
+            )
           }
         }
 
@@ -1761,6 +1554,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     options.selectedCityKey,
     options.onSelectCity,
     options.onHoverCity,
+    options.hoveredCity,
     options.historicalBordersData,
     options.historicalBordersConfig,
     options.selectedHistoricalFeature,

@@ -1313,7 +1313,7 @@ export let StadesterService = {
         }
       }
 
-      if (pop < min_pop || pop < 0.01)
+      if (pop < 0.01)
         continue
 
       //Resolve area and density at target year if available
@@ -1373,8 +1373,13 @@ export let StadesterService = {
       })
 
       let cap_state = cap_rec?.state_id ? StadesterService.getStateById(cap_rec.state_id) : null
-      let cap_color_val = cap_state?.fill_color || null
       let is_capital_val = Boolean(cap_rec && cap_state)
+
+      //Protect active capitals from population threshold culling
+      if (!is_capital_val && pop < min_pop)
+        continue
+
+      let cap_color_val = cap_state?.fill_color || null
       let polity_name = cap_state?.name || undefined
       let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
 
@@ -1405,9 +1410,27 @@ export let StadesterService = {
     //Sort descending by population
     result_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
 
-    //Apply max_cities limit
-    if (max_cities > 0 && max_cities < result_cities.length)
-      result_cities = result_cities.slice(0, max_cities)
+    //Apply max_cities limit, but ensure active capitals are always preserved
+    if (max_cities > 0 && max_cities < result_cities.length) {
+      let top_cities = result_cities.slice(0, max_cities)
+      let capitals_outside_slice = result_cities.slice(max_cities).filter((c) => c.isCapital)
+      if (capitals_outside_slice.length > 0) {
+        let non_capitals: CityRenderPoint[] = []
+        let preserved_list: CityRenderPoint[] = []
+        for (let i = 0; i < top_cities.length; i++) {
+          if (top_cities[i].isCapital) {
+            preserved_list.push(top_cities[i])
+          } else {
+            non_capitals.push(top_cities[i])
+          }
+        }
+        let slots_for_non_capitals = Math.max(0, max_cities - preserved_list.length - capitals_outside_slice.length)
+        result_cities = [...preserved_list, ...capitals_outside_slice, ...non_capitals.slice(0, slots_for_non_capitals)]
+        result_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
+      } else {
+        result_cities = top_cities
+      }
+    }
 
     //Return statement
     return result_cities

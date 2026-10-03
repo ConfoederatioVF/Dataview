@@ -434,49 +434,31 @@ export let StadesterService = {
 
       //C. Inherit metadata if nearest city is within 50 km threshold
       if (best_city && min_dist <= 50) {
-        let local_best_name = (best_city.name || '').toLowerCase().trim()
-        let local_is_key_match = Boolean(meta.key && meta.key === best_city.key)
-        let local_is_special_match = meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')
-        let local_meta_name = (meta.name || '').toLowerCase().trim()
+        let is_exact_coord_match = min_dist <= 0.1
+        let local_best_name = normalizeCityAlias(best_city.name || '')
+        let local_meta_name = normalizeCityAlias(meta.name || '')
 
-        let local_best_aliases = [
+        let best_aliases = [
           local_best_name,
-          ...(Array.isArray(best_city.other_names) ? best_city.other_names.map((arg0_s) => String(arg0_s).toLowerCase().trim()) : (typeof best_city.other_names === 'string' ? [best_city.other_names.toLowerCase().trim()] : [])),
-          ...(best_city.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
-        ]
-        let local_meta_aliases = [
+          ...(Array.isArray(best_city.other_names) ? best_city.other_names.map(normalizeCityAlias) : (typeof best_city.other_names === 'string' ? [normalizeCityAlias(best_city.other_names)] : [])),
+        ].filter(Boolean)
+
+        let meta_aliases = [
           local_meta_name,
-          ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase().trim()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase().trim()] : [])),
-          ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
-        ]
-        let local_is_direct_match = local_is_key_match || local_is_special_match || local_meta_aliases.some((arg0_ma) => arg0_ma && local_best_aliases.some((arg0_ba) => arg0_ba === arg0_ma || normalizeCityAlias(arg0_ba) === normalizeCityAlias(arg0_ma)))
+          ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map(normalizeCityAlias) : (typeof (meta as any).other_names === 'string' ? [normalizeCityAlias((meta as any).other_names)] : [])),
+        ].filter(Boolean)
 
-        if (!local_is_direct_match)
+        let is_name_match = meta_aliases.some((ma) => best_aliases.includes(ma))
+
+        if (!is_exact_coord_match && !is_name_match)
           continue
 
-        //Do not conflate Kathmandu and Patan/Lalitpur, or Capua and Santa Maria Capua Vetere
-        if ((local_meta_name.includes('kathmandu') || local_meta_name.includes('kantipur')) &&
-            (local_best_name.includes('patan') || local_best_name.includes('lalitpur')))
-          continue
-
-        if ((local_meta_name.includes('patan') || local_meta_name.includes('lalitpur')) &&
-            (local_best_name.includes('kathmandu') || local_best_name.includes('kantipur')))
-          continue
-
-        if (local_meta_name === 'capua' &&
-            (local_best_name.includes('vetere') || local_best_name.includes('maria')))
-          continue
-
-        if ((local_meta_name.includes('vetere') || local_meta_name.includes('maria')) &&
-            local_best_name === 'capua')
-          continue
-
-        if (meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')) {
+        if (is_exact_coord_match && meta.name)
           best_city.name = meta.name
-          best_city.historical_names = meta.historical_names
-        } else if (meta.historical_names && meta.historical_names.length > 0) {
+
+        if (meta.historical_names && meta.historical_names.length > 0)
           best_city.historical_names = StadesterService.mergeHistoricalNames(best_city.historical_names, meta.historical_names)
-        }
+
         if (meta.capital_records && meta.capital_records.length > 0) {
           if (!best_city.capital) {
             best_city.capital = meta.capital as any
@@ -505,10 +487,8 @@ export let StadesterService = {
         }
 
         //Also associate related agglomeration or pre/post-1975 counterpart cities in local grid cells
-        let base_name = (best_city.name || '').toLowerCase().trim()
         let center_lat = Math.floor(target_lat)
         let center_lng = Math.floor(target_lng)
-        let meta_name_lower = (meta.name || '').toLowerCase().trim()
 
         for (let d_lat = -1; d_lat <= 1; d_lat++) {
           for (let d_lng = -1; d_lng <= 1; d_lng++) {
@@ -520,37 +500,25 @@ export let StadesterService = {
                   continue
 
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
-                if (dist <= 60) {
-                  let other_name_lower = (other.name || '').toLowerCase().trim()
-                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem, or Kathmandu and Patan/Lalitpur, or Capua and Santa Maria Capua Vetere
-                  if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
-                      (base_name.includes('city of london') && other_name_lower === 'london') ||
-                      (base_name === 'jerusalem' && other_name_lower.includes('east jerusalem')) ||
-                      (base_name.includes('east jerusalem') && other_name_lower === 'jerusalem') ||
-                      ((base_name.includes('kathmandu') || base_name.includes('kantipur')) && (other_name_lower.includes('patan') || other_name_lower.includes('lalitpur'))) ||
-                      ((base_name.includes('patan') || base_name.includes('lalitpur')) && (other_name_lower.includes('kathmandu') || other_name_lower.includes('kantipur'))) ||
-                      (base_name === 'capua' && (other_name_lower.includes('vetere') || other_name_lower.includes('maria'))) ||
-                      ((base_name.includes('vetere') || base_name.includes('maria')) && other_name_lower === 'capua')) {
-                    continue
-                  }
-                  let other_aliases = [
-                    other_name_lower,
-                    ...(Array.isArray(other.other_names) ? other.other_names.map((arg0_s) => String(arg0_s).toLowerCase().trim()) : (typeof other.other_names === 'string' ? [other.other_names.toLowerCase().trim()] : [])),
-                    ...(other.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
-                  ]
-                  let meta_aliases = [
-                    meta_name_lower,
-                    base_name,
-                    ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map((arg0_s: any) => String(arg0_s).toLowerCase().trim()) : (typeof (meta as any).other_names === 'string' ? [(meta as any).other_names.toLowerCase().trim()] : [])),
-                    ...(meta.historical_names || []).map((arg0_h) => (arg0_h.name || '').toLowerCase().trim()),
-                  ]
-                  let is_name_match = meta_aliases.some((arg0_ma) => arg0_ma && other_aliases.some((arg0_oa) => arg0_oa === arg0_ma || normalizeCityAlias(arg0_oa) === normalizeCityAlias(arg0_ma)))
+                if (dist <= 25) {
                   let is_era_counterpart =
-                    ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
-                    (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
-                    is_name_match
+                    (best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
+                    (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))
 
-                  if (is_name_match || is_era_counterpart) {
+                  let is_agg_counterpart = Boolean(
+                    (other.is_agglomeration && (other.is_agglomeration_of === local_best_name || other.is_agglomeration_of === local_meta_name))
+                  )
+
+                  if (!is_era_counterpart && !is_agg_counterpart)
+                    continue
+
+                  let other_aliases = [
+                    normalizeCityAlias(other.name || ''),
+                    ...(Array.isArray(other.other_names) ? other.other_names.map(normalizeCityAlias) : (typeof other.other_names === 'string' ? [normalizeCityAlias(other.other_names)] : [])),
+                  ].filter(Boolean)
+
+                  let is_counterpart_name_match = is_agg_counterpart || meta_aliases.some((ma) => other_aliases.includes(ma))
+                  if (is_counterpart_name_match) {
                     if (meta.historical_names && meta.historical_names.length > 0)
                       other.historical_names = StadesterService.mergeHistoricalNames(other.historical_names, meta.historical_names)
                     if (meta.capital_records && meta.capital_records.length > 0) {

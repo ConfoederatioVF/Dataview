@@ -454,13 +454,21 @@ export let StadesterService = {
         if (!local_is_direct_match)
           continue
 
-        //Do not conflate Kathmandu and Patan/Lalitpur
+        //Do not conflate Kathmandu and Patan/Lalitpur, or Capua and Santa Maria Capua Vetere
         if ((local_meta_name.includes('kathmandu') || local_meta_name.includes('kantipur')) &&
             (local_best_name.includes('patan') || local_best_name.includes('lalitpur')))
           continue
 
         if ((local_meta_name.includes('patan') || local_meta_name.includes('lalitpur')) &&
             (local_best_name.includes('kathmandu') || local_best_name.includes('kantipur')))
+          continue
+
+        if (local_meta_name === 'capua' &&
+            (local_best_name.includes('vetere') || local_best_name.includes('maria')))
+          continue
+
+        if ((local_meta_name.includes('vetere') || local_meta_name.includes('maria')) &&
+            local_best_name === 'capua')
           continue
 
         if (meta.name === 'City of London' || (meta.name === 'East Jerusalem' && best_city.name === 'Yerushalayim')) {
@@ -514,13 +522,15 @@ export let StadesterService = {
                 let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
                 if (dist <= 60) {
                   let other_name_lower = (other.name || '').toLowerCase().trim()
-                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem, or Kathmandu and Patan/Lalitpur
+                  // Do not conflate London and City of London, or Jerusalem and East Jerusalem, or Kathmandu and Patan/Lalitpur, or Capua and Santa Maria Capua Vetere
                   if ((base_name === 'london' && other_name_lower.includes('city of london')) ||
                       (base_name.includes('city of london') && other_name_lower === 'london') ||
                       (base_name === 'jerusalem' && other_name_lower.includes('east jerusalem')) ||
                       (base_name.includes('east jerusalem') && other_name_lower === 'jerusalem') ||
                       ((base_name.includes('kathmandu') || base_name.includes('kantipur')) && (other_name_lower.includes('patan') || other_name_lower.includes('lalitpur'))) ||
-                      ((base_name.includes('patan') || base_name.includes('lalitpur')) && (other_name_lower.includes('kathmandu') || other_name_lower.includes('kantipur')))) {
+                      ((base_name.includes('patan') || base_name.includes('lalitpur')) && (other_name_lower.includes('kathmandu') || other_name_lower.includes('kantipur'))) ||
+                      (base_name === 'capua' && (other_name_lower.includes('vetere') || other_name_lower.includes('maria'))) ||
+                      ((base_name.includes('vetere') || base_name.includes('maria')) && other_name_lower === 'capua')) {
                     continue
                   }
                   let other_aliases = [

@@ -29,6 +29,7 @@ import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
+import { normalizeCityKey } from '@framework/stadester/city_metadata_framework.ts'
 import { MAP_CONFIG } from '@common'
 import {
   EquirectangularTileset2D,
@@ -70,7 +71,7 @@ function getShortCityLabel (arg0_name: string): string {
  * @param {Map<string, any>} arg1_capitals_by_key - Authoritative active capitals indexed by key
  * @param {Map<string, any>} arg2_capitals_by_name - Authoritative active capitals indexed by name
  * @param {Set<string>} arg3_acapital_state_ids - State IDs explicitly marked as acapital
- * @param {Map<string, { capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
+ * @param {Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
  * @param {Set<string>} [arg5_active_state_ids] - State IDs active in current historical borders
  * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
  * @param {Map<string, any>} [arg7_authoritative_capitals_by_city] - Pre-matched authoritative capitals by city key/id
@@ -83,7 +84,7 @@ function reconcileCapitalWithAuthoritativeBorders (
   arg1_capitals_by_key: Map<string, any>,
   arg2_capitals_by_name: Map<string, any>,
   arg3_acapital_state_ids: Set<string>,
-  arg4_state_capitals_by_sid: Map<string, { capkey?: string; capname?: string }>,
+  arg4_state_capitals_by_sid: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>,
   arg5_active_state_ids?: Set<string>,
   arg6_active_polity_names?: Set<string>,
   arg7_authoritative_capitals_by_city?: Map<string, any>,
@@ -105,7 +106,7 @@ function reconcileCapitalWithAuthoritativeBorders (
     return city
 
   //Declare local instance variables
-  let active_cap: { capkey?: string; capname?: string } | undefined
+  let active_cap: { cap_coords?: [number, number]; capkey?: string; capname?: string } | undefined
   let best_cap: any = null
   let best_dist: number = 999
   let c_id = city.id ? String(city.id) : undefined
@@ -159,15 +160,26 @@ function reconcileCapitalWithAuthoritativeBorders (
       match = capitals_by_name.get(c_name_nfd)
     } else if (c_short_nfd && capitals_by_name.has(c_short_nfd)) {
       match = capitals_by_name.get(c_short_nfd)
-    } else if (city.other_names && Array.isArray(city.other_names)) {
+    } else {
+      let clean_c = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+      if (clean_c && capitals_by_name.has(clean_c)) {
+        match = capitals_by_name.get(clean_c)
+      }
+    }
+    if (!match && city.other_names && Array.isArray(city.other_names)) {
       for (let on of city.other_names) {
-        let on_lower = on.toLowerCase().trim()
-        let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        let on_clean = on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+        let on_lower = on_clean
+        let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
         if (capitals_by_name.has(on_lower)) {
           match = capitals_by_name.get(on_lower)
           break
         } else if (capitals_by_name.has(on_nfd)) {
           match = capitals_by_name.get(on_nfd)
+          break
+        } else if (clean_on && capitals_by_name.has(clean_on)) {
+          match = capitals_by_name.get(clean_on)
           break
         }
       }
@@ -231,7 +243,29 @@ function reconcileCapitalWithAuthoritativeBorders (
       has_polity_by_id = Boolean(sid_str && active_state_ids.has(sid_str))
       has_polity_by_name = Boolean(polity_name_lower && active_polity_names && active_polity_names.has(polity_name_lower))
 
-      if (!has_polity_by_id && !has_polity_by_name) {
+      //Check if this city matches any active capital by coordinate proximity before demoting
+      let matches_any_active_cap = false
+      if (!has_polity_by_id && !has_polity_by_name && c_lon !== undefined && c_lat !== undefined && active_capitals_list && active_capitals_list.length > 0) {
+        for (let k = 0; k < active_capitals_list.length; k++) {
+          let cap = active_capitals_list[k]
+          if (cap.cap_coords && Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) <= 0.45) {
+            matches_any_active_cap = true
+            return {
+              ...city,
+              capitalColor: cap.color || city.capitalColor || city.capital_color || '#FFDC00',
+              capital_color: cap.color || city.capitalColor || city.capital_color || '#FFDC00',
+              capitalOf: cap.polity_name || city.capitalOf || city.capital_state_name,
+              capitalStateId: cap.state_id !== undefined ? cap.state_id : city.capitalStateId,
+              capital_state_id: cap.state_id !== undefined ? cap.state_id : city.capital_state_id,
+              capital_state_name: cap.polity_name || city.capital_state_name || city.capitalOf,
+              isCapital: true,
+              is_capital: true,
+            }
+          }
+        }
+      }
+
+      if (!has_polity_by_id && !has_polity_by_name && !matches_any_active_cap) {
         return {
           ...city,
           capitalColor: undefined,
@@ -254,10 +288,28 @@ function reconcileCapitalWithAuthoritativeBorders (
       }
 
       active_cap = state_capitals_by_sid.get(sid_str)
-      if (active_cap && (active_cap.capkey || active_cap.capname)) {
-        is_same_key = Boolean(active_cap.capkey && (active_cap.capkey === c_key || active_cap.capkey === c_id))
-        is_same_name = Boolean(active_cap.capname && (active_cap.capname.toLowerCase().trim() === c_name || active_cap.capname.toLowerCase().trim() === c_short))
-        if (!is_same_key && !is_same_name) {
+      if (active_cap && (active_cap.capkey || active_cap.capname || active_cap.cap_coords)) {
+        let is_same_coord = false
+        if (active_cap.cap_coords && (c_lon !== undefined && c_lat !== undefined)) {
+          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.45
+        }
+        let clean_active_key = normalizeCityKey(active_cap.capkey || '')
+        let clean_c_key = normalizeCityKey(c_key || '')
+        is_same_key = Boolean(
+          (active_cap.capkey && (active_cap.capkey === c_key || active_cap.capkey === c_id)) ||
+          (clean_active_key && clean_c_key && clean_active_key === clean_c_key)
+        )
+        let clean_cap_name = (active_cap.capname || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+        let clean_c_name = (c_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+        let clean_c_short = (c_short || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+        is_same_name = Boolean(
+          clean_cap_name &&
+          (clean_cap_name === clean_c_name ||
+           clean_cap_name === clean_c_short ||
+           clean_c_name.startsWith(clean_cap_name) ||
+           clean_cap_name.startsWith(clean_c_name))
+        )
+        if (!is_same_key && !is_same_name && !is_same_coord) {
           return {
             ...city,
             capitalColor: undefined,
@@ -605,7 +657,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           active_capitals_list.push(cap_entry)
 
           if (s_id)
-            active_state_capitals_by_sid.set(s_id, { capkey: p.capkey, capname: p.capname })
+            active_state_capitals_by_sid.set(s_id, {
+              cap_coords: cap_entry.cap_coords,
+              capkey: p.capkey,
+              capname: p.capname,
+            })
 
           if (p.capkey) {
             active_capitals_by_key.set(p.capkey, cap_entry)
@@ -615,6 +671,10 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             let names = p.capname.split(/[,/]/).map((s: string) => s.trim().toLowerCase()).filter(Boolean)
             for (let n of names) {
               active_capitals_by_name.set(n, cap_entry)
+              let n_nfd = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+              let n_clean = n_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+              if (n_clean)
+                active_capitals_by_name.set(n_clean, cap_entry)
             }
           }
         }
@@ -1247,12 +1307,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           if (c_lat === undefined || c_lon === undefined)
             continue
 
-          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey)) {
-            best_city = c
-            best_score = 1000000
-            break
-          }
-
           let dist = cap.cap_coords ? Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) : 999
           if (dist > 0.45)
             continue
@@ -1264,6 +1318,12 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           }
 
           let score = 0
+          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey))
+            score += 200000
+          let clean_c_key = normalizeCityKey(c.key || '')
+          let clean_cap_key = normalizeCityKey(cap.capkey || '')
+          if (clean_cap_key && clean_c_key && clean_cap_key === clean_c_key)
+            score += 100000
           let c_name_lower = (c.name || '').toLowerCase().trim()
           let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           let cap_name_lower = (cap.capname || '').toLowerCase().trim()
@@ -1271,8 +1331,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
 
           let is_name_match = false
           if (cap_name_lower) {
-            let clean_c_name = c_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
-            let clean_cap_name = cap_name_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
             if (
               c_name_lower === cap_name_lower ||
               c_name_nfd === cap_name_nfd ||
@@ -1283,9 +1343,10 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               is_name_match = true
             } else if (c.other_names && Array.isArray(c.other_names)) {
               is_name_match = c.other_names.some((arg0_on: string) => {
-                let on_lower = arg0_on.toLowerCase().trim()
-                let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-)/, '')
+                let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+                let on_lower = on_clean
+                let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
                 return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
               })
             }

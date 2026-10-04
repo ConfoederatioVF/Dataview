@@ -175,15 +175,24 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       }
       if (cap_coords) {
         let best_dist = 999
+        let best_score = -1
         for (let arg0_c of cities) {
           let c_lat = arg0_c.rawCoords ? arg0_c.rawCoords[1] : (arg0_c.lat !== undefined ? arg0_c.lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
           let c_lon = arg0_c.rawCoords ? arg0_c.rawCoords[0] : (arg0_c.lon !== undefined ? arg0_c.lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
           if (c_lat === undefined || c_lon === undefined)
             continue
           let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
-          if (dist <= 0.45 && dist < best_dist) {
-            best_dist = dist
-            target_city = arg0_c
+          if (dist <= 0.45) {
+            let score = 0
+            if (arg0_c.isCapital || (arg0_c as any).is_capital)
+              score += 100000
+            score += Math.max(0, Math.round((0.5 - dist) * 1000))
+            score += Math.min(1000, Math.round((arg0_c.population || 0) / 1000))
+            if (score > best_score) {
+              best_score = score
+              best_dist = dist
+              target_city = arg0_c
+            }
           }
         }
       }
@@ -203,6 +212,9 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         ) || null
       }
 
+      let s_clean = single_name.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+      let s_norm = s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+
       //3. Check matching country and name/alias
       if (!target_city && country_name) {
         let c_norm = country_name.toLowerCase().trim()
@@ -211,20 +223,33 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           let is_country_match = city_country && (city_country === c_norm || c_norm.includes(city_country) || city_country.includes(c_norm))
           if (!is_country_match)
             return false
-          return (
-            (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
-            (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase()) ||
-            ((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => arg0_o.toLowerCase() === single_name.toLowerCase()))
-          )
+          let c_n_clean = (arg0_c.name || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let c_n_norm = c_n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+          let c_s_clean = (arg0_c.shortName || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let c_s_norm = c_s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+          let is_alias_match = Boolean((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => {
+            let o_clean = arg0_o.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+            let o_norm = o_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+            return o_clean === s_clean || o_norm === s_norm
+          }))
+          return c_n_clean === s_clean || c_n_norm === s_norm || c_s_clean === s_clean || c_s_norm === s_norm || is_alias_match
         }) || null
       }
 
-      //4. Fallback: match by name or shortName
+      //4. Fallback: match by name, shortName or aliases
       if (!target_city) {
-        target_city = cities.find((arg0_c) =>
-          (arg0_c.name && arg0_c.name.toLowerCase() === single_name.toLowerCase()) ||
-          (arg0_c.shortName && arg0_c.shortName.toLowerCase() === single_name.toLowerCase())
-        ) || null
+        target_city = cities.find((arg0_c) => {
+          let c_n_clean = (arg0_c.name || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let c_n_norm = c_n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+          let c_s_clean = (arg0_c.shortName || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let c_s_norm = c_s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+          let is_alias_match = Boolean((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => {
+            let o_clean = arg0_o.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+            let o_norm = o_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+            return o_clean === s_clean || o_norm === s_norm
+          }))
+          return c_n_clean === s_clean || c_n_norm === s_norm || c_s_clean === s_clean || c_s_norm === s_norm || is_alias_match
+        }) || null
       }
     }
 
@@ -233,6 +258,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         on_select_city(target_city)
       if ((window as any).setSelectedCityKey)
         (window as any).setSelectedCityKey(target_city.key)
+      if ((window as any).selectedCityRecord !== undefined)
+        (window as any).selectedCityRecord = target_city
     } else {
       let cap_key = feature.properties?.capkey || ''
       let query_params = new URLSearchParams()
@@ -244,6 +271,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         query_params.set('country', country_name)
       if (state_id !== undefined)
         query_params.set('state_id', String(state_id))
+      if (cap_coords) {
+        query_params.set('lat', String(cap_coords[1]))
+        query_params.set('lon', String(cap_coords[0]))
+      }
 
       fetch(`/api/stadester/city?${query_params.toString()}`)
         .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))

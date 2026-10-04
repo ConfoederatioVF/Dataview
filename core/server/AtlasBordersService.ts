@@ -387,6 +387,105 @@ let getCityCoordsByKey = function (arg0_key: string): [number, number] | null {
   return city_coords_cache.get(key) || city_coords_cache.get(key.toLowerCase().trim()) || null
 }
 
+let all_cities_coords_list: Array<{ coords: [number, number]; key: string }> | null = null
+
+/**
+ * Resolves contemporaneous city key and coordinates for a given key and calendar year.
+ * Handles temporally displaced keys (such as modern GHSL keys assigned to pre-1975 historical intervals,
+ * or historical Stadestér keys persisting into the post-1975 modern era).
+ *
+ * @param {string} arg0_key
+ * @param {number} arg1_year
+ *
+ * @returns {{ coords?: [number, number]; key: string }}
+ */
+let getContemporaneousCityKey = function (
+  arg0_key: string,
+  arg1_year: number
+): { coords?: [number, number]; key: string } {
+  //Convert from parameters
+  let key = arg0_key
+  let year = arg1_year
+
+  //Declare local instance variables
+  let best: { coords: [number, number]; key: string } | null = null
+  let direct_coords: [number, number] | null = null
+  let is_ghsl = false
+  let is_stadester = false
+  let item: { coords: [number, number]; key: string } | undefined
+  let lat = 0
+  let lon = 0
+  let min_d = 999
+  let norm_target = ''
+
+  //Guard clauses
+  if (!key)
+    return { key: '' }
+
+  is_ghsl = key.startsWith('ghsl-')
+  is_stadester = key.startsWith('stadester-')
+  direct_coords = getCityCoordsByKey(key)
+  if (direct_coords && ((is_ghsl && year >= 1975) || (is_stadester && year < 1975)))
+    return { coords: direct_coords, key: key }
+
+  //Function body
+  if (!all_cities_coords_list) {
+    let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
+    if (fs.existsSync(coords_path)) {
+      try {
+        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
+        all_cities_coords_list = Object.values(raw).filter(
+          (arg0_item: any) => arg0_item && arg0_item.key && Array.isArray(arg0_item.coords) && arg0_item.coords.length >= 2
+        ) as any
+      } catch {
+        all_cities_coords_list = []
+      }
+    } else {
+      all_cities_coords_list = []
+    }
+  }
+
+  norm_target = key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  item = all_cities_coords_list?.find((arg0_c) => {
+    if (!arg0_c || !arg0_c.key)
+      return false
+    if (arg0_c.key.toLowerCase().trim() === key.toLowerCase().trim())
+      return true
+    let c_norm = arg0_c.key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    return c_norm === norm_target
+  })
+  if (!item || !item.coords) {
+    let fallback_coords = direct_coords || getCityCoordsByKey(key)
+    return { coords: fallback_coords || undefined, key: key }
+  }
+
+  lon = item.coords[0]
+  lat = item.coords[1]
+
+  if (all_cities_coords_list) {
+    for (let i = 0; i < all_cities_coords_list.length; i++) {
+      let c = all_cities_coords_list[i]
+      if (!c || !c.coords)
+        continue
+      if (year < 1975 && !c.key.startsWith('stadester-'))
+        continue
+      if (year >= 1975 && !c.key.startsWith('ghsl-'))
+        continue
+      let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
+      if (d < 0.45 && d < min_d) {
+        min_d = d
+        best = c
+      }
+    }
+  }
+
+  if (best)
+    return { coords: best.coords as [number, number], key: best.key }
+
+  //Return statement
+  return { coords: item.coords as [number, number], key: item.key }
+}
+
 let isCityCoordsInsideBbox = function (
   arg0_coords: [number, number],
   arg1_bbox: [number, number, number, number],
@@ -412,6 +511,114 @@ let isCityCoordsInsideBbox = function (
     c_lat >= min_lat - pad &&
     c_lat <= max_lat + pad
   )
+}
+
+/**
+ * Resolves city coordinates and key from city name and optional country.
+ *
+ * @param {string} arg0_city_name
+ * @param {string} [arg1_country]
+ *
+ * @returns {{ coords?: [number, number]; key?: string } | null}
+ */
+let findCityCoordsByName = function (
+  arg0_city_name: string,
+  arg1_country?: string
+): { coords?: [number, number]; key?: string } | null {
+  //Convert from parameters
+  let city_name = arg0_city_name
+  let country = arg1_country
+
+  //Declare local instance variables
+  let best_match: any = null
+  let best_score = -1
+  let c_clean: string
+  let c_lower: string
+  let c_norm: string
+  let coords_path: string
+  let country_lower: string
+
+  //Guard clauses
+  if (!city_name)
+    return null
+
+  c_lower = city_name.toLowerCase().trim()
+  c_norm = c_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+  c_clean = c_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+  country_lower = country ? country.toLowerCase().trim() : ''
+
+  if (!c_norm)
+    return null
+
+  //Function body
+  if (!all_cities_coords_list) {
+    coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
+    if (fs.existsSync(coords_path)) {
+      try {
+        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
+        all_cities_coords_list = Object.values(raw).filter(
+          (arg0_item: any) => arg0_item && arg0_item.key && Array.isArray(arg0_item.coords) && arg0_item.coords.length >= 2
+        ) as any
+      } catch {
+        all_cities_coords_list = []
+      }
+    } else {
+      all_cities_coords_list = []
+    }
+  }
+
+  if (all_cities_coords_list) {
+    for (let i = 0; i < all_cities_coords_list.length; i++) {
+      let item = all_cities_coords_list[i] as any
+      if (!item || !item.coords)
+        continue
+
+      let score = 0
+      let i_name = (item.name || '').toLowerCase().trim()
+      let i_norm = i_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+      let clean_i = i_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+      let has_exact = (i_norm === c_norm || i_name === c_lower || (c_clean && c_clean === clean_i))
+
+      if (has_exact) {
+        score += 1000
+      } else if (item.other_names && Array.isArray(item.other_names)) {
+        if (item.other_names.some((arg0_on: string) => {
+          let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let on_norm = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+          let clean_on = on_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+          return on_clean === c_lower || on_norm === c_norm || (c_clean && c_clean === clean_on)
+        })) {
+          score += 850
+        }
+      }
+
+      if (item.key && (item.key === city_name || item.key.toLowerCase().trim() === c_lower))
+        score += 2000
+
+      if (score === 0)
+        continue
+
+      if (country_lower && item.country) {
+        let i_c = item.country.toLowerCase().trim()
+        if (i_c === country_lower || country_lower.includes(i_c) || i_c.includes(country_lower))
+          score += 200
+      }
+
+      if (item.key && item.key.startsWith('stadester-'))
+        score += 50
+
+      if (score > best_score) {
+        best_score = score
+        best_match = item
+      }
+    }
+
+    if (best_match)
+      return { coords: best_match.coords, key: best_match.key }
+  }
+
+  //Return statement
+  return null
 }
 
 /**
@@ -538,8 +745,13 @@ let getStateCapitalInfo = function (
     valid_timeline = []
     for (let i = 0; i < info.timeline.length; i++) {
       let iv = info.timeline[i]
-      if (state_bbox && iv.key) {
-        let c_coords = getCityCoordsByKey(iv.key)
+      if (state_bbox) {
+        let c_coords = iv.key ? getCityCoordsByKey(iv.key) : undefined
+        if (!c_coords && iv.city) {
+          let by_name = findCityCoordsByName(iv.city, state?.country || state?.name)
+          if (by_name?.coords)
+            c_coords = by_name.coords
+        }
         if (c_coords && !isCityCoordsInsideBbox(c_coords, state_bbox, 3.5))
           continue
       }
@@ -552,8 +764,17 @@ let getStateCapitalInfo = function (
     for (let i = 0; i < valid_timeline.length; i++) {
       let iv = valid_timeline[i]
       if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac) {
-        let c_coords = iv.key ? getCityCoordsByKey(iv.key) : undefined
-        return { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: iv.key, capname: iv.city, is_acapital: false }
+        let contemp = iv.key ? getContemporaneousCityKey(iv.key, year_frac) : { key: iv.key }
+        let c_coords = contemp.coords || (iv.key ? getCityCoordsByKey(iv.key) : undefined)
+        if (!c_coords && iv.city) {
+          let by_name = findCityCoordsByName(iv.city, state?.country || state?.name)
+          if (by_name?.coords) {
+            c_coords = by_name.coords
+            if (!contemp.key)
+              contemp.key = by_name.key
+          }
+        }
+        return { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, is_acapital: false }
       }
     }
 
@@ -567,8 +788,17 @@ let getStateCapitalInfo = function (
         best_iv = iv
       }
     }
-    let best_coords = best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined
-    return { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: best_iv.key, capname: best_iv.city, is_acapital: false }
+    let contemp_best = best_iv.key ? getContemporaneousCityKey(best_iv.key, year_frac) : { key: best_iv.key }
+    let best_coords = contemp_best.coords || (best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined)
+    if (!best_coords && best_iv.city) {
+      let by_name = findCityCoordsByName(best_iv.city, state?.country || state?.name)
+      if (by_name?.coords) {
+        best_coords = by_name.coords
+        if (!contemp_best.key)
+          contemp_best.key = by_name.key
+      }
+    }
+    return { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, is_acapital: false }
   }
 
   //Return statement
@@ -1049,10 +1279,10 @@ export class AtlasBordersService {
       dataset?: string
       day?: number
       month?: number
-    }
+    } | string
   ): HistoricalBordersResponse {
     //Convert from parameters
-    let options = arg1_options || {}
+    let options = typeof arg1_options === 'string' ? { dataset: arg1_options } : (arg1_options || {})
     let target_year = arg0_year
     let bbox = options.bbox
     let dataset = options.dataset || 'statistical_borders'
@@ -1127,7 +1357,11 @@ export class AtlasBordersService {
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
-        if (Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)) {
+        let is_valid_cache = Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
+        let is_missing_cap_coords = cached_json.features && cached_json.features.some(
+          (arg0_f: any) => arg0_f.properties?.capname && !arg0_f.properties?.cap_coords
+        )
+        if (is_valid_cache && !is_missing_cap_coords) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
@@ -1221,7 +1455,10 @@ export class AtlasBordersService {
           properties: {
             adm0_a3: entity_name,
             area: current_props.area,
+            cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
+            caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
+            caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
             capname: cap_info.capname,
             date: UfDate.formatDate(resolved_date_obj),
             flags: current_props.flags,
@@ -1264,6 +1501,8 @@ export class AtlasBordersService {
 
         let gw = p.gwcode
         let keyframes = gw !== undefined ? cached_cshapes_keyframes_by_gwcode.get(gw) : undefined
+        let cs_cap_coords = (p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined
+        let cs_cap_key = cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined
 
         features.push({
           bbox: geom_bbox,
@@ -1272,7 +1511,8 @@ export class AtlasBordersService {
           properties: {
             adm0_a3: p.cntry_name,
             area: p.area,
-            cap_coords: (p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] : undefined,
+            cap_coords: cs_cap_coords,
+            capkey: cs_cap_key,
             caplat: p.caplat,
             caplong: p.caplong,
             capname: p.capname,
@@ -1291,6 +1531,7 @@ export class AtlasBordersService {
             name_long: p.cntry_name,
             startDate: p.gwsdate,
             startYear: p.gwsyear,
+            state_id: p.gwcode,
           },
           type: 'Feature',
         })
@@ -1616,6 +1857,21 @@ export class AtlasBordersService {
     arg2_entity_name?: string
   ): { capkey?: string; capname?: string; is_acapital: boolean } {
     return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name)
+  }
+
+  /**
+   * Resolves city coordinates and key from city name and optional country.
+   *
+   * @param {string} arg0_city_name
+   * @param {string} [arg1_country]
+   *
+   * @returns {{ coords?: [number, number]; key?: string } | null}
+   */
+  static findCityCoordsByName (
+    arg0_city_name: string,
+    arg1_country?: string
+  ): { coords?: [number, number]; key?: string } | null {
+    return findCityCoordsByName(arg0_city_name, arg1_country)
   }
 
   /**

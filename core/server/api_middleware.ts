@@ -825,28 +825,41 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
       let country = (query.country as string) || ''
       let dataset = (query.dataset as string) || 'stadester_1.1'
 
-      if (!city_key && !city_name) {
-        res.statusCode = 400
-        res.setHeader('Content-Type', 'application/json')
-        res.end(JSON.stringify({ error: 'Missing city key or name parameter' }))
-        return
-      }
-
       let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
+      let lat = query.lat !== undefined ? parseFloat(query.lat as string) : undefined
+      let lon = query.lon !== undefined ? parseFloat(query.lon as string) : undefined
       let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
       let state_id = query.state_id !== undefined ? (typeof query.state_id === 'string' && !isNaN(Number(query.state_id)) ? Number(query.state_id) : query.state_id as string) : undefined
       let year = query.year !== undefined ? (typeof query.year === 'string' && !isNaN(Number(query.year)) ? parseFloat(query.year) : query.year as string) : undefined
 
+      let coords: [number, number] | undefined = (lat !== undefined && !isNaN(lat) && lon !== undefined && !isNaN(lon)) ? [lat, lon] : undefined
+      if (!coords && (city_name || city_key)) {
+        let resolved_coords = AtlasBordersService.findCityCoordsByName(city_name || city_key, country)
+        if (resolved_coords?.coords) {
+          coords = [resolved_coords.coords[1], resolved_coords.coords[0]]
+        }
+      }
+
+      if (!city_key && !city_name && !coords) {
+        res.statusCode = 400
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: 'Missing city key, name, or coords parameter' }))
+        return
+      }
+
       try {
-        let city_options = { country, state_id }
+        let city_options = { coords, country, name: city_name, state_id }
         let city = city_key ? StadesterService.getCityByKey(dataset, city_key, year, month, day, city_options) : null
         if (!city && city_name) {
           city = StadesterService.getCityByKey(dataset, city_name, year, month, day, city_options)
         }
+        if (!city && coords) {
+          city = StadesterService.getCityByKey(dataset, '', year, month, day, city_options)
+        }
         if (!city) {
           res.statusCode = 404
           res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: `City not found: ${city_key || city_name}` }))
+          res.end(JSON.stringify({ error: `City not found: ${city_key || city_name || (coords ? coords.join(',') : '')}` }))
           return
         }
 

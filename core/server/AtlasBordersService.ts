@@ -472,7 +472,7 @@ let getContemporaneousCityKey = function (
       if (year >= 1975 && !c.key.startsWith('ghsl-'))
         continue
       let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
-      if (d < 0.45 && d < min_d) {
+      if (d < 0.20 && d < min_d) {
         min_d = d
         best = c
       }

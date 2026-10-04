@@ -1314,11 +1314,16 @@ export let StadesterService = {
 
             let is_alive = (target_year >= (c.min_year ?? -99999) && target_year <= (c.max_year ?? 99999)) ||
               (c.max_year !== undefined && c.max_year >= 1975 && target_year >= 1975)
+            if (!is_alive)
+              continue
+
+            if (target_year < 1975 && c.key.startsWith('ghsl-'))
+              continue
 
             let c_lat = c.coords[0]
             let c_lon = c.coords[1]
             let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
-            if (dist > 0.45)
+            if (dist > 0.20)
               continue
 
             if (feat.bbox) {
@@ -1328,9 +1333,6 @@ export let StadesterService = {
             }
 
             let score = 0
-            if (is_alive)
-              score += 100000
-
             if (p.capkey && (c.key === p.capkey || c.id === p.capkey))
               score += 200000
 
@@ -1377,7 +1379,7 @@ export let StadesterService = {
               score += 10000
             if (c.key && !c.key.includes('agglomeration'))
               score += 5000
-            score += Math.max(0, Math.round((0.5 - dist) * 2000))
+            score += Math.max(0, Math.round((0.25 - dist) * 5000))
             score += Math.min(1000, Math.round((c.max_pop || 0) / 1000))
 
             if (score > best_score) {
@@ -1709,15 +1711,14 @@ export let StadesterService = {
 
     enrichCity = function (arg0_entry: CityIndexEntry): any {
       let entry = arg0_entry
-      if (year === undefined || year === null)
-        return entry
+      let effective_year = (year !== undefined && year !== null) ? year : 1950
 
-      let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
-      let num_mo = month !== undefined ? month : (typeof year === 'string' ? parseYearMonthDay(year).month : undefined)
-      let num_day = day !== undefined ? day : (typeof year === 'string' ? parseYearMonthDay(year).day : undefined)
+      let num_yr = typeof effective_year === 'number' ? Math.floor(effective_year) : parseYearMonthDay(effective_year).year
+      let num_mo = month !== undefined ? month : (typeof effective_year === 'string' ? parseYearMonthDay(effective_year).month : undefined)
+      let num_day = day !== undefined ? day : (typeof effective_year === 'string' ? parseYearMonthDay(effective_year).day : undefined)
       let active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
 
-      let cap_rec = getCityActiveCapitalRecord(entry, year, (arg0_sid, arg0_y_frac) => {
+      let cap_rec = getCityActiveCapitalRecord(entry, effective_year, (arg0_sid, arg0_y_frac) => {
         let sid_num = Number(arg0_sid)
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
@@ -1769,7 +1770,47 @@ export let StadesterService = {
               if (cap_lon === undefined || cap_lat === undefined)
                 continue
               let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
-              if (dist <= 0.45) {
+              if (dist <= 0.20) {
+                //If capital explicitly defines capkey, it must match or be equivalent
+                if (p.capkey) {
+                  let clean_cap_key = normalizeCityKey(p.capkey)
+                  let clean_e_key = normalizeCityKey(entry.key || '')
+                  let is_key_match = p.capkey === entry.key || p.capkey === String(entry.id) || (clean_cap_key && clean_cap_key === clean_e_key)
+                  if (!is_key_match && indexed[p.capkey])
+                    continue
+                }
+
+                //If capital explicitly defines capname, check if name matches
+                let cap_name_lower = (p.capname || '').toLowerCase().trim()
+                let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                let e_name_lower = (entry.name || '').toLowerCase().trim()
+                let e_name_nfd = e_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                let is_name_match = Boolean(cap_name_lower && (e_name_lower === cap_name_lower || e_name_nfd === cap_name_nfd))
+                if (!is_name_match && entry.other_names && Array.isArray(entry.other_names) && cap_name_lower) {
+                  is_name_match = entry.other_names.some((arg0_on: string) => {
+                    let on_lower = arg0_on.toLowerCase().trim()
+                    let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    return on_lower === cap_name_lower || on_nfd === cap_name_nfd
+                  })
+                }
+
+                //If name didn't match and capkey didn't match, verify that no other contemporaneous city in dataset is closer
+                if (!is_name_match && !(p.capkey && (p.capkey === entry.key || p.capkey === String(entry.id)))) {
+                  let has_closer_city = false
+                  for (let k in indexed) {
+                    let other = indexed[k]
+                    if (!other.coords || other.key === entry.key)
+                      continue
+                    let other_dist = Math.hypot(other.coords[1] - cap_lon, other.coords[0] - cap_lat)
+                    if (other_dist < dist) {
+                      has_closer_city = true
+                      break
+                    }
+                  }
+                  if (has_closer_city)
+                    continue
+                }
+
                 cap_color = p.color || p.fillColor || '#FFDC00'
                 cap_sid = p.state_id || p.gwcode
                 is_capital = true
@@ -1790,9 +1831,10 @@ export let StadesterService = {
         capital_state_name: polity_name,
         capitalColor: cap_color,
         capitalOf: polity_name,
+        capitalStateId: cap_sid,
         is_capital: is_capital,
         isCapital: is_capital,
-        name: StadesterService.resolveCityNameAtYear(entry, year),
+        name: StadesterService.resolveCityNameAtYear(entry, effective_year),
       }
     }
 

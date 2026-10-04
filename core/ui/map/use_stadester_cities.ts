@@ -98,16 +98,21 @@ export async function fetchStadesterCitiesAsync (
         for (let i = 0; i < count; i++) {
           if (data.pops[i] < 0.01)
             continue
+          let is_cap = data.capitals ? Boolean(data.capitals[i]) : false
+          let cap_state_id = data.capital_state_ids ? (data.capital_state_ids[i] || undefined) : undefined
           city_list.push({
             capitalColor: data.capital_colors ? data.capital_colors[i] : undefined,
             capitalOf: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
-            capitalStateId: data.capital_state_ids ? (data.capital_state_ids[i] || undefined) : undefined,
+            capitalStateId: cap_state_id,
+            capital_color: data.capital_colors ? data.capital_colors[i] : undefined,
+            capital_state_id: cap_state_id,
             capital_state_name: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
             coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
             country: data.countries ? data.countries[i] : undefined,
             growthRate: data.growth ? data.growth[i] : 0,
             id: data.keys[i],
-            isCapital: data.capitals ? Boolean(data.capitals[i]) : false,
+            isCapital: is_cap,
+            is_capital: is_cap,
             key: data.keys[i],
             name: data.names[i],
             population: data.pops[i],
@@ -122,8 +127,11 @@ export async function fetchStadesterCitiesAsync (
             capitalColor: arg0_c.capital_color || arg0_c.capitalColor || undefined,
             capitalOf: arg0_c.capitalOf || arg0_c.capital_state_name || undefined,
             capitalStateId: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
+            capital_color: arg0_c.capital_color || arg0_c.capitalColor || undefined,
+            capital_state_id: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
             capital_state_name: arg0_c.capital_state_name || arg0_c.capitalOf || undefined,
             isCapital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
+            is_capital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
           }))
       }
 

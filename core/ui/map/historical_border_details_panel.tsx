@@ -182,11 +182,13 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           if (c_lat === undefined || c_lon === undefined)
             continue
           let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
-          if (dist <= 0.45) {
+          if (dist <= 0.20) {
             let score = 0
+            if (feature.properties?.capkey && (arg0_c.key === feature.properties.capkey || (arg0_c as any).id === feature.properties.capkey))
+              score += 200000
             if (arg0_c.isCapital || (arg0_c as any).is_capital)
               score += 100000
-            score += Math.max(0, Math.round((0.5 - dist) * 1000))
+            score += Math.max(0, Math.round((0.25 - dist) * 5000))
             score += Math.min(1000, Math.round((arg0_c.population || 0) / 1000))
             if (score > best_score) {
               best_score = score
@@ -254,12 +256,23 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     }
 
     if (target_city) {
+      let enriched_target: CityPoint = {
+        ...target_city,
+        capitalColor: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
+        capitalOf: target_city.capitalOf || target_city.capital_state_name || country_name,
+        capitalStateId: target_city.capitalStateId || (target_city as any).capital_state_id || state_id,
+        capital_color: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
+        capital_state_id: (target_city as any).capital_state_id || target_city.capitalStateId || state_id,
+        capital_state_name: target_city.capital_state_name || target_city.capitalOf || country_name,
+        isCapital: true,
+        is_capital: true,
+      }
       if (on_select_city)
-        on_select_city(target_city)
+        on_select_city(enriched_target)
       if ((window as any).setSelectedCityKey)
-        (window as any).setSelectedCityKey(target_city.key)
+        (window as any).setSelectedCityKey(enriched_target.key)
       if ((window as any).selectedCityRecord !== undefined)
-        (window as any).selectedCityRecord = target_city
+        (window as any).selectedCityRecord = enriched_target
     } else {
       let cap_key = feature.properties?.capkey || ''
       let query_params = new URLSearchParams()
@@ -282,12 +295,17 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           if (arg0_data && arg0_data.key) {
             let synth_city: CityPoint = {
               area: arg0_data.area ? (typeof arg0_data.area === 'object' ? Object.values(arg0_data.area)[0] as number : arg0_data.area) : undefined,
-              capitalOf: arg0_data.capitalOf || feature.properties?.name,
-              capital_state_id: arg0_data.capital_state_id || state_id,
+              capitalColor: arg0_data.capitalColor || arg0_data.capital_color || feature.properties?.fill_color || '#FFDC00',
+              capitalOf: arg0_data.capitalOf || arg0_data.capital_state_name || feature.properties?.name || country_name,
+              capitalStateId: arg0_data.capitalStateId || arg0_data.capital_state_id || state_id,
+              capital_color: arg0_data.capital_color || arg0_data.capitalColor || feature.properties?.fill_color || '#FFDC00',
+              capital_state_id: arg0_data.capital_state_id || arg0_data.capitalStateId || state_id,
+              capital_state_name: arg0_data.capital_state_name || arg0_data.capitalOf || feature.properties?.name || country_name,
               coords: arg0_data.coords || [0, 0],
-              country: arg0_data.country || feature.properties?.name,
+              country: arg0_data.country || feature.properties?.name || country_name,
               id: arg0_data.key,
               isCapital: true,
+              is_capital: true,
               key: arg0_data.key,
               name: arg0_data.name || single_name,
               population: typeof arg0_data.population === 'number'
@@ -301,7 +319,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
             if ((window as any).setSelectedCityKey)
               (window as any).setSelectedCityKey(arg0_data.key)
             if ((window as any).selectedCityRecord !== undefined)
-              (window as any).selectedCityRecord = arg0_data
+              (window as any).selectedCityRecord = synth_city
           }
         })
         .catch((arg0_err) => {

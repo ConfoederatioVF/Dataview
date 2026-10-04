@@ -1489,6 +1489,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       {ui_visible && !is_mobile && selected_city && active_panel_type !== 'country' && (
         <CityDetailsPanel
           anchorPos={selected_city_anchor}
+          bordersData={historical_borders_result.bordersData}
           city={selected_city}
           currentYear={timeline_year || 2025}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}

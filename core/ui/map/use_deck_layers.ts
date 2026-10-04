@@ -186,27 +186,6 @@ function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  //2b. Coordinate proximity match against active capitals list
-  if (!match && c_lon !== undefined && c_lat !== undefined && active_capitals_list && active_capitals_list.length > 0) {
-    for (let k = 0; k < active_capitals_list.length; k++) {
-      let cap = active_capitals_list[k]
-      if (!cap.cap_coords)
-        continue
-      let dist = Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1])
-      if (dist <= 0.45 && dist < best_dist) {
-        if (cap.bbox) {
-          let b_pad = 1.0
-          if (c_lon < cap.bbox[0] - b_pad || c_lon > cap.bbox[2] + b_pad || c_lat < cap.bbox[1] - b_pad || c_lat > cap.bbox[3] + b_pad)
-            continue
-        }
-        best_dist = dist
-        best_cap = cap
-      }
-    }
-    if (best_cap)
-      match = best_cap
-  }
-
   //3. If candidate match found, verify spatial plausibility against match.bbox
   if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
     if (
@@ -243,29 +222,7 @@ function reconcileCapitalWithAuthoritativeBorders (
       has_polity_by_id = Boolean(sid_str && active_state_ids.has(sid_str))
       has_polity_by_name = Boolean(polity_name_lower && active_polity_names && active_polity_names.has(polity_name_lower))
 
-      //Check if this city matches any active capital by coordinate proximity before demoting
-      let matches_any_active_cap = false
-      if (!has_polity_by_id && !has_polity_by_name && c_lon !== undefined && c_lat !== undefined && active_capitals_list && active_capitals_list.length > 0) {
-        for (let k = 0; k < active_capitals_list.length; k++) {
-          let cap = active_capitals_list[k]
-          if (cap.cap_coords && Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) <= 0.45) {
-            matches_any_active_cap = true
-            return {
-              ...city,
-              capitalColor: cap.color || city.capitalColor || city.capital_color || '#FFDC00',
-              capital_color: cap.color || city.capitalColor || city.capital_color || '#FFDC00',
-              capitalOf: cap.polity_name || city.capitalOf || city.capital_state_name,
-              capitalStateId: cap.state_id !== undefined ? cap.state_id : city.capitalStateId,
-              capital_state_id: cap.state_id !== undefined ? cap.state_id : city.capital_state_id,
-              capital_state_name: cap.polity_name || city.capital_state_name || city.capitalOf,
-              isCapital: true,
-              is_capital: true,
-            }
-          }
-        }
-      }
-
-      if (!has_polity_by_id && !has_polity_by_name && !matches_any_active_cap) {
+      if (!has_polity_by_id && !has_polity_by_name) {
         return {
           ...city,
           capitalColor: undefined,
@@ -291,7 +248,7 @@ function reconcileCapitalWithAuthoritativeBorders (
       if (active_cap && (active_cap.capkey || active_cap.capname || active_cap.cap_coords)) {
         let is_same_coord = false
         if (active_cap.cap_coords && (c_lon !== undefined && c_lat !== undefined)) {
-          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.45
+          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.20
         }
         let clean_active_key = normalizeCityKey(active_cap.capkey || '')
         let clean_c_key = normalizeCityKey(c_key || '')
@@ -1295,6 +1252,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
 
     //Pre-match active capitals to cities by coordinate proximity and key
     if (active_capitals_list.length > 0 && effective_points && effective_points.length > 0) {
+      let timeline_yr = options.timelineYear
       for (let k = 0; k < active_capitals_list.length; k++) {
         let cap = active_capitals_list[k]
         let best_city: any = null
@@ -1307,8 +1265,20 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           if (c_lat === undefined || c_lon === undefined)
             continue
 
+          //Skip temporally displaced cities (cities from another era/time period)
+          if (timeline_yr !== undefined) {
+            if (c.min_year !== undefined && timeline_yr < c.min_year)
+              continue
+            if (c.max_year !== undefined && c.max_year < 1975 && timeline_yr > c.max_year + 25)
+              continue
+            if (typeof c.population === 'number' && c.population <= 0)
+              continue
+            if (timeline_yr < 1975 && c.key && c.key.startsWith('ghsl-'))
+              continue
+          }
+
           let dist = cap.cap_coords ? Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) : 999
-          if (dist > 0.45)
+          if (dist > 0.20)
             continue
 
           if (cap.bbox) {
@@ -1358,7 +1328,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             score += 10000
           if (c.key && !c.key.includes('agglomeration'))
             score += 5000
-          score += Math.max(0, Math.round((0.5 - dist) * 2000))
+          score += Math.max(0, Math.round((0.25 - dist) * 5000))
           score += Math.min(1000, Math.round((c.population || 0) / 1000))
 
           if (score > best_score) {

@@ -194,6 +194,7 @@ export let App: React.FC = function () {
     showLabels: true,
   })
   let [selected_city_key, set_selected_city_key] = useState<string | null>(null)
+  let [selected_city_point, set_selected_city_point] = useState<CityPoint | null>(null)
   let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
     ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
     dataset: default_border_dataset,
@@ -374,18 +375,39 @@ export let App: React.FC = function () {
   })
   let stadester_cities: CityPoint[] = stadester_result.cities
   let selected_city_record: CityFullRecord | null = stadester_result.selectedCity
+  let effective_selected_city = useMemo<CityFullRecord | null>(() => {
+    if (selected_city_record && selected_city_point && (selected_city_record.key === selected_city_point.key || String(selected_city_record.id) === String(selected_city_point.id))) {
+      return {
+        ...selected_city_record,
+        capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
+        capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
+        capitalStateId: selected_city_record.capitalStateId || (selected_city_record as any).capital_state_id || selected_city_point.capitalStateId || (selected_city_point as any).capital_state_id,
+        capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
+        capital_state_id: (selected_city_record as any).capital_state_id || selected_city_record.capitalStateId || (selected_city_point as any).capital_state_id || selected_city_point.capitalStateId,
+        capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
+        isCapital: Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital || selected_city_point.isCapital || (selected_city_point as any).is_capital),
+        is_capital: Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital || (selected_city_point as any).is_capital || selected_city_point.isCapital),
+      }
+    }
+    if (selected_city_record)
+      return selected_city_record
+    if (selected_city_point)
+      return selected_city_point as unknown as CityFullRecord
+    return null
+  }, [selected_city_record, selected_city_point])
 
   useEffect(() => {
     ; (window as any).setStadesterConfig = set_stadester_config
       ; (window as any).stadesterConfig = stadester_config
       ; (window as any).setActiveLayerId = set_active_layer_id
       ; (window as any).setSelectedCityKey = set_selected_city_key
-      ; (window as any).selectedCityRecord = selected_city_record
+      ; (window as any).selectedCityRecord = effective_selected_city
       ; (window as any).selectedCityKey = selected_city_key
-  }, [set_stadester_config, stadester_config, set_active_layer_id, set_selected_city_key, selected_city_record, selected_city_key])
+  }, [set_stadester_config, stadester_config, set_active_layer_id, set_selected_city_key, effective_selected_city, selected_city_key])
 
   let handle_close_city_details = useCallback(() => {
     set_selected_city_key(null)
+    set_selected_city_point(null)
   }, [])
 
   let handle_select_city = useCallback((arg0_city: CityPoint | null) => {
@@ -396,8 +418,10 @@ export let App: React.FC = function () {
     let city = arg0_city
     if (!city) {
       set_selected_city_key(null)
+      set_selected_city_point(null)
     } else {
       set_selected_city_key(city.key)
+      set_selected_city_point(city)
     }
   }, [is_drawing])
 
@@ -1262,7 +1286,7 @@ export let App: React.FC = function () {
           onSelectCity={handle_select_city}
           performantMode={performant_mode}
           onTogglePerformantMode={set_performant_mode}
-          selectedCity={selected_city_record}
+          selectedCity={effective_selected_city}
           selectedCityKey={selected_city_key}
           setStadesterConfig={set_stadester_config}
           stadesterCities={stadester_cities}

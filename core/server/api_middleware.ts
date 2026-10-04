@@ -830,7 +830,7 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
       let lon = query.lon !== undefined ? parseFloat(query.lon as string) : undefined
       let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
       let state_id = query.state_id !== undefined ? (typeof query.state_id === 'string' && !isNaN(Number(query.state_id)) ? Number(query.state_id) : query.state_id as string) : undefined
-      let year = query.year !== undefined ? (typeof query.year === 'string' && !isNaN(Number(query.year)) ? parseFloat(query.year) : query.year as string) : undefined
+      let year = (query.year !== undefined && !isNaN(Number(query.year))) ? parseFloat(query.year as string) : (query.year ? (query.year as string) : 1950)
 
       let coords: [number, number] | undefined = (lat !== undefined && !isNaN(lat) && lon !== undefined && !isNaN(lon)) ? [lat, lon] : undefined
       if (!coords && (city_name || city_key)) {
@@ -865,7 +865,9 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
 
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
-        res.setHeader('Cache-Control', 'public, max-age=3600')
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+        res.setHeader('Pragma', 'no-cache')
+        res.setHeader('Expires', '0')
         res.end(JSON.stringify(city))
         return
       } catch (arg0_err: any) {

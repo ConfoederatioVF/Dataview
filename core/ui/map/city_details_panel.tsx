@@ -8,6 +8,7 @@ import { useLocalisation } from '@localisation'
 
 export interface CityDetailsPanelProps {
   anchorPos?: { x: number; y: number } | null
+  bordersData?: { features?: any[] } | null
   city: CityFullRecord | CityPoint | null
   currentYear: number
   embedded?: boolean
@@ -61,6 +62,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   //Convert from parameters
   let props = arg0_props
   let anchor_pos = props.anchorPos
+  let borders_data_param = props.bordersData
   let city = props.city
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
@@ -71,6 +73,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   //Declare local instance variables
   let active_metric_tab: 'population' | 'area' | 'density'
   let area_at_year: number | undefined
+  let borders_data: { features?: any[] } | null | undefined
   let chart_option: any
   let density_at_year: number | undefined
   let display_city_name: string
@@ -89,6 +92,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   //Function body
   localisation = useLocalisation()
+  borders_data = borders_data_param
   format = localisation.format
   t = localisation.t
 
@@ -115,6 +119,42 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
     (city as any)?.capitalOf ||
     (city as any)?.capital_state_name ||
     (city as any)?.capitalStateName
+
+  if (borders_data && borders_data.features && borders_data.features.length > 0) {
+    let sid = (city as any)?.capital_state_id || (city as any)?.capitalStateId
+    if (sid !== undefined && !polity_name) {
+      let matched_feat = borders_data.features.find((f: any) => f.properties?.state_id === sid || f.properties?.state_id === Number(sid))
+      if (matched_feat?.properties?.name) {
+        polity_name = matched_feat.properties.name
+        is_capital = true
+      }
+    }
+
+    if (!is_capital || !polity_name) {
+      let c_lat = (city as any)?.rawCoords ? (city as any).rawCoords[1] : (city?.lat !== undefined ? city.lat : (city?.coords ? city.coords[0] : undefined))
+      let c_lon = (city as any)?.rawCoords ? (city as any).rawCoords[0] : (city?.lon !== undefined ? city.lon : (city?.coords ? city.coords[1] : undefined))
+      if (c_lat !== undefined && c_lon !== undefined) {
+        for (let feat of borders_data.features) {
+          if (feat.properties?.cap_coords && Array.isArray(feat.properties.cap_coords) && feat.properties.cap_coords.length >= 2) {
+            let dist = Math.hypot(c_lon - feat.properties.cap_coords[0], c_lat - feat.properties.cap_coords[1])
+            if (dist <= 0.20) {
+              if (feat.properties.capkey && (city as any)?.key && feat.properties.capkey !== (city as any).key && feat.properties.capkey !== (city as any).id) {
+                continue
+              }
+              is_capital = true
+              if (!polity_name && feat.properties.name) {
+                polity_name = feat.properties.name
+              }
+              if ((city as any) && !(city as any).capital_state_id && feat.properties.state_id !== undefined) {
+                ;(city as any).capital_state_id = feat.properties.state_id
+              }
+              break
+            }
+          }
+        }
+      }
+    }
+  }
 
   //Extract population for current year (safely handle primitive vs dictionary)
   pop_at_year = 0

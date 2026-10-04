@@ -34,6 +34,7 @@ export interface WorkerProcessedPoint {
   capitalOf?: string
   capitalStateId?: number | string
   color: [number, number, number, number]
+  coords?: [number, number]
   country?: string
   growthRate?: number
   isCapital?: boolean
@@ -409,6 +410,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           capitalOf: c.capitalOf || c.capital_state_name,
           capitalStateId: c.capitalStateId,
           color: fill_color,
+          coords: [c_lat, c_lon],
           country: c.country,
           growthRate: c.growthRate,
           isCapital: is_cap,

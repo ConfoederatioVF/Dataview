@@ -388,7 +388,7 @@ export interface UseDeckLayersParams {
   stadesterPoints?: any[]
   selectedCityKey?: string | null
   hoveredCity?: CityPoint | null
-  onSelectCity?: (city: CityPoint) => void
+  onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
   onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   historicalBordersConfig?: HistoricalBordersConfig
   historicalBordersData?: {
@@ -1526,7 +1526,12 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               if (is_drawing)
                 return false
               if (info.object && options.onSelectCity)
-                options.onSelectCity(info.object)
+                options.onSelectCity(
+                  info.object,
+                  info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
+                  info.x,
+                  info.y
+                )
               return true
             },
             onHover: (info: any) => {
@@ -1598,7 +1603,12 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               if (is_drawing)
                 return false
               if (info.object && options.onSelectCity)
-                options.onSelectCity(info.object)
+                options.onSelectCity(
+                  info.object,
+                  info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
+                  info.x,
+                  info.y
+                )
               return true
             },
             onHover: (info: any) => {
@@ -1801,7 +1811,12 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 if (is_drawing)
                   return false
                 if (info.object && options.onSelectCity)
-                  options.onSelectCity(info.object)
+                  options.onSelectCity(
+                    info.object,
+                    info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
+                    info.x,
+                    info.y
+                  )
                 return true
               },
               onHover: (info: any) => {

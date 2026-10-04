@@ -379,7 +379,10 @@ export let App: React.FC = function () {
   let effective_selected_city = useMemo<CityFullRecord | null>(() => {
     if (selected_city_record && selected_city_point && (selected_city_record.key === selected_city_point.key || String(selected_city_record.id) === String(selected_city_point.id))) {
       return {
+        ...selected_city_point,
         ...selected_city_record,
+        coords: selected_city_record.coords || selected_city_point.coords,
+        rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
         capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
         capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
         capitalStateId: selected_city_record.capitalStateId || (selected_city_record as any).capital_state_id || selected_city_point.capitalStateId || (selected_city_point as any).capital_state_id,

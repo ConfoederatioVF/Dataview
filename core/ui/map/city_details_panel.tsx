@@ -441,29 +441,42 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   //Anchored positioning calculations
   panel_style = {}
-  if (!embedded && anchor_pos && anchor_pos.x !== undefined && anchor_pos.y !== undefined) {
+  if (!embedded && anchor_pos && anchor_pos.x !== undefined && anchor_pos.y !== undefined && Number.isFinite(anchor_pos.x) && Number.isFinite(anchor_pos.y)) {
     let panel_w = 384
     let panel_h = 390
     let target_x = anchor_pos.x + 24
     let target_y = anchor_pos.y - 120
 
+    let min_x = 16
+    let min_y = 16
     let max_x = (typeof window !== 'undefined') ? window.innerWidth - panel_w - 16 : 800
     let max_y = (typeof window !== 'undefined') ? window.innerHeight - panel_h - 70 : 600
 
-    if (target_x > max_x)
-      target_x = anchor_pos.x - panel_w - 24
-    if (target_x < 16)
-      target_x = 16
+    if (target_x > max_x) {
+      if (anchor_pos.x - panel_w - 24 >= min_x) {
+        target_x = anchor_pos.x - panel_w - 24
+      } else {
+        target_x = max_x
+      }
+    }
+    if (target_x < min_x)
+      target_x = min_x
 
     if (target_y > max_y)
       target_y = max_y
-    if (target_y < 16)
-      target_y = 16
+    if (target_y < min_y)
+      target_y = min_y
 
     panel_style = {
       left: `${Math.round(target_x)}px`,
       position: 'fixed',
       top: `${Math.round(target_y)}px`,
+    }
+  } else if (!embedded) {
+    panel_style = {
+      bottom: '80px',
+      left: '24px',
+      position: 'fixed',
     }
   } else if (embedded) {
     panel_style = {
@@ -479,9 +492,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       style={panel_style}
       className={embedded
         ? 'w-full text-foreground select-none font-sans space-y-2'
-        : `z-15 w-96 max-w-[calc(100vw-32px)] bg-card/95 backdrop-blur-md border border-border shadow-2xl p-3 text-foreground select-none font-sans ${
-            !anchor_pos ? 'absolute bottom-20 left-4' : ''
-          }`
+        : 'z-15 w-96 max-w-[calc(100vw-32px)] bg-card/95 backdrop-blur-md border border-border shadow-2xl p-3 text-foreground select-none font-sans'
       }
     >
       {/* Panel Header */}

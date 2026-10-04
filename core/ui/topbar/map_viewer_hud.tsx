@@ -433,6 +433,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
               <StadesterLegendCard
                 config={stadester_config}
                 hoveredCity={hovered_city}
+                isMobile={is_mobile}
                 settlementCount={stadester_cities?.length ?? 0}
                 width={is_mobile || is_center_pos || legend_position === 'bottom-right' ? '100%' : current_colourbar_width}
               />

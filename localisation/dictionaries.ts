@@ -526,7 +526,9 @@ export interface LocalisationConfig {
     stadesterLegend: {
       annualCompoundGrowth: string
       citiesCount: string
+      collapseLegend: string
       displaying: string
+      expandLegend: string
       fill: string
       labelsActive: string
       logarithmicScale: string

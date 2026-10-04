@@ -531,7 +531,9 @@
     stadesterLegend: {
       annualCompoundGrowth: "Visualising annual compound growth rates across global urban centres.",
       citiesCount: "£1£ cities",
+      collapseLegend: "Minimise settlements legend",
       displaying: "Displaying:",
+      expandLegend: "Expand settlements legend",
       fill: "Fill",
       labelsActive: "Labels Active",
       logarithmicScale: "Logarithmic Scale (Blue to Warm Gold)",

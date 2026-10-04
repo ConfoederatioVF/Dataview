@@ -531,7 +531,9 @@
     stadesterLegend: {
       annualCompoundGrowth: "Visualisation des taux de croissance annuelle composés dans les centres urbains mondiaux.",
       citiesCount: "£1£ villes",
+      collapseLegend: "Réduire la légende des localités",
       displaying: "Affichage :",
+      expandLegend: "Développer la légende des localités",
       fill: "Plein",
       labelsActive: "Étiquettes actives",
       logarithmicScale: "Échelle logarithmique (Bleu à or chaud)",

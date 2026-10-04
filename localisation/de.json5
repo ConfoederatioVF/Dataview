@@ -531,7 +531,9 @@
     stadesterLegend: {
       annualCompoundGrowth: "Visualisierung jährlicher Zuwachsraten über weltweite Stadtzentren.",
       citiesCount: "£1£ Städte",
+      collapseLegend: "Siedlungslegende einklappen",
       displaying: "Anzeige:",
+      expandLegend: "Siedlungslegende ausklappen",
       fill: "Füllung",
       labelsActive: "Beschriftungen aktiv",
       logarithmicScale: "Logarithmische Skala (Blau bis Warmgold)",

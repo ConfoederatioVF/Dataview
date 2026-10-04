@@ -272,12 +272,13 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
     //3. Historical Borders overlay
     if (historical_borders_config?.enabled) {
       let border_dataset = historical_borders_config.dataset || 'statistical_borders'
-      if (layers?.[border_dataset]?.description) {
-        let raw_md = (Array.isArray(layers[border_dataset].description)) ? layers[border_dataset].description.join('\n') : String(layers[border_dataset].description)
+      let border_layer = layers?.[border_dataset] || (border_dataset === 'statistical_borders' ? layers?.['simplified_borders'] : undefined)
+      if (border_layer?.description) {
+        let raw_md = (Array.isArray(border_layer.description)) ? border_layer.description.join('\n') : String(border_layer.description)
         active_entries.push({
           id: border_dataset,
           markdown: raw_md,
-          title: layers[border_dataset].name || 'Historical Borders',
+          title: border_layer.name || 'Historical Borders',
         })
         added_ids.add(border_dataset)
       }

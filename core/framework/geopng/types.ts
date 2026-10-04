@@ -219,6 +219,39 @@ export let DEFAULT_HISTORICAL_BORDERS_CONFIG: HistoricalBordersConfig = {
   strokeWidth: 1.25,
 }
 
+/**
+ * Determines whether a specified layer ID matches the active historical borders dataset configuration.
+ *
+ * @param {string} [arg0_config_dataset]
+ * @param {string} [arg1_layer_id]
+ *
+ * @returns {boolean}
+ */
+export let isBorderDatasetMatch = function (
+  arg0_config_dataset?: string,
+  arg1_layer_id?: string
+): boolean {
+  //Convert from parameters
+  let config_dataset = arg0_config_dataset
+  let layer_id = arg1_layer_id
+
+  //Guard clauses
+  if (!layer_id)
+    return false
+
+  if (!config_dataset)
+    return layer_id === 'simplified_borders' || layer_id === 'statistical_borders'
+
+  if (layer_id === 'detailed_borders')
+    return config_dataset === 'detailed_borders'
+
+  if (layer_id === 'simplified_borders' || layer_id === 'statistical_borders')
+    return config_dataset === 'simplified_borders' || config_dataset === 'statistical_borders'
+
+  //Return statement
+  return config_dataset === layer_id
+}
+
 export interface CircleOverlayConfig {
   enabled: boolean
   percentileCutoff: number // e.g. 99 for P99

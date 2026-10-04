@@ -1519,6 +1519,13 @@ export class AtlasBordersService {
       `borders_${dataset}_${target_year}.json`
     )
 
+    if (!fs.existsSync(disk_cache_path) && (dataset === 'simplified_borders' || dataset === 'statistical_borders')) {
+      let alt_dataset = (dataset === 'simplified_borders') ? 'statistical_borders' : 'simplified_borders'
+      let alt_path = path.join(AtlasBordersService.getDatasetPaths().cacheDir, `borders_${alt_dataset}_${target_year}.json`)
+      if (fs.existsSync(alt_path))
+        disk_cache_path = alt_path
+    }
+
     //Check disk cache only for baseline whole-year queries without spatial bbox
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {

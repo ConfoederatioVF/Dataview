@@ -6,7 +6,7 @@
         name: "Simplified Borders",
         description: [
             "### Simplified Borders",
-            "Temporally sliced statistical and historical borders from CShapes-2.0 and Atlas 0.6b.",
+            "Pooled borders from CShapes-2.0 (after 1886AD) and Atlas 0.6b (before 1886AD), used for statistical purposes. ",
         ],
         filepaths: [
             {
@@ -30,8 +30,8 @@
     "detailed_borders": {
         name: "Detailed Borders",
         description: [
-            "### De Facto Borders",
-            "Territorial frontiers from 3500BC to 2025AD."
+            "### Detailed Borders",
+            "De facto territorial frontiers from 3500BC to 2025AD. This dataset is chunked, meaning countries may have keyframes beyond the time period currently being viewed."
         ],
         filepaths: [
             {

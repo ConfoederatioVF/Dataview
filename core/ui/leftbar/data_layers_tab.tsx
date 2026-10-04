@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { Icon } from '@ui/components/icon'
-import { HistoricalBordersConfig, StadesterConfig } from '@framework/geopng/types.ts'
+import { HistoricalBordersConfig, StadesterConfig, isBorderDatasetMatch } from '@framework/geopng/types.ts'
 import { HistoricalBordersSettings } from '@ui/rightbar/mapmodes/historical_borders_settings'
 import { StadesterSettings } from '@ui/rightbar/mapmodes/stadester_settings'
 import { useLocalisation } from '@localisation'
@@ -267,9 +267,9 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
           let is_parent_of_active = Boolean(active_layer && active_layer.parent_id === arg0_layer.id)
           let is_highlighted = is_exact_active || is_parent_of_active
           let years_count = arg0_layer.available_years ? arg0_layer.available_years.length : 0
-          let is_borders = arg0_layer.id === 'statistical_borders' || arg0_layer.id === 'detailed_borders' || arg0_layer.type === 'vector.polygon' || arg0_layer.id.includes('borders')
+          let is_borders = arg0_layer.id === 'statistical_borders' || arg0_layer.id === 'detailed_borders' || arg0_layer.id === 'simplified_borders' || arg0_layer.type === 'vector.polygon' || arg0_layer.id.includes('borders')
           let is_border_dataset_match = is_borders
-            ? (historical_borders_config?.dataset === arg0_layer.id || (!historical_borders_config?.dataset && arg0_layer.id === 'statistical_borders'))
+            ? isBorderDatasetMatch(historical_borders_config?.dataset, arg0_layer.id)
             : false
           let is_stadester = arg0_layer.id.includes('stadester')
           let is_stadester_dataset_match = is_stadester
@@ -296,10 +296,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                   if (accessible) {
                     if (is_borders && on_change_historical_borders_config) {
                       on_change_historical_borders_config((arg0_prev) => {
-                        let is_currently_active = arg0_prev.enabled && (
-                          arg0_prev.dataset === arg0_layer.id ||
-                          (!arg0_prev.dataset && arg0_layer.id === 'statistical_borders')
-                        )
+                        let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, arg0_layer.id)
                         if (is_currently_active) {
                           return {
                             ...arg0_prev,
@@ -392,11 +389,23 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                       <span>{is_overlay_active ? t.sidebar.layers.overlayOn : t.sidebar.layers.overlayOff}</span>
                     </label>
                   ) : (
-                    is_exact_active && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-primary text-primary-foreground font-bold shadow-xs">
-                        {t.sidebar.layers.active}
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${is_exact_active
+                            ? 'border-primary bg-primary'
+                            : 'border-muted-foreground/60'
+                          }`}
+                      >
+                        {is_exact_active && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                        )}
                       </span>
-                    )
+                      {is_exact_active && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-primary text-primary-foreground font-bold shadow-xs">
+                          {t.sidebar.layers.active}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </button>
@@ -433,12 +442,13 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                         key={arg0_sub.id}
                         type="button"
                         onClick={() => on_select_layer(arg0_sub.id)}
-                        className={`text-[10px] px-1.5 py-0.5 border cursor-pointer transition-colors ${sub_active
+                        className={`text-[10px] px-1.5 py-0.5 border cursor-pointer transition-colors flex items-center gap-1.5 ${sub_active
                             ? 'bg-primary text-primary-foreground border-primary font-bold'
                             : 'bg-background hover:bg-muted text-foreground border-border'
                           }`}
                       >
-                        {arg0_sub.name}
+                        <span className={`w-2 h-2 rounded-full border shrink-0 ${sub_active ? 'border-primary-foreground bg-primary-foreground' : 'border-muted-foreground/60'}`} />
+                        <span>{arg0_sub.name}</span>
                       </button>
                     )
                   })}

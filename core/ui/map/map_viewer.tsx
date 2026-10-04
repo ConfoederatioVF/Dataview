@@ -300,6 +300,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     historical_borders_config?.enabled ||
     props.historicalBordersEnabled ||
     props.activeLayerId === 'statistical_borders' ||
+    props.activeLayerId === 'simplified_borders' ||
     props.activeLayerId === 'detailed_borders' ||
     (props.activeLayerId && props.activeLayerId.includes('border')) ||
     map_modes.find((arg0_m) => arg0_m.id === 'historical_borders')?.active

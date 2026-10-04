@@ -5,7 +5,7 @@ import { formatLocalisedString, useLocalisation } from '@localisation'
 import { Icon } from '@ui/components/icon'
 import { DataLayerNode } from './data_layer_node'
 
-export interface dataset_folder_nodeProps {
+export interface DatasetFolderNodeProps {
   activeLayerId: string | null
   activeVariableSelectors: Record<string, string | string[]>
   expandedNodes: Record<string, boolean>
@@ -26,11 +26,11 @@ export interface dataset_folder_nodeProps {
 /**
  * Renders an expandable category folder containing a grouped subset of data layers.
  *
- * @param {dataset_folder_nodeProps} arg0_props
+ * @param {DatasetFolderNodeProps} arg0_props
  *
  * @returns {React.ReactElement}
  */
-export let dataset_folder_node: React.FC<dataset_folder_nodeProps> = function (arg0_props) {
+export let DatasetFolderNode: React.FC<DatasetFolderNodeProps> = function (arg0_props) {
   //Convert from parameters
   let active_layer_id = arg0_props.activeLayerId
   let active_variable_selectors = arg0_props.activeVariableSelectors
@@ -116,4 +116,4 @@ export let dataset_folder_node: React.FC<dataset_folder_nodeProps> = function (a
   )
 }
 
-export let DatasetFolderNode = dataset_folder_node;
+export let dataset_folder_node = DatasetFolderNode

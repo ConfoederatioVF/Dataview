@@ -17,6 +17,7 @@ import {
   HistoricalBordersConfig,
   DEFAULT_HISTORICAL_BORDERS_CONFIG,
   StadesterConfig,
+  isBorderDatasetMatch,
 } from '@framework/geopng/types.ts'
 import { decodeRawGeoPngBufferAsync, computeRasterDifference } from '@framework/geopng/decoder.ts'
 import { computeQuantiles } from '@framework/geopng/scales.ts'
@@ -483,11 +484,21 @@ export let App: React.FC = function () {
     //Function body
     if (layer_id === 'lfpr')
       layer_id = 'lfpr.lfpr_female'
-    if (layer_id === 'statistical_borders') {
-      set_historical_borders_config((arg0_prev) => ({
-        ...arg0_prev,
-        enabled: !arg0_prev.enabled,
-      }))
+    if (layer_id === 'statistical_borders' || layer_id === 'simplified_borders' || layer_id === 'detailed_borders') {
+      set_historical_borders_config((arg0_prev) => {
+        let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, layer_id)
+        if (is_currently_active) {
+          return {
+            ...arg0_prev,
+            enabled: false,
+          }
+        }
+        return {
+          ...arg0_prev,
+          dataset: layer_id,
+          enabled: true,
+        }
+      })
       return
     }
 

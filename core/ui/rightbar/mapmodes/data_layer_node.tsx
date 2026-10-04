@@ -1,13 +1,13 @@
 import React from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
-import { HistoricalBordersConfig, StadesterConfig } from '@framework/geopng/types.ts'
+import { HistoricalBordersConfig, StadesterConfig, isBorderDatasetMatch } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { formatLocalisedString, useLocalisation } from '@localisation'
 import { HistoricalBordersSettings } from './historical_borders_settings'
 import { MapmodeTooltip } from './mapmode_tooltip'
 import { StadesterSettings } from './stadester_settings'
 
-export interface data_layer_nodeProps {
+export interface DataLayerNodeProps {
   activeLayerId: string | null
   activeVariableSelectors: Record<string, string | string[]>
   depth?: number
@@ -28,11 +28,11 @@ export interface data_layer_nodeProps {
 /**
  * Recursive tree node rendering a single dataset layer, folder, or multi-variable cohort selector.
  *
- * @param {data_layer_nodeProps} arg0_props
+ * @param {DataLayerNodeProps} arg0_props
  *
  * @returns {React.ReactElement}
  */
-export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_props) {
+export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
   //Convert from parameters
   let active_layer_id = arg0_props.activeLayerId
   let active_variable_selectors = arg0_props.activeVariableSelectors
@@ -56,8 +56,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
   let is_accessible = is_layer_accessible(layer)
   let is_active = active_layer_id === layer.id
   let is_border_dataset_match: boolean
-  let is_borders = layer.id === 'statistical_borders' || layer.id === 'detailed_borders' || layer.type === 'vector.polygon' || layer.id.includes('borders')
-  let is_continuous = layer.category_type === 'continuous'
+  let is_borders = layer.id === 'statistical_borders' || layer.id === 'detailed_borders' || layer.id === 'simplified_borders' || layer.type === 'vector.polygon' || layer.id.includes('borders')
   let is_node_expanded = Boolean(search_query.trim()) || (expanded_nodes[layer.id] ?? true)
   let is_overlay_active: boolean
   let is_searching = Boolean(search_query.trim())
@@ -69,7 +68,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
 
   //Function body
   is_border_dataset_match = is_borders
-    ? (historical_borders_config?.dataset === layer.id || (!historical_borders_config?.dataset && layer.id === 'statistical_borders'))
+    ? isBorderDatasetMatch(historical_borders_config?.dataset, layer.id)
     : false
   is_stadester_dataset_match = is_stadester
     ? (layer.id === 'stadester' || stadester_config?.dataset === layer.id || (!stadester_config?.dataset && layer.id === 'stadester_1.1'))
@@ -91,10 +90,7 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                 if (is_borders) {
                   if (set_historical_borders_config) {
                     set_historical_borders_config((arg0_prev) => {
-                      let is_currently_active = arg0_prev.enabled && (
-                        arg0_prev.dataset === layer.id ||
-                        (!arg0_prev.dataset && layer.id === 'statistical_borders')
-                      )
+                      let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, layer.id)
                       if (is_currently_active) {
                         return {
                           ...arg0_prev,
@@ -252,16 +248,12 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
                     if (!is_node_expanded)
                       toggle_node(layer.id)
                   }}
-                  className={`w-3.5 h-3.5 ${is_continuous ? 'rounded-none' : 'rounded-full'} border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60 hover:border-primary'
+                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 cursor-pointer transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60 hover:border-primary'
                     }`}
                   title={formatLocalisedString(t.mapmodes.selectLayer, layer.name)}
                 >
                   {is_active && (
-                    is_continuous ? (
-                      <Icon name="check" className="text-[10px]" />
-                    ) : (
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
-                    )
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
                   )}
                 </button>
                 <div
@@ -468,15 +460,11 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span
-                  className={`w-3 h-3 ${is_continuous ? 'rounded-none' : 'rounded-full'} border flex items-center justify-center shrink-0 transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60'
+                  className={`w-3 h-3 rounded-full border flex items-center justify-center shrink-0 transition-colors ${is_active ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/60'
                     }`}
                 >
                   {is_active && (
-                    is_continuous ? (
-                      <Icon name="check" className="text-[9px]" />
-                    ) : (
-                      <span className="w-1 h-1 rounded-full bg-primary-foreground" />
-                    )
+                    <span className="w-1 h-1 rounded-full bg-primary-foreground" />
                   )}
                 </span>
                 <span className="text-xs truncate">{layer.name}</span>
@@ -494,4 +482,4 @@ export let data_layer_node: React.FC<data_layer_nodeProps> = function (arg0_prop
   )
 }
 
-export let DataLayerNode = data_layer_node;
+export let data_layer_node = DataLayerNode

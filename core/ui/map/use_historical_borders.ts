@@ -64,7 +64,7 @@ export let useHistoricalBorders = function (
   ;[source, set_source] = useState<'cshapes' | 'naissance' | null>(null)
 
   cache_key = `${dataset}:${date_obj.year}-${date_obj.month}-${date_obj.day}`
-  is_active = enabled || active_layer_id === 'statistical_borders' || active_layer_id === 'detailed_borders' || Boolean(active_layer_id && active_layer_id.includes('border'))
+  is_active = enabled || active_layer_id === 'statistical_borders' || active_layer_id === 'detailed_borders' || active_layer_id === 'simplified_borders' || Boolean(active_layer_id && active_layer_id.includes('border'))
 
   useEffect(() => {
     //Guard clauses

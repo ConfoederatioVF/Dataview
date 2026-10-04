@@ -9,15 +9,7 @@ import { useLocalisation } from '@localisation'
 export interface CategoryBreakdownChartProps {
   activeVariableSelectors?: Record<string, string | string[]>
   countryStats?: CountryStats | null
-  currentYear: number
-  inspectData?: {
-    countryName?: string
-    lat: number
-    lng: number
-    pixelX: number
-    pixelY: number
-    value: number | null
-  } | null
+  currentYear?: number
   layerId?: string
   onTogglePlaceholder?: (arg0_val: boolean) => void
   raster: DecodedRaster | null
@@ -33,7 +25,7 @@ export interface SectorItem {
   label: string
 }
 
-export let PROFESSION_SECTORS: SectorItem[] = [
+let PROFESSION_SECTORS: SectorItem[] = [
   { color: '#8c510a', id: 'agriculture', label: 'Agriculture' },
   { color: '#457b9d', id: 'informal_labour', label: 'Informal Labour' },
   { color: '#2a9d8f', id: 'manufacturing', label: 'Manufacturing' },
@@ -54,8 +46,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   let {
     activeVariableSelectors: active_variable_selectors = {},
     countryStats: country_stats,
-    currentYear: current_year,
-    inspectData: inspect_data,
+    currentYear: current_year = 1950,
     layerId: layer_id = 'professions_percentage',
     onTogglePlaceholder: on_toggle_placeholder,
     raster,
@@ -67,12 +58,18 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
 
   //Declare local instance variables
   let by_country_data: Record<string, Record<string, number>>
+  let container_height: number
   let container_ref = useRef<HTMLDivElement>(null)
+  let container_width: number
+  let countries_key: string
+  let current_page: number
   let echart_ref = useRef<any>(null)
   let effective_countries: CountryFeature[]
   let effective_use_placeholder: boolean
   let format: ReturnType<typeof useLocalisation>['format']
   let global_sector_data: Record<string, number>
+  let handle_next_page: () => void
+  let handle_prev_page: () => void
   let handle_toggle_placeholder: (arg0_val: boolean) => void
   let has_countries: boolean
   let is_loading: boolean
@@ -81,18 +78,25 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   let is_use_placeholder: boolean
   let localisation: ReturnType<typeof useLocalisation>
   let option: any
+  let page: number
+  let page_size: number
+  let paged_country_names: string[]
   let refine_duration_estimate_ref = useRef<number>(3.0)
   let refine_start_time_ref = useRef<number>(0)
   let refining_pct: number
   let refining_time_remaining: number
   let set_by_country_data: React.Dispatch<React.SetStateAction<Record<string, Record<string, number>>>>
+  let set_container_height: React.Dispatch<React.SetStateAction<number>>
+  let set_container_width: React.Dispatch<React.SetStateAction<number>>
   let set_global_sector_data: React.Dispatch<React.SetStateAction<Record<string, number>>>
   let set_internal_use_placeholder: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_loading: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_refining: React.Dispatch<React.SetStateAction<boolean>>
+  let set_page: React.Dispatch<React.SetStateAction<number>>
   let set_refining_pct: React.Dispatch<React.SetStateAction<number>>
   let set_refining_time_remaining: React.Dispatch<React.SetStateAction<number>>
   let t: ReturnType<typeof useLocalisation>['t']
+  let total_pages: number
 
   //Function body
   localisation = useLocalisation()
@@ -105,25 +109,45 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       return [selected_country]
     return []
   }, [selected_countries, selected_country])
+  countries_key = effective_countries.map((arg0_c) => getFeatureEntityName(arg0_c)).filter(Boolean).sort().join(',')
 
   has_countries = effective_countries.length > 0
 
-    ;[global_sector_data, set_global_sector_data] = useState<Record<string, number>>({
-      agriculture: 25.0,
-      informal_labour: 15.0,
-      manufacturing: 35.0,
-      services: 25.0,
-    })
-    ;[by_country_data, set_by_country_data] = useState<Record<string, Record<string, number>>>({})
-    ;[is_use_placeholder, set_internal_use_placeholder] = useState<boolean>(
-      controlled_use_placeholder !== undefined ? controlled_use_placeholder : synthetic_by_default
-    )
-    ;[is_loading, set_is_loading] = useState<boolean>(false)
-    ;[is_refining, set_is_refining] = useState<boolean>(false)
-    ;[refining_pct, set_refining_pct] = useState<number>(0)
-    ;[refining_time_remaining, set_refining_time_remaining] = useState<number>(3.0)
+  ;[container_height, set_container_height] = useState<number>(240)
+  ;[container_width, set_container_width] = useState<number>(640)
+  ;[global_sector_data, set_global_sector_data] = useState<Record<string, number>>({
+    agriculture: 25.0,
+    informal_labour: 15.0,
+    manufacturing: 35.0,
+    services: 25.0,
+  })
+  ;[by_country_data, set_by_country_data] = useState<Record<string, Record<string, number>>>({})
+  ;[is_use_placeholder, set_internal_use_placeholder] = useState<boolean>(
+    controlled_use_placeholder !== undefined ? controlled_use_placeholder : synthetic_by_default
+  )
+  ;[is_loading, set_is_loading] = useState<boolean>(false)
+  ;[is_refining, set_is_refining] = useState<boolean>(false)
+  ;[page, set_page] = useState<number>(0)
+  ;[refining_pct, set_refining_pct] = useState<number>(0)
+  ;[refining_time_remaining, set_refining_time_remaining] = useState<number>(3.0)
 
   effective_use_placeholder = controlled_use_placeholder !== undefined ? controlled_use_placeholder : is_use_placeholder
+  page_size = Math.max(2, Math.min(8, Math.floor(Math.max(60, container_height - 56) / 30)))
+  total_pages = Math.max(1, Math.ceil((has_countries ? effective_countries.length : 1) / page_size))
+  current_page = Math.min(page, Math.max(0, total_pages - 1))
+  paged_country_names = has_countries
+    ? effective_countries.slice(current_page * page_size, (current_page + 1) * page_size).map((arg0_c) => getFeatureEntityName(arg0_c)).filter(Boolean)
+    : ['Global']
+
+  handle_next_page = function () {
+    if (page < total_pages - 1)
+      set_page(page + 1)
+  }
+
+  handle_prev_page = function () {
+    if (page > 0)
+      set_page(page - 1)
+  }
 
   handle_toggle_placeholder = function (arg0_val: boolean) {
     if (on_toggle_placeholder)
@@ -189,11 +213,8 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       })
     } else {
       let url = `/api/raster/breakdown?layer=${layer_id}&year=${current_yr}`
-      if (country_names.length > 0) {
+      if (country_names.length > 0)
         url += `&countries=${encodeURIComponent(country_names.join(','))}`
-      } else if (inspect_data && Number.isFinite(inspect_data.pixelX) && Number.isFinite(inspect_data.pixelY)) {
-        url += `&x=${inspect_data.pixelX}&y=${inspect_data.pixelY}`
-      }
       fetch_promise = fetch(url)
     }
 
@@ -241,7 +262,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       if (interval)
         clearInterval(interval)
     }
-  }, [current_year, effective_countries, effective_use_placeholder, inspect_data?.pixelX, inspect_data?.pixelY, layer_id])
+  }, [countries_key, current_year, effective_use_placeholder, layer_id])
 
   //Resize observer for responsive panel updates
   useEffect(() => {
@@ -257,10 +278,24 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       }
     }
 
-    let observer = new ResizeObserver(() => {
+    let observer = new ResizeObserver((arg0_entries) => {
+      for (let i = 0; i < arg0_entries.length; i++) {
+        let entry = arg0_entries[i]
+        let width = entry.contentRect.width
+        let height = entry.contentRect.height
+        if (width > 0)
+          set_container_width(Math.round(width))
+        if (height > 0)
+          set_container_height(Math.round(height))
+      }
       requestAnimationFrame(trigger_resize)
     })
     observer.observe(container)
+
+    if (container.clientWidth > 0)
+      set_container_width(container.clientWidth)
+    if (container.clientHeight > 0)
+      set_container_height(container.clientHeight)
 
     trigger_resize()
     let t1 = setTimeout(trigger_resize, 100)
@@ -278,60 +313,68 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   //Build ECharts 100% split-bar configuration
   option = useMemo(() => {
     let active_prof = active_variable_selectors.profession || 'agriculture'
-    let country_names = effective_countries.map((arg0_c) => getFeatureEntityName(arg0_c))
-    let entity_labels: string[]
+    let entity_labels = paged_country_names
+    let normalized_entities: Record<string, number>[]
+    let plot_height = Math.max(60, container_height - 56)
     let series_list: any[]
+    let slot_height = plot_height / entity_labels.length
+    let bar_max_width = Math.max(8, Math.min(32, Math.round(slot_height * 0.58)))
 
-    if (has_countries) {
-      //Split bar share per country
-      entity_labels = country_names
-    } else {
-      //Single split bar representing global share
-      entity_labels = ['Global']
-    }
+    //Normalize each entity's sector percentages so their sum is strictly 100.0%
+    normalized_entities = (has_countries ? paged_country_names : ['Global']).map((arg0_name) => {
+      let c_dict = has_countries ? by_country_data[arg0_name] : global_sector_data
+      if (has_countries && !c_dict) {
+        let found_k = Object.keys(by_country_data).find(
+          (arg0_k) => arg0_k.toLowerCase().trim() === arg0_name.toLowerCase().trim()
+        )
+        if (found_k)
+          c_dict = by_country_data[found_k]
+      }
+      let raw_vals = PROFESSION_SECTORS.map((arg0_s) =>
+        c_dict && c_dict[arg0_s.id] !== undefined ? Math.max(0, c_dict[arg0_s.id]) : (global_sector_data[arg0_s.id] ?? 25.0)
+      )
+      let sum = raw_vals.reduce((arg0_a, arg0_b) => arg0_a + arg0_b, 0)
+      let norm_vals = raw_vals.map((arg0_v) => (sum > 0 ? (arg0_v / sum) * 100 : 25.0))
+      let last_idx = norm_vals.length - 1
+      let lead_sum = 0
+      for (let s = 0; s < last_idx; s++) {
+        norm_vals[s] = Math.round(norm_vals[s] * 10) / 10
+        lead_sum += norm_vals[s]
+      }
+      norm_vals[last_idx] = Math.round((100 - lead_sum) * 10) / 10
+
+      let res: Record<string, number> = {}
+      for (let s = 0; s < PROFESSION_SECTORS.length; s++)
+        res[PROFESSION_SECTORS[s].id] = norm_vals[s]
+      return res
+    })
 
     series_list = PROFESSION_SECTORS.map((arg0_sector) => {
       let is_active_prof = arg0_sector.id === active_prof
-      let sector_data_points: number[]
-
-      if (has_countries) {
-        sector_data_points = country_names.map((arg0_name) => {
-          let c_dict = by_country_data[arg0_name]
-          if (!c_dict) {
-            let found_k = Object.keys(by_country_data).find(
-              (arg0_k) => arg0_k.toLowerCase().trim() === arg0_name.toLowerCase().trim()
-            )
-            if (found_k)
-              c_dict = by_country_data[found_k]
-          }
-          if (c_dict && c_dict[arg0_sector.id] !== undefined)
-            return c_dict[arg0_sector.id]
-          return global_sector_data[arg0_sector.id] ?? 25.0
-        })
-      } else {
-        sector_data_points = [global_sector_data[arg0_sector.id] ?? 25.0]
-      }
+      let sector_data_points = normalized_entities.map((arg0_dict) => arg0_dict[arg0_sector.id] ?? 25.0)
 
       return {
-        barWidth: Math.max(16, Math.min(32, Math.floor(140 / Math.max(1, entity_labels.length)))),
+        barCategoryGap: '20%',
+        barMaxWidth: bar_max_width,
         data: sector_data_points,
         emphasis: {
           focus: 'series',
           itemStyle: {
             borderColor: '#ffffff',
-            borderWidth: 2,
+            borderWidth: 1,
             shadowBlur: 6,
             shadowColor: 'rgba(255,255,255,0.4)',
           },
         },
         itemStyle: {
-          borderColor: is_active_prof ? '#ffffff' : '#18181b',
-          borderWidth: is_active_prof ? 2 : 0.5,
+          borderColor: '#18181b',
+          borderWidth: 0.5,
           color: arg0_sector.color,
+          opacity: is_active_prof ? 1 : 0.88,
         },
         label: {
           color: '#ffffff',
-          fontSize: 10,
+          fontSize: Math.max(8, Math.min(10.5, Math.round(bar_max_width * 0.6))),
           formatter: (arg0_param: any) => {
             let v = arg0_param.value
             return v >= 8 ? `${v.toFixed(0)}%` : ''
@@ -349,11 +392,11 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       animationDuration: 300,
       backgroundColor: 'transparent',
       grid: {
-        bottom: '8%',
+        bottom: 20,
         containLabel: true,
-        left: '4%',
-        right: '6%',
-        top: has_countries ? '32px' : '28px',
+        left: 8,
+        right: 18,
+        top: 26,
       },
       legend: {
         itemGap: 10,
@@ -365,9 +408,11 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       },
       series: series_list,
       tooltip: {
+        appendToBody: true,
         backgroundColor: 'rgba(20, 20, 25, 0.95)',
         borderColor: '#3f3f46',
         borderWidth: 1,
+        extraCssText: 'z-index: 99999999; pointer-events: none;',
         formatter: (arg0_param: any) => {
           let c_name = arg0_param.name
           let pct = arg0_param.value
@@ -394,7 +439,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       xAxis: {
         axisLabel: {
           color: '#71717a',
-          fontSize: 9,
+          fontSize: 8.5,
           formatter: '{value}%',
         },
         axisLine: { lineStyle: { color: '#27272a' } },
@@ -406,8 +451,12 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       yAxis: {
         axisLabel: {
           color: '#d4d4d8',
-          fontSize: 11,
+          ellipsis: '...',
+          fontSize: 10,
           fontWeight: 'bold',
+          interval: 0,
+          overflow: 'truncate',
+          width: 140,
         },
         axisLine: { lineStyle: { color: '#3f3f46' } },
         axisTick: { show: false },
@@ -420,18 +469,18 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
     active_variable_selectors.profession,
     by_country_data,
     current_year,
-    effective_countries,
     global_sector_data,
     has_countries,
+    paged_country_names,
   ])
 
   //Return statement
   return (
-    <div ref={container_ref} className="h-full w-full flex flex-col min-h-0 select-none">
+    <div className="h-full w-full flex flex-col min-h-0 select-none">
       <div className="flex items-center justify-between px-2 pt-1 pb-1 border-b border-border/40 text-[11px] bg-muted/20">
         <div className="flex items-center gap-2 truncate">
           <span className="font-bold text-foreground flex items-center gap-1">
-            <Icon name="briefcase" className="text-primary text-xs" />
+            <Icon name="work" className="text-primary text-xs" />
             <span>
               {has_countries
                 ? format(t.analytics.categorySplitSelected, effective_countries.length)
@@ -453,8 +502,8 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
         </div>
       </div>
 
-      {/* Secondary Controls Bar */}
-      <div className="flex items-center justify-between px-2 py-1 bg-muted/35 border-b border-border/40 text-[10px] font-mono shrink-0">
+      {/* Secondary Controls Bar & Pagination */}
+      <div className="flex items-center justify-between px-2 py-0.5 bg-muted/35 border-b border-border/40 text-[10px] font-mono shrink-0">
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5 cursor-pointer select-none text-foreground/80 hover:text-foreground">
             <input
@@ -478,9 +527,35 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
             </span>
           )}
         </div>
+
+        {total_pages > 1 && (
+          <div className="flex items-center gap-1 border-l border-border/60 pl-2">
+            <button
+              type="button"
+              disabled={page <= 0}
+              onClick={handle_prev_page}
+              className="h-4.5 w-4.5 flex items-center justify-center border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none cursor-pointer transition-colors"
+              title="Previous page"
+            >
+              <Icon name="chevron_left" className="text-xs" />
+            </button>
+            <span className="text-[9px] font-mono text-muted-foreground px-1 select-none">
+              {page + 1}/{total_pages}
+            </span>
+            <button
+              type="button"
+              disabled={page >= total_pages - 1}
+              onClick={handle_next_page}
+              className="h-4.5 w-4.5 flex items-center justify-center border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none cursor-pointer transition-colors"
+              title="Next page"
+            >
+              <Icon name="chevron_right" className="text-xs" />
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 min-h-0 relative">
+      <div ref={container_ref} className="flex-1 min-h-0 relative w-full overflow-hidden">
         <ReactECharts
           ref={echart_ref}
           option={option}

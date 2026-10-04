@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
@@ -44,20 +44,31 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
   let on_select_city = props.onSelectCity
 
   //Declare local instance variables
-  let chart_height: number
   let cities_list: CityPoint[]
-  let dominant_region: string
+  let container_height: number
+  let container_ref = useRef<HTMLDivElement>(null)
+  let container_width: number
+  let current_page: number
   let echart_option: any
+  let echart_ref = useRef<any>(null)
+  let effective_cities: CityPoint[]
   let format: ReturnType<typeof useLocalisation>['format']
+  let handle_next_page: () => void
+  let handle_prev_page: () => void
   let is_loading: boolean
-  let largest_city: CityPoint | null
   let limit: number
   let localisation: ReturnType<typeof useLocalisation>
+  let page: number
+  let page_size: number
+  let paged_cities: CityPoint[]
   let set_cities_list: React.Dispatch<React.SetStateAction<CityPoint[]>>
+  let set_container_height: React.Dispatch<React.SetStateAction<number>>
+  let set_container_width: React.Dispatch<React.SetStateAction<number>>
   let set_is_loading: React.Dispatch<React.SetStateAction<boolean>>
   let set_limit: React.Dispatch<React.SetStateAction<number>>
+  let set_page: React.Dispatch<React.SetStateAction<number>>
   let t: ReturnType<typeof useLocalisation>['t']
-  let total_top_population: number
+  let total_pages: number
 
   //Function body
   localisation = useLocalisation()
@@ -65,10 +76,73 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
   t = localisation.t
 
   ;[cities_list, set_cities_list] = useState<CityPoint[]>([])
+  ;[container_height, set_container_height] = useState<number>(240)
+  ;[container_width, set_container_width] = useState<number>(640)
   ;[is_loading, set_is_loading] = useState<boolean>(false)
   ;[limit, set_limit] = useState<number>(15)
+  ;[page, set_page] = useState<number>(0)
 
-  chart_height = Math.max(150, Math.min(360, (limit * 14) + 25))
+  //Resize observer to dynamically adapt page size and bar dimensions to container height
+  useEffect(() => {
+    let container = container_ref.current
+    if (!container)
+      return
+
+    let trigger_resize = function () {
+      if (echart_ref.current) {
+        let instance = echart_ref.current.getEchartsInstance?.()
+        if (instance && !instance.isDisposed?.())
+          instance.resize()
+      }
+    }
+
+    let observer = new ResizeObserver((arg0_entries) => {
+      for (let i = 0; i < arg0_entries.length; i++) {
+        let entry = arg0_entries[i]
+        let width = entry.contentRect.width
+        let height = entry.contentRect.height
+        if (width > 0)
+          set_container_width(Math.round(width))
+        if (height > 0)
+          set_container_height(Math.round(height))
+      }
+      requestAnimationFrame(trigger_resize)
+    })
+    observer.observe(container)
+
+    if (container.clientWidth > 0)
+      set_container_width(container.clientWidth)
+    if (container.clientHeight > 0)
+      set_container_height(container.clientHeight)
+
+    trigger_resize()
+    let t1 = setTimeout(trigger_resize, 100)
+    let t2 = setTimeout(trigger_resize, 300)
+
+    window.addEventListener('resize', trigger_resize)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', trigger_resize)
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [])
+
+  effective_cities = cities_list.slice(0, limit)
+  page_size = Math.max(3, Math.min(limit, Math.floor(Math.max(60, container_height - 30) / 21)))
+  total_pages = Math.max(1, Math.ceil(effective_cities.length / page_size))
+  current_page = Math.min(page, Math.max(0, total_pages - 1))
+  paged_cities = effective_cities.slice(current_page * page_size, (current_page + 1) * page_size)
+
+  handle_next_page = function () {
+    if (page < total_pages - 1)
+      set_page(page + 1)
+  }
+
+  handle_prev_page = function () {
+    if (page > 0)
+      set_page(page - 1)
+  }
 
   //Fetch largest cities whenever year, dataset or limit changes
   useEffect(() => {
@@ -76,6 +150,7 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
     let rounded_year = Math.round(current_year)
 
     set_is_loading(true)
+    set_page(0)
     fetch(`/api/stadester/largest?dataset=${dataset}&year=${rounded_year}&limit=${limit}`, {
       signal: controller.signal,
     })
@@ -100,43 +175,16 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
     }
   }, [current_year, dataset, limit])
 
-  //Compute summary metrics: #1 city, aggregate top population, and leading region
-  largest_city = cities_list.length > 0 ? cities_list[0] : null
-  total_top_population = useMemo(() => {
-    let sum = 0
-    for (let i = 0; i < cities_list.length; i++)
-      sum += (cities_list[i].population || 0)
-    return Math.round(sum)
-  }, [cities_list])
-
-  dominant_region = useMemo(() => {
-    if (cities_list.length === 0)
-      return '–'
-    let counts: Record<string, number> = {}
-    for (let i = 0; i < cities_list.length; i++) {
-      let reg = (cities_list[i].region || 'Other').toLowerCase()
-      counts[reg] = (counts[reg] || 0) + 1
-    }
-    let max_reg = '–'
-    let max_val = -1
-    let keys = Object.keys(counts)
-    for (let i = 0; i < keys.length; i++) {
-      if (counts[keys[i]] > max_val) {
-        max_val = counts[keys[i]]
-        max_reg = keys[i]
-      }
-    }
-    return max_reg.replace(/_/g, ' ')
-  }, [cities_list])
-
   //Build horizontal bar chart option for ECharts
   echart_option = useMemo(() => {
-    let sorted_cities = [...cities_list].reverse()
+    let available_plot_height = Math.max(60, container_height - 30)
+    let bar_max_width = Math.max(6, Math.min(18, Math.round((available_plot_height / Math.max(1, paged_cities.length)) * 0.55)))
+    let label_font_size = Math.max(8.5, Math.min(11, Math.round((available_plot_height / Math.max(1, paged_cities.length)) * 0.45)))
     let series_data: any[] = []
     let y_names: string[] = []
 
-    for (let i = 0; i < sorted_cities.length; i++) {
-      let c = sorted_cities[i]
+    for (let i = 0; i < paged_cities.length; i++) {
+      let c = paged_cities[i]
       let clean_name = getPrimaryCityName(c.name)
       let region_key = (c.region || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
       let item_color = REGION_COLOR_MAP[region_key] || '#3b82f6'
@@ -155,14 +203,16 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
     return {
       animationDuration: 300,
       grid: {
-        bottom: 20,
+        bottom: 22,
         containLabel: true,
         left: 8,
-        right: 24,
+        right: 34,
         top: 6,
       },
       series: [
         {
+          barCategoryGap: '22%',
+          barMaxWidth: bar_max_width,
           data: series_data,
           emphasis: {
             itemStyle: {
@@ -173,7 +223,7 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
           label: {
             color: '#cbd5e1',
             fontFamily: 'monospace',
-            fontSize: 9,
+            fontSize: Math.max(8.5, label_font_size - 0.5),
             formatter: (arg0_p: any) => {
               let val = arg0_p.value
               if (val >= 1000000)
@@ -189,14 +239,16 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
         },
       ],
       tooltip: {
+        appendToBody: true,
         backgroundColor: 'rgba(15, 23, 42, 0.95)',
         borderColor: '#334155',
+        extraCssText: 'z-index: 99999999; pointer-events: none;',
         formatter: function (arg0_params: any) {
           let c: CityPoint = arg0_params.data?.cityData
           if (!c)
             return ''
           let clean_name = getPrimaryCityName(c.name)
-          let rank = cities_list.findIndex((arg0_item) => arg0_item.key === c.key) + 1
+          let rank = effective_cities.findIndex((arg0_item) => arg0_item.key === c.key) + 1
           let pop_formatted = Math.round(c.population).toLocaleString('de-DE')
           let other_parts = c.name && c.name.includes(';') ? c.name.split(';').slice(1, 4).map((s) => s.trim()).join(', ') : ''
           return `<div style="font-size: 11px; max-width: 280px;">
@@ -216,7 +268,7 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
       xAxis: {
         axisLabel: {
           color: '#94a3b8',
-          fontSize: 9,
+          fontSize: 8.5,
           formatter: (arg0_v: number) => {
             if (arg0_v >= 1000000)
               return `${(arg0_v / 1000000).toFixed(0)}M`
@@ -233,97 +285,93 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
         axisLabel: {
           color: '#f8fafc',
           ellipsis: '...',
-          fontSize: 10,
+          fontSize: label_font_size,
+          interval: 0,
           overflow: 'truncate',
-          width: 95,
+          width: Math.max(70, Math.min(140, Math.round(container_width * 0.22))),
         },
         axisLine: { lineStyle: { color: '#334155' } },
         axisTick: { show: false },
         data: y_names,
+        inverse: true,
         type: 'category',
       },
     }
-  }, [cities_list, t])
+  }, [container_height, container_width, effective_cities, paged_cities, t])
 
   //Return statement
   return (
-    <div className="flex flex-col space-y-2 text-xs select-none">
-      {/* Top Controls: Ranking limits & summary */}
-      <div className="flex items-center justify-between border-b border-border/60 pb-1.5 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <Icon name="leaderboard" className="text-white text-xs" />
-          <span className="font-bold text-foreground text-xs uppercase tracking-wider">
+    <div className="h-full w-full flex flex-col justify-between min-h-0 select-none overflow-hidden gap-1.5">
+      {/* Top Controls: Ranking limits & pagination */}
+      <div className="flex items-center justify-between border-b border-border/60 pb-1 shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Icon name="leaderboard" className="text-white text-xs shrink-0" />
+          <span className="font-bold text-foreground text-xs uppercase tracking-wider truncate">
             {t.analytics.largestCitiesTitle}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono ml-1 border border-border/50">
-            {UfDate.formatYear(current_year)}
-          </span>
         </div>
 
-        {/* Limit Chips */}
-        <div className="flex items-center gap-1">
-          {[10, 15, 25, 50].map((arg0_n) => (
-            <button
-              key={arg0_n}
-              type="button"
-              onClick={() => set_limit(arg0_n)}
-              className={`px-1.5 py-0.5 text-[10px] rounded-none border transition-colors cursor-pointer ${
-                limit === arg0_n
-                  ? 'bg-primary text-primary-foreground border-primary font-bold'
-                  : 'bg-background hover:bg-muted text-muted-foreground border-border'
-              }`}
-            >
-              {format(t.analytics.topN, arg0_n)}
-            </button>
-          ))}
+        {/* Limit Chips & Page Switcher */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 flex-nowrap">
+            {[10, 15, 25, 50].map((arg0_n) => (
+              <button
+                key={arg0_n}
+                type="button"
+                onClick={() => {
+                  set_limit(arg0_n)
+                  set_page(0)
+                }}
+                className={`px-1.5 py-0.5 text-[10px] whitespace-nowrap shrink-0 rounded-none border transition-colors cursor-pointer ${
+                  limit === arg0_n
+                    ? 'bg-primary text-primary-foreground border-primary font-bold'
+                    : 'bg-background hover:bg-muted text-muted-foreground border-border'
+                }`}
+              >
+                {format(t.analytics.topN, arg0_n)}
+              </button>
+            ))}
+          </div>
+
+          {total_pages > 1 && (
+            <div className="flex items-center gap-0.5 border-l border-border/60 pl-1.5">
+              <button
+                type="button"
+                disabled={page <= 0}
+                onClick={handle_prev_page}
+                className="h-5 w-5 flex items-center justify-center border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none cursor-pointer transition-colors"
+                title="Previous page"
+              >
+                <Icon name="chevron_left" className="text-xs" />
+              </button>
+              <span className="text-[10px] font-mono text-muted-foreground px-1 select-none">
+                {page + 1}/{total_pages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= total_pages - 1}
+                onClick={handle_next_page}
+                className="h-5 w-5 flex items-center justify-center border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-25 disabled:pointer-events-none cursor-pointer transition-colors"
+                title="Next page"
+              >
+                <Icon name="chevron_right" className="text-xs" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Snapshot metric summary cards */}
-      <div className="grid grid-cols-3 gap-1.5 shrink-0">
-        <div className="bg-muted/30 border border-border/50 p-1.5">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t.analytics.top1City}</div>
-          <div
-            className="text-xs font-bold text-foreground truncate mt-0.5"
-            title={largest_city ? getPrimaryCityName(largest_city.name) : '–'}
-          >
-            {largest_city ? getPrimaryCityName(largest_city.name) : '–'}
-          </div>
-          <div className="text-[10px] font-mono text-foreground font-semibold truncate">
-            {largest_city ? Math.round(largest_city.population).toLocaleString('de-DE') : '–'}
-          </div>
-        </div>
-
-        <div className="bg-muted/30 border border-border/50 p-1.5">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{format(t.analytics.topNTotal, limit)}</div>
-          <div className="text-xs font-bold font-mono text-foreground truncate mt-0.5">
-            {total_top_population.toLocaleString('de-DE')}
-          </div>
-          <div className="text-[9px] text-muted-foreground truncate">{t.analytics.inhabitants}</div>
-        </div>
-
-        <div className="bg-muted/30 border border-border/50 p-1.5">
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">{t.analytics.leadingRegion}</div>
-          <div className="text-xs font-bold text-foreground capitalize truncate mt-0.5">
-            {dominant_region}
-          </div>
-          <div className="text-[9px] text-muted-foreground truncate">{t.analytics.mostRepresented}</div>
-        </div>
-      </div>
-
-      {/* Ranked Bar Chart Container */}
-      <div
-        className="relative border border-border/40 bg-card/30 shrink-0 w-full"
-        style={{ height: `${chart_height}px` }}
-      >
+      {/* Ranked Bar Chart Container bounded to available space */}
+      <div ref={container_ref} className="flex-1 min-h-0 relative w-full overflow-hidden">
         {is_loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-xs text-xs text-muted-foreground animate-pulse">
             {format(t.analytics.rankingUrbanSettlements, UfDate.formatYear(current_year))}
           </div>
         )}
 
-        {cities_list.length > 0 ? (
+        {paged_cities.length > 0 ? (
           <ReactECharts
+            ref={echart_ref}
             option={echart_option}
             style={{ height: '100%', width: '100%' }}
             notMerge={true}

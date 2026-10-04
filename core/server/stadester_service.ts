@@ -124,10 +124,12 @@ export interface StadesterQueryOptions {
   active_state_ids?: Set<number>
   bbox?: [number, number, number, number] // [west, south, east, north]
   color_mode?: 'growth' | 'population' | 'region' | 'continent'
+  dataset?: string
   day?: number
   max_cities?: number
   min_pop?: number
   month?: number
+  preserve_capitals?: boolean
 }
 
 export interface CompactCitiesPayload {
@@ -1536,8 +1538,8 @@ export let StadesterService = {
     let active_state_ids: Set<number>
     let all_city_keys: string[]
     let bugged_set: Set<string>
-    let cache_key = `${dataset_name}:${target_year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}`
-    let cshapes_capitals_by_city_key = new Map<string, { color?: string; name: string; state_id?: number | string }>()
+    let cache_key = `${dataset_name}:${target_year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}:${options.preserve_capitals !== false}`
+    let cshapes_capitals_by_city_key = new Map<string, { color?: string; name?: string; state_id?: number | string }>()
     let indexed = StadesterService.loadDataset(dataset_name)
     let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
     let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
@@ -1776,25 +1778,29 @@ export let StadesterService = {
     //Sort descending by population
     result_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
 
-    //Apply max_cities limit, but ensure active capitals are always preserved
+    //Apply max_cities limit, but ensure active capitals are always preserved (unless preserve_capitals is false)
     if (max_cities > 0 && max_cities < result_cities.length) {
-      let top_cities = result_cities.slice(0, max_cities)
-      let capitals_outside_slice = result_cities.slice(max_cities).filter((c) => c.isCapital)
-      if (capitals_outside_slice.length > 0) {
-        let non_capitals: CityRenderPoint[] = []
-        let preserved_list: CityRenderPoint[] = []
-        for (let i = 0; i < top_cities.length; i++) {
-          if (top_cities[i].isCapital) {
-            preserved_list.push(top_cities[i])
-          } else {
-            non_capitals.push(top_cities[i])
+      if (options.preserve_capitals !== false) {
+        let top_cities = result_cities.slice(0, max_cities)
+        let capitals_outside_slice = result_cities.slice(max_cities).filter((c) => c.isCapital)
+        if (capitals_outside_slice.length > 0) {
+          let non_capitals: CityRenderPoint[] = []
+          let preserved_list: CityRenderPoint[] = []
+          for (let i = 0; i < top_cities.length; i++) {
+            if (top_cities[i].isCapital) {
+              preserved_list.push(top_cities[i])
+            } else {
+              non_capitals.push(top_cities[i])
+            }
           }
+          let slots_for_non_capitals = Math.max(0, max_cities - preserved_list.length - capitals_outside_slice.length)
+          result_cities = [...preserved_list, ...capitals_outside_slice, ...non_capitals.slice(0, slots_for_non_capitals)]
+          result_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
+        } else {
+          result_cities = top_cities
         }
-        let slots_for_non_capitals = Math.max(0, max_cities - preserved_list.length - capitals_outside_slice.length)
-        result_cities = [...preserved_list, ...capitals_outside_slice, ...non_capitals.slice(0, slots_for_non_capitals)]
-        result_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
       } else {
-        result_cities = top_cities
+        result_cities = result_cities.slice(0, max_cities)
       }
     }
 
@@ -2150,9 +2156,17 @@ export let StadesterService = {
     let year = arg1_year !== undefined ? arg1_year : 1950
 
     //Declare local instance variables
-    let raw_cities = StadesterService.getCitiesAtYear(dataset_name, year, { max_cities: limit, min_pop: 0.01 })
+    let raw_cities: CityRenderPoint[]
 
     //Function body
+    raw_cities = StadesterService.getCitiesAtYear(dataset_name, year, {
+      max_cities: limit,
+      min_pop: 0.01,
+      preserve_capitals: false,
+    })
+    raw_cities.sort((arg0_a, arg0_b) => arg0_b.population - arg0_a.population)
+    raw_cities = raw_cities.slice(0, limit)
+
     for (let i = 0; i < raw_cities.length; i++) {
       raw_cities[i].name = getPrimaryCityName(raw_cities[i].name, raw_cities[i].population)
     }

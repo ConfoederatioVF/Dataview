@@ -288,11 +288,12 @@ export let HistogramChart: React.FC<HistogramChartProps> = function (arg0_props)
         fontFamily: 'Karla, sans-serif',
       },
       tooltip: {
+        appendToBody: true,
         axisPointer: { type: 'shadow' },
         backgroundColor: '#18181b',
         borderColor: '#27272a',
         borderRadius: 0,
-        confine: true,
+        extraCssText: 'z-index: 99999999; pointer-events: none;',
         formatter: (arg0_params: any) => {
           let item = arg0_params[0]
           let idx = item.dataIndex

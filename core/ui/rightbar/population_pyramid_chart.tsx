@@ -10,15 +10,7 @@ import { useLocalisation } from '@localisation'
 export interface PopulationPyramidChartProps {
   activeVariableSelectors?: Record<string, string | string[]>
   countryStats?: CountryStats | null
-  currentYear: number
-  inspectData?: {
-    countryName?: string
-    lat: number
-    lng: number
-    pixelX: number
-    pixelY: number
-    value: number | null
-  } | null
+  currentYear?: number
   isMobile?: boolean
   onTogglePlaceholder?: (arg0_val: boolean) => void
   raster: DecodedRaster | null
@@ -34,7 +26,7 @@ export interface AgeCohortItem {
   label: string
 }
 
-export let AGE_COHORTS: AgeCohortItem[] = [
+let AGE_COHORTS: AgeCohortItem[] = [
   { compactLabel: '0-1', id: '00', label: '0-1yo, Infants' },
   { compactLabel: '1-5', id: '01', label: '1-5yo' },
   { compactLabel: '5-10', id: '05', label: '5-10yo' },
@@ -69,8 +61,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let {
     activeVariableSelectors: active_variable_selectors = {},
     countryStats: country_stats,
-    currentYear: current_year,
-    inspectData: inspect_data,
+    currentYear: current_year = 1950,
     isMobile: is_mobile_prop = false,
     onTogglePlaceholder: on_toggle_placeholder,
     raster,
@@ -82,8 +73,10 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
 
   //Declare local instance variables
   let active_country_name: string | null
+  let container_height: number
   let container_ref = useRef<HTMLDivElement>(null)
   let container_width: number
+  let countries_key: string
   let echart_ref = useRef<any>(null)
   let effective_countries: CountryFeature[]
   let effective_use_placeholder: boolean
@@ -105,6 +98,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let refining_pct: number
   let refining_time_remaining: number
   let set_active_country_name: React.Dispatch<React.SetStateAction<string | null>>
+  let set_container_height: React.Dispatch<React.SetStateAction<number>>
   let set_container_width: React.Dispatch<React.SetStateAction<number>>
   let set_internal_use_placeholder: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_loading: React.Dispatch<React.SetStateAction<boolean>>
@@ -132,10 +126,12 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       return [selected_country]
     return []
   }, [selected_countries, selected_country])
+  countries_key = effective_countries.map((arg0_c) => getFeatureEntityName(arg0_c)).filter(Boolean).sort().join(',')
 
     ;[active_country_name, set_active_country_name] = useState<string | null>(
       effective_countries.length > 0 ? getFeatureEntityName(effective_countries[effective_countries.length - 1]) : null
     )
+    ;[container_height, set_container_height] = useState<number>(260)
     ;[container_width, set_container_width] = useState<number>(() => {
       if (typeof window !== 'undefined')
         return window.innerWidth < 768 ? window.innerWidth : 640
@@ -173,7 +169,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
     } else {
       set_active_country_name(null)
     }
-  }, [effective_countries])
+  }, [countries_key])
 
   //Fetch individual country or global pyramid breakdown with instantaneous synthetic responsiveness
   useEffect(() => {
@@ -237,11 +233,8 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       })
     } else {
       let url = `/api/raster/breakdown?layer=age_sex&year=${current_yr}`
-      if (active_country_name) {
+      if (active_country_name)
         url += `&country=${encodeURIComponent(active_country_name)}`
-      } else if (inspect_data && Number.isFinite(inspect_data.pixelX) && Number.isFinite(inspect_data.pixelY)) {
-        url += `&x=${inspect_data.pixelX}&y=${inspect_data.pixelY}`
-      }
       fetch_promise = fetch(url)
     }
 
@@ -294,7 +287,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       if (interval)
         clearInterval(interval)
     }
-  }, [active_country_name, current_year, effective_countries, effective_use_placeholder, inspect_data?.pixelX, inspect_data?.pixelY])
+  }, [active_country_name, countries_key, current_year, effective_use_placeholder])
 
   //Resize observer for responsive panel updates
   useEffect(() => {
@@ -314,8 +307,11 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       for (let i = 0; i < arg0_entries.length; i++) {
         let entry = arg0_entries[i]
         let width = entry.contentRect.width
+        let height = entry.contentRect.height
         if (width > 0)
           set_container_width(Math.round(width))
+        if (height > 0)
+          set_container_height(Math.round(height))
       }
       requestAnimationFrame(trigger_resize)
     })
@@ -323,14 +319,20 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
 
     if (container.clientWidth > 0)
       set_container_width(container.clientWidth)
+    if (container.clientHeight > 0)
+      set_container_height(container.clientHeight)
 
     trigger_resize()
     let t1 = setTimeout(trigger_resize, 100)
     let t2 = setTimeout(trigger_resize, 300)
 
     let handle_window_resize = function () {
-      if (container_ref.current && container_ref.current.clientWidth > 0)
-        set_container_width(container_ref.current.clientWidth)
+      if (container_ref.current) {
+        if (container_ref.current.clientWidth > 0)
+          set_container_width(container_ref.current.clientWidth)
+        if (container_ref.current.clientHeight > 0)
+          set_container_height(container_ref.current.clientHeight)
+      }
       trigger_resize()
     }
 
@@ -352,7 +354,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   female_values = useMemo(() => {
     if (!pyramid_data?.female)
       return AGE_COHORTS.map(() => 0)
-    return AGE_COHORTS.map((arg0_c) => pyramid_data!.female[arg0_c.id] || 0)
+    return AGE_COHORTS.map((arg0_c) => (pyramid_data!.female[arg0_c.id] || 0))
   }, [pyramid_data])
 
   old_age_dependency_ratio = useMemo(() => {
@@ -382,12 +384,55 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       ? active_variable_selectors.gender[0] || 't'
       : active_variable_selectors.gender || 't'
     let axis_limit: number
+    let bar_max_width: number
+    let chart_height = container_height > 0 ? container_height : 260
     let effective_width = container_width > 0 ? container_width : (typeof window !== 'undefined' ? (window.innerWidth < 768 ? window.innerWidth : 640) : 640)
-    let grid_bottom = 30
-    let grid_inset_x = is_narrow ? 14 : '4%'
-    let label_margin = Math.max(16, Math.round(effective_width * 0.07))
+    let grid_bottom = 16
+    let grid_inset_x = is_narrow ? 10 : '3%'
+    let label_font_size: number
+    let label_line_height: number
+    let label_margin = Math.max(14, Math.round(effective_width * 0.065))
     let max_abs_val = 1
+    let min_step: number
+    let non_terminal_span: number
+    let num_steps: number
+    let plot_height = Math.max(60, chart_height - (18 + grid_bottom))
+    let required_pitch: number
+    let slot_height = plot_height / AGE_COHORTS.length
+    let total_cohorts = AGE_COHORTS.length
+    let visible_indices = new Set<number>()
     let y_labels = AGE_COHORTS.map((arg0_c) => arg0_c.label)
+
+    //Scale bar width and font size dynamically to container slot height
+    bar_max_width = Math.max(4, Math.min(16, Math.round(slot_height * 0.68)))
+    label_font_size = Math.max(8, Math.min(10.5, Math.round(slot_height * 0.62)))
+    label_line_height = Math.round(label_font_size * 1.25)
+    required_pitch = label_line_height
+
+    //Calculate line height and required vertical pitch to prevent label overlap
+    min_step = Math.max(1, Math.ceil(required_pitch / slot_height))
+
+    if (min_step <= 1) {
+      //All cohort labels fit without physical overlap
+      for (let i = 0; i < total_cohorts; i++)
+        visible_indices.add(i)
+    } else {
+      //Terminal bands always display as normal
+      visible_indices.add(0)
+      visible_indices.add(1)
+      visible_indices.add(total_cohorts - 1)
+
+      //Dynamically allocate in-between bands across available vertical space without dead space
+      non_terminal_span = (total_cohorts - 1) - 1
+      num_steps = Math.floor(non_terminal_span / min_step)
+
+      if (num_steps > 1) {
+        for (let k = 1; k < num_steps; k++) {
+          let allocated_idx = 1 + Math.round((k * non_terminal_span) / num_steps)
+          visible_indices.add(allocated_idx)
+        }
+      }
+    }
 
     for (let i = 0; i < AGE_COHORTS.length; i++) {
       let m = Math.abs(male_values[i] || 0)
@@ -407,35 +452,36 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           bottom: grid_bottom,
           containLabel: false,
           left: grid_inset_x,
-          right: '57%',
-          top: effective_countries.length > 0 ? '34px' : '28px',
+          right: '56%',
+          top: 18,
         },
         {
           bottom: grid_bottom,
           containLabel: false,
-          left: '57%',
+          left: '56%',
           right: grid_inset_x,
-          top: effective_countries.length > 0 ? '34px' : '28px',
+          top: 18,
         },
       ],
       legend: {
         data: [t.analytics.maleCohorts, t.analytics.femaleCohorts],
-        itemGap: 14,
-        itemHeight: 10,
-        itemWidth: 12,
-        right: '4%',
-        textStyle: { color: '#a1a1aa', fontSize: 11 },
-        top: '2px',
+        itemGap: 10,
+        itemHeight: 8,
+        itemWidth: 10,
+        right: '3%',
+        textStyle: { color: '#a1a1aa', fontSize: 9.5 },
+        top: '1px',
       },
       series: [
         {
-          barCategoryGap: '18%',
+          barCategoryGap: '16%',
+          barMaxWidth: bar_max_width,
           data: male_values.map((arg0_v) => Math.abs(arg0_v)),
           emphasis: {
             itemStyle: {
               borderColor: '#ffffff',
               borderWidth: 1.5,
-              shadowBlur: 8,
+              shadowBlur: 6,
               shadowColor: 'rgba(59, 130, 246, 0.5)',
             },
           },
@@ -450,13 +496,14 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           yAxisIndex: 0,
         },
         {
-          barCategoryGap: '18%',
+          barCategoryGap: '16%',
+          barMaxWidth: bar_max_width,
           data: female_values,
           emphasis: {
             itemStyle: {
               borderColor: '#ffffff',
               borderWidth: 1.5,
-              shadowBlur: 8,
+              shadowBlur: 6,
               shadowColor: 'rgba(236, 72, 153, 0.5)',
             },
           },
@@ -472,10 +519,12 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
         },
       ],
       tooltip: {
+        appendToBody: true,
         axisPointer: { type: 'shadow' },
         backgroundColor: 'rgba(20, 20, 25, 0.95)',
         borderColor: '#3f3f46',
         borderWidth: 1,
+        extraCssText: 'z-index: 99999999; pointer-events: none;',
         formatter: (arg0_params: any) => {
           let param = Array.isArray(arg0_params) ? arg0_params[0] : arg0_params
           let idx = param.dataIndex
@@ -516,11 +565,13 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
         {
           axisLabel: {
             color: '#71717a',
-            fontSize: is_narrow ? 8.5 : 9,
+            fontSize: is_narrow ? 7.5 : 8,
             formatter: (arg0_val: number) => {
               if (arg0_val === 0)
                 return '0'
-              return `${Math.round(arg0_val).toLocaleString('de-DE')}`
+              if (arg0_val >= 1000)
+                return `${(arg0_val / 1000).toFixed(0)}M`
+              return `${Math.round(arg0_val)}k`
             },
           },
           axisLine: { lineStyle: { color: '#27272a' } },
@@ -528,10 +579,6 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           inverse: true, //Male points to the left
           max: axis_limit,
           min: 0,
-          name: 'Thousands',
-          nameGap: 14,
-          nameLocation: 'middle',
-          nameTextStyle: { color: '#71717a', fontSize: is_narrow ? 8.5 : 9 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
           splitNumber: is_narrow ? 3 : 4,
           type: 'value',
@@ -539,21 +586,19 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
         {
           axisLabel: {
             color: '#71717a',
-            fontSize: is_narrow ? 8.5 : 9,
+            fontSize: is_narrow ? 7.5 : 8,
             formatter: (arg0_val: number) => {
               if (arg0_val === 0)
                 return '0'
-              return `${Math.round(arg0_val).toLocaleString('de-DE')}`
+              if (arg0_val >= 1000)
+                return `${(arg0_val / 1000).toFixed(0)}M`
+              return `${Math.round(arg0_val)}k`
             },
           },
           axisLine: { lineStyle: { color: '#27272a' } },
           gridIndex: 1,
           max: axis_limit,
           min: 0,
-          name: 'Thousands',
-          nameGap: 14,
-          nameLocation: 'middle',
-          nameTextStyle: { color: '#71717a', fontSize: is_narrow ? 8.5 : 9 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
           splitNumber: is_narrow ? 3 : 4,
           type: 'value',
@@ -574,11 +619,18 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
             align: 'center',
             color: '#e4e4e7',
             fontFamily: 'sans-serif',
-            fontSize: is_narrow ? 9 : 9.5,
+            fontSize: label_font_size,
             formatter: (arg0_val: string, arg1_idx: number) => {
-              let cohort = AGE_COHORTS[arg1_idx]
-              return cohort ? (cohort.compactLabel || cohort.label) : arg0_val
+              let idx = typeof arg1_idx === 'number' ? arg1_idx : y_labels.indexOf(arg0_val)
+              let cohort = AGE_COHORTS[idx]
+              let full_text = cohort ? (cohort.compactLabel || cohort.label) : arg0_val
+
+              if (visible_indices.has(idx))
+                return full_text
+              return ''
             },
+            interval: 0,
+            lineHeight: label_line_height,
             margin: label_margin,
           },
           axisLine: { lineStyle: { color: '#3f3f46' } },
@@ -593,6 +645,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   }, [
     active_country_name,
     active_variable_selectors.gender,
+    container_height,
     container_width,
     effective_countries.length,
     female_values,
@@ -603,9 +656,9 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
 
   //Return statement
   return (
-    <div ref={container_ref} className="h-full w-full flex flex-col min-h-0 select-none">
+    <div className="h-full w-full flex flex-col min-h-0 select-none">
       {/* Header bar with demographic summary metrics */}
-      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2 pt-1 pb-1 border-b border-border/40 text-[11px] bg-muted/20 gap-x-2 gap-y-1">
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2 py-0.5 border-b border-border/40 text-[10px] bg-muted/20 gap-x-2 gap-y-0.5 shrink-0">
         <div className="flex items-center gap-2 truncate min-w-0">
           <span className="font-bold text-foreground flex items-center gap-1 shrink-0">
             <Icon name="people" className="text-primary text-xs" />
@@ -616,7 +669,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
           </span>
         </div>
 
-        <div className="flex items-center gap-2.5 text-[10px] font-mono text-muted-foreground shrink-0 flex-wrap">
+        <div className="flex items-center gap-2 text-[9.5px] font-mono text-muted-foreground shrink-0 flex-wrap">
           <span>
             {t.analytics.totalLabel} <b className="text-foreground">{formatLegendValue((total_male + total_female)*1000)}</b>
           </span>
@@ -630,8 +683,8 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       </div>
 
       {/* Secondary Controls Bar */}
-      <div className="flex items-center justify-between px-2 py-1 bg-muted/35 border-b border-border/40 text-[10px] font-mono shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-2 py-0.5 bg-muted/35 border-b border-border/40 text-[10px] font-mono shrink-0">
+        <div className="flex items-center gap-2.5">
           <label className="flex items-center gap-1.5 cursor-pointer select-none text-foreground/80 hover:text-foreground">
             <input
               type="checkbox"
@@ -658,14 +711,14 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
 
       {/* Country Selector Switcher Bar when countries are selected */}
       {effective_countries.length > 0 && (
-        <div className="flex items-center gap-1 px-2 py-1 bg-muted/40 border-b border-border/40 overflow-x-auto select-none shrink-0 scrollbar-thin">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mr-1 shrink-0">
+        <div className="flex items-center gap-1 px-2 py-0.5 bg-muted/40 border-b border-border/40 overflow-x-auto select-none shrink-0 scrollbar-thin">
+          <span className="text-[9.5px] text-muted-foreground uppercase tracking-wider font-semibold mr-1 shrink-0">
             {t.analytics.viewPyramid}
           </span>
           <button
             type="button"
             onClick={() => set_active_country_name(null)}
-            className={`px-2 py-0.5 text-[11px] rounded-none cursor-pointer transition-colors shrink-0 ${!active_country_name
+            className={`px-1.5 py-0.5 text-[10px] rounded-none cursor-pointer transition-colors shrink-0 ${!active_country_name
               ? 'bg-primary text-primary-foreground font-bold shadow-sm'
               : 'bg-background/60 text-muted-foreground hover:text-foreground border border-border/40'
               }`}
@@ -680,7 +733,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
                 key={name}
                 type="button"
                 onClick={() => set_active_country_name(name)}
-                className={`px-2 py-0.5 text-[11px] rounded-none cursor-pointer transition-colors truncate max-w-[140px] flex items-center gap-1 shrink-0 ${is_active
+                className={`px-1.5 py-0.5 text-[10px] rounded-none cursor-pointer transition-colors truncate max-w-[130px] flex items-center gap-1 shrink-0 ${is_active
                   ? 'bg-primary text-primary-foreground font-bold shadow-sm'
                   : 'bg-background/60 text-muted-foreground hover:text-foreground border border-border/40'
                   }`}
@@ -695,7 +748,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       )}
 
       {/* Chart Canvas */}
-      <div className="flex-1 min-h-0 relative">
+      <div ref={container_ref} className="flex-1 min-h-0 relative w-full overflow-hidden">
         <ReactECharts
           ref={echart_ref}
           option={option}

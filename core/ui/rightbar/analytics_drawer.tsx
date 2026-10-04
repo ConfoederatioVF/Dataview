@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { DecodedRaster, ScaleType } from '@framework/geopng/types.ts'
 import { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { getAnalyticsPanelRightOffset, UI_LAYOUT } from '@framework/utils/ui_layout'
@@ -56,6 +56,8 @@ export interface AnalyticsDrawerProps {
  *
  * @returns {React.ReactElement | null}
  */
+let EMPTY_ARRAY: CountryFeature[] = []
+
 export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_props) {
   //Convert from parameters
   let props = arg0_props
@@ -90,9 +92,14 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
 
   //Declare local instance variables
   let active_tab: 'cities' | 'pyramid' | 'breakdown' | 'histogram' | 'stats'
+  let drawer_height: number
+  let drawer_width: number
   let effective_countries: CountryFeature[]
   let format_string: (template: string, ...args: any[]) => string
   let handle_clear: () => void
+  let handle_resize_bottom: (e: React.MouseEvent) => void
+  let handle_resize_bottom_left: (e: React.MouseEvent) => void
+  let handle_resize_left: (e: React.MouseEvent) => void
   let has_category_breakdown = Boolean(
     active_layer?.type === 'raster.category_profession' ||
     active_layer?.id?.includes('profession')
@@ -107,9 +114,13 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
     active_layer?.id === 'age_sex'
   )
   let is_dev = user_role === 'developer' && !isPublicBuild()
+  let is_resizing: boolean
   let localisation: ReturnType<typeof useLocalisation>
   let right_offset = getAnalyticsPanelRightOffset(is_settings_drawer_open)
   let set_active_tab: React.Dispatch<React.SetStateAction<'cities' | 'pyramid' | 'breakdown' | 'histogram' | 'stats'>>
+  let set_drawer_height: React.Dispatch<React.SetStateAction<number>>
+  let set_drawer_width: React.Dispatch<React.SetStateAction<number>>
+  let set_is_resizing: React.Dispatch<React.SetStateAction<boolean>>
   let set_stats_progress_pct: React.Dispatch<React.SetStateAction<number>>
   let set_stats_time_remaining: React.Dispatch<React.SetStateAction<number>>
   let set_use_placeholder_breakdown: React.Dispatch<React.SetStateAction<boolean>>
@@ -135,6 +146,15 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
         : 'histogram'
 
     ;[active_tab, set_active_tab] = useState<'cities' | 'pyramid' | 'breakdown' | 'histogram' | 'stats'>(initial_tab)
+    ;[drawer_width, set_drawer_width] = useState<number>(() => {
+      let saved = typeof localStorage !== 'undefined' ? localStorage.getItem('dataview_analytics_width') : null
+      return saved ? parseInt(saved, 10) : 640
+    })
+    ;[drawer_height, set_drawer_height] = useState<number>(() => {
+      let saved = typeof localStorage !== 'undefined' ? localStorage.getItem('dataview_analytics_height') : null
+      return saved ? parseInt(saved, 10) : 380
+    })
+    ;[is_resizing, set_is_resizing] = useState<boolean>(false)
     ;[use_placeholder_pyramid, set_use_placeholder_pyramid] = useState<boolean>(
       is_dev ? false : (active_layer?.synthetic_by_default !== false)
     )
@@ -211,16 +231,17 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
     }
   }, [is_open, right_offset, raster, raster_key, active_tab])
 
+  effective_countries = useMemo(() => {
+    if (selected_countries && selected_countries.length > 0)
+      return selected_countries
+    if (selected_country)
+      return [selected_country]
+    return EMPTY_ARRAY
+  }, [selected_countries, selected_country])
+
   //Guard clauses
   if (!is_open)
     return null
-
-  effective_countries =
-    selected_countries && selected_countries.length > 0
-      ? selected_countries
-      : selected_country
-        ? [selected_country]
-        : []
 
   handle_clear = function () {
     if (on_clear_countries) {
@@ -228,6 +249,98 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
     } else if (on_select_country) {
       on_select_country(null)
     }
+  }
+
+  handle_resize_bottom = function (e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    set_is_resizing(true)
+    let start_h = drawer_height
+    let start_y = e.clientY
+
+    let on_mouse_move = function (move_e: MouseEvent) {
+      let delta_y = move_e.clientY - start_y
+      let max_h = Math.min(1000, window.innerHeight - UI_LAYOUT.margin - 24)
+      let next_h = Math.max(280, Math.min(max_h, start_h + delta_y))
+      set_drawer_height(next_h)
+      window.dispatchEvent(new Event('resize'))
+      if (typeof localStorage !== 'undefined')
+        localStorage.setItem('dataview_analytics_height', String(next_h))
+    }
+
+    let on_mouse_up = function () {
+      set_is_resizing(false)
+      window.removeEventListener('mousemove', on_mouse_move)
+      window.removeEventListener('mouseup', on_mouse_up)
+      window.dispatchEvent(new Event('resize'))
+    }
+
+    window.addEventListener('mousemove', on_mouse_move)
+    window.addEventListener('mouseup', on_mouse_up)
+  }
+
+  handle_resize_bottom_left = function (e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    set_is_resizing(true)
+    let start_h = drawer_height
+    let start_w = drawer_width
+    let start_x = e.clientX
+    let start_y = e.clientY
+
+    let on_mouse_move = function (move_e: MouseEvent) {
+      let delta_x = start_x - move_e.clientX
+      let delta_y = move_e.clientY - start_y
+      let max_w = Math.min(1200, window.innerWidth - right_offset - 20)
+      let max_h = Math.min(1000, window.innerHeight - UI_LAYOUT.margin - 24)
+      let next_w = Math.max(380, Math.min(max_w, start_w + delta_x))
+      let next_h = Math.max(280, Math.min(max_h, start_h + delta_y))
+      set_drawer_width(next_w)
+      set_drawer_height(next_h)
+      window.dispatchEvent(new Event('resize'))
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('dataview_analytics_width', String(next_w))
+        localStorage.setItem('dataview_analytics_height', String(next_h))
+      }
+    }
+
+    let on_mouse_up = function () {
+      set_is_resizing(false)
+      window.removeEventListener('mousemove', on_mouse_move)
+      window.removeEventListener('mouseup', on_mouse_up)
+      window.dispatchEvent(new Event('resize'))
+    }
+
+    window.addEventListener('mousemove', on_mouse_move)
+    window.addEventListener('mouseup', on_mouse_up)
+  }
+
+  handle_resize_left = function (e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    set_is_resizing(true)
+    let start_w = drawer_width
+    let start_x = e.clientX
+
+    let on_mouse_move = function (move_e: MouseEvent) {
+      let delta_x = start_x - move_e.clientX
+      let max_w = Math.min(1200, window.innerWidth - right_offset - 20)
+      let next_w = Math.max(380, Math.min(max_w, start_w + delta_x))
+      set_drawer_width(next_w)
+      window.dispatchEvent(new Event('resize'))
+      if (typeof localStorage !== 'undefined')
+        localStorage.setItem('dataview_analytics_width', String(next_w))
+    }
+
+    let on_mouse_up = function () {
+      set_is_resizing(false)
+      window.removeEventListener('mousemove', on_mouse_move)
+      window.removeEventListener('mouseup', on_mouse_up)
+      window.dispatchEvent(new Event('resize'))
+    }
+
+    window.addEventListener('mousemove', on_mouse_move)
+    window.addEventListener('mouseup', on_mouse_up)
   }
 
   //Return statement
@@ -243,14 +356,43 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
           left: '0px',
           right: '0px',
         } : {
+          height: `${drawer_height}px`,
+          maxHeight: 'calc(100dvh - 40px)',
+          maxWidth: `min(${drawer_width}px, calc(100vw - 420px))`,
           right: `${right_offset}px`,
           top: `${UI_LAYOUT.margin}px`,
+          width: `${drawer_width}px`,
         }}
         className={is_mobile
           ? 'fixed z-50 w-full max-w-none h-[380px] max-h-[calc(var(--app-height,100dvh)-54px)] pb-3 bg-card/95 backdrop-blur-md border-t border-border rounded-t-lg text-card-foreground shadow-2xl flex flex-col font-sans transition-transform duration-200 ease-out'
-          : 'absolute z-40 w-[640px] max-w-[min(640px,calc(100vw-420px))] h-[340px] max-h-[calc(100dvh-40px)] bg-card/95 backdrop-blur-md border border-border rounded-none text-card-foreground shadow-2xl flex flex-col font-sans transition-all duration-200 ease-out animate-in fade-in-0 zoom-in-95 duration-150'
+          : `absolute z-40 bg-card/95 backdrop-blur-md border border-border rounded-none text-card-foreground shadow-2xl flex flex-col font-sans ${is_resizing ? '' : 'transition-all duration-150 ease-out animate-in fade-in-0 zoom-in-95'}`
         }
       >
+        {/* Resize Handles (Active when not mobile) */}
+        {!is_mobile && (
+          <>
+            {/* Left Border Drag Handle */}
+            <div
+              onMouseDown={handle_resize_left}
+              className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/40 active:bg-primary z-30 transition-colors"
+              title="Drag left edge to resize width"
+            />
+            {/* Bottom Border Drag Handle */}
+            <div
+              onMouseDown={handle_resize_bottom}
+              className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-primary/40 active:bg-primary z-30 transition-colors"
+              title="Drag bottom edge to resize height"
+            />
+            {/* Bottom-Left Corner Drag Handle */}
+            <div
+              onMouseDown={handle_resize_bottom_left}
+              className="absolute bottom-0 left-0 w-3.5 h-3.5 cursor-nesw-resize hover:bg-primary active:bg-primary z-40 transition-colors flex items-center justify-center group"
+              title="Drag corner to resize width and height"
+            >
+              <div className="w-1.5 h-1.5 border-b-2 border-l-2 border-muted-foreground group-hover:border-primary-foreground" />
+            </div>
+          </>
+        )}
         {/* Panel Header */}
         <div className="px-[var(--padding)] py-1.5 flex flex-col border-b border-border select-none gap-1.5 bg-card/90">
           <div className="flex items-center justify-between w-full gap-2">
@@ -329,7 +471,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                   : 'text-muted-foreground hover:text-foreground font-light'
                   }`}
               >
-                <Icon name="briefcase" className="text-white text-xs" />
+                <Icon name="work" className="text-white text-xs" />
                 {t.analytics.breakdown}
               </button>
             )}
@@ -390,7 +532,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
         )}
 
         {/* Panel Body */}
-        <div className="flex-1 p-[var(--padding)] overflow-y-auto custom-scrollbar bg-background/50 flex flex-col min-h-0">
+        <div className="flex-1 p-[var(--padding)] overflow-hidden bg-background/50 flex flex-col min-h-0">
           {active_tab === 'cities' ? (
             <LargestCitiesChart
               key={`cities-${stadester_dataset}-${current_year}`}
@@ -434,7 +576,6 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                       selectedCountry={selected_country}
                       currentYear={current_year}
                       activeVariableSelectors={active_variable_selectors}
-                      inspectData={inspect_data}
                       isMobile={is_mobile}
                       usePlaceholder={use_placeholder_pyramid}
                       onTogglePlaceholder={set_use_placeholder_pyramid}
@@ -452,7 +593,6 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
                       currentYear={current_year}
                       layerId={active_layer?.id}
                       activeVariableSelectors={active_variable_selectors}
-                      inspectData={inspect_data}
                       usePlaceholder={use_placeholder_breakdown}
                       onTogglePlaceholder={set_use_placeholder_breakdown}
                       syntheticByDefault={active_layer?.synthetic_by_default}

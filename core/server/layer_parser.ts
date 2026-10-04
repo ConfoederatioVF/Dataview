@@ -382,7 +382,7 @@ export let getLayerIcon = function (arg0_layer_id: string): string {
   if (id.includes('labourforce') || id.includes('lfpr'))
     return 'users'
   if (id.includes('profession'))
-    return 'briefcase'
+    return 'work'
   if (id.includes('age_sex'))
     return 'people'
   if (id.includes('birth'))

@@ -355,40 +355,128 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
   return geometry
 }
 
-let city_coords_cache: Map<string, [number, number]> | null = null
+interface CityCoordRecord {
+  coords: [number, number]
+  country?: string
+  key: string
+  name: string
+  other_names?: string[]
+}
+
+let capital_info_cache: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }> = new Map()
+let city_coords_by_key: Map<string, CityCoordRecord> = new Map()
+let city_coords_by_norm_name: Map<string, CityCoordRecord[]> = new Map()
+let city_coords_loaded = false
+let city_coords_spatial_grid: Map<string, CityCoordRecord[]> = new Map()
+let city_name_coords_cache: Map<string, { coords?: [number, number]; key?: string } | null> = new Map()
+let contemp_city_cache: Map<string, { coords?: [number, number]; key?: string }> = new Map()
 let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
+let states_by_clean_name: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> = new Map()
 let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
+
+let ensureCityCoordsLoaded = function (): void {
+  //Guard clauses
+  if (city_coords_loaded)
+    return
+
+  city_coords_loaded = true
+
+  //Declare local instance variables
+  let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
+  let list: any[]
+  let raw: any
+
+  //Guard clauses
+  if (!fs.existsSync(coords_path))
+    return
+
+  //Function body
+  try {
+    raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
+    list = Object.values(raw)
+
+    for (let i = 0; i < list.length; i++) {
+      let item = list[i]
+      if (!item || !item.key || !Array.isArray(item.coords) || item.coords.length < 2)
+        continue
+
+      let rec: CityCoordRecord = {
+        coords: [item.coords[0], item.coords[1]],
+        country: item.country,
+        key: item.key,
+        name: item.name || '',
+        other_names: item.other_names,
+      }
+
+      city_coords_by_key.set(item.key, rec)
+      city_coords_by_key.set(item.key.toLowerCase().trim(), rec)
+
+      let norm_key = item.key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
+      if (norm_key && !city_coords_by_key.has(norm_key))
+        city_coords_by_key.set(norm_key, rec)
+
+      let names_to_index: string[] = []
+      if (item.name)
+        names_to_index.push(item.name)
+      if (Array.isArray(item.other_names)) {
+        for (let x = 0; x < item.other_names.length; x++)
+          names_to_index.push(item.other_names[x])
+      }
+
+      for (let x = 0; x < names_to_index.length; x++) {
+        let n_str = names_to_index[x]
+        let n_clean = n_str.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+        let n_norm = n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+        let n_strip = n_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+
+        let add_name = function (arg0_key: string) {
+          if (!arg0_key)
+            return
+          let arr = city_coords_by_norm_name.get(arg0_key)
+          if (!arr) {
+            arr = []
+            city_coords_by_norm_name.set(arg0_key, arr)
+          }
+          if (!arr.includes(rec))
+            arr.push(rec)
+        }
+
+        add_name(n_clean)
+        add_name(n_norm)
+        add_name(n_strip)
+      }
+
+      let cell_x = Math.floor(rec.coords[0])
+      let cell_y = Math.floor(rec.coords[1])
+      let cell_key = `${cell_x}_${cell_y}`
+      let cell_bucket = city_coords_spatial_grid.get(cell_key)
+      if (!cell_bucket) {
+        cell_bucket = []
+        city_coords_spatial_grid.set(cell_key, cell_bucket)
+      }
+      cell_bucket.push(rec)
+    }
+  } catch (arg0_err) {
+    console.error('[AtlasBordersService] Error indexing all_cities_coords.json:', arg0_err)
+  }
+}
 
 let getCityCoordsByKey = function (arg0_key: string): [number, number] | null {
   //Convert from parameters
   let key = arg0_key
 
+  //Guard clauses
+  if (!key)
+    return null
+
   //Function body
-  if (!city_coords_cache) {
-    city_coords_cache = new Map()
-    let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
-    if (fs.existsSync(coords_path)) {
-      try {
-        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
-        let list = Object.values(raw) as any[]
-        for (let i = 0; i < list.length; i++) {
-          let item = list[i]
-          if (item && item.key && Array.isArray(item.coords) && item.coords.length >= 2) {
-            city_coords_cache.set(item.key, item.coords as [number, number])
-            city_coords_cache.set(item.key.toLowerCase().trim(), item.coords as [number, number])
-          }
-        }
-      } catch {
-        //Ignore parsing error
-      }
-    }
-  }
+  ensureCityCoordsLoaded()
+
+  let rec = city_coords_by_key.get(key) || city_coords_by_key.get(key.toLowerCase().trim())
 
   //Return statement
-  return city_coords_cache.get(key) || city_coords_cache.get(key.toLowerCase().trim()) || null
+  return rec ? rec.coords : null
 }
-
-let all_cities_coords_list: Array<{ coords: [number, number]; key: string }> | null = null
 
 /**
  * Resolves contemporaneous city key and coordinates for a given key and calendar year.
@@ -397,94 +485,107 @@ let all_cities_coords_list: Array<{ coords: [number, number]; key: string }> | n
  *
  * @param {string} arg0_key
  * @param {number} arg1_year
+ * @param {[number, number]} [arg2_coords]
  *
  * @returns {{ coords?: [number, number]; key: string }}
  */
 let getContemporaneousCityKey = function (
   arg0_key: string,
-  arg1_year: number
+  arg1_year: number,
+  arg2_coords?: [number, number]
 ): { coords?: [number, number]; key: string } {
   //Convert from parameters
+  let coords = arg2_coords
   let key = arg0_key
   let year = arg1_year
 
   //Declare local instance variables
-  let best: { coords: [number, number]; key: string } | null = null
+  let best: CityCoordRecord | null = null
+  let cache_k: string
   let direct_coords: [number, number] | null = null
+  let direct_rec: CityCoordRecord | undefined
+  let final_result: { coords?: [number, number]; key: string }
   let is_ghsl = false
   let is_stadester = false
-  let item: { coords: [number, number]; key: string } | undefined
+  let item: CityCoordRecord | undefined
   let lat = 0
   let lon = 0
+  let max_cell_x: number
+  let max_cell_y: number
+  let min_cell_x: number
+  let min_cell_y: number
   let min_d = 999
   let norm_target = ''
+  let ref_coords: [number, number] | null = null
 
   //Guard clauses
-  if (!key)
+  if (!key && !coords)
     return { key: '' }
+
+  cache_k = `${key}_${year < 1975 ? 'hist' : 'mod'}_${coords ? coords.join(',') : ''}`
+  if (contemp_city_cache.has(cache_k))
+    return contemp_city_cache.get(cache_k)!
+
+  //Function body
+  ensureCityCoordsLoaded()
 
   is_ghsl = key.startsWith('ghsl-')
   is_stadester = key.startsWith('stadester-')
-  direct_coords = getCityCoordsByKey(key)
-  if (direct_coords && ((is_ghsl && year >= 1975) || (is_stadester && year < 1975)))
-    return { coords: direct_coords, key: key }
+  direct_rec = city_coords_by_key.get(key) || city_coords_by_key.get(key.toLowerCase().trim())
+  direct_coords = coords || (direct_rec ? direct_rec.coords : null)
 
-  //Function body
-  if (!all_cities_coords_list) {
-    let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
-    if (fs.existsSync(coords_path)) {
-      try {
-        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
-        all_cities_coords_list = Object.values(raw).filter(
-          (arg0_item: any) => arg0_item && arg0_item.key && Array.isArray(arg0_item.coords) && arg0_item.coords.length >= 2
-        ) as any
-      } catch {
-        all_cities_coords_list = []
-      }
-    } else {
-      all_cities_coords_list = []
-    }
+  if (direct_coords && ((is_ghsl && year >= 1975) || (is_stadester && year < 1975))) {
+    final_result = { coords: direct_coords, key }
+    contemp_city_cache.set(cache_k, final_result)
+    return final_result
   }
 
   norm_target = key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  item = all_cities_coords_list?.find((arg0_c) => {
-    if (!arg0_c || !arg0_c.key)
-      return false
-    if (arg0_c.key.toLowerCase().trim() === key.toLowerCase().trim())
-      return true
-    let c_norm = arg0_c.key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
-    return c_norm === norm_target
-  })
-  if (!item || !item.coords) {
-    let fallback_coords = direct_coords || getCityCoordsByKey(key)
-    return { coords: fallback_coords || undefined, key: key }
+  item = direct_rec || (norm_target ? city_coords_by_key.get(norm_target) : undefined)
+
+  ref_coords = direct_coords || (item ? item.coords : null)
+  if (!ref_coords) {
+    final_result = { coords: direct_coords || undefined, key }
+    contemp_city_cache.set(cache_k, final_result)
+    return final_result
   }
 
-  lon = item.coords[0]
-  lat = item.coords[1]
+  lon = ref_coords[0]
+  lat = ref_coords[1]
 
-  if (all_cities_coords_list) {
-    for (let i = 0; i < all_cities_coords_list.length; i++) {
-      let c = all_cities_coords_list[i]
-      if (!c || !c.coords)
+  min_cell_x = Math.floor(lon - 0.25)
+  max_cell_x = Math.floor(lon + 0.25)
+  min_cell_y = Math.floor(lat - 0.25)
+  max_cell_y = Math.floor(lat + 0.25)
+
+  for (let i = min_cell_x; i <= max_cell_x; i++) {
+    for (let x = min_cell_y; x <= max_cell_y; x++) {
+      let bucket = city_coords_spatial_grid.get(`${i}_${x}`)
+      if (!bucket)
         continue
-      if (year < 1975 && !c.key.startsWith('stadester-'))
-        continue
-      if (year >= 1975 && !c.key.startsWith('ghsl-'))
-        continue
-      let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
-      if (d < 0.20 && d < min_d) {
-        min_d = d
-        best = c
+      for (let y = 0; y < bucket.length; y++) {
+        let c = bucket[y]
+        if (year < 1975 && !c.key.startsWith('stadester-'))
+          continue
+        if (year >= 1975 && !c.key.startsWith('ghsl-'))
+          continue
+        let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
+        if (d < 0.20 && d < min_d) {
+          min_d = d
+          best = c
+        }
       }
     }
   }
 
-  if (best)
-    return { coords: best.coords as [number, number], key: best.key }
+  final_result = best
+    ? { coords: best.coords, key: best.key }
+    : { coords: ref_coords, key: item ? item.key : key }
+
+  contemp_city_cache.set(cache_k, final_result)
 
   //Return statement
-  return { coords: item.coords as [number, number], key: item.key }
+  return final_result
 }
 
 let isCityCoordsInsideBbox = function (
@@ -531,95 +632,111 @@ let findCityCoordsByName = function (
   let country = arg1_country
 
   //Declare local instance variables
-  let best_match: any = null
+  let best_match: CityCoordRecord | null = null
   let best_score = -1
   let c_clean: string
   let c_lower: string
   let c_norm: string
-  let coords_path: string
+  let cache_k: string
+  let candidate_set = new Set<CityCoordRecord>()
+  let clean_matches: CityCoordRecord[] | undefined
   let country_lower: string
+  let key_match: CityCoordRecord | undefined
+  let lower_matches: CityCoordRecord[] | undefined
+  let norm_matches: CityCoordRecord[] | undefined
+  let result: { coords?: [number, number]; key?: string } | null = null
 
   //Guard clauses
   if (!city_name)
     return null
+
+  cache_k = `${city_name}|${country || ''}`
+  if (city_name_coords_cache.has(cache_k))
+    return city_name_coords_cache.get(cache_k)!
+
+  //Function body
+  ensureCityCoordsLoaded()
 
   c_lower = city_name.toLowerCase().trim()
   c_norm = c_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
   c_clean = c_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
   country_lower = country ? country.toLowerCase().trim() : ''
 
-  if (!c_norm)
+  if (!c_norm) {
+    city_name_coords_cache.set(cache_k, null)
     return null
-
-  //Function body
-  if (!all_cities_coords_list) {
-    coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
-    if (fs.existsSync(coords_path)) {
-      try {
-        let raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
-        all_cities_coords_list = Object.values(raw).filter(
-          (arg0_item: any) => arg0_item && arg0_item.key && Array.isArray(arg0_item.coords) && arg0_item.coords.length >= 2
-        ) as any
-      } catch {
-        all_cities_coords_list = []
-      }
-    } else {
-      all_cities_coords_list = []
-    }
   }
 
-  if (all_cities_coords_list) {
-    for (let i = 0; i < all_cities_coords_list.length; i++) {
-      let item = all_cities_coords_list[i] as any
-      if (!item || !item.coords)
-        continue
+  key_match = city_coords_by_key.get(city_name) || city_coords_by_key.get(c_lower)
+  if (key_match)
+    candidate_set.add(key_match)
 
-      let score = 0
-      let i_name = (item.name || '').toLowerCase().trim()
-      let i_norm = i_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-      let clean_i = i_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-      let has_exact = (i_norm === c_norm || i_name === c_lower || (c_clean && c_clean === clean_i))
+  norm_matches = city_coords_by_norm_name.get(c_norm)
+  if (norm_matches) {
+    for (let i = 0; i < norm_matches.length; i++)
+      candidate_set.add(norm_matches[i])
+  }
 
-      if (has_exact) {
-        score += 1000
-      } else if (item.other_names && Array.isArray(item.other_names)) {
-        if (item.other_names.some((arg0_on: string) => {
-          let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-          let on_norm = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-          let clean_on = on_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-          return on_clean === c_lower || on_norm === c_norm || (c_clean && c_clean === clean_on)
-        })) {
-          score += 850
-        }
-      }
+  clean_matches = city_coords_by_norm_name.get(c_clean)
+  if (clean_matches) {
+    for (let i = 0; i < clean_matches.length; i++)
+      candidate_set.add(clean_matches[i])
+  }
 
-      if (item.key && (item.key === city_name || item.key.toLowerCase().trim() === c_lower))
-        score += 2000
+  lower_matches = city_coords_by_norm_name.get(c_lower)
+  if (lower_matches) {
+    for (let i = 0; i < lower_matches.length; i++)
+      candidate_set.add(lower_matches[i])
+  }
 
-      if (score === 0)
-        continue
+  let all_candidates = Array.from(candidate_set)
+  for (let i = 0; i < all_candidates.length; i++) {
+    let item = all_candidates[i]
+    let score = 0
+    let i_name = (item.name || '').toLowerCase().trim()
+    let i_norm = i_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+    let clean_i = i_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+    let has_exact = (i_norm === c_norm || i_name === c_lower || (c_clean && c_clean === clean_i))
 
-      if (country_lower && item.country) {
-        let i_c = item.country.toLowerCase().trim()
-        if (i_c === country_lower || country_lower.includes(i_c) || i_c.includes(country_lower))
-          score += 200
-      }
-
-      if (item.key && item.key.startsWith('stadester-'))
-        score += 50
-
-      if (score > best_score) {
-        best_score = score
-        best_match = item
+    if (has_exact) {
+      score += 1000
+    } else if (item.other_names && Array.isArray(item.other_names)) {
+      if (item.other_names.some((arg0_on: string) => {
+        let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+        let on_norm = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+        let clean_on = on_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+        return on_clean === c_lower || on_norm === c_norm || (c_clean && c_clean === clean_on)
+      })) {
+        score += 850
       }
     }
 
-    if (best_match)
-      return { coords: best_match.coords, key: best_match.key }
+    if (item.key && (item.key === city_name || item.key.toLowerCase().trim() === c_lower))
+      score += 2000
+
+    if (score === 0)
+      continue
+
+    if (country_lower && item.country) {
+      let i_c = item.country.toLowerCase().trim()
+      if (i_c === country_lower || country_lower.includes(i_c) || i_c.includes(country_lower))
+        score += 200
+    }
+
+    if (item.key && item.key.startsWith('stadester-'))
+      score += 50
+
+    if (score > best_score) {
+      best_score = score
+      best_match = item
+    }
   }
+
+  result = best_match ? { coords: best_match.coords, key: best_match.key } : null
+  city_name_coords_cache.set(cache_k, result)
 
   //Return statement
-  return null
+  return result
 }
 
 /**
@@ -644,15 +761,21 @@ let getStateCapitalInfo = function (
   //Declare local instance variables
   let best_diff: number
   let best_iv: any
+  let cache_k = `${state_id}_${year_frac.toFixed(4)}_${entity_name || ''}`
   let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
   let clean_e: string
   let diff: number
   let file_path: string
   let info: { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
+  let res_info: { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }
   let state: any
   let state_bbox: [number, number, number, number] | undefined
   let states_path: string
   let valid_timeline: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }>
+
+  //Guard clauses
+  if (capital_info_cache.has(cache_k))
+    return capital_info_cache.get(cache_k)!
 
   //Function body
   if (!state_capitals_data) {
@@ -690,6 +813,15 @@ let getStateCapitalInfo = function (
                 state_id: Number(s.state_id),
                 stop_year: s.stop_year ?? 99999,
               })
+
+              let base_s = s_name.replace(/\(.*?\)/g, '').trim()
+              if (!states_by_clean_name.has(base_s))
+                states_by_clean_name.set(base_s, [])
+              states_by_clean_name.get(base_s)!.push({
+                start_year: s.start_year ?? -99999,
+                state_id: Number(s.state_id),
+                stop_year: s.stop_year ?? 99999,
+              })
             }
           }
         } catch {
@@ -701,14 +833,23 @@ let getStateCapitalInfo = function (
     clean_e = entity_name.toLowerCase().trim()
     candidates = []
 
-    for (let [s_name, list] of states_name_map.entries()) {
-      let base_s = s_name.replace(/\(.*?\)/g, '').trim()
-      let is_match = (base_s === clean_e) ||
-        (clean_e.length >= 4 && (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' ')))
-      if (is_match) {
-        for (let j = 0; j < list.length; j++) {
-          if (year_frac >= list[j].start_year && year_frac <= list[j].stop_year)
-            candidates.push(list[j])
+    let direct_matches = states_by_clean_name.get(clean_e)
+    if (direct_matches) {
+      for (let i = 0; i < direct_matches.length; i++) {
+        if (year_frac >= direct_matches[i].start_year && year_frac <= direct_matches[i].stop_year)
+          candidates.push(direct_matches[i])
+      }
+    }
+
+    if (candidates.length === 0 && clean_e.length >= 4) {
+      for (let [s_name, list] of states_name_map.entries()) {
+        let base_s = s_name.replace(/\(.*?\)/g, '').trim()
+        let is_match = (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' '))
+        if (is_match) {
+          for (let x = 0; x < list.length; x++) {
+            if (year_frac >= list[x].start_year && year_frac <= list[x].stop_year)
+              candidates.push(list[x])
+          }
         }
       }
     }
@@ -732,11 +873,17 @@ let getStateCapitalInfo = function (
     }
   }
 
-  if (!info)
-    return { is_acapital: false }
+  if (!info) {
+    res_info = { is_acapital: false }
+    capital_info_cache.set(cache_k, res_info)
+    return res_info
+  }
 
-  if (info.acapital)
-    return { is_acapital: true }
+  if (info.acapital) {
+    res_info = { is_acapital: true }
+    capital_info_cache.set(cache_k, res_info)
+    return res_info
+  }
 
   if (info.timeline && info.timeline.length > 0) {
     state = AtlasBordersService.getStateById(state_id)
@@ -759,8 +906,11 @@ let getStateCapitalInfo = function (
       valid_timeline.push(iv)
     }
 
-    if (valid_timeline.length === 0)
-      return { is_acapital: false }
+    if (valid_timeline.length === 0) {
+      res_info = { is_acapital: false }
+      capital_info_cache.set(cache_k, res_info)
+      return res_info
+    }
 
     for (let i = 0; i < valid_timeline.length; i++) {
       let iv = valid_timeline[i]
@@ -775,7 +925,9 @@ let getStateCapitalInfo = function (
               contemp.key = by_name.key
           }
         }
-        return { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, is_acapital: false }
+        res_info = { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, is_acapital: false }
+        capital_info_cache.set(cache_k, res_info)
+        return res_info
       }
     }
 
@@ -799,11 +951,16 @@ let getStateCapitalInfo = function (
           contemp_best.key = by_name.key
       }
     }
-    return { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, is_acapital: false }
+    res_info = { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, is_acapital: false }
+    capital_info_cache.set(cache_k, res_info)
+    return res_info
   }
 
+  res_info = { is_acapital: false }
+  capital_info_cache.set(cache_k, res_info)
+
   //Return statement
-  return { is_acapital: false }
+  return res_info
 }
 
 /**
@@ -1367,7 +1524,8 @@ export class AtlasBordersService {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
         let is_valid_cache = Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
-        let is_missing_cap_coords = cached_json.features &&
+        let is_missing_cap_coords = cached_json.v !== 2 &&
+          cached_json.features &&
           cached_json.features.length > 20 &&
           !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
           cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
@@ -1645,7 +1803,7 @@ export class AtlasBordersService {
       try {
         fs.writeFile(
           disk_cache_path,
-          JSON.stringify({ date: UfDate.formatDate(target_date_obj), domain, features, source, timestamp: target_ts, year: target_year }),
+          JSON.stringify({ date: UfDate.formatDate(target_date_obj), domain, features, source, timestamp: target_ts, v: 2, year: target_year }),
           'utf-8',
           () => {}
         )
@@ -1891,8 +2049,13 @@ export class AtlasBordersService {
    */
   static clearCache (): void {
     //Function body
-    in_memory_slice_lru.clear()
+    cached_active_state_ids.clear()
     cached_naissance_entities_by_path.clear()
+    capital_info_cache.clear()
+    city_name_coords_cache.clear()
+    contemp_city_cache.clear()
+    in_memory_slice_lru.clear()
+
     let cache_dir = AtlasBordersService.getDatasetPaths().cacheDir
     if (fs.existsSync(cache_dir)) {
       let files = fs.readdirSync(cache_dir)

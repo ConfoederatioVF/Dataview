@@ -230,22 +230,36 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
       return
     }
 
+    let is_cancelled = false
+    let prefetch_timer: NodeJS.Timeout | null = null
     let rounded_year = Math.round(year)
     let cache_key = `${dataset}:${rounded_year}:${min_pop}:${max_cities}:${color_mode}`
+
+    let schedule_prefetch = function () {
+      if (!is_playing && !performant_mode) {
+        if (prefetch_timer)
+          clearTimeout(prefetch_timer)
+        prefetch_timer = setTimeout(() => {
+          if (!is_cancelled) {
+            fetchStadesterCitiesAsync(dataset, rounded_year + 1, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
+            fetchStadesterCitiesAsync(dataset, rounded_year + 2, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
+          }
+        }, 500)
+      }
+    }
 
     if (client_cache_ref.current.has(cache_key)) {
       set_cities(client_cache_ref.current.get(cache_key)!)
       set_error(null)
       set_is_loading(false)
-
-      if (!is_playing && !performant_mode) {
-        fetchStadesterCitiesAsync(dataset, rounded_year + 1, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
-        fetchStadesterCitiesAsync(dataset, rounded_year + 2, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
+      schedule_prefetch()
+      return () => {
+        is_cancelled = true
+        if (prefetch_timer)
+          clearTimeout(prefetch_timer)
       }
-      return
     }
 
-    let is_cancelled = false
     set_is_loading(true)
     set_error(null)
 
@@ -254,11 +268,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
         if (!is_cancelled) {
           set_cities(arg0_list)
           set_is_loading(false)
-
-          if (!is_playing && !performant_mode) {
-            fetchStadesterCitiesAsync(dataset, rounded_year + 1, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
-            fetchStadesterCitiesAsync(dataset, rounded_year + 2, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode).catch(() => {})
-          }
+          schedule_prefetch()
         }
       })
       .catch((arg0_err) => {
@@ -270,6 +280,8 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
 
     return () => {
       is_cancelled = true
+      if (prefetch_timer)
+        clearTimeout(prefetch_timer)
     }
   }, [enabled, dataset, Math.round(year), min_pop, max_cities, color_mode, is_playing, performant_mode])
 

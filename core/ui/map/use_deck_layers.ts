@@ -1253,12 +1253,117 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     //Pre-match active capitals to cities by coordinate proximity and key
     if (active_capitals_list.length > 0 && effective_points && effective_points.length > 0) {
       let timeline_yr = options.timelineYear
-      for (let k = 0; k < active_capitals_list.length; k++) {
-        let cap = active_capitals_list[k]
+      let pts_by_key = new Map<string, number>()
+      let pts_by_name = new Map<string, number[]>()
+      let pts_grid = new Map<string, number[]>()
+
+      for (let i = 0; i < effective_points.length; i++) {
+        let c = effective_points[i]
+        let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
+        let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : undefined))
+        if (c_lat === undefined || c_lon === undefined)
+          continue
+
+        let cell = `${Math.floor(c_lon)}_${Math.floor(c_lat)}`
+        let b = pts_grid.get(cell)
+        if (!b) {
+          b = []
+          pts_grid.set(cell, b)
+        }
+        b.push(i)
+
+        if (c.key) {
+          pts_by_key.set(c.key, i)
+          let clean_k = normalizeCityKey(c.key)
+          if (clean_k)
+            pts_by_key.set(clean_k, i)
+        }
+        if (c.id) {
+          pts_by_key.set(String(c.id), i)
+          let clean_id = normalizeCityKey(String(c.id))
+          if (clean_id)
+            pts_by_key.set(clean_id, i)
+        }
+
+        if (c.name) {
+          let c_name_lower = c.name.toLowerCase().trim()
+          let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          let clean_c = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+
+          let add_point_name = function (arg0_nm: string) {
+            if (!arg0_nm)
+              return
+            let arr = pts_by_name.get(arg0_nm)
+            if (!arr) {
+              arr = []
+              pts_by_name.set(arg0_nm, arr)
+            }
+            arr.push(i)
+          }
+
+          add_point_name(c_name_lower)
+          add_point_name(c_name_nfd)
+          add_point_name(clean_c)
+        }
+
+        if (c.other_names && Array.isArray(c.other_names)) {
+          for (let x = 0; x < c.other_names.length; x++) {
+            let on = c.other_names[x]
+            let on_clean = on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+            let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+            let arr = pts_by_name.get(on_clean) || pts_by_name.get(on_nfd) || pts_by_name.get(clean_on)
+            if (!arr) {
+              arr = []
+              pts_by_name.set(on_clean, arr)
+              pts_by_name.set(on_nfd, arr)
+              pts_by_name.set(clean_on, arr)
+            }
+            arr.push(i)
+          }
+        }
+      }
+
+      for (let i = 0; i < active_capitals_list.length; i++) {
+        let cap = active_capitals_list[i]
         let best_city: any = null
         let best_score = -1
+        let candidate_indices = new Set<number>()
 
-        for (let j = 0; j < effective_points.length; j++) {
+        if (cap.cap_coords) {
+          let min_cx = Math.floor(cap.cap_coords[0] - 0.25)
+          let max_cx = Math.floor(cap.cap_coords[0] + 0.25)
+          let min_cy = Math.floor(cap.cap_coords[1] - 0.25)
+          let max_cy = Math.floor(cap.cap_coords[1] + 0.25)
+
+          for (let x = min_cx; x <= max_cx; x++)
+            for (let y = min_cy; y <= max_cy; y++) {
+              let bucket = pts_grid.get(`${x}_${y}`)
+              if (bucket)
+                for (let z = 0; z < bucket.length; z++)
+                  candidate_indices.add(bucket[z])
+            }
+        }
+
+        if (cap.capkey) {
+          let idx = pts_by_key.get(cap.capkey) ?? pts_by_key.get(normalizeCityKey(cap.capkey))
+          if (idx !== undefined)
+            candidate_indices.add(idx)
+        }
+
+        if (cap.capname) {
+          let cap_name_lower = cap.capname.toLowerCase().trim()
+          let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          let clean_cap = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+          let list = pts_by_name.get(cap_name_lower) || pts_by_name.get(cap_name_nfd) || pts_by_name.get(clean_cap)
+          if (list)
+            for (let x = 0; x < list.length; x++)
+              candidate_indices.add(list[x])
+        }
+
+        let all_candidates = Array.from(candidate_indices)
+        for (let x = 0; x < all_candidates.length; x++) {
+          let j = all_candidates[x]
           let c = effective_points[j]
           let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
           let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : undefined))

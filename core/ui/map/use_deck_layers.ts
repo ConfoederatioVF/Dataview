@@ -1277,6 +1277,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
               continue
           }
 
+          if (cap.cap_coords) {
+            if (Math.abs(c_lon - cap.cap_coords[0]) > 0.20 || Math.abs(c_lat - cap.cap_coords[1]) > 0.20)
+              continue
+          }
+
           let dist = cap.cap_coords ? Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) : 999
           if (dist > 0.20)
             continue

@@ -289,6 +289,31 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         query_params.set('lon', String(cap_coords[0]))
       }
 
+      if (cap_coords) {
+        let initial_synth_city: CityPoint = {
+          capitalColor: feature.properties?.fill_color || '#FFDC00',
+          capitalOf: feature.properties?.name || country_name,
+          capitalStateId: state_id,
+          capital_color: feature.properties?.fill_color || '#FFDC00',
+          capital_state_id: state_id,
+          capital_state_name: feature.properties?.name || country_name,
+          coords: [cap_coords[1], cap_coords[0]],
+          country: feature.properties?.name || country_name,
+          id: cap_key || single_name,
+          isCapital: true,
+          is_capital: true,
+          key: cap_key || single_name,
+          name: single_name,
+          population: 0,
+        }
+        if (on_select_city)
+          on_select_city(initial_synth_city)
+        if ((window as any).setSelectedCityKey)
+          (window as any).setSelectedCityKey(cap_key || single_name)
+        if ((window as any).selectedCityRecord !== undefined)
+          (window as any).selectedCityRecord = initial_synth_city
+      }
+
       fetch(`/api/stadester/city?${query_params.toString()}`)
         .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))
         .then((arg0_data) => {

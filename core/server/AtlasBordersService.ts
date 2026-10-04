@@ -80,6 +80,7 @@ let detailed_borders_slices = [
   { domain: [1946, 1991], file: '7.1991.1.1.naissance' },
   { domain: [1991, 2026], file: '8.2026.1.1.naissance' },
 ]
+let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let max_lru_entries = 60
 
@@ -1079,19 +1080,27 @@ export class AtlasBordersService {
 
     //Declare local instance variables
     let active_ids = new Set<number>()
+    let cache_key = `${year}_${month !== undefined ? month : 1}_${day !== undefined ? day : 1}`
+
+    //Guard clauses
+    if (cached_active_state_ids.has(cache_key))
+      return cached_active_state_ids.get(cache_key)!
+
+    //Function body
     let borders_res = AtlasBordersService.getBordersAtYear(year, {
       dataset: 'detailed_borders',
       day,
       month,
     })
 
-    //Function body
     for (let i = 0; i < borders_res.features.length; i++) {
       let feat = borders_res.features[i]
       let sid = feat.properties?.state_id
       if (sid !== undefined && sid !== null)
         active_ids.add(Number(sid))
     }
+
+    cached_active_state_ids.set(cache_key, active_ids)
 
     //Return statement
     return active_ids
@@ -1358,9 +1367,10 @@ export class AtlasBordersService {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
         let is_valid_cache = Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
-        let is_missing_cap_coords = cached_json.features && cached_json.features.some(
-          (arg0_f: any) => arg0_f.properties?.capname && !arg0_f.properties?.cap_coords
-        )
+        let is_missing_cap_coords = cached_json.features &&
+          cached_json.features.length > 20 &&
+          !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
+          cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
         if (is_valid_cache && !is_missing_cap_coords) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {

@@ -389,10 +389,10 @@ export let App: React.FC = function () {
         is_capital: Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital || (selected_city_point as any).is_capital || selected_city_point.isCapital),
       }
     }
-    if (selected_city_record)
-      return selected_city_record
     if (selected_city_point)
       return selected_city_point as unknown as CityFullRecord
+    if (selected_city_record)
+      return selected_city_record
     return null
   }, [selected_city_record, selected_city_point])
 

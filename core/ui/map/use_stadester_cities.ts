@@ -317,6 +317,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     }
 
     let is_cancelled = false
+    set_selected_city((arg0_prev) => (arg0_prev?.key === effective_city_key ? arg0_prev : null))
     fetch_full_city_record(effective_city_key).then((arg0_data) => {
       if (!is_cancelled && arg0_data)
         set_selected_city(arg0_data)

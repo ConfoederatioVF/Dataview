@@ -227,6 +227,10 @@ export function isCityInsideStateBBox (
 }
 
 export let StadesterService = {
+  _cache_authoritative_capitals_by_year: new Map<string, Map<string, { color: string; name?: string; state_id?: number | string }>>(),
+  _cache_cities_at_year: new Map<string, CityRenderPoint[]>(),
+  _cache_compact_cities: new Map<string, CompactCitiesPayload>(),
+  _spatial_grid_by_dataset: new Map<string, Map<string, string[]>>(),
   city_metadata: null as CityMetadataEntry[] | null,
   city_metadata_mtime: 0,
   datasets: new Map<string, Record<string, CityIndexEntry>>(),
@@ -1241,56 +1245,53 @@ export let StadesterService = {
   },
 
   /**
-   * Retrieves active cities interpolated at a specific historical year.
+   * Resolves and caches authoritative border capitals mapped to their best/closest contemporaneous cities.
    *
    * @param {string} [arg0_dataset_name='stadester_1.1']
    * @param {number} [arg1_year=1950]
-   * @param {StadesterQueryOptions} [arg2_options]
+   * @param {number} [arg2_month=1]
+   * @param {number} [arg3_day=1]
+   * @param {string} [arg4_border_dataset='detailed_borders']
    *
-   * @returns {CityRenderPoint[]}
+   * @returns {Map<string, { color: string; name?: string; state_id?: number | string }>}
    */
-  getCitiesAtYear: function (
+  getAuthoritativeCapitalsAtYear: function (
     arg0_dataset_name?: string,
     arg1_year?: number,
-    arg2_options?: StadesterQueryOptions
-  ): CityRenderPoint[] {
+    arg2_month?: number,
+    arg3_day?: number,
+    arg4_border_dataset?: string
+  ): Map<string, { color: string; name?: string; state_id?: number | string }> {
     //Convert from parameters
+    let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'detailed_borders'
     let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
-    let options = (arg2_options) ? arg2_options : {}
-    let target_year = arg1_year !== undefined ? arg1_year : 1950
+    let day = arg3_day !== undefined ? arg3_day : 1
+    let month = arg2_month !== undefined ? arg2_month : 1
+    let year = arg1_year !== undefined ? Math.floor(arg1_year) : 1950
 
     //Declare local instance variables
-    let active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
-      Math.floor(target_year),
-      options.month,
-      options.day
-    )
-    let all_city_keys: string[]
-    let cshapes_capitals_by_city_key = new Map<string, { color?: string; name: string; state_id?: number | string }>()
+    let borders: any
+    let cache_key = `${dataset_name}:${year}:${month}:${day}:${border_dataset}`
+    let capitals_by_city = new Map<string, { color: string; name?: string; state_id?: number | string }>()
     let indexed = StadesterService.loadDataset(dataset_name)
-    let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
-    let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
-    let result_cities: CityRenderPoint[] = []
 
     //Guard clauses
-    if (!indexed || Object.keys(indexed).length === 0)
-      return []
+    if (StadesterService._cache_authoritative_capitals_by_year.has(cache_key))
+      return StadesterService._cache_authoritative_capitals_by_year.get(cache_key)!
 
     //Function body
-    let bugged_set = getBuggedCitiesSet()
-    all_city_keys = Object.keys(indexed)
-
-    //Pre-resolve authoritative border capitals by coordinate proximity across all eras
     try {
-      let borders = AtlasBordersService.getBordersAtYear(target_year, { dataset: options.dataset || 'detailed_borders' })
-      if ((!borders || !borders.features || borders.features.length === 0) && (!options.dataset || options.dataset === 'detailed_borders')) {
-        borders = AtlasBordersService.getBordersAtYear(target_year, { dataset: 'statistical_borders' })
-      }
+      borders = AtlasBordersService.getBordersAtYear(year, { dataset: border_dataset, day, month })
+      if ((!borders || !borders.features || borders.features.length === 0) && border_dataset === 'detailed_borders')
+        borders = AtlasBordersService.getBordersAtYear(year, { dataset: 'statistical_borders', day, month })
+
       if (borders && borders.features) {
-        for (let feat of borders.features) {
+        for (let i = 0; i < borders.features.length; i++) {
+          let feat = borders.features[i]
           let p = feat.properties
           if (!p || p.is_acapital)
             continue
+
           let cap_lat: number | undefined
           let cap_lon: number | undefined
           if (p.cap_coords && Array.isArray(p.cap_coords) && p.cap_coords.length >= 2) {
@@ -1304,20 +1305,24 @@ export let StadesterService = {
           if (cap_lat === undefined || cap_lon === undefined)
             continue
 
+          let candidate_keys = StadesterService.getNearbyCityKeys(dataset_name, cap_lat, cap_lon, 0.20)
+          if (p.capkey && !candidate_keys.includes(p.capkey) && indexed[p.capkey])
+            candidate_keys.push(p.capkey)
+
           let best_city: CityIndexEntry | null = null
           let best_score = -1
 
-          for (let j = 0; j < all_city_keys.length; j++) {
-            let c = indexed[all_city_keys[j]]
-            if (!c.coords)
+          for (let x = 0; x < candidate_keys.length; x++) {
+            let c = indexed[candidate_keys[x]]
+            if (!c || !c.coords)
               continue
 
-            let is_alive = (target_year >= (c.min_year ?? -99999) && target_year <= (c.max_year ?? 99999)) ||
-              (c.max_year !== undefined && c.max_year >= 1975 && target_year >= 1975)
+            let is_alive = (year >= (c.min_year ?? -99999) && year <= (c.max_year ?? 99999)) ||
+              (c.max_year !== undefined && c.max_year >= 1975 && year >= 1975)
             if (!is_alive)
               continue
 
-            if (target_year < 1975 && c.key.startsWith('ghsl-'))
+            if (year < 1975 && c.key.startsWith('ghsl-'))
               continue
 
             let c_lat = c.coords[0]
@@ -1369,11 +1374,11 @@ export let StadesterService = {
 
             if (is_name_match)
               score += 50000
-            if (target_year < 1975 && c.key.startsWith('stadester-'))
+            if (year < 1975 && c.key.startsWith('stadester-'))
               score += 25000
-            if (target_year >= 1975 && c.key.startsWith('ghsl-'))
+            if (year >= 1975 && c.key.startsWith('ghsl-'))
               score += 25000
-            if (c.years && c.years.length > 0 && target_year >= c.years[0] && target_year <= c.years[c.years.length - 1])
+            if (c.years && c.years.length > 0 && year >= c.years[0] && year <= c.years[c.years.length - 1])
               score += 15000
             if (c.capital_records && c.capital_records.length > 0)
               score += 10000
@@ -1390,17 +1395,172 @@ export let StadesterService = {
 
           if (best_city) {
             let cap_color_val = p.symbol?.polygonFill || p.symbol?.fillColor || p.color || p.fillColor || '#FFDC00'
-            cshapes_capitals_by_city_key.set(best_city.key, {
+            let cap_entry = {
               color: cap_color_val,
               name: p.name,
               state_id: p.state_id || p.gwcode,
-            })
+            }
+            capitals_by_city.set(best_city.key, cap_entry)
+            if (best_city.id && String(best_city.id) !== best_city.key)
+              capitals_by_city.set(String(best_city.id), cap_entry)
           }
         }
       }
     } catch (arg0_err) {
       console.error('[StadesterService] Error resolving border capitals by coordinate:', arg0_err)
     }
+
+    StadesterService._cache_authoritative_capitals_by_year.set(cache_key, capitals_by_city)
+
+    //Return statement
+    return capitals_by_city
+  },
+
+  /**
+   * Returns candidate city keys within a given radius around a coordinate using the spatial grid.
+   *
+   * @param {string} arg0_dataset_name
+   * @param {number} arg1_lat
+   * @param {number} arg2_lon
+   * @param {number} [arg3_radius=0.20]
+   *
+   * @returns {string[]}
+   */
+  getNearbyCityKeys: function (
+    arg0_dataset_name: string,
+    arg1_lat: number,
+    arg2_lon: number,
+    arg3_radius?: number
+  ): string[] {
+    //Convert from parameters
+    let dataset_name = arg0_dataset_name
+    let lat = arg1_lat
+    let lon = arg2_lon
+    let radius = arg3_radius !== undefined ? arg3_radius : 0.20
+
+    //Declare local instance variables
+    let grid = StadesterService.getSpatialGrid(dataset_name)
+    let max_x = Math.floor(lon + radius)
+    let max_y = Math.floor(lat + radius)
+    let min_x = Math.floor(lon - radius)
+    let min_y = Math.floor(lat - radius)
+    let result: string[] = []
+
+    //Function body
+    for (let i = min_x; i <= max_x; i++) {
+      for (let x = min_y; x <= max_y; x++) {
+        let bucket = grid.get(`${i}_${x}`)
+        if (bucket) {
+          for (let y = 0; y < bucket.length; y++)
+            result.push(bucket[y])
+        }
+      }
+    }
+
+    //Return statement
+    return result
+  },
+
+  /**
+   * Retrieves or builds a 1x1 degree spatial hash grid for fast proximity candidate queries.
+   *
+   * @param {string} [arg0_dataset_name='stadester_1.1']
+   *
+   * @returns {Map<string, string[]>}
+   */
+  getSpatialGrid: function (arg0_dataset_name?: string): Map<string, string[]> {
+    //Convert from parameters
+    let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+
+    //Declare local instance variables
+    let grid: Map<string, string[]>
+    let indexed: Record<string, CityIndexEntry>
+    let keys: string[]
+
+    //Guard clauses
+    if (StadesterService._spatial_grid_by_dataset.has(dataset_name))
+      return StadesterService._spatial_grid_by_dataset.get(dataset_name)!
+
+    //Function body
+    grid = new Map<string, string[]>()
+    indexed = StadesterService.loadDataset(dataset_name)
+    keys = Object.keys(indexed)
+
+    for (let i = 0; i < keys.length; i++) {
+      let c = indexed[keys[i]]
+      if (!c || !c.coords)
+        continue
+      let cell_x = Math.floor(c.coords[1])
+      let cell_y = Math.floor(c.coords[0])
+      let cell_key = `${cell_x}_${cell_y}`
+      let bucket = grid.get(cell_key)
+      if (!bucket) {
+        bucket = []
+        grid.set(cell_key, bucket)
+      }
+      bucket.push(keys[i])
+    }
+
+    StadesterService._spatial_grid_by_dataset.set(dataset_name, grid)
+
+    //Return statement
+    return grid
+  },
+
+  /**
+   * Retrieves active cities interpolated at a specific historical year.
+   *
+   * @param {string} [arg0_dataset_name='stadester_1.1']
+   * @param {number} [arg1_year=1950]
+   * @param {StadesterQueryOptions} [arg2_options]
+   *
+   * @returns {CityRenderPoint[]}
+   */
+  getCitiesAtYear: function (
+    arg0_dataset_name?: string,
+    arg1_year?: number,
+    arg2_options?: StadesterQueryOptions
+  ): CityRenderPoint[] {
+    //Convert from parameters
+    let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+    let options = (arg2_options) ? arg2_options : {}
+    let target_year = arg1_year !== undefined ? arg1_year : 1950
+
+    //Declare local instance variables
+    let active_state_ids: Set<number>
+    let all_city_keys: string[]
+    let bugged_set: Set<string>
+    let cache_key = `${dataset_name}:${target_year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}`
+    let cshapes_capitals_by_city_key = new Map<string, { color?: string; name: string; state_id?: number | string }>()
+    let indexed = StadesterService.loadDataset(dataset_name)
+    let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
+    let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
+    let result_cities: CityRenderPoint[] = []
+
+    //Guard clauses
+    if (!indexed || Object.keys(indexed).length === 0)
+      return []
+
+    if (StadesterService._cache_cities_at_year.has(cache_key))
+      return StadesterService._cache_cities_at_year.get(cache_key)!
+
+    //Function body
+    active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
+      Math.floor(target_year),
+      options.month,
+      options.day
+    )
+    bugged_set = getBuggedCitiesSet()
+    all_city_keys = Object.keys(indexed)
+
+    //Pre-resolve authoritative border capitals by coordinate proximity across all eras
+    cshapes_capitals_by_city_key = StadesterService.getAuthoritativeCapitalsAtYear(
+      dataset_name,
+      target_year,
+      options.month,
+      options.day,
+      options.dataset || 'detailed_borders'
+    )
 
     for (let i = 0; i < all_city_keys.length; i++) {
       let city = indexed[all_city_keys[i]]
@@ -1629,6 +1789,13 @@ export let StadesterService = {
       }
     }
 
+    if (StadesterService._cache_cities_at_year.size >= 100) {
+      let oldest_key = StadesterService._cache_cities_at_year.keys().next().value
+      if (oldest_key !== undefined)
+        StadesterService._cache_cities_at_year.delete(oldest_key)
+    }
+    StadesterService._cache_cities_at_year.set(cache_key, result_cities)
+
     //Return statement
     return result_cities
   },
@@ -1746,78 +1913,19 @@ export let StadesterService = {
 
       if (num_yr !== undefined && entry.coords) {
         try {
-          let border_dataset = options.dataset || 'detailed_borders'
-          let cshapes_borders = AtlasBordersService.getBordersAtYear(num_yr, { dataset: border_dataset })
-          if (!cshapes_borders?.features || cshapes_borders.features.length === 0) {
-            cshapes_borders = AtlasBordersService.getBordersAtYear(num_yr, { dataset: 'statistical_borders' })
-          }
-          if (cshapes_borders && cshapes_borders.features) {
-            let c_lat = entry.coords[0]
-            let c_lon = entry.coords[1]
-            for (let feat of cshapes_borders.features) {
-              let p = feat.properties
-              if (!p || p.is_acapital)
-                continue
-              let cap_lon: number | undefined
-              let cap_lat: number | undefined
-              if (p.cap_coords && Array.isArray(p.cap_coords) && p.cap_coords.length >= 2) {
-                cap_lon = p.cap_coords[0]
-                cap_lat = p.cap_coords[1]
-              } else if (p.caplong !== undefined && p.caplat !== undefined) {
-                cap_lon = Number(p.caplong)
-                cap_lat = Number(p.caplat)
-              }
-              if (cap_lon === undefined || cap_lat === undefined)
-                continue
-              let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
-              if (dist <= 0.20) {
-                //If capital explicitly defines capkey, it must match or be equivalent
-                if (p.capkey) {
-                  let clean_cap_key = normalizeCityKey(p.capkey)
-                  let clean_e_key = normalizeCityKey(entry.key || '')
-                  let is_key_match = p.capkey === entry.key || p.capkey === String(entry.id) || (clean_cap_key && clean_cap_key === clean_e_key)
-                  if (!is_key_match && indexed[p.capkey])
-                    continue
-                }
-
-                //If capital explicitly defines capname, check if name matches
-                let cap_name_lower = (p.capname || '').toLowerCase().trim()
-                let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let e_name_lower = (entry.name || '').toLowerCase().trim()
-                let e_name_nfd = e_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let is_name_match = Boolean(cap_name_lower && (e_name_lower === cap_name_lower || e_name_nfd === cap_name_nfd))
-                if (!is_name_match && entry.other_names && Array.isArray(entry.other_names) && cap_name_lower) {
-                  is_name_match = entry.other_names.some((arg0_on: string) => {
-                    let on_lower = arg0_on.toLowerCase().trim()
-                    let on_nfd = on_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                    return on_lower === cap_name_lower || on_nfd === cap_name_nfd
-                  })
-                }
-
-                //If name didn't match and capkey didn't match, verify that no other contemporaneous city in dataset is closer
-                if (!is_name_match && !(p.capkey && (p.capkey === entry.key || p.capkey === String(entry.id)))) {
-                  let has_closer_city = false
-                  for (let k in indexed) {
-                    let other = indexed[k]
-                    if (!other.coords || other.key === entry.key)
-                      continue
-                    let other_dist = Math.hypot(other.coords[1] - cap_lon, other.coords[0] - cap_lat)
-                    if (other_dist < dist) {
-                      has_closer_city = true
-                      break
-                    }
-                  }
-                  if (has_closer_city)
-                    continue
-                }
-
-                cap_color = p.color || p.fillColor || '#FFDC00'
-                cap_sid = p.state_id || p.gwcode
-                is_capital = true
-                polity_name = p.name
-                break
-              }
-            }
+          let cshapes_capitals = StadesterService.getAuthoritativeCapitalsAtYear(
+            dataset_name,
+            num_yr,
+            num_mo,
+            num_day,
+            options.dataset || 'detailed_borders'
+          )
+          let cap_info = cshapes_capitals.get(entry.key) || (entry.id ? cshapes_capitals.get(String(entry.id)) : undefined)
+          if (cap_info) {
+            cap_color = cap_info.color
+            cap_sid = cap_info.state_id
+            is_capital = true
+            polity_name = cap_info.name
           }
         } catch {
           //Ignore CShapes lookup error
@@ -2064,21 +2172,41 @@ export let StadesterService = {
     let year = arg1_year !== undefined ? arg1_year : 1950
 
     //Declare local instance variables
-    let cities = StadesterService.getCitiesAtYear(dataset_name, year, options)
-    let len = cities.length
-    let capital_colors: (string | null)[] = new Array(len)
-    let capital_names: (string | null)[] = new Array(len)
-    let capital_state_ids: (number | null)[] = new Array(len)
-    let capitals: number[] = new Array(len)
-    let coords: number[] = new Array(len * 2)
-    let countries: (string | undefined)[] = new Array(len)
-    let growth: number[] = new Array(len)
-    let keys: string[] = new Array(len)
-    let names: string[] = new Array(len)
-    let pops: number[] = new Array(len)
-    let regions: (string | undefined)[] = new Array(len)
+    let cache_key = `${dataset_name}:${year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}`
+    let capital_colors: (string | null)[]
+    let capital_names: (string | null)[]
+    let capital_state_ids: (number | null)[]
+    let capitals: number[]
+    let cities: CityRenderPoint[]
+    let coords: number[]
+    let countries: (string | undefined)[]
+    let growth: number[]
+    let keys: string[]
+    let len: number
+    let names: string[]
+    let payload: CompactCitiesPayload
+    let pops: number[]
+    let regions: (string | undefined)[]
+
+    //Guard clauses
+    if (StadesterService._cache_compact_cities.has(cache_key))
+      return StadesterService._cache_compact_cities.get(cache_key)!
 
     //Function body
+    cities = StadesterService.getCitiesAtYear(dataset_name, year, options)
+    len = cities.length
+    capital_colors = new Array(len)
+    capital_names = new Array(len)
+    capital_state_ids = new Array(len)
+    capitals = new Array(len)
+    coords = new Array(len * 2)
+    countries = new Array(len)
+    growth = new Array(len)
+    keys = new Array(len)
+    names = new Array(len)
+    pops = new Array(len)
+    regions = new Array(len)
+
     for (let i = 0; i < len; i++) {
       let c = cities[i]
       keys[i] = c.key
@@ -2095,8 +2223,7 @@ export let StadesterService = {
       capital_state_ids[i] = (c.capital_state_id !== undefined && c.capital_state_id !== null) ? Number(c.capital_state_id) : null
     }
 
-    //Return statement
-    return {
+    payload = {
       capitals,
       capital_colors,
       capital_names,
@@ -2110,6 +2237,16 @@ export let StadesterService = {
       pops,
       regions,
     }
+
+    if (StadesterService._cache_compact_cities.size >= 100) {
+      let oldest_key = StadesterService._cache_compact_cities.keys().next().value
+      if (oldest_key !== undefined)
+        StadesterService._cache_compact_cities.delete(oldest_key)
+    }
+    StadesterService._cache_compact_cities.set(cache_key, payload)
+
+    //Return statement
+    return payload
   },
 }
 

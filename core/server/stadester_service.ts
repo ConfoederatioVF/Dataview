@@ -103,6 +103,7 @@ export interface CityIndexEntry {
   country?: string
   density?: Record<string, number>
   elevation?: number
+  ghsl_name?: string
   historical_names?: HistoricalNameRecord[]
   id: number | string
   key: string
@@ -114,6 +115,7 @@ export interface CityIndexEntry {
   original_names?: string | string[]
   other_names?: string | string[]
   population?: Record<string, number>
+  reconciled_name?: string
   region?: string
   years: number[]
 }
@@ -491,7 +493,7 @@ export let StadesterService = {
         if (!is_exact_coord_match && !is_name_match)
           continue
 
-        if (is_exact_coord_match && meta.name)
+        if (is_exact_coord_match && meta.name && !best_city.key.startsWith('ghsl-'))
           best_city.name = meta.name
 
         if (meta.historical_names && meta.historical_names.length > 0)
@@ -967,7 +969,7 @@ export let StadesterService = {
    * @returns {string}
    */
   resolveCityNameAtYear: function (
-    arg0_city: CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[] },
+    arg0_city: CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[]; ghsl_name?: string; reconciled_name?: string },
     arg1_year?: number | string
   ): string {
     //Convert from parameters
@@ -1107,6 +1109,7 @@ export let StadesterService = {
         country: c.country,
         density: c.density,
         elevation: c.elevation,
+        ghsl_name: clean_display_name,
         id: c.id !== undefined ? c.id : i + 1,
         key: c.key || key,
         max_pop: max_p,
@@ -1116,6 +1119,7 @@ export let StadesterService = {
         original_names: c.original_names,
         other_names: c.other_names,
         population: pop_obj,
+        reconciled_name: clean_display_name,
         region: c.region,
         years: pop_years,
       }
@@ -1224,6 +1228,7 @@ export let StadesterService = {
         colour: c.colour,
         coords: c.coords,
         country: c.country,
+        ghsl_name: c.ghsl_name || c.reconciled_name,
         historical_names: c.historical_names,
         id: c.id,
         key: c.key,
@@ -1233,6 +1238,7 @@ export let StadesterService = {
         min_year: c.min_year,
         name: c.name,
         other_names: c.other_names,
+        reconciled_name: c.reconciled_name || c.ghsl_name,
         region: c.region,
       })
     }
@@ -1738,7 +1744,10 @@ export let StadesterService = {
       let cap_color_val = cs_cap?.color || cap_state?.fill_color || null
       let cap_state_id = cs_cap?.state_id || cap_rec?.state_id || undefined
       let polity_name = cs_cap?.name || cap_state?.name || undefined
-      let resolved_name = StadesterService.resolveCityNameAtYear(city, target_year)
+      let resolved_date = (options.month !== undefined || options.day !== undefined)
+        ? `${Math.floor(target_year)}.${options.month || 1}.${options.day || 1}`
+        : target_year
+      let resolved_name = StadesterService.resolveCityNameAtYear(city, resolved_date)
 
       result_cities.push({
         area: area_val,

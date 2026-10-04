@@ -618767,5 +618767,23 @@
     "name": "Þorlákshöfn *",
     "other_names": [],
     "region": "europe"
+  },
+  {
+    "aliases_found": [],
+    "coords": [
+      32.88,
+      51.34
+    ],
+    "country": "Ukraine",
+    "dataset_keys": [
+      "stadester-Baturyn-Ukraine"
+    ],
+    "earliest_year": 1649,
+    "has_pre_1900": true,
+    "key": "stadester-Baturyn-Ukraine",
+    "latest_year": 1708,
+    "name": "Baturyn",
+    "other_names": [],
+    "region": "eastern_europe_and_russia"
   }
 ]

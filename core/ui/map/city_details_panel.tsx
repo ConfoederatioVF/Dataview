@@ -104,7 +104,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
     ? formatPanelCityName(
         city.historical_names && city.historical_names.length > 0
           ? resolveHistoricalCityName(city as any, current_year)
-          : city.name
+          : ((city as any).reconciled_name || (city as any).ghsl_name || city.name)
       )
     : ''
 

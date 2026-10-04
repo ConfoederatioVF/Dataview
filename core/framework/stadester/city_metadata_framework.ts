@@ -304,7 +304,7 @@ export let parseYearMonthDay = function (arg0_date_val: string | number): Parsed
  * @returns {string} Resolved historical display name
  */
 export let resolveHistoricalCityName = function (
-  arg0_city: { name: string; historical_names?: HistoricalNameRecord[] },
+  arg0_city: { name: string; historical_names?: HistoricalNameRecord[]; ghsl_name?: string; reconciled_name?: string },
   arg1_year_or_date?: number | string
 ): string {
   //Convert from parameters
@@ -312,7 +312,13 @@ export let resolveHistoricalCityName = function (
   let year_or_date = arg1_year_or_date
 
   //Declare local instance variables
+  let active_1975_legacy: HistoricalNameRecord | null = null
+  let default_name = (city as any)?.reconciled_name || (city as any)?.ghsl_name || city?.name || ''
+  let first_post_1975: HistoricalNameRecord | null = null
   let hist: HistoricalNameRecord[]
+  let latest_post_1975: HistoricalNameRecord | null = null
+  let parsed: ParsedYearMonthDay
+  let rec_frac: number
   let target_frac: number
 
   //Guard clauses
@@ -320,40 +326,68 @@ export let resolveHistoricalCityName = function (
     return ''
 
   if (!city.historical_names || city.historical_names.length === 0)
-    return city.name
+    return default_name
 
-  //Function body
+  hist = city.historical_names
+
   if (year_or_date !== undefined && year_or_date !== null) {
     if (typeof year_or_date === 'number') {
       target_frac = year_or_date
     } else {
-      let parsed = parseYearMonthDay(year_or_date)
+      parsed = parseYearMonthDay(year_or_date)
       target_frac = parsed.year_frac
     }
   } else {
     target_frac = 1950
   }
 
-  hist = city.historical_names
+  //Function body
+  //1. Historical era (pre-1975AD): standard retrospective resolution
+  if (target_frac < 1975) {
+    for (let i = hist.length - 1; i >= 0; i--) {
+      rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
+        ? hist[i].year_frac
+        : parseYearMonthDay(hist[i].date).year_frac
 
-  //Find the latest transition on or before target_frac
-  for (let i = hist.length - 1; i >= 0; i--) {
-    let rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
+      if (target_frac >= rec_frac)
+        return hist[i].name
+    }
+
+    if (hist.length > 0)
+      return hist[0].name
+
+    //Return statement
+    return default_name
+  }
+
+  //2. Modern era (>= 1975AD): bifurcated post-1975 resolution
+  for (let i = 0; i < hist.length; i++) {
+    rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
       ? hist[i].year_frac
       : parseYearMonthDay(hist[i].date).year_frac
 
-    if (target_frac >= rec_frac) {
-      //Return statement
-      return hist[i].name
+    if (rec_frac < 1975) {
+      active_1975_legacy = hist[i]
+    } else if (rec_frac > 1975.0) {
+      if (!first_post_1975)
+        first_post_1975 = hist[i]
+
+      if (rec_frac <= target_frac)
+        latest_post_1975 = hist[i]
     }
   }
 
-  //If before earliest recorded change, return the earliest known name
-  if (hist.length > 0)
-    return hist[0].name
+  //Case 2A: On or after a genuine post-1975 transition (e.g. Saint Petersburg post-1991, Mumbai post-1995, Gqeberha post-2021)
+  if (latest_post_1975)
+    return latest_post_1975.name
 
+  //Case 2B: Before a genuine post-1975 transition; legacy 1975 name carries over (e.g. Leningrad 1975-1991, Bombay 1975-1995, Port Elizabeth 1975-2021)
+  if (first_post_1975 && active_1975_legacy)
+    return active_1975_legacy.name
+
+  //Case 2C: No post-1975 changes exist; disregard pre-1975 historical names and return canonical modern name
   //Return statement
-  return city.name
+  return default_name
 }
 
 /**

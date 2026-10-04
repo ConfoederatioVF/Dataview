@@ -420,20 +420,13 @@ export let resolveCityDisplayName = function (
   let coord_key = coords ? `${coords[0].toFixed(3)},${coords[1].toFixed(3)}` : key
   let ghsl_map = loadGhslCsvNames()
 
-  //1. Check primary candidate from raw_name / c.name first
-  if (raw_name && raw_name !== '0' && !isCorruptedCityName(raw_name)) {
-    let primary = getPrimaryCityName(raw_name, pop)
-    if (primary && primary !== '0' && !isCorruptedCityName(primary))
-      return primary
-  }
-
-  //2. Check persistent disk cache
+  //1. Check persistent disk cache
   if (cache[key] && !isCorruptedCityName(cache[key].resolvedName))
     return cache[key].resolvedName
   if (cache[coord_key] && !isCorruptedCityName(cache[coord_key].resolvedName))
     return cache[coord_key].resolvedName
 
-  //3. If key is ghsl- or id is passed, lookup in GHSL.csv table
+  //2. If key is ghsl- or id is passed, lookup in GHSL.csv table first
   if (key.startsWith('ghsl-') || id_val !== undefined) {
     let lookup_id = (id_val !== undefined && id_val !== null) ? String(id_val) : ''
     if (!lookup_id && key.startsWith('ghsl-')) {
@@ -446,6 +439,13 @@ export let resolveCityDisplayName = function (
       if (csv_name && csv_name !== '0' && !isCorruptedCityName(csv_name))
         return csv_name
     }
+  }
+
+  //3. Check primary candidate from raw_name / c.name
+  if (raw_name && raw_name !== '0' && !isCorruptedCityName(raw_name)) {
+    let primary = getPrimaryCityName(raw_name, pop)
+    if (primary && primary !== '0' && !isCorruptedCityName(primary))
+      return primary
   }
 
   //4. Fallback to clean candidate from key string

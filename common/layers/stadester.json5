@@ -7,8 +7,10 @@
         unit: "Urban Population",
         icon: "location_city",
         description: [
-            "### Stadestér Settlements",
-            "A global historical database of 34,400+ cities and urban settlements from 3300BC to the present."
+            "### Stadestér",
+            "A global historical database of 34.400+ cities and urban settlements from 3300BC to the present. Split by version (1.0, 1.1).",
+            "",
+            "Historical names, capital cities, and other visuals can be toggled in the **Mapmodes** menu."
         ],
         filepath: "${l_stad}/stadester_1.1.json",
         permissions: [

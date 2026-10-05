@@ -9,9 +9,9 @@
             "Simplified de facto borders used for statistical purposes. Shapes after 1886AD are not coloured.",
             "<details>",
             "<summary>Methodology</summary>",
-            "Joint database between [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf).",
+            "Joint database between Atlas 0.6b and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf).",
             "",
-            "Both Cliopatria and C-Shapes 2.0 are known to contain encoding and historical errors, but allow for qualitative encoding from academic databases, i.e. via [Seshat](https://seshat-db.com/).",
+            "Atlas 0.6b was heavily inspired by Cliopatria, but differed in containing border adjustments to align better with historical reality. Both [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and C-Shapes 2.0 are known to contain encoding and historical errors, but allow for qualitative encoding from academic databases, i.e. via [Seshat](https://seshat-db.com/).",
             "</details>"
         ],
         filepaths: [
@@ -37,7 +37,13 @@
         name: "Detailed Borders",
         description: [
             "### Detailed Borders",
-            "De facto territorial frontiers from 3500BC to 2025AD. This dataset is chunked, meaning countries may have keyframes beyond the time period currently being viewed."
+            "De facto territorial frontiers from 3500BC to 2025AD. This dataset is chunked, meaning countries may have keyframes beyond the time period currently being viewed.",
+            "<details>",
+            "<summary>Methodology</summary>",
+            "Largely based on presence modelling (convex hull) over a borderpool. This means there is a lot of work in terms of manually refining and iterating over the current data at hand, as many borders during conflict periods are poor interpolations which require fixing.",
+            "",
+            "In addition, regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints and adding diplomatic relations prior to a full release.",
+            "</details>"
         ],
         filepaths: [
             {

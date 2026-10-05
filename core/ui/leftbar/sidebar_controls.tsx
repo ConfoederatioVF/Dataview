@@ -205,7 +205,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
     binning: false,
     description: true,
     manual: false,
-    visual: true,
+    visual: false,
   })
   ;[viewport_width, set_viewport_width] = useState<number>(() => {
     if (typeof window !== 'undefined')

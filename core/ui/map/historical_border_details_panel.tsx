@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef } from 'react'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import type { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { calculateFeatureArea } from '@framework/geopng/polygon_area.ts'
@@ -56,6 +56,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let sidebar_width = props.sidebarWidth
 
   //Hooks
+  let last_country_id_ref = useRef<string | null>(null)
+  let last_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let localisation = useLocalisation()
 
   //Determine effective raster statistics for feature (computed asynchronously via Web Worker)
@@ -99,6 +101,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let current_ts: number
   let display_year: string
   let end_year: number | undefined
+  let feature_id: string | null
   let format = localisation.format
   let handle_capital_click: (arg0_e: React.MouseEvent) => void
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
@@ -108,6 +111,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let max_x: number
   let max_y: number
   let min_x: number
+  let min_y: number
   let panel_h: number
   let panel_style: React.CSSProperties
   let panel_w: number
@@ -164,21 +168,22 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     if (!single_name)
       return
 
+    let cap_coords: [number, number] | undefined
+    if (feature.properties?.cap_coords && Array.isArray(feature.properties.cap_coords) && feature.properties.cap_coords.length >= 2) {
+      cap_coords = feature.properties.cap_coords as [number, number]
+    } else if (feature.properties?.caplong !== undefined && feature.properties?.caplat !== undefined) {
+      cap_coords = [Number(feature.properties.caplong), Number(feature.properties.caplat)]
+    }
+
     let target_city: CityPoint | null = null
     if (cities && cities.length > 0) {
       //0. Coordinate proximity match if cap_coords or caplat/caplong available on feature
-      let cap_coords: [number, number] | undefined
-      if (feature.properties?.cap_coords && Array.isArray(feature.properties.cap_coords) && feature.properties.cap_coords.length >= 2) {
-        cap_coords = feature.properties.cap_coords as [number, number]
-      } else if (feature.properties?.caplong !== undefined && feature.properties?.caplat !== undefined) {
-        cap_coords = [Number(feature.properties.caplong), Number(feature.properties.caplat)]
-      }
       if (cap_coords) {
         let best_dist = 999
         let best_score = -1
         for (let arg0_c of cities) {
-          let c_lat = arg0_c.rawCoords ? arg0_c.rawCoords[1] : (arg0_c.lat !== undefined ? arg0_c.lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
-          let c_lon = arg0_c.rawCoords ? arg0_c.rawCoords[0] : (arg0_c.lon !== undefined ? arg0_c.lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
+          let c_lat = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[1] : ((arg0_c as any).lat !== undefined ? (arg0_c as any).lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
+          let c_lon = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[0] : ((arg0_c as any).lon !== undefined ? (arg0_c as any).lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
           if (c_lat === undefined || c_lon === undefined)
             continue
           let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
@@ -440,27 +445,68 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     raster_metric_tooltip = t.mapPanels.historicalBorders.noRasterData
   }
 
-  //Anchored positioning calculations with strict sidebar collision avoidance
+  //Anchored positioning calculations with strict sidebar and HUD collision avoidance
   min_x = (sidebar_width !== undefined ? sidebar_width : 336) + 16
+  min_y = 60
   panel_w = 384
   panel_h = 420
-  target_x = anchor_pos ? anchor_pos.x + 24 : min_x
-  target_y = anchor_pos ? anchor_pos.y - 120 : 60
 
-  max_x = (typeof window !== 'undefined') ? window.innerWidth - panel_w - 16 : 800
+  max_x = (typeof window !== 'undefined') ? window.innerWidth - panel_w - 60 : 800
   max_y = (typeof window !== 'undefined') ? window.innerHeight - panel_h - 70 : 600
 
+  feature_id = feature ? String(feature.id || feature.properties?.id || feature.properties?.name || '') : null
+  if (feature_id && feature_id !== last_country_id_ref.current) {
+    last_country_id_ref.current = feature_id
+    last_pos_ref.current = null
+  }
+
   if (!embedded) {
-    if (anchor_pos) {
-      if (target_x > max_x)
-        target_x = anchor_pos.x - panel_w - 24
+    if (anchor_pos && Number.isFinite(anchor_pos.x) && Number.isFinite(anchor_pos.y)) {
+      target_x = anchor_pos.x + 24
+      target_y = anchor_pos.y - 120
+
+      if (target_x > max_x) {
+        if (anchor_pos.x - panel_w - 24 >= min_x) {
+          target_x = anchor_pos.x - panel_w - 24
+        } else {
+          target_x = max_x
+        }
+      }
       if (target_x < min_x)
         target_x = min_x
 
       if (target_y > max_y)
         target_y = max_y
-      if (target_y < 16)
-        target_y = 16
+      if (target_y < min_y)
+        target_y = min_y
+
+      //Strict collision avoidance with the top-left floating colourbar / settlements card
+      if (typeof document !== 'undefined') {
+        let legend_el = document.getElementById('dataview-legend-card-container')
+        if (legend_el) {
+          let legend_rect = legend_el.getBoundingClientRect()
+          if (legend_rect.width > 0 && legend_rect.height > 0) {
+            let overlaps_x = target_x < legend_rect.right + 16 && (target_x + panel_w) > (legend_rect.left - 16)
+            let overlaps_y = target_y < legend_rect.bottom + 16 && (target_y + panel_h) > (legend_rect.top - 16)
+            if (overlaps_x && overlaps_y) {
+              if (legend_rect.right + 16 + panel_w <= (typeof window !== 'undefined' ? window.innerWidth - 16 : 1200)) {
+                target_x = legend_rect.right + 16
+              } else {
+                target_y = Math.min(max_y, legend_rect.bottom + 16)
+              }
+            }
+          }
+        }
+      }
+
+      last_pos_ref.current = { x: target_x, y: target_y }
+    } else if (last_pos_ref.current) {
+      target_x = last_pos_ref.current.x
+      target_y = last_pos_ref.current.y
+    } else {
+      target_x = max_x
+      target_y = min_y
+      last_pos_ref.current = { x: target_x, y: target_y }
     }
 
     panel_style = {

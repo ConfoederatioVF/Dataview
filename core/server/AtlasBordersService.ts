@@ -369,7 +369,7 @@ let city_coords_by_norm_name: Map<string, CityCoordRecord[]> = new Map()
 let city_coords_loaded = false
 let city_coords_spatial_grid: Map<string, CityCoordRecord[]> = new Map()
 let city_name_coords_cache: Map<string, { coords?: [number, number]; key?: string } | null> = new Map()
-let contemp_city_cache: Map<string, { coords?: [number, number]; key?: string }> = new Map()
+let contemp_city_cache: Map<string, { coords?: [number, number]; key: string }> = new Map()
 let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
 let states_by_clean_name: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> = new Map()
 let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
@@ -915,7 +915,7 @@ let getStateCapitalInfo = function (
     for (let i = 0; i < valid_timeline.length; i++) {
       let iv = valid_timeline[i]
       if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac) {
-        let contemp = iv.key ? getContemporaneousCityKey(iv.key, year_frac) : { key: iv.key }
+        let contemp: { coords?: [number, number]; key?: string } = iv.key ? getContemporaneousCityKey(iv.key, year_frac) : { coords: undefined, key: iv.key }
         let c_coords = contemp.coords || (iv.key ? getCityCoordsByKey(iv.key) : undefined)
         if (!c_coords && iv.city) {
           let by_name = findCityCoordsByName(iv.city, state?.country || state?.name)
@@ -941,7 +941,7 @@ let getStateCapitalInfo = function (
         best_iv = iv
       }
     }
-    let contemp_best = best_iv.key ? getContemporaneousCityKey(best_iv.key, year_frac) : { key: best_iv.key }
+    let contemp_best: { coords?: [number, number]; key?: string } = best_iv.key ? getContemporaneousCityKey(best_iv.key, year_frac) : { coords: undefined, key: best_iv.key }
     let best_coords = contemp_best.coords || (best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined)
     if (!best_coords && best_iv.city) {
       let by_name = findCityCoordsByName(best_iv.city, state?.country || state?.name)

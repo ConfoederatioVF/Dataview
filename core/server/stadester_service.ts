@@ -106,6 +106,8 @@ export interface CityIndexEntry {
   ghsl_name?: string
   historical_names?: HistoricalNameRecord[]
   id: number | string
+  is_agglomeration?: boolean
+  is_agglomeration_of?: string
   key: string
   max_pop: number
   max_year: number

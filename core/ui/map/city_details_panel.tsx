@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { CityFullRecord, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
@@ -13,8 +13,10 @@ export interface CityDetailsPanelProps {
   currentYear: number
   embedded?: boolean
   onBack?: () => void
+  onCenterCity?: () => void
   onClose: () => void
   onSelectCountry?: (arg0_state_id?: number | string, arg0_country_name?: string) => void
+  sidebarWidth?: number
 }
 
 /**
@@ -67,27 +69,41 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
   let on_back = props.onBack
+  let on_center_city = props.onCenterCity
   let on_close = props.onClose
   let on_select_country = props.onSelectCountry
+  let sidebar_width = props.sidebarWidth
 
   //Declare local instance variables
   let active_metric_tab: 'population' | 'area' | 'density'
   let area_at_year: number | undefined
   let borders_data: { features?: any[] } | null | undefined
   let chart_option: any
+  let city_key: string | null
   let density_at_year: number | undefined
   let display_city_name: string
   let format: ReturnType<typeof useLocalisation>['format']
   let formatted_current_year: string
   let full_record: CityFullRecord | null
   let is_capital: boolean
+  let last_city_key_ref = useRef<string | null>(null)
+  let last_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let localisation: ReturnType<typeof useLocalisation>
+  let max_x: number
+  let max_y: number
+  let min_x: number
+  let min_y: number
   let other_names_list: string[]
+  let panel_h: number
   let panel_style: React.CSSProperties
+  let panel_w: number
   let polity_name: string | undefined
   let pop_at_year: number
   let set_active_metric_tab: React.Dispatch<React.SetStateAction<'population' | 'area' | 'density'>>
+  let sidebar_w: number
   let t: ReturnType<typeof useLocalisation>['t']
+  let target_x: number
+  let target_y: number
   let timeseries_data: Array<[number, number]>
 
   //Function body
@@ -131,8 +147,8 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
     }
 
     if (!is_capital || !polity_name) {
-      let c_lat = (city as any)?.rawCoords ? (city as any).rawCoords[1] : (city?.lat !== undefined ? city.lat : (city?.coords ? city.coords[0] : undefined))
-      let c_lon = (city as any)?.rawCoords ? (city as any).rawCoords[0] : (city?.lon !== undefined ? city.lon : (city?.coords ? city.coords[1] : undefined))
+      let c_lat = (city as any)?.rawCoords ? (city as any).rawCoords[1] : ((city as any)?.lat !== undefined ? (city as any).lat : (city?.coords ? city.coords[0] : undefined))
+      let c_lon = (city as any)?.rawCoords ? (city as any).rawCoords[0] : ((city as any)?.lon !== undefined ? (city as any).lon : (city?.coords ? city.coords[1] : undefined))
       if (c_lat !== undefined && c_lon !== undefined) {
         for (let feat of borders_data.features) {
           if (feat.properties?.cap_coords && Array.isArray(feat.properties.cap_coords) && feat.properties.cap_coords.length >= 2) {
@@ -441,42 +457,75 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   //Anchored positioning calculations
   panel_style = {}
-  if (!embedded && anchor_pos && anchor_pos.x !== undefined && anchor_pos.y !== undefined && Number.isFinite(anchor_pos.x) && Number.isFinite(anchor_pos.y)) {
-    let panel_w = 384
-    let panel_h = 390
-    let target_x = anchor_pos.x + 24
-    let target_y = anchor_pos.y - 120
+  if (!embedded) {
+    panel_w = 384
+    panel_h = 390
+    sidebar_w = sidebar_width !== undefined ? sidebar_width : 336
+    min_x = sidebar_w + 16
+    min_y = 60
+    max_x = (typeof window !== 'undefined') ? window.innerWidth - panel_w - 60 : 800
+    max_y = (typeof window !== 'undefined') ? window.innerHeight - panel_h - 70 : 600
 
-    let min_x = 16
-    let min_y = 16
-    let max_x = (typeof window !== 'undefined') ? window.innerWidth - panel_w - 16 : 800
-    let max_y = (typeof window !== 'undefined') ? window.innerHeight - panel_h - 70 : 600
-
-    if (target_x > max_x) {
-      if (anchor_pos.x - panel_w - 24 >= min_x) {
-        target_x = anchor_pos.x - panel_w - 24
-      } else {
-        target_x = max_x
-      }
+    city_key = city ? (city.key || city.id ? String(city.id) : null) : null
+    if (city_key && city_key !== last_city_key_ref.current) {
+      last_city_key_ref.current = city_key
+      last_pos_ref.current = null
     }
-    if (target_x < min_x)
-      target_x = min_x
 
-    if (target_y > max_y)
-      target_y = max_y
-    if (target_y < min_y)
+    if (anchor_pos && Number.isFinite(anchor_pos.x) && Number.isFinite(anchor_pos.y)) {
+      target_x = anchor_pos.x + 24
+      target_y = anchor_pos.y - 120
+
+      if (target_x > max_x) {
+        if (anchor_pos.x - panel_w - 24 >= min_x) {
+          target_x = anchor_pos.x - panel_w - 24
+        } else {
+          target_x = max_x
+        }
+      }
+      if (target_x < min_x)
+        target_x = min_x
+
+      if (target_y > max_y)
+        target_y = max_y
+      if (target_y < min_y)
+        target_y = min_y
+
+      //Strict collision avoidance with the top-left floating colourbar / settlements card
+      if (typeof document !== 'undefined') {
+        let legend_el = document.getElementById('dataview-legend-card-container')
+        if (legend_el) {
+          let legend_rect = legend_el.getBoundingClientRect()
+          if (legend_rect.width > 0 && legend_rect.height > 0) {
+            let overlaps_x = target_x < legend_rect.right + 16 && (target_x + panel_w) > (legend_rect.left - 16)
+            let overlaps_y = target_y < legend_rect.bottom + 16 && (target_y + panel_h) > (legend_rect.top - 16)
+            if (overlaps_x && overlaps_y) {
+              if (legend_rect.right + 16 + panel_w <= (typeof window !== 'undefined' ? window.innerWidth - 16 : 1200)) {
+                target_x = legend_rect.right + 16
+              } else {
+                target_y = Math.min(max_y, legend_rect.bottom + 16)
+              }
+            }
+          }
+        }
+      }
+
+      last_pos_ref.current = { x: target_x, y: target_y }
+    } else if (last_pos_ref.current) {
+      //Anchor is no longer on viewport (e.g. panned away): retain last stable on-screen position so it never jumps into occluded UI
+      target_x = last_pos_ref.current.x
+      target_y = last_pos_ref.current.y
+    } else {
+      //Unanchored initial position: default cleanly to the unoccluded top-right of the viewport
+      target_x = max_x
       target_y = min_y
+      last_pos_ref.current = { x: target_x, y: target_y }
+    }
 
     panel_style = {
       left: `${Math.round(target_x)}px`,
       position: 'fixed',
       top: `${Math.round(target_y)}px`,
-    }
-  } else if (!embedded) {
-    panel_style = {
-      bottom: '80px',
-      left: '24px',
-      position: 'fixed',
     }
   } else if (embedded) {
     panel_style = {
@@ -527,14 +576,26 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={on_close}
-            className="p-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0"
-            title={t.mapPanels.cityDetails.closeCityDetails}
-          >
-            <Icon name="close" className="text-sm" />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {on_center_city && (
+              <button
+                type="button"
+                onClick={on_center_city}
+                className="p-1 text-muted-foreground hover:text-white transition-colors cursor-pointer"
+                title={(t.mapPanels.cityDetails as any).centerOnMap || 'Center on map'}
+              >
+                <Icon name="my_location" className="text-sm" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={on_close}
+              className="p-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              title={t.mapPanels.cityDetails.closeCityDetails}
+            >
+              <Icon name="close" className="text-sm" />
+            </button>
+          </div>
         </div>
       )}
 

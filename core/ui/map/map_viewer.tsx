@@ -248,6 +248,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   //Declare local instance variables
   let active_layer: any = null
+  let center_on_coordinates: (arg0_lon: number, arg1_lat: number) => void
   let circle_pixel_data: any
   let container_ref = useRef<HTMLDivElement>(null)
   let deck_ref = useRef<any>(null)
@@ -257,6 +258,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let elevation_spikes_data: any
   let equal_earth_land_geo_json: any
   let graticule_paths: { path: [number, number][] }[]
+  let handle_center_selected_city: () => void
   let handle_click: (info: any) => void
   let handle_close_all_details: () => void
   let handle_hover: (info: any) => void
@@ -267,6 +269,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let handle_select_country_from_city: (arg0_state_id?: number | string, arg0_country_name?: string) => void
   let hover_raf_ref = useRef<number | null>(null)
   let is_interacting_ref = useRef<boolean>(false)
+  let last_centered_city_key_ref = useRef<string | null>(null)
   let last_country_ref = useRef<CountryFeature | null>(null)
   let last_hovered_country_code_ref = useRef<string | null | undefined>(null)
   let layers: any[]
@@ -417,6 +420,120 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     setProjViewStates: set_proj_view_states,
     views,
   } = view_state_mgmt
+
+  center_on_coordinates = useCallback(
+    (arg0_lon: number, arg1_lat: number) => {
+      //Convert from parameters
+      let c_lat = arg1_lat
+      let c_lon = arg0_lon
+
+      //Guard clauses
+      if (!Number.isFinite(c_lon) || !Number.isFinite(c_lat))
+        return
+
+      //Function body
+      set_proj_view_states((arg0_prev) => {
+        let current = arg0_prev[projection] || {}
+        let updated: any
+
+        if (projection === 'EqualEarth') {
+          let proj = projectEqualEarth(c_lon, c_lat)
+          updated = {
+            ...current,
+            target: [proj[0], proj[1], 0],
+          }
+        } else if (projection === 'Equirectangular') {
+          updated = {
+            ...current,
+            target: [c_lon, c_lat, 0],
+          }
+        } else if (projection === 'Mercator') {
+          updated = {
+            ...current,
+            latitude: Math.max(-85, Math.min(85, c_lat)),
+            longitude: c_lon,
+          }
+        } else {
+          //Globe
+          updated = {
+            ...current,
+            latitude: c_lat,
+            longitude: c_lon,
+          }
+        }
+
+        return {
+          ...arg0_prev,
+          [projection]: updated,
+        }
+      })
+    },
+    [projection, set_proj_view_states]
+  )
+
+  handle_center_selected_city = useCallback(() => {
+    //Declare local instance variables
+    let c_lat: number | undefined
+    let c_lon: number | undefined
+
+    //Function body
+    if (selected_city_anchor_coord && Number.isFinite(selected_city_anchor_coord[0]) && Number.isFinite(selected_city_anchor_coord[1])) {
+      c_lon = selected_city_anchor_coord[0]
+      c_lat = selected_city_anchor_coord[1]
+    } else if (selected_city) {
+      let city_coords = (selected_city as any).coords
+      let city_raw = (selected_city as any).rawCoords
+
+      if (city_raw && Number.isFinite(city_raw[0]) && Number.isFinite(city_raw[1])) {
+        c_lon = city_raw[0]
+        c_lat = city_raw[1]
+      } else if (city_coords && Number.isFinite(city_coords[0]) && Number.isFinite(city_coords[1])) {
+        if (Math.abs(city_coords[0]) > 90 && Math.abs(city_coords[1]) <= 90) {
+          c_lon = city_coords[0]
+          c_lat = city_coords[1]
+        } else {
+          c_lat = city_coords[0]
+          c_lon = city_coords[1]
+        }
+      }
+    }
+
+    if (c_lon !== undefined && c_lat !== undefined)
+      center_on_coordinates(c_lon, c_lat)
+  }, [center_on_coordinates, selected_city, selected_city_anchor_coord])
+
+  useEffect(() => {
+    if (selected_city && selected_city.key && selected_city.key !== last_centered_city_key_ref.current) {
+      last_centered_city_key_ref.current = selected_city.key
+
+      if (!selected_city_anchor_screen) {
+        let c_lat: number | undefined
+        let c_lon: number | undefined
+        let city_coords = (selected_city as any).coords
+        let city_raw = (selected_city as any).rawCoords
+
+        if (city_raw && Number.isFinite(city_raw[0]) && Number.isFinite(city_raw[1])) {
+          c_lon = city_raw[0]
+          c_lat = city_raw[1]
+        } else if (city_coords && Number.isFinite(city_coords[0]) && Number.isFinite(city_coords[1])) {
+          if (Math.abs(city_coords[0]) > 90 && Math.abs(city_coords[1]) <= 90) {
+            c_lon = city_coords[0]
+            c_lat = city_coords[1]
+          } else {
+            c_lat = city_coords[0]
+            c_lon = city_coords[1]
+          }
+        }
+
+        if (c_lon !== undefined && c_lat !== undefined) {
+          set_selected_city_anchor_coord([c_lon, c_lat])
+          center_on_coordinates(c_lon, c_lat)
+        }
+      }
+    } else if (!selected_city) {
+      last_centered_city_key_ref.current = null
+    }
+  }, [selected_city, selected_city_anchor_screen, center_on_coordinates])
 
 
   let [basemap, set_basemap] = useState<string>(MAP_CONFIG.basemapLayers[0]?.id || 'dark')
@@ -895,8 +1012,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       //Function body
       if (coord && Number.isFinite(coord[0]) && Number.isFinite(coord[1])) {
         city_anchor_coord = [coord[0], coord[1]]
-      } else if (city.rawCoords && Number.isFinite(city.rawCoords[0]) && Number.isFinite(city.rawCoords[1])) {
-        city_anchor_coord = [city.rawCoords[0], city.rawCoords[1]]
+      } else if ((city as any).rawCoords && Number.isFinite((city as any).rawCoords[0]) && Number.isFinite((city as any).rawCoords[1])) {
+        city_anchor_coord = [(city as any).rawCoords[0], (city as any).rawCoords[1]]
       } else if (city.coords && Number.isFinite(city.coords[0]) && Number.isFinite(city.coords[1])) {
         if (Math.abs(city.coords[0]) > 90 && Math.abs(city.coords[1]) <= 90) {
           city_anchor_coord = [city.coords[0], city.coords[1]]
@@ -1095,15 +1212,18 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   //Compute screen anchor coordinates for selected city panel
   let selected_city_anchor = useMemo(() => {
-    if (!selected_city && !selected_city_anchor_coord && !selected_city_anchor_screen)
+    let current_view_state = proj_view_states[projection]
+    if (!current_view_state)
+      return null
+    if (!selected_city && !selected_city_anchor_coord)
       return null
     if (!deck_ref.current)
-      return selected_city_anchor_screen || null
+      return null
 
     try {
       let vp = deck_ref.current.deck?.getViewports?.()[0]
       if (!vp)
-        return selected_city_anchor_screen || null
+        return null
 
       let c_lat: number | undefined
       let c_lon: number | undefined
@@ -1129,7 +1249,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       }
 
       if (c_lon === undefined || c_lat === undefined || !Number.isFinite(c_lon) || !Number.isFinite(c_lat))
-        return selected_city_anchor_screen || null
+        return null
 
       let px = c_lon
       let py = c_lat
@@ -1142,24 +1262,36 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           return null
       }
       let projected = vp.project(projection === 'EqualEarth' ? [px, py, 0] : [px, py])
-      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1]))
-        return { x: projected[0], y: projected[1] }
+      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1])) {
+        let is_in_viewport = (
+          projected[0] >= 0 &&
+          projected[0] <= vp.width &&
+          projected[1] >= 0 &&
+          projected[1] <= vp.height
+        )
+        if (is_in_viewport)
+          return { x: projected[0], y: projected[1] }
+      }
+      return null
     } catch {
       // Ignore projection errors
     }
-    return selected_city_anchor_screen || null
-  }, [selected_city, selected_city_anchor_coord, selected_city_anchor_screen, projection, proj_view_states])
+    return null
+  }, [selected_city, selected_city_anchor_coord, projection, proj_view_states])
 
   //Compute screen anchor coordinates for selected historical borders panel
   let selected_historical_anchor = useMemo(() => {
+    let current_view_state = proj_view_states[projection]
+    if (!current_view_state)
+      return null
     if (!selected_historical_feature || !deck_ref.current)
-      return selected_historical_anchor_screen || null
+      return null
     if (!selected_historical_anchor_coord)
-      return selected_historical_anchor_screen || null
+      return null
     try {
       let vp = deck_ref.current.deck?.getViewports?.()[0]
       if (!vp)
-        return selected_historical_anchor_screen || null
+        return null
       let [c_lon, c_lat] = selected_historical_anchor_coord
       let px = c_lon
       let py = c_lat
@@ -1172,13 +1304,21 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           return null
       }
       let projected = vp.project(projection === 'EqualEarth' ? [px, py, 0] : [px, py])
-      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1]))
-        return { x: projected[0], y: projected[1] }
+      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1])) {
+        let is_in_viewport = (
+          projected[0] >= 0 &&
+          projected[0] <= vp.width &&
+          projected[1] >= 0 &&
+          projected[1] <= vp.height
+        )
+        if (is_in_viewport)
+          return { x: projected[0], y: projected[1] }
+      }
     } catch {
       // Ignore projection errors
     }
-    return selected_historical_anchor_screen || null
-  }, [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, projection, proj_view_states])
+    return null
+  }, [selected_historical_feature, selected_historical_anchor_coord, projection, proj_view_states])
 
   handle_close_all_details = useCallback(() => {
     //Function body
@@ -1259,8 +1399,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       let city_anchor_coord: [number, number] | null = null
 
       //Function body
-      if (city.rawCoords && Number.isFinite(city.rawCoords[0]) && Number.isFinite(city.rawCoords[1])) {
-        city_anchor_coord = [city.rawCoords[0], city.rawCoords[1]]
+      if ((city as any).rawCoords && Number.isFinite((city as any).rawCoords[0]) && Number.isFinite((city as any).rawCoords[1])) {
+        city_anchor_coord = [(city as any).rawCoords[0], (city as any).rawCoords[1]]
       } else if (city.coords && Number.isFinite(city.coords[0]) && Number.isFinite(city.coords[1])) {
         if (Math.abs(city.coords[0]) > 90 && Math.abs(city.coords[1]) <= 90) {
           city_anchor_coord = [city.coords[0], city.coords[1]]
@@ -1283,10 +1423,14 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       set_active_panel_type('city')
       set_selected_city_anchor_coord(city_anchor_coord)
       set_selected_city_anchor_screen(null)
+
+      if (city_anchor_coord)
+        center_on_coordinates(city_anchor_coord[0], city_anchor_coord[1])
+
       if (on_select_city)
         on_select_city(city)
     },
-    [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, on_select_city]
+    [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, center_on_coordinates, on_select_city]
   )
 
   handle_select_country_from_city = useCallback(
@@ -1583,8 +1727,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           city={selected_city}
           currentYear={timeline_year || 2025}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}
+          onCenterCity={handle_center_selected_city}
           onClose={handle_close_all_details}
           onSelectCountry={handle_select_country_from_city}
+          sidebarWidth={sidebar_width}
         />
       )}
 

@@ -385,13 +385,13 @@ export let App: React.FC = function () {
         rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
         capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
         capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
-        capitalStateId: selected_city_record.capitalStateId || (selected_city_record as any).capital_state_id || selected_city_point.capitalStateId || (selected_city_point as any).capital_state_id,
+        capitalStateId: (selected_city_record as any).capitalStateId || (selected_city_record as any).capital_state_id || (selected_city_point as any).capitalStateId || (selected_city_point as any).capital_state_id,
         capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
-        capital_state_id: (selected_city_record as any).capital_state_id || selected_city_record.capitalStateId || (selected_city_point as any).capital_state_id || selected_city_point.capitalStateId,
+        capital_state_id: (selected_city_record as any).capital_state_id || (selected_city_record as any).capitalStateId || (selected_city_point as any).capital_state_id || (selected_city_point as any).capitalStateId,
         capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
         isCapital: Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital || selected_city_point.isCapital || (selected_city_point as any).is_capital),
         is_capital: Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital || (selected_city_point as any).is_capital || selected_city_point.isCapital),
-      }
+      } as unknown as CityFullRecord
     }
     if (selected_city_point)
       return selected_city_point as unknown as CityFullRecord

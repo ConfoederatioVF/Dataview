@@ -317,7 +317,7 @@ export let resolveHistoricalCityName = function (
   let first_post_1975: HistoricalNameRecord | null = null
   let hist: HistoricalNameRecord[]
   let latest_post_1975: HistoricalNameRecord | null = null
-  let parsed: ParsedYearMonthDay
+  let parsed: ParsedDateRecord
   let rec_frac: number
   let target_frac: number
 

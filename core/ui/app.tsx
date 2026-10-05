@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useDeferredValue } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react'
 import {
   AppMode,
   DataFormat,
@@ -175,7 +175,7 @@ export let App: React.FC = function () {
     percentileCutoff: 99,
     strokeWidth: 2,
   })
-  let [stadester_config, set_stadester_config] = useState<StadesterConfig>({
+  let [stadester_config, set_stadester_config] = useState<StadesterConfig>(() => ({
     bubbleSize: 0.4,
     capitalColorMode: 'state',
     capitalConstantColor: '#FFDC00',
@@ -185,7 +185,7 @@ export let App: React.FC = function () {
     filled: true,
     growthPalette: 'Rainbow',
     halo: false,
-    heuristicCulling: false,
+    heuristicCulling: is_mobile,
     labelCollision: true,
     maxCities: 4000,
     minPop: 0.01,
@@ -193,7 +193,7 @@ export let App: React.FC = function () {
     showCapitals: true,
     showCapitalUnderlines: true,
     showLabels: true,
-  })
+  }))
   let [selected_city_key, set_selected_city_key] = useState<string | null>(null)
   let [selected_city_point, set_selected_city_point] = useState<CityPoint | null>(null)
   let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
@@ -258,6 +258,19 @@ export let App: React.FC = function () {
     if (url_proj && ['EqualEarth', 'Mercator', 'Globe', 'Equirectangular'].includes(url_proj))
       set_projection(url_proj)
   }, [])
+
+  let prev_is_mobile_culling_ref = useRef(is_mobile)
+  useEffect(() => {
+    if (prev_is_mobile_culling_ref.current !== is_mobile) {
+      prev_is_mobile_culling_ref.current = is_mobile
+      if (is_mobile) {
+        set_stadester_config((arg0_prev) => ({
+          ...arg0_prev,
+          heuristicCulling: true,
+        }))
+      }
+    }
+  }, [is_mobile])
 
   useEffect(() => {
     let updateAppHeight = () => {
@@ -637,7 +650,9 @@ export let App: React.FC = function () {
                 filled: opts.filled ?? arg0_prev.filled,
                 growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
                 halo: opts.halo ?? arg0_prev.halo,
-                heuristicCulling: opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false,
+                heuristicCulling: is_mobile
+                  ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
+                  : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
                 labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
                 largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
                 maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
@@ -668,7 +683,7 @@ export let App: React.FC = function () {
     return () => {
       cancelled = true
     }
-  }, [default_data_layers, default_stadester_enabled])
+  }, [default_data_layers, default_stadester_enabled, is_mobile])
 
   //Hot reload layers definitions and descriptions in real time without full-page reload
   useEffect(() => {
@@ -689,7 +704,9 @@ export let App: React.FC = function () {
             filled: opts.filled ?? arg0_prev.filled,
             growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
             halo: opts.halo ?? arg0_prev.halo,
-            heuristicCulling: opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false,
+            heuristicCulling: is_mobile
+              ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
+              : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
             labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
             largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
             maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
@@ -706,7 +723,7 @@ export let App: React.FC = function () {
     return () => {
       unsubscribe()
     }
-  }, [])
+  }, [is_mobile])
 
   //Hot reload map modes descriptions and labels in real time
   useEffect(() => {

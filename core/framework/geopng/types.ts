@@ -105,6 +105,8 @@ export interface StadesterDisplayOptions {
   maxCities?: number
   min_pop?: number
   minPop?: number
+  mobile_heuristic_culling?: boolean
+  mobileHeuristicCulling?: boolean
   opacity?: number
   prefer_least_diacritics?: boolean
   show_capitals?: boolean

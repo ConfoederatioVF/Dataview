@@ -1925,7 +1925,6 @@
 {"name":"Krempe","coords":[9.48,53.83],"historical_names":[{"date":"1234.1.1","name":"Crempe"},{"date":"1500.1.1","name":"Krempe"}]},
 {"name":"Lahr","coords":[7.87,48.4],"historical_names":[{"date":"1278.1.1","name":"Lahre"},{"date":"1350.1.1","name":"Lahr"}],"capital":{"1428.1.1":599,"1804.1.1":null}},
 {"name":"Lalibela","coords":[39.04763,12.0309],"historical_names":[{"date":"1200.1.1","name":"Lalibela"}]},
-{"name":"Lamphun","coords":[99.43393,8.82753],"historical_names":[{"date":"668.1.1","name":"Hariphunchai"},{"date":"1281.1.1","name":"Lamphun"}]},
 {"name":"Landshut","coords":[12.14685,48.54419],"historical_names":[{"date":"1200.1.1","name":"Landshut"}]},
 {"name":"Le Locle","coords":[6.74874,47.05772],"historical_names":[{"date":"1200.1.1","name":"Le Locle"}]},
 {"name":"Leek","coords":[-2.02,53.11],"historical_names":[{"date":"1200.1.1","name":"Leek"}]},

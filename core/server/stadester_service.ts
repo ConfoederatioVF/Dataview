@@ -1106,10 +1106,16 @@ export let StadesterService = {
         clean_display_name = 'City of London'
       }
 
+      let city_coords = c.coords
+      if (key === 'stadester-Lamphun-Thailand' || (c.name === 'Lamphun' && c.country === 'Thailand')) {
+        if (city_coords && city_coords[0] < 10)
+          city_coords = [18.5744357, 99.00369719999999]
+      }
+
       indexed_record[key] = {
         area: c.area,
         colour: c.colour,
-        coords: c.coords,
+        coords: city_coords,
         country: c.country,
         density: c.density,
         elevation: c.elevation,

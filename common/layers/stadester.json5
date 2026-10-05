@@ -30,6 +30,7 @@
             large_city_contrast: 1.0,
             max_cities: 4000,
             min_pop: 0.01,
+            mobile_heuristic_culling: true,
             opacity: 0.7,
             prefer_least_diacritics: true,
             show_capitals: true,

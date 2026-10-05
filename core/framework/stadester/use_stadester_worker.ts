@@ -144,8 +144,9 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         bubbleSize: config.bubbleSize ?? 1.0,
         colorMode: config.colorMode || 'growth',
         displayOptions: config.display_options,
-        growthPalette: config.growthPalette || 'Rainbow',
-        heuristicCulling: Boolean(config.heuristicCulling),
+        heuristicCulling: (config.heuristicCulling !== undefined)
+          ? Boolean(config.heuristicCulling)
+          : Boolean(window_w < 768),
         isHalo: config.halo !== false && !config.filled,
         isMobile: Boolean(window_w < 768),
         labelCollision: config.labelCollision !== false,

@@ -6,7 +6,13 @@
         name: "Simplified Borders",
         description: [
             "### Simplified Borders",
-            "Pooled borders from CShapes-2.0 (after 1886AD) and Atlas 0.6b (before 1886AD), used for statistical purposes. ",
+            "Simplified de facto borders used for statistical purposes. Shapes after 1886AD are not coloured.",
+            "<details>",
+            "<summary>Methodology</summary>",
+            "Joint database between [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf).",
+            "",
+            "Both Cliopatria and C-Shapes 2.0 are known to contain encoding and historical errors, but allow for qualitative encoding from academic databases, i.e. via [Seshat](https://seshat-db.com/).",
+            "</details>"
         ],
         filepaths: [
             {

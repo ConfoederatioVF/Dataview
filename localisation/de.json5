@@ -325,6 +325,7 @@
     play: "Zeitleiste abspielen",
     pause: "Zeitleiste anhalten",
     speed: "Wiedergabegeschwindigkeit",
+    customSpeed: "Benutzerdefinierte Geschwindigkeit",
     snap: "An Keyframes einrasten",
     settings: "Zeitleisten-Einstellungen",
     loop: "Wiedergabeschleife",

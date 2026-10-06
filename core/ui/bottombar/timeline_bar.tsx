@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { UfDate, TIMELINE_MILESTONES, type UfDateObject } from '@framework/utils/uf_date.ts'
 import { Icon } from '@ui/components/icon'
+import { NumberInput } from '@ui/components/number_input'
 import { Slider } from '@ui/components/slider'
 import { HistoricalDatePicker } from './historical_date_picker'
 import { useLocalisation } from '@localisation'
@@ -54,9 +55,12 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
   //Declare local instance variables
   let anim_frame_ref = useRef<number | null>(null)
   let current_year_ref = useRef<number>(current_year)
+  let custom_speed_input: string
   let date_obj: { day: number; month: number; year: number }
   let format_string: (template: string, ...args: any[]) => string
   let formatted_date: string
+  let handle_custom_speed_blur: () => void
+  let handle_custom_speed_change: (arg0_val: string) => void
   let handle_jump_year: (arg0_year: number) => void
   let handle_select_exact_date: (arg0_date: UfDateObject) => void
   let handle_slider_change: (arg0_val: number[]) => void
@@ -81,6 +85,8 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
   let localisation: ReturnType<typeof useLocalisation>
   let on_change_year_ref = useRef(on_change_year)
   let on_toggle_play_ref = useRef(on_toggle_play)
+  let render_speed_controls: () => React.ReactNode
+  let set_custom_speed_input: React.Dispatch<React.SetStateAction<string>>
   let set_is_collapsed: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_date_picker_open: React.Dispatch<React.SetStateAction<boolean>>
   let set_is_looping: React.Dispatch<React.SetStateAction<boolean>>
@@ -99,6 +105,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
   localisation = useLocalisation()
   format_string = localisation.formatString
   t = localisation.t
+  ;[custom_speed_input, set_custom_speed_input] = useState(String(playback_speed))
   ;[is_collapsed, set_is_collapsed] = useState(false)
   ;[is_date_picker_open, set_is_date_picker_open] = useState(false)
   ;[is_looping, set_is_looping] = useState(false)
@@ -201,6 +208,32 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
     }
     return list
   }, [available_keyframes, min_year, max_year])
+
+  useEffect(() => {
+    set_custom_speed_input(String(playback_speed))
+  }, [playback_speed])
+
+  handle_custom_speed_blur = function () {
+    let parsed = parseFloat(custom_speed_input)
+    if (isNaN(parsed) || parsed <= 0 || parsed > 100) {
+      set_custom_speed_input(String(playback_speed))
+    } else {
+      set_custom_speed_input(String(parsed))
+      if (on_change_playback_speed)
+        on_change_playback_speed(parsed)
+    }
+  }
+
+  handle_custom_speed_change = function (arg0_val: string) {
+    let parsed: number
+    let val = arg0_val
+
+    set_custom_speed_input(val)
+    parsed = parseFloat(val)
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 100)
+      if (on_change_playback_speed)
+        on_change_playback_speed(parsed)
+  }
 
   handle_jump_year = useCallback(
     function (arg0_year: number) {
@@ -382,6 +415,54 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
     }
   }, [])
 
+  render_speed_controls = function () {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] text-muted-foreground block">{t.timeline.speed}</label>
+          <span className="text-[11px] font-mono text-primary font-semibold">{playback_speed}×</span>
+        </div>
+        <div className="grid grid-cols-5 gap-1 border border-border bg-muted/30 p-0.5 text-xs font-mono">
+          {speed_options.map((arg0_spd) => (
+            <button
+              key={arg0_spd}
+              type="button"
+              onClick={() => on_change_playback_speed && on_change_playback_speed(arg0_spd)}
+              className={`py-1 text-center transition-colors cursor-pointer ${
+                playback_speed === arg0_spd
+                  ? 'bg-primary text-primary-foreground font-bold shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              {arg0_spd}×
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/30">
+          <span className="text-[11px] text-muted-foreground truncate">{t.timeline.customSpeed}</span>
+          <div className="w-24 shrink-0">
+            <NumberInput
+              aria-label={t.timeline.customSpeed}
+              value={custom_speed_input}
+              onChange={handle_custom_speed_change}
+              onBlur={handle_custom_speed_blur}
+              onKeyDown={(arg0_e) => {
+                if (arg0_e.key === 'Enter')
+                  (arg0_e.target as HTMLInputElement).blur()
+              }}
+              min={0.05}
+              max={100}
+              step={0.25}
+              precision={2}
+              className="text-xs font-mono py-1 px-2"
+              containerClassName="h-7"
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   //Return statement
   return (
     <div
@@ -473,25 +554,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                       </div>
 
                       {/* Playback Speed */}
-                      <div>
-                        <label className="text-[11px] text-muted-foreground block mb-1">{t.timeline.speed}</label>
-                        <div className="grid grid-cols-5 gap-1 border border-border bg-muted/30 p-0.5 text-xs font-mono">
-                          {speed_options.map((arg0_spd) => (
-                            <button
-                              key={arg0_spd}
-                              type="button"
-                              onClick={() => on_change_playback_speed && on_change_playback_speed(arg0_spd)}
-                              className={`py-1 text-center transition-colors cursor-pointer ${
-                                playback_speed === arg0_spd
-                                  ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                              }`}
-                            >
-                              {arg0_spd}×
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      {render_speed_controls()}
 
                       {/* Keyframe Snapping */}
                       <div className="pt-2 border-t border-border/40">
@@ -663,25 +726,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                     </div>
 
                     {/* Playback Speed */}
-                    <div>
-                      <label className="text-[11px] text-muted-foreground block mb-1">{t.timeline.speed}</label>
-                      <div className="grid grid-cols-5 gap-1 border border-border bg-muted/30 p-0.5 text-xs font-mono">
-                        {speed_options.map((arg0_spd) => (
-                          <button
-                            key={arg0_spd}
-                            type="button"
-                            onClick={() => on_change_playback_speed && on_change_playback_speed(arg0_spd)}
-                            className={`py-1 text-center transition-colors cursor-pointer ${
-                              playback_speed === arg0_spd
-                                ? 'bg-primary text-primary-foreground font-bold shadow-xs'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                            }`}
-                          >
-                            {arg0_spd}×
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    {render_speed_controls()}
 
                     {/* Keyframe Snapping */}
                     <div className="pt-2 border-t border-border/40">

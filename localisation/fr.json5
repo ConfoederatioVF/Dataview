@@ -325,6 +325,7 @@
     play: "Lire la chronologie",
     pause: "Mettre en pause la chronologie",
     speed: "Vitesse de lecture",
+    customSpeed: "Vitesse personnalisée",
     snap: "Aligner sur les images clés",
     settings: "Paramètres de la chronologie",
     loop: "Lecture en boucle",

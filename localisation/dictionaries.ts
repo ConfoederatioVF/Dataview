@@ -321,6 +321,7 @@ export interface LocalisationConfig {
     closeTimeline: string
     collapseScrubber: string
     currentYear?: string
+    customSpeed: string
     expandScrubber: string
     jumpToMilestone: string
     loadingRaster: string

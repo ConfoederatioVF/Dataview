@@ -325,6 +325,7 @@
     play: "Play Timeline",
     pause: "Pause Timeline",
     speed: "Playback Speed",
+    customSpeed: "Custom Speed",
     snap: "Snap to Keyframes",
     settings: "Timeline Settings",
     loop: "Loop Playback",

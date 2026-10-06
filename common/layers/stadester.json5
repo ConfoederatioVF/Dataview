@@ -10,7 +10,18 @@
             "### Stadestér",
             "A global historical database of 34.400+ cities and urban settlements from 3300BC to the present. Split by version (1.0, 1.1).",
             "",
-            "Historical names, capital cities, and other visuals can be toggled in the **Mapmodes** menu."
+            "Historical names, capital cities, and other visuals can be toggled in the **Mapmodes** menu.",
+            "<details>",
+            "<summary>Methodology (1.1)</summary>",
+            "Recalculation of Reba et al. using Worldcitypop as ground truth anchors. Relative rates of change were then assessed using Reba, and flagging systems for manual geolocation were put in place. Most cities were located using Geohack, Google Places API, and Photon (OSM).",
+            "",
+            "In addition, historical names and capital city histories were added to Stadestér via agent chunking and batch processing. Spatiotemporal heuristics were then applied to flag chunks for review.",
+            "</details>",
+            "<details>",
+            "<summary>Methodology (1.0)</summary>",
+            "Merger of Buringh, Chandler, de Vries, GHSL (UCDB), GHS-POP, Modelski, Populstat, Reba et al. and Wikipedia. Cities were then geolocated using Google Maps/Nominatim. Population estimates were calculated via weighted geometric means of cubic spline interpolations over source domains.",
+            "- DOI: [10.5281/zenodo.17180328](https://doi.org/10.5281/zenodo.17180328)",
+            "</details>"
         ],
         filepath: "${l_stad}/stadester_1.1.json",
         permissions: [

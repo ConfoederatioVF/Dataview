@@ -118,7 +118,7 @@
             "<summary>Methodology</summary>",
             "Superlearner structure trained on disaggregated ILOSTAT, Olivetti data. This structure was pioneered by [van Dijk et al. 2022](https://doi.org/10.1371/journal.pone.0278120).",
             "",
-            "Due to the sparsity of empirical data further back, outputs from hybrid superlearners were then subjected to spatial variance algorithms anchored to estimated historical baselines and Clark-Fisher/[Chenery & Syrquin 1975](https://documents1.worldbank.org/curated/en/482491468328816108/pdf/11913.pdf) modelling (GDP/urbanisation covariates), taking into account GDP per capita and urbanisation.",
+            "Due to the sparsity of empirical data further back, outputs from hybrid superlearners were then subjected to spatial variance algorithms anchored to estimated historical baselines and Clark-Fisher/[Chenery & Syrquin 1975](https://documents1.worldbank.org/curated/en/482491468328816108/pdf/11913.pdf) modelling, taking into account GDP per capita and urbanisation.",
             "",
             "An additive log ratio (ALR) shift is used to preserve intra-country spatial variance.",
             "</details>"
@@ -184,6 +184,12 @@
         name: "Professions",
         synthetic_by_default: true,
         filepath: "${prof_tot}/${profession}_${gender}_${year}.png",
+        description: [
+            "### Professions (Total)",
+            "The total amount of workers in the given sector (agriculture/manufacturing/services/informal labour). Not in work constitutes the population of working age not actively in employment (1 - LFPR), defined as cohorts aged 15-65 (ILO/World Bank definition), stratified by sex. This currently has the weakness of excluding some forms of child labour in earlier periods.",
+            "",
+            "See methodology in **Professions (%)** for more details."
+        ],
         unit: "Total workforce in the selected occupation(s)",
         variable_selectors: { //There should also be an option to enable all variable selectors
             gender: {

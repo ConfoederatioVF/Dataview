@@ -1175,6 +1175,51 @@ export let StadesterService = {
       }
     }
 
+    if (!indexed_record['stadester-Macau-Macao']) {
+      indexed_record['stadester-Macau-Macao'] = {
+        colour: [173, 62, 62],
+        coords: [22.1987, 113.5439],
+        country: 'Macao',
+        elevation: 10,
+        id: 'stadester-Macau-Macao',
+        key: 'stadester-Macau-Macao',
+        max_pop: 680000,
+        max_year: 2020,
+        min_year: 1557,
+        name: 'Macau',
+        original_names: ['macau', 'macao'],
+        other_names: ['Macau', 'Macao', 'Aomen'],
+        population: {
+          '1557': 500,
+          '1560': 1000,
+          '1600': 5000,
+          '1635': 35000,
+          '1700': 19500,
+          '1750': 24000,
+          '1800': 30000,
+          '1850': 29000,
+          '1900': 63000,
+          '1910': 75000,
+          '1920': 84000,
+          '1930': 120000,
+          '1940': 150000,
+          '1950': 188000,
+          '1960': 169000,
+          '1970': 249000,
+          '1980': 242000,
+          '1990': 352000,
+          '2000': 432000,
+          '2010': 540000,
+          '2020': 680000,
+        },
+        region: 'eastasia',
+        years: [1557, 1560, 1600, 1635, 1700, 1750, 1800, 1850, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020],
+      }
+    }
+    if (!indexed_record['stadester-Macau-Macau']) {
+      indexed_record['stadester-Macau-Macau'] = indexed_record['stadester-Macau-Macao']
+    }
+
     StadesterService.applyCityMetadata(indexed_record)
     StadesterService.applyStateCapitals(indexed_record)
     StadesterService.datasets.set(dataset_name, indexed_record)

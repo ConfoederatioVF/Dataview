@@ -117,11 +117,17 @@ function reconcileCapitalWithAuthoritativeBorders (
   let c_name_nfd = c_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   let c_short = (city.shortName || getShortCityLabel(city.name || '')).toLowerCase().trim()
   let c_short_nfd = c_short.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  let cand_country: string
+  let cap_dist: number
   let has_polity_by_id: boolean
   let has_polity_by_name: boolean
+  let is_capkey_match: boolean
+  let is_direct_polity_match: boolean
   let is_same_key: boolean
   let is_same_name: boolean
   let match: any = null
+  let match_capkey: string
+  let match_polity: string
   let pad: number = 3.5
   let polity_name_lower: string
   let resolved_color: any
@@ -186,7 +192,14 @@ function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  //3. If candidate match found, verify spatial plausibility against match.bbox
+  //3. If candidate match found, verify spatial plausibility against match.cap_coords, match.bbox and country compatibility
+  if (match && match.cap_coords && c_lon !== undefined && c_lat !== undefined) {
+    cap_dist = Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
+    if (cap_dist > 1.5) {
+      match = null
+    }
+  }
+
   if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
     if (
       c_lon < match.bbox[0] - pad ||
@@ -195,6 +208,24 @@ function reconcileCapitalWithAuthoritativeBorders (
       c_lat > match.bbox[3] + pad
     ) {
       match = null
+    }
+  }
+
+  if (match) {
+    cand_country = (city.country || '').toLowerCase().trim()
+    match_polity = (match.polity_name || '').toLowerCase().trim()
+    match_capkey = (match.capkey || '').toLowerCase().trim()
+    if (cand_country && match_polity) {
+      is_direct_polity_match = cand_country === match_polity || match_polity.includes(cand_country) || cand_country.includes(match_polity)
+      is_capkey_match = Boolean(match_capkey && match_capkey.includes(cand_country))
+      if (!is_direct_polity_match && !is_capkey_match) {
+        cap_dist = (match.cap_coords && c_lon !== undefined && c_lat !== undefined)
+          ? Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
+          : 999
+        if (cap_dist > 0.5) {
+          match = null
+        }
+      }
     }
   }
 

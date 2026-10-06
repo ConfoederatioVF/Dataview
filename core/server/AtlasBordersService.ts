@@ -456,6 +456,47 @@ let ensureCityCoordsLoaded = function (): void {
       }
       cell_bucket.push(rec)
     }
+
+    if (!city_coords_by_key.has('stadester-Macau-Macao')) {
+      let macau_rec: CityCoordRecord = {
+        coords: [113.5439, 22.1987],
+        country: 'Macao',
+        key: 'stadester-Macau-Macao',
+        name: 'Macau',
+        other_names: ['Macao', 'Aomen'],
+      }
+      city_coords_by_key.set('stadester-Macau-Macao', macau_rec)
+      city_coords_by_key.set('stadester-macau-macao', macau_rec)
+      city_coords_by_key.set('stadester-Macau-Macau', macau_rec)
+      city_coords_by_key.set('macaumacao', macau_rec)
+
+      let m_bucket = city_coords_spatial_grid.get('113_22')
+      if (!m_bucket) {
+        m_bucket = []
+        city_coords_spatial_grid.set('113_22', m_bucket)
+      }
+      m_bucket.push(macau_rec)
+    }
+
+    if (!city_coords_by_key.has('stadester-Vaduz-Liechtenstein')) {
+      let vaduz_rec: CityCoordRecord = {
+        coords: [9.521, 47.141],
+        country: 'Liechtenstein',
+        key: 'stadester-Vaduz-Liechtenstein',
+        name: 'Vaduz',
+        other_names: ['Vaduz'],
+      }
+      city_coords_by_key.set('stadester-Vaduz-Liechtenstein', vaduz_rec)
+      city_coords_by_key.set('stadester-vaduz-liechtenstein', vaduz_rec)
+      city_coords_by_key.set('vaduzliechtenstein', vaduz_rec)
+
+      let v_bucket = city_coords_spatial_grid.get('9_47')
+      if (!v_bucket) {
+        v_bucket = []
+        city_coords_spatial_grid.set('9_47', v_bucket)
+      }
+      v_bucket.push(vaduz_rec)
+    }
   } catch (arg0_err) {
     console.error('[AtlasBordersService] Error indexing all_cities_coords.json:', arg0_err)
   }

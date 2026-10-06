@@ -56839,8 +56839,7 @@
     "other_names": [
       "Chuhai",
       "Chu-hai",
-      "Zhuhai",
-      "Macau"
+      "Zhuhai"
     ],
     "region": "eastasia"
   },
@@ -618785,5 +618784,46 @@
     "name": "Baturyn",
     "other_names": [],
     "region": "eastern_europe_and_russia"
+  },
+  {
+    "aliases_found": [],
+    "coords": [
+      113.5439,
+      22.1987
+    ],
+    "country": "Macao",
+    "dataset_keys": [
+      "stadester-Macau-Macao"
+    ],
+    "earliest_year": 1557,
+    "has_pre_1900": true,
+    "key": "stadester-Macau-Macao",
+    "latest_year": 2026,
+    "name": "Macau",
+    "other_names": [
+      "Macao",
+      "Aomen"
+    ],
+    "region": "eastasia"
+  },
+  {
+    "aliases_found": [],
+    "coords": [
+      9.521,
+      47.141
+    ],
+    "country": "Liechtenstein",
+    "dataset_keys": [
+      "stadester-Vaduz-Liechtenstein"
+    ],
+    "earliest_year": 1400,
+    "has_pre_1900": true,
+    "key": "stadester-Vaduz-Liechtenstein",
+    "latest_year": 2026,
+    "name": "Vaduz",
+    "other_names": [
+      "Vaduz"
+    ],
+    "region": "europe"
   }
 ]

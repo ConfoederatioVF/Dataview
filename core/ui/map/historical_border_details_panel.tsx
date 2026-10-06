@@ -246,6 +246,15 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       //4. Fallback: match by name, shortName or aliases
       if (!target_city) {
         target_city = cities.find((arg0_c) => {
+          if (cap_coords) {
+            let c_lat = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[1] : ((arg0_c as any).lat !== undefined ? (arg0_c as any).lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
+            let c_lon = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[0] : ((arg0_c as any).lon !== undefined ? (arg0_c as any).lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
+            if (c_lat !== undefined && c_lon !== undefined) {
+              let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
+              if (dist > 1.5)
+                return false
+            }
+          }
           let c_n_clean = (arg0_c.name || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
           let c_n_norm = c_n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
           let c_s_clean = (arg0_c.shortName || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()

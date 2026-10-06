@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { HistoricalBorderFeature, HistoricalBordersResponse } from '@server/AtlasBordersService'
-import { UfDate } from '@framework/utils/uf_date'
+import { UfDate, type UfDateObject } from '@framework/utils/uf_date'
 
 export interface HistoricalBordersHookResult {
   bordersData: {
@@ -84,7 +84,7 @@ export let fetchHistoricalBordersAsync = async function (
   ;(data as any).collection = collection
 
   //Cap client-side cache
-  max_cache_size = 160
+  max_cache_size = 1000
   while (client_borders_cache.size >= max_cache_size) {
     oldest_k = client_borders_cache.keys().next().value
     if (oldest_k) {
@@ -141,6 +141,7 @@ export let useHistoricalBorders = function (
   } | null
   let cache_key: string
   let dataset = custom_dataset || (active_layer_id && active_layer_id.includes('border') ? active_layer_id : 'statistical_borders')
+  let date_obj: UfDateObject
   let debounce_timer_ref = useRef<NodeJS.Timeout | null>(null)
   let domain: [number, number] | null
   let effective_day: number
@@ -201,16 +202,10 @@ export let useHistoricalBorders = function (
 
   is_active = enabled || active_layer_id === 'statistical_borders' || active_layer_id === 'detailed_borders' || active_layer_id === 'simplified_borders' || Boolean(active_layer_id && active_layer_id.includes('border'))
 
-  if (is_playing && !snap_to_keyframes) {
-    effective_year = Math.round(timeline_year)
-    effective_month = 1
-    effective_day = 1
-  } else {
-    let date_obj = UfDate.fromFractionalYear(timeline_year)
-    effective_year = date_obj.year
-    effective_month = date_obj.month
-    effective_day = date_obj.day
-  }
+  date_obj = UfDate.fromFractionalYear(timeline_year)
+  effective_day = date_obj.day
+  effective_month = date_obj.month
+  effective_year = date_obj.year
 
   cache_key = `${dataset}:${effective_year}-${effective_month}-${effective_day}`
 

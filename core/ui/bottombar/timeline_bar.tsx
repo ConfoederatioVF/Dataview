@@ -194,7 +194,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
   }, [date_obj])
 
   slider_normalised_val = useMemo(() => {
-    return Math.round(UfDate.yearToTimelinePosition(current_year)*1000)
+    return Math.round(UfDate.yearToTimelinePosition(current_year)*100000)
   }, [current_year])
 
   keyframe_positions = useMemo(() => {
@@ -277,7 +277,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
   handle_slider_change = useCallback(
     function (arg0_val: number[]) {
-      let norm_val = Math.max(0, Math.min(1000, arg0_val[0]))/1000
+      let norm_val = Math.max(0, Math.min(100000, arg0_val[0]))/100000
       let mapped_year = UfDate.timelinePositionToYear(norm_val)
 
       if (snap_to_keyframes && available_keyframes.length > 0) {
@@ -345,15 +345,18 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
           if (is_looping_ref.current) {
             next_pos = 0
             let next_year = UfDate.timelinePositionToYear(next_pos)
+            current_year_ref.current = next_year
             on_change_year_ref.current(next_year)
           } else {
             let end_year = UfDate.timelinePositionToYear(1)
+            current_year_ref.current = end_year
             on_change_year_ref.current(end_year)
             on_toggle_play_ref.current()
             return
           }
         } else {
           let next_year = UfDate.timelinePositionToYear(next_pos)
+          current_year_ref.current = next_year
           on_change_year_ref.current(next_year)
         }
       }
@@ -450,10 +453,10 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
                 if (arg0_e.key === 'Enter')
                   (arg0_e.target as HTMLInputElement).blur()
               }}
-              min={0.05}
+              min={0.001}
               max={100}
-              step={0.25}
-              precision={2}
+              step={0.1}
+              precision={3}
               className="text-xs font-mono py-1 px-2"
               containerClassName="h-7"
             />
@@ -860,7 +863,7 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
               {/* Logarithmic Range Slider */}
               <Slider
                 min={0}
-                max={1000}
+                max={100000}
                 step={1}
                 value={[slider_normalised_val]}
                 onValueChange={handle_slider_change}

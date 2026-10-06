@@ -65,6 +65,7 @@ export interface MapViewerProps {
   minVal: number
   maxVal: number
   isMobile?: boolean
+  isPlaying?: boolean
   isTimelapseExporting?: boolean
   legendSubtitle?: string
   legendTitle: string
@@ -115,6 +116,7 @@ export interface MapViewerProps {
   settingsDrawerOpen?: boolean
   onToggleSettingsDrawer?: (open: boolean) => void
   sidebarWidth?: number
+  snapToKeyframes?: boolean
   colourbarWidth?: number
   onResizeColourbarWidth?: (width: number) => void
   infoPanelOpen?: boolean
@@ -186,6 +188,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let is_calculating_stats = props.isCalculatingStats
   let is_drawing = Boolean(props.isDrawing)
   let is_mobile = props.isMobile ?? false
+  let is_playing = props.isPlaying ?? false
   let is_timelapse_exporting = props.isTimelapseExporting ?? false
   let legend_position = ((props.legendPosition || 'top-left') as string).replace('centre', 'center') as 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
   let legend_subtitle = props.legendSubtitle
@@ -241,6 +244,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let set_projection = props.setProjection
   let set_stadester_config = props.setStadesterConfig
   let sidebar_width = props.sidebarWidth
+  let snap_to_keyframes = props.snapToKeyframes ?? false
   let stadester_cities = props.stadesterCities
   let stadester_config = props.stadesterConfig
   let timeline_year = props.timelineYear
@@ -315,7 +319,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     props.activeLayerId,
     timeline_year || 1950,
     is_historical_borders_active,
-    border_dataset
+    border_dataset,
+    { isPlaying: is_playing, snapToKeyframes: snap_to_keyframes }
   )
 
   //Dismiss city hover tooltip when cities overlay is disabled or mode changes

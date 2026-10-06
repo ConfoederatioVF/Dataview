@@ -423,8 +423,13 @@ export interface UseDeckLayersParams {
   onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   historicalBordersConfig?: HistoricalBordersConfig
   historicalBordersData?: {
+    count?: number
+    date?: string
     features: HistoricalBorderFeature[]
+    tag?: string
     type: 'FeatureCollection'
+    year?: number
+    [key: string]: any
   } | null
   selectedHistoricalFeature?: HistoricalBorderFeature | null
   hoveredHistoricalFeature?: HistoricalBorderFeature | null

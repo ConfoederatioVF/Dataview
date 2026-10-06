@@ -9,8 +9,13 @@ export interface HistoricalBordersLayerOptions {
   config?: HistoricalBordersConfig
   hoveredHistoricalId?: string | number | null
   historicalBordersData?: {
+    count?: number
+    date?: string
     features: HistoricalBorderFeature[]
+    tag?: string
     type: 'FeatureCollection'
+    year?: number
+    [key: string]: any
   } | null
   isDrawing?: boolean
   onHoverHistoricalFeature?: (arg0_feature: HistoricalBorderFeature | null, arg1_x?: number, arg2_y?: number) => void
@@ -72,7 +77,8 @@ export function createHistoricalBordersDeckLayer (
   //Declare local instance variables
   let base_layer: GeoJsonLayer
   let base_rgba: [number, number, number, number]
-  let date_tag: string | number
+  let clean_tag: string
+  let data_tag: string
   let feature_count: number
   let fill_alpha: number
   let fill_opacity: number
@@ -92,6 +98,8 @@ export function createHistoricalBordersDeckLayer (
     return null
 
   //Function body
+  data_tag = (borders_data as any).tag || (borders_data as any).date || borders_data.features[0]?.properties?.date || (borders_data as any).year || ''
+  clean_tag = data_tag ? String(data_tag).replace(/[^a-zA-Z0-9_-]/g, '_') : 'slice'
   feature_count = borders_data.features.length
   fill_opacity = (config?.fillOpacity !== undefined) ? config.fillOpacity : 0.0
   fill_alpha = Math.round(fill_opacity * 255)
@@ -100,8 +108,7 @@ export function createHistoricalBordersDeckLayer (
   stroke_width = (config?.strokeWidth !== undefined) ? config.strokeWidth : 1.25
   base_rgba = parseHexToRgba(stroke_color, 200)
 
-  date_tag = borders_data.features[0]?.properties?.date || timeline_year
-  layer_id = `historical-borders-${projection}-${timeline_year}-${date_tag}-${feature_count}`
+  layer_id = `historical-borders-${projection}${config?.dataset ? `-${config.dataset}` : ''}-${clean_tag}-${feature_count}`
 
   //Retrieve or create memoised layer data with stable reference across renders
   if (!cached_layer_data_map.has(borders_data))

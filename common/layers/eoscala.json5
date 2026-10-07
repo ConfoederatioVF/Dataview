@@ -146,6 +146,12 @@
             category_type: "continuous",
             filepath: "${h2}LFPR_OLS/4.active_labourforce/labourforce_t_${year}.png",
             unit: "Total",
+            description: [
+                "### Raw Labourforce (Total)",
+                "The sum total of the active workforce in both the female and male labourforce, estimated per gridcell. This is not the same as cohorts of working age (15-65), since it only takes into account the economically active labourforce (LFPR).",
+                "",
+                "See **LFPR** for more details on Methodology."
+            ],
             legend: {
                 colourscheme: "plasma"
             }
@@ -173,6 +179,16 @@
         name: "Labourforce Participation Rate (LFPR)",
         category_type: "continuous",
         unit: "%",
+        description: [
+            "### Labourforce Participation Rate (LFPR)",
+            "The percentage of working-age cohorts (15-65) currently economically active, stratified by sex.",
+            "<details>",
+            "<summary>Methodology</summary>",
+            "Rolling Weighted Least Squares (WLS) ensemble with Tukey's fences to preserve intra-country variance. Source training data came from [Olivetti (2013)](https://www.nber.org/system/files/working_papers/w19131/w19131.pdf) and [ILOSTAT](https://ilostat.ilo.org/). Structural equations for female LFPR (modelled elastically) was derived from [Goldin (1994)](http://doi.org/10.3386/w4707).",
+            "",
+            "Conversely, male LFPR was estimated to be relatively inelastic in terms of global composition; see [Costa (2000)](https://doi.org/10.1257/jep.14.4.101), [Pencavel (1986)](https://doi.org/10.1016/S1573-4463(86)01004-0) for the reasonings behind this decision.",
+            "</details>"
+        ],
         lfpr_female: {
             name: "Labourforce Participation Rate (LFPR, Female)",
             category_type: "continuous",
@@ -201,7 +217,7 @@
         filepath: "${prof_per}/${profession}_${gender}_${year}.png",
         description: [
             "### Professions (Percentage)",
-            "Estimated sectoral breakdowns per gridcell (agriculture/manufacturing/services/informal labour). Note that labour structures without corresponding state capacity are typically treated as informal labour. This includes non-sedentary work.",
+            "Estimated sectoral breakdowns per gridcell (agriculture/manufacturing/services/informal labour). Note that labour structures without corresponding state capacity are typically treated as informal labour. This includes non-sedentary work. Those labelled __Not in Work__ are the residual for LFPR, i.e. `1 - LFPR.`",
             "",
             "> [!WARNING]",
             "> Uniquely amongst Confoederal datasets, source work here currently involves the encoding of **magic numbers**, which we will be keen to remove in the future. Problem?",
@@ -340,6 +356,23 @@
         name: "Wealth/Income",
         filepath: "${h3}/wealth_income/1.${indicator}/${indicator}_${year}.png",
         unit: "FY$2000, average household in gridcell",
+        description: [
+            "### Wealth/Income",
+            "Per household fiscal statistics, modelled in average terms per gridcell. Note that national accounts for certain places was incomplete, and for such regions, regional fallbacks were used for training. ",
+            "",
+            "<details>",
+            "<summary>Methodology</summary>",
+            "National accounts data was compiled from the [World Inequality Database (WID)](http://wid.world/) and BR Mitchell's [_International Historical Statistics_](https://link.springer.com/series/13993) (ISSN: 2947-1583). Training for wealth/income relied on Regularised Least Squares [L2] and Tukey's fences for normalisation.",
+            "",
+            "LCU deflators were borrowed from the [World Bank](https://data.worldbank.org/indicator/NY.GDP.DEFL.ZS.AD). After disaggregation, such data served as training targets for discrete WLS models.",
+            "",
+            "__Definitions:__",
+            "- Net wealth: `ahweali992`: (Net personal wealth)",
+            "- Net income: `aptinci992`: (Pre-tax national income)",
+            "- Disposable income: `adiinci992`: (Post-tax national income)",
+            "- Discretionary income: `asavhoi992` + `aindgoi992`: (Savings rate + government-provided services)",
+            "</details>"
+        ],
         variable_selectors: {
             indicator: {
                 name: "Indicator",

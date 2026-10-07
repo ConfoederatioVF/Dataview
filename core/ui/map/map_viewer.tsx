@@ -838,7 +838,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           info.object.properties?.is_drawn !== undefined
         ))
       ) {
-        let hist_feat = info.object as HistoricalBorderFeature
+        let hist_feat = ((info.object && info.object.raw_feature) ? info.object.raw_feature : info.object) as HistoricalBorderFeature
         set_nav_history([])
         set_active_panel_type('country')
         if (on_close_city_details)
@@ -1871,7 +1871,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         <MapmodesTray
           activeLayerId={props.activeLayerId}
           activeVariableSelectors={props.activeVariableSelectors}
-          allCountries={country_features}
+          allCountries={effective_country_features.length > 0 ? effective_country_features : country_features}
           analyticsOpen={props.analyticsOpen}
           bottomClearance={effective_mapmodes_bottom}
           legendPosition={legend_position}

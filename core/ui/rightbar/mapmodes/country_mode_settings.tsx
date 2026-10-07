@@ -48,10 +48,18 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
 
   get_country_code = function (arg0_country: CountryFeature) {
     let country = arg0_country;
-    let iso = country.properties.iso_a3;
+    let iso = country.properties?.iso_a3;
     if (iso && iso !== '-99')
       return iso;
-    return country.properties.adm0_a3 || country.properties.name || '';
+    if (country.properties?.adm0_a3)
+      return country.properties.adm0_a3;
+    if (country.properties?.gwcode !== undefined && country.properties?.gwcode !== null)
+      return String(country.properties.gwcode);
+    if (country.id !== undefined && country.id !== null)
+      return String(country.id);
+    if (country.properties?.id !== undefined && country.properties?.id !== null)
+      return String(country.properties.id);
+    return country.properties?.name || '';
   };
 
   filtered_countries = useMemo(() => {
@@ -60,13 +68,31 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       return all_countries;
     return all_countries.filter((arg0_country) => {
       let code = get_country_code(arg0_country).toLowerCase();
-      let name = (arg0_country.properties.name || '').toLowerCase();
-      return name.includes(q) || code.includes(q);
+      let gwcode_str = (arg0_country.properties?.gwcode !== undefined && arg0_country.properties?.gwcode !== null) ? String(arg0_country.properties.gwcode) : '';
+      let name = (arg0_country.properties?.name || '').toLowerCase();
+      return name.includes(q) || code.includes(q) || (gwcode_str && gwcode_str.includes(q));
     });
   }, [all_countries, country_search]);
 
   selected_country_code_set = useMemo(() => {
-    return new Set(selected_countries.map(get_country_code));
+    let code_set = new Set<string>();
+    for (let i = 0; i < selected_countries.length; i++) {
+      let c = selected_countries[i];
+      let primary_code = get_country_code(c);
+      if (primary_code)
+        code_set.add(primary_code);
+      if (c.id !== undefined && c.id !== null)
+        code_set.add(String(c.id));
+      if (c.properties?.id !== undefined && c.properties?.id !== null)
+        code_set.add(String(c.properties.id));
+      if (c.properties?.gwcode !== undefined && c.properties?.gwcode !== null)
+        code_set.add(`gw_${c.properties.gwcode}`);
+      if (c.properties?.iso_a3 && c.properties.iso_a3 !== '-99')
+        code_set.add(c.properties.iso_a3);
+      if (c.properties?.name)
+        code_set.add(`name_${c.properties.name.toLowerCase()}`);
+    }
+    return code_set;
   }, [selected_countries]);
 
   //Return statement
@@ -155,10 +181,16 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
           filtered_countries.map((arg0_c) => {
             let c = arg0_c;
             let code = get_country_code(c);
-            let is_checked = selected_country_code_set.has(code);
+            let is_checked = selected_country_code_set.has(code) ||
+              (c.id !== undefined && c.id !== null && selected_country_code_set.has(String(c.id))) ||
+              (c.properties?.id !== undefined && c.properties?.id !== null && selected_country_code_set.has(String(c.properties.id))) ||
+              (c.properties?.gwcode !== undefined && c.properties?.gwcode !== null && selected_country_code_set.has(`gw_${c.properties.gwcode}`)) ||
+              Boolean(c.properties?.name && selected_country_code_set.has(`name_${c.properties.name.toLowerCase()}`));
+            let item_key = (c.id !== undefined && c.id !== null) ? String(c.id) : (code || c.properties?.name || '');
+
             return (
               <label
-                key={code || c.properties.name}
+                key={item_key}
                 className="flex items-center gap-2 px-2 py-1 hover:bg-muted/50 cursor-pointer"
               >
                 <input
@@ -168,13 +200,17 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
                   className="w-[var(--body-font-size)] h-[var(--body-font-size)] rounded-none accent-emerald-500 cursor-pointer shrink-0"
                 />
                 <span className="truncate flex-1 text-foreground">
-                  {c.properties.name}
+                  {c.properties?.name || code}
                 </span>
-                {c.properties.iso_a3 && c.properties.iso_a3 !== '-99' && (
+                {c.properties?.iso_a3 && c.properties.iso_a3 !== '-99' ? (
                   <span className="text-[var(--body-font-size)] text-muted-foreground">
                     {c.properties.iso_a3}
                   </span>
-                )}
+                ) : (c.properties?.gwcode !== undefined && c.properties?.gwcode !== null) ? (
+                  <span className="text-[var(--body-font-size)] text-muted-foreground">
+                    #{c.properties.gwcode}
+                  </span>
+                ) : null}
               </label>
             );
           })
@@ -184,14 +220,15 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       {/* Selected Country Pills */}
       {selected_countries.length > 0 && (
         <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto pt-1">
-          {selected_countries.map((arg0_c) => {
+          {selected_countries.map((arg0_c, arg1_i) => {
             let c = arg0_c;
+            let pill_key = (c.id !== undefined && c.id !== null) ? String(c.id) : (get_country_code(c) || c.properties?.name || String(arg1_i));
             return (
               <span
-                key={get_country_code(c)}
+                key={pill_key}
                 className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[var(--body-font-size)] bg-primary/20 text-primary border border-primary/40 rounded-none font-medium"
               >
-                <span className="truncate max-w-[90px]">{c.properties.name}</span>
+                <span className="truncate max-w-[90px]">{c.properties?.name || pill_key}</span>
                 <button
                   type="button"
                   onClick={() => on_toggle_country(c)}

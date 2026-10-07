@@ -901,20 +901,26 @@ export let App: React.FC = function () {
 
     let c = arg0_c
     set_selected_countries((arg0_prev) => {
-      let exists = arg0_prev.some(
-        (arg0_x) =>
-          (arg0_x.properties.iso_a3 && arg0_x.properties.iso_a3 !== '-99' && arg0_x.properties.iso_a3 === c.properties.iso_a3) ||
-          arg0_x.properties.name === c.properties.name
-      )
-      if (exists) {
-        return arg0_prev.filter(
-          (arg0_x) =>
-            !(
-              (arg0_x.properties.iso_a3 && arg0_x.properties.iso_a3 !== '-99' && arg0_x.properties.iso_a3 === c.properties.iso_a3) ||
-              arg0_x.properties.name === c.properties.name
-            )
-        )
+      let matches = function (arg0_a: CountryFeature, arg1_b: CountryFeature): boolean {
+        let a = arg0_a
+        let b = arg1_b
+        if (a === b)
+          return true
+        if (a.id !== undefined && b.id !== undefined && a.id === b.id)
+          return true
+        if (a.properties?.id !== undefined && b.properties?.id !== undefined && a.properties.id === b.properties.id)
+          return true
+        if (a.properties?.gwcode !== undefined && b.properties?.gwcode !== undefined && a.properties.gwcode === b.properties.gwcode)
+          return true
+        if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
+          return true
+        return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
       }
+
+      let exists = arg0_prev.some((arg0_x) => matches(arg0_x, c))
+      if (exists)
+        return arg0_prev.filter((arg0_x) => !matches(arg0_x, c))
+
       return [...arg0_prev, c]
     })
   }, [is_drawing])
@@ -936,15 +942,25 @@ export let App: React.FC = function () {
         set_inspect_data(null)
       } else {
         set_selected_countries((arg0_prev) => {
-          if (
-            arg0_prev.length === 1 &&
-            (arg0_prev[0] === c ||
-              ((arg0_prev[0] as any).id !== undefined &&
-                (arg0_prev[0] as any).id === (c as any).id &&
-                arg0_prev[0].properties?.name === c.properties?.name &&
-                arg0_prev[0].geometry === c.geometry))
-          )
+          let matches = function (arg0_a: CountryFeature, arg1_b: CountryFeature): boolean {
+            let a = arg0_a
+            let b = arg1_b
+            if (a === b)
+              return true
+            if (a.id !== undefined && b.id !== undefined && a.id === b.id)
+              return true
+            if (a.properties?.id !== undefined && b.properties?.id !== undefined && a.properties.id === b.properties.id)
+              return true
+            if (a.properties?.gwcode !== undefined && b.properties?.gwcode !== undefined && a.properties.gwcode === b.properties.gwcode)
+              return true
+            if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
+              return true
+            return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
+          }
+
+          if (arg0_prev.length === 1 && matches(arg0_prev[0], c))
             return arg0_prev
+
           return [c]
         })
       }

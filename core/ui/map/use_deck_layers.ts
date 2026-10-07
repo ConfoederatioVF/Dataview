@@ -564,6 +564,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let invert_palette = options.invertPalette
     let is_cartesian: boolean
     let is_drawing = Boolean(options.isDrawing)
+    let is_historical_hovered_selected: boolean
     let is_hovered_already_selected: boolean
     let is_mobile = Boolean(options.isMobile)
     let land_data: any
@@ -675,9 +676,23 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     }
 
     if (selected_countries && selected_countries.length > 0) {
-      effective_selected_array = selected_countries
+      effective_selected_array = [...selected_countries]
+      if (options.selectedHistoricalFeature) {
+        let hist_feat = options.selectedHistoricalFeature as unknown as CountryFeature
+        let already_in = effective_selected_array.some((arg0_c: any) =>
+          arg0_c === hist_feat ||
+          (arg0_c.id !== undefined && hist_feat.id !== undefined && arg0_c.id === hist_feat.id) ||
+          (arg0_c.properties?.id !== undefined && hist_feat.properties?.id !== undefined && arg0_c.properties.id === hist_feat.properties.id) ||
+          (arg0_c.properties?.gwcode !== undefined && hist_feat.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hist_feat.properties.gwcode) ||
+          (arg0_c.properties?.name && hist_feat.properties?.name && arg0_c.properties.name === hist_feat.properties.name)
+        )
+        if (!already_in)
+          effective_selected_array.push(hist_feat)
+      }
     } else if (selected_country) {
       effective_selected_array = [selected_country]
+    } else if (options.selectedHistoricalFeature) {
+      effective_selected_array = [options.selectedHistoricalFeature as unknown as CountryFeature]
     }
 
     //1. Basemap Layer
@@ -933,97 +948,29 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       )
     }
 
-    //6. Selected Countries Highlight
-    let non_historical_selected_array = effective_selected_array.filter((arg0_c: any) => {
-      let is_historical = Boolean(
-        options.historicalBordersConfig?.enabled &&
-        (arg0_c.properties?.gwcode !== undefined ||
-         arg0_c.raw_feature !== undefined ||
-         (options.selectedHistoricalFeature && (
-           arg0_c.id === options.selectedHistoricalFeature.id ||
-           arg0_c.properties?.id === options.selectedHistoricalFeature.properties?.id ||
-           arg0_c.properties?.gwcode === options.selectedHistoricalFeature.properties?.gwcode
-         )))
-      )
-      return !is_historical
-    })
-
-    if (non_historical_selected_array.length > 0) {
-      selected_data = (projection === 'EqualEarth')
-        ? non_historical_selected_array.map((c) => ({
-            ...c,
-            geometry: transformGeometryToEqualEarth(c.geometry),
-          }))
-        : non_historical_selected_array.map((c) => ({ ...c, geometry: { ...c.geometry } }))
-
-      selected_key = non_historical_selected_array
-        .map((c) => (c.properties.iso_a3 && c.properties.iso_a3 !== '-99' ? c.properties.iso_a3 : c.properties.name))
-        .join('_')
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `countries-selected-${projection}-${selected_key}`,
-          data: selected_data,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          filled: true,
-          getFillColor: [240, 60, 60, 30],
-          stroked: true,
-          getLineColor: [240, 60, 60, 220],
-          getLineWidth: 2,
-          lineWidthUnits: 'pixels',
-          updateTriggers: {
-            getFillColor: [selected_key],
-            getLineColor: [selected_key],
-          },
-          parameters: { depthTest: false },
-          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
-        })
-      )
-    }
-
-    //7. Hovered Country Highlight in Countries Mode
-    is_hovered_already_selected = effective_selected_array.some(
-      (c) =>
-        (c.properties.iso_a3 && c.properties.iso_a3 !== '-99' && c.properties.iso_a3 === hovered_country?.properties.iso_a3) ||
-        c.properties.name === hovered_country?.properties.name
+    //6. Historical Statistical Borders (CShapes-2.0 & atlas.naissance)
+    is_historical_hovered_selected = Boolean(
+      options.hoveredHistoricalFeature && effective_selected_array.some((arg0_c: any) => {
+        let hf = options.hoveredHistoricalFeature!
+        return (
+          arg0_c === hf ||
+          (arg0_c.id !== undefined && hf.id !== undefined && arg0_c.id === hf.id) ||
+          (arg0_c.properties?.id !== undefined && hf.properties?.id !== undefined && arg0_c.properties.id === hf.properties.id) ||
+          (arg0_c.properties?.gwcode !== undefined && hf.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hf.properties.gwcode) ||
+          (arg0_c.properties?.name && hf.properties?.name && arg0_c.properties.name === hf.properties.name)
+        )
+      })
     )
 
-    if (!is_drawing && countries_mode && hovered_country && !is_hovered_already_selected) {
-      hov_key = (hovered_country.properties.iso_a3 && hovered_country.properties.iso_a3 !== '-99')
-        ? hovered_country.properties.iso_a3
-        : (hovered_country.properties.adm0_a3 || hovered_country.properties.name || 'hov')
-
-      hovered_data = (projection === 'EqualEarth')
-        ? [{ ...hovered_country, geometry: transformGeometryToEqualEarth(hovered_country.geometry) }]
-        : [{ ...hovered_country, geometry: { ...hovered_country.geometry } }]
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `country-hovered-${projection}-${hov_key}`,
-          data: hovered_data,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          filled: true,
-          getFillColor: [255, 255, 255, 45],
-          stroked: true,
-          getLineColor: [255, 255, 255, 220],
-          getLineWidth: 1.5,
-          lineWidthUnits: 'pixels',
-          parameters: { depthTest: false },
-          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
-        })
-      )
-    }
-
-    //8. Historical Statistical Borders (CShapes-2.0 & atlas.naissance)
     let historical_borders_layer = createHistoricalBordersDeckLayer({
       config: options.historicalBordersConfig,
       historicalBordersData: options.historicalBordersData,
-      hoveredHistoricalId: options.hoveredHistoricalFeature?.id || options.hoveredHistoricalFeature?.properties?.id,
+      hoveredHistoricalId: !is_historical_hovered_selected ? (options.hoveredHistoricalFeature?.id || options.hoveredHistoricalFeature?.properties?.id) : null,
       isDrawing: is_drawing,
       onHoverHistoricalFeature: options.onHoverHistoricalFeature,
       onSelectHistoricalFeature: options.onSelectHistoricalFeature,
       projection,
-      selectedHistoricalId: options.selectedHistoricalFeature?.id || options.selectedHistoricalFeature?.properties?.id,
+      selectedHistoricalId: null,
       timelineYear: options.timelineYear || 1950,
     })
     if (historical_borders_layer) {
@@ -1189,6 +1136,103 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             depthMask: false,
             depthTest: false,
           },
+        })
+      )
+    }
+
+    //8c-2. Selected Countries Highlight (Unified across Modern Natural Earth and Atlas Historical Borders)
+    if (effective_selected_array.length > 0) {
+      selected_data = (projection === 'EqualEarth')
+        ? effective_selected_array.map((arg0_c: any) => {
+            let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
+            return {
+              ...arg0_c,
+              geometry: transformGeometryToEqualEarth(geom),
+            }
+          })
+        : effective_selected_array.map((arg0_c: any) => {
+            let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
+            return {
+              ...arg0_c,
+              geometry: { ...geom },
+            }
+          })
+
+      selected_key = effective_selected_array
+        .map((arg0_c: any) => {
+          let iso = arg0_c.properties?.iso_a3
+          if (iso && iso !== '-99')
+            return iso
+          if (arg0_c.properties?.gwcode !== undefined && arg0_c.properties?.gwcode !== null)
+            return `gw_${arg0_c.properties.gwcode}`
+          if (arg0_c.id !== undefined && arg0_c.id !== null)
+            return String(arg0_c.id)
+          if (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null)
+            return String(arg0_c.properties.id)
+          return arg0_c.properties?.name || 'sel'
+        })
+        .join('_')
+
+      layers_array.push(
+        new GeoJsonLayer({
+          id: `countries-selected-${projection}-${selected_key}`,
+          data: selected_data,
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          filled: true,
+          getFillColor: [200, 40, 40, 35],
+          stroked: true,
+          getLineColor: [200, 40, 40, 255],
+          getLineWidth: 2.5,
+          lineWidthUnits: 'pixels',
+          lineWidthMinPixels: 2,
+          updateTriggers: {
+            getFillColor: [selected_key],
+            getLineColor: [selected_key],
+          },
+          parameters: { depthTest: false },
+          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
+        })
+      )
+    }
+
+    //8c-3. Hovered Country Highlight in Countries Mode
+    is_hovered_already_selected = effective_selected_array.some((arg0_c: any) => {
+      if (!hovered_country)
+        return false
+      return (
+        (arg0_c.properties?.iso_a3 && arg0_c.properties.iso_a3 !== '-99' && arg0_c.properties.iso_a3 === hovered_country.properties?.iso_a3) ||
+        (arg0_c.id !== undefined && hovered_country.id !== undefined && arg0_c.id === hovered_country.id) ||
+        (arg0_c.properties?.id !== undefined && hovered_country.properties?.id !== undefined && arg0_c.properties.id === hovered_country.properties.id) ||
+        (arg0_c.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hovered_country.properties.gwcode) ||
+        Boolean(arg0_c.properties?.name && hovered_country.properties?.name && arg0_c.properties.name === hovered_country.properties.name)
+      )
+    })
+
+    if (!is_drawing && countries_mode && hovered_country && !is_hovered_already_selected) {
+      hov_key = (hovered_country.properties?.iso_a3 && hovered_country.properties.iso_a3 !== '-99')
+        ? hovered_country.properties.iso_a3
+        : (hovered_country.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== null)
+          ? `gw_${hovered_country.properties.gwcode}`
+          : (hovered_country.properties?.adm0_a3 || (hovered_country.id !== undefined && hovered_country.id !== null ? String(hovered_country.id) : '') || hovered_country.properties?.name || 'hov')
+
+      let hov_geom = (hovered_country as any).raw_feature?.geometry || hovered_country.geometry
+      hovered_data = (projection === 'EqualEarth')
+        ? [{ ...hovered_country, geometry: transformGeometryToEqualEarth(hov_geom) }]
+        : [{ ...hovered_country, geometry: { ...hov_geom } }]
+
+      layers_array.push(
+        new GeoJsonLayer({
+          id: `country-hovered-${projection}-${hov_key}`,
+          data: hovered_data,
+          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+          filled: true,
+          getFillColor: [255, 255, 255, 45],
+          stroked: true,
+          getLineColor: [255, 255, 255, 220],
+          getLineWidth: 1.5,
+          lineWidthUnits: 'pixels',
+          parameters: { depthTest: false },
+          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
         })
       )
     }

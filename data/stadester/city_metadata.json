@@ -6188,19 +6188,12 @@
       {
         "date": "500.1.1",
         "name": "Isanapura"
-      },
-      {
-        "date": "889.1.1",
-        "name": "Angkor"
-      },
-      {
-        "date": "1432.1.1",
-        "name": "Phnom Penh"
-      },
-      {
-        "date": "1800.1.1",
-        "name": "Isanapura"
       }
+    ],
+    "other_names": [
+      "Isanapura",
+      "Ishanapura",
+      "Sambor Prei Kuk"
     ],
     "capital": {
       "551.1.1": 1903,
@@ -7186,8 +7179,26 @@
     "historical_names": [
       {
         "date": "622.1.1",
+        "name": "Chaktomuk"
+      },
+      {
+        "date": "1372.1.1",
+        "name": "Phnom Penh"
+      },
+      {
+        "date": "1432.1.1",
+        "name": "Chaktomuk"
+      },
+      {
+        "date": "1865.1.1",
         "name": "Phnom Penh"
       }
+    ],
+    "other_names": [
+      "Phnom Penh",
+      "Chaktomuk",
+      "Krong Chaktomuk",
+      "Phnum Penh"
     ],
     "capital": {
       "1432.1.1": 7825,
@@ -28299,9 +28310,19 @@
     ],
     "historical_names": [
       {
-        "date": "1000.1.1",
+        "date": "889.1.1",
+        "name": "Yasodharapura"
+      },
+      {
+        "date": "1432.1.1",
         "name": "Angkor"
       }
+    ],
+    "other_names": [
+      "Angkor",
+      "Yasodharapura",
+      "Yaśodharapura",
+      "Nokor"
     ],
     "capital": {
       "701.1.1": 3672,

@@ -12,12 +12,15 @@
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/3.data_transform/GDP_PPP_pc) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/3.data_transform/GDP_PPP_pc)",
             "",
             "__Sources:__",
             "1. [Nordhaus (1994)](https://www.nber.org/system/files/chapters/c6064/c6064.pdf) via [De Long (1998)](https://pdf.stafforini.com/delong-1998-estimating-world-gdp.pdf).",
             "2. [Maddison Project Database (2023)](https://doi.org/10.34894/INZBF2)",
             "3. [Kummu et al. (2025)](https://doi.org/10.1038/s41597-025-04487-x)",
             "4. [World Bank (PPP deflators)](https://data.worldbank.org/indicator/PA.NUS.PPP)",
+            "",
+            "Since GDP (Nominal) is derived analogously to GDP (PPP) with only PPP deflators applied, you should check **GDP (PPP)** for more details.",
             "</details>"
         ],
         legend: {
@@ -32,7 +35,7 @@
         description: [
             "### GDP (Nominal) per capita",
             "Measured in FY$2000 International Dollars. Divides the GDP (Nominal) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
-            "Normalised via Tukey's fences.",
+            "Normalised via Tukey's fences (log-tail normalisation).",
             "",
             "See **GDP (Nominal)** for more details."
         ],
@@ -50,12 +53,21 @@
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/3.data_transform/GDP_pc) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/3.data_transform/GDP_pc)",
             "",
             "__Sources:__",
             "1. [Nordhaus (1994)](https://www.nber.org/system/files/chapters/c6064/c6064.pdf) via [De Long (1998)](https://pdf.stafforini.com/delong-1998-estimating-world-gdp.pdf).",
             "2. [Maddison Project Database (2023)](https://doi.org/10.34894/INZBF2)",
             "3. [Kummu et al. (2025)](https://doi.org/10.1038/s41597-025-04487-x)",
             "4. [World Bank (PPP deflators)](https://data.worldbank.org/indicator/PA.NUS.PPP)",
+            "",
+            "__Covariates used by OLS models:__",
+            "Covariates are used for both consistent training and hindcasting.",
+            "- [HYDE 3.3 (LU)](https://landuse.sites.uu.nl/hyde-project/): `conv_rangeland`, `cropland`, `grazing`, `ir_norice`, `ir_rice`, `pasture`, `rangeland`, `rf_norice`, `rf_rice`, `shifting`, `tot_irri`, `tot_rainfed`, `tot_rice`, `uopp_`",
+            "- [Velkscala 1.0](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b): `popc_`, `popd_`, `rurc_`, `urbc_`",
+            "- Delta covariates (annualised changes in Eoscala/Velkscala rasters).",
+            "",
+            "**Confused about how covariates were calculated?** Click the corresponding mapmode to highlight their methodology.",
             "</details>"
         ],
         legend: {
@@ -70,7 +82,7 @@
         description: [
             "### GDP (PPP) per capita",
             "Measured in FY$2000 International Dollars. Divides the GDP (PPP) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
-            "Normalised via Tukey's fences.",
+            "Normalised via Tukey's fences (log-tail normalisation).",
             "",
             "See **GDP (PPP)** for more details."
         ],
@@ -87,7 +99,8 @@
             "Due to legal and proxy changes, Gini measures wealth Gini prior to 1800AD, and income Gini after 1800AD (since legal/debt distortions afterwards render wealth as a metric of inequality somewhat arbitrary).",
             "<details>",
             "<summary>Methodology</summary>",
-            "Rolling ensemble WLS model with population-weighted dasymetric gravity modelling prior to 1800AD. Clamps use Tukey log-tail normalisation to preserve spatial variance within countries.",
+            "Rolling ensemble WLS model with population-weighted dasymetric gravity modelling prior to 1800AD. Clamps use Tukey's fences/log-tail normalisation to preserve spatial variance within countries.",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/2.data_cleaning/gini_OLS) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/2.data_cleaning/gini_OLS)",
             "",
             "__Sources:__",
             "- Prior to 1800AD: [GINI Project Database](https://doi.org/10.48512/XCV8502429) and others",
@@ -130,6 +143,14 @@
             "33. [Williamson et al. (2008)](https://ideas.repec.org/p/afc/wpaper/08-06.html)",
             "34. [Wronski (2022)](https://doi.org/10.1080/03585522.2022.2148736)",
             "</details>",
+            "__Covariates used by OLS models:__",
+            "Covariates are used for both consistent training and hindcasting.",
+            "- [HYDE 3.3 (LU)](https://landuse.sites.uu.nl/hyde-project/): `conv_rangeland`, `cropland`, `grazing`, `ir_norice`, `ir_rice`, `pasture`, `rangeland`, `rf_norice`, `rf_rice`, `shifting`, `tot_irri`, `tot_rainfed`, `tot_rice`, `uopp_`",
+            "- [Velkscala 1.0](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b): `popc_`, `popd_`, `rurc_`, `urbc_`",
+            "- [Eoscala 1.5](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr): `gdp_nominal`, `gdp_pc`, `gdp_ppp`, `gdp_ppp_pc`",
+            "- Delta covariates (annualised changes in Eoscala/Velkscala rasters).",
+            "",
+            "**Confused about how covariates were calculated?** Click the corresponding mapmode to highlight their methodology.",
             "</details>"
         ],
         legend: {
@@ -150,7 +171,7 @@
                 "### Raw Labourforce (Total)",
                 "The sum total of the active workforce in both the female and male labourforce, estimated per gridcell. This is not the same as cohorts of working age (15-65), since it only takes into account the economically active labourforce (LFPR).",
                 "",
-                "See **LFPR** for more details on Methodology."
+                "See **LFPR** and **Age/Sex** for more details on Methodology."
             ],
             legend: {
                 colourscheme: "plasma"
@@ -184,9 +205,18 @@
             "The percentage of working-age cohorts (15-65) currently economically active, stratified by sex.",
             "<details>",
             "<summary>Methodology</summary>",
-            "Rolling Weighted Least Squares (WLS) ensemble with Tukey's fences to preserve intra-country variance. Source training data came from [Olivetti (2013)](https://www.nber.org/system/files/working_papers/w19131/w19131.pdf) and [ILOSTAT](https://ilostat.ilo.org/). Structural equations for female LFPR (modelled elastically) was derived from [Goldin (1994)](http://doi.org/10.3386/w4707).",
+            "Rolling Weighted Least Squares (WLS) ensemble with Tukey's fences/log-tail normalisation to preserve intra-country variance. Source training data came from [Olivetti (2013)](https://www.nber.org/system/files/working_papers/w19131/w19131.pdf) and [ILOSTAT](https://ilostat.ilo.org/). Structural equations for female LFPR (modelled elastically) was derived from [Goldin (1994)](http://doi.org/10.3386/w4707).",
             "",
             "Conversely, male LFPR was estimated to be relatively inelastic in terms of global composition; see [Costa (2000)](https://doi.org/10.1257/jep.14.4.101), [Pencavel (1986)](https://doi.org/10.1016/S1573-4463(86)01004-0) for the reasonings behind this decision.",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/blob/main/histmap/2.data_cleaning/LFPR_OLS/) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/2.data_cleaning/LFPR_OLS)",
+            "",
+            "__Covariates used by WLS models:__",
+            "Covariates are used for both consistent training and hindcasting.",
+            "- [HYDE 3.3 (LU)](https://landuse.sites.uu.nl/hyde-project/): `conv_rangeland`, `cropland`, `grazing`, `ir_norice`, `ir_rice`, `pasture`, `rangeland`, `rf_norice`, `rf_rice`, `shifting`, `tot_irri`, `tot_rainfed`, `tot_rice`, `uopp_`",
+            "- [Velkscala 1.0](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b): `popc_`, `popd_`, `rurc_`, `urbc_`",
+            "- [Eoscala 1.5](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr): `discretionary_income`, `disposable_income`, `gdp_nominal`, `gdp_pc`, `gdp_ppp`, `gdp_ppp_pc`, `net_income`, `net_wealth`",
+            "",
+            "**Confused about how covariates were calculated?** Click the corresponding mapmode to highlight their methodology.",
             "</details>"
         ],
         lfpr_female: {
@@ -225,16 +255,33 @@
             "<details>",
             "<summary>Methodology</summary>",
             "Superlearner structure trained on disaggregated ILOSTAT, Olivetti data. This structure was pioneered by [van Dijk et al. 2022](https://doi.org/10.1371/journal.pone.0278120).",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/3.data_transform/professions) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/3.data_transform/professions)",
             "",
             "Due to the sparsity of empirical data further back, outputs from hybrid superlearners were then subjected to spatial variance algorithms anchored to estimated historical baselines and Clark-Fisher/[Chenery & Syrquin 1975](https://documents1.worldbank.org/curated/en/482491468328816108/pdf/11913.pdf) modelling, taking into account GDP per capita and urbanisation.",
             "",
             "An additive log ratio (ALR) shift is used to preserve intra-country spatial variance.",
+            "",
+            "__Definitions:__",
+            "Sectors are defined based on the ILO definition.",
+            "- Agriculture: self-enclosed.",
+            "- Manufacturing: construction, manufacturing; mining and quarrying, electricity, gas, and water supply.",
+            "- Services: public administration, community, social, and other services and activities; trade, transportation, accommodation, food, business, and administrative services.",
+            "- Informal labour: labour outside a formal state structure which is generally not taxed. Hunting and gathering/non-sedentary activity falls into this definition.",
+            "",
+            "__Covariates used by Superlearner models:__",
+            "Covariates are used for both consistent training and hindcasting. Superlearners are 50% OLS and 50% Random Forest. See Source Code for more details on parameters.",
+            "- [HYDE 3.3 (LU)](https://landuse.sites.uu.nl/hyde-project/): `conv_rangeland`, `cropland`, `grazing`, `ir_norice`, `ir_rice`, `pasture`, `rangeland`, `rf_norice`, `rf_rice`, `shifting`, `tot_irri`, `tot_rainfed`, `tot_rice`, `uopp_`",
+            "- [Velkscala 1.0](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b): `popc_`, `popd_`, `rurc_`, `urbc_`",
+            "- [Eoscala 1.5](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr): `discretionary_income`, `disposable_income`, `gdp_nominal`, `gdp_pc`, `gdp_ppp`, `gdp_ppp_pc`, `gini`, `lfpr_f`, `lfpr_m`, `net_income`, `net_wealth`",
+            "- Delta covariates (annualised changes in Eoscala/Velkscala rasters).",
+            "",
+            "**Confused about how covariates were calculated?** Click the corresponding mapmode to highlight their methodology.",
             "</details>"
         ],
         legend: {
             type: "linear"
         },
-        variable_selectors: { //There should also be an option to enable all variable selectors
+        variable_selectors: {
             gender: {
                 name: "Gender",
                 category_type: "continuous",
@@ -363,7 +410,7 @@
             "<details>",
             "<summary>Methodology</summary>",
             "",
-            "National accounts data was compiled from the [World Inequality Database (WID)](http://wid.world/) and BR Mitchell's [_International Historical Statistics_](https://link.springer.com/series/13993) (ISSN: 2947-1583). Training for wealth/income relied on Regularised Least Squares [L2] and Tukey's fences for normalisation.",
+            "National accounts data was compiled from the [World Inequality Database (WID)](http://wid.world/) and BR Mitchell's [_International Historical Statistics_](https://link.springer.com/series/13993) (ISSN: 2947-1583). Training for wealth/income relied on Regularised Least Squares [L2] and Tukey's fences, log-tail normalisation.",
             "",
             "LCU deflators were borrowed from the [World Bank](https://data.worldbank.org/indicator/NY.GDP.DEFL.ZS.AD). After disaggregation, such data served as training targets for discrete WLS models.",
             "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/3.data_transform/wealth_income) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/branch/main/histmap/3.data_transform/wealth_income)",

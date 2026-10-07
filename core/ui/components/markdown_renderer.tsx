@@ -159,18 +159,19 @@ interface ListItemNode {
   children: ListItemNode[]
   depth: number
   isOrdered: boolean
+  startNumber?: number
   text: string
 }
 
 /**
  * Builds a hierarchical tree of list item nodes based on their nesting depths.
  *
- * @param {Array<{ depth: number; isOrdered: boolean; text: string }>} arg0_items
+ * @param {Array<{ depth: number; isOrdered: boolean; start_number?: number; text: string }>} arg0_items
  *
  * @returns {ListItemNode[]}
  */
 let buildListTree = function (
-  arg0_items: { depth: number; isOrdered: boolean; text: string }[]
+  arg0_items: { depth: number; isOrdered: boolean; start_number?: number; text: string }[]
 ): ListItemNode[] {
   //Convert from parameters
   let items = arg0_items
@@ -186,6 +187,7 @@ let buildListTree = function (
       children: [],
       depth: item.depth,
       isOrdered: item.isOrdered,
+      startNumber: item.start_number,
       text: item.text,
     }
 
@@ -233,11 +235,14 @@ let renderListTree = function (
   let is_ordered = items[0].isOrdered
   let list_style: React.CSSProperties
   let list_type_class: string
+  let start_num = (is_ordered && items[0]?.startNumber && items[0].startNumber > 1)
+    ? items[0].startNumber
+    : undefined
   let Tag: 'ol' | 'ul' = is_ordered ? 'ol' : 'ul'
 
   //Function body
   list_style = is_ordered
-    ? {}
+    ? { listStyleType: 'decimal' }
     : { listStyleType: depth === 0 ? 'disc' : (depth === 1 ? 'circle' : 'square') }
 
   list_type_class = is_ordered ? 'list-decimal' : 'list-disc'
@@ -246,6 +251,7 @@ let renderListTree = function (
   return (
     <Tag
       key={key_prefix}
+      start={start_num}
       style={list_style}
       className={
         depth === 0
@@ -282,7 +288,7 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
   let block_key: number = 0
   let class_name = props.className || ''
   let code_block_lines_array: string[] = []
-  let collected_list_items: { is_ordered: boolean; raw_indent: number; text: string }[] = []
+  let collected_list_items: { is_ordered: boolean; raw_indent: number; start_number?: number; text: string }[] = []
   let content = props.content
   let elements_array: React.ReactNode[] = []
   let flush_code_block: () => void
@@ -305,7 +311,7 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
       return
 
     let base_indent = collected_list_items[0].raw_indent
-    let depth_items: { depth: number; isOrdered: boolean; text: string }[] = []
+    let depth_items: { depth: number; isOrdered: boolean; start_number?: number; text: string }[] = []
     let indent_stack: number[] = [base_indent]
 
     for (let i = 0; i < collected_list_items.length; i++) {
@@ -324,6 +330,7 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
       depth_items.push({
         depth: indent_stack.length - 1,
         isOrdered: item.is_ordered,
+        start_number: item.start_number,
         text: item.text,
       })
     }
@@ -373,6 +380,21 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
 
     //2. Blank line
     if (local_trimmed === '') {
+      if (collected_list_items.length > 0) {
+        let has_next_list_item = false
+        for (let x = i + 1; x < lines_array.length; x++) {
+          let next_trimmed = lines_array[x].trim()
+          if (next_trimmed === '')
+            continue
+          let is_next_hr = /^(\s*[-*_]\s*){3,}$/.test(lines_array[x])
+          if (!is_next_hr && /^(\s*)([-*+]|\d+[\.\)])\s+/.test(lines_array[x]))
+            has_next_list_item = true
+          break
+        }
+        if (has_next_list_item)
+          continue
+      }
+
       flush_list()
       continue
     }
@@ -713,10 +735,20 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
       let marker = list_match[2]
       let is_ordered = /^\d+[\.\)]$/.test(marker)
       let item_text = list_match[3].trim()
+      let start_num = is_ordered ? parseInt(marker, 10) : undefined
+
+      if (
+        collected_list_items.length > 0 &&
+        indent_spaces === collected_list_items[0].raw_indent &&
+        is_ordered !== collected_list_items[collected_list_items.length - 1].is_ordered
+      ) {
+        flush_list()
+      }
 
       collected_list_items.push({
         is_ordered,
         raw_indent: indent_spaces,
+        start_number: !isNaN(start_num as number) ? start_num : 1,
         text: item_text,
       })
       continue

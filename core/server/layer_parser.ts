@@ -667,7 +667,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
         //Determine description
         let desc_text: string | undefined = undefined
         if (Array.isArray(item.description)) {
-          desc_text = item.description.join('\n\n')
+          desc_text = item.description.join('\n')
         } else if (typeof item.description === 'string') {
           desc_text = item.description
         }
@@ -691,7 +691,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
 
           let sub_desc_text: string | undefined = undefined
           if (Array.isArray(sub_item.description)) {
-            sub_desc_text = sub_item.description.join('\n\n')
+            sub_desc_text = sub_item.description.join('\n')
           } else if (typeof sub_item.description === 'string') {
             sub_desc_text = sub_item.description
           } else {

@@ -40,12 +40,12 @@
     "lastModified": 1790631540342.354
   },
   "1850": {
-    "agriculture": 72.4,
-    "informal_labour": 4.4,
-    "manufacturing": 13.7,
-    "services": 9.6,
+    "agriculture": 69.7,
+    "informal_labour": 6,
+    "manufacturing": 8.3,
+    "services": 15.9,
     "not_in_work": 28.2,
-    "lastModified": 1791275987935.9773
+    "lastModified": 1791285267652.3975
   },
   "1860": {
     "agriculture": 48.3,
@@ -56,12 +56,12 @@
     "lastModified": 1790631806474.8645
   },
   "1900": {
-    "agriculture": 42.1,
-    "informal_labour": 3.6,
-    "manufacturing": 31.1,
-    "services": 23.2,
+    "agriculture": 47.9,
+    "informal_labour": 13.9,
+    "manufacturing": 13.8,
+    "services": 24.4,
     "not_in_work": 43.5,
-    "lastModified": 1790650108579.0615
+    "lastModified": 1791285323204.8914
   },
   "1950": {
     "agriculture": 44.8,

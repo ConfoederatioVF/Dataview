@@ -11,7 +11,7 @@ export interface MarkdownRendererProps {
 export type { AlertStyle }
 
 /**
- * Parses inline markdown tokens (links, images, bold, italic, inline code, strikethrough).
+ * Parses inline markdown tokens (links, images, bold, underline, italic, inline code, strikethrough).
  *
  * @param {string} arg0_text
  * @returns {Array<React.ReactNode>}
@@ -31,7 +31,7 @@ let parseInline = function (arg0_text: string): React.ReactNode[] {
     return []
 
   //Function body
-  token_regex = /(\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\]\(([^)]+)\)|!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|~~([^~]+)~~)/g
+  token_regex = /(\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\]\(([^)]+)\)|!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\[([^\]]+)\]\(([^)]+)\)|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|___([^_]+)___|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|~~([^~]+)~~)/g
   all_matches_array = Array.from(text.matchAll(token_regex))
 
   for (let i = 0; i < all_matches_array.length; i++) {
@@ -91,34 +91,56 @@ let parseInline = function (arg0_text: string): React.ReactNode[] {
           className="text-primary hover:underline font-medium align-[-1px]"
           style={{ verticalAlign: '-1px' }}
         >
-          {local_match[9]}
+          {parseInline(local_match[9])}
         </a>
       )
-    } else if (local_match[11] || local_match[12]) {
+    } else if (local_match[11]) {
+      parts_array.push(
+        <strong key={`bold-em-${local_match_index}`} className="font-semibold text-foreground">
+          <em className="italic">
+            {parseInline(local_match[11])}
+          </em>
+        </strong>
+      )
+    } else if (local_match[12]) {
       parts_array.push(
         <strong key={`bold-${local_match_index}`} className="font-semibold text-foreground">
-          {local_match[11] || local_match[12]}
+          {parseInline(local_match[12])}
         </strong>
       )
     } else if (local_match[13]) {
+      parts_array.push(
+        <u key={`underline-em-${local_match_index}`} className="underline underline-offset-2">
+          <em className="italic">
+            {parseInline(local_match[13])}
+          </em>
+        </u>
+      )
+    } else if (local_match[14]) {
+      parts_array.push(
+        <u key={`underline-${local_match_index}`} className="underline underline-offset-2">
+          {parseInline(local_match[14])}
+        </u>
+      )
+    } else if (local_match[15]) {
       parts_array.push(
         <code
           key={`code-${local_match_index}`}
           className="px-1 py-0.5 bg-muted text-foreground border border-border text-[0.8em] font-mono leading-none inline-block align-baseline"
         >
-          {local_match[13]}
+          {local_match[15]}
         </code>
       )
-    } else if (local_match[14] || local_match[15]) {
+    } else if (local_match[16] || local_match[17]) {
       parts_array.push(
         <em key={`em-${local_match_index}`} className="italic">
-          {local_match[14] || local_match[15]}
+          {parseInline(local_match[16] || local_match[17])}
         </em>
       )
-    } else if (local_match[16]) {
+    } else if (local_match[18]) {
       parts_array.push(
         <del key={`del-${local_match_index}`} className="line-through text-muted-foreground">
-          {local_match[16]}
+          {parseInline(local_match[18])}
         </del>
       )
     }

@@ -11,7 +11,7 @@
             "<summary>Methodology</summary>",
             "Joint database between Atlas 0.6b and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf).",
             "",
-            "Atlas 0.6b was heavily inspired by Cliopatria, but differed in containing border adjustments to align better with historical reality. Both [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and C-Shapes 2.0 are known to contain encoding and historical errors, but allow for qualitative encoding from academic databases, i.e. via [Seshat](https://seshat-db.com/).",
+            "Atlas 0.6b is isomorphic to Cliopatria (which [Seshat](https://seshat-db.com/) uses for its historical borders), but differed in containing border adjustments to align better with historical reality. Both [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and C-Shapes 2.0 are known to contain encoding and historical errors, but both allow for the qualitative encoding of academic databases on institutions or polity status, i.e. via Seshat or the [Correlates of War](https://correlatesofwar.org/data-sets/).",
             "</details>"
         ],
         filepaths: [
@@ -42,7 +42,9 @@
             "<summary>Methodology</summary>",
             "Largely based on presence modelling (convex hull) over a borderpool. This means there is a lot of work in terms of manually refining and iterating over the current data at hand, as many borders during conflict periods are poor interpolations which require fixing.",
             "",
-            "In addition, regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints and adding diplomatic relations prior to a full release.",
+            "A presence model is effectively a scrape of natural language text and web maps that is used to encode the presence of a state or entity at a set of given points (typically settlements), and often via LLMs. Territorial control is then inferred over a borderpool.",
+            "",
+            "In addition, regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints via manual curation and adding diplomatic relations prior to a full release. Note that vassals, colonies, military occupations, parents, and state structures are already encoded.",
             "</details>"
         ],
         filepaths: [

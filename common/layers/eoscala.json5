@@ -13,7 +13,11 @@
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
             "",
-            "__Sources:__ Nordhaus, Maddison Project Database, Gapminder, Kummu et al./SEDAC.",
+            "__Sources:__",
+            "1. [Nordhaus (1994)](https://www.nber.org/system/files/chapters/c6064/c6064.pdf) via [De Long (1998)](https://pdf.stafforini.com/delong-1998-estimating-world-gdp.pdf).",
+            "2. [Maddison Project Database (2023)](https://doi.org/10.34894/INZBF2)",
+            "3. [Kummu et al. (2025)](https://doi.org/10.1038/s41597-025-04487-x)",
+            "4. [World Bank (PPP deflators)](https://data.worldbank.org/indicator/PA.NUS.PPP)",
             "</details>"
         ],
         legend: {
@@ -27,7 +31,7 @@
         filepath: "${h3}GDP_pc/8.GDP_nominal_pc_rasters/GDP_pc_${year}.png",
         description: [
             "### GDP (Nominal) per capita",
-            "Measured in FY$2000 International Dollars. Divides the GDP (Nominal) by Population (Total) per gridcell. Cells with <1ihb are excluded.",
+            "Measured in FY$2000 International Dollars. Divides the GDP (Nominal) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
             "Normalised via Tukey's fences.",
             "",
             "See **GDP (Nominal)** for more details."
@@ -47,7 +51,11 @@
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
             "",
-            "__Sources:__ Nordhaus, Maddison Project Database, Gapminder, Kummu et al./SEDAC, World Bank (for PPP deflators).",
+            "__Sources:__",
+            "1. [Nordhaus (1994)](https://www.nber.org/system/files/chapters/c6064/c6064.pdf) via [De Long (1998)](https://pdf.stafforini.com/delong-1998-estimating-world-gdp.pdf).",
+            "2. [Maddison Project Database (2023)](https://doi.org/10.34894/INZBF2)",
+            "3. [Kummu et al. (2025)](https://doi.org/10.1038/s41597-025-04487-x)",
+            "4. [World Bank (PPP deflators)](https://data.worldbank.org/indicator/PA.NUS.PPP)",
             "</details>"
         ],
         legend: {
@@ -61,7 +69,7 @@
         filepath: "${h3}GDP_PPP_pc/8.GDP_PPP_pc_rasters/GDP_PPP_pc_${year}.png",
         description: [
             "### GDP (PPP) per capita",
-            "Measured in FY$2000 International Dollars. Divides the GDP (PPP) by Population (Total) per gridcell. Cells with <1ihb are excluded.",
+            "Measured in FY$2000 International Dollars. Divides the GDP (PPP) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
             "Normalised via Tukey's fences.",
             "",
             "See **GDP (PPP)** for more details."

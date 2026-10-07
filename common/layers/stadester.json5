@@ -17,7 +17,7 @@
             "",
             "In addition, historical names and capital city histories were added to Stadestér via agent chunking and batch processing. Spatiotemporal heuristics were then applied to flag chunks for review.",
             "",
-            "Since **1.1** is an improvement on Stadestér **1.0**, we highly encourage you to read its [methodology report]((https://doi.org/10.5281/zenodo.17180328).",
+            "Since **1.1** is an improvement on Stadestér **1.0**, we highly encourage you to read its [methodology report](https://doi.org/10.5281/zenodo.17180328).",
             "</details>",
             "<details>",
             "<summary>Methodology (1.0)</summary>",

@@ -12,7 +12,19 @@
         legend: {
             colourscheme: "greys",
             type: "linear"
-        }
+        },
+        description: [
+            "### Anthropogenic Land Use/Cover Change",
+            "Fraction of gridcell underneath anthropogenic land use. ALCC can then be derived by calculating the annualised delta between years of ALU.",
+            "",
+            "<details>",
+            "<summary>Methodology</summary>",
+            "Globally scaled ALCC model from [Hurtt et al. (2020)](https://doi.org/10.5194/gmd-13-5425-2020) and [Kaplan and Krumhardt (2010)](https://doi.org/10.1594/PANGAEA.871369). Referred to internally as KK10LUH2.",
+            "",
+            "The anthropogenic land use fraction per gridcell was then summed up for both models respectively, and the two were averaged over their common domain. Where the domain was not shared, it fell back to the most recent model with availability for the target year; LUH2 after 850AD, KK10 prior to 850AD.",
+            "- Source code: [Github](https://github.com/ConfoederatioVF/Collation/tree/main/histmap/2.data_cleaning/population_KK10LUH2) | [Projects](https://projects.confoederatio.org/Confoederatio/Collation/src/2.data_cleaning/population_KK10LUH2)",
+            "</details>"
+        ]
     },
     conv_rangeland: {
         name: "Converted Rangeland (km^2)",
@@ -21,7 +33,13 @@
         legend: {
             colourscheme: "inferno",
             type: "linear"
-        }
+        },
+        description: [
+            "### Converted Rangeland",
+            "Defined as rangeland being placed on a potential forest area, and thus being converted; relevant to DVGM and climate models.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     cropland: {
         name: "Cropland (km^2)",
@@ -30,7 +48,13 @@
         legend: {
             colourscheme: "rdylgn",
             type: "linear"
-        }
+        },
+        description: [
+            "### Cropland",
+            "Total cropland area, after 1960 identical to FAO's category 'Arable land and permanent crops'.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     grazing: {
         name: "Grazing (km^2)",
@@ -39,7 +63,13 @@
         legend: {
             colourscheme: "greens",
             type: "linear"
-        }
+        },
+        description: [
+            "### Grazing",
+            "Total land used for grazing, after 1960 identical to FAO's category 'Permanent meadows and pastures'.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     ir_norice: {
         name: "Irrigated Non-Rice Cropland (km^2)",
@@ -48,7 +78,13 @@
         legend: {
             colourscheme: "spectral",
             type: "linear"
-        }
+        },
+        description: [
+            "### Irrigated Non-Rice Cropland",
+            "All crops cultivated under irrigation, with the exception of rice.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     ir_rice: {
         name: "Irrigated Rice Cropland (km^2)",
@@ -57,7 +93,13 @@
         legend: {
             colourscheme: "spectral",
             type: "linear"
-        }
+        },
+        description: [
+            "### Irrigated Rice Cropland",
+            "All rice crops cultivated under irrigation.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     pasture: {
         name: "Pasture (km^2)",
@@ -66,7 +108,13 @@
         legend: {
             colourscheme: "piyg",
             type: "linear"
-        }
+        },
+        description: [
+            "### Pasture",
+            "Defined as grazing land with an aridity index >0,5; assumed to be more intensively managed. (Converted in climate models).",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     rangeland: {
         name: "Rangeland (km^2)",
@@ -75,7 +123,13 @@
         legend: {
             colourscheme: "orrd",
             type: "linear"
-        }
+        },
+        description: [
+            "### Rangeland",
+            "Defined as grazing land with an aridity index <0,5; defined as grazing land with an aridity index <0,5; assumed to be less or not managed. (Not converted in climate models).",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     rf_norice: {
         name: "Rainfed Non-Rice Cropland (km^2)",
@@ -84,7 +138,13 @@
         legend: {
             colourscheme: "oranges",
             type: "linear"
-        }
+        },
+        description: [
+            "### Rainfed Non-Rice Cropland",
+            "Cropland reliant upon being rainfed (rather than irrigated), excluding rice cultivation.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     rf_rice: {
         name: "Rainfed Rice Cropland (km^2)",
@@ -93,7 +153,13 @@
         legend: {
             colourscheme: "greens",
             type: "linear"
-        }
+        },
+        description: [
+            "### Rainfed Rice Cropland",
+            "Rice cropland reliant upon being rainfed (rather than irrigated).",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     shifting: {
         name: "Shifting Cultivation (km^2)",
@@ -102,7 +168,13 @@
         legend: {
             colourscheme: "rdgy",
             type: "linear"
-        }
+        },
+        description: [
+            "### Shifting Cultivation",
+            "Unlike other HYDE variables, this was assessed in 1deg cells. Described as temporary agriculture in which cultivation occurs for a short period and is then fallowed post-exhaustion.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     tot_irri: {
         name: "Total Irrigated Area (km^2)",
@@ -111,7 +183,13 @@
         legend: {
             colourscheme: "pubugn",
             type: "linear"
-        }
+        },
+        description: [
+            "### Total Irrigation",
+            "Total actual irrigated area, including both rice and non-rice areas.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     tot_rainfed: {
         name: "Total Rainfed Area (km^2)",
@@ -120,7 +198,13 @@
         legend: {
             colourscheme: "blues",
             type: "linear"
-        }
+        },
+        description: [
+            "### Total Rainfed Area",
+            "Total area reliant upon being rainfed, not including rice areas.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     },
     tot_rice: {
         name: "Total Rice Cultivation (km^2)",
@@ -129,6 +213,12 @@
         legend: {
             colourscheme: "greens",
             type: "linear"
-        }
+        },
+        description: [
+            "### Total Rice Cultivation",
+            "Total rice cultivation including both rainfed and irrigated varieties.",
+            "",
+            "Taken directly from [HYDE](https://landuse.sites.uu.nl/datasets/)."
+        ]
     }
 }

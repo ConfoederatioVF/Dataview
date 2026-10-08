@@ -66,16 +66,24 @@
             "Complex multi-raster calculations are downsampled to `1080x540` for performance reasons.",
             "",
             "There are some known issues with NWM2 data we are currently working on.",
-            "- Urban rasters and GHS-POP (which provides backcalculation for certain low-pop areas from 1800AD-1975AD) are offset 2px too far south.",
-            "- Areas with a pop. density <0,5ihb/5-arcmin^2 are not currently shown.",
-            "- Certain issues with multinomial logit distributions:",
-            "  - Population pyramids are currently overly stochastic between adjacent age/sex bands.",
-            "  - Professions are overly equalised between spatiotemporal domains.",
-            "  - These issues have to do with the effect of how multinomial logit is presently implemented, as well as correction/constraint stages after training.",
-            "- Not in work should be calculated as workforce-aged cohorts minus LFPR, but is currently flawed/corrupted.",
-            "- Other known data caveats are shown in their respective mapmode descriptions.",
+            "- Detailed borders are overly reliant on presence modelling/scraping, and as a result of the latter, we cannot make them more available than they currently are until they have been substantially improved.",
+            "- Modern borders are often used for statistical purposes in the secondary sources we rely on, and thus bias training data.",
+            "- Net migration may not always be predicted accurately for years further back.",
+            "",
+            "In addition, full data methodologies or releases for Eoscala/Velkscala are a work-in-progress. We try our best to document their methodologies whereever possible.",
             "",
             "If you encounter any issues not documented here, please contact us at [Confoederatio Element](https://element.confoederatio.org)."
+          ]
+        },
+        {
+          title: "Downloads",
+          open: false,
+          content: [
+            "- Atlas 0.51: [Datavault](https://datavault.confoederatio.org/s/rPntqXwCxzXg4Bk)",
+            "  - We do not feel that Atlas 0.6 is in a strong position for release; we are working on this.",
+            "- Eoscala 1.5: [Datavault](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr)",
+            "- Velkscala 1.0: [Datavault](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b)",
+            "  - Stadestér is available as part of Velkscala."
           ]
         },
         {
@@ -91,6 +99,25 @@
             "In later periods (4. Era and after), climatic transitions tend to be caused by human activity, rather than climate influencing human behaviour. Still, influence cannot be taken as determinism: only with the weight of surrounding human events did they make sense as historical periodisations.",
             "",
             "AD/BC is used for fixed width purposes."
+          ]
+        },
+        {
+          title: "Source Code",
+          open: false,
+          content: [
+            "Source code is available as part of the **Naissance World Model**, specifically in the `histmap/` folder. You can find up-to-date images on either [Github](https://github.com/ConfoederatioVF/Collation/) or [Projects](https://projects.confoederatio.org/c/Collation).",
+            "",
+            "> [!WARNING]",
+            "> We do not recommend using the [Gitlab](https://gitlab.com/confoederatio/research-division/collation) image as it is usually several months out-of-date, and requires registration to view.",
+            "",
+            "In addition, you should be aware that you will have to download your own versions of input datasets to run the available source code, since they often involve terabytes of data transfer, which is impractical for us to do over Git forges. We are working on ways of making the full image available to others.",
+            "",
+            "Processing for the NWM is done on a consumer workstation with the following specs:",
+            "- CPU: Intel(R) Core(TM) i9-14900F",
+            "- GPU: NVIDIA GeForce RTX 4080 SUPER",
+            "- RAM: 128GB DDR5",
+            "- Storage: ~2TB minimum",
+            "Given these specs, it takes about 2-3 days for full reproduction."
           ]
         }
       ],

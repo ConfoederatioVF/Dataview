@@ -46244,14 +46244,10 @@
   {
     "name": "Múgica",
     "coords": [
-      -102.55278,
-      23.6345
+      -102.10889,
+      19.01944
     ],
     "historical_names": [
-      {
-        "date": "1400.1.1",
-        "name": "Chakanputun"
-      },
       {
         "date": "1900.1.1",
         "name": "Múgica"
@@ -225791,7 +225787,11 @@
     ],
     "historical_names": [
       {
-        "date": "1960.1.1",
+        "date": "1400.1.1",
+        "name": "Chakanputun"
+      },
+      {
+        "date": "1900.1.1",
         "name": "Champotón"
       }
     ]

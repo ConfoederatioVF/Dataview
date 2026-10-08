@@ -50286,21 +50286,19 @@
   {
     "aliases_found": [],
     "coords": [
-      -102.55278,
-      23.6345
+      -102.10889,
+      19.01944
     ],
     "country": "Mexico",
     "dataset_keys": [
       "stadester-Múgica-Mexico"
     ],
-    "earliest_year": 1400,
-    "has_pre_1900": true,
+    "earliest_year": 1960,
+    "has_pre_1900": false,
     "key": "stadester-Múgica-Mexico",
     "latest_year": 1974,
     "name": "Múgica",
-    "other_names": [
-      "Chakanputun"
-    ],
+    "other_names": [],
     "region": "latin_america"
   },
   {
@@ -299111,12 +299109,14 @@
     "dataset_keys": [
       "stadester-Champotón-Mexico"
     ],
-    "earliest_year": 1960,
-    "has_pre_1900": false,
+    "earliest_year": 1400,
+    "has_pre_1900": true,
     "key": "stadester-Champotón-Mexico",
     "latest_year": 1974,
     "name": "Champotón",
-    "other_names": [],
+    "other_names": [
+      "Chakanputun"
+    ],
     "region": "latin_america"
   },
   {

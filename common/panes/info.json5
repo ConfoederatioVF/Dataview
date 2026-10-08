@@ -54,7 +54,7 @@
           content: [
             "> [!WARNING]",
             "> Confoederatio Dataview is currently a **work-in-progress**.",
-            "This means that you may see placeholder text, misalignment issues, and features that may not display as intended.",
+            "> This means that you may see placeholder text, misalignment issues, and features that may not display as intended.",
             "",
             "We advise you to not share this URL currently if you have access to it, or to advertise it publicly. Not that we would break your kneecaps, but the website might not always be online in such cases."
           ],
@@ -63,7 +63,8 @@
           title: "Data Caveats",
           open: false,
           content: [
-            "Complex multi-raster calculations are downsampled to `1080x540` for performance reasons.",
+            "> [!NOTE]",
+            "> Complex multi-raster calculations are downsampled to `1080x540` for performance reasons.",
             "",
             "There are some known issues with NWM2 data we are currently working on.",
             "- Detailed borders are overly reliant on presence modelling/scraping, and as a result of the latter, we cannot make them more available than they currently are until they have been substantially improved.",
@@ -83,7 +84,9 @@
             "  - We do not feel that Atlas 0.6 is in a strong position for release; we are working on this.",
             "- Eoscala 1.5: [Datavault](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr)",
             "- Velkscala 1.0: [Datavault](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b)",
-            "  - Stadestér is available as part of Velkscala."
+            "- Stadestér is available as **part of Velkscala**. Whilst separate images are available below, they may be significantly out-of-date.",
+            "  - Stadestér 1.1: [Datavault](https://datavault.confoederatio.org/s/KqC3kAKgeKNfWYc)",
+            "  - Stadestér 1.0: [Datavault](https://datavault.confoederatio.org/s/CBT74PsEc6tCZFx) | [Zenodo](https://zenodo.org/records/17180328)",
           ]
         },
         {
@@ -115,7 +118,7 @@
             "Processing for the NWM is done on a consumer workstation with the following specs:",
             "- CPU: Intel(R) Core(TM) i9-14900F",
             "- GPU: NVIDIA GeForce RTX 4080 SUPER",
-            "- RAM: 128GB DDR5",
+            "- RAM: 128GB DDR5 / 256GB Pagefile",
             "- Storage: ~2TB minimum",
             "Given these specs, it takes about 2-3 days for full reproduction."
           ]

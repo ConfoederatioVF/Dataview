@@ -240,7 +240,7 @@
             colourscheme: "rdylgn"
         },
         description: [
-            "### Net Migration:",
+            "### Net Migration",
             "Aggregate annualised net migration of both sexes per gridcell.",
             "<details>",
             "<summary>Methodology</summary>",

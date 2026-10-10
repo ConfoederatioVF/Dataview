@@ -259,6 +259,8 @@
             "",
             "Due to the sparsity of empirical data further back, outputs from hybrid superlearners were then subjected to spatial variance algorithms anchored to estimated historical baselines and Clark-Fisher/[Chenery & Syrquin 1975](https://documents1.worldbank.org/curated/en/482491468328816108/pdf/11913.pdf) modelling, taking into account GDP per capita and urbanisation.",
             "",
+            "For industrialisation between 1750-1980, we use the estimates provided by [Bairoch 1982](https://jeeh.it/documents/5848/2-1982-international-industrialization-levels-from-1750-to-1980.pdf) as an intercept to determine shares of manufacturing.",
+            "",
             "An additive log ratio (ALR) shift is used to preserve intra-country spatial variance.",
             "",
             "__Definitions:__",

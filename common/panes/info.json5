@@ -52,11 +52,10 @@
         {
           title: "Overview",
           content: [
-            "> [!WARNING]",
-            "> Confoederatio Dataview is currently a **work-in-progress**.",
-            "> This means that you may see placeholder text, misalignment issues, and features that may not display as intended.",
-            "",
-            "We advise you to not share this URL currently if you have access to it, or to advertise it publicly. Not that we would break your kneecaps, but the website might not always be online in such cases."
+            "What is **NWM2**?",
+            "NWM2 is the second generation of the __Naissance World Model__, which integrated previously separate datasets (NWM1) into a cohesive model of Earth.",
+            "---",
+            "During this phase, we expect integration and reproducibility to be our top priorities, in addition to ensuring as complete global coverage as possible."
           ],
         },
         {
@@ -131,6 +130,23 @@
       icon: "gavel",
       type: "content",
       markdown: [
+        {
+          title: "General Policy",
+          content: [
+            "> [!WARNING]",
+            "> Confoederatio Dataview is currently a **work-in-progress**.",
+            "> This means that you may see placeholder text, misalignment issues, and features that may not display as intended.",
+            "",
+            "We advise you to not share this URL currently if you have access to it, or to advertise it publicly. Not that we would break your kneecaps, but the website might not always be online in such cases."
+          ]
+        },
+        {
+          title: "Inaccurate!",
+          content: [
+            "1. We are a small team of around 2-5 researchers working on the entire history of the globe. We offer an [open-source map editor](https://projects.confoederatio.org/c/Naissance) with which you can help contribute to this project.",
+            "2. What have you ever done? Netflix and tiki takis. If you can do better, do so."
+          ]
+        },
         {
           title: "Otherwise, we have no policy!",
           content: [

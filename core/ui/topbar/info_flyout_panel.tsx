@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   MapModeItem,
   HeightmapConfig,
@@ -6,11 +6,12 @@ import {
   ProjectionType,
 } from '@framework/geopng/types.ts'
 import { CountryFeature } from '@framework/geopng/polygon_binning'
+import { UI_BREAKPOINTS } from '@framework/utils/ui_layout'
 import { Icon } from '@ui/components/icon'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@ui/components/tabs'
 import { MarkdownRenderer } from '@ui/components/markdown_renderer'
 import { Window } from '@ui/components/window'
-import { useInfoPanelConfig, useMapmodesConfig, MarkdownSectionItem } from '@common'
+import { useInfoPanelConfig, MarkdownSectionItem } from '@common'
 import { useLocalisation } from '@localisation'
 
 export interface InfoCollapsibleSectionProps {
@@ -71,23 +72,24 @@ export let InfoCollapsibleSection: React.FC<InfoCollapsibleSectionProps> = funct
 
 export interface InfoFlyoutPanelProps {
   cameraTilt?: number
-  circleOverlayConfig: CircleOverlayConfig
+  circleOverlayConfig?: CircleOverlayConfig
   className?: string
   defaultPinned?: boolean
   embedded?: boolean
-  heightmapConfig: HeightmapConfig
+  heightmapConfig?: HeightmapConfig
+  isMobile?: boolean
   isOpen: boolean
   isPinned?: boolean
-  mapModes: MapModeItem[]
+  mapModes?: MapModeItem[]
   onClose: () => void
   onTogglePin?: (pinned: boolean) => void
-  projection: ProjectionType
-  selectedCountries: CountryFeature[]
+  projection?: ProjectionType
+  selectedCountries?: CountryFeature[]
   width?: number
 }
 
 /**
- * Information and active modes control flyout window.
+ * Information and camera controls flyout window.
  *
  * @param {InfoFlyoutPanelProps} arg0_props
  * @returns {React.ReactElement|null}
@@ -97,30 +99,27 @@ export let InfoFlyoutPanel: React.FC<InfoFlyoutPanelProps> = function (arg0_prop
   let props = (arg0_props) ? arg0_props : ({} as InfoFlyoutPanelProps)
 
   //Declare local instance variables
-  let active_modes_array: MapModeItem[]
   let active_tab: string
-  let camera_tilt = props.cameraTilt ?? 0
-  let circle_overlay_config = props.circleOverlayConfig
   let class_name = props.className
   let default_pinned = props.defaultPinned ?? true
+  let device_mode: 'desktop' | 'mobile'
   let embedded = Boolean(props.embedded)
-  let heightmap_config = props.heightmapConfig
+  let info_config: ReturnType<typeof useInfoPanelConfig>
+  let is_device_mobile: boolean
   let is_open = props.isOpen
   let is_pinned = props.isPinned
   let localisation: ReturnType<typeof useLocalisation>
-  let map_modes = props.mapModes
   let on_close = props.onClose
   let on_toggle_pin = props.onTogglePin
-  let projection = props.projection
-  let selected_countries = props.selectedCountries
   let set_active_tab: React.Dispatch<React.SetStateAction<string>>
+  let set_device_mode: React.Dispatch<React.SetStateAction<'desktop' | 'mobile'>>
+  let set_is_device_mobile: React.Dispatch<React.SetStateAction<boolean>>
   let t: ReturnType<typeof useLocalisation>['t']
   let tabs_element: React.ReactElement
   let width = props.width ?? 336
 
   //Function body
-  let info_config = useInfoPanelConfig()
-  let mapmodes_config = useMapmodesConfig()
+  info_config = useInfoPanelConfig()
   localisation = useLocalisation()
   t = localisation.t
 
@@ -130,11 +129,48 @@ export let InfoFlyoutPanel: React.FC<InfoFlyoutPanelProps> = function (arg0_prop
   active_tab = current_tab
   set_active_tab = set_current_tab
 
+  let [mobile_detected, set_mobile_detected] = useState<boolean>(() => {
+    if (typeof props.isMobile === 'boolean')
+      return props.isMobile
+    if (typeof window !== 'undefined')
+      return (window.innerWidth < UI_BREAKPOINTS.mobile || (('ontouchstart' in window) && window.innerWidth < UI_BREAKPOINTS.tablet))
+    return false
+  })
+  is_device_mobile = mobile_detected
+  set_is_device_mobile = set_mobile_detected
+
+  let [current_device_mode, set_current_device_mode] = useState<'desktop' | 'mobile'>(() => {
+    if (typeof props.isMobile === 'boolean')
+      return (props.isMobile) ? 'mobile' : 'desktop'
+    if (typeof window !== 'undefined')
+      return (window.innerWidth < UI_BREAKPOINTS.mobile || (('ontouchstart' in window) && window.innerWidth < UI_BREAKPOINTS.tablet)) ? 'mobile' : 'desktop'
+    return 'desktop'
+  })
+  device_mode = current_device_mode
+  set_device_mode = set_current_device_mode
+
+  useEffect(() => {
+    if (typeof props.isMobile === 'boolean') {
+      set_is_device_mobile(props.isMobile)
+      set_device_mode((props.isMobile) ? 'mobile' : 'desktop')
+      return
+    }
+
+    let handleResize = () => {
+      let is_mobile_now = (window.innerWidth < UI_BREAKPOINTS.mobile || (('ontouchstart' in window) && window.innerWidth < UI_BREAKPOINTS.tablet))
+      set_is_device_mobile(is_mobile_now)
+      set_device_mode((is_mobile_now) ? 'mobile' : 'desktop')
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [props.isMobile])
+
   //Guard clauses
   if (!is_open)
     return null
-
-  active_modes_array = map_modes.filter((m) => m.active)
 
   tabs_element = (
     <Tabs
@@ -142,111 +178,74 @@ export let InfoFlyoutPanel: React.FC<InfoFlyoutPanelProps> = function (arg0_prop
       onValueChange={set_active_tab}
       className="flex flex-col flex-1 min-h-0 overflow-hidden"
     >
-        <TabsList className="w-full flex h-8 bg-muted/60 border border-border rounded-none p-0.5 shrink-0">
-          {info_config.tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              className="flex-1 text-[var(--body-font-size)] h-full flex items-center justify-center gap-1.5 rounded-none font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold transition-colors cursor-pointer truncate"
-            >
-              {tab.icon && <Icon name={tab.icon} size={14} className="shrink-0 text-white" />}
-              <span className="truncate">{tab.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <TabsList className="w-full flex h-8 bg-muted/60 border border-border rounded-none p-0.5 shrink-0">
+        {info_config.tabs.map((tab) => (
+          <TabsTrigger
+            key={tab.id}
+            value={tab.id}
+            className="flex-1 text-[var(--body-font-size)] h-full flex items-center justify-center gap-1.5 rounded-none font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold transition-colors cursor-pointer truncate"
+          >
+            {tab.icon && <Icon name={tab.icon} size={14} className="shrink-0 text-white" />}
+            <span className="truncate">{tab.label}</span>
+          </TabsTrigger>
+        ))}
+      </TabsList>
 
-        {/* Tab Contents Scroll Area with Prominent Vertical Scrollbar */}
-        <div className="flex-1 min-h-0 overflow-y-auto mt-3 pr-2 space-y-3 custom-scrollbar">
-          {info_config.tabs.map((tab) => (
+      {/* Tab Contents Scroll Area with Prominent Vertical Scrollbar */}
+      <div className="flex-1 min-h-0 overflow-y-auto mt-3 pr-2 space-y-3 custom-scrollbar">
+        {info_config.tabs.map((tab) => {
+          let shortcuts_list = (device_mode === 'mobile')
+            ? (tab.mobileShortcuts || tab.shortcuts || [])
+            : (tab.desktopShortcuts || tab.shortcuts || [])
+
+          return (
             <TabsContent
               key={tab.id}
               value={tab.id}
               className="m-0 focus-visible:outline-none space-y-3"
             >
               {(tab.type === 'controls') ? (
-                /* TAB 1: CONTROLS & ACTIVE MODES */
+                /* TAB 1: CONTROLS */
                 <div className="space-y-3">
-                  {/* Live Active Modes Section */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-foreground text-[var(--body-font-size)] uppercase tracking-wider flex items-center gap-1.5">
-                        <Icon name="layers" size={14} className="text-white" />
-                        <span>{t.infoPanel.activeRenderingModes}</span>
-                      </span>
-                      <span className="text-[var(--body-font-size)] px-2 py-0.5 bg-primary/20 text-primary border border-primary/40 font-semibold leading-none flex items-center">
-                        {localisation.format(t.infoPanel.activeCount, active_modes_array.length)}
-                      </span>
-                    </div>
-
-                    <div className="space-y-1.5 bg-background/60 p-2 border border-border">
-                      {(active_modes_array.length === 0) ? (
-                        <p className="text-muted-foreground text-[var(--body-font-size)] italic">
-                          {t.infoPanel.noActiveMapmodes}
-                        </p>
-                      ) : (
-                        active_modes_array.map((m) => {
-                          let config_item = mapmodes_config.modes.find((c) => c.id === m.id)
-                          let desc =
-                            config_item?.controlDescription ||
-                            config_item?.description ||
-                            'Active layer'
-
-                          if (m.id === 'country_analysis') {
-                            let count = selected_countries.length
-                            desc = (count > 0)
-                              ? `${count} ${(count === 1) ? 'country' : 'countries'} isolated`
-                              : config_item?.controlDescription || 'Active (select country)'
-                          } else if (m.id === 'spike_map') {
-                            let mode_str =
-                              (heightmap_config.heightScaleMode === 'percentile')
-                                ? ' • % height'
-                                : (heightmap_config.heightScaleMode === 'blend')
-                                  ? ` • blend (${Math.round((heightmap_config.blendWeight ?? 0.5) * 100)}%)`
-                                  : ' • linear height'
-                            let pct_str = (heightmap_config.opacityByPercentile) ? ' (pct opacity)' : ''
-                            let res_str = (heightmap_config.resolutionArcmin) ? ` • ${heightmap_config.resolutionArcmin}' res` : ''
-                            desc = `${Math.round(
-                              (heightmap_config.elevationScale ?? 800000) / 1000
-                            )}km peak • ${Math.round((heightmap_config.opacity ?? 0.9) * 100)}% opacity${pct_str}${mode_str}${res_str}`
-                          } else if (m.id === 'circle_sizing') {
-                            desc = `≥P${circle_overlay_config.percentileCutoff ?? 99} cutoff • ${(
-                              circle_overlay_config.baseRadius ?? 1.0
-                            ).toFixed(1)} ha/unit`
-                          }
-
-                          return (
-                            <div
-                              key={m.id}
-                              className="flex items-center justify-between gap-2 text-[var(--body-font-size)] leading-snug"
-                            >
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <span className="w-1.5 h-1.5 bg-primary rounded-none" />
-                                <span className="font-semibold text-foreground">{m.label}:</span>
-                              </div>
-                              <span className="text-muted-foreground text-right text-[var(--body-font-size)]">
-                                {desc}
-                              </span>
-                            </div>
-                          )
-                        })
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Camera & Projection State */}
-                  <div className="flex items-center justify-between p-2 bg-background/40 border border-border text-[var(--body-font-size)]">
-                    <span className="text-muted-foreground">{t.infoPanel.projection}: <strong className="text-foreground">{projection}</strong></span>
-                    <span className="text-muted-foreground">{t.infoPanel.tilt}: <strong className="text-foreground">{Math.round(camera_tilt)}°</strong></span>
-                  </div>
-
                   {/* Navigation Shortcuts Section */}
                   <div className="space-y-1.5">
-                    <span className="font-bold text-foreground text-[var(--body-font-size)] uppercase tracking-wider block">
-                      {tab.shortcutsHeader || t.infoPanel.navigationShortcuts}
-                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-foreground text-[var(--body-font-size)] uppercase tracking-wider block truncate">
+                        {tab.shortcutsHeader || t.infoPanel.navigationShortcuts}
+                      </span>
+
+                      <div className="flex items-center border border-border bg-background/60 p-0.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => set_device_mode('desktop')}
+                          className={`px-2 py-0.5 text-[var(--body-font-size)] flex items-center gap-1 cursor-pointer transition-colors ${
+                            (device_mode === 'desktop')
+                              ? 'bg-primary text-primary-foreground font-bold'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          title={t.infoPanel.desktopControls}
+                        >
+                          <Icon name="desktop_windows" size={13} />
+                          <span>{t.infoPanel.desktop}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => set_device_mode('mobile')}
+                          className={`px-2 py-0.5 text-[var(--body-font-size)] flex items-center gap-1 cursor-pointer transition-colors ${
+                            (device_mode === 'mobile')
+                              ? 'bg-primary text-primary-foreground font-bold'
+                              : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          title={t.infoPanel.mobileControls}
+                        >
+                          <Icon name="smartphone" size={13} />
+                          <span>{t.infoPanel.mobile}</span>
+                        </button>
+                      </div>
+                    </div>
 
                     <div className="space-y-1 bg-background/60 p-2 border border-border">
-                      {(tab.shortcuts || []).map((sc, idx) => (
+                      {shortcuts_list.map((sc, idx) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between gap-2 py-1.5 border-b border-border/40 last:border-0 text-[var(--body-font-size)]"
@@ -310,7 +309,7 @@ export let InfoFlyoutPanel: React.FC<InfoFlyoutPanelProps> = function (arg0_prop
                 </div>
               )}
             </TabsContent>
-          ))}
+          )})}
         </div>
       </Tabs>
   )

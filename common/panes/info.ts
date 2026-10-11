@@ -26,18 +26,20 @@ export interface MarkdownSectionItem {
 export type TabMarkdownContent = string | string[] | MarkdownSectionItem[]
 
 export interface InfoPanelTab {
+  badge?: string
+  content?: TabMarkdownContent
+  description?: string
+  desktopShortcuts?: InfoPanelShortcut[]
+  icon?: string
   id: string
   label: string
-  icon?: string
-  type: 'controls' | 'content' | string
-  title?: string
-  description?: string
-  badge?: string
-  shortcutsHeader?: string
-  shortcuts?: InfoPanelShortcut[]
   markdown?: TabMarkdownContent
-  content?: TabMarkdownContent
+  mobileShortcuts?: InfoPanelShortcut[]
   sections?: InfoPanelSection[]
+  shortcuts?: InfoPanelShortcut[]
+  shortcutsHeader?: string
+  title?: string
+  type: 'controls' | 'content' | string
 }
 
 export interface InfoPanelConfig {

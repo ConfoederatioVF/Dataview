@@ -532,6 +532,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
           <div className="flex-1 p-[var(--padding)] flex flex-col min-h-0 overflow-y-auto">
             <InfoFlyoutPanel
               isOpen={true}
+              isMobile={is_mobile}
               embedded={true}
               onClose={on_toggle_info_panel || (() => {})}
               mapModes={map_modes}

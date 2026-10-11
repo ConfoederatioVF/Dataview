@@ -209,10 +209,14 @@
   infoPanel: {
     activeRenderingModes: "Active Rendering Modes",
     activeCount: "£1£ Active",
+    desktop: "Desktop",
+    desktopControls: "Desktop Controls",
+    mobile: "Mobile",
+    mobileControls: "Mobile Controls",
+    navigationShortcuts: "Navigation Shortcuts",
     noActiveMapmodes: "No active mapmodes. Base 2D raster only.",
     projection: "Projection",
     tilt: "3D Tilt",
-    navigationShortcuts: "Navigation Shortcuts",
   },
   mapmodes: {
     title: "Mapmodes",

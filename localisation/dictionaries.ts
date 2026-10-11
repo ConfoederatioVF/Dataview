@@ -201,6 +201,10 @@ export interface LocalisationConfig {
   infoPanel: {
     activeCount: string
     activeRenderingModes: string
+    desktop: string
+    desktopControls: string
+    mobile: string
+    mobileControls: string
     navigationShortcuts: string
     noActiveMapmodes: string
     projection: string

@@ -209,10 +209,14 @@
   infoPanel: {
     activeRenderingModes: "Aktive Rendering-Modi",
     activeCount: "£1£ Aktiv",
+    desktop: "Desktop",
+    desktopControls: "Desktop-Steuerung",
+    mobile: "Mobil",
+    mobileControls: "Mobile Steuerung",
+    navigationShortcuts: "Navigations-Tastaturkürzel",
     noActiveMapmodes: "Keine aktiven Kartenmodi. Nur 2D-Basiskarte.",
     projection: "Projektion",
     tilt: "3D-Neigung",
-    navigationShortcuts: "Navigations-Tastaturkürzel",
   },
   mapmodes: {
     title: "Kartenmodi",

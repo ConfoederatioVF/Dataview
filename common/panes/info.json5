@@ -13,9 +13,61 @@
       label: "Controls",
       icon: "tune",
       type: "controls",
-      title: "Active Modes & Camera Controls",
-      description: "Live summary of active rendering layers, projection state, and 3D camera shortcuts.",
-      shortcutsHeader: "Navigation Shortcuts",
+      title: "Camera & Navigation Controls",
+      description: "Navigation controls and camera shortcuts for map inspection.",
+      shortcutsHeader: "Navigation",
+      desktopShortcuts: [
+        {
+          key: "Ctrl + Drag",
+          action: "Pitch & rotate 3D camera (smooth linear tilt)",
+        },
+        {
+          key: "Right-click Drag",
+          action: "Pitch & rotate 3D camera",
+        },
+        {
+          key: "Left Drag",
+          action: "Pan map view smoothly across all projections",
+        },
+        {
+          key: "Scroll Wheel",
+          action: "Smooth zoom in & out",
+        },
+        {
+          key: "Double Click",
+          action: "Reset camera centre, pitch, and zoom",
+        },
+        {
+          key: "Hover",
+          action: "Inspect pixel coordinates & scalar values",
+        },
+      ],
+      mobileShortcuts: [
+        {
+          key: "One-Finger Drag",
+          action: "Pan map view smoothly across all projections",
+        },
+        {
+          key: "Two-Finger Drag (Vertical)",
+          action: "Pitch & tilt 3D camera (smooth vertical tilt)",
+        },
+        {
+          key: "Pinch",
+          action: "Smooth zoom in & out",
+        },
+        {
+          key: "Two-Finger Twist",
+          action: "Rotate camera orientation",
+        },
+        {
+          key: "Double Tap",
+          action: "Reset camera centre, pitch, and zoom",
+        },
+        {
+          key: "Tap",
+          action: "Inspect pixel coordinates & scalar values",
+        },
+      ],
       shortcuts: [
         {
           key: "Ctrl + Drag",

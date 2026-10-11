@@ -445,6 +445,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
             <div className="pointer-events-auto flex-1 min-h-0 flex flex-col overflow-hidden">
               <InfoFlyoutPanel
                 isOpen={info_panel_open}
+                isMobile={is_mobile}
                 onClose={on_close_info_panel || (() => { })}
                 mapModes={map_modes}
                 heightmapConfig={heightmap_config}

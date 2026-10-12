@@ -996,7 +996,11 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
         let borders_payload = AtlasBordersService.getBordersAtYear(year, { bbox, dataset, day, month })
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
-        res.setHeader('Cache-Control', 'public, max-age=3600')
+        if (borders_payload.features.length === 0 && year >= -3000) {
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+        } else {
+          res.setHeader('Cache-Control', 'no-cache, must-revalidate')
+        }
         res.end(JSON.stringify(borders_payload))
         return
       } catch (arg0_err: any) {

@@ -85,6 +85,57 @@ let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let max_lru_entries = 60
 
 /**
+ * Generates or retrieves cached keyframes summary for a Naissance entity.
+ *
+ * @param {NaissanceEntityRecord} arg0_ent
+ *
+ * @returns {HistoricalBorderKeyframe[]}
+ */
+export let getEntityKeyframesSummary = function (arg0_ent: NaissanceEntityRecord): HistoricalBorderKeyframe[] {
+  //Convert from parameters
+  let ent = arg0_ent
+
+  //Guard clauses
+  if (ent.keyframes_summary)
+    return ent.keyframes_summary
+
+  //Declare local instance variables
+  let keyframes_summary: HistoricalBorderKeyframe[] = []
+
+  //Function body
+  for (let k = 0; k < ent.sorted_timestamps.length; k++) {
+    let k_ts = ent.sorted_timestamps[k]
+    let date_obj = UfDate.convertTimestampToDate(k_ts)
+    let k_val = ent.keyframes.get(k_ts)
+    let label = 'Boundary keyframe'
+    if (k_val && (k_val[0] === null || k_val[2]?.hidden === true)) {
+      label = 'Boundary unrecorded / hidden'
+    } else if (k === 0) {
+      label = 'Recorded keyframe'
+    } else if (k_val && k_val[2] && k_val[2].name) {
+      label = `Renamed to ${String(k_val[2].name).replace(/\n+/g, ' ')}`
+    } else {
+      label = 'Boundary updated'
+    }
+
+    keyframes_summary.push({
+      date: UfDate.formatDate(date_obj),
+      day: date_obj.day,
+      label,
+      month: date_obj.month,
+      timestamp: k_ts,
+      year: date_obj.year,
+    })
+  }
+
+  ent.keyframes_summary = keyframes_summary
+
+  //Return statement
+  return keyframes_summary
+}
+
+
+/**
  * Computes a 2D bounding box [minLng, minLat, maxLng, maxLat] for a GeoJSON geometry.
  *
  * @param {any} arg0_geometry
@@ -1023,14 +1074,21 @@ export class AtlasBordersService {
   /**
    * Retrieves the absolute filesystem paths for atlas datasets.
    *
-   * @returns {{ cacheDir: string, cshapesPath: string, detailedDir: string, naissancePath: string }}
+   * @returns {{ cacheDir: string, cshapesPath: string, detailedDir: string, detailedNaissancePath: string, naissancePath: string }}
    */
-  static getDatasetPaths (): { cacheDir: string; cshapesPath: string; detailedDir: string; naissancePath: string } {
+  static getDatasetPaths (): {
+    cacheDir: string
+    cshapesPath: string
+    detailedDir: string
+    detailedNaissancePath: string
+    naissancePath: string
+  } {
     //Declare local instance variables
     let base_dir = path.resolve(process.cwd(), 'data/atlas')
     let cache_dir = path.join(base_dir, 'cache')
     let cshapes_path = path.join(base_dir, 'CShapes-2.0.geojson')
     let detailed_dir = path.join(base_dir, 'detailed')
+    let detailed_naissance_path = path.join(base_dir, 'detailed.naissance')
     let naissance_path = path.join(base_dir, 'atlas.naissance')
 
     //Function body
@@ -1042,6 +1100,7 @@ export class AtlasBordersService {
       cacheDir: cache_dir,
       cshapesPath: cshapes_path,
       detailedDir: detailed_dir,
+      detailedNaissancePath: detailed_naissance_path,
       naissancePath: naissance_path,
     }
   }
@@ -1150,6 +1209,7 @@ export class AtlasBordersService {
    */
   /**
    * Loads and indexes a .naissance file in memory on first access using SVEA History keyframe specifications.
+   * Supports both small and very large (>500MB) files using chunked streaming buffers to prevent V8 string limits.
    *
    * @param {string} [arg0_file_path]
    *
@@ -1172,80 +1232,179 @@ export class AtlasBordersService {
 
     //Declare local instance variables
     let entity_records = new Map<string, NaissanceEntityRecord>()
+    let stat = fs.statSync(file_path)
 
-    //Release previous slice from memory cache to prevent holding multiple 600MB-900MB slices in RAM
-    if (cached_naissance_entities_by_path.size >= 1)
-      cached_naissance_entities_by_path.clear()
+    //Maintain memory bounded cache: retain at most 3 parsed maps in memory
+    if (cached_naissance_entities_by_path.size >= 3) {
+      let oldest_key = cached_naissance_entities_by_path.keys().next().value
+      if (oldest_key !== undefined)
+        cached_naissance_entities_by_path.delete(oldest_key)
+    }
 
     //Function body
     try {
-      console.log(`[AtlasBordersService] Loading and indexing ${path.basename(file_path)}...`)
-      let raw = fs.readFileSync(file_path, 'utf-8')
-      let parsed_data = JSON.parse(raw)
-      raw = ''
+      console.log(`[AtlasBordersService] Loading and indexing ${path.basename(file_path)} (${Math.round(stat.size / 1024 / 1024)}MB)...`)
 
-      let keys = Object.keys(parsed_data)
-      for (let i = 0; i < keys.length; i++) {
-        let ent_id = keys[i]
-        if (ent_id === 'map_settings')
-          continue
+      if (stat.size >= 250 * 1024 * 1024) {
+        //Large file (>250MB): use chunked synchronous buffer reads to prevent V8 ERR_STRING_TOO_LONG
+        let buffer_size = 4 * 1024 * 1024
+        let buffer = Buffer.alloc(buffer_size)
+        let fd = fs.openSync(file_path, 'r')
+        let file_size = stat.size
+        let leftover = ''
+        let position = 0
 
-        let ent = parsed_data[ent_id]
-        if (!ent || ent.class_name !== 'GeometryPolygon' || !ent.history)
-          continue
+        while (position < file_size) {
+          let bytes_to_read = Math.min(buffer_size, file_size - position)
+          let bytes_read = fs.readSync(fd, buffer, 0, bytes_to_read, position)
+          position += bytes_read
 
-        let raw_ts_keys = Object.keys(ent.history)
-        if (raw_ts_keys.length === 0)
-          continue
+          let chunk_str = leftover + buffer.toString('utf-8', 0, bytes_read)
+          let last_nl = chunk_str.lastIndexOf('\n')
+          if (last_nl === -1) {
+            leftover = chunk_str
+            continue
+          }
 
-        let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-        let kf_map = new Map<number, [any, any, any]>()
+          let to_process = chunk_str.slice(0, last_nl)
+          leftover = chunk_str.slice(last_nl + 1)
+          let lines = to_process.split('\n')
 
-        for (let x = 0; x < sorted_ts.length; x++) {
-          let ts = sorted_ts[x]
-          let val = ent.history[String(ts)]
-          if (Array.isArray(val))
-            kf_map.set(ts, val as [any, any, any])
+          for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim()
+            if (line === '{' || line === '}' || line === '')
+              continue
+            if (line.endsWith(','))
+              line = line.slice(0, -1)
+            if (line.startsWith('"map_settings":'))
+              continue
+
+            let colon_idx = line.indexOf('":')
+            if (colon_idx === -1)
+              continue
+
+            let ent_id = line.slice(1, colon_idx)
+            let json_str = line.slice(colon_idx + 2)
+
+            try {
+              let ent = JSON.parse(json_str)
+              if (!ent || ent.class_name !== 'GeometryPolygon' || !ent.history)
+                continue
+
+              let raw_ts_keys = Object.keys(ent.history)
+              if (raw_ts_keys.length === 0)
+                continue
+
+              let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
+              let kf_map = new Map<number, [any, any, any]>()
+
+              for (let x = 0; x < sorted_ts.length; x++) {
+                let ts = sorted_ts[x]
+                let val = ent.history[String(ts)]
+                if (Array.isArray(val))
+                  kf_map.set(ts, val as [any, any, any])
+              }
+
+              entity_records.set(ent_id, {
+                class_name: ent.class_name,
+                id: ent_id,
+                keyframes: kf_map,
+                max_ts: sorted_ts[sorted_ts.length - 1],
+                min_ts: sorted_ts[0],
+                name: ent.name,
+                sorted_timestamps: sorted_ts,
+              })
+            } catch {
+              //Skip malformed entry
+            }
+          }
         }
 
-        let keyframes_summary: HistoricalBorderKeyframe[] = []
-        for (let k = 0; k < sorted_ts.length; k++) {
-          let k_ts = sorted_ts[k]
-          let date_obj = UfDate.convertTimestampToDate(k_ts)
-          let k_val = kf_map.get(k_ts)
-          let label = 'Boundary keyframe'
-          if (k_val && (k_val[0] === null || k_val[2]?.hidden === true))
-            label = 'Boundary unrecorded / hidden'
-          else if (k === 0)
-            label = 'Recorded keyframe'
-          else if (k_val && k_val[2] && k_val[2].name)
-            label = `Renamed to ${String(k_val[2].name).replace(/\n+/g, ' ')}`
-          else
-            label = 'Boundary updated'
+        if (leftover.trim().length > 0) {
+          let line = leftover.trim()
+          if (line.endsWith(','))
+            line = line.slice(0, -1)
+          if (line !== '}' && !line.startsWith('"map_settings":')) {
+            let colon_idx = line.indexOf('":')
+            if (colon_idx !== -1) {
+              let ent_id = line.slice(1, colon_idx)
+              let json_str = line.slice(colon_idx + 2)
+              try {
+                let ent = JSON.parse(json_str)
+                if (ent && ent.class_name === 'GeometryPolygon' && ent.history) {
+                  let raw_ts_keys = Object.keys(ent.history)
+                  if (raw_ts_keys.length > 0) {
+                    let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
+                    let kf_map = new Map<number, [any, any, any]>()
+                    for (let x = 0; x < sorted_ts.length; x++) {
+                      let ts = sorted_ts[x]
+                      let val = ent.history[String(ts)]
+                      if (Array.isArray(val))
+                        kf_map.set(ts, val as [any, any, any])
+                    }
+                    entity_records.set(ent_id, {
+                      class_name: ent.class_name,
+                      id: ent_id,
+                      keyframes: kf_map,
+                      max_ts: sorted_ts[sorted_ts.length - 1],
+                      min_ts: sorted_ts[0],
+                      name: ent.name,
+                      sorted_timestamps: sorted_ts,
+                    })
+                  }
+                }
+              } catch {
+                //Skip malformed entry
+              }
+            }
+          }
+        }
 
-          keyframes_summary.push({
-            date: UfDate.formatDate(date_obj),
-            day: date_obj.day,
-            label,
-            month: date_obj.month,
-            timestamp: k_ts,
-            year: date_obj.year,
+        fs.closeSync(fd)
+      } else {
+        //Small file (<250MB): read in one go
+        let raw = fs.readFileSync(file_path, 'utf-8')
+        let parsed_data = JSON.parse(raw)
+        raw = ''
+
+        let keys = Object.keys(parsed_data)
+        for (let i = 0; i < keys.length; i++) {
+          let ent_id = keys[i]
+          if (ent_id === 'map_settings')
+            continue
+
+          let ent = parsed_data[ent_id]
+          if (!ent || ent.class_name !== 'GeometryPolygon' || !ent.history)
+            continue
+
+          let raw_ts_keys = Object.keys(ent.history)
+          if (raw_ts_keys.length === 0)
+            continue
+
+          let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
+          let kf_map = new Map<number, [any, any, any]>()
+
+          for (let x = 0; x < sorted_ts.length; x++) {
+            let ts = sorted_ts[x]
+            let val = ent.history[String(ts)]
+            if (Array.isArray(val))
+              kf_map.set(ts, val as [any, any, any])
+          }
+
+          entity_records.set(ent_id, {
+            class_name: ent.class_name,
+            id: ent_id,
+            keyframes: kf_map,
+            max_ts: sorted_ts[sorted_ts.length - 1],
+            min_ts: sorted_ts[0],
+            name: ent.name,
+            sorted_timestamps: sorted_ts,
           })
         }
 
-        entity_records.set(ent_id, {
-          class_name: ent.class_name,
-          id: ent_id,
-          keyframes: kf_map,
-          keyframes_summary,
-          max_ts: sorted_ts[sorted_ts.length - 1],
-          min_ts: sorted_ts[0],
-          name: ent.name,
-          sorted_timestamps: sorted_ts,
-        })
+        parsed_data = null as any
       }
 
-      parsed_data = null as any
       console.log(`[AtlasBordersService] Successfully indexed ${entity_records.size} entities from ${path.basename(file_path)}.`)
     } catch (arg0_err) {
       console.error(`[AtlasBordersService] Failed to load ${file_path}:`, arg0_err)
@@ -1571,7 +1730,9 @@ export class AtlasBordersService {
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
-        let is_valid_cache = Array.isArray(cached_json.features) && (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
+        let is_valid_cache = Array.isArray(cached_json.features) &&
+          (cached_json.features.length > 0 || target_year < -3000) &&
+          (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
         let is_missing_cap_coords = cached_json.v !== 2 &&
           cached_json.features &&
           cached_json.features.length > 20 &&
@@ -1596,14 +1757,21 @@ export class AtlasBordersService {
 
     if (dataset === 'detailed_borders') {
       //--- 1. DETAILED BORDERS SLICER (-3500 to 2026) ---
-      let slice = detailed_borders_slices.find((arg0_s) =>
-        target_year >= arg0_s.domain[0] && (target_year < arg0_s.domain[1] || arg0_s.domain[1] === 2026)
-      )
-      if (!slice)
-        slice = target_year < -3500 ? detailed_borders_slices[0] : detailed_borders_slices[detailed_borders_slices.length - 1]
+      let dataset_paths = AtlasBordersService.getDatasetPaths()
+      let entities: Map<string, NaissanceEntityRecord>
 
-      let detailed_path = path.join(AtlasBordersService.getDatasetPaths().detailedDir, slice.file)
-      let entities = AtlasBordersService.loadNaissance(detailed_path)
+      if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
+        entities = AtlasBordersService.loadNaissance(dataset_paths.detailedNaissancePath)
+      } else {
+        let slice = detailed_borders_slices.find((arg0_s) =>
+          target_year >= arg0_s.domain[0] && (target_year < arg0_s.domain[1] || arg0_s.domain[1] === 2026)
+        )
+        if (!slice)
+          slice = target_year < -3500 ? detailed_borders_slices[0] : detailed_borders_slices[detailed_borders_slices.length - 1]
+
+        let detailed_path = path.join(dataset_paths.detailedDir, slice.file)
+        entities = AtlasBordersService.loadNaissance(detailed_path)
+      }
 
       for (let [ent_id, ent] of entities.entries()) {
         //Guard clause: check if entity exists at or before target timestamp
@@ -1681,7 +1849,7 @@ export class AtlasBordersService {
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
-            keyframes: ent.keyframes_summary || [],
+            keyframes: getEntityKeyframesSummary(ent),
             label: current_props.label,
             link: current_props.link,
             name: entity_name,
@@ -1823,7 +1991,7 @@ export class AtlasBordersService {
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
-            keyframes: ent.keyframes_summary || [],
+            keyframes: getEntityKeyframesSummary(ent),
             name: entity_name,
             name_long: entity_name,
             state_id: num_sid,
@@ -1944,10 +2112,17 @@ export class AtlasBordersService {
 
     //Declare local instance variables
     let cshapes = AtlasBordersService.loadCShapes()
+    let dataset_paths = AtlasBordersService.getDatasetPaths()
     let default_entities = AtlasBordersService.loadNaissance()
     let search_entity_maps = [default_entities, ...cached_naissance_entities_by_path.values()]
 
     //Function body
+    if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
+      let detailed_entities = AtlasBordersService.loadNaissance(dataset_paths.detailedNaissancePath)
+      if (!search_entity_maps.includes(detailed_entities))
+        search_entity_maps.push(detailed_entities)
+    }
+
     //1. Check Naissance entities across any loaded maps or default atlas.naissance
     for (let i = 0; i < search_entity_maps.length; i++) {
       let entities = search_entity_maps[i]

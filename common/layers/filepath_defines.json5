@@ -14,7 +14,6 @@
     h5: "${nwm}/histmap/5.data_visualisation/",
     hyde: "${h2}/landuse_HYDE/rasters/",
     l_atlas: "D:/Project 1436 - Dataview/data/atlas",
-    l_df: "D:/Project 1436 - Dataview/data/atlas/detailed",
     l_stad: "D:/Project 1436 - Dataview/data/stadester",
     nwm: "D:/Project 1509 - SVEA/histmap/",
     prof_per: "${h3}/professions/3.percentages/",

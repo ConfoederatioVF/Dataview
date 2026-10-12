@@ -55,12 +55,16 @@ export let fetchHistoricalBordersAsync = async function (
   let url: string
 
   //Guard clauses
-  if (client_borders_cache.has(cache_key))
-    return client_borders_cache.get(cache_key)!
+  if (client_borders_cache.has(cache_key)) {
+    let cached = client_borders_cache.get(cache_key)!
+    if (cached.features && (cached.features.length > 0 || year < -3000))
+      return cached
+    client_borders_cache.delete(cache_key)
+  }
 
   //Function body
   url = `/api/atlas/borders?year=${year}&dataset=${dataset}&day=${day}&month=${month}`
-  res = await fetch(url, { signal })
+  res = await fetch(url, { cache: 'no-cache', signal })
   if (!res.ok)
     throw new Error(`HTTP error ${res.status}`)
 
@@ -148,6 +152,7 @@ export let useHistoricalBorders = function (
   let effective_month: number
   let effective_year: number
   let error: string | null
+  let in_flight_target_key_ref = useRef<string>('')
   let is_active: boolean
   let is_loading: boolean
   let is_playing = Boolean(options.isPlaying)
@@ -219,30 +224,38 @@ export let useHistoricalBorders = function (
     //1. Instant client-side cache hit
     if (client_borders_cache.has(target.cache_key)) {
       let cached = client_borders_cache.get(target.cache_key)!
-      let coll = (cached as any).collection || {
-        count: cached.count,
-        date: cached.date || cached.features[0]?.properties?.date,
-        features: cached.features,
-        tag: target.cache_key,
-        type: 'FeatureCollection',
-        year: cached.year,
+      if (cached.features && (cached.features.length > 0 || target.year < -3000)) {
+        let coll = (cached as any).collection || {
+          count: cached.count,
+          date: cached.date || cached.features[0]?.properties?.date,
+          features: cached.features,
+          tag: target.cache_key,
+          type: 'FeatureCollection',
+          year: cached.year,
+        }
+        rendered_key_ref.current = target.cache_key
+        set_borders_data(coll)
+        set_domain(cached.domain)
+        set_source(cached.source)
+        set_is_loading(false)
+        set_error(null)
+        return
       }
-      rendered_key_ref.current = target.cache_key
-      set_borders_data(coll)
-      set_domain(cached.domain)
-      set_source(cached.source)
-      set_is_loading(false)
-      set_error(null)
-      return
+      client_borders_cache.delete(target.cache_key)
     }
 
     //2. If a fetch is already in flight
     if (active_fetch_ref.current) {
+      if (in_flight_target_key_ref.current === target.cache_key) {
+        //Already fetching this exact target: let it proceed without aborting
+        return
+      }
       if (!target.is_playing && active_controller_ref.current) {
-        //User stopped or scrubbed: abort previous background request to free connection socket immediately
+        //User stopped or scrubbed to a different target: abort previous background request
         active_controller_ref.current.abort()
         active_controller_ref.current = null
         active_fetch_ref.current = false
+        in_flight_target_key_ref.current = ''
       } else {
         //Playback is actively running: let in-flight request complete smoothly; it will trigger the next target on finish
         return
@@ -256,11 +269,13 @@ export let useHistoricalBorders = function (
 
     let current_target = target
     let target_key = target.cache_key
+    in_flight_target_key_ref.current = target_key
 
     fetchHistoricalBordersAsync(current_target.dataset, current_target.year, current_target.month, current_target.day, controller.signal)
       .then((arg0_data) => {
         active_fetch_ref.current = false
         active_controller_ref.current = null
+        in_flight_target_key_ref.current = ''
 
         let coll = (arg0_data as any).collection || {
           count: arg0_data.count,
@@ -286,6 +301,7 @@ export let useHistoricalBorders = function (
       .catch((arg0_err: any) => {
         active_fetch_ref.current = false
         active_controller_ref.current = null
+        in_flight_target_key_ref.current = ''
 
         if (arg0_err?.name === 'AbortError') {
           //Aborted intentionally to prioritize stopped or scrubbed target
@@ -329,8 +345,8 @@ export let useHistoricalBorders = function (
       return
     }
 
-    //2. If playback just stopped, execute immediately without debounce delay
-    if (just_stopped) {
+    //2. If initial load (borders not yet loaded) or playback just stopped, execute immediately without debounce delay
+    if (!borders_data || just_stopped) {
       if (debounce_timer_ref.current)
         clearTimeout(debounce_timer_ref.current)
       pump_queue()

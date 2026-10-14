@@ -26,10 +26,13 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
   //Guard clauses
   if (
     normalized_file.includes('/data/') ||
+    normalized_file.includes('/dist/') ||
     normalized_file.includes('/exports/') ||
     normalized_file.includes('/.agents/') ||
     normalized_file.includes('/docs/') ||
-    normalized_file.includes('/tests/')
+    normalized_file.includes('/tests/') ||
+    normalized_file.endsWith('.log') ||
+    normalized_file.includes('/.git/')
   )
     return []
 
@@ -37,7 +40,7 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
 
   //Handle common/ and localisation/ hot updates
   if (normalized_file.includes('/common/') || normalized_file.includes('/localisation/')) {
-    let hot_channel = server.hot || (server as any).ws
+    let hot_channel = (server.environments && (server.environments as any).client?.hot) || server.hot || (server as any).ws
 
     //1. Layers update: common/layers/ (including filepath_defines.json5 and individual layer configs)
     if (normalized_file.includes('/common/layers/')) {
@@ -166,6 +169,26 @@ function dataviewBackendPlugin (): Plugin {
       //Convert from parameters
       let server = arg0_server
 
+      //Keep WebSocket connections alive across tunnels/proxies with a 20-second heartbeat
+      let heartbeat_interval = setInterval(() => {
+        let hot_channel = (server.environments && (server.environments as any).client?.hot) || server.hot || (server as any).ws
+        if (hot_channel) {
+          try {
+            hot_channel.send({
+              type: 'custom',
+              event: 'dataview:heartbeat',
+              data: { timestamp: Date.now() },
+            })
+          } catch {
+            //Ignore errors during closing sockets
+          }
+        }
+      }, 20000)
+
+      server.httpServer?.on('close', () => {
+        clearInterval(heartbeat_interval)
+      })
+
       //Function body
       server.middlewares.use(
         createApiMiddleware({
@@ -216,13 +239,18 @@ export default defineConfig({
     strictPort: true,
     host: true,
     allowedHosts: true,
+    hmr: {
+      timeout: 120000,
+    },
     watch: {
       ignored: [
         '**/data/**',
+        '**/dist/**',
         '**/exports/**',
         '**/.agents/**',
         '**/docs/**',
         '**/tests/**',
+        '**/*.log',
       ],
     },
   },

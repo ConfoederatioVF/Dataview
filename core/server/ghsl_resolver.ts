@@ -21,7 +21,8 @@ export interface ResolverQueueTask {
 }
 
 let city_cache: Record<string, CityCacheRecord> = {}
-let city_cache_path = path.resolve(process.cwd(), 'common/stadester_city_cache.json')
+let city_cache_path = path.resolve(process.cwd(), 'data/stadester/cache/stadester_city_cache.json')
+let legacy_city_cache_path = path.resolve(process.cwd(), 'common/stadester_city_cache.json')
 let ghsl_csv_map = new Map<string, string>()
 let historical_cities_index: Array<{ coords: [number, number]; maxPop: number; name: string }> = []
 let is_cache_loaded = false
@@ -31,13 +32,14 @@ let photon_queue: ResolverQueueTask[] = []
 let queued_keys_set = new Set<string>()
 
 /**
- * Loads the persisted city cache from config/stadester_city_cache.json into memory.
+ * Loads the persisted city cache from data/stadester/cache/stadester_city_cache.json into memory.
  *
  * @returns {Record<string, CityCacheRecord>}
  */
 export let loadCityCache = function (): Record<string, CityCacheRecord> {
   //Declare local instance variables
   let raw_content: string
+  let target_load_path: string | null = null
 
   //Guard clauses
   if (is_cache_loaded)
@@ -45,8 +47,14 @@ export let loadCityCache = function (): Record<string, CityCacheRecord> {
 
   //Function body
   if (fs.existsSync(city_cache_path)) {
+    target_load_path = city_cache_path
+  } else if (fs.existsSync(legacy_city_cache_path)) {
+    target_load_path = legacy_city_cache_path
+  }
+
+  if (target_load_path) {
     try {
-      raw_content = fs.readFileSync(city_cache_path, 'utf-8')
+      raw_content = fs.readFileSync(target_load_path, 'utf-8')
       city_cache = JSON.parse(raw_content)
     } catch (arg0_err) {
       console.warn('[GhslResolver] Failed to load city cache, creating new:', arg0_err)
@@ -113,7 +121,7 @@ export let loadGhslCsvNames = function (): Map<string, string> {
 }
 
 /**
- * Saves current memory cache to config/stadester_city_cache.json.
+ * Saves current memory cache to data/stadester/cache/stadester_city_cache.json.
  */
 export let saveCityCache = function (): void {
   //Declare local instance variables

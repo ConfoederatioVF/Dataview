@@ -44,6 +44,7 @@ import { useRasterPipeline, fetchRasterKeyframe, fetchInterpolatedRasterAsync } 
 import { useRasterRenderer } from '@framework/raster/use_raster_renderer.ts'
 import { useTimelapseExportOrchestrator } from '@ui/export/use_timelapse_export_orchestrator.ts'
 import { applyLayerLegend } from '@framework/raster/legend_utils.ts'
+import { useLocalisation } from '@localisation'
 import { useAppLayoutState } from './use_app_layout_state'
 import { useHeadlessExport } from './export/use_headless_export'
 import { onConfigUpdate, onLayersUpdate } from '@framework/config/config_hot_reload'
@@ -106,6 +107,7 @@ export let getDefaultSelectorsForLayer = function (
  */
 export let App: React.FC = function () {
   //Function body
+  let { t } = useLocalisation()
   let layout_state = useAppLayoutState()
   let {
     activeMobileTab: active_mobile_tab,
@@ -579,6 +581,8 @@ export let App: React.FC = function () {
   ])
 
   useEffect(() => {
+    if (active_file_name || diff_name_a || diff_name_b)
+      return
     if (active_layer) {
       applyLayerLegend(
         active_layer,
@@ -593,7 +597,7 @@ export let App: React.FC = function () {
       if (active_layer.encoding)
         set_data_format(active_layer.encoding)
     }
-  }, [active_layer, active_variable_selectors])
+  }, [active_file_name, active_layer, active_variable_selectors, diff_name_a, diff_name_b])
 
   useEffect(() => {
     if (active_layer && active_layer.variable_selectors) {
@@ -772,32 +776,86 @@ export let App: React.FC = function () {
 
   let handle_file_upload = useCallback(
     async function (arg0_file: File, arg1_target: 'single' | 'diff_a' | 'diff_b') {
+      //Convert from parameters
       let file = arg0_file
       let target = arg1_target
+
+      //Declare local instance variables
+      let buffer: ArrayBuffer
+      let clean_a: string
+      let clean_b: string
+      let clean_name: string
+      let decoded: DecodedRaster
+      let uint8: Uint8Array
+
+      //Function body
       try {
-        let buffer = await file.arrayBuffer()
-        let uint8 = new Uint8Array(buffer)
-        let decoded = await decodeRawGeoPngBufferAsync(uint8, data_format)
+        buffer = await file.arrayBuffer()
+        uint8 = new Uint8Array(buffer)
+        decoded = await decodeRawGeoPngBufferAsync(uint8, data_format)
+        clean_name = file.name.replace(/\.[^/.]+$/, '')
 
         if (target === 'single') {
           set_active_file_name(file.name)
           set_raw_bytes_a(uint8)
           set_raster_a(decoded)
+          set_legend_title(clean_name)
+          set_legend_subtitle(t.sidebar.upload.uploadedGeoPng || 'Uploaded GeoPNG')
         } else if (target === 'diff_a') {
           set_diff_name_a(file.name)
           set_raw_bytes_a(uint8)
           set_raster_a(decoded)
+          if (diff_name_b) {
+            clean_b = diff_name_b.replace(/\.[^/.]+$/, '')
+            set_legend_title(`${clean_name} vs ${clean_b}`)
+            set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
+          } else {
+            set_legend_title(clean_name)
+            set_legend_subtitle(t.sidebar.upload.differenceA || 'Difference (A)')
+          }
         } else if (target === 'diff_b') {
           set_diff_name_b(file.name)
           set_raw_bytes_b(uint8)
           set_raster_b(decoded)
+          if (diff_name_a) {
+            clean_a = diff_name_a.replace(/\.[^/.]+$/, '')
+            set_legend_title(`${clean_a} vs ${clean_name}`)
+            set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
+          } else {
+            set_legend_title(clean_name)
+            set_legend_subtitle(t.sidebar.upload.differenceB || 'Difference (B)')
+          }
         }
+
+        set_active_layer_id('default_basemap')
+        set_bounds_mode('Manual')
+        set_min_val_override('')
+        set_max_val_override('')
         set_raster_version((arg0_v: number) => arg0_v + 1)
       } catch (arg0_err) {
         console.error('Failed to load GeoPNG file:', arg0_err)
       }
     },
-    [data_format, set_active_file_name, set_diff_name_a, set_diff_name_b, set_raster_a, set_raster_b, set_raster_version, set_raw_bytes_a, set_raw_bytes_b]
+    [
+      data_format,
+      diff_name_a,
+      diff_name_b,
+      set_active_file_name,
+      set_active_layer_id,
+      set_bounds_mode,
+      set_diff_name_a,
+      set_diff_name_b,
+      set_legend_subtitle,
+      set_legend_title,
+      set_max_val_override,
+      set_min_val_override,
+      set_raster_a,
+      set_raster_b,
+      set_raster_version,
+      set_raw_bytes_a,
+      set_raw_bytes_b,
+      t,
+    ]
   )
 
   let handle_toggle_snap_to_keyframes = useCallback(
@@ -829,8 +887,30 @@ export let App: React.FC = function () {
       return raster_a
     if (raster_a && raster_b)
       return computeRasterDifference(raster_a, raster_b)
-    return raster_a
+    return raster_a || raster_b
   }, [app_mode, raster_a, raster_b])
+
+  useEffect(() => {
+    if (app_mode === 'Single Image') {
+      if (active_file_name) {
+        set_legend_title(active_file_name.replace(/\.[^/.]+$/, ''))
+        set_legend_subtitle(t.sidebar.upload.uploadedGeoPng || 'Uploaded GeoPNG')
+      }
+    } else if (app_mode === 'Image Difference') {
+      if (diff_name_a && diff_name_b) {
+        let clean_a = diff_name_a.replace(/\.[^/.]+$/, '')
+        let clean_b = diff_name_b.replace(/\.[^/.]+$/, '')
+        set_legend_title(`${clean_a} vs ${clean_b}`)
+        set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
+      } else if (diff_name_a) {
+        set_legend_title(diff_name_a.replace(/\.[^/.]+$/, ''))
+        set_legend_subtitle(t.sidebar.upload.differenceA || 'Difference (A)')
+      } else if (diff_name_b) {
+        set_legend_title(diff_name_b.replace(/\.[^/.]+$/, ''))
+        set_legend_subtitle(t.sidebar.upload.differenceB || 'Difference (B)')
+      }
+    }
+  }, [app_mode, active_file_name, diff_name_a, diff_name_b, t])
 
   let display_raster = useMemo<DecodedRaster | null>(() => {
     let base = pipeline_display_raster || active_raster
@@ -1255,7 +1335,7 @@ export let App: React.FC = function () {
           maxVal={max_val}
           legendTitle={legend_title}
           legendSubtitle={legend_subtitle}
-          hideColourbar={Boolean(active_layer?.hide_colourbar)}
+          hideColourbar={Boolean(active_layer?.hide_colourbar && !active_file_name && !diff_name_a && !diff_name_b)}
           scaleType={scale_type}
           logSigma={log_sigma}
           breaks={breaks}
@@ -1319,7 +1399,7 @@ export let App: React.FC = function () {
           activeLayerId={active_layer_id}
           activeVariableSelectors={active_variable_selectors}
           dataLayers={layers}
-          isLoadingLayers={is_loading_layers || is_loading_raster}
+          isLoadingLayers={is_loading_layers}
           onChangeVariableSelector={handle_change_variable_selector}
           onInspect={handle_app_inspect}
           onSelectLayer={handle_select_layer}
@@ -1436,7 +1516,7 @@ export let App: React.FC = function () {
           infoPanelOpen={info_panel_open}
           invertPalette={invert_palette}
           isMobile={is_mobile}
-          isLoadingLayers={is_loading_layers || is_loading_raster}
+          isLoadingLayers={is_loading_layers}
           layers={layers}
           legendSubtitle={legend_subtitle}
           legendTitle={legend_title}

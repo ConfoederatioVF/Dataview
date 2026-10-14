@@ -105,6 +105,9 @@ export interface LocalisationConfig {
       chooseImageA: string
       chooseImageB: string
       difference: string
+      differenceA?: string
+      differenceB?: string
+      differenceTitle?: string
       encodingFormat: string
       firstImage: string
       firstPlaceholder: string
@@ -115,6 +118,7 @@ export interface LocalisationConfig {
       selectSingle: string
       single: string
       singlePlaceholder: string
+      uploadedGeoPng?: string
       vectorTab?: string
     }
     vectorUpload: {

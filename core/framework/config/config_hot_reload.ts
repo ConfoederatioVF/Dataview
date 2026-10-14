@@ -117,6 +117,36 @@ export function onLayersUpdate (arg0_callback: LayersUpdateListener): () => void
 
 //Initialise Vite HMR listener if running in development environment
 if (import.meta.hot) {
+  //Keep-alive heartbeat and acknowledgment across tunnels, proxies, and background tabs
+  import.meta.hot.on('dataview:heartbeat', () => {
+    try {
+      import.meta.hot?.send('dataview:heartbeat-ack', { timestamp: Date.now() })
+    } catch {
+      //Ignore send errors
+    }
+  })
+
+  //Periodic client-to-server keepalive pulse
+  setInterval(() => {
+    try {
+      if (typeof document === 'undefined' || document.visibilityState !== 'hidden')
+        import.meta.hot?.send('dataview:client-ping', { timestamp: Date.now() })
+    } catch {
+      //Ignore send errors
+    }
+  }, 25000)
+
+  //Prevent Vite client from triggering an involuntary full-page reload on transient socket drops
+  if (typeof window !== 'undefined') {
+    setTimeout(() => {
+      try {
+        window.dispatchEvent(new Event('beforeunload'))
+      } catch {
+        //Ignore
+      }
+    }, 100)
+  }
+
   import.meta.hot.on('dataview:layers-update', (arg0_payload: any) => {
     let payload = arg0_payload
     if (payload && payload.layers) {

@@ -119,7 +119,7 @@
             "",
             "There are some known issues with NWM2 data we are currently working on.",
             "- Detailed borders are overly reliant on presence modelling/scraping, and as a result of the latter, we cannot make them more available than they currently are until they have been substantially improved.",
-            "- Modern borders are often used for statistical purposes in the secondary sources we rely on, and thus bias training data.",
+            "- Modern borders are often used for consistency by historical statisticians, and the input of such academic sources biases training data.",
             "- Net migration may not always be predicted accurately for years further back.",
             "",
             "In addition, full data methodologies or releases for Eoscala/Velkscala are a work-in-progress. We try our best to document their methodologies whereever possible.",

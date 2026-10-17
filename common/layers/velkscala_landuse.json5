@@ -15,7 +15,7 @@
         },
         description: [
             "### Anthropogenic Land Use/Cover Change",
-            "Fraction of gridcell underneath anthropogenic land use. ALCC can then be derived by calculating the annualised delta between years of ALU.",
+            "Anthropogenic land use area per gridcell (cropland, managed pasture, and built-up land) in km^2/cell, dervied from KK10 and LUH2.",
             "",
             "<details>",
             "<summary>Methodology</summary>",

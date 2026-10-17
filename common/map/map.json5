@@ -15,7 +15,7 @@
   touchPickRadius: 18,
   desktopPickRadius: 2,
   // Camera viewport definitions, graticule settings, and projection pixel offsets.
-  // pixelOffset: -1 shifts the raster SOUTH by 1 pixel height to correct northern offset.
+  // pixelOffset: 0 for standard raster alignment with geographic coordinates.
   mapDefines: {
     initialMercator: {
       longitude: 0,
@@ -25,7 +25,7 @@
       bearing: 0,
       maxZoom: 18,
       minZoom: 0,
-      pixelOffset: -1,
+      pixelOffset: 0,
     },
     initialGlobe: {
       longitude: 0,
@@ -35,7 +35,7 @@
       bearing: 0,
       maxZoom: 18,
       minZoom: 0,
-      pixelOffset: -1,
+      pixelOffset: 0,
     },
     initialEquirectangular: {
       target: [
@@ -46,7 +46,7 @@
       zoom: 2.83,
       minZoom: 0.2,
       maxZoom: 10,
-      pixelOffset: -1,
+      pixelOffset: 0,
     },
     initialEqualEarth: {
       target: [
@@ -57,7 +57,7 @@
       zoom: 2.80,
       minZoom: 0.2,
       maxZoom: 10,
-      pixelOffset: -1,
+      pixelOffset: 0,
     },
     graticule: {
       latInterval: 10,

@@ -74,7 +74,7 @@ onConfigUpdate('map', (arg0_next_config) => {
 
 /**
  * Returns the configured pixel offset for a given projection mode.
- * Defaults to -1 if unspecified.
+ * Defaults to 0 if unspecified.
  *
  * @param {string} arg0_projection
  *
@@ -89,19 +89,19 @@ export function getPixelOffset (arg0_projection: string): number {
 
   //Guard clauses
   if (!defs)
-    return -1
+    return 0
 
   //Function body
   if (projection === 'Mercator') {
-    return defs.initialMercator?.pixelOffset ?? defs.mercator?.pixelOffset ?? MAP_CONFIG.mercatorPixelOffset ?? -1
+    return defs.initialMercator?.pixelOffset ?? defs.mercator?.pixelOffset ?? MAP_CONFIG.mercatorPixelOffset ?? 0
   } else if (projection === 'Globe') {
-    return defs.initialGlobe?.pixelOffset ?? defs.globe?.pixelOffset ?? MAP_CONFIG.globePixelOffset ?? -1
+    return defs.initialGlobe?.pixelOffset ?? defs.globe?.pixelOffset ?? MAP_CONFIG.globePixelOffset ?? 0
   } else if (projection === 'Equirectangular') {
-    return defs.initialEquirectangular?.pixelOffset ?? defs.equirectangular?.pixelOffset ?? MAP_CONFIG.equirectangularPixelOffset ?? -1
+    return defs.initialEquirectangular?.pixelOffset ?? defs.equirectangular?.pixelOffset ?? MAP_CONFIG.equirectangularPixelOffset ?? 0
   } else if (projection === 'EqualEarth') {
-    return defs.initialEqualEarth?.pixelOffset ?? defs.equalEarth?.pixelOffset ?? MAP_CONFIG.equalEarthPixelOffset ?? -1
+    return defs.initialEqualEarth?.pixelOffset ?? defs.equalEarth?.pixelOffset ?? MAP_CONFIG.equalEarthPixelOffset ?? 0
   }
 
   //Return statement
-  return -1
+  return 0
 }

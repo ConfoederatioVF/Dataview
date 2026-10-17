@@ -246,6 +246,8 @@
     continuous: "Kontinuierlich (Mehrfachauswahl)",
     overlayOn: "ÜBERLAGERUNG AN",
     overlayOff: "ÜBERLAGERUNG AUS",
+    useRadiocarbon: "Radiokarbon verwenden",
+    useRadiocarbonDescription: "Für Jahre vor 1 n. Chr. empirische demografische Radiokarbon-Verläufe verwenden (population_c14bazAAR).",
     borders: {
       appearance: "Grenzen-Erscheinungsbild",
       colourPicker: "Benutzerdefinierte Farbauswahl",

@@ -17,12 +17,14 @@ export interface DataLayerNodeProps {
   layer: ParsedDataLayer
   onChangeVariableSelector?: (arg0_key: string, arg1_option: string | string[]) => void
   onSelectLayer?: (arg0_layer_id: string) => void
+  onToggleRadiocarbon?: () => void
   searchQuery: string
   setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
   setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
   toggleNode: (arg0_id: string) => void
+  useRadiocarbon?: boolean
 }
 
 /**
@@ -43,12 +45,14 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
   let layer = arg0_props.layer
   let on_change_variable_selector = arg0_props.onChangeVariableSelector
   let on_select_layer = arg0_props.onSelectLayer
+  let on_toggle_radiocarbon = arg0_props.onToggleRadiocarbon
   let search_query = arg0_props.searchQuery
   let set_historical_borders_config = arg0_props.setHistoricalBordersConfig
   let set_stadester_config = arg0_props.setStadesterConfig
   let stadester_city_count = arg0_props.stadesterCityCount ?? 0
   let stadester_config = arg0_props.stadesterConfig
   let toggle_node = arg0_props.toggleNode
+  let use_radiocarbon = arg0_props.useRadiocarbon ?? true
 
   //Declare local instance variables
   let has_sub_layers = Boolean(layer.sub_layers && layer.sub_layers.length > 0)
@@ -218,12 +222,14 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                   layer={arg0_sub}
                   onChangeVariableSelector={on_change_variable_selector}
                   onSelectLayer={on_select_layer}
+                  onToggleRadiocarbon={on_toggle_radiocarbon}
                   searchQuery={search_query}
                   setHistoricalBordersConfig={set_historical_borders_config}
                   setStadesterConfig={set_stadester_config}
                   stadesterCityCount={stadester_city_count}
                   stadesterConfig={stadester_config}
                   toggleNode={toggle_node}
+                  useRadiocarbon={use_radiocarbon}
                 />
               ))}
             </div>
@@ -476,6 +482,42 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
               )}
             </button>
           </MapmodeTooltip>
+
+          {/* Radiocarbon demographic mapmode toggle for pre-1AD populations */}
+          {(layer.id === 'population_total' || layer.id === 'population_density' || layer.use_radiocarbon) && (
+            <div
+              title={t.mapmodes.useRadiocarbonDescription}
+              onClick={(arg0_e) => {
+                arg0_e.stopPropagation()
+                if (on_toggle_radiocarbon)
+                  on_toggle_radiocarbon()
+              }}
+              className="flex items-center justify-between px-2 py-0.5 mt-0.5 ml-4 text-xs cursor-pointer border border-border/50 bg-card/40 hover:bg-card/70 transition-colors"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span
+                  className={`w-3 h-3 rounded-none border flex items-center justify-center shrink-0 transition-colors ${
+                    use_radiocarbon
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-muted-foreground/60'
+                  }`}
+                >
+                  {use_radiocarbon && (
+                    <Icon
+                      name="check"
+                      className="text-[9px]"
+                    />
+                  )}
+                </span>
+                <span className={`text-[11px] truncate ${use_radiocarbon ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                  {t.mapmodes.useRadiocarbon}
+                </span>
+              </div>
+              <span className="text-[9px] font-mono text-muted-foreground uppercase">
+                {use_radiocarbon ? t.mapmodes.on : t.mapmodes.off}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

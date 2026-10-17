@@ -246,6 +246,8 @@
     continuous: "Continuous (multi-select)",
     overlayOn: "OVERLAY ON",
     overlayOff: "OVERLAY OFF",
+    useRadiocarbon: "Use Radiocarbon",
+    useRadiocarbonDescription: "For years prior to 1AD, use empirical radiocarbon demographic trajectories (population_c14bazAAR).",
     borders: {
       appearance: "Borders Appearance",
       colourPicker: "Custom colour picker",

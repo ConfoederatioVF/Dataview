@@ -72,6 +72,7 @@ export interface MapmodesTrayProps {
   onToggleCountriesMode?: (enabled: boolean) => void
   onToggleCountry: (country: CountryFeature) => void
   onToggleMapMode: (id: MapModeId) => void
+  onToggleRadiocarbon?: () => void
   raster?: DecodedRaster | null
   selectedCity?: CityFullRecord | CityPoint | null
   selectedCountries: CountryFeature[]
@@ -85,6 +86,7 @@ export interface MapmodesTrayProps {
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
   timelineYear?: number
+  useRadiocarbon?: boolean
   userRole?: UserRole
 }
 
@@ -131,6 +133,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     onToggleCountriesMode: on_toggle_countries_mode,
     onToggleCountry: on_toggle_country,
     onToggleMapMode: on_toggle_map_mode,
+    onToggleRadiocarbon: on_toggle_radiocarbon,
     raster: raster = null,
     selectedCity: selected_city = null,
     selectedCountries: selected_countries,
@@ -144,6 +147,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
     stadesterCityCount: stadester_city_count = 0,
     stadesterConfig: stadester_config,
     timelineYear: timeline_year = 2025,
+    useRadiocarbon: use_radiocarbon,
     userRole: user_role = 'default',
   } = props
 
@@ -667,12 +671,14 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                   historicalBordersConfig={historical_borders_config}
                   onChangeVariableSelector={on_change_variable_selector}
                   onSelectLayer={on_select_layer}
+                  onToggleRadiocarbon={on_toggle_radiocarbon}
                   searchQuery={search_query}
                   setHistoricalBordersConfig={set_historical_borders_config}
                   setStadesterConfig={set_stadester_config}
                   stadesterCityCount={stadester_city_count}
                   stadesterConfig={stadester_config}
                   toggleNode={toggle_node}
+                  useRadiocarbon={use_radiocarbon}
                 />
               ))}
 

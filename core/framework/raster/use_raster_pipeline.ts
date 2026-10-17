@@ -37,6 +37,7 @@ export interface UseRasterPipelineParams {
   performantMode: boolean
   snapToKeyframes: boolean
   timelineYear: number
+  useRadiocarbon?: boolean
 }
 
 export interface UseRasterPipelineResult {
@@ -83,6 +84,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
   let performant_mode = arg0_params.performantMode
   let snap_to_keyframes = arg0_params.snapToKeyframes
   let timeline_year = arg0_params.timelineYear
+  let use_radiocarbon = arg0_params.useRadiocarbon !== false
 
   //Declare local instance variables
   let abort_controller_ref = useRef<AbortController | null>(null)
@@ -224,11 +226,13 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
       }
     }
 
+    let is_radiocarbon_layer = requested_layer_id === 'population_total' || requested_layer_id === 'population_density' || Boolean(active_layer.use_radiocarbon)
     let po_key = typeof layer_pixel_offset === 'number'
       ? `po${layer_pixel_offset}`
       : (layer_pixel_offset && typeof layer_pixel_offset === 'object' && layer_pixel_offset.covariate
         ? `po${layer_pixel_offset.y || 0}_${layer_pixel_offset.covariate}`
         : 'po0')
+    let rc_key = is_radiocarbon_layer ? `:rc=${use_radiocarbon}` : ''
     let sel_keys = has_selectors ? Object.keys(effective_selectors).sort() : []
     let sel_part = sel_keys.map((arg0_k) => {
       let val = effective_selectors[arg0_k]
@@ -237,12 +241,12 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
     }).join(':')
 
     let cache_key_a = has_selectors && sel_part.length > 0
-      ? `${requested_layer_id}:${sel_part}:${is_interpolating ? prev_year : primary_year}:${effective_format}:${po_key}`
-      : `${requested_layer_id}:${is_interpolating ? prev_year : primary_year}:${effective_format}:${po_key}`
+      ? `${requested_layer_id}:${sel_part}:${is_interpolating ? prev_year : primary_year}:${effective_format}:${po_key}${rc_key}`
+      : `${requested_layer_id}:${is_interpolating ? prev_year : primary_year}:${effective_format}:${po_key}${rc_key}`
 
     let cache_key_b = has_selectors && sel_part.length > 0
-      ? `${requested_layer_id}:${sel_part}:${next_year}:${effective_format}:${po_key}`
-      : `${requested_layer_id}:${next_year}:${effective_format}:${po_key}`
+      ? `${requested_layer_id}:${sel_part}:${next_year}:${effective_format}:${po_key}${rc_key}`
+      : `${requested_layer_id}:${next_year}:${effective_format}:${po_key}${rc_key}`
 
     if (is_interpolating) {
       let has_a = raster_cache_ref.current.has(cache_key_a)
@@ -262,8 +266,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
         in_flight_fetches_count_ref.current++
 
         Promise.all([
-          fetchRasterKeyframe(requested_layer_id, prev_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited),
-          fetchRasterKeyframe(requested_layer_id, next_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited),
+          fetchRasterKeyframe(requested_layer_id, prev_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited, use_radiocarbon),
+          fetchRasterKeyframe(requested_layer_id, next_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited, use_radiocarbon),
         ])
           .then(([arg0_primary, arg0_secondary]) => {
             in_flight_fetches_count_ref.current = Math.max(0, in_flight_fetches_count_ref.current - 1)
@@ -316,7 +320,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           layer_pixel_offset,
           performant_mode,
           controller.signal,
-          can_be_uninhabited
+          can_be_uninhabited,
+          use_radiocarbon
         )
           .then((arg0_primary) => {
             in_flight_fetches_count_ref.current = Math.max(0, in_flight_fetches_count_ref.current - 1)
@@ -368,7 +373,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
             layer_pixel_offset,
             performant_mode,
             undefined,
-            can_be_uninhabited
+            can_be_uninhabited,
+            use_radiocarbon
           ).catch(() => {})
         })
       }
@@ -387,6 +393,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
     performant_mode,
     snap_to_keyframes,
     timeline_year,
+    use_radiocarbon,
   ])
 
   //Compute active display raster based on app mode (Single Image or Image Difference)

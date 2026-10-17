@@ -237,7 +237,10 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
   handle_jump_year = useCallback(
     function (arg0_year: number) {
-      let yr = Math.max(min_year, Math.min(max_year, arg0_year))
+      let yr = Math.abs(arg0_year) < 0.001 ? 1 : arg0_year
+      yr = Math.max(min_year, Math.min(max_year, yr))
+      if (Math.abs(yr) < 0.001)
+        yr = 1
       on_change_year(yr)
     },
     [min_year, max_year, on_change_year]
@@ -246,6 +249,8 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
   handle_select_exact_date = useCallback(
     function (arg0_date: UfDateObject) {
       let frac_year = UfDate.toFractionalYear(arg0_date)
+      if (Math.abs(frac_year) < 0.001)
+        frac_year = 1
       handle_jump_year(frac_year)
     },
     [handle_jump_year]
@@ -253,43 +258,58 @@ export let TimelineBar: React.FC<TimelineBarProps> = function (arg0_props) {
 
   handle_step_backward = useCallback(() => {
     if (available_keyframes.length > 0) {
-      let prev_candidates = available_keyframes.filter((arg0_y) => arg0_y < current_year - 0.05)
+      let prev_candidates = available_keyframes
+        .map((arg0_y) => (arg0_y === 0 ? 1 : arg0_y))
+        .filter((arg0_y) => arg0_y < current_year - 0.05)
       if (prev_candidates.length > 0) {
         let prev = prev_candidates[prev_candidates.length - 1]
         handle_jump_year(prev)
         return
       }
     }
-    handle_jump_year(current_year - 1)
+    let step_yr = current_year - 1
+    if (Math.abs(step_yr) < 0.001)
+      step_yr = -1
+    handle_jump_year(step_yr)
   }, [available_keyframes, current_year, handle_jump_year])
 
   handle_step_forward = useCallback(() => {
     if (available_keyframes.length > 0) {
-      let next_candidates = available_keyframes.filter((arg0_y) => arg0_y > current_year + 0.05)
+      let next_candidates = available_keyframes
+        .map((arg0_y) => (arg0_y === 0 ? 1 : arg0_y))
+        .filter((arg0_y) => arg0_y > current_year + 0.05)
       if (next_candidates.length > 0) {
         let next = next_candidates[0]
         handle_jump_year(next)
         return
       }
     }
-    handle_jump_year(current_year + 1)
+    let step_yr = current_year + 1
+    if (Math.abs(step_yr) < 0.001)
+      step_yr = 1
+    handle_jump_year(step_yr)
   }, [available_keyframes, current_year, handle_jump_year])
 
   handle_slider_change = useCallback(
     function (arg0_val: number[]) {
       let norm_val = Math.max(0, Math.min(100000, arg0_val[0]))/100000
       let mapped_year = UfDate.timelinePositionToYear(norm_val)
+      if (Math.abs(mapped_year) < 0.001)
+        mapped_year = 1
 
       if (snap_to_keyframes && available_keyframes.length > 0) {
-        let closest = available_keyframes[0]
+        let closest = available_keyframes[0] === 0 ? 1 : available_keyframes[0]
         let min_dist = Math.abs(mapped_year - closest)
         for (let i = 1; i < available_keyframes.length; i++) {
-          let dist = Math.abs(mapped_year - available_keyframes[i])
+          let candidate = available_keyframes[i] === 0 ? 1 : available_keyframes[i]
+          let dist = Math.abs(mapped_year - candidate)
           if (dist < min_dist) {
             min_dist = dist
-            closest = available_keyframes[i]
+            closest = candidate
           }
         }
+        if (Math.abs(closest) < 0.001)
+          closest = 1
         on_change_year(closest)
       } else {
         on_change_year(mapped_year)

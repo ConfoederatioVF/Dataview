@@ -51,10 +51,12 @@ export interface ParsedDataLayer {
   parent_id?: string
   permissions: string[]
   pixel_offset?: number | { covariate?: string; x?: number; y?: number }
+  radiocarbon_filepath?: string
   sub_layers?: ParsedDataLayer[]
   synthetic_by_default?: boolean
   type: string
   unit?: string
+  use_radiocarbon?: boolean
   variable_selectors?: Record<string, LayerVariableSelector>
 }
 
@@ -297,36 +299,43 @@ export let scanLayerTemplate = function (
         }
 
         if (!Number.isNaN(yr)) {
-          available_years_set.add(yr)
+          let canonical_yr = (yr === 0) ? 1 : yr
+          available_years_set.add(canonical_yr)
 
-          //Cache mapping strategies
-          if (keys.length > 0) {
-            //Strategy 1: Canonical sorted key (e.g. layer:indicator=net_wealth:1950)
-            let sorted_pairs = Object.keys(combo).sort().map((arg0_k) => `${arg0_k}=${combo[arg0_k]}`).join(':')
-            file_cache.set(`${layer_id}:${sorted_pairs}:${yr}`, full_path)
+          let cache_years = (yr === 0) ? [0, 1] : (yr === 1 ? [1, 0] : [yr])
 
-            //Strategy 2: Sorted values key (e.g. layer:net_wealth:1950)
-            let sorted_values = Object.keys(combo).sort().map((arg0_k) => combo[arg0_k]).join(':')
-            file_cache.set(`${layer_id}:${sorted_values}:${yr}`, full_path)
+          for (let cy = 0; cy < cache_years.length; cy++) {
+            let target_yr = cache_years[cy]
 
-            //Strategy 3: Legacy positional (e.g. layer:profession:gender:1950)
-            if (combo.profession && combo.gender) {
-              file_cache.set(`${layer_id}:${combo.profession}:${combo.gender}:${yr}`, full_path)
-            }
-            if (keys.length === 1) {
-              let single_val = combo[keys[0]]
-              file_cache.set(`${layer_id}:${single_val}:${yr}`, full_path)
-            }
+            //Cache mapping strategies
+            if (keys.length > 0) {
+              //Strategy 1: Canonical sorted key (e.g. layer:indicator=net_wealth:1950)
+              let sorted_pairs = Object.keys(combo).sort().map((arg0_k) => `${arg0_k}=${combo[arg0_k]}`).join(':')
+              file_cache.set(`${layer_id}:${sorted_pairs}:${target_yr}`, full_path)
 
-            //Strategy 4: Default fallback key (first combo)
-            if (is_first_combo) {
-              file_cache.set(`${layer_id}:${yr}`, full_path)
+              //Strategy 2: Sorted values key (e.g. layer:net_wealth:1950)
+              let sorted_values = Object.keys(combo).sort().map((arg0_k) => combo[arg0_k]).join(':')
+              file_cache.set(`${layer_id}:${sorted_values}:${target_yr}`, full_path)
+
+              //Strategy 3: Legacy positional (e.g. layer:profession:gender:1950)
               if (combo.profession && combo.gender) {
-                file_cache.set(`${layer_id}:agriculture:t:${yr}`, full_path)
+                file_cache.set(`${layer_id}:${combo.profession}:${combo.gender}:${target_yr}`, full_path)
               }
+              if (keys.length === 1) {
+                let single_val = combo[keys[0]]
+                file_cache.set(`${layer_id}:${single_val}:${target_yr}`, full_path)
+              }
+
+              //Strategy 4: Default fallback key (first combo)
+              if (is_first_combo) {
+                file_cache.set(`${layer_id}:${target_yr}`, full_path)
+                if (combo.profession && combo.gender) {
+                  file_cache.set(`${layer_id}:agriculture:t:${target_yr}`, full_path)
+                }
+              }
+            } else {
+              file_cache.set(`${layer_id}:${target_yr}`, full_path)
             }
-          } else {
-            file_cache.set(`${layer_id}:${yr}`, full_path)
           }
         }
       }
@@ -497,12 +506,14 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'open',
       'permissions',
       'pixel_offset',
+      'radiocarbon_filepath',
       'root_folders',
       'show_colourbar',
       'show_colorbar',
       'synthetic_by_default',
       'type',
       'unit',
+      'use_radiocarbon',
       'variable_selectors',
     ]
 
@@ -738,6 +749,23 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           resolved_template = sub_layer_list[0].filepath_template
         }
 
+        //Scan radiocarbon template if configured
+        let resolved_radiocarbon_filepath: string | undefined = undefined
+        if (item.radiocarbon_filepath) {
+          let rc_template = item.radiocarbon_filepath
+          for (let y = 0; y < root_keys.length; y++) {
+            let rk = root_keys[y]
+            rc_template = rc_template.replace(new RegExp(`(\\$\\{${rk}\\}|\\{${rk}\\})`, 'g'), resolved_roots[rk])
+          }
+          resolved_radiocarbon_filepath = normaliseLayerPath(rc_template)
+          let rc_years = scanLayerTemplate(resolved_radiocarbon_filepath, `${k}:radiocarbon`, file_cache)
+          for (let rci = 0; rci < rc_years.length; rci++) {
+            if (!years.includes(rc_years[rci]))
+              years.push(rc_years[rci])
+          }
+          years.sort((arg0_a, arg0_b) => arg0_a - arg0_b)
+        }
+
         parsed_layers[k] = {
           available_years: years,
           can_be_uninhabited: Boolean(item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
@@ -756,12 +784,14 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           name: item.name || k,
           permissions: item.permissions ? (Array.isArray(item.permissions) ? item.permissions : [item.permissions]) : ['default'],
           pixel_offset: item.pixel_offset,
+          radiocarbon_filepath: resolved_radiocarbon_filepath,
           sub_layers: sub_layer_list.length > 0 ? sub_layer_list : undefined,
           synthetic_by_default: item.synthetic_by_default !== undefined
             ? Boolean(item.synthetic_by_default)
             : (parsed_json.synthetic_by_default !== undefined ? Boolean(parsed_json.synthetic_by_default) : undefined),
           type: layer_type,
           unit: item.unit,
+          use_radiocarbon: item.use_radiocarbon !== undefined ? Boolean(item.use_radiocarbon) : undefined,
           variable_selectors: selectors,
         }
       }

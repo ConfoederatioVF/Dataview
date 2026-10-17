@@ -15,12 +15,14 @@ export interface DatasetFolderNodeProps {
   isLayerAccessible: (arg0_layer: ParsedDataLayer) => boolean
   onChangeVariableSelector?: (arg0_key: string, arg1_option: string | string[]) => void
   onSelectLayer?: (arg0_layer_id: string) => void
+  onToggleRadiocarbon?: () => void
   searchQuery: string
   setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
   setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
   toggleNode: (arg0_id: string, arg1_current_open?: boolean) => void
+  useRadiocarbon?: boolean
 }
 
 /**
@@ -41,12 +43,14 @@ export let DatasetFolderNode: React.FC<DatasetFolderNodeProps> = function (arg0_
   let is_layer_accessible = arg0_props.isLayerAccessible
   let on_change_variable_selector = arg0_props.onChangeVariableSelector
   let on_select_layer = arg0_props.onSelectLayer
+  let on_toggle_radiocarbon = arg0_props.onToggleRadiocarbon
   let search_query = arg0_props.searchQuery
   let set_historical_borders_config = arg0_props.setHistoricalBordersConfig
   let set_stadester_config = arg0_props.setStadesterConfig
   let stadester_city_count = arg0_props.stadesterCityCount
   let stadester_config = arg0_props.stadesterConfig
   let toggle_node = arg0_props.toggleNode
+  let use_radiocarbon = arg0_props.useRadiocarbon
 
   //Declare local instance variables
   let default_open: boolean
@@ -102,12 +106,14 @@ export let DatasetFolderNode: React.FC<DatasetFolderNodeProps> = function (arg0_
               layer={arg0_layer}
               onChangeVariableSelector={on_change_variable_selector}
               onSelectLayer={on_select_layer}
+              onToggleRadiocarbon={on_toggle_radiocarbon}
               searchQuery={search_query}
               setHistoricalBordersConfig={set_historical_borders_config}
               setStadesterConfig={set_stadester_config}
               stadesterCityCount={stadester_city_count}
               stadesterConfig={stadester_config}
               toggleNode={toggle_node}
+              useRadiocarbon={use_radiocarbon}
             />
           ))}
         </div>

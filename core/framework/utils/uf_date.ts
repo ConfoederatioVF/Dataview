@@ -57,7 +57,7 @@ export let UfDate = {
    */
   getBlankDate: function (): UfDateObject {
     //Return statement
-    return { day: 1, hour: 0, minute: 0, month: 1, year: 0 }
+    return { day: 1, hour: 0, minute: 0, month: 1, year: 1 }
   },
 
   /**
@@ -128,6 +128,8 @@ export let UfDate = {
     //Function body
     //1. Parse whole years
     date_obj.year = Math.floor(years)
+    if (date_obj.year === 0)
+      date_obj.year = 1
     remainder = years - date_obj.year
     total_days = UfDate.isLeapYear(date_obj.year) ? 366 : 365
 
@@ -205,7 +207,7 @@ export let UfDate = {
     let month = Math.max(1, Math.min(12, date.month || 1))
     let passed_days = 0
     let total_days = UfDate.isLeapYear(date.year) ? 366 : 365
-    let year = date.year
+    let year = date.year === 0 ? 1 : date.year
 
     //Function body
     for (let i = 1; i < month; i++) {
@@ -381,6 +383,8 @@ export let UfDate = {
     let year = Math.floor(arg0_year)
 
     //Return statement
+    if (year === 0)
+      return '1AD'
     if (year < 0)
       return `${Math.abs(year)}BC`
     return `${year}AD`
@@ -433,7 +437,7 @@ export let UfDate = {
    */
   yearToTimelinePosition: function (arg0_year: number): number {
     //Convert from parameters
-    let year = arg0_year
+    let year = arg0_year === 0 ? 1 : arg0_year
 
     //Declare local instance variables
     let ms = TIMELINE_MILESTONES
@@ -489,9 +493,12 @@ export let UfDate = {
       if (pos >= m_curr.pos && pos <= m_next.pos) {
         let pos_span = m_next.pos - m_curr.pos
         let t = pos_span > 0 ? (pos - m_curr.pos)/pos_span : 0
+        let calc_year = m_curr.year + t*(m_next.year - m_curr.year)
 
         //Return statement
-        return m_curr.year + t*(m_next.year - m_curr.year)
+        if (Math.abs(calc_year) < 0.001)
+          return 1
+        return calc_year
       }
     }
 

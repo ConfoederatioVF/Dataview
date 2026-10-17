@@ -269,12 +269,14 @@
         encoding: "float32",
         filepath: "${stad}/stadester_density_rasters/stadester_density_${year}.png",
         unit: "ihb/km^2",
+        use_radiocarbon: true,
+        radiocarbon_filepath: "${c14}/6.rasters_density/popd_${year}.png",
         legend: {
             colourscheme: "reds"
         },
         description: [
             "### Population Density:",
-            "Population density per gridcell in terms of inhabitants per square kilometre, i.e. total population divided by land area.",
+            "Population density per gridcell in terms of inhabitants per square kilometre, i.e. total population divided by land area."
         ]
     },
     population_total: {
@@ -282,6 +284,8 @@
         encoding: "float32",
         filepath: "${stad}/stadester_population_rasters/stadester_population_${year}.png",
         unit: "Total",
+        use_radiocarbon: true,
+        radiocarbon_filepath: "${c14}/5.rasters_scaled_to_global/popc_${year}.png",
         legend: {
             colourscheme: "viridis"
         },

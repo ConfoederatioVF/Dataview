@@ -212,7 +212,8 @@ export async function fetchSingleDecodedRasterAsync (
   arg6_pixel_offset?: number | { covariate?: string; x?: number; y?: number },
   arg7_performant_mode?: boolean,
   arg8_signal?: AbortSignal,
-  arg9_can_be_uninhabited?: boolean
+  arg9_can_be_uninhabited?: boolean,
+  arg10_use_radiocarbon?: boolean
 ): Promise<DecodedRaster | null> {
   //Convert from parameters
   let cache = arg4_cache
@@ -224,23 +225,26 @@ export async function fetchSingleDecodedRasterAsync (
   let pixel_offset = arg6_pixel_offset
   let selectors = arg2_selectors
   let signal = arg8_signal
+  let use_radiocarbon = arg10_use_radiocarbon
   let year = arg1_year
 
   //Declare local instance variables
   let cache_key: string
+  let is_radiocarbon_layer = layer_id === 'population_total' || layer_id === 'population_density'
   let pending_promise: Promise<DecodedRaster | null>
   let po_key = typeof pixel_offset === 'number'
     ? `po${pixel_offset}`
     : (pixel_offset && typeof pixel_offset === 'object' && pixel_offset.covariate
       ? `po${pixel_offset.y || 0}_${pixel_offset.covariate}`
       : 'po0')
+  let rc_key = is_radiocarbon_layer && use_radiocarbon !== undefined ? `:rc=${use_radiocarbon}` : ''
   let sel_keys = has_selectors ? Object.keys(selectors).sort() : []
   let sel_part = sel_keys.map((arg0_k) => `${arg0_k}=${selectors[arg0_k]}`).join(':')
 
   //Construct cache_key
   cache_key = has_selectors && sel_part.length > 0
-    ? `${layer_id}:${sel_part}:${year}:${format}:${po_key}`
-    : `${layer_id}:${year}:${format}:${po_key}`
+    ? `${layer_id}:${sel_part}:${year}:${format}:${po_key}${rc_key}`
+    : `${layer_id}:${year}:${format}:${po_key}${rc_key}`
 
   //Guard clauses
   if (cache.has(cache_key))
@@ -263,6 +267,9 @@ export async function fetchSingleDecodedRasterAsync (
         layer: layer_id,
         year: year.toString(),
       })
+      if (use_radiocarbon !== undefined) {
+        query_params.set('radiocarbon', use_radiocarbon ? 'true' : 'false')
+      }
       if (has_selectors) {
         for (let i = 0; i < sel_keys.length; i++) {
           let sk = sel_keys[i]
@@ -468,7 +475,8 @@ export async function fetchRasterKeyframe (
   arg6_pixel_offset?: number | { covariate?: string; x?: number; y?: number },
   arg7_performant_mode?: boolean,
   arg8_signal?: AbortSignal,
-  arg9_can_be_uninhabited?: boolean
+  arg9_can_be_uninhabited?: boolean,
+  arg10_use_radiocarbon?: boolean
 ): Promise<DecodedRaster | null> {
   //Convert from parameters
   let cache = arg4_cache
@@ -480,17 +488,20 @@ export async function fetchRasterKeyframe (
   let pixel_offset = arg6_pixel_offset
   let selectors = arg2_selectors
   let signal = arg8_signal
+  let use_radiocarbon = arg10_use_radiocarbon
   let year = arg1_year
 
   //Declare local instance variables
   let combinations = has_selectors ? getSelectorCombinations(selectors) : [{}]
   let composite_cache_key: string
   let composite_promise: Promise<DecodedRaster | null>
+  let is_radiocarbon_layer = layer_id === 'population_total' || layer_id === 'population_density'
   let po_key = typeof pixel_offset === 'number'
     ? `po${pixel_offset}`
     : (pixel_offset && typeof pixel_offset === 'object' && pixel_offset.covariate
       ? `po${pixel_offset.y || 0}_${pixel_offset.covariate}`
       : 'po0')
+  let rc_key = is_radiocarbon_layer && use_radiocarbon !== undefined ? `:rc=${use_radiocarbon}` : ''
   let sel_keys = has_selectors ? Object.keys(selectors).sort() : []
   let sel_part = sel_keys.map((arg0_k) => {
     let val = selectors[arg0_k]
@@ -500,8 +511,8 @@ export async function fetchRasterKeyframe (
 
   //Construct composite_cache_key
   composite_cache_key = has_selectors && sel_part.length > 0
-    ? `${layer_id}:${sel_part}:${year}:${format}:${po_key}`
-    : `${layer_id}:${year}:${format}:${po_key}`
+    ? `${layer_id}:${sel_part}:${year}:${format}:${po_key}${rc_key}`
+    : `${layer_id}:${year}:${format}:${po_key}${rc_key}`
 
   //Fast path: already in cache
   if (cache.has(composite_cache_key))
@@ -530,7 +541,8 @@ export async function fetchRasterKeyframe (
       pixel_offset,
       performant_mode,
       signal,
-      can_be_uninhabited
+      can_be_uninhabited,
+      use_radiocarbon
     )
   }
 
@@ -548,7 +560,8 @@ export async function fetchRasterKeyframe (
           pixel_offset,
           performant_mode,
           signal,
-          can_be_uninhabited
+          can_be_uninhabited,
+          use_radiocarbon
         )
       )
       let results = await Promise.all(raster_promises)

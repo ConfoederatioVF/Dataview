@@ -242,7 +242,13 @@ export let App: React.FC = function () {
   let [is_playing, set_is_playing] = useState<boolean>(false)
   let [playback_speed, set_playback_speed] = useState<number>(1)
   let [snap_to_keyframes, set_snap_to_keyframes] = useState<boolean>(false)
+  let [use_radiocarbon, set_use_radiocarbon] = useState<boolean>(true)
   let [video_export_open, set_video_export_open] = useState<boolean>(false)
+
+  let handle_change_year = useCallback((arg0_year: number) => {
+    let yr = arg0_year === 0 ? 1 : arg0_year
+    set_timeline_year(yr)
+  }, [])
 
   let handle_change_user_role = useCallback(
     function (arg0_role: UserRole) {
@@ -357,6 +363,7 @@ export let App: React.FC = function () {
     performantMode: performant_mode,
     snapToKeyframes: snap_to_keyframes,
     timelineYear: timeline_year,
+    useRadiocarbon: use_radiocarbon,
   })
 
   useEffect(() => {
@@ -1422,7 +1429,9 @@ export let App: React.FC = function () {
           snapToKeyframes={snap_to_keyframes}
           timelineYear={timeline_year}
           userRole={user_role}
-          onChangeYear={set_timeline_year}
+          onChangeYear={handle_change_year}
+          onToggleRadiocarbon={() => set_use_radiocarbon((arg0_prev) => !arg0_prev)}
+          useRadiocarbon={use_radiocarbon}
         />
 
         {/* ECharts Analytical View Panel (Top Right) */}
@@ -1456,7 +1465,7 @@ export let App: React.FC = function () {
           onSelectCity={(arg0_key) => {
             set_selected_city_key(arg0_key)
           }}
-          onChangeYear={set_timeline_year}
+          onChangeYear={handle_change_year}
           stadesterDataset={stadester_config.dataset}
           userRole={user_role}
         />
@@ -1473,7 +1482,7 @@ export let App: React.FC = function () {
           maxYear={available_keyframes.length > 0 ? available_keyframes[available_keyframes.length - 1] : 2025}
           minYear={available_keyframes.length > 0 ? available_keyframes[0] : -10000}
           onChangePlaybackSpeed={set_playback_speed}
-          onChangeYear={set_timeline_year}
+          onChangeYear={handle_change_year}
           onClose={() => set_active_mobile_tab(null)}
           onTogglePlay={() => set_is_playing((arg0_prev) => !arg0_prev)}
           onToggleSnapToKeyframes={handle_toggle_snap_to_keyframes}

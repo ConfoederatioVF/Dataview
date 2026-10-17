@@ -155,6 +155,9 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
       let layer_id = query.layer as string
       let raw_year = parseFloat(query.year as string)
 
+      if (raw_year === 0)
+        raw_year = 1
+
       if (!layer_id || Number.isNaN(raw_year)) {
         res.statusCode = 400
         res.setHeader('Content-Type', 'application/json')
@@ -240,49 +243,88 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
           target_layer = parent.sub_layers.find((arg0_sub: any) => arg0_sub.id === layer)
       }
 
-      //Collect selector query parameters
-      let selector_param_keys = Object.keys(query).filter(
-        (arg0_k) => arg0_k !== 'layer' && arg0_k !== 'year' && typeof query[arg0_k] === 'string'
-      ).sort()
+      let num_year = parseFloat(year)
+      let req_radiocarbon = query.radiocarbon !== 'false' && query.radiocarbon !== '0'
+      let is_radiocarbon_layer = layer === 'population_total' || layer === 'population_density' || Boolean(target_layer?.use_radiocarbon)
 
-      if (target_layer?.variable_selectors) {
-        let valid_keys = Object.keys(target_layer.variable_selectors)
-        selector_param_keys = selector_param_keys.filter((arg0_k) => valid_keys.includes(arg0_k))
+      //Radiocarbon dataset lookup for years prior to 1AD
+      if (is_radiocarbon_layer && req_radiocarbon && num_year < 1) {
+        file_path = registry.file_cache.get(`${layer}:radiocarbon:${year}`)
+        if (!file_path && year === '0')
+          file_path = registry.file_cache.get(`${layer}:radiocarbon:1`)
+        if (!file_path && year === '1')
+          file_path = registry.file_cache.get(`${layer}:radiocarbon:0`)
       }
 
-      //Strategy 1: Canonical sorted key (e.g. layer:indicator=net_wealth:1950)
-      if (selector_param_keys.length > 0) {
-        let combo_str = selector_param_keys.map((arg0_k) => `${arg0_k}=${query[arg0_k]}`).join(':')
-        file_path = registry.file_cache.get(`${layer}:${combo_str}:${year}`)
-      }
-
-      //Strategy 2: Values-only key (e.g. layer:net_wealth:1950)
-      if (!file_path && selector_param_keys.length > 0) {
-        let vals_str = selector_param_keys.map((arg0_k) => query[arg0_k]).join(':')
-        file_path = registry.file_cache.get(`${layer}:${vals_str}:${year}`)
-      }
-
-      //Strategy 3: Legacy positional (e.g. layer:profession:gender:1950)
-      if (!file_path && (query.profession || query.gender)) {
-        let prof = (query.profession as string) || 'agriculture'
-        let gen = (query.gender as string) || 't'
-        file_path = registry.file_cache.get(`${layer}:${prof}:${gen}:${year}`)
-      }
-
-      //Strategy 4: Single parameter fallback
-      if (!file_path && selector_param_keys.length === 1) {
-        let val = query[selector_param_keys[0]] as string
-        file_path = registry.file_cache.get(`${layer}:${val}:${year}`)
-      }
-
-      //Strategy 5: Default layer:year key
       if (!file_path) {
-        file_path = registry.file_cache.get(`${layer}:${year}`)
-      }
+        //Collect selector query parameters
+        let selector_param_keys = Object.keys(query).filter(
+          (arg0_k) => arg0_k !== 'layer' && arg0_k !== 'year' && arg0_k !== 'radiocarbon' && typeof query[arg0_k] === 'string'
+        ).sort()
 
-      //Strategy 6: Legacy default fallback
-      if (!file_path) {
-        file_path = registry.file_cache.get(`${layer}:agriculture:t:${year}`)
+        if (target_layer?.variable_selectors) {
+          let valid_keys = Object.keys(target_layer.variable_selectors)
+          selector_param_keys = selector_param_keys.filter((arg0_k) => valid_keys.includes(arg0_k))
+        }
+
+        //Strategy 1: Canonical sorted key (e.g. layer:indicator=net_wealth:1950)
+        if (selector_param_keys.length > 0) {
+          let combo_str = selector_param_keys.map((arg0_k) => `${arg0_k}=${query[arg0_k]}`).join(':')
+          file_path = registry.file_cache.get(`${layer}:${combo_str}:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:${combo_str}:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:${combo_str}:1`)
+        }
+
+        //Strategy 2: Values-only key (e.g. layer:net_wealth:1950)
+        if (!file_path && selector_param_keys.length > 0) {
+          let vals_str = selector_param_keys.map((arg0_k) => query[arg0_k]).join(':')
+          file_path = registry.file_cache.get(`${layer}:${vals_str}:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:${vals_str}:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:${vals_str}:1`)
+        }
+
+        //Strategy 3: Legacy positional (e.g. layer:profession:gender:1950)
+        if (!file_path && (query.profession || query.gender)) {
+          let prof = (query.profession as string) || 'agriculture'
+          let gen = (query.gender as string) || 't'
+          file_path = registry.file_cache.get(`${layer}:${prof}:${gen}:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:${prof}:${gen}:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:${prof}:${gen}:1`)
+        }
+
+        //Strategy 4: Single parameter fallback
+        if (!file_path && selector_param_keys.length === 1) {
+          let val = query[selector_param_keys[0]] as string
+          file_path = registry.file_cache.get(`${layer}:${val}:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:${val}:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:${val}:1`)
+        }
+
+        //Strategy 5: Default layer:year key
+        if (!file_path) {
+          file_path = registry.file_cache.get(`${layer}:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:1`)
+        }
+
+        //Strategy 6: Legacy default fallback
+        if (!file_path) {
+          file_path = registry.file_cache.get(`${layer}:agriculture:t:${year}`)
+          if (!file_path && year === '1')
+            file_path = registry.file_cache.get(`${layer}:agriculture:t:0`)
+          if (!file_path && year === '0')
+            file_path = registry.file_cache.get(`${layer}:agriculture:t:1`)
+        }
       }
 
       if (!file_path || !fs.existsSync(file_path)) {
@@ -347,7 +389,7 @@ export let createApiMiddleware = function (arg0_options: ApiMiddlewareOptions) {
         let layer = params.layer || 'age_sex'
         let raw_x = params.x
         let raw_y = params.y
-        let year = params.year || 1950
+        let year = params.year === 0 ? 1 : (params.year || 1950)
 
         let current_source_mtime = getLayerYearSourceMtime(layer, year)
         let opt_info = getOptimisationConfig()

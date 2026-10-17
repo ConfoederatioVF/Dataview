@@ -89,10 +89,11 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
       return
 
     let d = UfDate.fromFractionalYear(current_year)
+    let safe_year = d.year === 0 ? 1 : d.year
     set_selected_day(d.day)
     set_selected_month(d.month)
-    set_selected_era(d.year < 0 ? 'BC' : 'AD')
-    set_year_text(String(Math.abs(d.year || 1)))
+    set_selected_era(safe_year < 0 ? 'BC' : 'AD')
+    set_year_text(String(Math.abs(safe_year)))
   }, [is_open, current_year])
 
   //Dismiss on click outside
@@ -120,7 +121,7 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
   }, [is_open, on_close])
 
   year_num = parseInt(year_text, 10)
-  if (Number.isNaN(year_num))
+  if (Number.isNaN(year_num) || year_num === 0)
     year_num = 1
   effective_year = selected_era === 'BC' ? -Math.abs(year_num) : Math.abs(year_num)
 
@@ -156,18 +157,26 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
 
   handle_year_step = function (arg0_delta: number) {
     let curr = parseInt(year_text, 10)
-    if (Number.isNaN(curr))
+    if (Number.isNaN(curr) || curr === 0)
       curr = 1
 
-    let next_effective = (selected_era === 'BC' ? -curr : curr) + arg0_delta
+    let curr_effective = selected_era === 'BC' ? -curr : curr
+    let next_effective = curr_effective + arg0_delta
+
+    // Skip year 0 when stepping across boundary between AD and BC
+    if (curr_effective > 0 && next_effective <= 0) {
+      next_effective = next_effective - 1
+    } else if (curr_effective < 0 && next_effective >= 0) {
+      next_effective = next_effective + 1
+    }
+
     next_effective = Math.max(min_year, Math.min(max_year, next_effective))
+    if (next_effective === 0)
+      next_effective = 1
 
     if (next_effective < 0) {
       set_selected_era('BC')
       set_year_text(String(Math.abs(next_effective)))
-    } else if (next_effective === 0) {
-      set_selected_era('AD')
-      set_year_text('1')
     } else {
       set_selected_era('AD')
       set_year_text(String(next_effective))
@@ -202,10 +211,11 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
   }
 
   handle_apply = function () {
+    let final_year = effective_year === 0 ? 1 : effective_year
     let d: UfDateObject = {
       day: Math.min(selected_day, days_in_current_month),
       month: selected_month,
-      year: effective_year,
+      year: final_year,
     }
     on_select_date(d)
     on_close()
@@ -297,6 +307,13 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
               type="text"
               value={year_text}
               onChange={(arg0_e) => handle_year_change(arg0_e.target.value)}
+              onBlur={() => {
+                let parsed = parseInt(year_text, 10)
+                if (Number.isNaN(parsed) || parsed === 0) {
+                  set_year_text('1')
+                  set_selected_era('AD')
+                }
+              }}
               onKeyDown={(arg0_e) => {
                 if (arg0_e.key === 'Enter')
                   handle_apply()

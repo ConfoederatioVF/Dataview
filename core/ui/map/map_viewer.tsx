@@ -145,11 +145,9 @@ export interface MapViewerProps {
   stadesterConfig?: StadesterConfig
   timelineYear?: number
   uiVisible?: boolean
-  useRadiocarbon?: boolean
   userRole?: UserRole
   onChangeYear?: (arg0_year: number) => void
   onToggleHistoricalBorders?: (arg0_enabled: boolean) => void
-  onToggleRadiocarbon?: () => void
 }
 
 interface MapDetailsNavEntry {
@@ -1918,8 +1916,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           timelineYear={timeline_year || 1950}
           userRole={props.userRole}
           isMobile={is_mobile}
-          onToggleRadiocarbon={props.onToggleRadiocarbon}
-          useRadiocarbon={props.useRadiocarbon}
         />
       )}
     </div>

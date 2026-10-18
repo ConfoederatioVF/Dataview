@@ -267,10 +267,8 @@
     population_density: {
         name: "Population Density (ihb/km^2)",
         encoding: "float32",
-        filepath: "${stad}/stadester_density_rasters/stadester_density_${year}.png",
+        filepath: "${velk}/velkscala_density_rasters/velkscala_density_${year}.png",
         unit: "ihb/km^2",
-        use_radiocarbon: true,
-        radiocarbon_filepath: "${c14}/6.rasters_density/popd_${year}.png",
         legend: {
             colourscheme: "reds"
         },
@@ -282,10 +280,8 @@
     population_total: {
         name: "Population (Total)",
         encoding: "float32",
-        filepath: "${stad}/stadester_population_rasters/stadester_population_${year}.png",
+        filepath: "${velk}/velkscala_population_rasters/velkscala_population_${year}.png",
         unit: "Total",
-        use_radiocarbon: true,
-        radiocarbon_filepath: "${c14}/5.rasters_scaled_to_global/popc_${year}.png",
         legend: {
             colourscheme: "viridis"
         },
@@ -308,7 +304,7 @@
     population_rural: {
         name: "Population (Rural)",
         encoding: "float32",
-        filepath: "${stad}/stadester_rural_rasters/stadester_rural_{year}.png",
+        filepath: "${velk}/velkscala_rural_rasters/velkscala_rural_${year}.png",
         unit: "Rural and periurban population, total",
         legend: {
             colourscheme: "greens"
@@ -321,7 +317,7 @@
     population_urban: {
         name: "Population (Urban)",
         encoding: "float32",
-        filepath: "${stad}/stadester_urban_rasters/stadester_urban_{year}.png",
+        filepath: "${velk}/velkscala_urban_rasters/velkscala_urban_${year}.png",
         unit: "Urban population, total",
         legend: {
             colourscheme: "blues"

@@ -242,7 +242,6 @@ export let App: React.FC = function () {
   let [is_playing, set_is_playing] = useState<boolean>(false)
   let [playback_speed, set_playback_speed] = useState<number>(1)
   let [snap_to_keyframes, set_snap_to_keyframes] = useState<boolean>(false)
-  let [use_radiocarbon, set_use_radiocarbon] = useState<boolean>(true)
   let [video_export_open, set_video_export_open] = useState<boolean>(false)
 
   let handle_change_year = useCallback((arg0_year: number) => {
@@ -363,7 +362,6 @@ export let App: React.FC = function () {
     performantMode: performant_mode,
     snapToKeyframes: snap_to_keyframes,
     timelineYear: timeline_year,
-    useRadiocarbon: use_radiocarbon,
   })
 
   useEffect(() => {
@@ -1430,8 +1428,6 @@ export let App: React.FC = function () {
           timelineYear={timeline_year}
           userRole={user_role}
           onChangeYear={handle_change_year}
-          onToggleRadiocarbon={() => set_use_radiocarbon((arg0_prev) => !arg0_prev)}
-          useRadiocarbon={use_radiocarbon}
         />
 
         {/* ECharts Analytical View Panel (Top Right) */}

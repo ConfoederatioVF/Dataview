@@ -51,12 +51,10 @@ export interface ParsedDataLayer {
   parent_id?: string
   permissions: string[]
   pixel_offset?: number | { covariate?: string; x?: number; y?: number }
-  radiocarbon_filepath?: string
   sub_layers?: ParsedDataLayer[]
   synthetic_by_default?: boolean
   type: string
   unit?: string
-  use_radiocarbon?: boolean
   variable_selectors?: Record<string, LayerVariableSelector>
 }
 
@@ -506,14 +504,12 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'open',
       'permissions',
       'pixel_offset',
-      'radiocarbon_filepath',
       'root_folders',
       'show_colourbar',
       'show_colorbar',
       'synthetic_by_default',
       'type',
       'unit',
-      'use_radiocarbon',
       'variable_selectors',
     ]
 
@@ -749,23 +745,6 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           resolved_template = sub_layer_list[0].filepath_template
         }
 
-        //Scan radiocarbon template if configured
-        let resolved_radiocarbon_filepath: string | undefined = undefined
-        if (item.radiocarbon_filepath) {
-          let rc_template = item.radiocarbon_filepath
-          for (let y = 0; y < root_keys.length; y++) {
-            let rk = root_keys[y]
-            rc_template = rc_template.replace(new RegExp(`(\\$\\{${rk}\\}|\\{${rk}\\})`, 'g'), resolved_roots[rk])
-          }
-          resolved_radiocarbon_filepath = normaliseLayerPath(rc_template)
-          let rc_years = scanLayerTemplate(resolved_radiocarbon_filepath, `${k}:radiocarbon`, file_cache)
-          for (let rci = 0; rci < rc_years.length; rci++) {
-            if (!years.includes(rc_years[rci]))
-              years.push(rc_years[rci])
-          }
-          years.sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-        }
-
         parsed_layers[k] = {
           available_years: years,
           can_be_uninhabited: Boolean(item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
@@ -784,14 +763,12 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           name: item.name || k,
           permissions: item.permissions ? (Array.isArray(item.permissions) ? item.permissions : [item.permissions]) : ['default'],
           pixel_offset: item.pixel_offset,
-          radiocarbon_filepath: resolved_radiocarbon_filepath,
           sub_layers: sub_layer_list.length > 0 ? sub_layer_list : undefined,
           synthetic_by_default: item.synthetic_by_default !== undefined
             ? Boolean(item.synthetic_by_default)
             : (parsed_json.synthetic_by_default !== undefined ? Boolean(parsed_json.synthetic_by_default) : undefined),
           type: layer_type,
           unit: item.unit,
-          use_radiocarbon: item.use_radiocarbon !== undefined ? Boolean(item.use_radiocarbon) : undefined,
           variable_selectors: selectors,
         }
       }

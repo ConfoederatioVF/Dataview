@@ -321,8 +321,6 @@ export interface LocalisationConfig {
       title: string
     }
     title: string
-    useRadiocarbon: string
-    useRadiocarbonDescription: string
     varsCount: string
   }
   timeline: {

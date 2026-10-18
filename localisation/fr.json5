@@ -246,8 +246,6 @@
     continuous: "Continue (sélection multiple)",
     overlayOn: "SUPERPOSITION ACTIVÉE",
     overlayOff: "SUPERPOSITION DÉSACTIVÉE",
-    useRadiocarbon: "Utiliser le radiocarbone",
-    useRadiocarbonDescription: "Pour les années avant 1 apr. J.-C., utiliser les trajectoires démographiques radiocarbone empiriques (population_c14bazAAR).",
     borders: {
       appearance: "Apparence des frontières",
       colourPicker: "Sélecteur de couleur personnalisé",

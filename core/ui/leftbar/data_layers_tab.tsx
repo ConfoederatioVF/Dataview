@@ -21,10 +21,8 @@ export interface DataLayersTabProps {
   onChangeVariableSelector: (arg0_key: string, arg1_option: string | string[]) => void
   onOpenVideoExport?: () => void
   onSelectLayer: (arg0_layer_id: string) => void
-  onToggleRadiocarbon?: () => void
   stadesterCityCount?: number
   stadesterConfig?: StadesterConfig
-  useRadiocarbon?: boolean
   userRole?: UserRole
 }
 
@@ -50,10 +48,8 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
     onChangeVariableSelector: on_change_variable_selector,
     onOpenVideoExport: on_open_video_export,
     onSelectLayer: on_select_layer,
-    onToggleRadiocarbon: on_toggle_radiocarbon,
     stadesterCityCount: stadester_city_count = 0,
     stadesterConfig: stadester_config,
-    useRadiocarbon: use_radiocarbon = true,
     userRole: user_role = 'default',
   } = props
 
@@ -412,42 +408,6 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                     </div>
                 </div>
               </button>
-
-              {/* Radiocarbon Demographic Dataset Toggle for pre-1AD */}
-              {(arg0_layer.id === 'population_total' || arg0_layer.id === 'population_density' || arg0_layer.use_radiocarbon) && (
-                <div
-                  title={t.mapmodes.useRadiocarbonDescription}
-                  onClick={(arg0_e) => {
-                    arg0_e.stopPropagation()
-                    if (on_toggle_radiocarbon)
-                      on_toggle_radiocarbon()
-                  }}
-                  className="px-3 py-1 border-t border-border/40 bg-card/60 hover:bg-muted/40 cursor-pointer flex items-center justify-between text-xs transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span
-                      className={`w-3.5 h-3.5 rounded-none border flex items-center justify-center shrink-0 transition-colors ${
-                        use_radiocarbon
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-muted-foreground/60'
-                      }`}
-                    >
-                      {use_radiocarbon && (
-                        <Icon
-                          name="check"
-                          className="text-[10px]"
-                        />
-                      )}
-                    </span>
-                    <span className={`text-[11px] truncate ${use_radiocarbon ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                      {t.mapmodes.useRadiocarbon}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase">
-                    {use_radiocarbon ? t.mapmodes.on : t.mapmodes.off}
-                  </span>
-                </div>
-              )}
 
               {/* Historical Borders Inline Configuration */}
               {is_borders && is_overlay_active && historical_borders_config && on_change_historical_borders_config && (

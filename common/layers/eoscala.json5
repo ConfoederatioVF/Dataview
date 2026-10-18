@@ -9,6 +9,8 @@
         description: [
             "### GDP (Nominal)",
             "Measured in FY$2000 International Dollars. Nominal conversions do not use PPP deflations and LCU conversions are anchored to the base year. Total per gridcell.",
+            "",
+            "Cells with <1 inhabitant are excluded.",
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
@@ -34,10 +36,9 @@
         filepath: "${h3}GDP_pc/6.GDP_nominal_pc_rasters/GDP_pc_${year}.png",
         description: [
             "### GDP (Nominal) per capita",
-            "Measured in FY$2000 International Dollars. Divides the GDP (Nominal) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
-            "Normalised via Tukey's fences (log-tail normalisation).",
+            "Measured in FY$2000 International Dollars. Divides the GDP (Nominal) by Population (Total) per gridcell.",
             "",
-            "See **GDP (Nominal)** for more details."
+            "Normalised via Tukey's fences (log-tail normalisation). Cells with <1 inhabitant are excluded. See **GDP (Nominal)** for more details."
         ],
         legend: {
             colourscheme: "turbo",
@@ -50,6 +51,8 @@
         description: [
             "### GDP (PPP)",
             "Measured in FY$2000 International Dollars. PPP deflated and anchored to the base year. Total per gridcell.",
+            "",
+            "Cells with <1 inhabitant are excluded.",
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
@@ -81,10 +84,8 @@
         filepath: "${h3}GDP_PPP_pc/6.GDP_PPP_pc_rasters/GDP_PPP_pc_${year}.png",
         description: [
             "### GDP (PPP) per capita",
-            "Measured in FY$2000 International Dollars. Divides the GDP (PPP) by Population (Total) per gridcell. Cells with <1 inhabitant are excluded.",
-            "Normalised via Tukey's fences (log-tail normalisation).",
-            "",
-            "See **GDP (PPP)** for more details."
+            "Measured in FY$2000 International Dollars. Divides the GDP (PPP) by Population (Total) per gridcell.",
+            "Normalised via Tukey's fences (log-tail normalisation). Cells with <1 inhabitant are excluded. See **GDP (PPP)** for more details."
         ],
         legend: {
             colourscheme: "turbo"

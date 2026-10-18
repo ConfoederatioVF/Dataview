@@ -8,6 +8,9 @@
         icon: "location_city",
         description: [
             "### Stadestér",
+            "> [!NOTE]",
+            "> Larger cities may have two entries: one for incorporated urban areas, and for metro pop. not already counted.",
+            "",
             "A global historical database of 34.400+ cities and urban settlements from 3300BC to the present. Split by version (1.0, 1.1).",
             "",
             "Historical names, capital cities, and other visuals can be toggled in the **Mapmodes** menu.",

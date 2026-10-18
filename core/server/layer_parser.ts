@@ -270,13 +270,13 @@ export let scanLayerTemplate = function (
           return arg0_match
         return `\\${arg0_match}`
       })
-      .replace(/(\$\{year\}\$\{hs\}|\{year\}\{hs\}|\$\{year\}\{hs\}|\{year\}\$\{hs\})/g, '(\\d+)(BC|AD)_number')
+      .replace(/(\$\{year\}\$\{hs\}|\{year\}\{hs\}|\$\{year\}\{hs\}|\{year\}\$\{hs\})/g, '(\\d+)(BC|AD)(?:_number)?')
       .replace(/(\$\{year\}|\{year\})/g, '(-?\\d+)')
       .replace(/(\$\{profession\}|\{profession\})/g, '([a-zA-Z0-9_-]+)')
       .replace(/(\$\{gender\}|\{gender\})/g, '([a-zA-Z0-9_-]+)')
       .replace(/(\$\{indicator\}|\{indicator\})/g, '([a-zA-Z0-9_-]+)')
       .replace(/(\$\{age\}|\{age\})/g, '([a-zA-Z0-9_-]+)')
-      .replace(/(\$\{hs\}|\{hs\})/g, '(BC|AD)_number')
+      .replace(/(\$\{hs\}|\{hs\})/g, '(BC|AD)(?:_number)?')
 
     let is_first_combo = i === 0
     let scan_regex = new RegExp(`^${regex_str}$`, 'i')

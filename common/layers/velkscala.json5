@@ -267,7 +267,7 @@
     population_density: {
         name: "Population Density (ihb/km^2)",
         encoding: "float32",
-        filepath: "${velk}/velkscala_density_rasters/velkscala_density_${year}.png",
+        filepath: "${velk}/population_density_rasters/population_density_${year}.png",
         unit: "ihb/km^2",
         legend: {
             colourscheme: "reds"
@@ -280,7 +280,7 @@
     population_total: {
         name: "Population (Total)",
         encoding: "float32",
-        filepath: "${velk}/velkscala_population_rasters/velkscala_population_${year}.png",
+        filepath: "${velk}/population_rasters/population_${year}.png",
         unit: "Total",
         legend: {
             colourscheme: "viridis"
@@ -304,7 +304,7 @@
     population_rural: {
         name: "Population (Rural)",
         encoding: "float32",
-        filepath: "${velk}/velkscala_rural_rasters/velkscala_rural_${year}.png",
+        filepath: "${velk}/population_rural_rasters/population_rural_${year}.png",
         unit: "Rural and periurban population, total",
         legend: {
             colourscheme: "greens"
@@ -317,7 +317,7 @@
     population_urban: {
         name: "Population (Urban)",
         encoding: "float32",
-        filepath: "${velk}/velkscala_urban_rasters/velkscala_urban_${year}.png",
+        filepath: "${velk}/population_urban_rasters/population_urban_${year}.png",
         unit: "Urban population, total",
         legend: {
             colourscheme: "blues"

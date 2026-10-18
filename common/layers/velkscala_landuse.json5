@@ -3,7 +3,7 @@
     open: false,
     can_be_uninhabited: true,
     expressions: {
-        hs: "${(year < 0) ? 'BC' : 'AD'}_number" //HYDE suffix
+        hs: "${(year < 0) ? 'BC' : 'AD'}" //HYDE suffix
     },
     alcc: {
         name: "Anthropogenic Land Cover Change (ALCC)",

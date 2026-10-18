@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set NODE_OPTIONS=--max-old-space-size=8192
+set NODE_OPTIONS=--max-old-space-size=16384
 title Confoederatio Dataview
 
 :: Change to the directory where this script is located

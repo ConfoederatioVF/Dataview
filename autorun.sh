@@ -3,7 +3,7 @@
 #           Dataview Webviewer Launcher (Bash)
 # ===================================================
 set -e
-export NODE_OPTIONS="--max-old-space-size=8192"
+export NODE_OPTIONS="--max-old-space-size=16384"
 
 cd "$(dirname "$0")"
 

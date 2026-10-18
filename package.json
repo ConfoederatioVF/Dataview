@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js --port 15000",
-    "build": "node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc -b && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build",
+    "dev": "node --max-old-space-size=16384 ./node_modules/vite/bin/vite.js --port 15000",
+    "build": "node --max-old-space-size=16384 ./node_modules/typescript/bin/tsc -b && node --max-old-space-size=16384 ./node_modules/vite/bin/vite.js build",
     "lint": "oxlint",
     "docs": "typedoc --out docs core --entryPointStrategy expand --exclude \"**/*.worker.ts\" --tsconfig tsconfig.app.json",
-    "preview": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js preview --port 15000"
+    "preview": "node --max-old-space-size=16384 ./node_modules/vite/bin/vite.js preview --port 15000"
   },
   "dependencies": {
     "@deck.gl/core": "^9.4.0",

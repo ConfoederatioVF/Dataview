@@ -8,9 +8,11 @@ export interface LayerVariableOption {
   legend?: {
     colourscheme?: string
     inverted?: boolean
+    midpoint?: number
     steepness?: number
     type?: string
   }
+  midpoint?: number
 }
 
 export interface LayerVariableSelector {
@@ -44,9 +46,11 @@ export interface ParsedDataLayer {
   legend?: {
     colourscheme?: string
     inverted?: boolean
+    midpoint?: number
     steepness?: number
     type?: string
   }
+  midpoint?: number
   name: string
   parent_id?: string
   permissions: string[]
@@ -501,6 +505,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'hide_colourbar',
       'hide_colorbar',
       'legend',
+      'midpoint',
       'name',
       'open',
       'permissions',
@@ -588,6 +593,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
               options_record[ok] = {
                 discounted: opt_val.discounted,
                 legend: opt_val.legend,
+                midpoint: opt_val.midpoint !== undefined ? Number(opt_val.midpoint) : (opt_val.legend?.midpoint !== undefined ? Number(opt_val.legend.midpoint) : undefined),
                 name: opt_val.name || ok,
               }
             }
@@ -622,6 +628,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
                   options_record[ok] = {
                     discounted: opt_val.discounted,
                     legend: opt_val.legend,
+                    midpoint: opt_val.midpoint !== undefined ? Number(opt_val.midpoint) : (opt_val.legend?.midpoint !== undefined ? Number(opt_val.legend.midpoint) : undefined),
                     name: opt_val.name || ok,
                   }
                 }
@@ -720,6 +727,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             id: sub_full_id,
             is_nested: true,
             legend: sub_item.legend,
+            midpoint: sub_item.midpoint !== undefined ? Number(sub_item.midpoint) : (sub_item.legend?.midpoint !== undefined ? Number(sub_item.legend.midpoint) : undefined),
             name: sub_item.name || sub_k,
             parent_id: k,
             permissions: sub_item.permissions ? (Array.isArray(sub_item.permissions) ? sub_item.permissions : [sub_item.permissions]) : ['default'],
@@ -772,6 +780,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           icon: getLayerIcon(k),
           id: k,
           legend: item.legend,
+          midpoint: item.midpoint !== undefined ? Number(item.midpoint) : (item.legend?.midpoint !== undefined ? Number(item.legend.midpoint) : undefined),
           name: item.name || k,
           permissions: item.permissions ? (Array.isArray(item.permissions) ? item.permissions : [item.permissions]) : ['default'],
           pixel_offset: item.pixel_offset,

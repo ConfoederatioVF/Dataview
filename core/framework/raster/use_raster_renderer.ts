@@ -20,6 +20,7 @@ export interface UseRasterRendererParams {
   invertPalette: boolean
   logSigma: number
   maxVal: number
+  midpoint?: number
   minVal: number
   projection: ProjectionType
   rasterVersion?: number
@@ -50,6 +51,7 @@ export function useRasterRenderer (arg0_params: UseRasterRendererParams): UseRas
   let invert_palette = arg0_params.invertPalette
   let log_sigma = arg0_params.logSigma
   let max_val = arg0_params.maxVal
+  let midpoint = arg0_params.midpoint
   let min_val = arg0_params.minVal
   let projection = arg0_params.projection
   let raster_version = arg0_params.rasterVersion
@@ -109,8 +111,20 @@ export function useRasterRenderer (arg0_params: UseRasterRendererParams): UseRas
         Number.isFinite(effective_country_stats.max)
     )
 
-    effective_max = is_country_isolated ? effective_country_stats!.max : max_val
-    effective_min = is_country_isolated ? effective_country_stats!.min : min_val
+    if (is_country_isolated) {
+      effective_max = effective_country_stats!.max
+      effective_min = effective_country_stats!.min
+      if (midpoint === 0) {
+        let abs_max = Math.max(Math.abs(effective_min), Math.abs(effective_max))
+        if (abs_max === 0)
+          abs_max = 1
+        effective_min = -abs_max
+        effective_max = abs_max
+      }
+    } else {
+      effective_max = max_val
+      effective_min = min_val
+    }
 
     //Select double-buffered canvas to notify Deck.gl of image updates without allocations
     target_canvas = buffer_flip_ref.current ? canvas_b_ref.current : canvas_a_ref.current
@@ -134,6 +148,7 @@ export function useRasterRenderer (arg0_params: UseRasterRendererParams): UseRas
         invertPalette: invert_palette,
         logSigma: log_sigma,
         maxVal: effective_max,
+        midpoint,
         minVal: effective_min,
         palette: color_palette,
         projection,
@@ -175,6 +190,7 @@ export function useRasterRenderer (arg0_params: UseRasterRendererParams): UseRas
     invert_palette,
     log_sigma,
     max_val,
+    midpoint,
     min_val,
     projection,
     raster_version,

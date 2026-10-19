@@ -14,6 +14,7 @@ export interface ColorBarLegendProps {
   legendTitle: string
   logSigma: number
   maxVal: number
+  midpoint?: number | null
   minVal: number
   onResizeWidth?: (width: number) => void
   onUpdateBreaks?: (breaks: number[]) => void
@@ -155,6 +156,7 @@ export let ColorBarLegend: React.FC<ColorBarLegendProps> = React.memo(function (
   let localisation: ReturnType<typeof useLocalisation>
   let log_sigma = props.logSigma
   let max_val = props.maxVal
+  let midpoint = props.midpoint
   let min_val = props.minVal
   let on_resize_width = props.onResizeWidth
   let on_update_breaks = props.onUpdateBreaks
@@ -206,8 +208,15 @@ export let ColorBarLegend: React.FC<ColorBarLegendProps> = React.memo(function (
 
   safe_min = Number.isFinite(min_val) ? min_val : 0
   safe_max = Number.isFinite(max_val) ? max_val : 1
-  if (safe_max <= safe_min)
+  if (midpoint === 0) {
+    let abs_max = Math.max(Math.abs(safe_min), Math.abs(safe_max))
+    if (abs_max === 0)
+      abs_max = 1
+    safe_min = -abs_max
+    safe_max = abs_max
+  } else if (safe_max <= safe_min) {
     safe_max = safe_min + 1
+  }
 
   t_min = useMemo(() => {
     let t = transformValue(safe_min, scale_type as ScaleType, log_sigma)
@@ -275,6 +284,8 @@ export let ColorBarLegend: React.FC<ColorBarLegendProps> = React.memo(function (
       real_val = inverseTransform(t_val, scale_type as ScaleType, log_sigma)
       if (!Number.isFinite(real_val))
         real_val = safe_min + s*(safe_max - safe_min)
+      if (Math.abs(real_val) < 1e-9 || (midpoint === 0 && s === 0.5))
+        real_val = 0
       return {
         val: real_val,
         pct: s*100,

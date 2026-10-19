@@ -43,7 +43,7 @@ import { useStadesterCities, fetchStadesterCitiesAsync } from '@ui/map/use_stade
 import { useRasterPipeline, fetchRasterKeyframe, fetchInterpolatedRasterAsync } from '@framework/raster/use_raster_pipeline.ts'
 import { useRasterRenderer } from '@framework/raster/use_raster_renderer.ts'
 import { useTimelapseExportOrchestrator } from '@ui/export/use_timelapse_export_orchestrator.ts'
-import { applyLayerLegend } from '@framework/raster/legend_utils.ts'
+import { applyLayerLegend, getActiveLayerMidpoint } from '@framework/raster/legend_utils.ts'
 import { useLocalisation } from '@localisation'
 import { useAppLayoutState } from './use_app_layout_state'
 import { useHeadlessExport } from './export/use_headless_export'
@@ -936,6 +936,10 @@ export let App: React.FC = function () {
     }
   }, [active_raster, binning_config, pipeline_display_raster])
 
+  let active_midpoint = useMemo(() => {
+    return getActiveLayerMidpoint(active_layer, active_variable_selectors)
+  }, [active_layer, active_variable_selectors])
+
   let { breaks, maxVal: max_val, minVal: min_val } = useMemo(() => {
     let r = display_raster || active_raster
     if (!r)
@@ -952,6 +956,12 @@ export let App: React.FC = function () {
         let q_breaks = computeQuantiles(r.data, parts)
         let p_max = Math.max(...q_breaks)
         let p_min = Math.min(...q_breaks)
+        if (active_midpoint === 0) {
+          let abs_max = Math.max(Math.abs(p_min), Math.abs(p_max))
+          if (abs_max === 0)
+            abs_max = 1
+          return { breaks: q_breaks, maxVal: abs_max, minVal: -abs_max }
+        }
         return { breaks: q_breaks, maxVal: p_max, minVal: p_min }
       }
     } else if (bounds_mode === 'Absolute') {
@@ -976,8 +986,35 @@ export let App: React.FC = function () {
     let safe_max = Number.isFinite(parsed_max) ? parsed_max : r.max
     let safe_min = Number.isFinite(parsed_min) ? parsed_min : r.min
 
+    if (active_midpoint === 0) {
+      if (max_val_override !== '' && min_val_override === '') {
+        let abs_max = Math.abs(safe_max) || 1
+        safe_min = -abs_max
+        safe_max = abs_max
+      } else if (min_val_override !== '' && max_val_override === '') {
+        let abs_max = Math.abs(safe_min) || 1
+        safe_min = -abs_max
+        safe_max = abs_max
+      } else if (min_val_override === '' && max_val_override === '') {
+        let abs_max = Math.max(Math.abs(safe_min), Math.abs(safe_max))
+        if (abs_max === 0)
+          abs_max = 1
+        safe_min = -abs_max
+        safe_max = abs_max
+      }
+    }
+
     return { breaks: [], maxVal: safe_max, minVal: safe_min }
-  }, [display_raster, active_raster, bounds_mode, percentile_list, absolute_breaks, min_val_override, max_val_override])
+  }, [
+    display_raster,
+    active_raster,
+    bounds_mode,
+    percentile_list,
+    absolute_breaks,
+    min_val_override,
+    max_val_override,
+    active_midpoint,
+  ])
 
   let handle_toggle_country = useCallback((arg0_c: CountryFeature) => {
     //Guard clauses
@@ -1259,6 +1296,7 @@ export let App: React.FC = function () {
     invertPalette: invert_palette,
     logSigma: log_sigma,
     maxVal: max_val,
+    midpoint: active_midpoint,
     minVal: min_val,
     projection: projection,
     rasterVersion: raster_version,
@@ -1340,6 +1378,7 @@ export let App: React.FC = function () {
           invertPalette={invert_palette}
           minVal={min_val}
           maxVal={max_val}
+          midpoint={active_midpoint}
           legendTitle={legend_title}
           legendSubtitle={legend_subtitle}
           hideColourbar={Boolean(active_layer?.hide_colourbar && !active_file_name && !diff_name_a && !diff_name_b)}

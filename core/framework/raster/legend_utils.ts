@@ -72,6 +72,7 @@ export let mapColourschemeToPalette = function (arg0_scheme?: string): ColorPale
  * @param {(arg0_title: string) => void} arg5_set_title
  * @param {(arg0_subtitle: string) => void} arg6_set_subtitle
  * @param {(arg0_sigma: number) => void} [arg7_set_log_sigma]
+ * @param {(arg0_midpoint: number | undefined) => void} [arg8_set_midpoint]
  */
 export let applyLayerLegend = function (
   arg0_layer: ParsedDataLayer | null,
@@ -81,7 +82,8 @@ export let applyLayerLegend = function (
   arg4_set_scale: (arg0_scale: ScaleType) => void,
   arg5_set_title: (arg0_title: string) => void,
   arg6_set_subtitle: (arg0_subtitle: string) => void,
-  arg7_set_log_sigma?: (arg0_sigma: number) => void
+  arg7_set_log_sigma?: (arg0_sigma: number) => void,
+  arg8_set_midpoint?: (arg0_midpoint: number | undefined) => void
 ) {
   //Convert from parameters
   let layer = arg0_layer
@@ -92,6 +94,7 @@ export let applyLayerLegend = function (
   let set_title = arg5_set_title
   let set_subtitle = arg6_set_subtitle
   let set_log_sigma = arg7_set_log_sigma
+  let set_midpoint = arg8_set_midpoint
 
   //Guard clauses
   if (!layer)
@@ -212,6 +215,72 @@ export let applyLayerLegend = function (
       set_log_sigma(1.0)
   }
 
+  if (arg8_set_midpoint)
+    arg8_set_midpoint(getActiveLayerMidpoint(layer, selectors))
+
   set_title(candidate_title)
   set_subtitle(candidate_unit)
 }
+
+
+/**
+ * Resolves the active layer's configured midpoint based on active variable selectors and layer definition.
+ *
+ * @param {ParsedDataLayer | null} arg0_layer
+ * @param {Record<string, string | string[]>} [arg1_selectors]
+ *
+ * @returns {number | undefined}
+ */
+export let getActiveLayerMidpoint = function (
+  arg0_layer: ParsedDataLayer | null,
+  arg1_selectors?: Record<string, string | string[]>
+): number | undefined {
+  //Convert from parameters
+  let layer = arg0_layer
+  let selectors = (arg1_selectors) ? arg1_selectors : {}
+
+  //Guard clauses
+  if (!layer)
+    return undefined
+
+  //Declare local instance variables
+  let candidate_midpoint: number | undefined
+
+  //Function body
+  if (layer.variable_selectors) {
+    let sel_keys = Object.keys(layer.variable_selectors)
+    for (let i = 0; i < sel_keys.length; i++) {
+      let chosen_vals: string[]
+      let opt_keys = Object.keys(layer.variable_selectors[sel_keys[i]]?.options || {})
+      let primary_val: string
+      let raw_val = selectors[sel_keys[i]]
+      let sk = sel_keys[i]
+      let valid_chosen_vals: string[]
+
+      chosen_vals = Array.isArray(raw_val) ? raw_val : [raw_val || opt_keys[0] || '']
+      valid_chosen_vals = chosen_vals.filter((arg0_val) => layer.variable_selectors![sk]?.options[arg0_val])
+      primary_val = (valid_chosen_vals.length > 0) ? valid_chosen_vals[0] : (opt_keys[0] || '')
+
+      if (primary_val && layer.variable_selectors[sk]?.options[primary_val]) {
+        let opt = layer.variable_selectors[sk].options[primary_val]
+        if (opt.midpoint !== undefined) {
+          candidate_midpoint = opt.midpoint
+        } else if (opt.legend?.midpoint !== undefined) {
+          candidate_midpoint = opt.legend.midpoint
+        }
+      }
+    }
+  }
+
+  if (candidate_midpoint === undefined) {
+    if (layer.midpoint !== undefined) {
+      candidate_midpoint = layer.midpoint
+    } else if (layer.legend?.midpoint !== undefined) {
+      candidate_midpoint = layer.legend.midpoint
+    }
+  }
+
+  //Return statement
+  return candidate_midpoint
+}
+

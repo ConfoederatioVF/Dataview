@@ -207,6 +207,9 @@
         name: "Migration (Gender)",
         filepath: "${vitals}/4.${gender}_net_migration/${gender}_net_migration_{year}.png",
         unit: "Total",
+        legend: {
+            midpoint: 0
+        },
         variable_selectors: {
             gender: {
                 name: "Gender",
@@ -215,14 +218,16 @@
                     name: "Female",
                     legend: {
                         colourscheme: "rdgy",
-                        inverted: true
+                        inverted: true,
+                        midpoint: 0
                     }
                 },
                 male: {
                     name: "Male",
                     legend: {
                         colourscheme: "prgn",
-                        inverted: true
+                        inverted: true,
+                        midpoint: 0
                     }
                 }
             }
@@ -237,7 +242,8 @@
         filepath: "${vitals}/4.net_migration/net_migration_${year}.png",
         unit: "Total",
         legend: {
-            colourscheme: "rdylgn"
+            colourscheme: "rdylgn",
+            midpoint: 0
         },
         description: [
             "### Net Migration",

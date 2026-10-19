@@ -101,6 +101,7 @@ export interface RenderRasterOptions {
   invertPalette?: boolean
   logSigma: number
   maxVal: number
+  midpoint?: number
   minVal: number
   opacity?: number
   palette: ColorPalette
@@ -257,8 +258,18 @@ export function renderRasterToCanvas (
   let sorted_breaks = has_breaks ? [...options.breaks!].sort((arg0_a, arg0_b) => arg0_a - arg0_b) : []
   let num_segments = sorted_breaks.length - 1
 
-  let t_min = transformValue(options.minVal, options.scaleType, options.logSigma)
-  let t_max = transformValue(options.maxVal, options.scaleType, options.logSigma)
+  let safe_max = options.maxVal
+  let safe_min = options.minVal
+  if (options.midpoint === 0) {
+    let abs_max = Math.max(Math.abs(safe_min), Math.abs(safe_max))
+    if (abs_max === 0)
+      abs_max = 1
+    safe_min = -abs_max
+    safe_max = abs_max
+  }
+
+  let t_min = transformValue(safe_min, options.scaleType, options.logSigma)
+  let t_max = transformValue(safe_max, options.scaleType, options.logSigma)
   let t_range = t_max - t_min || 1
   let inv_range = 1/t_range
   let is_linear = (!options.scaleType || options.scaleType === 'linear') && !has_breaks

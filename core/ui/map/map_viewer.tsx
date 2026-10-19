@@ -62,8 +62,9 @@ export interface MapViewerProps {
   opacity: number
   palette: any
   invertPalette?: boolean
-  minVal: number
   maxVal: number
+  midpoint?: number | null
+  minVal: number
   isMobile?: boolean
   isPlaying?: boolean
   isTimelapseExporting?: boolean
@@ -196,6 +197,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let log_sigma = props.logSigma
   let map_modes = props.mapModes
   let max_val = props.maxVal
+  let midpoint = props.midpoint
   let min_val = props.minVal
   let on_add_draw_point = props.onAddDrawPoint
   let on_cancel_draw = props.onCancelDraw
@@ -1806,6 +1808,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           )
           let legend_min = (is_country_relative) ? country_stats!.min : min_val
           let legend_max = (is_country_relative) ? country_stats!.max : max_val
+          if (is_country_relative && midpoint === 0) {
+            let abs_max = Math.max(Math.abs(legend_min), Math.abs(legend_max))
+            if (abs_max === 0)
+              abs_max = 1
+            legend_min = -abs_max
+            legend_max = abs_max
+          }
           let legend_breaks = (is_country_relative) ? undefined : breaks
           let legend_country_name = (is_country_relative) ? country_stats!.name : undefined
 
@@ -1845,6 +1854,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               legendCountryName={legend_country_name || undefined}
               legendMax={legend_max}
               legendMin={legend_min}
+              midpoint={midpoint}
               legendPosition={legend_position}
               legendSubtitle={legend_subtitle}
               legendTitle={legend_title}

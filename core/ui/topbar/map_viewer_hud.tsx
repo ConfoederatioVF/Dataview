@@ -57,6 +57,7 @@ export interface MapViewerHUDProps {
   legendCountryName?: string
   legendMax: number
   legendMin: number
+  midpoint?: number | null
   legendPosition: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
   legendSubtitle?: string
   legendTitle: string
@@ -146,6 +147,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   let legend_subtitle = props.legendSubtitle
   let legend_title = props.legendTitle
   let log_sigma = props.logSigma
+  let midpoint = props.midpoint
   let map_modes = props.mapModes
   let mapmodes_bounds = props.mapmodesBounds
   let mapmodes_clearance_prop = props.mapmodesClearance
@@ -413,6 +415,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
                 isMobile={is_mobile}
                 minVal={legend_min}
                 maxVal={legend_max}
+                midpoint={midpoint}
                 legendTitle={legend_title}
                 legendSubtitle={legend_subtitle}
                 scaleType={scale_type}

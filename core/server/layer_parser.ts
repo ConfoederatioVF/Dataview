@@ -53,6 +53,7 @@ export interface ParsedDataLayer {
   pixel_offset?: number | { covariate?: string; x?: number; y?: number }
   sub_layers?: ParsedDataLayer[]
   synthetic_by_default?: boolean
+  threshold?: number
   type: string
   unit?: string
   variable_selectors?: Record<string, LayerVariableSelector>
@@ -728,6 +729,17 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
               : (item.synthetic_by_default !== undefined
                 ? Boolean(item.synthetic_by_default)
                 : (parsed_json.synthetic_by_default !== undefined ? Boolean(parsed_json.synthetic_by_default) : undefined)),
+            threshold: sub_item.threshold !== undefined
+              ? Number(sub_item.threshold)
+              : (sub_item.min_threshold !== undefined
+                ? Number(sub_item.min_threshold)
+                : (item.threshold !== undefined
+                  ? Number(item.threshold)
+                  : (item.min_threshold !== undefined
+                    ? Number(item.min_threshold)
+                    : (parsed_json.threshold !== undefined
+                      ? Number(parsed_json.threshold)
+                      : (parsed_json.min_threshold !== undefined ? Number(parsed_json.min_threshold) : undefined))))),
             type: sub_item.type || layer_type,
             unit: sub_item.unit || item.unit,
           })
@@ -767,6 +779,13 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           synthetic_by_default: item.synthetic_by_default !== undefined
             ? Boolean(item.synthetic_by_default)
             : (parsed_json.synthetic_by_default !== undefined ? Boolean(parsed_json.synthetic_by_default) : undefined),
+          threshold: item.threshold !== undefined
+            ? Number(item.threshold)
+            : (item.min_threshold !== undefined
+              ? Number(item.min_threshold)
+              : (parsed_json.threshold !== undefined
+                ? Number(parsed_json.threshold)
+                : (parsed_json.min_threshold !== undefined ? Number(parsed_json.min_threshold) : undefined))),
           type: layer_type,
           unit: item.unit,
           variable_selectors: selectors,

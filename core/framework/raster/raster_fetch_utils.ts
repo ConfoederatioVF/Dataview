@@ -199,6 +199,7 @@ let in_flight_fetches = new Map<string, Promise<DecodedRaster | null>>()
  * @param {boolean} [arg7_performant_mode]
  * @param {AbortSignal} [arg8_signal]
  * @param {boolean} [arg9_can_be_uninhabited]
+ * @param {number} [arg10_threshold]
  *
  * @returns {Promise<DecodedRaster | null>}
  */
@@ -212,7 +213,8 @@ export async function fetchSingleDecodedRasterAsync (
   arg6_pixel_offset?: number | { covariate?: string; x?: number; y?: number },
   arg7_performant_mode?: boolean,
   arg8_signal?: AbortSignal,
-  arg9_can_be_uninhabited?: boolean
+  arg9_can_be_uninhabited?: boolean,
+  arg10_threshold?: number
 ): Promise<DecodedRaster | null> {
   //Convert from parameters
   let cache = arg4_cache
@@ -224,6 +226,7 @@ export async function fetchSingleDecodedRasterAsync (
   let pixel_offset = arg6_pixel_offset
   let selectors = arg2_selectors
   let signal = arg8_signal
+  let threshold = (arg10_threshold !== undefined) ? Number(arg10_threshold) : undefined
   let year = arg1_year
 
   //Declare local instance variables
@@ -277,12 +280,18 @@ export async function fetchSingleDecodedRasterAsync (
 
       let buf = await resp.arrayBuffer()
       let uint8 = new Uint8Array(buf)
-      let is_stadester_layer = layer_id === 'population_total' ||
+      let is_pop_layer = (
+        layer_id === 'population_total' ||
+        layer_id.endsWith('.population_total') ||
         layer_id === 'population_rural' ||
+        layer_id.endsWith('.population_rural') ||
         layer_id === 'population_urban' ||
+        layer_id.endsWith('.population_urban') ||
         layer_id === 'population_density' ||
+        layer_id.endsWith('.population_density') ||
         layer_id.includes('stadester')
-      let min_threshold = is_stadester_layer ? 0.01 : undefined
+      )
+      let min_threshold = threshold !== undefined ? threshold : (is_pop_layer ? 0.01 : undefined)
       let decoded = await decodeRawGeoPngBufferAsync(uint8, format, min_threshold)
 
       //Apply pixel offset if configured
@@ -372,14 +381,14 @@ export async function fetchSingleDecodedRasterAsync (
         }
       }
 
-      //Mask uninhabited cells (<0.01) in Stadestér population rasters
-      if (is_stadester_layer) {
+      //Mask uninhabited cells (< threshold) in population rasters
+      if (min_threshold !== undefined) {
         let d = decoded.data
         let len = d.length
         let has_under_threshold = false
         for (let i = 0; i < len; i++) {
           let p = d[i]
-          if (!Number.isNaN(p) && p < 0.01) {
+          if (!Number.isNaN(p) && p < min_threshold) {
             d[i] = NaN
             has_under_threshold = true
           }
@@ -387,17 +396,6 @@ export async function fetchSingleDecodedRasterAsync (
         if (has_under_threshold)
           decoded = buildDecodedRasterResult(d, decoded.width, decoded.height)
       }
-
-      let is_pop_layer = (
-        layer_id === 'population_total' ||
-        layer_id.endsWith('.population_total') ||
-        layer_id === 'population_rural' ||
-        layer_id.endsWith('.population_rural') ||
-        layer_id === 'population_urban' ||
-        layer_id.endsWith('.population_urban') ||
-        layer_id === 'population_density' ||
-        layer_id.endsWith('.population_density')
-      )
 
       //Mask uninhabited cells as NaN if layer requires human habitation
       if (!can_be_uninhabited && !is_pop_layer) {
@@ -411,15 +409,17 @@ export async function fetchSingleDecodedRasterAsync (
           undefined,
           performant_mode,
           signal,
-          true
+          true,
+          threshold !== undefined ? threshold : 0.01
         )
         let pop_data = pop_raster?.data
         if (pop_data && pop_data.length === decoded.data.length) {
           let d = decoded.data
           let len = d.length
+          let pop_threshold = threshold !== undefined ? threshold : 0.01
           for (let i = 0; i < len; i++) {
             let p = pop_data[i]
-            if (p < 0.01 || Number.isNaN(p))
+            if (p < pop_threshold || Number.isNaN(p))
               d[i] = NaN
           }
           decoded = buildDecodedRasterResult(d, decoded.width, decoded.height)
@@ -455,6 +455,7 @@ export async function fetchSingleDecodedRasterAsync (
  * @param {boolean} [arg7_performant_mode]
  * @param {AbortSignal} [arg8_signal]
  * @param {boolean} [arg9_can_be_uninhabited]
+ * @param {number} [arg10_threshold]
  *
  * @returns {Promise<DecodedRaster | null>}
  */
@@ -468,7 +469,8 @@ export async function fetchRasterKeyframe (
   arg6_pixel_offset?: number | { covariate?: string; x?: number; y?: number },
   arg7_performant_mode?: boolean,
   arg8_signal?: AbortSignal,
-  arg9_can_be_uninhabited?: boolean
+  arg9_can_be_uninhabited?: boolean,
+  arg10_threshold?: number
 ): Promise<DecodedRaster | null> {
   //Convert from parameters
   let cache = arg4_cache
@@ -480,6 +482,7 @@ export async function fetchRasterKeyframe (
   let pixel_offset = arg6_pixel_offset
   let selectors = arg2_selectors
   let signal = arg8_signal
+  let threshold = (arg10_threshold !== undefined) ? Number(arg10_threshold) : undefined
   let year = arg1_year
 
   //Declare local instance variables
@@ -530,7 +533,8 @@ export async function fetchRasterKeyframe (
       pixel_offset,
       performant_mode,
       signal,
-      can_be_uninhabited
+      can_be_uninhabited,
+      threshold
     )
   }
 
@@ -548,7 +552,8 @@ export async function fetchRasterKeyframe (
           pixel_offset,
           performant_mode,
           signal,
-          can_be_uninhabited
+          can_be_uninhabited,
+          threshold
         )
       )
       let results = await Promise.all(raster_promises)
@@ -611,6 +616,7 @@ export async function fetchRasterKeyframe (
  * @param {boolean} [arg9_snap_to_keyframes]
  * @param {AbortSignal} [arg10_signal]
  * @param {boolean} [arg11_can_be_uninhabited]
+ * @param {number} [arg12_threshold]
  *
  * @returns {Promise<DecodedRaster | null>}
  */
@@ -626,7 +632,8 @@ export async function fetchInterpolatedRasterAsync (
   arg8_performant_mode?: boolean,
   arg9_snap_to_keyframes?: boolean,
   arg10_signal?: AbortSignal,
-  arg11_can_be_uninhabited?: boolean
+  arg11_can_be_uninhabited?: boolean,
+  arg12_threshold?: number
 ): Promise<DecodedRaster | null> {
   //Convert from parameters
   let cache = arg5_cache
@@ -639,12 +646,13 @@ export async function fetchInterpolatedRasterAsync (
   let selectors = arg3_selectors
   let signal = arg10_signal
   let snap_to_keyframes = Boolean(arg9_snap_to_keyframes)
+  let threshold = (arg12_threshold !== undefined) ? Number(arg12_threshold) : undefined
   let timeline_year = arg1_timeline_year
   let years = arg2_available_years
 
   //Guard clauses
   if (!years || years.length === 0)
-    return fetchRasterKeyframe(layer_id, timeline_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited)
+    return fetchRasterKeyframe(layer_id, timeline_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited, threshold)
 
   //Declare local instance variables
   let next_year = years[years.length - 1]
@@ -665,12 +673,12 @@ export async function fetchInterpolatedRasterAsync (
     primary_year = snap_to_keyframes
       ? (Math.abs(timeline_year - prev_year) <= Math.abs(timeline_year - next_year) ? prev_year : next_year)
       : prev_year
-    return fetchRasterKeyframe(layer_id, primary_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited)
+    return fetchRasterKeyframe(layer_id, primary_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited, threshold)
   }
 
   let [r_a, r_b] = await Promise.all([
-    fetchRasterKeyframe(layer_id, prev_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited),
-    fetchRasterKeyframe(layer_id, next_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited),
+    fetchRasterKeyframe(layer_id, prev_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited, threshold),
+    fetchRasterKeyframe(layer_id, next_year, selectors, format, cache, has_selectors, pixel_offset, performant_mode, signal, can_be_uninhabited, threshold),
   ])
 
   if (r_a && r_b) {

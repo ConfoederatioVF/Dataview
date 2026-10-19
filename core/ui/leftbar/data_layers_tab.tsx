@@ -406,6 +406,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                         </span>
                       )}
                     </div>
+                  )}
                 </div>
               </button>
 

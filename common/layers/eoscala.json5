@@ -9,8 +9,6 @@
         description: [
             "### GDP (Nominal)",
             "Measured in FY$2000 International Dollars. Nominal conversions do not use PPP deflations and LCU conversions are anchored to the base year. Total per gridcell.",
-            "",
-            "Cells with <1 inhabitant are excluded.",
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",
@@ -51,8 +49,6 @@
         description: [
             "### GDP (PPP)",
             "Measured in FY$2000 International Dollars. PPP deflated and anchored to the base year. Total per gridcell.",
-            "",
-            "Cells with <1 inhabitant are excluded.",
             "<details>",
             "<summary>Methodology</summary>",
             "Regularised Weighted Least Squares [L2] and dasymetric gravity modelling for years prior to 1800 using population weights. Per capita basis points are estimated first, then multiplied outwards per gridcell.",

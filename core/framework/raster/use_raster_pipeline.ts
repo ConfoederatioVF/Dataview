@@ -184,6 +184,7 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
     let can_be_uninhabited = Boolean(active_layer.can_be_uninhabited)
     let current_req_id = ++load_req_id_ref.current
     let layer_pixel_offset = active_layer.pixel_offset
+    let layer_threshold = active_layer.threshold
 
     let prev_year = years[0]
     let next_year = years[years.length - 1]
@@ -262,8 +263,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
         in_flight_fetches_count_ref.current++
 
         Promise.all([
-          fetchRasterKeyframe(requested_layer_id, prev_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited),
-          fetchRasterKeyframe(requested_layer_id, next_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited),
+          fetchRasterKeyframe(requested_layer_id, prev_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited, layer_threshold),
+          fetchRasterKeyframe(requested_layer_id, next_year, effective_selectors, effective_format, raster_cache_ref.current, has_selectors, layer_pixel_offset, performant_mode, controller.signal, can_be_uninhabited, layer_threshold),
         ])
           .then(([arg0_primary, arg0_secondary]) => {
             in_flight_fetches_count_ref.current = Math.max(0, in_flight_fetches_count_ref.current - 1)
@@ -316,7 +317,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
           layer_pixel_offset,
           performant_mode,
           controller.signal,
-          can_be_uninhabited
+          can_be_uninhabited,
+          layer_threshold
         )
           .then((arg0_primary) => {
             in_flight_fetches_count_ref.current = Math.max(0, in_flight_fetches_count_ref.current - 1)
@@ -368,7 +370,8 @@ export function useRasterPipeline (arg0_params: UseRasterPipelineParams): UseRas
             layer_pixel_offset,
             performant_mode,
             undefined,
-            can_be_uninhabited
+            can_be_uninhabited,
+            layer_threshold
           ).catch(() => {})
         })
       }

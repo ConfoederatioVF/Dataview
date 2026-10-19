@@ -358,6 +358,24 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   }, [is_drawing])
 
   useEffect(() => {
+    if (drawn_polygon_feature && !is_drawing) {
+      let hist_feat = drawn_polygon_feature as unknown as HistoricalBorderFeature
+      set_selected_historical_feature(hist_feat)
+      set_active_panel_type('country')
+      if (drawn_polygon_feature.geometry?.coordinates?.[0]?.[0]) {
+        let first_pt = drawn_polygon_feature.geometry.coordinates[0][0]
+        set_selected_historical_anchor_coord([first_pt[0], first_pt[1]])
+        if (deck_ref.current) {
+          let screen = projectLngLatToScreen([first_pt[0], first_pt[1]], deck_ref.current, projection)
+          if (screen) {
+            set_selected_historical_anchor_screen({ x: screen[0], y: screen[1] })
+          }
+        }
+      }
+    }
+  }, [drawn_polygon_feature, is_drawing, projection])
+
+  useEffect(() => {
     if (selected_historical_feature && historical_borders_result.bordersData) {
       let current_gw = selected_historical_feature.properties?.gwcode
       let current_id = selected_historical_feature.id || selected_historical_feature.properties?.id
@@ -796,15 +814,23 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         if (click_x === undefined || click_y === undefined)
           return
 
-        // Check if clicking near start vertex to close loop (when points >= 3)
-        if (draw_points.length >= 3 && deck_ref.current) {
-          let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
-          if (start_screen) {
-            let dist_sq = (click_x - start_screen[0]) ** 2 + (click_y - start_screen[1]) ** 2
-            if (dist_sq <= 22 * 22) {
-              if (on_finish_draw)
-                on_finish_draw()
-              return
+        // Check if clicking start vertex object or near start vertex to close loop (when points >= 3)
+        if (draw_points.length >= 3) {
+          if (info.object?.idx === 0) {
+            if (on_finish_draw)
+              on_finish_draw()
+            return
+          }
+
+          if (deck_ref.current) {
+            let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
+            if (start_screen) {
+              let dist_sq = (click_x - start_screen[0]) ** 2 + (click_y - start_screen[1]) ** 2
+              if (dist_sq <= 32 * 32) {
+                if (on_finish_draw)
+                  on_finish_draw()
+                return
+              }
             }
           }
         }

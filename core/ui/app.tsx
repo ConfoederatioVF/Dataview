@@ -1040,6 +1040,8 @@ export let App: React.FC = function () {
               return true
             if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
               return true
+            if (a.properties?.is_drawn || b.properties?.is_drawn)
+              return false
             return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
           }
 

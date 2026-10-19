@@ -120,7 +120,12 @@ export let projectLngLatToScreen = function (
     return null
 
   try {
-    let projected = vp.project([layer_coords[0], layer_coords[1], 0])
+    let altitude = (projection === 'Globe') ? 150 : 0
+    let projected = vp.project([layer_coords[0], layer_coords[1], altitude])
+    if (projected && Number.isFinite(projected[0]) && Number.isFinite(projected[1]))
+      return [projected[0], projected[1]]
+
+    projected = vp.project([layer_coords[0], layer_coords[1], 0])
     if (projected && Number.isFinite(projected[0]) && Number.isFinite(projected[1]))
       return [projected[0], projected[1]]
   } catch {

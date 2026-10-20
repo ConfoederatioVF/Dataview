@@ -56,6 +56,7 @@ export let parseDateStringToTimestamp = function (arg0_val: any): number {
 
   //Declare local instance variables
   let num: number
+  let parsed_date: UfDateObject | undefined
   let str = String(val || '').trim()
 
   //Function body
@@ -66,18 +67,12 @@ export let parseDateStringToTimestamp = function (arg0_val: any): number {
     return num
   }
 
-  if (str.includes('-')) {
-    let is_bce = str.startsWith('-')
-    let clean_str = is_bce ? str.slice(1) : str
-    let parts = clean_str.split('-').map(Number)
-    let yr = (parts[0] || 0)*(is_bce ? -1 : 1)
-    let mo = parts.length > 1 ? parts[1] || 1 : 1
-    let da = parts.length > 2 ? parts[2] || 1 : 1
-    return UfDate.getTimestamp({ day: da, hour: 0, minute: 0, month: mo, year: yr })
-  }
+  parsed_date = UfDate.convertStringToDate(str)
+  if (parsed_date)
+    return UfDate.getTimestamp(parsed_date)
 
   //Return statement
-  return 0
+  return UfDate.getTimestamp(str)
 }
 
 /**
@@ -176,13 +171,23 @@ export let extractDateFromFileName = function (
     }
   }
 
-  //2. Pattern: <prefix>.<year>.<month>.<day>.naissance
-  m_quad = file_name.match(/(?:^|\.)(-?\d+)\.(\d+)\.(\d+)\.naissance$/i)
+  //2. Pattern: <prefix>.<year>.<month>.<day>.naissance or <prefix>.<day>.<month>.<year>.naissance (e.g. detailed_13.10.2026.naissance)
+  m_quad = file_name.match(/(?:^|[._-])(-?\d+)\.(\d+)\.(\d+)\.naissance$/i)
   if (m_quad) {
+    let p1 = parseInt(m_quad[1], 10)
+    let p2 = parseInt(m_quad[2], 10)
+    let p3 = parseInt(m_quad[3], 10)
+    if (p3 > 31 || (p1 <= 31 && p3 > 100)) {
+      return {
+        day: p1,
+        month: p2,
+        year: p3,
+      }
+    }
     return {
-      day: parseInt(m_quad[3], 10),
-      month: parseInt(m_quad[2], 10),
-      year: parseInt(m_quad[1], 10),
+      day: p3,
+      month: p2,
+      year: p1,
     }
   }
 
@@ -280,7 +285,11 @@ export let parseCustomVectorText = function (
       if (typeof raw_date === 'string') {
         try {
           raw_date = JSON.parse(raw_date)
-        } catch {}
+        } catch {
+          let parsed_str_date = UfDate.convertStringToDate(raw_date)
+          if (parsed_str_date)
+            raw_date = parsed_str_date
+        }
       }
       if (raw_date && typeof raw_date === 'object' && typeof raw_date.year === 'number') {
         target_date = {

@@ -151,6 +151,16 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
   }, [selected_day, selected_month, effective_year, days_in_current_month])
 
   handle_year_change = function (arg0_val: string) {
+    let parsed = UfDate.convertStringToDate(arg0_val)
+    if (parsed) {
+      let safe_year = parsed.year === 0 ? 1 : parsed.year
+      set_selected_day(parsed.day)
+      set_selected_month(parsed.month)
+      set_selected_era(safe_year < 0 ? 'BC' : 'AD')
+      set_year_text(String(Math.abs(safe_year)))
+      return
+    }
+
     let cleaned = arg0_val.replace(/[^0-9]/g, '')
     set_year_text(cleaned)
   }

@@ -1208,6 +1208,96 @@ export class AtlasBordersService {
    * @returns {Map<string, NaissanceEntityRecord>}
    */
   /**
+   * Parses keyframes from a Naissance entity object, supporting stringified JSON,
+   * numeric timestamps, and UF/Date natural/ISO/delimited date strings.
+   *
+   * @param {any} arg0_ent
+   *
+   * @returns {{ kf_map: Map<number, [any, any, any]>, sorted_ts: number[] } | null}
+   */
+  static parseNaissanceKeyframes (
+    arg0_ent: any
+  ): { kf_map: Map<number, [any, any, any]>; sorted_ts: number[] } | null {
+    //Convert from parameters
+    let ent = arg0_ent
+
+    //Guard clauses
+    if (!ent || typeof ent !== 'object')
+      return null
+
+    //Declare local instance variables
+    let history_obj: any
+    let kf_items: { ts: number; val: [any, any, any] }[] = []
+    let kf_map = new Map<number, [any, any, any]>()
+    let raw_history = ent.history || ent.keyframes
+    let raw_keys: string[]
+    let sorted_ts: number[]
+
+    //Function body
+    if (typeof raw_history === 'string') {
+      try {
+        raw_history = JSON.parse(raw_history)
+      } catch {
+        return null
+      }
+    }
+
+    history_obj = (raw_history && raw_history.keyframes) ? raw_history.keyframes : raw_history
+    if (!history_obj || typeof history_obj !== 'object')
+      return null
+
+    raw_keys = Object.keys(history_obj)
+    if (raw_keys.length === 0)
+      return null
+
+    for (let i = 0; i < raw_keys.length; i++) {
+      let raw_key = raw_keys[i]
+      let raw_val = history_obj[raw_key]
+      let ts: number
+      let val = Array.isArray(raw_val) ? raw_val : raw_val?.value
+      let trimmed_key = String(raw_key).trim()
+      let num_val = Number(trimmed_key)
+
+      if (!Number.isNaN(num_val)) {
+        if (Math.abs(num_val) <= 10000) {
+          ts = UfDate.getTimestamp({ day: 1, hour: 0, minute: 0, month: 1, year: Math.round(num_val) })
+        } else {
+          ts = num_val
+        }
+      } else {
+        let parsed_date = UfDate.convertStringToDate(trimmed_key)
+        if (parsed_date) {
+          ts = UfDate.getTimestamp(parsed_date)
+        } else {
+          ts = UfDate.getTimestamp(trimmed_key)
+        }
+      }
+
+      if (Array.isArray(val)) {
+        kf_items.push({ ts, val: val as [any, any, any] })
+      } else if (raw_val && typeof raw_val === 'object') {
+        let geom = raw_val.geometry || raw_val.feature || null
+        let symbol = (typeof raw_val.symbol === 'object' && raw_val.symbol !== null) ? raw_val.symbol : {}
+        let props = (typeof raw_val.properties === 'object' && raw_val.properties !== null) ? raw_val.properties : {}
+        kf_items.push({ ts, val: [geom, symbol, props] })
+      }
+    }
+
+    if (kf_items.length === 0)
+      return null
+
+    kf_items.sort((arg0_a, arg0_b) => arg0_a.ts - arg0_b.ts)
+    sorted_ts = kf_items.map((arg0_it) => arg0_it.ts)
+
+    for (let i = 0; i < kf_items.length; i++) {
+      kf_map.set(kf_items[i].ts, kf_items[i].val)
+    }
+
+    //Return statement
+    return { kf_map, sorted_ts }
+  }
+
+  /**
    * Loads and indexes a .naissance file in memory on first access using SVEA History keyframe specifications.
    * Supports both small and very large (>500MB) files using chunked streaming buffers to prevent V8 string limits.
    *
@@ -1288,31 +1378,21 @@ export class AtlasBordersService {
 
             try {
               let ent = JSON.parse(json_str)
-              if (!ent || ent.class_name !== 'GeometryPolygon' || !ent.history)
+              if (!ent || ent.class_name !== 'GeometryPolygon')
                 continue
 
-              let raw_ts_keys = Object.keys(ent.history)
-              if (raw_ts_keys.length === 0)
+              let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
+              if (!parsed_kfs)
                 continue
-
-              let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-              let kf_map = new Map<number, [any, any, any]>()
-
-              for (let x = 0; x < sorted_ts.length; x++) {
-                let ts = sorted_ts[x]
-                let val = ent.history[String(ts)]
-                if (Array.isArray(val))
-                  kf_map.set(ts, val as [any, any, any])
-              }
 
               entity_records.set(ent_id, {
                 class_name: ent.class_name,
                 id: ent_id,
-                keyframes: kf_map,
-                max_ts: sorted_ts[sorted_ts.length - 1],
-                min_ts: sorted_ts[0],
+                keyframes: parsed_kfs.kf_map,
+                max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+                min_ts: parsed_kfs.sorted_ts[0],
                 name: ent.name,
-                sorted_timestamps: sorted_ts,
+                sorted_timestamps: parsed_kfs.sorted_ts,
               })
             } catch {
               //Skip malformed entry
@@ -1331,25 +1411,17 @@ export class AtlasBordersService {
               let json_str = line.slice(colon_idx + 2)
               try {
                 let ent = JSON.parse(json_str)
-                if (ent && ent.class_name === 'GeometryPolygon' && ent.history) {
-                  let raw_ts_keys = Object.keys(ent.history)
-                  if (raw_ts_keys.length > 0) {
-                    let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-                    let kf_map = new Map<number, [any, any, any]>()
-                    for (let x = 0; x < sorted_ts.length; x++) {
-                      let ts = sorted_ts[x]
-                      let val = ent.history[String(ts)]
-                      if (Array.isArray(val))
-                        kf_map.set(ts, val as [any, any, any])
-                    }
+                if (ent && ent.class_name === 'GeometryPolygon') {
+                  let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
+                  if (parsed_kfs) {
                     entity_records.set(ent_id, {
                       class_name: ent.class_name,
                       id: ent_id,
-                      keyframes: kf_map,
-                      max_ts: sorted_ts[sorted_ts.length - 1],
-                      min_ts: sorted_ts[0],
+                      keyframes: parsed_kfs.kf_map,
+                      max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+                      min_ts: parsed_kfs.sorted_ts[0],
                       name: ent.name,
-                      sorted_timestamps: sorted_ts,
+                      sorted_timestamps: parsed_kfs.sorted_ts,
                     })
                   }
                 }
@@ -1374,31 +1446,21 @@ export class AtlasBordersService {
             continue
 
           let ent = parsed_data[ent_id]
-          if (!ent || ent.class_name !== 'GeometryPolygon' || !ent.history)
+          if (!ent || ent.class_name !== 'GeometryPolygon')
             continue
 
-          let raw_ts_keys = Object.keys(ent.history)
-          if (raw_ts_keys.length === 0)
+          let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
+          if (!parsed_kfs)
             continue
-
-          let sorted_ts = raw_ts_keys.map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-          let kf_map = new Map<number, [any, any, any]>()
-
-          for (let x = 0; x < sorted_ts.length; x++) {
-            let ts = sorted_ts[x]
-            let val = ent.history[String(ts)]
-            if (Array.isArray(val))
-              kf_map.set(ts, val as [any, any, any])
-          }
 
           entity_records.set(ent_id, {
             class_name: ent.class_name,
             id: ent_id,
-            keyframes: kf_map,
-            max_ts: sorted_ts[sorted_ts.length - 1],
-            min_ts: sorted_ts[0],
+            keyframes: parsed_kfs.kf_map,
+            max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+            min_ts: parsed_kfs.sorted_ts[0],
             name: ent.name,
-            sorted_timestamps: sorted_ts,
+            sorted_timestamps: parsed_kfs.sorted_ts,
           })
         }
 

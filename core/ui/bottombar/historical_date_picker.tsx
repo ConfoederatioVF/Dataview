@@ -151,9 +151,54 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
   }, [selected_day, selected_month, effective_year, days_in_current_month])
 
   handle_year_change = function (arg0_val: string) {
-    let parsed = UfDate.convertStringToDate(arg0_val)
+    //Convert from parameters
+    let val = arg0_val
+
+    //Declare local instance variables
+    let cleaned: string
+    let era_str: string
+    let parsed: UfDateObject | undefined
+    let safe_year: number
+    let trimmed: string
+    let year_era_match: RegExpMatchArray | null
+    let yr_val: number
+
+    //Function body
+    trimmed = val.trim()
+
+    //1. Plain positive number: preserve currently selected era
+    if (/^\+?\d*$/.test(trimmed)) {
+      cleaned = val.replace(/[^0-9]/g, '')
+      set_year_text(cleaned)
+      return
+    }
+
+    //2. Negative number: set era to BC and extract digits
+    if (/^-\d*$/.test(trimmed)) {
+      cleaned = val.replace(/[^0-9]/g, '')
+      set_selected_era('BC')
+      set_year_text(cleaned)
+      return
+    }
+
+    //3. Year with explicit era suffix: e.g. "500 BC", "500AD"
+    year_era_match = trimmed.match(/^(-?\d+)\s*(AD|BC|BCE)$/i)
+    if (year_era_match) {
+      yr_val = parseInt(year_era_match[1], 10)
+      era_str = year_era_match[2].toUpperCase()
+      if (era_str === 'BC' || era_str === 'BCE' || yr_val < 0) {
+        set_selected_era('BC')
+      } else {
+        set_selected_era('AD')
+      }
+      set_year_text(String(Math.abs(yr_val || 1)))
+      return
+    }
+
+    //4. Full date string: parse and set date components
+    parsed = UfDate.convertStringToDate(val)
     if (parsed) {
-      let safe_year = parsed.year === 0 ? 1 : parsed.year
+      safe_year = parsed.year === 0 ? 1 : parsed.year
       set_selected_day(parsed.day)
       set_selected_month(parsed.month)
       set_selected_era(safe_year < 0 ? 'BC' : 'AD')
@@ -161,7 +206,8 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
       return
     }
 
-    let cleaned = arg0_val.replace(/[^0-9]/g, '')
+    //5. Fallback: clean to digits only
+    cleaned = val.replace(/[^0-9]/g, '')
     set_year_text(cleaned)
   }
 
@@ -319,10 +365,8 @@ export let HistoricalDatePicker: React.FC<HistoricalDatePickerProps> = function 
               onChange={(arg0_e) => handle_year_change(arg0_e.target.value)}
               onBlur={() => {
                 let parsed = parseInt(year_text, 10)
-                if (Number.isNaN(parsed) || parsed === 0) {
+                if (Number.isNaN(parsed) || parsed === 0)
                   set_year_text('1')
-                  set_selected_era('AD')
-                }
               }}
               onKeyDown={(arg0_e) => {
                 if (arg0_e.key === 'Enter')

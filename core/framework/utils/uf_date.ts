@@ -146,19 +146,21 @@ export let UfDate = {
     }
 
     //5. Delimited numeric date (e.g. "1463.1.1", "-44.3.15", "1463.1.1.0.0")
-    date_array = clean_string.split(delimiter)
-    for (let i = 0; i < date_array.length; i++) {
-      if (Number.isNaN(parseFloat(date_array[i])))
-        return
-    }
+    if (clean_string.includes(delimiter)) {
+      date_array = clean_string.split(delimiter)
+      for (let i = 0; i < date_array.length; i++) {
+        if (Number.isNaN(parseFloat(date_array[i])))
+          return
+      }
 
-    for (let i = 0; i < date_array.length; i++) {
-      if (date_properties[i])
-        date_obj[date_properties[i]] = parseFloat(date_array[i])
-    }
+      for (let i = 0; i < date_array.length; i++) {
+        if (date_properties[i])
+          date_obj[date_properties[i]] = parseFloat(date_array[i])
+      }
 
-    //Return statement
-    return date_obj
+      //Return statement
+      return date_obj
+    }
   },
 
 

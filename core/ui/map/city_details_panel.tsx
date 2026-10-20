@@ -150,22 +150,58 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       let c_lat = (city as any)?.rawCoords ? (city as any).rawCoords[1] : ((city as any)?.lat !== undefined ? (city as any).lat : (city?.coords ? city.coords[0] : undefined))
       let c_lon = (city as any)?.rawCoords ? (city as any).rawCoords[0] : ((city as any)?.lon !== undefined ? (city as any).lon : (city?.coords ? city.coords[1] : undefined))
       if (c_lat !== undefined && c_lon !== undefined) {
+        let best_feat: any = null
+        let best_score = -1
+        let city_country = (city?.country || (city as any)?.country || '').toLowerCase().trim()
+
         for (let feat of borders_data.features) {
           if (feat.properties?.cap_coords && Array.isArray(feat.properties.cap_coords) && feat.properties.cap_coords.length >= 2) {
             let dist = Math.hypot(c_lon - feat.properties.cap_coords[0], c_lat - feat.properties.cap_coords[1])
             if (dist <= 0.20) {
-              if (feat.properties.capkey && (city as any)?.key && feat.properties.capkey !== (city as any).key && feat.properties.capkey !== (city as any).id) {
+              if (feat.properties.capkey && (city as any)?.key && feat.properties.capkey !== (city as any).key && feat.properties.capkey !== (city as any).id)
                 continue
+
+              let f_area = feat.properties?.area !== undefined ? Number(feat.properties.area) : 0
+              if (!f_area && feat.bbox)
+                f_area = Math.max(0, (feat.bbox[2] - feat.bbox[0])*(feat.bbox[3] - feat.bbox[1]))
+
+              let f_name = (feat.properties?.name || '').toLowerCase().trim()
+              let matches_country = Boolean(city_country && (f_name.includes(city_country) || city_country.includes(f_name)))
+
+              let score = (matches_country ? 1e12 : 0) + (f_area || 0)
+              if (score > best_score) {
+                best_score = score
+                best_feat = feat
               }
-              is_capital = true
-              if (!polity_name && feat.properties.name) {
-                polity_name = feat.properties.name
-              }
-              if ((city as any) && !(city as any).capital_state_id && feat.properties.state_id !== undefined) {
-                ;(city as any).capital_state_id = feat.properties.state_id
-              }
-              break
             }
+          }
+        }
+
+        if (best_feat) {
+          is_capital = true
+          if (!polity_name && best_feat.properties.name)
+            polity_name = best_feat.properties.name
+          if ((city as any) && !(city as any).capital_state_id && best_feat.properties.state_id !== undefined) {
+            (city as any).capital_state_id = best_feat.properties.state_id
+          }
+        }
+      }
+    }
+
+    //Enforce larger country resolution: if city claims to be capital of a microstate that does not match city.country,
+    //and a matching larger state exists in borders_data:
+    let city_country = (city?.country || (city as any)?.country || '').toLowerCase().trim()
+    if (city_country) {
+      let pol_norm = (polity_name || '').toLowerCase().trim()
+      if (pol_norm && !pol_norm.includes(city_country) && !city_country.includes(pol_norm)) {
+        let country_feat = borders_data.features.find((arg0_f: any) => {
+          let fn = (arg0_f.properties?.name || '').toLowerCase().trim()
+          return fn === city_country || fn.includes(city_country) || city_country.includes(fn)
+        })
+        if (country_feat && country_feat.properties?.name) {
+          polity_name = country_feat.properties.name
+          if (country_feat.properties?.state_id !== undefined && (city as any)) {
+            (city as any).capital_state_id = country_feat.properties.state_id
           }
         }
       }

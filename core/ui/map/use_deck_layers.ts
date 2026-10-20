@@ -219,11 +219,15 @@ function reconcileCapitalWithAuthoritativeBorders (
       is_direct_polity_match = cand_country === match_polity || match_polity.includes(cand_country) || cand_country.includes(match_polity)
       is_capkey_match = Boolean(match_capkey && match_capkey.includes(cand_country))
       if (!is_direct_polity_match && !is_capkey_match) {
-        cap_dist = (match.cap_coords && c_lon !== undefined && c_lat !== undefined)
-          ? Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
-          : 999
-        if (cap_dist > 0.5) {
+        let current_cap_of = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
+        if (current_cap_of && (current_cap_of === cand_country || current_cap_of.includes(cand_country) || cand_country.includes(current_cap_of))) {
           match = null
+        } else {
+          cap_dist = (match.cap_coords && c_lon !== undefined && c_lat !== undefined)
+            ? Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
+            : 999
+          if (cap_dist > 0.5)
+            match = null
         }
       }
     }
@@ -638,7 +642,14 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             cap_lat = Number(p.caplat)
           }
 
+          let feat_area = p.area !== undefined ? Number(p.area) : 0
+          if (!feat_area && (feat as any).bbox) {
+            let b = (feat as any).bbox
+            feat_area = Math.max(0, (b[2] - b[0])*(b[3] - b[1]))
+          }
+
           let cap_entry = {
+            area: feat_area,
             bbox: (feat as any).bbox || p.bbox,
             cap_coords: (cap_lon !== undefined && cap_lat !== undefined) ? [cap_lon, cap_lat] as [number, number] : undefined,
             capkey: p.capkey,
@@ -658,17 +669,23 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             })
 
           if (p.capkey) {
-            active_capitals_by_key.set(p.capkey, cap_entry)
-            active_capitals_by_key.set(p.capkey.toLowerCase().trim(), cap_entry)
+            let existing_k = active_capitals_by_key.get(p.capkey)
+            if (!existing_k || (cap_entry.area > (existing_k.area || 0))) {
+              active_capitals_by_key.set(p.capkey, cap_entry)
+              active_capitals_by_key.set(p.capkey.toLowerCase().trim(), cap_entry)
+            }
           }
           if (p.capname) {
             let names = p.capname.split(/[,/]/).map((s: string) => s.trim().toLowerCase()).filter(Boolean)
             for (let n of names) {
-              active_capitals_by_name.set(n, cap_entry)
-              let n_nfd = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-              let n_clean = n_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-              if (n_clean)
-                active_capitals_by_name.set(n_clean, cap_entry)
+              let existing_n = active_capitals_by_name.get(n)
+              if (!existing_n || (cap_entry.area > (existing_n.area || 0))) {
+                active_capitals_by_name.set(n, cap_entry)
+                let n_nfd = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                let n_clean = n_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+                if (n_clean)
+                  active_capitals_by_name.set(n_clean, cap_entry)
+              }
             }
           }
         }
@@ -1528,10 +1545,33 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         }
 
         if (best_city) {
-          if (best_city.key)
-            authoritative_capitals_by_city.set(best_city.key, cap)
-          if (best_city.id)
-            authoritative_capitals_by_city.set(String(best_city.id), cap)
+          let existing = authoritative_capitals_by_city.get(best_city.key)
+          let should_set = true
+
+          if (existing) {
+            let city_country = (best_city.country || '').toLowerCase().trim()
+            let exist_area = (existing as any).area || 0
+            let exist_polity = (existing.polity_name || '').toLowerCase().trim()
+            let new_polity = (cap.polity_name || '').toLowerCase().trim()
+            let exist_matches_country = Boolean(city_country && (exist_polity.includes(city_country) || city_country.includes(exist_polity)))
+            let new_area = cap.area || 0
+            let new_matches_country = Boolean(city_country && (new_polity.includes(city_country) || city_country.includes(new_polity)))
+
+            if (exist_matches_country && !new_matches_country) {
+              should_set = false
+            } else if (!exist_matches_country && new_matches_country) {
+              should_set = true
+            } else if (exist_area > new_area) {
+              should_set = false
+            }
+          }
+
+          if (should_set) {
+            if (best_city.key)
+              authoritative_capitals_by_city.set(best_city.key, cap)
+            if (best_city.id)
+              authoritative_capitals_by_city.set(String(best_city.id), cap)
+          }
         }
       }
     }

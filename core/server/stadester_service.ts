@@ -233,7 +233,7 @@ export function isCityInsideStateBBox (
 }
 
 export let StadesterService = {
-  _cache_authoritative_capitals_by_year: new Map<string, Map<string, { color: string; name?: string; state_id?: number | string }>>(),
+  _cache_authoritative_capitals_by_year: new Map<string, Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>>(),
   _cache_cities_at_year: new Map<string, CityRenderPoint[]>(),
   _cache_compact_cities: new Map<string, CompactCitiesPayload>(),
   _spatial_grid_by_dataset: new Map<string, Map<string, string[]>>(),
@@ -1314,7 +1314,7 @@ export let StadesterService = {
    * @param {number} [arg3_day=1]
    * @param {string} [arg4_border_dataset='detailed_borders']
    *
-   * @returns {Map<string, { color: string; name?: string; state_id?: number | string }>}
+   * @returns {Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>}
    */
   getAuthoritativeCapitalsAtYear: function (
     arg0_dataset_name?: string,
@@ -1322,7 +1322,7 @@ export let StadesterService = {
     arg2_month?: number,
     arg3_day?: number,
     arg4_border_dataset?: string
-  ): Map<string, { color: string; name?: string; state_id?: number | string }> {
+  ): Map<string, { area?: number; color: string; name?: string; state_id?: number | string }> {
     //Convert from parameters
     let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'detailed_borders'
     let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
@@ -1333,7 +1333,7 @@ export let StadesterService = {
     //Declare local instance variables
     let borders: any
     let cache_key = `${dataset_name}:${year}:${month}:${day}:${border_dataset}`
-    let capitals_by_city = new Map<string, { color: string; name?: string; state_id?: number | string }>()
+    let capitals_by_city = new Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>()
     let indexed = StadesterService.loadDataset(dataset_name)
 
     //Guard clauses
@@ -1456,14 +1456,42 @@ export let StadesterService = {
 
           if (best_city) {
             let cap_color_val = p.symbol?.polygonFill || p.symbol?.fillColor || p.color || p.fillColor || '#FFDC00'
+            let feat_area = p.area !== undefined ? Number(p.area) : 0
+            if (!feat_area && feat.bbox)
+              feat_area = Math.max(0, (feat.bbox[2] - feat.bbox[0])*(feat.bbox[3] - feat.bbox[1]))
+
             let cap_entry = {
+              area: feat_area,
               color: cap_color_val,
               name: p.name,
               state_id: p.state_id || p.gwcode,
             }
-            capitals_by_city.set(best_city.key, cap_entry)
-            if (best_city.id && String(best_city.id) !== best_city.key)
-              capitals_by_city.set(String(best_city.id), cap_entry)
+
+            let existing_entry = capitals_by_city.get(best_city.key)
+            let should_set = true
+
+            if (existing_entry) {
+              let city_country = (best_city.country || '').toLowerCase().trim()
+              let exist_area = existing_entry.area || 0
+              let exist_polity = (existing_entry.name || '').toLowerCase().trim()
+              let new_polity = (p.name || '').toLowerCase().trim()
+              let exist_matches_country = Boolean(city_country && (exist_polity.includes(city_country) || city_country.includes(exist_polity)))
+              let new_matches_country = Boolean(city_country && (new_polity.includes(city_country) || city_country.includes(new_polity)))
+
+              if (exist_matches_country && !new_matches_country) {
+                should_set = false
+              } else if (!exist_matches_country && new_matches_country) {
+                should_set = true
+              } else if (exist_area > feat_area) {
+                should_set = false
+              }
+            }
+
+            if (should_set) {
+              capitals_by_city.set(best_city.key, cap_entry)
+              if (best_city.id && String(best_city.id) !== best_city.key)
+                capitals_by_city.set(String(best_city.id), cap_entry)
+            }
           }
         }
       }
@@ -1799,6 +1827,32 @@ export let StadesterService = {
       let cap_color_val = cs_cap?.color || cap_state?.fill_color || null
       let cap_state_id = cs_cap?.state_id || cap_rec?.state_id || undefined
       let polity_name = cs_cap?.name || cap_state?.name || undefined
+
+      //Resolve conflicting capital polities in favour of larger country / country-matching polity
+      if (cs_cap && cap_state && String(cs_cap.state_id) !== String(cap_rec?.state_id)) {
+        let city_country = (city.country || '').toLowerCase().trim()
+        let cs_name = (cs_cap.name || '').toLowerCase().trim()
+        let cs_state = cs_cap.state_id !== undefined ? StadesterService.getStateById(cs_cap.state_id) : null
+        let cs_bbox_area = cs_state?.bbox ? Math.max(0, (cs_state.bbox[2] - cs_state.bbox[0])*(cs_state.bbox[3] - cs_state.bbox[1])) : 0
+        let cs_matches = Boolean(city_country && (cs_name.includes(city_country) || city_country.includes(cs_name)))
+        let state_name = (cap_state.name || '').toLowerCase().trim()
+        let state_bbox_area = cap_state.bbox ? Math.max(0, (cap_state.bbox[2] - cap_state.bbox[0])*(cap_state.bbox[3] - cap_state.bbox[1])) : 0
+        let state_matches = Boolean(city_country && (state_name.includes(city_country) || city_country.includes(state_name)))
+
+        if (state_matches && !cs_matches) {
+          cap_color_val = cap_state.fill_color || cap_color_val
+          cap_state_id = cap_rec?.state_id ?? undefined
+          polity_name = cap_state.name
+        } else if (!state_matches && cs_matches) {
+          cap_color_val = cs_cap.color || cap_color_val
+          cap_state_id = cs_cap.state_id
+          polity_name = cs_cap.name
+        } else if (state_bbox_area > cs_bbox_area) {
+          cap_color_val = cap_state.fill_color || cap_color_val
+          cap_state_id = cap_rec?.state_id ?? undefined
+          polity_name = cap_state.name
+        }
+      }
       let resolved_date = (options.month !== undefined || options.day !== undefined)
         ? `${Math.floor(target_year)}.${options.month || 1}.${options.day || 1}`
         : target_year
@@ -1990,10 +2044,30 @@ export let StadesterService = {
           )
           let cap_info = cshapes_capitals.get(entry.key) || (entry.id ? cshapes_capitals.get(String(entry.id)) : undefined)
           if (cap_info) {
-            cap_color = cap_info.color
-            cap_sid = cap_info.state_id
-            is_capital = true
-            polity_name = cap_info.name
+            let should_override = true
+            if (cap_state && String(cap_info.state_id) !== String(cap_state.state_id)) {
+              let cap_polity = (cap_info.name || '').toLowerCase().trim()
+              let cap_state_obj = cap_info.state_id !== undefined ? StadesterService.getStateById(cap_info.state_id) : null
+              let cap_area = cap_state_obj?.bbox ? Math.max(0, (cap_state_obj.bbox[2] - cap_state_obj.bbox[0])*(cap_state_obj.bbox[3] - cap_state_obj.bbox[1])) : 0
+              let city_country = (entry.country || '').toLowerCase().trim()
+              let cap_matches = Boolean(city_country && (cap_polity.includes(city_country) || city_country.includes(cap_polity)))
+              let state_polity = (cap_state.name || '').toLowerCase().trim()
+              let state_area = cap_state.bbox ? Math.max(0, (cap_state.bbox[2] - cap_state.bbox[0])*(cap_state.bbox[3] - cap_state.bbox[1])) : 0
+              let state_matches = Boolean(city_country && (state_polity.includes(city_country) || city_country.includes(state_polity)))
+
+              if (state_matches && !cap_matches) {
+                should_override = false
+              } else if (state_area > cap_area && !cap_matches) {
+                should_override = false
+              }
+            }
+
+            if (should_override) {
+              cap_color = cap_info.color
+              cap_sid = cap_info.state_id
+              is_capital = true
+              polity_name = cap_info.name
+            }
           }
         } catch {
           //Ignore CShapes lookup error

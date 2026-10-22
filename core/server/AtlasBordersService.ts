@@ -952,7 +952,12 @@ let getStateCapitalInfo = function (
       }
     }
 
-    if (candidates.length === 0 && clean_e.length >= 4) {
+    let has_capital_candidate = candidates.some((c) => {
+      let info_c = state_capitals_data ? state_capitals_data[c.state_id] : undefined
+      return info_c && !info_c.acapital && info_c.timeline && info_c.timeline.length > 0
+    })
+
+    if (!has_capital_candidate && clean_e.length >= 4) {
       for (let [s_name, list] of states_name_map.entries()) {
         let base_s = s_name.replace(/\(.*?\)/g, '').trim()
         let is_match = (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' '))
@@ -971,15 +976,23 @@ let getStateCapitalInfo = function (
         let a_has_tl = a_info && !a_info.acapital && a_info.timeline && a_info.timeline.length > 0 ? 1 : 0
         let b_info = state_capitals_data![arg0_b.state_id]
         let b_has_tl = b_info && !b_info.acapital && b_info.timeline && b_info.timeline.length > 0 ? 1 : 0
-        return b_has_tl - a_has_tl
+        if (b_has_tl !== a_has_tl)
+          return b_has_tl - a_has_tl
+
+        let a_state = AtlasBordersService.getStateById(arg0_a.state_id)
+        let b_state = AtlasBordersService.getStateById(arg0_b.state_id)
+        let a_is_occ = (a_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
+        let b_is_occ = (b_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
+        return a_is_occ - b_is_occ
       })
 
       for (let k = 0; k < candidates.length; k++) {
         let candidate_info = state_capitals_data[candidates[k].state_id]
-        if (candidate_info) {
+        if (candidate_info && (!candidate_info.acapital || !info)) {
           info = candidate_info
           matched_state_id = candidates[k].state_id
-          break
+          if (!candidate_info.acapital)
+            break
         }
       }
     }

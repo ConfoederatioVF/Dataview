@@ -1,0 +1,3932 @@
+# ==============================================================================
+# STATE CAPITALS CURATION CHUNK 01 / 12
+# States: 1 to 653 (Count: 653)
+# Format:
+#   STATE: [ID] Name (start_date -> stop_date) [fill: #HEX]
+#   STATUS: CAPITAL | ACAPITAL
+#   TIMELINE: (for CAPITAL)
+#     start_date -> stop_date: City Name [city_key]
+#   REASON: (for ACAPITAL) Reason for acapital status
+# ==============================================================================
+
+STATE: [1] Bishopric of Ösel-Wiek (1559.9.26 -> 1560.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1559.9.26 -> 1560.1.1: Haapsalu [stadester-Haapsalu-Estonia]
+---
+
+STATE: [2] Bishopric of Ösel-Wiek (Denmark) (1560.1.1 -> 1645.8.13) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1560.1.1 -> 1645.8.13: Kuressaare [stadester-Kuressaare-Estonia]
+---
+
+STATE: [3] Terra Mariana (Holy Roman state) (1207.2.2 -> 1216.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1207.2.2 -> 1216.1.1: Riga [stadester-Riga-Latvia]
+---
+
+STATE: [4] Bishopric of Acqui (979.1.1 -> 1136.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  979.1.1 -> 1136.1.1: Acqui Terme [stadester-AcquiTerme-Italy]
+---
+
+STATE: [5] Aosta Prince-Bishopric (1001.1.1 -> 1025.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1025.1.1: Aosta [stadester-Aosta-Italy]
+---
+
+STATE: [6] Aquileia Patriarchate (1078.1.1 -> 1544.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1078.1.1 -> 1544.1.1: Aquileia [stadester-Aquileia-Italy]
+---
+
+STATE: [7] Augsburg Prince-Bishopric (1259.1.1 -> 1803.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1259.1.1 -> 1803.1.1: Augsburg
+---
+
+STATE: [8] Bamberg Prince-Bishopric (1008.1.1 -> 1803.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1008.1.1 -> 1803.1.1: Bamberg
+---
+
+STATE: [9] Prince-Bishopric of Basel (1033.1.1 -> 1580.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1033.1.1 -> 1580.1.1: Basel
+---
+
+STATE: [10] Belluno Prince-Bishopric (962.2.2 -> 1389.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1389.1.1: Belluno [stadester-Belluno-Italy]
+---
+
+STATE: [11] Berchtesgaden Provostry (1195.1.1 -> 1804.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1195.1.1 -> 1804.1.1: Berchtesgaden [stadester-Berchtesgaden-Germany]
+---
+
+STATE: [12] Biella Prince-Bishopric (1161.1.1 -> 1378.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1161.1.1 -> 1378.1.1: Biella [stadester-Biella-Italy]
+---
+
+STATE: [13] Brand Prince-Bishopric (1166.1.1 -> 1572.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1166.1.1 -> 1572.1.1: Brandenburg an der Havel [stadester-BrandenburganderHavel-Germany]
+---
+
+STATE: [14] Archbishopric of Bremen (1181.1.1 -> 1649.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1649.1.1: Bremen
+---
+
+STATE: [15] Brixen Prince-Bishopric (1180.1.1 -> 1803.2.25) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1180.1.1 -> 1803.2.25: Brixen [stadester-Brixen-Italy]
+---
+
+STATE: [16] Cammin Bishopric (1181.1.1 -> 1545.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1545.1.1: Kamień Pomorski [stadester-KamiePomorski-Poland]
+---
+
+STATE: [17] Ceneda Prince-Bishopric (962.2.2 -> 1771.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1771.1.1: Vittorio Veneto [stadester-VittorioVeneto-Italy]
+---
+
+STATE: [18] Chur Bishopric (962.2.2 -> 1367.1.29) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1367.1.29: Chur
+---
+
+STATE: [19] Corvey Abbey (1151.1.1 -> 1793.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1793.1.1: Höxter [stadester-Hxter-Germany]
+---
+
+STATE: [20] Teutonic Order (1220.1.1 -> 1810.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1220.1.1 -> 1291.5.18: Acre [stadester-Akko-Israel]
+  1291.5.18 -> 1309.9.14: Venice [stadester-Venezia-Italy]
+  1309.9.14 -> 1457.6.6: Malbork [stadester-Malbork-Poland]
+  1457.6.6 -> 1525.4.8: Kaliningrad [stadester-Kaliningrad-Russia]
+  1525.4.8 -> 1809.4.24: Bad Mergentheim [stadester-Bad Mergentheim-Germany]
+  1809.4.24 -> 1810.1.1: Wien [stadester-Wien-Austria]
+---
+
+STATE: [21] Teutonic Order (Poland) (1466.10.19 -> 1525.4.8) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1466.10.19 -> 1525.4.8: Kaliningrad [stadester-Kaliningrad-Russia]
+---
+
+STATE: [22] Disentis Imperial Monastery (962.2.2 -> 1396.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1396.1.1: Disentis [stadester-Disentis-Switzerland]
+---
+
+STATE: [23] Eichstädt Prince-Bishopric (962.2.2 -> 1803.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1803.1.1: Eichstätt [stadester-Eichstätt-Germany]
+---
+
+STATE: [24] Ellwangen Imperial Monastery (1461.1.1 -> 1803.2.25) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1461.1.1 -> 1803.2.25: Ellwangen [stadester-Ellwangen-Germany]
+---
+
+STATE: [25] Engelberg Monastery (1121.1.1 -> 1426.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1121.1.1 -> 1426.1.1: Engelberg [stadester-Engelberg-Germany]
+---
+
+STATE: [26] Essen Abbey (962.2.2 -> 1803.2.25) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1803.2.25: Essen [stadester-Essen-Germany]
+---
+
+STATE: [27] Feltre Prince-Bishopric (1101.1.1 -> 1236.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1236.1.1: Feltre [stadester-Feltre-Italy]
+---
+
+STATE: [28] Freising Prince-Bishopric (962.2.2 -> 1804.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1804.1.1: Freising [stadester-Freising-Germany]
+---
+
+STATE: [29] Fulda Abbey (775.1.1 -> 1157.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  775.1.1 -> 1157.1.1: Fulda [stadester-Fulda-Germany]
+---
+
+STATE: [30] Geneva Bishopric (1155.1.1 -> 1527.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1155.1.1 -> 1527.1.1: Geneva [stadester-Geneva-Switzerland]
+---
+
+STATE: [31] Halberstadt Prince-Bishopric (1181.1.1 -> 1648.10.24) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1648.10.24: Halberstadt [stadester-Halberstadt-Germany]
+---
+
+STATE: [32] Havelberg Bishopric (1145.1.1 -> 1572.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1145.1.1 -> 1572.1.1: Havelberg [stadester-Havelberg-Germany]
+---
+
+STATE: [33] Hersfeld Abbey (776.1.1 -> 1607.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  776.1.1 -> 1607.1.1: Bad Hersfeld [stadester-BadHersfeld-Germany]
+---
+
+STATE: [34] Hildesheim Prince-Bishopric (1236.1.1 -> 1804.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1236.1.1 -> 1804.1.1: Hildesheim [stadester-Hildesheim-Germany]
+---
+
+STATE: [35] Fulda Prince-Bishopric (1753.1.1 -> 1804.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1753.1.1 -> 1804.1.1: Fulda [stadester-Fulda-Germany]
+---
+
+STATE: [36] Corvey Prince-Bishopric (1793.1.1 -> 1804.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1793.1.1 -> 1804.1.1: Höxter [stadester-Hxter-Germany]
+---
+
+STATE: [37] Irsee Imperial Abbey (1201.1.1 -> 1803.2.25) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1803.2.25: Irsee [stadester-Kaufbeuren-Germany]
+---
+
+STATE: [38] Cambrai Prince-Bishopric (1108.1.1 -> 1338.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1108.1.1 -> 1338.1.1: Cambrai [stadester-Cambrai-France]
+---
+
+STATE: [39] Princely Abbey of Kempten (1063.1.1 -> 1804.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1063.1.1 -> 1804.1.1: Kempten [stadester-Kempten-Germany]
+---
+
+STATE: [40] Archbishopric of Cologne (1065.1.1 -> 1807.7.9) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1065.1.1 -> 1807.7.9: Köln
+---
+
+STATE: [41] Konstanz Prince-Bishopric (1156.1.1 -> 1804.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1156.1.1 -> 1804.1.1: Konstanz
+---
+
+STATE: [42] Kornelimünster Imperial Abbey (962.2.2 -> 1794.12.28) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1794.12.28: Kornelimünster [stadester-Aachen-Germany]
+---
+
+STATE: [43] Lausanne Prince-Bishopric (1033.1.1 -> 1537.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1033.1.1 -> 1537.1.1: Lausanne [stadester-Lausanne-Switzerland]
+---
+
+STATE: [44] Lebus Prince-Bishopric (1249.1.1 -> 1556.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1249.1.1 -> 1556.1.1: Lebus [stadester-Lebus-Germany]
+---
+
+STATE: [45] Lübeck Prince-Bishopric (1181.1.1 -> 1804.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1804.1.1: Lübeck
+---
+
+STATE: [46] Liege Prince-Bishopric (986.1.1 -> 1794.12.28) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  986.1.1 -> 1794.12.28: Liège [stadester-Liège-Belgium]
+---
+
+STATE: [47] Lyon Prince-Bishopric (1101.1.1 -> 1313.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1313.1.1: Lyon [stadester-Lyon-France]
+---
+
+STATE: [48] Magdeburg Archbishopric (1181.1.1 -> 1681.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1681.1.1: Magdeburg [stadester-Magdeburg-Germany]
+---
+
+STATE: [49] Mainz Archbishopric (962.2.2 -> 1815.6.9) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1815.6.9: Mainz [stadester-Mainz-Germany]
+---
+
+STATE: [50] Meissen Prince-Bishopric (1181.1.1 -> 1667.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1667.1.1: Meissen [stadester-Meissen-Germany]
+---
+
+STATE: [51] Merseburg Prince-Bishopric (1005.1.1 -> 1566.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1005.1.1 -> 1566.1.1: Merseburg [stadester-Merseburg-Germany]
+---
+
+STATE: [52] Metz Prince-Bishopric (1001.1.1 -> 1633.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1633.1.1: Metz [stadester-Metz-France]
+---
+
+STATE: [53] Minden Prince-Bishopric (1181.1.1 -> 1648.10.24) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1648.10.24: Minden [stadester-Minden-Germany]
+---
+
+STATE: [54] Münster Prince-Bishopric (1181.1.1 -> 1806.3.15) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1806.3.15: Münster
+---
+
+STATE: [55] Murbach Abbey (793.1.1 -> 1648.10.24) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  793.1.1 -> 1648.10.24: Murbach [stadester-Colmar-France]
+---
+
+STATE: [56] Murlo Prince-Bishopric (1190.1.1 -> 1388.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1190.1.1 -> 1388.1.1: Murlo [stadester-Siena-Italy]
+---
+
+STATE: [57] Naumburg Prince-Bishopric (1030.1.1 -> 1565.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1030.1.1 -> 1565.1.1: Naumburg [stadester-Naumburg-Germany]
+---
+
+STATE: [58] Osnabrück Prince-Bishopric (1227.1.1 -> 1804.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1227.1.1 -> 1804.1.1: Osnabrück [stadester-Osnabrck-Germany]
+---
+
+STATE: [59] Paderborn Prince-Bishopric (1282.1.1 -> 1803.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1282.1.1 -> 1803.1.1: Paderborn [stadester-Paderborn-Germany]
+---
+
+STATE: [60] Passau Prince-Bishopric (1000.1.1 -> 1804.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1000.1.1 -> 1804.1.1: Passau [stadester-Passau-Germany]
+---
+
+STATE: [61] Pruem Abbey (1223.1.1 -> 1795.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1223.1.1 -> 1795.1.1: Prüm [stadester-Prüm-Germany]
+---
+
+STATE: [62] Quedlinburg Abbey (995.1.1 -> 1803.2.25) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  995.1.1 -> 1803.2.25: Quedlinburg [stadester-Quedlinburg-Germany]
+---
+
+STATE: [63] Ratzeburg Prince-Bishopric (1155.1.1 -> 1649.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1155.1.1 -> 1649.1.1: Ratzeburg [stadester-Ratzeburg-Germany]
+---
+
+STATE: [64] Regensburg Prince-Bishopric (1201.1.1 -> 1804.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1804.1.1: Regensburg [stadester-Regensburg-Germany]
+---
+
+STATE: [65] Fulda Imperial Abbey (1157.1.1 -> 1753.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1157.1.1 -> 1753.1.1: Fulda [stadester-Fulda-Germany]
+---
+
+STATE: [66] Rottenmuenster Abbey (1238.1.1 -> 1802.11.23) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1238.1.1 -> 1802.11.23: Rottweil [stadester-Rottweil-Germany]
+---
+
+STATE: [67] Saeckingen Monastery (962.2.2 -> 1478.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1478.1.1: Bad Säckingen [stadester-Bad Säckingen-Germany]
+---
+
+STATE: [68] Salem Abbey (1295.1.1 -> 1803.2.25) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1295.1.1 -> 1803.2.25: Salem [stadester-Salem-Germany]
+---
+
+STATE: [69] Salzburg Prince-Bishopric (962.2.2 -> 1803.2.11) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1803.2.11: Salzburg
+---
+
+STATE: [70] San Colombano Abbey (973.1.1 -> 1228.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  973.1.1 -> 1228.1.1: Bobbio [stadester-Bobbio-Italy]
+---
+
+STATE: [71] San Giulio Prince-Bishopric (1219.9.20 -> 1768.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1219.9.20 -> 1768.1.1: Orta San Giulio [stadester-Orta San Giulio-Italy]
+---
+
+STATE: [72] Santa Maria di Lucedio Abbey (1124.1.1 -> 1458.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1124.1.1 -> 1458.1.1: Trino [stadester-Trino-Italy]
+---
+
+STATE: [73] Schwerin Prince-Bishopric (1163.1.1 -> 1649.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1163.1.1 -> 1649.1.1: Schwerin [stadester-Schwerin-Germany]
+---
+
+STATE: [74] Seborga Abbey (1178.1.1 -> 1729.1.31) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1178.1.1 -> 1729.1.31: Seborga [stadester-Imperia-Italy]
+---
+
+STATE: [75] Sitten Prince-Bishopric (1000.1.1 -> 1351.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1000.1.1 -> 1351.1.1: Sion [stadester-Sion-Switzerland]
+---
+
+STATE: [76] Speyer Prince-Bishopric (1087.1.1 -> 1804.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1087.1.1 -> 1804.1.1: Speyer
+---
+
+STATE: [77] St. Blasien Abbey (962.2.2 -> 1379.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1379.1.1: St. Blasien [stadester-StBlasien-Germany]
+---
+
+STATE: [78] St. Gallen Abbey (1208.1.1 -> 1452.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1208.1.1 -> 1452.1.1: St. Gallen [stadester-StGallen-Switzerland]
+---
+
+STATE: [79] St. Hubert Abbey (962.2.2 -> 1796.10.19) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1796.10.19: Saint-Hubert [stadester-Saint-Hubert-Belgium]
+---
+
+STATE: [80] St. Moritz Abbey (1221.1.1 -> 1251.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1251.1.1: Saint-Maurice [stadester-Saint-Maurice-Switzerland]
+---
+
+STATE: [81] Stablo-Malmedy Imperial Abbey (962.2.2 -> 1796.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1796.1.1: Malmedy [stadester-Malmedy-Belgium]
+---
+
+STATE: [82] Papal States (729.1.1 -> 1870.4.20) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  754.1.1 -> 1798.2.15: Rome
+  1799.10.1 -> 1809.5.17: Rome
+  1814.5.24 -> 1849.2.9: Rome
+  1849.7.3 -> 1870.9.20: Rome
+---
+
+STATE: [83] Strassburg Prince-Bishopric (776.1.1 -> 1804.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  776.1.1 -> 1804.1.1: Strasbourg
+---
+
+STATE: [84] Toul Prince-Bishopric (1049.1.1 -> 1553.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1049.1.1 -> 1553.1.1: Toul [stadester-Toul-France]
+---
+
+STATE: [85] Trento Prince-Bishopric (1028.1.1 -> 1804.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1028.1.1 -> 1804.1.1: Trento [stadester-Trento-Italy]
+---
+
+STATE: [86] Trier Archbishopric (962.2.2 -> 1806.8.30) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1806.8.30: Trier [stadester-Trier-Germany]
+---
+
+STATE: [87] Utrecht Prince-Bishopric (1025.1.1 -> 1528.10.20) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1025.1.1 -> 1528.10.20: Utrecht [stadester-Utrecht-Netherlands]
+---
+
+STATE: [88] Vangadizza Abbey (996.12.26 -> 1401.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  996.12.26 -> 1401.1.1: Badia Polesine [stadester-Badia Polesine-Italy]
+---
+
+STATE: [89] Verden Prince-Bishopric (1181.1.1 -> 1626.8.27) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1626.8.27: Verden [stadester-Verden (Aller)-Germany]
+---
+
+STATE: [90] Verdun Prince-Bishopric (962.2.2 -> 1553.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1553.1.1: Verdun [stadester-Verdun-France]
+---
+
+STATE: [91] Walkenried Abbey (1138.1.1 -> 1649.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1138.1.1 -> 1649.1.1: Walkenried [stadester-Walkenried-Germany]
+---
+
+STATE: [92] Weingarten Abbey (1057.1.1 -> 1803.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1057.1.1 -> 1803.1.1: Weingarten [stadester-Weingarten-Germany]
+---
+
+STATE: [93] Weissenburg Abbey (962.2.2 -> 1547.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1547.1.1: Wissembourg [stadester-Wissembourg-France]
+---
+
+STATE: [94] Werden Abbey (962.2.2 -> 1804.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1804.1.1: Werden [stadester-Werden-Germany]
+---
+
+STATE: [95] Würzburg Prince-Bishopric (1169.1.1 -> 1804.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1169.1.1 -> 1804.1.1: Würzburg [stadester-Wrzburg-Germany]
+---
+
+STATE: [96] Zeitz Prince-Bishopric (969.1.1 -> 1030.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  969.1.1 -> 1030.1.1: Zeitz [stadester-Zeitz-Germany]
+---
+
+STATE: [97] Zossen Monastery (1139.1.1 -> 1376.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1376.1.1: Zossen [stadester-Zossen-Germany]
+---
+
+STATE: [98] Zwiefalten Abbey (1379.1.1 -> 1803.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1379.1.1 -> 1803.1.1: Zwiefalten [stadester-Zwiefalten-Germany]
+---
+
+STATE: [99] Papal States (Military Occupation) (1511.1.20 -> 1848.8.1) [fill: #687FAD]
+STATUS: ACAPITAL
+REASON: Papal military occupation administration of captured Italian territory during war
+---
+
+STATE: [100] Teutonic Order (Military Occupation) (1519.2.1 -> 1525.4.8) [fill: #B37B50]
+STATUS: ACAPITAL
+REASON: Teutonic Order military operational theater and expeditionary command
+---
+
+STATE: [101] Terra Mariana (1216.1.1 -> 1557.9.14) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1216.1.1 -> 1557.9.14: Riga [stadester-Riga-Latvia]
+---
+
+STATE: [102] Free Imperial city of Riga (1561.11.28 -> 1581.1.14) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1561.11.28 -> 1581.1.14: Riga [stadester-Riga-Latvia]
+---
+
+STATE: [103] Imperial City of Aachen (1166.1.8 -> 1794.12.28) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1166.1.8 -> 1794.12.28: Aachen [stadester-Aachen-Germany]
+---
+
+STATE: [104] Imperial City of Aalen (1361.1.1 -> 1803.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1361.1.1 -> 1803.1.1: Aalen [stadester-Aalen-Germany]
+---
+
+STATE: [105] Imperial City of Augsburg (1277.1.1 -> 1807.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1277.1.1 -> 1807.1.1: Augsburg [stadester-Augsburg-Germany]
+---
+
+STATE: [106] Imperial City of Baderweiler (1273.1.1 -> 1445.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1273.1.1 -> 1445.1.1: Badenweiler [stadester-Badenweiler-Germany]
+---
+
+STATE: [107] Imperial City of Basel (1393.1.1 -> 1501.7.13) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1393.1.1 -> 1501.7.13: Basel [stadester-Basel-Switzerland]
+---
+
+STATE: [108] Imperial City of Bern (1219.1.1 -> 1354.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1354.1.1: Bern [stadester-Bern-Switzerland]
+---
+
+STATE: [109] Imperial City of Biberach (1283.1.1 -> 1803.2.25) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1283.1.1 -> 1803.2.25: Biberach an der Riß [stadester-BiberachanderRi-Germany]
+---
+
+STATE: [110] Imperial City of Bisanz (1291.1.1 -> 1649.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1291.1.1 -> 1649.1.1: Besançon [stadester-Besançon-France]
+---
+
+STATE: [111] Imperial City of Bopflingen (1242.1.1 -> 1803.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1242.1.1 -> 1803.1.1: Bopfingen [stadester-Bopfingen-Germany]
+---
+
+STATE: [112] Imperial City of Boppard (1051.1.1 -> 1310.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1051.1.1 -> 1310.1.1: Boppard [stadester-Boppard-Germany]
+---
+
+STATE: [113] Imperial City of Bremen (1367.1.1 -> 1807.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1367.1.1 -> 1807.1.1: Bremen [stadester-Bremen-Germany]
+---
+
+STATE: [114] Imperial City of Buchau (1251.1.1 -> 1804.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1251.1.1 -> 1804.1.1: Bad Buchau [stadester-BadBuchau-Germany]
+---
+
+STATE: [115] Imperial City of Buchhorn (1276.1.1 -> 1803.2.25) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1276.1.1 -> 1803.2.25: Friedrichshafen [stadester-Friedrichshafen-Germany]
+---
+
+STATE: [116] Imperial City of Cochem (962.2.2 -> 1295.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1295.1.1: Cochem [stadester-Cochem-Germany]
+---
+
+STATE: [117] Imperial City of Colmar (1227.1.1 -> 1680.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1227.1.1 -> 1680.1.1: Colmar [stadester-Colmar-France]
+---
+
+STATE: [118] Imperial City of Dinkelsbühl (1352.1.1 -> 1803.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1352.1.1 -> 1803.1.1: Dinkelsbühl [stadester-Dinkelsbhl-Germany]
+---
+
+STATE: [119] Imperial City of Donauwörth (1302.1.1 -> 1537.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1302.1.1 -> 1537.1.1: Donauwörth [stadester-Donauwrth-Germany]
+---
+
+STATE: [120] Imperial City of Dortmund (1221.1.1 -> 1804.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1804.1.1: Dortmund [stadester-Dortmund-Germany]
+---
+
+STATE: [121] Imperial City of Dueren (1001.1.1 -> 1242.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1242.1.1: Düren [stadester-Düren-Germany]
+---
+
+STATE: [122] Imperial City of Duisburg (962.2.2 -> 1291.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1291.1.1: Duisburg [stadester-Duisburg-Germany]
+---
+
+STATE: [123] Imperial City of Eger (1243.1.1 -> 1269.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1243.1.1 -> 1269.1.1: Cheb [stadester-Cheb-Czech Republic]
+---
+
+STATE: [124] Imperial City of Esslinegen (1251.1.1 -> 1803.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1251.1.1 -> 1803.1.1: Esslingen am Neckar [stadester-Esslingen am Neckar-Germany]
+---
+
+STATE: [125] Imperial City of Frankfurt am Main (1373.1.1 -> 1807.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1373.1.1 -> 1807.1.1: Frankfurt am Main [stadester-FrankfurtamMain-Germany]
+---
+
+STATE: [126] Imperial City of Friedberg (1253.1.1 -> 1803.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1253.1.1 -> 1803.1.1: Friedberg [stadester-Friedberg-Germany]
+---
+
+STATE: [127] Imperial City of Gelnhausen (1171.1.1 -> 1804.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1171.1.1 -> 1804.1.1: Gelnhausen [stadester-Gelnhausen-Germany]
+---
+
+STATE: [128] Imperial City of Giengen (1148.1.1 -> 1803.2.25) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1803.2.25: Giengen an der Brenz [stadester-GiengenanderBrenz-Germany]
+---
+
+STATE: [129] Imperial City of Gmuend (1274.1.1 -> 1803.2.25) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1274.1.1 -> 1803.2.25: Schwäbisch Gmünd [stadester-Schwäbisch Gmünd-Germany]
+---
+
+STATE: [130] Imperial City of Goslar (1291.1.1 -> 1804.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1291.1.1 -> 1804.1.1: Goslar [stadester-Goslar-Germany]
+---
+
+STATE: [131] Imperial City of Groningen (1478.1.1 -> 1548.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1478.1.1 -> 1548.1.1: Groningen [stadester-Groningen-Netherlands]
+---
+
+STATE: [132] Hagenau Landvogtei (1379.1.1 -> 1424.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1379.1.1 -> 1424.1.1: Haguenau [stadester-Haguenau-France]
+---
+
+STATE: [133] Imperial City of Hagenau (1258.1.1 -> 1648.5.17) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1258.1.1 -> 1648.5.17: Haguenau [stadester-Haguenau-France]
+---
+
+STATE: [134] Imperial City of Hall (1281.1.1 -> 1803.2.25) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1281.1.1 -> 1803.2.25: Schwäbisch Hall [stadester-Schwäbisch Hall-Germany]
+---
+
+STATE: [135] Imperial City of Hamburg (1379.1.1 -> 1811.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1379.1.1 -> 1811.1.1: Hamburg [stadester-Hamburg-Germany]
+---
+
+STATE: [136] Imperial City of Heilbron (1372.1.1 -> 1803.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1372.1.1 -> 1803.1.1: Heilbronn [stadester-Heilbronn-Germany]
+---
+
+STATE: [137] Imperial City of Isny (1366.1.1 -> 1807.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1366.1.1 -> 1807.1.1: Isny im Allgäu [stadester-IsnyimAllgu-Germany]
+---
+
+STATE: [138] Imperial City of Kaiserswerth (1182.1.1 -> 1398.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1182.1.1 -> 1398.1.1: Kaiserswerth [stadester-Düsseldorf-Germany]
+---
+
+STATE: [139] Imperial City of Kaufbeuren (1287.1.1 -> 1804.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1287.1.1 -> 1804.1.1: Kaufbeuren [stadester-Kaufbeuren-Germany]
+---
+
+STATE: [140] Imperial City of Kempten (1290.1.1 -> 1804.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1290.1.1 -> 1804.1.1: Kempten [stadester-Kempten-Germany]
+---
+
+STATE: [141] Imperial City of Cologne (1288.6.5 -> 1795.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1288.6.5 -> 1795.1.1: Köln [stadester-Kln-Germany]
+---
+
+STATE: [142] Imperial City of Konstanz (1193.1.1 -> 1547.4.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1193.1.1 -> 1547.4.1: Konstanz [stadester-Konstanz-Germany]
+---
+
+STATE: [143] Imperial City of Landau (1292.1.1 -> 1648.10.24) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1292.1.1 -> 1648.10.24: Landau in der Pfalz [stadester-LandauinderPfalz-Germany]
+---
+
+STATE: [144] Imperial City of Leutkirch (1294.1.1 -> 1804.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1294.1.1 -> 1804.1.1: Leutkirch im Allgäu [stadester-LeutkirchimAllgu-Germany]
+---
+
+STATE: [145] Imperial City of Lindau (1276.1.1 -> 1804.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1276.1.1 -> 1804.1.1: Lindau [stadester-Lindau-Germany]
+---
+
+STATE: [146] Imperial City of Lübeck (1228.1.1 -> 1811.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1228.1.1 -> 1811.1.1: Lübeck [stadester-Lbeck-Germany]
+---
+
+STATE: [147] Imperial City of Lutzern (1179.1.1 -> 1292.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1179.1.1 -> 1292.1.1: Luzern [stadester-Luzern-Switzerland]
+---
+
+STATE: [148] Imperial City of Maastricht (1205.1.1 -> 1579.7.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1205.1.1 -> 1579.7.1: Maastricht [stadester-Maastricht-Netherlands]
+---
+
+STATE: [149] Imperial City of Memmingen (1287.1.1 -> 1803.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1287.1.1 -> 1803.1.1: Memmingen [stadester-Memmingen-Germany]
+---
+
+STATE: [150] Imperial City of Metz (1190.1.1 -> 1553.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1190.1.1 -> 1553.1.1: Metz [stadester-Metz-France]
+---
+
+STATE: [151] Imperial City of Mosbach (1242.1.1 -> 1368.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1242.1.1 -> 1368.1.1: Mosbach [stadester-Mosbach-Germany]
+---
+
+STATE: [152] Imperial City of Mühlhausen (Thuringia) (1252.1.1 -> 1803.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1252.1.1 -> 1803.1.1: Mühlhausen [stadester-Mhlhausen-Germany]
+---
+
+STATE: [153] Imperial City of Mühlhausen (Alsace) (1276.1.1 -> 1516.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1276.1.1 -> 1516.1.1: Mulhouse [stadester-Mulhouse-France]
+---
+
+STATE: [154] Imperial City of Münster (1355.1.1 -> 1648.10.24) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1355.1.1 -> 1648.10.24: Munster [stadester-Munster-France]
+---
+
+STATE: [155] Lower Alsace Landvogtei (1275.1.1 -> 1355.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1275.1.1 -> 1355.1.1: Haguenau [stadester-Haguenau-France]
+---
+
+STATE: [156] Imperial City of Nijmegen (1231.1.1 -> 1248.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1231.1.1 -> 1248.1.1: Nijmegen [ghsl-Nijmegen-Netherlands]
+---
+
+STATE: [157] Imperial City of Nördlingen (1216.1.1 -> 1803.2.25) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1216.1.1 -> 1803.2.25: Nördlingen [stadester-Nrdlingen-Germany]
+---
+
+STATE: [158] Imperial City of Nordhausen (1221.1.1 -> 1803.2.25) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1803.2.25: Nordhausen [stadester-Nordhausen-Germany]
+---
+
+STATE: [159] Imperial City of Nuremberg (1220.1.1 -> 1807.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1220.1.1 -> 1807.1.1: Nürnberg [stadester-Nürnberg-Germany]
+---
+
+STATE: [160] Imperial City of Offenburg (1241.1.1 -> 1804.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1241.1.1 -> 1804.1.1: Offenburg [stadester-Offenburg-Germany]
+---
+
+STATE: [161] Imperial City of Pfullendorf (1221.1.1 -> 1804.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1804.1.1: Pfullendorf [stadester-Pfullendorf-Germany]
+---
+
+STATE: [162] Imperial City of Ravensburg (1277.1.1 -> 1804.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1277.1.1 -> 1804.1.1: Ravensburg [stadester-Ravensburg-Germany]
+---
+
+STATE: [163] Imperial City of Regensburg (1246.1.1 -> 1804.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1246.1.1 -> 1804.1.1: Regensburg [stadester-Regensburg-Germany]
+---
+
+STATE: [164] Imperial Possessions (962.2.2 -> 1373.1.1) [fill: #B37B50]
+STATUS: ACAPITAL
+REASON: Dispersed imperial crown estates (Reichsgüter) of the Holy Roman Empire without a centralized administrative capital
+---
+
+STATE: [165] Imperial City of Remagen (1222.1.1 -> 1249.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1222.1.1 -> 1249.1.1: Remagen [stadester-Remagen-Germany]
+---
+
+STATE: [166] Imperial City of Reutlingen (1241.1.1 -> 1803.2.25) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1241.1.1 -> 1803.2.25: Reutlingen [stadester-Reutlingen-Germany]
+---
+
+STATE: [167] Imperial City of Rothenburg (1275.1.1 -> 1804.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1275.1.1 -> 1804.1.1: Rothenburg ob der Tauber [stadester-Rothenburg ob der Tauber-Germany]
+---
+
+STATE: [168] Imperial City of Rottweil (1269.1.1 -> 1464.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1269.1.1 -> 1464.1.1: Rottweil [stadester-Rottweil-Germany]
+---
+
+STATE: [169] Imperial City of Saalfeld (1209.1.1 -> 1390.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1209.1.1 -> 1390.1.1: Saalfeld [stadester-Saalfeld-Germany]
+---
+
+STATE: [170] Imperial City of Sangerhausen (1195.1.1 -> 1486.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1195.1.1 -> 1486.1.1: Sangerhausen [stadester-Sangerhausen-Germany]
+---
+
+STATE: [171] Imperial City of Schaffhausen (1419.1.1 -> 1455.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1419.1.1 -> 1455.1.1: Schaffhausen [stadester-Schaffhausen-Switzerland]
+---
+
+STATE: [172] Imperial City of Schlettstadt (1217.1.1 -> 1648.5.17) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1217.1.1 -> 1648.5.17: Sélestat [stadester-Slestat-France]
+---
+
+STATE: [173] Imperial City of Schweinfurth (1234.1.1 -> 1803.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1234.1.1 -> 1803.1.1: Schweinfurt [stadester-Schweinfurt-Germany]
+---
+
+STATE: [174] Imperial City of Selz (1359.1.1 -> 1419.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1359.1.1 -> 1419.1.1: Seltz [stadester-Seltz-France]
+---
+
+STATE: [175] Imperial City of Solothurn (1219.1.1 -> 1354.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1354.1.1: Solothurn [stadester-Solothurn-Switzerland]
+---
+
+STATE: [176] Imperial City of Speyer (1295.1.1 -> 1804.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1295.1.1 -> 1804.1.1: Speyer [stadester-Speyer-Germany]
+---
+
+STATE: [177] Imperial City of Strasbourg (1263.1.1 -> 1681.9.30) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1263.1.1 -> 1681.9.30: Strasbourg [stadester-Strasbourg-France]
+---
+
+STATE: [178] Imperial City of Toul (1251.1.1 -> 1553.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1251.1.1 -> 1553.1.1: Toul [stadester-Toul-France]
+---
+
+STATE: [179] Imperial City of Trieste (1201.1.1 -> 1380.6.26) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1380.6.26: Trieste [stadester-Trieste-Italy]
+---
+
+STATE: [180] Imperial City of Überlingen (1269.1.1 -> 1804.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1269.1.1 -> 1804.1.1: Überlingen [stadester-berlingen-Germany]
+---
+
+STATE: [181] Imperial City of Ulm (1116.1.1 -> 1803.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1116.1.1 -> 1803.1.1: Ulm [stadester-Ulm-Germany]
+---
+
+STATE: [182] Imperial City of Verdun (1221.1.1 -> 1553.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1553.1.1: Verdun [stadester-Verdun-France]
+---
+
+STATE: [183] Imperial City of Villingen (1219.1.1 -> 1284.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1284.1.1: Villingen [stadester-Villingen-Germany]
+---
+
+STATE: [184] Imperial City of Wangen (1287.1.1 -> 1803.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1287.1.1 -> 1803.1.1: Wangen im Allgäu [stadester-WangenimAllgu-Germany]
+---
+
+STATE: [185] Imperial City of Weil (1276.1.1 -> 1803.2.25) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1276.1.1 -> 1803.2.25: Weil der Stadt [stadester-Weil der Stadt-Germany]
+---
+
+STATE: [186] Imperial City of Weissenburg (1355.1.1 -> 1648.5.17) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1355.1.1 -> 1648.5.17: Wissembourg [stadester-Wissembourg-France]
+---
+
+STATE: [187] Imperial City of Weissenburg in Bavaria (1242.1.1 -> 1802.10.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1242.1.1 -> 1802.10.1: Weißenburg in Bayern [stadester-Weißenburg in Bayern-Germany]
+---
+
+STATE: [188] Imperial City of Wesel (1221.1.1 -> 1310.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1310.1.1: Wesel [stadester-Wesel-Germany]
+---
+
+STATE: [189] Imperial City of Wetzlar (1181.1.1 -> 1804.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1804.1.1: Wetzlar [stadester-Wetzlar-Germany]
+---
+
+STATE: [190] Imperial City of Wiesensteig (1357.1.1 -> 1643.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1357.1.1 -> 1643.1.1: Wiesensteig [stadester-Wiesensteig-Germany]
+---
+
+STATE: [191] Imperial City of Wimpfen (1301.1.1 -> 1804.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1804.1.1: Bad Wimpfen [stadester-BadWimpfen-Germany]
+---
+
+STATE: [192] Imperial City of Windesheim (1249.1.1 -> 1803.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1249.1.1 -> 1803.1.1: Bad Windsheim [stadester-Bad Windsheim-Germany]
+---
+
+STATE: [193] Imperial City of Wipperfuerth (1218.1.1 -> 1379.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1218.1.1 -> 1379.1.1: Wipperfürth [stadester-Wipperfürth-Germany]
+---
+
+STATE: [194] Imperial City of Worms (1075.1.1 -> 1793.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1075.1.1 -> 1793.1.1: Worms [stadester-Worms-Germany]
+---
+
+STATE: [195] Imperial City of Zürich (1219.1.1 -> 1447.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1447.1.1: Zürich [stadester-Zrich-Switzerland]
+---
+
+STATE: [196] Holy Roman Empire (1191.1.1 -> 1191.2.1) [fill: #D1453B]
+STATUS: ACAPITAL
+REASON: Itinerant imperial court on coronation expedition through Italy without a static capital
+---
+
+STATE: [197] Alliance of Holy Roman Empire States (1554.7.1 -> 1555.1.1) [fill: #283C70]
+STATUS: ACAPITAL
+REASON: Heidelberg League defensive alliance of imperial princes during the Second Margrave War
+---
+
+STATE: [198] "Piagnoni" Republic (Florence) (1527.5.16 -> 1530.8.12) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1527.5.16 -> 1530.8.12: Florence [stadester-Firenze-Italy]
+---
+
+STATE: [199] Kingdom of Bohemia (1199.1.1 -> 1526.12.16) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1199.1.1 -> 1526.12.16: Praha [stadester-Praha-Czech Republic]
+---
+
+STATE: [200] Kingdom of Jerusalem (Personal Union with HRE) (1195.1.1 -> 1226.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1195.1.1 -> 1226.1.1: Acre [stadester-Akko-Israel]
+---
+
+STATE: [201] Kingdom of Sicily (Personal Union with HRE) (1195.1.1 -> 1255.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1195.1.1 -> 1255.1.1: Palermo [stadester-Palermo-Italy]
+---
+
+STATE: [202] Münster Prince-Bishopric (Sweden) (1649.1.1 -> 1690.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1649.1.1 -> 1690.1.1: Münster [stadester-Mnster-Germany]
+---
+
+STATE: [203] Abenberg County (1025.1.1 -> 1237.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1025.1.1 -> 1237.1.1: Abenberg [stadester-Abenberg-Germany]
+---
+
+STATE: [204] Abensberg County (1139.1.1 -> 1486.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1486.1.1: Abensberg [stadester-Abensberg-Germany]
+---
+
+STATE: [205] Acqui Commune (1136.1.1 -> 1279.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1136.1.1 -> 1279.1.1: Acqui Terme [stadester-AcquiTerme-Italy]
+---
+
+STATE: [206] Adelsheim Lordship (1339.1.1 -> 1804.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1339.1.1 -> 1804.1.1: Adelsheim [stadester-Adelsheim-Germany]
+---
+
+STATE: [207] Ahaus Lordship (1031.1.1 -> 1355.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1031.1.1 -> 1355.1.1: Ahaus [stadester-Ahaus-Germany]
+---
+
+STATE: [208] Alba Commune (1151.1.1 -> 1560.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1560.1.1: Alba [stadester-Alba-Italy]
+---
+
+STATE: [209] Albenga Commune (1099.1.1 -> 1252.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1099.1.1 -> 1252.1.1: Albenga [stadester-Albenga-Italy]
+---
+
+STATE: [210] Aldobrandeschi County (962.2.2 -> 1302.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1302.1.1: Santa Fiora [stadester-SantaFiora-Italy]
+---
+
+STATE: [211] Alessandria Commune (1169.1.1 -> 1251.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1169.1.1 -> 1251.1.1: Alessandria [stadester-Alessandria-Italy]
+---
+
+STATE: [212] Altenburg Burgraviate (1148.1.1 -> 1330.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1330.1.1: Altenburg [stadester-Altenburg-Germany]
+---
+
+STATE: [213] Ancona Republic (1001.1.1 -> 1533.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1533.1.1: Ancona [stadester-Ancona-Italy]
+---
+
+STATE: [214] Anhalt County (1213.1.1 -> 1806.5.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1213.1.1 -> 1806.5.1: Dessau [stadester-Dessau-Germany]
+---
+
+STATE: [215] Anholt Lordship (1235.1.1 -> 1642.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1235.1.1 -> 1642.1.1: Isselburg [stadester-Isselburg-Germany]
+---
+
+STATE: [216] Ansbach Principality (1398.1.21 -> 1792.1.28) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1398.1.21 -> 1792.1.28: Ansbach [stadester-Ansbach-Germany]
+---
+
+STATE: [217] Antwerp Margraviate (1292.1.1 -> 1431.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1292.1.1 -> 1431.1.1: Antwerp [stadester-Antwerpen-Belgium]
+---
+
+STATE: [218] Arbe (481.1.1 -> 1001.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  481.1.1 -> 1001.1.1: Rab [stadester-Rab-Croatia]
+---
+
+STATE: [219] Arenberg Lordship (1118.1.1 -> 1550.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1118.1.1 -> 1550.1.1: Aremberg [stadester-Aremberg-Germany]
+---
+
+STATE: [220] Arezzo Commune (1099.1.1 -> 1290.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1099.1.1 -> 1290.1.1: Arezzo [stadester-Arezzo-Italy]
+---
+
+STATE: [221] Signoria of Arezzo (1290.1.1 -> 1385.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1290.1.1 -> 1385.1.1: Arezzo [stadester-Arezzo-Italy]
+---
+
+STATE: [222] Arnasco Commune (1237.1.1 -> 1567.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1237.1.1 -> 1567.1.1: Arnasco [stadester-Arnasco-Italy]
+---
+
+STATE: [223] Arnsberg County (1103.1.1 -> 1369.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1103.1.1 -> 1369.1.1: Arnsberg [stadester-Arnsberg-Germany]
+---
+
+STATE: [224] Arnstein Lordship (1132.1.1 -> 1388.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1132.1.1 -> 1388.1.1: Arnstein [stadester-Arnstein-Germany]
+---
+
+STATE: [225] Aschaffenburg Principality (1804.1.1 -> 1810.2.16) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1804.1.1 -> 1810.2.16: Aschaffenburg [stadester-Aschaffenburg-Germany]
+---
+
+STATE: [226] Ascoli Piceno Commune (1190.1.1 -> 1436.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1190.1.1 -> 1436.1.1: Ascoli Piceno [stadester-AscoliPiceno-Italy]
+---
+
+STATE: [227] Assisi Commune (1200.1.1 -> 1541.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1200.1.1 -> 1541.1.1: Assisi [stadester-Assisi-Italy]
+---
+
+STATE: [228] Asti Republic (1096.1.1 -> 1342.8.14) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1096.1.1 -> 1342.8.14: Asti [stadester-Asti-Italy]
+---
+
+STATE: [229] Aulla Commune (1201.1.1 -> 1544.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1544.1.1: Aulla [stadester-Aulla-Italy]
+---
+
+STATE: [230] Marquisate of Aulla (1544.1.1 -> 1711.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1544.1.1 -> 1711.1.1: Aulla [stadester-Aulla-Italy]
+---
+
+STATE: [231] Golden Ambrosian Republic (1447.8.14 -> 1450.3.25) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1447.8.14 -> 1450.3.25: Milano [stadester-Milano-Italy]
+---
+
+STATE: [232] Babenburg County (1038.1.1 -> 1097.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1038.1.1 -> 1097.1.1: Bamberg [stadester-Bamberg-Germany]
+---
+
+STATE: [233] Bagnaria Commune (1165.1.1 -> 1486.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1165.1.1 -> 1486.1.1: Bagnaria [stadester-Bagnaria-Europe]
+---
+
+STATE: [234] Bagnone Marquisate (1352.1.1 -> 1452.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1352.1.1 -> 1452.1.1: Bagnone [stadester-Bagnone-Italy]
+---
+
+STATE: [235] Balestrino Marquisate (1398.1.1 -> 1546.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1398.1.1 -> 1546.1.1: Balestrino [stadester-Balestrino-Europe]
+---
+
+STATE: [236] Bar County (1034.1.1 -> 1355.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1034.1.1 -> 1355.1.1: Bar-le-Duc [stadester-BarleDuc-France]
+---
+
+STATE: [237] Bassano Commune (1151.1.1 -> 1176.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1176.1.1: Bassano del Grappa [stadester-Bassano del Grappa-Italy]
+---
+
+STATE: [238] Batavian Republic (1795.1.19 -> 1806.6.5) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1795.1.19 -> 1806.6.5: 's-Gravenhage [stadester-Gravenhage, 's--Netherlands]
+---
+
+STATE: [239] Bayreuth Principality (1398.1.21 -> 1770.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1398.1.21 -> 1770.1.1: Bayreuth [stadester-Bayreuth-Germany]
+---
+
+STATE: [240] Bederkesa Lordship (1160.1.1 -> 1382.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1160.1.1 -> 1382.1.1: Bederkesa [stadester-Bederkesa-Europe]
+---
+
+STATE: [241] Beichlingen Lordship (1015.1.1 -> 1520.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1015.1.1 -> 1520.1.1: Beichlingen [stadester-Beichlingen-Europe]
+---
+
+STATE: [242] Belmont Lordship (1139.1.22 -> 1391.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.22 -> 1391.1.1: Belmont [stadester-Belmont-Europe]
+---
+
+STATE: [243] Bentheim County (1183.1.1 -> 1808.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1183.1.1 -> 1808.1.1: Bad Bentheim [stadester-BadBentheim-Germany]
+---
+
+STATE: [244] Berg County (1078.1.1 -> 1381.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1078.1.1 -> 1381.1.1: Düsseldorf [stadester-Dsseldorf-Germany]
+---
+
+STATE: [245] Bergamo Commune (1099.1.1 -> 1333.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1099.1.1 -> 1333.1.1: Bergamo [stadester-Bergamo-Italy]
+---
+
+STATE: [246] Berge Lordship (1097.1.1 -> 1344.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1097.1.1 -> 1344.1.1: Berge [stadester-Berge-Europe]
+---
+
+STATE: [247] Bergell Free Valley (1101.1.1 -> 1367.1.29) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1367.1.29: Bergell [stadester-Bergell-Europe]
+---
+
+STATE: [248] Bergen op zoom Margraviate (1288.1.1 -> 1478.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1288.1.1 -> 1478.1.1: Bergen op Zoom [stadester-Bergen op Zoom-Netherlands]
+---
+
+STATE: [249] Bertinoro County (1001.1.1 -> 1178.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1178.1.1: Bertinoro [stadester-Bertinoro-Europe]
+---
+
+STATE: [250] Bibbiena Commune (980.1.1 -> 1291.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  980.1.1 -> 1291.1.1: Bibbiena [stadester-Bibbiena-Europe]
+---
+
+STATE: [251] Biberstein Lordship (1385.1.1 -> 1519.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1385.1.1 -> 1519.1.1: Biberstein [stadester-Biberstein-Europe]
+---
+
+STATE: [252] Billung Mark (962.2.2 -> 984.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 984.1.1: Billung [stadester-Billung-Europe]
+---
+
+STATE: [253] Bilstein Lordship (1221.1.1 -> 1366.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1366.1.1: Bilstein [stadester-Bilstein-Europe]
+---
+
+STATE: [254] Bitsch County (1287.1.1 -> 1571.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1287.1.1 -> 1571.1.1: Bitche [stadester-Bitche-France]
+---
+
+STATE: [255] Blankenberg Lordship (1201.1.1 -> 1500.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1500.1.1: Blankenberg [stadester-Blankenberg-Europe]
+---
+
+STATE: [256] Blankenburg County (1124.1.1 -> 1732.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1124.1.1 -> 1732.1.1: Blankenburg [stadester-Blankenburg-Germany]
+---
+
+STATE: [257] Blieskastel County (1660.3.4 -> 1795.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1660.3.4 -> 1795.1.1: Blieskastel [stadester-Blieskastel-Germany]
+---
+
+STATE: [258] County of Bobbio (1015.1.1 -> 1517.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1015.1.1 -> 1517.1.1: Bobbio [stadester-Bobbio-Italy]
+---
+
+STATE: [259] Marquisate of Bobbio (1517.1.1 -> 1748.10.18) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1517.1.1 -> 1748.10.18: Bobbio [stadester-Bobbio-Italy]
+---
+
+STATE: [260] Bologna Commune (1116.1.1 -> 1402.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1116.1.1 -> 1402.1.1: Bologna [stadester-Bologna-Italy]
+---
+
+STATE: [261] Signoria of Bologna (1402.1.1 -> 1503.9.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1402.1.1 -> 1503.9.1: Bologna [stadester-Bologna-Italy]
+---
+
+STATE: [262] Bonndorf County (1224.1.1 -> 1801.4.9) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1224.1.1 -> 1801.4.9: Bonndorf im Schwarzwald [stadester-BonndorfimSchwarzwald-Germany]
+---
+
+STATE: [263] Bormio (962.2.2 -> 1301.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1301.1.1: Bormio [stadester-Bormio-Italy]
+---
+
+STATE: [264] Bouillon County (962.2.2 -> 1457.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1457.1.1: Bouillon [stadester-Bouillon-Belgium]
+---
+
+STATE: [265] Landgraviate of Brabant (1086.1.1 -> 1184.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1086.1.1 -> 1184.1.1: Bruxelles [stadester-Bruxelles-Belgium]
+---
+
+STATE: [266] Brandenburg-Prussia (1619.1.1 -> 1701.1.18) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1619.1.1 -> 1701.1.18: Berlin [stadester-Berlin-Germany]
+---
+
+STATE: [267] Brandenburg-Prussia (Territories outside Confederation) (1619.1.1 -> 1701.1.18) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1619.1.1 -> 1701.1.18: Königsberg [stadester-Kaliningrad-Russia]
+---
+
+STATE: [268] Duchy of Brunswick-Lüneburg (1236.1.1 -> 1787.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1236.1.1 -> 1787.1.1: Braunschweig [stadester-Braunschweig-Germany]
+---
+
+STATE: [269] Electorate of Hanover (1705.8.28 -> 1714.8.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1705.8.28 -> 1714.8.1: Hannover [stadester-Hannover-Germany]
+---
+
+STATE: [270] Electorate of Hanover (England) (1714.8.1 -> 1814.10.12) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1714.8.1 -> 1814.10.12: Hannover [stadester-Hannover-Germany]
+---
+
+STATE: [271] Brunswick-Wolfenbüttel Principality (1705.8.28 -> 1808.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1705.8.28 -> 1808.1.1: Braunschweig [stadester-Braunschweig-Germany]
+---
+
+STATE: [272] Breda Lordship (1081.1.1 -> 1478.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1081.1.1 -> 1478.1.1: Breda [stadester-Breda-Netherlands]
+---
+
+STATE: [273] Bremen-Verden (Denmark) (1713.1.1 -> 1787.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1713.1.1 -> 1787.1.1: Stade [stadester-Stade-Germany]
+---
+
+STATE: [274] Bremen-Verden (Sweden) (1644.1.1 -> 1712.10.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1644.1.1 -> 1712.10.1: Stade [stadester-Stade-Germany]
+---
+
+STATE: [275] Brene County (1054.1.1 -> 1128.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1054.1.1 -> 1128.1.1: Brene [stadester-Brene-Europe]
+---
+
+STATE: [276] Brescia Commune (1101.1.1 -> 1314.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1314.1.1: Brescia [stadester-Brescia-Italy]
+---
+
+STATE: [277] Bretzenheim Lordship (1804.1.1 -> 1805.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1804.1.1 -> 1805.1.1: Bretzenheim [stadester-Bretzenheim-Europe]
+---
+
+STATE: [278] Bruchhausen County (1200.1.1 -> 1339.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1200.1.1 -> 1339.1.1: Bruchhausen [stadester-Bruchhausen-Europe]
+---
+
+STATE: [279] Buedingen County (1132.1.1 -> 1305.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1132.1.1 -> 1305.1.1: Buedingen [stadester-Buedingen-Europe]
+---
+
+STATE: [280] Bueren Lordship (1096.1.1 -> 1291.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1096.1.1 -> 1291.1.1: Bueren [stadester-Bueren-Europe]
+---
+
+STATE: [281] Burgau Margraviate (1148.1.1 -> 1379.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1379.1.1: Burgau [stadester-Burgau-Europe]
+---
+
+STATE: [282] Kingdom of Burgundy (934.1.1 -> 1221.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  934.1.1 -> 1221.1.1: Arles [stadester-Arles-France]
+---
+
+STATE: [283] County Palatine of Burgundy (1170.1.1 -> 1361.1.30) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1170.1.1 -> 1361.1.30: Dole [stadester-Dole-France]
+---
+
+STATE: [284] Valois-Burgundy Domains (1338.1.1 -> 1482.12.23) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1338.1.1 -> 1482.12.23: Dijon [stadester-Dijon-France]
+---
+
+STATE: [285] Busalla Commune (1193.1.1 -> 1240.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1193.1.1 -> 1240.1.1: Busalla [stadester-Busalla-Europe]
+---
+
+STATE: [286] Marquisate of Busalla (1240.1.1 -> 1729.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1240.1.1 -> 1729.1.1: Busalla [stadester-Busalla-Europe]
+---
+
+STATE: [287] Cagli Commune (1151.1.1 -> 1377.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1377.1.1: Cagli [stadester-Cagli-Europe]
+---
+
+STATE: [288] Calice Marquisate (1711.1.1 -> 1773.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1711.1.1 -> 1773.1.1: Calice [stadester-Calice-Europe]
+---
+
+STATE: [289] Calw County (1190.1.1 -> 1365.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1190.1.1 -> 1365.1.1: Calw [stadester-Calw-Europe]
+---
+
+STATE: [290] Camerino Commune (1001.1.1 -> 1260.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1260.1.1: Camerino [stadester-Camerino-Italy]
+---
+
+STATE: [291] Duchy of Camerino (1516.1.1 -> 1546.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1516.1.1 -> 1546.1.1: Camerino [stadester-Camerino-Italy]
+---
+
+STATE: [292] Signoria of Camerino (1260.1.1 -> 1516.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1260.1.1 -> 1516.1.1: Camerino [stadester-Camerino-Italy]
+---
+
+STATE: [293] Campo Ligure Commune (1101.1.1 -> 1330.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1330.1.1: Campo Ligure [stadester-Campo-Europe]
+---
+
+STATE: [294] Signoria of Campo Ligure (1330.1.1 -> 1797.10.17) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1330.1.1 -> 1797.10.17: Campo Ligure [stadester-Campo-Europe]
+---
+
+STATE: [295] Carmagnola Marquisate (1035.1.1 -> 1487.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1035.1.1 -> 1487.1.1: Carmagnola [stadester-Carmagnola-Europe]
+---
+
+STATE: [296] Carpegna County (1191.1.1 -> 1820.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1191.1.1 -> 1820.1.1: Carpegna [stadester-Carpegna-Europe]
+---
+
+STATE: [297] Signoria of Carpi (1320.1.1 -> 1527.6.7) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1320.1.1 -> 1527.6.7: Carpi [stadester-Carpi-Italy]
+---
+
+STATE: [298] Signoria of Carrara (1314.1.1 -> 1473.2.22) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1314.1.1 -> 1473.2.22: Carrara [stadester-Carrara-Italy]
+---
+
+STATE: [299] Carrosio Commune (1101.1.1 -> 1736.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1736.1.1: Carrosio [stadester-Carrosio-Europe]
+---
+
+STATE: [300] Castell County (1055.1.1 -> 1807.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1055.1.1 -> 1807.1.1: Castell [stadester-Castell-Europe]
+---
+
+STATE: [301] Castellaro Commune (1154.1.1 -> 1289.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1154.1.1 -> 1289.1.1: Castellaro [stadester-Castellaro-Italy]
+---
+
+STATE: [302] Castell'ottieri County (1382.1.1 -> 1617.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1382.1.1 -> 1617.1.1: Castellottieri [stadester-Castellottieri-Europe]
+---
+
+STATE: [303] Castevoli Marquisate (1078.1.1 -> 1797.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1078.1.1 -> 1797.1.1: Castevoli [stadester-Castevoli-Europe]
+---
+
+STATE: [304] Castevoli and Villafranca Marquisate (1797.1.1 -> 1807.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1797.1.1 -> 1807.1.1: Castevoli [stadester-Castevoli-Europe]
+---
+
+STATE: [305] Castiglione del Lago Marquisate (1563.11.19 -> 1647.12.12) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1563.11.19 -> 1647.12.12: Castiglione del Lago [stadester-Perugia-Italy]
+---
+
+STATE: [306] Castiglione della Pescaia Commune (1201.1.1 -> 1275.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1275.1.1: Castiglione della Pescaia [stadester-Grosseto-Italy]
+---
+
+STATE: [307] Castro Duchy (1538.1.1 -> 1649.10.2) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1538.1.1 -> 1649.10.2: Castro [stadester-Viterbo-Italy]
+---
+
+STATE: [308] Ceccano County (962.2.2 -> 1451.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1451.1.1: Ceccano [stadester-Ceccano-Europe]
+---
+
+STATE: [309] Cesena Commune (1181.1.1 -> 1334.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1334.1.1: Cesena [stadester-Cesena-Italy]
+---
+
+STATE: [310] Ceva Marquisate (1126.1.1 -> 1532.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1126.1.1 -> 1532.1.1: Ceva [stadester-Ceva-Europe]
+---
+
+STATE: [311] Cherasco Commune (1244.1.1 -> 1304.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1244.1.1 -> 1304.1.1: Cherasco [stadester-Cherasco-Europe]
+---
+
+STATE: [312] Chieri Commune (1093.1.1 -> 1340.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1093.1.1 -> 1340.1.1: Chieri [stadester-Chieri-Italy]
+---
+
+STATE: [313] Chiny County (993.1.1 -> 1379.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  993.1.1 -> 1379.1.1: Chiny [stadester-Chiny-Europe]
+---
+
+STATE: [314] Chiusi Commune (1001.1.1 -> 1232.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1232.1.1: Chiusi [stadester-Chiusi-Europe]
+---
+
+STATE: [315] Churchill-Marlborough Principality (1705.1.1 -> 1715.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1705.1.1 -> 1715.1.1: Mindelheim [stadester-Mindelheim-Germany]
+---
+
+STATE: [316] Città di Castello Commune (1101.1.1 -> 1423.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1423.1.1: Città di Castello [stadester-CittdiCastello-Italy]
+---
+
+STATE: [317] Signoria of Città di Castello (1423.1.1 -> 1503.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1423.1.1 -> 1503.1.1: Città di Castello [stadester-CittdiCastello-Italy]
+---
+
+STATE: [318] Clavesana Marquisate (1143.1.1 -> 1398.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1143.1.1 -> 1398.1.1: Clavesana [stadester-Clavesana-Europe]
+---
+
+STATE: [319] Clermont Lordship (1379.1.1 -> 1478.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1379.1.1 -> 1478.1.1: Clermont [stadester-Clermont-Europe]
+---
+
+STATE: [320] Colditz Lordship (1159.1.1 -> 1405.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1159.1.1 -> 1405.1.1: Colditz [stadester-Colditz-Europe]
+---
+
+STATE: [321] Colle Val d'Elsa Commune (1151.1.1 -> 1341.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1341.1.1: Colle [stadester-Colle-Europe]
+---
+
+STATE: [322] Commercy Lordship (1001.1.1 -> 1478.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1478.1.1: Commercy [stadester-Commercy-Europe]
+---
+
+STATE: [323] Como Commune (1001.1.1 -> 1417.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1417.1.1: Como [stadester-Como-Italy]
+---
+
+STATE: [324] Federal Commune of Frignano (1151.1.1 -> 1201.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1201.1.1: Modena [stadester-Modena-Italy]
+---
+
+STATE: [325] Signoria of Correggio (1010.1.1 -> 1660.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1010.1.1 -> 1660.1.1: Correggio [stadester-Correggio-Italy]
+---
+
+STATE: [326] Cortona Commune (1201.1.1 -> 1401.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1401.1.1: Cortona [stadester-Cortona-Italy]
+---
+
+STATE: [327] Republic of Cospaia (1441.3.1 -> 1826.6.26) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1441.3.1 -> 1826.6.26: Cospaia [stadester-CittdiCastello-Italy]
+---
+
+STATE: [328] Cossonay Lordship (1097.1.1 -> 1316.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1097.1.1 -> 1316.1.1: Cossonay [stadester-Cossonay-Europe]
+---
+
+STATE: [329] Crema Commune (1186.1.1 -> 1336.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1186.1.1 -> 1336.1.1: Crema [stadester-Crema-Italy]
+---
+
+STATE: [330] Cremona Commune (1099.1.1 -> 1407.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1099.1.1 -> 1407.1.1: Cremona [stadester-Cremona-Italy]
+---
+
+STATE: [331] Crescentino Commune (1243.1.1 -> 1614.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1243.1.1 -> 1614.1.1: Crescentino [stadester-Crescentino-Italy]
+---
+
+STATE: [332] Crocefieschi Commune (1254.1.1 -> 1276.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1254.1.1 -> 1276.1.1: Crocefieschi [stadester-Crocefieschi-Europe]
+---
+
+STATE: [333] Cuijk Lordship (1201.1.1 -> 1309.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1309.1.1: Cuijk [stadester-Cuijk-Europe]
+---
+
+STATE: [334] Cuneo Commune (1199.1.1 -> 1383.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1199.1.1 -> 1383.1.1: Cuneo [stadester-Cuneo-Italy]
+---
+
+STATE: [335] Dachstuhl Lordship (1663.1.1 -> 1794.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1663.1.1 -> 1794.1.1: Dachstuhl [stadester-Dachstuhl-Europe]
+---
+
+STATE: [336] Dagsburg County (1151.1.1 -> 1242.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1242.1.1: Dagsburg [stadester-Dagsburg-Europe]
+---
+
+STATE: [337] Dahme Lordship (1187.1.1 -> 1406.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1187.1.1 -> 1406.1.1: Dahme [stadester-Dahme-Europe]
+---
+
+STATE: [338] Dannenberg County (1154.1.1 -> 1304.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1154.1.1 -> 1304.1.1: Dannenberg [stadester-Dannenberg-Europe]
+---
+
+STATE: [339] Dassel County (1101.1.1 -> 1310.2.15) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1310.2.15: Dassel [stadester-Dassel-Europe]
+---
+
+STATE: [340] Dauphin County (1071.1.1 -> 1356.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1071.1.1 -> 1356.1.1: Grenoble [stadester-Grenoble-France]
+---
+
+STATE: [341] Depenau Lordship (1081.1.1 -> 1379.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1081.1.1 -> 1379.1.1: Depenau [stadester-Depenau-Europe]
+---
+
+STATE: [342] County of Desana (1511.1.1 -> 1694.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1511.1.1 -> 1694.1.1: Desana [stadester-Vercelli-Italy]
+---
+
+STATE: [343] Signoria of Desana (1412.1.1 -> 1511.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1412.1.1 -> 1511.1.1: Desana [stadester-Vercelli-Italy]
+---
+
+STATE: [344] Deutz Lordship (1004.1.1 -> 1312.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1004.1.1 -> 1312.1.1: Deutz [stadester-Deutz-Europe]
+---
+
+STATE: [345] Dewin Burgraviate (1018.1.1 -> 1292.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1018.1.1 -> 1292.1.1: Dewin [stadester-Dewin-Europe]
+---
+
+STATE: [346] Diepholz County (1161.1.1 -> 1586.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1161.1.1 -> 1586.1.1: Diepholz [stadester-Diepholz-Europe]
+---
+
+STATE: [347] Diez County (1074.1.1 -> 1387.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1074.1.1 -> 1387.1.1: Diez [stadester-Diez-Europe]
+---
+
+STATE: [348] Dillingen County (962.2.2 -> 1262.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1262.1.1: Dillingen [stadester-Dillingen-Europe]
+---
+
+STATE: [349] Dithmarschen Peasant Republic (1448.1.1 -> 1560.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1448.1.1 -> 1560.1.1: Meldorf [stadester-Meldorf-Germany]
+---
+
+STATE: [350] Dohna Burgraviate (1145.1.1 -> 1403.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1145.1.1 -> 1403.1.1: Dohna [stadester-Dohna-Germany]
+---
+
+STATE: [351] Dolceacqua Commune (1152.1.1 -> 1277.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1152.1.1 -> 1277.1.1: Dolceacqua [stadester-Dolceacqua-Italy]
+---
+
+STATE: [352] Dornberg Lordship (1144.10.18 -> 1332.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1144.10.18 -> 1332.1.1: Darmstadt [stadester-Darmstadt-Germany]
+---
+
+STATE: [353] Dornberg County (1101.1.1 -> 1224.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1224.1.1: Darmstadt [stadester-Darmstadt-Germany]
+---
+
+STATE: [354] Three Leagues (1472.1.1 -> 1799.3.21) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1472.1.1 -> 1799.3.21: Chur [stadester-Chur-Switzerland]
+---
+
+STATE: [355] Duerne Lordship (1169.1.1 -> 1310.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1169.1.1 -> 1310.1.1: Duerne [stadester-Duerne-Europe]
+---
+
+STATE: [356] Ebeleben Lordship (1199.1.1 -> 1373.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1199.1.1 -> 1373.1.1: Ebeleben [stadester-Ebeleben-Europe]
+---
+
+STATE: [357] Eberstein County (1086.1.1 -> 1388.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1086.1.1 -> 1388.1.1: Gernsbach [stadester-Gernsbach-Germany]
+---
+
+STATE: [358] Old Swiss Confederacy (1292.1.1 -> 1798.4.12) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1292.1.1 -> 1798.4.12: Zürich [stadester-Zrich-Switzerland]
+---
+
+STATE: [359] Emlichheim Lordship (1478.1.1 -> 1548.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1478.1.1 -> 1548.1.1: Emlichheim [stadester-Emlichheim-Europe]
+---
+
+STATE: [360] Enghien Lordship (1101.1.1 -> 1395.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1395.1.1: Enghien [stadester-Enghien-Europe]
+---
+
+STATE: [361] Erbach Lordship (1149.1.1 -> 1533.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1149.1.1 -> 1533.1.1: Erbach [stadester-Erbach-Germany]
+---
+
+STATE: [362] Eschenlohe Lordship (1141.1.1 -> 1251.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1141.1.1 -> 1251.1.1: Eschenlohe [stadester-Eschenlohe-Europe]
+---
+
+STATE: [363] Everstein County (1117.1.1 -> 1409.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1117.1.1 -> 1409.1.1: Everstein [stadester-Everstein-Europe]
+---
+
+STATE: [364] Fabriano Commune (1235.1.1 -> 1436.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1235.1.1 -> 1436.1.1: Fabriano [stadester-Fabriano-Italy]
+---
+
+STATE: [365] Faenza Commune (1156.1.1 -> 1314.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1156.1.1 -> 1314.1.1: Faenza [stadester-Faenza-Italy]
+---
+
+STATE: [366] Signoria of Faenza (1314.1.1 -> 1501.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1314.1.1 -> 1501.1.1: Faenza [stadester-Faenza-Italy]
+---
+
+STATE: [367] Falkenstein County (1167.1.1 -> 1273.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1167.1.1 -> 1273.1.1: Falkenstein [stadester-Falkenstein-Germany]
+---
+
+STATE: [368] Falkenstein Lordship (Rhine) (1136.1.1 -> 1795.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1136.1.1 -> 1795.1.1: Falkenstein [stadester-Falkenstein-Germany]
+---
+
+STATE: [369] Fano Commune (1201.1.1 -> 1301.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1301.1.1: Fano [stadester-Fano-Italy]
+---
+
+STATE: [370] Faucigny Lordship (1001.1.1 -> 1305.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1305.1.1: Faucigny [stadester-Faucigny-Europe]
+---
+
+STATE: [371] Federation of the Seven Communes (1260.1.1 -> 1405.2.20) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1260.1.1 -> 1405.2.20: Asiago [stadester-Vicenza-Italy]
+---
+
+STATE: [372] Fermo Commune (1200.1.1 -> 1332.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1200.1.1 -> 1332.1.1: Fermo [stadester-Fermo-Italy]
+---
+
+STATE: [373] Signoria of Fermo (1332.1.1 -> 1539.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1332.1.1 -> 1539.1.1: Fermo [stadester-Fermo-Italy]
+---
+
+STATE: [374] Ferrara Commune (1116.1.1 -> 1209.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1116.1.1 -> 1209.1.1: Ferrara [stadester-Ferrara-Italy]
+---
+
+STATE: [375] Duchy of Ferrara (1472.1.1 -> 1599.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1472.1.1 -> 1599.1.1: Ferrara [stadester-Ferrara-Italy]
+---
+
+STATE: [376] Signoria of Ferrara (1209.1.1 -> 1472.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1209.1.1 -> 1472.1.1: Ferrara [stadester-Ferrara-Italy]
+---
+
+STATE: [377] Fugger Domains (1478.1.1 -> 1807.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1478.1.1 -> 1807.1.1: Augsburg [stadester-Augsburg-Germany]
+---
+
+STATE: [378] Filattiera Marquisate (1165.1.1 -> 1549.3.17) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1165.1.1 -> 1549.3.17: Filattiera [stadester-Filattiera-Italy]
+---
+
+STATE: [379] Finale Marquisate (1289.1.1 -> 1356.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1289.1.1 -> 1356.1.1: Finale Ligure [stadester-FinaleLigure-Italy]
+---
+
+STATE: [380] Finale Ligure Marquisate (1398.1.1 -> 1603.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1398.1.1 -> 1603.1.1: Finale Ligure [stadester-FinaleLigure-Italy]
+---
+
+STATE: [381] Finstingen Lordship (1101.1.1 -> 1459.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1459.1.1: Finstingen [stadester-Finstingen-Europe]
+---
+
+STATE: [382] Duchy of Florence (1532.5.1 -> 1569.8.27) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1532.5.1 -> 1569.8.27: Florence [stadester-Firenze-Italy]
+---
+
+STATE: [383] Republic of Florence (1116.1.1 -> 1532.5.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1116.1.1 -> 1532.5.1: Florence [stadester-Firenze-Italy]
+---
+
+STATE: [384] Signoria of Fivizzano (1341.1.1 -> 1477.3.7) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1341.1.1 -> 1477.3.7: Fivizzano [stadester-Fivizzano-Italy]
+---
+
+STATE: [385] Flandern County (1101.1.1 -> 1384.1.30) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1384.1.30: Gent [stadester-Gent-Belgium]
+---
+
+STATE: [386] Fleckenstein Lordship (1175.1.1 -> 1675.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1175.1.1 -> 1675.1.1: Fleckenstein [stadester-Fleckenstein-Europe]
+---
+
+STATE: [387] Flochberg County (1139.1.1 -> 1331.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1331.1.1: Flochberg [stadester-Flochberg-Europe]
+---
+
+STATE: [388] Foligno Commune (1256.1.1 -> 1440.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1256.1.1 -> 1440.1.1: Foligno [stadester-Foligno-Italy]
+---
+
+STATE: [389] Forbach Lordship (1201.1.1 -> 1478.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1478.1.1: Forbach [stadester-Forbach-Europe]
+---
+
+STATE: [390] Forcalquier County (1094.1.1 -> 1210.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1094.1.1 -> 1210.1.1: Forcalquier [stadester-Forcalquier-Europe]
+---
+
+STATE: [391] Forlì Commune (1182.10.15 -> 1283.9.13) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1182.10.15 -> 1283.9.13: Forlì [stadester-Forl-Italy]
+---
+
+STATE: [392] Signoria of Forlì (1301.1.1 -> 1505.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1505.1.1: Forlì [stadester-Forl-Italy]
+---
+
+STATE: [393] Forlimpopoli Commune (1045.1.1 -> 1301.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1045.1.1 -> 1301.1.1: Forlimpopoli [stadester-Forlimpopoli-Italy]
+---
+
+STATE: [394] Signoria of Forlimpopoli (1471.1.1 -> 1579.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1471.1.1 -> 1579.1.1: Forlimpopoli [stadester-Forlimpopoli-Italy]
+---
+
+STATE: [395] Marquisate of Fosdinovo (France) (1797.10.17 -> 1807.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1797.10.17 -> 1807.1.1: Fosdinovo [stadester-Fosdinovo-Italy]
+---
+
+STATE: [396] Marquisate of Fosdinovo (1341.1.1 -> 1815.6.9) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1341.1.1 -> 1815.6.9: Fosdinovo [stadester-Fosdinovo-Italy]
+---
+
+STATE: [397] Fossano Commune (1237.1.1 -> 1305.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1237.1.1 -> 1305.1.1: Fossano [stadester-Fossano-Italy]
+---
+
+STATE: [398] Principality of Fossano (1315.1.1 -> 1419.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1315.1.1 -> 1419.1.1: Fossano [stadester-Fossano-Italy]
+---
+
+STATE: [399] Fossombrone Commune (1301.1.1 -> 1445.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1445.1.1: Fossombrone [stadester-Fossombrone-Italy]
+---
+
+STATE: [400] Duchy of Franconia (962.2.2 -> 1213.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1213.1.1: Würzburg [stadester-Würzburg-Germany]
+---
+
+STATE: [401] Frankenstein County (1201.1.1 -> 1336.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1336.1.1: Frankenstein [stadester-Frankenstein-Europe]
+---
+
+STATE: [402] Freiburg County (1219.1.1 -> 1369.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1369.1.1: Freiburg im Breisgau [stadester-FreiburgimBreisgau-Germany]
+---
+
+STATE: [403] Free Hanseatic City of Bremen (1807.1.1 -> 1871.1.18) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1807.1.1 -> 1871.1.18: Bremen [stadester-Bremen-Germany]
+---
+
+STATE: [404] Free Hanseatic City of Hamburg (1815.6.9 -> 1871.1.18) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1871.1.18: Hamburg [stadester-Hamburg-Germany]
+---
+
+STATE: [405] Free Hanseatic City of Lübeck (1815.6.9 -> 1871.1.18) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1871.1.18: Lübeck [stadester-Lbeck-Germany]
+---
+
+STATE: [406] Free City of Frankfurt (1815.6.9 -> 1866.7.16) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1866.7.16: Frankfurt am Main [stadester-Frankfurt am Main-Germany]
+---
+
+STATE: [407] Frisian Freedom (962.2.2 -> 1525.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1525.1.1: Aurich [stadester-Aurich-Germany]
+---
+
+STATE: [408] Frohburg County (1081.1.1 -> 1464.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1081.1.1 -> 1464.1.1: Frohburg [stadester-Frohburg-Europe]
+---
+
+STATE: [409] Frontenhausen County (1101.1.1 -> 1227.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1227.1.1: Frontenhausen [stadester-Frontenhausen-Europe]
+---
+
+STATE: [410] Fuerstenberg County (1219.1.1 -> 1807.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1219.1.1 -> 1807.1.1: Donaueschingen [stadester-Donaueschingen-Germany]
+---
+
+STATE: [411] Arenberg Principality (1577.1.1 -> 1646.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1577.1.1 -> 1646.1.1: Aremberg [stadester-Aremberg-Germany]
+---
+
+STATE: [412] Principality of Hohenlohe (1744.5.21 -> 1807.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1744.5.21 -> 1807.1.1: Öhringen [stadester-hringen-Germany]
+---
+
+STATE: [413] Principality of Hohenzollern-Haigerloch (1624.1.1 -> 1768.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1624.1.1 -> 1768.1.1: Haigerloch [stadester-Haigerloch-Germany]
+---
+
+STATE: [414] Principality of Hohenzollern-Hechingen (1624.1.1 -> 1850.3.12) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1624.1.1 -> 1850.3.12: Hechingen [stadester-Hechingen-Germany]
+---
+
+STATE: [415] Principality of Hohenzollern-Sigmaringen (1624.1.1 -> 1850.4.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1624.1.1 -> 1850.4.1: Sigmaringen [stadester-Sigmaringen-Germany]
+---
+
+STATE: [416] Principality of Isenburg (1745.1.1 -> 1815.6.9) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1745.1.1 -> 1815.6.9: Offenbach am Main [stadester-OffenbachamMain-Germany]
+---
+
+STATE: [417] Principality of Leiningen (1804.1.1 -> 1807.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1804.1.1 -> 1807.1.1: Amorbach [stadester-Amorbach-Germany]
+---
+
+STATE: [418] Principality of Ligny (1602.1.1 -> 1796.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1602.1.1 -> 1796.1.1: Ligny-en-Barrois [stadester-BarleDuc-France]
+---
+
+STATE: [419] Principality of Lippe (1720.10.27 -> 1871.1.18) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1720.10.27 -> 1871.1.18: Detmold [stadester-Detmold-Germany]
+---
+
+STATE: [420] Principality of Öttingen (1775.1.1 -> 1807.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1775.1.1 -> 1807.1.1: Oettingen in Bayern [stadester-Oettingen-in-Bayern-Germany]
+---
+
+STATE: [421] Principality of Ostfriesland (1668.1.1 -> 1745.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1668.1.1 -> 1745.1.1: Aurich [stadester-Aurich-Germany]
+---
+
+STATE: [422] Principality of Schaumburg-Lippe (1807.4.18 -> 1871.1.18) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1807.4.18 -> 1871.1.18: Bückeburg [stadester-Bückeburg-Germany]
+---
+
+STATE: [423] Principality of Schwarzburg-Rudolstadt (1711.4.15 -> 1871.1.18) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1711.4.15 -> 1871.1.18: Rudolstadt [stadester-Rudolstadt-Germany]
+---
+
+STATE: [424] Principality of Schwarzburg-Sonderhausen (1697.9.13 -> 1871.1.18) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1697.9.13 -> 1871.1.18: Sondershausen [stadester-Sondershausen-Germany]
+---
+
+STATE: [425] Principality of Waldeck (1693.1.1 -> 1813.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1693.1.1 -> 1813.1.1: Bad Arolsen [stadester-BadArolsen-Germany]
+---
+
+STATE: [426] Principality of Wied-Runkel (1786.1.1 -> 1796.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1796.1.1: Dierdorf [stadester-Neuwied-Germany]
+---
+
+STATE: [427] Gastein Lordship (1221.1.1 -> 1478.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1478.1.1: Gastein [stadester-Gastein-Europe]
+---
+
+STATE: [428] Gavi Marquisate (1061.1.1 -> 1202.9.16) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1061.1.1 -> 1202.9.16: Gavi [stadester-Gavi-Italy]
+---
+
+STATE: [429] Princely County of Scheer (1786.1.1 -> 1807.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1807.1.1: Scheer [stadester-Sigmaringen-Germany]
+---
+
+STATE: [430] Geisenhausen County (1051.1.1 -> 1394.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1051.1.1 -> 1394.1.1: Geisenhausen [stadester-Geisenhausen-Europe]
+---
+
+STATE: [431] Geldern County (1097.1.1 -> 1340.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1097.1.1 -> 1340.1.1: Arnhem [stadester-Arnhem-Netherlands]
+---
+
+STATE: [432] Genf County (962.2.2 -> 1402.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1402.1.1: Geneva [stadester-Geneva-Switzerland]
+---
+
+STATE: [433] Republic of Genoa (1100.1.1 -> 1815.2.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1100.1.1 -> 1815.2.1: Genova [stadester-Genova-Italy]
+---
+
+STATE: [434] Geroldseck County (1140.1.1 -> 1807.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1140.1.1 -> 1807.1.1: Geroldseck [stadester-Geroldseck-Europe]
+---
+
+STATE: [435] Gerolstein County (1337.1.1 -> 1795.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1337.1.1 -> 1795.1.1: Gerolstein [stadester-Gerolstein-Europe]
+---
+
+STATE: [436] Gimborn County (1632.1.1 -> 1807.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1632.1.1 -> 1807.1.1: Gimborn [stadester-Gimborn-Europe]
+---
+
+STATE: [437] Glarus Free Valley (962.2.2 -> 1379.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1379.1.1: Glarus [stadester-Glarus-Switzerland]
+---
+
+STATE: [438] Gleichen County (1100.1.1 -> 1641.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1100.1.1 -> 1641.1.1: Gleichen [stadester-Gleichen-Europe]
+---
+
+STATE: [439] Gleichenstein County (1229.1.1 -> 1295.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1229.1.1 -> 1295.1.1: Gleichenstein [stadester-Gleichenstein-Europe]
+---
+
+STATE: [440] Görz County (1128.1.1 -> 1366.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1128.1.1 -> 1366.1.1: Gorizia [stadester-Gorizia-Italy]
+---
+
+STATE: [441] League of God's House (1367.1.29 -> 1472.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1367.1.29 -> 1472.1.1: Chur [stadester-Chur-Switzerland]
+---
+
+STATE: [442] Arenberg County (1550.1.1 -> 1577.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1550.1.1 -> 1577.1.1: Aremberg [stadester-Aremberg-Germany]
+---
+
+STATE: [443] Erbach County (1533.1.1 -> 1807.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1533.1.1 -> 1807.1.1: Erbach [stadester-Erbach-Germany]
+---
+
+STATE: [444] Eschenlohe County (1251.1.1 -> 1296.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1251.1.1 -> 1296.1.1: Eschenlohe [stadester-Eschenlohe-Europe]
+---
+
+STATE: [445] Lichtenberg County (1459.1.1 -> 1803.2.25) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1459.1.1 -> 1803.2.25: Lichtenberg [stadester-Lichtenberg-Europe]
+---
+
+STATE: [446] Ligny County (1545.1.1 -> 1602.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1545.1.1 -> 1602.1.1: Ligny-en-Barrois [stadester-BarleDuc-France]
+---
+
+STATE: [447] County of Lippe (1530.1.1 -> 1720.10.27) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1530.1.1 -> 1720.10.27: Detmold [stadester-Detmold-Germany]
+---
+
+STATE: [448] Luxembourg County (1061.1.1 -> 1354.3.13) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1061.1.1 -> 1354.3.13: Luxembourg [stadester-Luxembourg-Luxembourg]
+---
+
+STATE: [449] County of Oldenburg (1182.1.1 -> 1774.12.29) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1182.1.1 -> 1774.12.29: Oldenburg [stadester-Oldenburg-Germany]
+---
+
+STATE: [450] County of Oldenburg (Denmark) (1667.6.19 -> 1773.8.27) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1667.6.19 -> 1773.8.27: Oldenburg [stadester-Oldenburg-Germany]
+---
+
+STATE: [451] Pappenheim County (1629.1.1 -> 1807.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1629.1.1 -> 1807.1.1: Pappenheim [stadester-Pappenheim-Germany]
+---
+
+STATE: [452] Rochefort County (1495.1.1 -> 1796.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1495.1.1 -> 1796.1.1: Rochefort [stadester-Rochefort-Europe]
+---
+
+STATE: [453] Schaumburg County (1290.12.21 -> 1647.7.19) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1290.12.21 -> 1647.7.19: Bückeburg [stadester-Bückeburg-Germany]
+---
+
+STATE: [454] Scheer County (1464.1.1 -> 1786.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1464.1.1 -> 1786.1.1: Scheer [stadester-Sigmaringen-Germany]
+---
+
+STATE: [455] Waldeck County (1350.1.1 -> 1693.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1350.1.1 -> 1693.1.1: Bad Arolsen [stadester-BadArolsen-Germany]
+---
+
+STATE: [456] County of Württemberg (1136.1.1 -> 1495.7.21) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1136.1.1 -> 1495.7.21: Stuttgart [stadester-Stuttgart-Germany]
+---
+
+STATE: [457] Grand Duchy of Frankfurt (1810.2.16 -> 1815.6.9) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1810.2.16 -> 1815.6.9: Frankfurt am Main [stadester-FrankfurtamMain-Germany]
+---
+
+STATE: [458] Grey League (1396.1.1 -> 1472.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1396.1.1 -> 1472.1.1: Disentis [stadester-Disentis-Switzerland]
+---
+
+STATE: [459] Gravedona Commune (1155.1.1 -> 1336.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1155.1.1 -> 1336.1.1: Gravedona [stadester-Gravedona-Italy]
+---
+
+STATE: [460] Greiffenstein Lordship (1173.1.1 -> 1379.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1173.1.1 -> 1379.1.1: Greiffenstein [stadester-Greiffenstein-Europe]
+---
+
+STATE: [461] Greyerz County (1101.1.1 -> 1549.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1549.1.1: Greyerz [stadester-Greyerz-Europe]
+---
+
+STATE: [462] Groppoli Marquisate (1582.1.1 -> 1775.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1582.1.1 -> 1775.1.1: Groppoli [stadester-Groppoli-Europe]
+---
+
+STATE: [463] Grosseto Commune (1204.9.8 -> 1338.3.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1204.9.8 -> 1338.3.1: Grosseto [stadester-Grosseto-Italy]
+---
+
+STATE: [464] Granduchy of Baden (1806.10.24 -> 1871.1.18) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1806.10.24 -> 1871.1.18: Karlsruhe [stadester-Karlsruhe-Germany]
+---
+
+STATE: [465] Granduchy of Berg (1806.2.15 -> 1813.10.19) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1806.2.15 -> 1813.10.19: Düsseldorf [stadester-Düsseldorf-Germany]
+---
+
+STATE: [466] Granduchy of Hesse (1806.8.13 -> 1817.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1806.8.13 -> 1817.1.1: Darmstadt [stadester-Darmstadt-Germany]
+---
+
+STATE: [467] Grand Duchy of Hesse and by Rhine (1817.1.1 -> 1871.1.18) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1817.1.1 -> 1871.1.18: Darmstadt [stadester-Darmstadt-Germany]
+---
+
+STATE: [468] Granduchy of Luxembourg (1839.4.19 -> 2026.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1839.4.19 -> 2026.1.1: Luxembourg [stadester-Luxembourg-Luxembourg]
+---
+
+STATE: [469] Granduchy of Mecklenburg-Schwerin (1815.6.14 -> 1871.1.18) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.14 -> 1871.1.18: Schwerin [stadester-Schwerin-Germany]
+---
+
+STATE: [470] Granduchy of Mecklenburg-Strelitz (1815.6.28 -> 1871.1.18) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.28 -> 1871.1.18: Neustrelitz [stadester-Neustrelitz-Germany]
+---
+
+STATE: [471] Granduchy of Oldenburg (1815.6.9 -> 1871.1.18) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1871.1.18: Oldenburg [stadester-Oldenburg-Germany]
+---
+
+STATE: [472] Grueningen County (1090.1.1 -> 1379.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1090.1.1 -> 1379.1.1: Grueningen [stadester-Grueningen-Europe]
+---
+
+STATE: [473] Guastalla County (1429.1.1 -> 1622.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1429.1.1 -> 1622.1.1: Guastalla [stadester-Guastalla-Italy]
+---
+
+STATE: [474] Duchy of Guastalla (1622.1.1 -> 1735.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1622.1.1 -> 1735.1.1: Guastalla [stadester-Guastalla-Italy]
+---
+
+STATE: [475] Gubbio Commune (1001.1.1 -> 1385.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1385.1.1: Gubbio [stadester-Gubbio-Italy]
+---
+
+STATE: [476] Habsburg Domains (1041.1.1 -> 1804.8.11) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1041.1.1 -> 1804.8.11: Wien [stadester-Wien-Austria]
+---
+
+STATE: [477] Habsburg Domains (Territories outside Confederation) (1382.1.1 -> 1804.8.11) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1382.1.1 -> 1804.8.11: Wien [stadester-Wien-Austria]
+---
+
+STATE: [478] Haigerloch Lordship (1096.1.1 -> 1201.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1096.1.1 -> 1201.1.1: Haigerloch [stadester-Haigerloch-Germany]
+---
+
+STATE: [479] Hals County (1001.1.1 -> 1716.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1716.1.1: Hals [stadester-Hals-Europe]
+---
+
+STATE: [480] Hanau County (1144.1.1 -> 1810.2.16) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1144.1.1 -> 1810.2.16: Hanau [stadester-Hanau-Germany]
+---
+
+STATE: [481] Harbach Lordship (1221.1.1 -> 1509.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1509.1.1: Harbach [stadester-Harbach-Europe]
+---
+
+STATE: [482] Heiligenberg County (1136.1.1 -> 1536.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1136.1.1 -> 1536.1.1: Heiligenberg [stadester-Heiligenberg-Europe]
+---
+
+STATE: [483] Heinsberg County (1086.1.1 -> 1473.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1086.1.1 -> 1473.1.1: Heinsberg [stadester-Heinsberg-Europe]
+---
+
+STATE: [484] Heitersheim Lordship (1549.1.1 -> 1806.8.6) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1549.1.1 -> 1806.8.6: Heitersheim [stadester-Heitersheim-Europe]
+---
+
+STATE: [485] Helfenstein County (1114.1.1 -> 1518.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1114.1.1 -> 1518.1.1: Helfenstein [stadester-Helfenstein-Europe]
+---
+
+STATE: [486] Hellenstein Lordship (1097.1.1 -> 1379.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1097.1.1 -> 1379.1.1: Hellenstein [stadester-Hellenstein-Europe]
+---
+
+STATE: [487] Henneberg County (1097.1.1 -> 1661.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1097.1.1 -> 1661.1.1: Henneberg [stadester-Henneberg-Europe]
+---
+
+STATE: [488] Hennegau County (962.2.2 -> 1433.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1433.1.1: Mons [stadester-Mons-Belgium]
+---
+
+STATE: [489] Anhalt Duchy (1806.5.1 -> 1871.1.18) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1806.5.1 -> 1871.1.18: Dessau [stadester-Dessau-Germany]
+---
+
+STATE: [490] Arenberg Duchy (1646.1.1 -> 1811.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1646.1.1 -> 1811.1.1: Aremberg [stadester-Aremberg-Germany]
+---
+
+STATE: [491] Bar Duchy (1355.1.1 -> 1420.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1355.1.1 -> 1420.1.1: Bar-le-Duc [stadester-BarleDuc-France]
+---
+
+STATE: [492] Barby Duchy (1498.1.1 -> 1660.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1498.1.1 -> 1660.1.1: Barby [stadester-Barby-Germany]
+---
+
+STATE: [493] Duchy of Bavaria (962.2.2 -> 1777.12.30) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1777.12.30: München [stadester-Mnchen-Germany]
+---
+
+STATE: [494] Berg Duchy (1381.1.1 -> 1438.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1381.1.1 -> 1438.1.1: Düsseldorf [stadester-Dsseldorf-Germany]
+---
+
+STATE: [495] Bouillon Duchy (1457.1.1 -> 1677.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1457.1.1 -> 1677.1.1: Bouillon [stadester-Bouillon-Belgium]
+---
+
+STATE: [496] Brabant Duchy (1184.1.1 -> 1431.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1184.1.1 -> 1431.1.1: Bruxelles [stadester-Bruxelles-Belgium]
+---
+
+STATE: [497] Duchy of Brunswick (1813.10.19 -> 1871.1.18) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1813.10.19 -> 1871.1.18: Braunschweig [stadester-Braunschweig-Germany]
+---
+
+STATE: [498] Duchy of Geldria (1340.1.1 -> 1528.10.20) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1340.1.1 -> 1528.10.20: Arnhem [stadester-Arnhem-Netherlands]
+---
+
+STATE: [499] Duchy of Holstein (1461.1.1 -> 1863.12.31) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1461.1.1 -> 1863.12.31: Kiel [stadester-Kiel-Germany]
+---
+
+STATE: [500] Duchy of Jülich (1357.1.1 -> 1424.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1357.1.1 -> 1424.1.1: Jülich [stadester-Jlich-Germany]
+---
+
+STATE: [501] Duchy of Limburg (Netherlands) (1839.4.19 -> 1867.5.11) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1839.4.19 -> 1867.5.11: Maastricht [stadester-Maastricht-Netherlands]
+---
+
+STATE: [502] Duchy of Luxembourg (1354.3.13 -> 1478.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1354.3.13 -> 1478.1.1: Luxembourg [stadester-Luxembourg-Luxembourg]
+---
+
+STATE: [503] Duchy of Luxembourg (Netherlands) (1815.6.9 -> 1839.4.19) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1839.4.19: Luxembourg [stadester-Luxembourg-Luxembourg]
+---
+
+STATE: [504] Duchy of Nassau (1806.8.30 -> 1866.9.20) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1806.8.30 -> 1866.9.20: Wiesbaden [stadester-Wiesbaden-Germany]
+---
+
+STATE: [505] Duchy of Oldenburg (1774.12.29 -> 1815.6.9) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1774.12.29 -> 1815.6.9: Oldenburg [stadester-Oldenburg-Germany]
+---
+
+STATE: [506] Duchy of Prussia (1525.4.8 -> 1619.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1525.4.8 -> 1619.1.1: Kaliningrad [stadester-Kaliningrad-Russia]
+---
+
+STATE: [507] Duchy of Saxony (Albertines) (1485.11.11 -> 1548.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1485.11.11 -> 1548.1.1: Dresden [stadester-Dresden-Germany]
+---
+
+STATE: [508] Duchy of Saxony (Ernestines) (1547.5.19 -> 1573.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1547.5.19 -> 1573.1.1: Weimar [stadester-Weimar-Germany]
+---
+
+STATE: [509] Duchy of Savoy (1417.1.1 -> 1721.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1417.1.1 -> 1563.1.1: Chambéry [stadester-Chambéry-France]
+  1563.1.1 -> 1721.1.1: Torino [stadester-Torino-Italy]
+---
+
+STATE: [510] Duchy of Württemberg (1495.7.21 -> 1804.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1495.7.21 -> 1804.1.1: Stuttgart [stadester-Stuttgart-Germany]
+---
+
+STATE: [511] Landgraviate of Hesse (1264.9.11 -> 1568.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1264.9.11 -> 1568.1.1: Kassel [stadester-Kassel-Germany]
+---
+
+STATE: [512] Landgraviate of Hesse-Darmstadt (1568.1.1 -> 1806.8.13) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1568.1.1 -> 1806.8.13: Darmstadt [stadester-Darmstadt-Germany]
+---
+
+STATE: [513] Landgraviate of Hesse-Homburg (1669.1.1 -> 1866.9.20) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1669.1.1 -> 1866.9.20: Bad Homburg v.d. Höhe [stadester-Bad Homburg v.d. Höhe-Germany]
+---
+
+STATE: [514] Landgraviate of Hesse-Kassel (1568.1.1 -> 1803.2.25) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1568.1.1 -> 1803.2.25: Kassel [stadester-Kassel-Germany]
+---
+
+STATE: [515] Landgraviate of Hesse-Marburg (1568.1.1 -> 1605.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1568.1.1 -> 1605.1.1: Marburg [stadester-Marburg-Germany]
+---
+
+STATE: [516] Landgraviate of Hesse-Rheinfels (1568.1.1 -> 1584.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1568.1.1 -> 1584.1.1: Sankt Goar [stadester-Koblenz-Germany]
+---
+
+STATE: [517] Hirschberg County (1171.1.1 -> 1304.9.8) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1171.1.1 -> 1304.9.8: Beilngries [stadester-Beilngries-Germany]
+---
+
+STATE: [518] Hochberg Margraviate (1128.1.1 -> 1416.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1128.1.1 -> 1416.1.1: Emmendingen [stadester-Emmendingen-Germany]
+---
+
+STATE: [519] Höckelheim Lordship (1098.1.1 -> 1151.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1098.1.1 -> 1151.1.1: Northeim [stadester-Northeim-Germany]
+---
+
+STATE: [520] Hohenberg County (1145.1.1 -> 1382.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1145.1.1 -> 1382.1.1: Rottenburg am Neckar [stadester-Rottenburg am Neckar-Germany]
+---
+
+STATE: [521] Hohenburg Lordship (1001.1.1 -> 1379.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1379.1.1: Hohenburg [stadester-Hohenburg-Germany]
+---
+
+STATE: [522] Hohenems Imperial County (1201.1.1 -> 1766.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1766.1.1: Hohenems [stadester-Hohenems-Austria]
+---
+
+STATE: [523] Hohenlimburg County (1247.1.1 -> 1305.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1247.1.1 -> 1305.1.1: Hohenlimburg [stadester-Hohenlimburg-Germany]
+---
+
+STATE: [524] Hohenlohe County (1101.1.1 -> 1744.5.21) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1744.5.21: Weikersheim [stadester-Weikersheim-Germany]
+---
+
+STATE: [525] Hohenschwangau Lordship (1091.1.1 -> 1537.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1091.1.1 -> 1537.1.1: Schwangau [stadester-Schwangau-Germany]
+---
+
+STATE: [526] Hohenwaldeck County (1301.1.1 -> 1735.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1735.1.1: Miesbach [stadester-Miesbach-Germany]
+---
+
+STATE: [527] Hohenzollern County (1112.1.1 -> 1577.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1112.1.1 -> 1577.1.1: Hechingen [stadester-Hechingen-Germany]
+---
+
+STATE: [528] Hohenzollern-Haigerloch County (1577.1.1 -> 1624.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1577.1.1 -> 1624.1.1: Haigerloch [stadester-Haigerloch-Germany]
+---
+
+STATE: [529] Hohenzollern-Hechingen County (1577.1.1 -> 1624.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1577.1.1 -> 1624.1.1: Hechingen [stadester-Hechingen-Germany]
+---
+
+STATE: [530] Hohenzollern-Sigmaringen County (1577.1.1 -> 1624.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1577.1.1 -> 1624.1.1: Sigmaringen [stadester-Sigmaringen-Germany]
+---
+
+STATE: [531] Hohnstein County (1181.1.1 -> 1633.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1633.1.1: Neustadt am Harz [stadester-Neustadt-am-Harz-Germany]
+---
+
+STATE: [532] Holland County (1151.1.1 -> 1391.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1391.1.1: The Hague [stadester-Gravenhage, 's--Netherlands]
+---
+
+STATE: [533] Holstein County (1112.1.1 -> 1262.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1112.1.1 -> 1262.1.1: Kiel [stadester-Kiel-Germany]
+---
+
+STATE: [534] Duchy of Holstein-Gottorp (1555.1.1 -> 1762.1.5) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1555.1.1 -> 1762.1.5: Kiel [stadester-Kiel-Germany]
+---
+
+STATE: [535] Duchy of Holstein-Gottorp (Russia) (1762.1.5 -> 1773.6.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1762.1.5 -> 1773.6.1: Kiel [stadester-Kiel-Germany]
+---
+
+STATE: [536] Holstein-Itzehoe County (1262.1.1 -> 1291.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1262.1.1 -> 1291.1.1: Itzehoe [stadester-Itzehoe-Germany]
+---
+
+STATE: [537] Holstein-Kiel County (1262.1.1 -> 1392.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1262.1.1 -> 1392.1.1: Kiel [stadester-Kiel-Germany]
+---
+
+STATE: [538] Holstein-Ploen County (1291.1.1 -> 1352.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1291.1.1 -> 1352.1.1: Plön [stadester-Plön-Germany]
+---
+
+STATE: [539] Holstein-Rendsburg County (1291.1.1 -> 1461.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1291.1.1 -> 1461.1.1: Rendsburg [stadester-Rendsburg-Germany]
+---
+
+STATE: [540] Holstein-Segeberg County (1274.1.1 -> 1310.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1274.1.1 -> 1310.1.1: Bad Segeberg [stadester-Bad-Segeberg-Germany]
+---
+
+STATE: [541] Homburg (Stadtoldendorf) Lordship (1145.1.1 -> 1410.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1145.1.1 -> 1410.1.1: Stadtoldendorf [stadester-Stadtoldendorf-Germany]
+---
+
+STATE: [542] Homburg Lordship (1277.1.1 -> 1807.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1277.1.1 -> 1807.1.1: Nümbrecht [stadester-Nümbrecht-Germany]
+---
+
+STATE: [543] Hoorn County (1101.1.1 -> 1569.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1569.1.1: Weert [stadester-Weert-Netherlands]
+---
+
+STATE: [544] Horburg Lordship (1201.1.1 -> 1325.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1325.1.1: Horbourg-Wihr [stadester-Horbourg-Wihr-France]
+---
+
+STATE: [545] Hoya County (1203.1.1 -> 1583.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1203.1.1 -> 1583.1.1: Nienburg [stadester-Nienburg (Weser)-Germany]
+---
+
+STATE: [546] Hükeswag Lordship (1086.1.1 -> 1260.7.6) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1086.1.1 -> 1260.7.6: Hückeswagen [stadester-Hückeswagen-Germany]
+---
+
+STATE: [547] Imola Commune (1141.1.1 -> 1424.2.14) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1141.1.1 -> 1424.2.14: Imola [stadester-Imola-Italy]
+---
+
+STATE: [548] Signoria of Imola (1474.1.1 -> 1499.11.25) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1474.1.1 -> 1499.11.25: Imola [stadester-Imola-Italy]
+---
+
+STATE: [549] Incisa Marquisate (1162.1.1 -> 1549.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1162.1.1 -> 1549.1.1: Incisa Scapaccino [stadester-Incisa-Scapaccino-Italy]
+---
+
+STATE: [550] Isenberg County (1221.1.1 -> 1247.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1247.1.1: Hattingen [stadester-Weitmar-Germany]
+---
+
+STATE: [551] Isenburg County (1001.1.1 -> 1745.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1745.1.1: Birstein [stadester-Birstein-Germany]
+---
+
+STATE: [552] Kingdom of Italy (Holy Roman Empire) (934.1.1 -> 1686.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  934.1.1 -> 1686.1.1: Pavia [stadester-Pavia-Italy]
+---
+
+STATE: [553] Itter Lordship (1191.1.1 -> 1384.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1191.1.1 -> 1384.1.1: Vöhl [stadester-Vöhl-Germany]
+---
+
+STATE: [554] Ivrea Commune (1101.1.1 -> 1251.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1251.1.1: Ivrea [stadester-Ivrea-Italy]
+---
+
+STATE: [555] Jesi Commune (1131.1.1 -> 1434.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1131.1.1 -> 1434.1.1: Jesi [stadester-Jesi-Italy]
+---
+
+STATE: [556] Jever Lordship (1429.1.1 -> 1576.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1429.1.1 -> 1576.1.1: Jever [stadester-Wilhelmshaven-Germany]
+---
+
+STATE: [557] Joint Ferrara and Venice Rule (1396.1.1 -> 1439.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1396.1.1 -> 1439.1.1: Ferrara [stadester-Ferrara-Italy]
+---
+
+STATE: [558] Jülich County (1144.1.1 -> 1337.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1144.1.1 -> 1337.1.1: Jülich [stadester-Jülich-Germany]
+---
+
+STATE: [559] Duchy of Jülich-Berg (1424.1.1 -> 1522.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1424.1.1 -> 1522.1.1: Düsseldorf [stadester-Düsseldorf-Germany]
+---
+
+STATE: [560] Duchy of Jülich-Kleve-Berg-Mark (1522.1.1 -> 1609.5.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1522.1.1 -> 1609.5.1: Düsseldorf [stadester-Düsseldorf-Germany]
+---
+
+STATE: [561] Justingen Lordship (1091.1.1 -> 1752.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1091.1.1 -> 1752.1.1: Schelklingen [stadester-Schelklingen-Germany]
+---
+
+STATE: [562] Duchy of Carinthia (977.1.1 -> 1287.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  977.1.1 -> 1287.1.1: Klagenfurt am Wörthersee [stadester-Klagenfurt-Austria]
+---
+
+STATE: [563] Austrian Empire (1804.8.11 -> 1867.6.12) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1804.8.11 -> 1867.6.12: Wien
+---
+
+STATE: [564] Austrian Empire (Territories outside German Confederation) (1815.6.9 -> 1866.8.23) [fill: #AEC76D]
+STATUS: ACAPITAL
+REASON: Kingdoms of Hungary, Galicia, and Dalmatia under Habsburg crown rule outside the German Confederation
+---
+
+STATE: [565] Austrian Empire (Territories outside HRE) (1804.8.11 -> 1806.8.6) [fill: #AEC76D]
+STATUS: ACAPITAL
+REASON: Hereditary Habsburg domains (Hungary and Transylvania) exterior to the Holy Roman Empire
+---
+
+STATE: [566] Katzenelnbogen County (1139.1.1 -> 1558.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1558.1.1: Sankt Goar [stadester-Koblenz-Germany]
+---
+
+STATE: [567] Kefernburg County (1104.1.1 -> 1387.5.29) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1104.1.1 -> 1387.5.29: Arnstadt [stadester-Arnstadt-Germany]
+---
+
+STATE: [568] Kingdom of Sardinia (1721.1.1 -> 1861.3.17) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1720.8.24 -> 1798.12.9: Torino
+  1814.5.30 -> 1861.3.17: Torino
+---
+
+STATE: [569] Kirchberg County (1088.1.1 -> 1511.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1088.1.1 -> 1511.1.1: Illerkirchberg [stadester-Illerkirchberg-Germany]
+---
+
+STATE: [570] Kirchberg Lordship (1221.1.1 -> 1379.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1379.1.1: Kirchberg an der Jagst [stadester-Kirchberg-an-der-Jagst-Germany]
+---
+
+STATE: [571] Klettenberg Lordship (1188.1.1 -> 1254.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1188.1.1 -> 1254.1.1: Hohenstein [stadester-Hohenstein-Germany]
+---
+
+STATE: [572] Kleve County (1093.1.1 -> 1392.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1093.1.1 -> 1392.1.1: Kleve [stadester-Kleve-Germany]
+---
+
+STATE: [573] Kleve-Mark Duchy (1392.1.1 -> 1522.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1392.1.1 -> 1522.1.1: Kleve [stadester-Kleve-Germany]
+---
+
+STATE: [574] Klingenberg Lordship (1101.1.1 -> 1501.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1501.1.1: Klingenberg am Main [stadester-Klingenberg-am-Main-Germany]
+---
+
+STATE: [575] Kniphausen Lordship (1654.1.1 -> 1808.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1654.1.1 -> 1808.1.1: Wilhelmshaven [stadester-Wilhelmshaven-Germany]
+---
+
+STATE: [576] Kingdom of Bavaria (1805.12.26 -> 1871.1.18) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1805.12.26 -> 1871.1.18: München [stadester-München-Germany]
+---
+
+STATE: [577] Kingdom of Hanover (1837.6.20 -> 1866.6.29) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1837.6.20 -> 1866.6.29: Hannover [stadester-Hannover-Germany]
+---
+
+STATE: [578] Kingdom of Hanover (England) (1814.10.12 -> 1837.6.20) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1814.10.12 -> 1837.6.20: Hannover [stadester-Hannover-Germany]
+---
+
+STATE: [579] Kingdom of Prussia (1701.1.18 -> 1871.1.18) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.18 -> 1871.1.18: Berlin
+---
+
+STATE: [580] Kingdom of Prussia (Territories outside the German Confederation) (1815.6.9 -> 1866.8.23) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1866.8.23: Berlin [stadester-Berlin-Germany]
+---
+
+STATE: [581] Kingdom of Prussia (Territories outside the HRE) (1701.1.18 -> 1806.8.6) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.18 -> 1806.8.6: Königsberg [stadester-Kaliningrad-Russia]
+---
+
+STATE: [582] Kingdom of Saxony (1806.12.20 -> 1871.1.18) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1806.12.20 -> 1871.1.18: Dresden [ghsl-Dresden-Germany]
+---
+
+STATE: [583] Kingdom of Württemberg (1805.12.26 -> 1871.1.18) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1805.12.26 -> 1871.1.18: Stuttgart [ghsl-Stuttgart-Germany]
+---
+
+STATE: [584] Koenigsegg-Rothenfels County (1566.1.1 -> 1805.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1566.1.1 -> 1805.1.1: Immenstadt [stadester-Sonthofen-Germany]
+---
+
+STATE: [585] Königstein Imperial County (1505.8.6 -> 1581.8.5) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1505.8.6 -> 1581.8.5: Königstein im Taunus [stadester-Königstein-im-Taunus-Germany]
+---
+
+STATE: [586] County of Carniola (1041.1.1 -> 1246.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1041.1.1 -> 1246.1.1: Ljubljana [stadester-Ljubljana-Slovenia]
+---
+
+STATE: [587] Kuilenburg Lordship (1101.1.1 -> 1379.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1379.1.1: Culemborg [stadester-Culemborg-Netherlands]
+---
+
+STATE: [588] Electorate of Baden (1803.4.27 -> 1806.10.24) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1803.4.27 -> 1806.10.24: Karlsruhe [ghsl-Karlsruhe-Germany]
+---
+
+STATE: [589] Electorate of Brandenburg (1412.1.1 -> 1619.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1412.1.1 -> 1619.1.1: Berlin [stadester-Berlin-Germany]
+---
+
+STATE: [590] Electorate of Hesse (1803.2.25 -> 1866.9.20) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1803.2.25 -> 1866.9.20: Kassel [stadester-Kassel-Germany]
+---
+
+STATE: [591] Electorate of Saxony (Albertines) (1547.5.19 -> 1806.12.20) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1547.5.19 -> 1806.12.20: Dresden [stadester-Dresden-Germany]
+---
+
+STATE: [592] Electorate of Saxony (Ernestines) (1485.11.11 -> 1548.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1485.11.11 -> 1548.1.1: Wittenberg, Lutherstadt [stadester-Wittenberg, Lutherstadt-Germany]
+---
+
+STATE: [593] Electorate of Saxony (Wettines) (1356.1.10 -> 1485.11.11) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1356.1.10 -> 1485.11.11: Wittenberg, Lutherstadt [stadester-Wittenberg, Lutherstadt-Germany]
+---
+
+STATE: [594] Electorate of Württemberg (1804.1.1 -> 1805.12.26) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1804.1.1 -> 1805.12.26: Stuttgart [stadester-Stuttgart-Germany]
+---
+
+STATE: [595] Electoral Palatinate (1086.1.1 -> 1777.12.30) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1086.1.1 -> 1720.1.1: Heidelberg [stadester-Heidelberg-Germany]
+  1720.1.1 -> 1777.12.30: Mannheim [ghsl-Mannheim; Ludwigshafen am Rhein-Germany]
+---
+
+STATE: [596] Bavaria-Palatinate (1777.12.30 -> 1805.12.26) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1777.12.30 -> 1805.12.26: München [stadester-München-Germany]
+---
+
+STATE: [597] Kyburg County (1101.1.1 -> 1278.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1278.1.1: Winterthur [stadester-Winterthur-Switzerland]
+---
+
+STATE: [598] La Bresse Lordship (1221.1.1 -> 1273.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1273.1.1: Bourg-en-Bresse [stadester-Bourg-en-Bresse-France]
+---
+
+STATE: [599] Lahr Lordship (1428.1.1 -> 1804.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1428.1.1 -> 1804.1.1: Lahr [stadester-Lahr/Schwarzwald-Germany]
+---
+
+STATE: [600] Landser Lordship (1221.1.1 -> 1304.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1221.1.1 -> 1304.1.1: Landser [stadester-Landser-France]
+---
+
+STATE: [601] Landstuhl Lordship (1151.1.1 -> 1795.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1795.1.1: Landstuhl [stadester-Landstuhl-Germany]
+---
+
+STATE: [602] Latera Duchy (1408.11.6 -> 1668.2.18) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1408.11.6 -> 1668.2.18: Latera [stadester-Latera-Italy]
+---
+
+STATE: [603] Laufen County (1001.1.1 -> 1226.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1226.1.1: Laufen an der Salzach [stadester-Laufen-an-der-Salzach-Germany]
+---
+
+STATE: [604] Laupen (1033.1.1 -> 1265.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1033.1.1 -> 1265.1.1: Laupen [stadester-Laupen-Switzerland]
+---
+
+STATE: [605] Lausitz Margraviate (966.1.1 -> 1249.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  966.1.1 -> 1249.1.1: Lübben [stadester-Lübben-Germany]
+---
+
+STATE: [606] Signoria of Lavagna (1051.1.1 -> 1199.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1051.1.1 -> 1199.1.1: Lavagna [stadester-Lavagna-Italy]
+---
+
+STATE: [607] Lecco Commune (1101.1.1 -> 1297.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1297.1.1: Lecco [stadester-Lecco-Italy]
+---
+
+STATE: [608] Lechsgemuend County (1079.1.1 -> 1328.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1079.1.1 -> 1328.1.1: Marxheim [stadester-Marxheim-Germany]
+---
+
+STATE: [609] Leiningen County (1129.1.1 -> 1795.4.5) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1129.1.1 -> 1795.4.5: Altleiningen [stadester-Altleiningen-Germany]
+---
+
+STATE: [610] Leisnig Burgraviate (1159.1.1 -> 1366.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1159.1.1 -> 1366.1.1: Leisnig [stadester-Leisnig-Germany]
+---
+
+STATE: [611] Landgraviate of Lenzburg (973.1.1 -> 1174.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  973.1.1 -> 1174.1.1: Lenzburg [stadester-Lenzburg-Switzerland]
+---
+
+STATE: [612] Leonsberg County (1001.1.1 -> 1438.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1438.1.1: Pilsting [stadester-Pilsting-Germany]
+---
+
+STATE: [613] Leuchtenburg County (1161.1.1 -> 1647.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1161.1.1 -> 1647.1.1: Leuchtenberg [stadester-Leuchtenberg-Germany]
+---
+
+STATE: [614] Leyen Principality (1807.1.1 -> 1814.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1807.1.1 -> 1814.1.1: Seelbach [stadester-Seelbach-Germany]
+---
+
+STATE: [615] Lichtenberg Lordship (1207.1.1 -> 1459.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1207.1.1 -> 1459.1.1: Bouxwiller [stadester-Bouxwiller-France]
+---
+
+STATE: [616] Principality of Liechtenstein (1713.1.1 -> 2026.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1713.1.1 -> 2026.1.1: Vaduz [stadester-Vaduz-Liechtenstein]
+---
+
+STATE: [617] Ligny Lordship (1101.1.1 -> 1545.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1545.1.1: Ligny-en-Barrois [stadester-BarleDuc-France]
+---
+
+STATE: [618] Duchy of Limburg (1156.1.1 -> 1281.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1156.1.1 -> 1281.1.1: Limbourg [stadester-Verviers-Belgium]
+---
+
+STATE: [619] Limburg Lordship (1181.1.1 -> 1407.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1181.1.1 -> 1407.1.1: Hohenlimburg [stadester-Hagen-Germany]
+---
+
+STATE: [620] Limpurg County (1274.1.1 -> 1807.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1274.1.1 -> 1807.1.1: Gaildorf [stadester-Gaildorf-Germany]
+---
+
+STATE: [621] Lindow Lordship (1215.1.1 -> 1525.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1215.1.1 -> 1525.1.1: Lindow (Mark) [stadester-Lindow-(Mark)-Germany]
+---
+
+STATE: [622] Lingen County (1494.1.1 -> 1703.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1494.1.1 -> 1703.1.1: Lingen [stadester-Lingen (Ems)-Germany]
+---
+
+STATE: [623] Lippe Lordship (1124.1.1 -> 1530.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1124.1.1 -> 1530.1.1: Detmold [stadester-Detmold-Germany]
+---
+
+STATE: [624] Loano County (1256.1.1 -> 1771.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1256.1.1 -> 1771.1.1: Loano [stadester-Loano-Italy]
+---
+
+STATE: [625] Lobdaburg Lordship (1167.1.1 -> 1334.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1167.1.1 -> 1334.1.1: Jena [ghsl-Jena-Germany]
+---
+
+STATE: [626] Lodi Commune (1158.8.3 -> 1336.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1158.8.3 -> 1336.1.1: Lodi [stadester-Lodi-Italy]
+---
+
+STATE: [627] Loewenstein County (1124.1.1 -> 1383.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1124.1.1 -> 1383.1.1: Löwenstein [stadester-Löwenstein-Germany]
+---
+
+STATE: [628] Looz County (1016.1.1 -> 1367.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1016.1.1 -> 1367.1.1: Borgloon [stadester-Borgloon-Belgium]
+---
+
+STATE: [629] Duchy of Upper Lotharingia (962.2.2 -> 1766.2.23) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 1766.2.23: Nancy [stadester-Nancy-France]
+---
+
+STATE: [630] Duchy of Lucca (1815.6.9 -> 1848.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1815.6.9 -> 1848.1.1: Lucca [ghsl-Lucca-Italy]
+---
+
+STATE: [631] Republic of Lucca (France) (1799.1.22 -> 1805.6.23) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1799.1.22 -> 1805.6.23: Lucca [ghsl-Lucca-Italy]
+---
+
+STATE: [632] Republic of Lucca (1163.1.1 -> 1799.1.22) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1163.1.1 -> 1799.1.22: Lucca [stadester-Lucca-Italy]
+---
+
+STATE: [633] Principality of Lucca and Piombino (1805.3.18 -> 1815.6.9) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1805.3.18 -> 1815.6.9: Lucca [stadester-Lucca-Italy]
+---
+
+STATE: [634] Luechow County (1172.1.1 -> 1319.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1172.1.1 -> 1319.1.1: Lüchow [stadester-Lüchow-Germany]
+---
+
+STATE: [635] Luetzelstein County (1201.1.1 -> 1462.12.31) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1462.12.31: La Petite-Pierre [stadester-La-Petite-Pierre-France]
+---
+
+STATE: [636] Lupfen County (1066.1.1 -> 1440.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1066.1.1 -> 1440.1.1: Engen [stadester-Engen-Germany]
+---
+
+STATE: [637] Macerata Commune (1139.1.1 -> 1434.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1434.1.1: Macerata [stadester-Macerata-Italy]
+---
+
+STATE: [638] Mansfeld County (1051.1.1 -> 1781.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1051.1.1 -> 1781.1.1: Eisleben, Lutherstadt [stadester-Eisleben, Lutherstadt-Germany]
+---
+
+STATE: [639] Mantova Commune (1115.7.25 -> 1329.11.11) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1115.7.25 -> 1329.11.11: Mantova [stadester-Mantova-Italy]
+---
+
+STATE: [640] Duchy of Mantova (1531.1.1 -> 1737.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1531.1.1 -> 1737.1.1: Mantova [stadester-Mantova-Italy]
+---
+
+STATE: [641] Marquisate of Mantova (1434.1.1 -> 1531.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1434.1.1 -> 1531.1.1: Mantova [stadester-Mantova-Italy]
+---
+
+STATE: [642] Signoria of Mantova (1329.11.11 -> 1434.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1329.11.11 -> 1434.1.1: Mantova [stadester-Mantova-Italy]
+---
+
+STATE: [643] Marca Geronis (962.2.2 -> 966.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  962.2.2 -> 966.1.1: Merseburg [stadester-Merseburg-Germany]
+---
+
+STATE: [644] Mark County (1199.1.1 -> 1392.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1199.1.1 -> 1392.1.1: Hamm [stadester-Hamm-Germany]
+---
+
+STATE: [645] Margraviate of Baden (1113.1.1 -> 1803.4.27) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1113.1.1 -> 1803.4.27: Karlsruhe [stadester-Karlsruhe-Germany]
+---
+
+STATE: [646] Margraviate of Brandenburg (1158.1.1 -> 1324.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1158.1.1 -> 1324.1.1: Brandenburg an der Havel [stadester-Brandenburg an der Havel-Germany]
+---
+
+STATE: [647] Margraviate of Jülich (1337.1.1 -> 1357.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1337.1.1 -> 1357.1.1: Jülich [stadester-Jülich-Germany]
+---
+
+STATE: [648] Marmorea Lordship (1136.1.1 -> 1379.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1136.1.1 -> 1379.1.1: Marmora [stadester-Marmora-Italy]
+---
+
+STATE: [649] Marquartstein County (1076.1.1 -> 1301.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1076.1.1 -> 1301.1.1: Marquartstein [stadester-Marquartstein-Germany]
+---
+
+STATE: [650] Marstetten County (1001.1.1 -> 1649.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1649.1.1: Aitrach [stadester-Aitrach-Germany]
+---
+
+STATE: [651] Signoria of Massa (1442.1.1 -> 1665.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1442.1.1 -> 1665.1.1: Massa [stadester-Massa-Italy]
+---
+
+STATE: [652] Duchy of Massa and Carrara (1665.1.1 -> 1830.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1665.1.1 -> 1830.1.1: Massa [stadester-Massa-Italy]
+---
+
+STATE: [653] Republic of Massa Marittima (1226.1.1 -> 1336.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1226.1.1 -> 1336.1.1: Massa Marittima [stadester-Massa Marittima-Italy]
+---

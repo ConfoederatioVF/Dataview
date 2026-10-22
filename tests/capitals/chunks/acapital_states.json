@@ -1,0 +1,2212 @@
+[
+  {
+    "state_id": 99,
+    "name": "Papal States (Military Occupation)",
+    "reason": "Papal military occupation administration of captured Italian territory during war"
+  },
+  {
+    "state_id": 100,
+    "name": "Teutonic Order (Military Occupation)",
+    "reason": "Teutonic Order military operational theater and expeditionary command"
+  },
+  {
+    "state_id": 164,
+    "name": "Imperial Possessions",
+    "reason": "Dispersed imperial crown estates (Reichsgüter) of the Holy Roman Empire without a centralized administrative capital"
+  },
+  {
+    "state_id": 196,
+    "name": "Holy Roman Empire",
+    "reason": "Itinerant imperial court on coronation expedition through Italy without a static capital"
+  },
+  {
+    "state_id": 197,
+    "name": "Alliance of Holy Roman Empire States",
+    "reason": "Heidelberg League defensive alliance of imperial princes during the Second Margrave War"
+  },
+  {
+    "state_id": 564,
+    "name": "Austrian Empire (Territories outside German Confederation)",
+    "reason": "Kingdoms of Hungary, Galicia, and Dalmatia under Habsburg crown rule outside the German Confederation"
+  },
+  {
+    "state_id": 565,
+    "name": "Austrian Empire (Territories outside HRE)",
+    "reason": "Hereditary Habsburg domains (Hungary and Transylvania) exterior to the Holy Roman Empire"
+  },
+  {
+    "state_id": 972,
+    "name": "Swiss Associate Territories",
+    "reason": "Confederated rural communes and condominium districts (Gemeine Herrschaften) without a federal capital"
+  },
+  {
+    "state_id": 974,
+    "name": "Duchy of Milan (Military Occupation)",
+    "reason": "Military occupation administration of the Duchy of Milan during the Italian Wars"
+  },
+  {
+    "state_id": 976,
+    "name": "Duchy of Milan (Habsburg Military Occupation)",
+    "reason": "Habsburg imperial military occupation government over Milanese territories"
+  },
+  {
+    "state_id": 977,
+    "name": "Holy Roman Empire (Military Occupation)",
+    "reason": "Imperial military occupation command of the Holy Roman Empire"
+  },
+  {
+    "state_id": 978,
+    "name": "Bavaria (Military Occupation)",
+    "reason": "Bavarian armed military occupation zone during regional campaign"
+  },
+  {
+    "state_id": 979,
+    "name": "Bayreuth (Military Occupation)",
+    "reason": "Margravial military occupation of captured Franconian territories"
+  },
+  {
+    "state_id": 980,
+    "name": "Electorate of Brandenburg (Military Occupation)",
+    "reason": "Brandenburg military occupation operational zone"
+  },
+  {
+    "state_id": 986,
+    "name": "Hanover (Military Occupation)",
+    "reason": "Hanoverian wartime military occupation administration"
+  },
+  {
+    "state_id": 988,
+    "name": "Ferrara (Military Occupation)",
+    "reason": "Ferrarese military operational theater during the War of Ferrara"
+  },
+  {
+    "state_id": 990,
+    "name": "Bremen (Military Occupation)",
+    "reason": "Archbishopric of Bremen military occupation zone"
+  },
+  {
+    "state_id": 991,
+    "name": "Jülich-Kleve-Berg-Mark (Military Occupation)",
+    "reason": "United Duchies military occupation theater during succession dispute"
+  },
+  {
+    "state_id": 992,
+    "name": "Mecklenburg (Military Occupation)",
+    "reason": "Mecklenburg military occupation zone during the Thirty Years' War"
+  },
+  {
+    "state_id": 993,
+    "name": "Münster, Bremen, Lüneburg and Denmark (Military Occupation)",
+    "reason": "Allied coalition military occupation zone during the Bremen War"
+  },
+  {
+    "state_id": 994,
+    "name": "Kurpfalz (Military Occupation)",
+    "reason": "Electoral Palatinate military occupation forces in neighboring territory"
+  },
+  {
+    "state_id": 995,
+    "name": "Albertine Saxony (Military Occupation)",
+    "reason": "Saxon military occupation administration in wartime theater"
+  },
+  {
+    "state_id": 1001,
+    "name": "3R",
+    "reason": "Return, Reclamation, Rehabilitation (3R) armed defense militia movement in northwestern Central African Republic"
+  },
+  {
+    "state_id": 1023,
+    "name": "Adal Sultanate (Military Occupation)",
+    "reason": "Adalite military occupation zone across the Ethiopian highlands"
+  },
+  {
+    "state_id": 1031,
+    "name": "League of Lezhë (Military Occupation)",
+    "reason": "League of Lezhë military coalition operational territory under Skanderbeg"
+  },
+  {
+    "state_id": 1042,
+    "name": "Afghanistan (Military Occupation)",
+    "reason": "Afghan military expeditionary occupation zone"
+  },
+  {
+    "state_id": 1063,
+    "name": "Argentine Confederation (Military Occupation)",
+    "reason": "Argentine Confederation armed occupation force during Platine conflicts"
+  },
+  {
+    "state_id": 1089,
+    "name": "Oribe Rebel Faction",
+    "reason": "Blanco insurgent army of Manuel Oribe during the Great Siege of Montevideo"
+  },
+  {
+    "state_id": 1092,
+    "name": "United Provinces of the Rio de la Plata (Military Occupation)",
+    "reason": "United Provinces of the Río de la Plata military expedition forces in Upper Peru"
+  },
+  {
+    "state_id": 1110,
+    "name": "Allied (Spanish Succession)",
+    "reason": "Grand Alliance joint military occupation theater in the War of the Spanish Succession"
+  },
+  {
+    "state_id": 1130,
+    "name": "Algeria (Military Occupation)",
+    "reason": "Deylik of Algiers expeditionary military occupation zone"
+  },
+  {
+    "state_id": 1131,
+    "name": "Habsburg Empire (Military Occupation)",
+    "reason": "Habsburg imperial armed forces military occupation territory"
+  },
+  {
+    "state_id": 1132,
+    "name": "Habsburg (Military Occupation)",
+    "reason": "Austrian Habsburg military forces operating in wartime occupation theater"
+  },
+  {
+    "state_id": 1137,
+    "name": "Austrian Empire (Military Occupation)",
+    "reason": "Austrian imperial military occupation command during European campaigns"
+  },
+  {
+    "state_id": 1142,
+    "name": "Allied (Brazil, Argentina, Uruguay)",
+    "reason": "Triple Alliance allied military operational theater during the Paraguayan War"
+  },
+  {
+    "state_id": 1143,
+    "name": "Allies of World War II",
+    "reason": "Allied joint military administration over liberated and occupied territories during World War II"
+  },
+  {
+    "state_id": 1145,
+    "name": "Allies of Epyrus",
+    "reason": "Pyrrhic expeditionary coalition military forces operating in Magna Graecia"
+  },
+  {
+    "state_id": 1156,
+    "name": "Al-Shabaab",
+    "reason": "Insurgent Islamist militant organization operating through dispersed insurgent cells in southern Somalia"
+  },
+  {
+    "state_id": 1189,
+    "name": "Amsterdam Island",
+    "reason": "Uninhabited volcanic island territory in the southern Indian Ocean"
+  },
+  {
+    "state_id": 1213,
+    "name": "Anglo-French Joint Naval Commission",
+    "reason": "Joint naval commission policing the New Hebrides archipelago without an administrative seat"
+  },
+  {
+    "state_id": 1217,
+    "name": "Bijapur, Ahmadnagar, Golconda and Bidar Sultanates Military Occupation",
+    "reason": "Deccan Sultanates unified military encampment during the Talikota campaign"
+  },
+  {
+    "state_id": 1231,
+    "name": "Ansar and Quraush Tribes",
+    "reason": "Rebel tribal forces of Medina and Mecca during the Second Fitna"
+  },
+  {
+    "state_id": 1240,
+    "name": "Anti Balaka",
+    "reason": "Decentralised Christian-animist militia coalition in the Central African Republic"
+  },
+  {
+    "state_id": 1261,
+    "name": "AQAP",
+    "reason": "Al-Qaeda in the Arabian Peninsula insurgent militant network in southern Yemen"
+  },
+  {
+    "state_id": 1273,
+    "name": "Arguin (Brandenburg)",
+    "reason": "Brandenburg colonial fortification and trading post on Arguin Island off Mauritania"
+  },
+  {
+    "state_id": 1276,
+    "name": "Island of the Crabs (Brandenburg)",
+    "reason": "Vieques Island naval expedition outpost of the Margraviate of Brandenburg"
+  },
+  {
+    "state_id": 1279,
+    "name": "Argentina Military Occupation",
+    "reason": "Argentine military occupation of the Falkland and South Georgia Islands"
+  },
+  {
+    "state_id": 1281,
+    "name": "St. Thomas (Brandenburg)",
+    "reason": "Temporary Brandenburg leasehold trading post on Saint Thomas"
+  },
+  {
+    "state_id": 1284,
+    "name": "Tertholen (Brandenburg-Prussia Colony)",
+    "reason": "Short-lived Caribbean colonial trading outpost of Brandenburg-Prussia"
+  },
+  {
+    "state_id": 1289,
+    "name": "Brandenburg-Prussia (Military Occupation)",
+    "reason": "Brandenburg-Prussian armed forces military occupation theater"
+  },
+  {
+    "state_id": 1290,
+    "name": "Arguin (France)",
+    "reason": "French coastal trade station and fortification on Arguin Island"
+  },
+  {
+    "state_id": 1291,
+    "name": "Prussia (Military Occupation)",
+    "reason": "Prussian armed forces wartime military occupation theater"
+  },
+  {
+    "state_id": 1292,
+    "name": "Prussia and Austria (Military Occupation)",
+    "reason": "Prussian and Austrian joint military occupation of the Danish Duchies"
+  },
+  {
+    "state_id": 1293,
+    "name": "Alliance of German States",
+    "reason": "Combined armed forces of the North German Confederation and South German states during the Franco-Prussian War"
+  },
+  {
+    "state_id": 1300,
+    "name": "Prussia and russia (Military Occupation)",
+    "reason": "Joint Prussian-Russian military occupation force during the Napoleonic Wars"
+  },
+  {
+    "state_id": 1308,
+    "name": "Brazil (Military Occupation)",
+    "reason": "Brazilian imperial armed forces military occupation theater"
+  },
+  {
+    "state_id": 1309,
+    "name": "Armenian Rebels",
+    "reason": "Armenian self-defense fighters during the Van Resistance"
+  },
+  {
+    "state_id": 1315,
+    "name": "Empire of Brazil, Enre Rios, Corrientes",
+    "reason": "Allied anti-Rosas campaign army during the Platine War"
+  },
+  {
+    "state_id": 1322,
+    "name": "Burma (Military Occupation)",
+    "reason": "Burmese royal army military occupation zone"
+  },
+  {
+    "state_id": 1343,
+    "name": "Konbaung Dynasty (Military Occupation)",
+    "reason": "Konbaung royal armed forces expeditionary occupation in Assam and Manipur"
+  },
+  {
+    "state_id": 1344,
+    "name": "Toungoo Kingdom (Military Occupation)",
+    "reason": "Toungoo expeditionary army occupation zone in Siam and Lan Na"
+  },
+  {
+    "state_id": 1371,
+    "name": "Australia (Military Occupation)",
+    "reason": "Australian military naval expeditionary occupation in German New Guinea"
+  },
+  {
+    "state_id": 1373,
+    "name": "Austria-Hungary and Germany (Military Occupation)",
+    "reason": "Central Powers joint military occupation zone in Russian Poland and Serbia"
+  },
+  {
+    "state_id": 1374,
+    "name": "Austria-Hungary (Military occupation)",
+    "reason": "Authentic military occupation zone operating under field military administration without a distinct civil capital city."
+  },
+  {
+    "state_id": 1389,
+    "name": "Axis",
+    "reason": "Axis joint military occupation authority across the Balkans and Greece"
+  },
+  {
+    "state_id": 1394,
+    "name": "Kingdom of Castile (Military Occupation)",
+    "reason": "Castilian royal military occupation of captured Andalusian frontier zones"
+  },
+  {
+    "state_id": 1397,
+    "name": "Ming China (Military Occupation)",
+    "reason": "Ming imperial military expeditionary occupation in Jiaozhi"
+  },
+  {
+    "state_id": 1400,
+    "name": "Azerbaijan (Military Occupation)",
+    "reason": "Azerbaijani armed forces military control zone during the Karabakh conflict"
+  },
+  {
+    "state_id": 1414,
+    "name": "Badounga",
+    "reason": "Decentralised traditional chieftaincy in the central African grassfields"
+  },
+  {
+    "state_id": 1437,
+    "name": "Crimean Khanate (Military Occupation)",
+    "reason": "Crimean Tatar cavalry expeditionary zone across Eastern Europe"
+  },
+  {
+    "state_id": 1445,
+    "name": "Delhi Sultanate (Military Occupation)",
+    "reason": "Delhi Sultanate military expeditionary command in the Deccan"
+  },
+  {
+    "state_id": 1467,
+    "name": "Denmark (Military Occupation)",
+    "reason": "Danish royal armed forces military occupation in northern Germany"
+  },
+  {
+    "state_id": 1515,
+    "name": "Cautionary Towns (England)",
+    "reason": "Dutch port fortresses pledged as military security guarantees to England"
+  },
+  {
+    "state_id": 1530,
+    "name": "Bassas da India",
+    "reason": "Uninhabited atoll territory in the Mozambique Channel without permanent settlement"
+  },
+  {
+    "state_id": 1548,
+    "name": "England (Military Occupation)",
+    "reason": "English royal army military occupation zone in France"
+  },
+  {
+    "state_id": 1556,
+    "name": "Beijing Legation Quarter (international Concession)",
+    "reason": "Foreign diplomatic and trade concession without an independent capital city"
+  },
+  {
+    "state_id": 1567,
+    "name": "Belgium (Military Occupation)",
+    "reason": "Belgian armed forces military administration in the Ruhr and Rhineland"
+  },
+  {
+    "state_id": 1605,
+    "name": "England and Flanders (Military Occupation)",
+    "reason": "English and Flemish allied military expedition in the Low Countries"
+  },
+  {
+    "state_id": 1650,
+    "name": "Blancos",
+    "reason": "Uruguayan political-military Blanco faction operating across rural departments during civil war"
+  },
+  {
+    "state_id": 1688,
+    "name": "Bouvet (dependent territory of norway)",
+    "reason": "Uninhabited subantarctic volcanic island dependency of Norway"
+  },
+  {
+    "state_id": 1689,
+    "name": "Boxers",
+    "reason": "Anti-foreign peasant uprising movement across northern China without a territorial capital"
+  },
+  {
+    "state_id": 1726,
+    "name": "British North America",
+    "reason": "Collective British colonial possessions in northern North America prior to unitive confederation"
+  },
+  {
+    "state_id": 1731,
+    "name": "British Western Pacific Territories",
+    "reason": "Dispersed island protectorates administered by the British High Commissioner in the Western Pacific"
+  },
+  {
+    "state_id": 1756,
+    "name": "Compagnie des Îles de l'Amérique",
+    "reason": "French commercial proprietary company governing scattered Antillean island colonies"
+  },
+  {
+    "state_id": 1758,
+    "name": "Bulgaria (Military Occupation)",
+    "reason": "Bulgarian army military occupation in eastern Macedonia and Thrace"
+  },
+  {
+    "state_id": 1759,
+    "name": "French West India Company",
+    "reason": "Chartered trading company administering dispersed Atlantic and Caribbean commercial colonies"
+  },
+  {
+    "state_id": 1768,
+    "name": "Dirk Hartog Island (France)",
+    "reason": "Offshore Western Australian island visited by French navigators without permanent settlement"
+  },
+  {
+    "state_id": 1776,
+    "name": "Bushmanland",
+    "reason": "Designated homeland territory in South West Africa without an established sovereign capital"
+  },
+  {
+    "state_id": 1808,
+    "name": "France and Bavaria (Military Occupation)",
+    "reason": "French-Bavarian allied military operational zone during the War of the Spanish Succession"
+  },
+  {
+    "state_id": 1809,
+    "name": "Cambodia (Military Occupation)",
+    "reason": "Cambodian royal military forces occupying border outposts"
+  },
+  {
+    "state_id": 1820,
+    "name": "France and UK (Military Occupation)",
+    "reason": "Anglo-French joint military occupation of Beijing and Tianjin"
+  },
+  {
+    "state_id": 1823,
+    "name": "France and Spain (Military Occupation)",
+    "reason": "Franco-Spanish joint naval expedition in Cochinchina"
+  },
+  {
+    "state_id": 1824,
+    "name": "Holy League (Military Occupation)",
+    "reason": "Holy League allied naval and military expeditionary forces"
+  },
+  {
+    "state_id": 1831,
+    "name": "Cartier",
+    "reason": "Uninhabited coral reef territory in the Timor Sea"
+  },
+  {
+    "state_id": 1834,
+    "name": "Dutch Republic and GB (Military Occupation)",
+    "reason": "Anglo-Dutch maritime and ground military operational coalition"
+  },
+  {
+    "state_id": 1842,
+    "name": "Genoa (Military Occupation)",
+    "reason": "Genoese military naval expeditionary outpost in the Levant"
+  },
+  {
+    "state_id": 1850,
+    "name": "Central Powers",
+    "reason": "Central Powers military administration over occupied Romanian territory"
+  },
+  {
+    "state_id": 1857,
+    "name": "Chad (Military Occupation)",
+    "reason": "Chadian armed forces military intervention zone in the Central African Republic"
+  },
+  {
+    "state_id": 1882,
+    "name": "Cautionary Towns (Great Britain)",
+    "reason": "Dutch port fortresses pledged as security guarantees to Great Britain"
+  },
+  {
+    "state_id": 1939,
+    "name": "Childebert and Clothar Military Occupation",
+    "reason": "Frankish co-monarchs joint military expedition against Burgundy"
+  },
+  {
+    "state_id": 1940,
+    "name": "Chile (Military Occupation)",
+    "reason": "Chilean army military administration over occupied Peruvian provinces"
+  },
+  {
+    "state_id": 1942,
+    "name": "Macapa (Great Britain)",
+    "reason": "Amazon estuary naval outpost claim without established colonial capital"
+  },
+  {
+    "state_id": 1947,
+    "name": "Childebert, Clodomir, and Clothar",
+    "reason": "Merovingian Frankish brothers military expeditionary force against the Thuringii"
+  },
+  {
+    "state_id": 1976,
+    "name": "Sakhalin (Russian and Japanese Condominium)",
+    "reason": "Joint Russian-Japanese condominium over Sakhalin Island without a fixed provincial capital"
+  },
+  {
+    "state_id": 1977,
+    "name": "Cnd. Sweden and Germany",
+    "reason": "Short-lived joint military intervention command on the Åland Islands"
+  },
+  {
+    "state_id": 1979,
+    "name": "Coalition (Gulf War)",
+    "reason": "Multi-national military coalition operational theater liberating Kuwait during the Gulf War"
+  },
+  {
+    "state_id": 1980,
+    "name": "Coalition (Iraq War)",
+    "reason": "Coalition Provisional Authority military governing command across Iraq"
+  },
+  {
+    "state_id": 2005,
+    "name": "Oyapuc",
+    "reason": "Short-lived English Guiana trading colony on the Oyapock River"
+  },
+  {
+    "state_id": 2012,
+    "name": "Compagnia del Benadir",
+    "reason": "Commercial chartered company holding temporary concessionary administrative rights in Somalia"
+  },
+  {
+    "state_id": 2015,
+    "name": "Côn Sơn Island",
+    "reason": "Offshore penal colony archipelago in the South China Sea without an independent sovereign capital"
+  },
+  {
+    "state_id": 2017,
+    "name": "Confederacy of the Veleti",
+    "reason": "Pagan Polabian Slavic tribal confederation without a centralized administrative seat"
+  },
+  {
+    "state_id": 2023,
+    "name": "Port Egmont",
+    "reason": "Isolated British naval garrison settlement at Port Egmont in West Falkland"
+  },
+  {
+    "state_id": 2056,
+    "name": "Saracen Corsica",
+    "reason": "Moorish naval raiders temporary military stronghold on Corsica"
+  },
+  {
+    "state_id": 2057,
+    "name": "Saint Peter (Great Britain)",
+    "reason": "Isolated South Atlantic rock outcrop territory without municipal capital"
+  },
+  {
+    "state_id": 2082,
+    "name": "CPC",
+    "reason": "Coalition of Patriots for Change armed opposition rebel alliance in the Central African Republic"
+  },
+  {
+    "state_id": 2086,
+    "name": "British East India Company",
+    "reason": "Corporate chartered trading company with decentralized presidency factories across India"
+  },
+  {
+    "state_id": 2092,
+    "name": "Crozet Islands",
+    "reason": "Subantarctic archipelago without permanent civilian habitation or sovereign capital"
+  },
+  {
+    "state_id": 2122,
+    "name": "Dahae Confederation",
+    "reason": "Ancient Central Asian nomadic tribal confederation of the Karakum Desert"
+  },
+  {
+    "state_id": 2123,
+    "name": "Dai",
+    "reason": "Short-lived transient northern rebel fiefdom established by Chen Xi during the Chu-Han Contention"
+  },
+  {
+    "state_id": 2124,
+    "name": "Dai ( 代國)",
+    "reason": "Ancient northern Chinese regional marcher fief without an administrative municipal capital"
+  },
+  {
+    "state_id": 2125,
+    "name": "Dai (Northern Hebei)",
+    "reason": "Frontier marcher defense command in northern Hebei without a fortified permanent capital"
+  },
+  {
+    "state_id": 2126,
+    "name": "Dai (代)",
+    "reason": "Spring and Autumn period northern border tribal fiefdom"
+  },
+  {
+    "state_id": 2127,
+    "name": "Dai (戴)",
+    "reason": "Minor Western Zhou vassal state without an autonomous municipal capital"
+  },
+  {
+    "state_id": 2141,
+    "name": "Second Coalition",
+    "reason": "Allied coalition military command during the War of the Second Coalition"
+  },
+  {
+    "state_id": 2143,
+    "name": "Allied (Great Britain, France, Ottoman Empire, Sardinia)",
+    "reason": "Allied joint military operational theater during the Crimean War"
+  },
+  {
+    "state_id": 2144,
+    "name": "Hanthawaddy Kingdom (Military Occupation)",
+    "reason": "Mon royal armed forces military occupation in Upper Burma"
+  },
+  {
+    "state_id": 2164,
+    "name": "Hungary, Poland and Serbia (Military Occupation)",
+    "reason": "Allied Christian crusade army campaign against the Ottoman Empire"
+  },
+  {
+    "state_id": 2166,
+    "name": "Hyderabad State (Military Occupation)",
+    "reason": "Nizam of Hyderabad military forces operational zone in the Deccan"
+  },
+  {
+    "state_id": 2207,
+    "name": "British East India Company (Military Occupation)",
+    "reason": "British East India Company military operational theater under martial law"
+  },
+  {
+    "state_id": 2215,
+    "name": "Kingdom of Kandy (Military Occupation)",
+    "reason": "Kandyan royal army military occupation in Portuguese coastal forts"
+  },
+  {
+    "state_id": 2217,
+    "name": "Kazan Khanate (Military Occupation)",
+    "reason": "Kazan Tatar cavalry military operational zone"
+  },
+  {
+    "state_id": 2218,
+    "name": "Khivan Khanate (Military Occupation)",
+    "reason": "Khivan armed forces military operational theater in Khwarazm"
+  },
+  {
+    "state_id": 2225,
+    "name": "Ava Kingdom (Military Occupation)",
+    "reason": "Burmese Ava royal army military occupation command"
+  },
+  {
+    "state_id": 2227,
+    "name": "Kingdom of Mysore (Military Occupation)",
+    "reason": "Mysorean armed forces under Tipu Sultan occupying Malabar"
+  },
+  {
+    "state_id": 2237,
+    "name": "Later Jin (Military Occupation)",
+    "reason": "Jurchen-Manchu military expeditionary zone south of the Great Wall"
+  },
+  {
+    "state_id": 2242,
+    "name": "Lithuania (Military Occupation)",
+    "reason": "Lithuanian grand ducal armed forces military occupation of Rus principalities"
+  },
+  {
+    "state_id": 2269,
+    "name": "Maratha Empire (Military Occupation)",
+    "reason": "Maratha confederate armies military operational command"
+  },
+  {
+    "state_id": 2281,
+    "name": "Centralist Republic of Mexico (Military Occupation)",
+    "reason": "Mexican centralist army occupying rebellious regional departments"
+  },
+  {
+    "state_id": 2284,
+    "name": "Moghulistan (Military Occupation)",
+    "reason": "Chagatai Mongol nomadic army military occupation in Transoxiana"
+  },
+  {
+    "state_id": 2315,
+    "name": "Donghu",
+    "reason": "Proto-Mongolic nomadic tribal confederation of northern Hebei and Inner Mongolia"
+  },
+  {
+    "state_id": 2327,
+    "name": "Duan Tribe",
+    "reason": "Xianbei nomadic tribal clan operating across the northern Chinese frontier"
+  },
+  {
+    "state_id": 2355,
+    "name": "Kingdom of Naples (Military Occupation)",
+    "reason": "Neapolitan royal army military operational command in southern Italy"
+  },
+  {
+    "state_id": 2361,
+    "name": "Kingdom of the Two Sicilies (Military Occupation)",
+    "reason": "Bourbon Neapolitan military occupation forces in Sicily"
+  },
+  {
+    "state_id": 2366,
+    "name": "Nepal (Military Occupation)",
+    "reason": "Gorkha military expansionist operational theater in Kumaon and Garhwal"
+  },
+  {
+    "state_id": 2376,
+    "name": "Dirk Hartog Island (Netherlands)",
+    "reason": "Western Australian landing site visited by Dutch East India Company navigators without permanent settlement"
+  },
+  {
+    "state_id": 2415,
+    "name": "Dutch Republic (Military Occupation)",
+    "reason": "Dutch States Army military operational command during European wars"
+  },
+  {
+    "state_id": 2427,
+    "name": "Nogai and Crimea",
+    "reason": "Combined Tatar and Nogai cavalry raiding coalition across the Pontic steppe"
+  },
+  {
+    "state_id": 2443,
+    "name": "Ecuador (Military Occupation)",
+    "reason": "Ecuadorian armed forces military occupation of disputed Amazonian border posts"
+  },
+  {
+    "state_id": 2450,
+    "name": "Egypt (Military Occupation)",
+    "reason": "Egyptian khedival army military occupation in the Levant and Sudan"
+  },
+  {
+    "state_id": 2451,
+    "name": "Paraguay (Military Occupation)",
+    "reason": "Paraguayan armed forces military occupation in Mato Grosso and Corrientes"
+  },
+  {
+    "state_id": 2457,
+    "name": "El Salvador (Military Occupation)",
+    "reason": "Salvadoran armed forces military operational command in Central America"
+  },
+  {
+    "state_id": 2465,
+    "name": "Safavid Empire (Military Occupation)",
+    "reason": "Persian Safavid royal army military occupation in Iraq and the Caucasus"
+  },
+  {
+    "state_id": 2567,
+    "name": "Poland-Lithuania (Military Occupation)",
+    "reason": "Polish-Lithuanian military operational forces in Moscow during the Time of Troubles"
+  },
+  {
+    "state_id": 2580,
+    "name": "Ethiopia (Military Occupation)",
+    "reason": "Imperial Ethiopian army military operational command in the Ogaden"
+  },
+  {
+    "state_id": 2592,
+    "name": "Europa",
+    "reason": "Low-lying tropical atoll in the Mozambique Channel with no permanent urban settlement"
+  },
+  {
+    "state_id": 2607,
+    "name": "Polish-Lithuanian Commonwealth, Denmark and Prussia (Military Occupation)",
+    "reason": "Allied coalition military forces during the Livonian War"
+  },
+  {
+    "state_id": 2610,
+    "name": "Polish-Lithuanian Commonwealth, Denmark and Russia (Military Occupation)",
+    "reason": "Northern Wars coalition military theater in the Baltic"
+  },
+  {
+    "state_id": 2613,
+    "name": "Polish-Lithuanian Commonwealth and Russia (Military Occupation)",
+    "reason": "Military occupation zone, rebellion, temporary coalition, or tribal entity without fixed capital"
+  },
+  {
+    "state_id": 2614,
+    "name": "FDPC",
+    "reason": "Armed guerrilla rebel faction operating in northwestern Central African Republic"
+  },
+  {
+    "state_id": 2645,
+    "name": "Finnish Volunteers",
+    "reason": "Finnish volunteer expeditionary forces in Olonets Karelia during the Russian Civil War"
+  },
+  {
+    "state_id": 2682,
+    "name": "Fotouni",
+    "reason": "Autonomous traditional Bamileke chiefdom in western Cameroon"
+  },
+  {
+    "state_id": 2683,
+    "name": "Foyantcha",
+    "reason": "Traditional Bamileke autonomous chieftaincy without a chartered municipal capital"
+  },
+  {
+    "state_id": 2687,
+    "name": "France and Belgium (Military Occupation)",
+    "reason": "Joint Franco-Belgian military occupation of the Ruhr industrial basin"
+  },
+  {
+    "state_id": 2688,
+    "name": "France and Greece (Military Occupation)",
+    "reason": "Franco-Greek joint military operational sector in Odessa and Thrace"
+  },
+  {
+    "state_id": 2692,
+    "name": "France (Military Occupation)",
+    "reason": "French armed forces wartime military occupation command"
+  },
+  {
+    "state_id": 2714,
+    "name": "French Concession in Shanghai",
+    "reason": "Foreign concession enclave in Shanghai administered by the French Municipal Council without an independent capital"
+  },
+  {
+    "state_id": 2715,
+    "name": "French Concession in Tianjin",
+    "reason": "Foreign concession enclave in Tianjin administered by French consular municipal authorities"
+  },
+  {
+    "state_id": 2716,
+    "name": "French Concession in Hankou",
+    "reason": "French treaty port concession in Hankou governed by consular municipal administration"
+  },
+  {
+    "state_id": 2794,
+    "name": "Portuguese North America",
+    "reason": "Portuguese seasonal cod fishery seasonal stations along the Newfoundland coast without permanent settlement"
+  },
+  {
+    "state_id": 2796,
+    "name": "GB and France (Military Occupation)",
+    "reason": "Joint British and French military intervention operational sector in the Crimea"
+  },
+  {
+    "state_id": 2797,
+    "name": "Great Britain (Military Occupation)",
+    "reason": "British armed forces wartime military occupation command"
+  },
+  {
+    "state_id": 2798,
+    "name": "British and French Military Occupation",
+    "reason": "Allied joint military administration of occupied German Togoland"
+  },
+  {
+    "state_id": 2812,
+    "name": "Georgian Rebels",
+    "reason": "Anti-Safavid insurrectionary movements in Kakheti and Kartli without formal capital"
+  },
+  {
+    "state_id": 2816,
+    "name": "German Concession in Tianjin",
+    "reason": "German concession enclave in Tianjin administered by Imperial German consular authorities"
+  },
+  {
+    "state_id": 2817,
+    "name": "German Concession in Hankou",
+    "reason": "German treaty port concession in Hankou administered by consular municipal authorities"
+  },
+  {
+    "state_id": 2818,
+    "name": "Saint Pierre and Miquelon (Portugal)",
+    "reason": "Portuguese seasonal fishing fleet seasonal station without permanent municipal settlement"
+  },
+  {
+    "state_id": 2820,
+    "name": "German East Africa (Military Occupation)",
+    "reason": "Schutztruppe mobile guerrilla operational theater during World War I in East Africa"
+  },
+  {
+    "state_id": 2830,
+    "name": "Germany (Military Occupation)",
+    "reason": "German armed forces wartime military occupation command"
+  },
+  {
+    "state_id": 2831,
+    "name": "Germany and Romania (Military Occupation)",
+    "reason": "Axis German-Romanian joint military administration of Transnistria"
+  },
+  {
+    "state_id": 2851,
+    "name": "GNA-Fajr Libya-Misrata Brigade",
+    "reason": "Coalition of Islamist and regional militias controlling western Libya"
+  },
+  {
+    "state_id": 2862,
+    "name": "Portugal (Military Occupation)",
+    "reason": "Portuguese royal military forces operating in maritime fortresses"
+  },
+  {
+    "state_id": 2897,
+    "name": "Naiman Confederation (Vassal)",
+    "reason": "Semi-nomadic Mongol-Turkic tribal confederacy across western Mongolia"
+  },
+  {
+    "state_id": 2898,
+    "name": "French and British Military Occupation",
+    "reason": "Joint Anglo-French military condominium over captured German Kamerun"
+  },
+  {
+    "state_id": 2906,
+    "name": "Greece (Military Occupation)",
+    "reason": "Hellenic army military administration in Smyrna and Eastern Thrace"
+  },
+  {
+    "state_id": 2908,
+    "name": "Duchy of Moscow (Military occupation)",
+    "reason": "Muscovite military forces occupying Novgorod and Pskov lands"
+  },
+  {
+    "state_id": 2911,
+    "name": "Grand Duchy of Moscow (Military Occupation)",
+    "reason": "Muscovite grand ducal military expeditionary forces during regional campaigns"
+  },
+  {
+    "state_id": 2912,
+    "name": "Principality of Moldavia (Russia Military Occupation)",
+    "reason": "Imperial Russian military occupation of the Danubian Principalities"
+  },
+  {
+    "state_id": 2922,
+    "name": "Tsardom of Russia (Military Occupation)",
+    "reason": "Tsardom of Russia military operational theater in Livonia"
+  },
+  {
+    "state_id": 2940,
+    "name": "Gulangyu Island (international Concession)",
+    "reason": "International concession settlement on Gulangyu Island administered by a multilateral municipal council"
+  },
+  {
+    "state_id": 3021,
+    "name": "Heard Island and McDonald Islands (Australia)",
+    "reason": "Subantarctic island territory of Australia without permanent human population or capital"
+  },
+  {
+    "state_id": 3022,
+    "name": "Heard Island and McDonald Islands",
+    "reason": "Uninhabited subantarctic island group utilized as temporary sealing station without municipal capital"
+  },
+  {
+    "state_id": 3063,
+    "name": "Russia (Military Occupation) and Saxony (Military Occupation)",
+    "reason": "Russian armed forces wartime military occupation administration"
+  },
+  {
+    "state_id": 3073,
+    "name": "Savoy Military occupation",
+    "reason": "Duchy of Savoy military occupation operational sector in Montferrat"
+  },
+  {
+    "state_id": 3077,
+    "name": "Kingdom of Sardinia (Military Occupation)",
+    "reason": "Piedmontese-Sardinian military occupation forces in Lombardy"
+  },
+  {
+    "state_id": 3083,
+    "name": "Pedmont-Savoy (Military Occupation) and Habsburg Empire (Military Occupation)",
+    "reason": "Savoyard military operational command during regional conflict"
+  },
+  {
+    "state_id": 3114,
+    "name": "Hungarian Rebels",
+    "reason": "Kuruc anti-Habsburg rebellion led by Imre Thököly operating from regional fortresses"
+  },
+  {
+    "state_id": 3120,
+    "name": "Hungary (Military Occupation)",
+    "reason": "Hungarian royal military forces occupying frontier banates"
+  },
+  {
+    "state_id": 3200,
+    "name": "Imperial Faction",
+    "reason": "Satsuma-Choshu imperial allied military army during the Boshin War"
+  },
+  {
+    "state_id": 3211,
+    "name": "India and Bangladesh Rebels",
+    "reason": "Joint Indian Army and Mukti Bahini military operational command in East Pakistan"
+  },
+  {
+    "state_id": 3212,
+    "name": "India (Military Occupation)",
+    "reason": "Indian armed forces military occupation of Goa and Hyderabad"
+  },
+  {
+    "state_id": 3215,
+    "name": "Sikh Empire (Military Occupation)",
+    "reason": "Khalsa army military occupation in Kashmir and Peshawar"
+  },
+  {
+    "state_id": 3218,
+    "name": "Indonesia (Military Occupation)",
+    "reason": "Indonesian military operational administration in East Timor"
+  },
+  {
+    "state_id": 3225,
+    "name": "Intermittent Guerrilla",
+    "reason": "Dispersed insurgent bands during the Mexican War of Independence after Morelos"
+  },
+  {
+    "state_id": 3236,
+    "name": "Iran (Military Occupation)",
+    "reason": "Iranian armed forces military operational command"
+  },
+  {
+    "state_id": 3238,
+    "name": "Iraq (Military Occupation)",
+    "reason": "Iraqi armed forces military occupation administration in Kuwait"
+  },
+  {
+    "state_id": 3247,
+    "name": "Clipperton (Spain)",
+    "reason": "Uninhabited coral atoll in the eastern Pacific Ocean claimed without civil settlement"
+  },
+  {
+    "state_id": 3252,
+    "name": "Isla de Alboran",
+    "reason": "Small uninhabited islet in the Alboran Sea garrisoned without civil municipal status"
+  },
+  {
+    "state_id": 3262,
+    "name": "Islamist Rebels (Northern Mali Conflict)",
+    "reason": "Coalition of Islamist insurgent groups in northern Mali without formal state capital"
+  },
+  {
+    "state_id": 3263,
+    "name": "Islamist Rebels (Lebanon)",
+    "reason": "Paramilitary militia factions operating in northern and eastern Lebanon"
+  },
+  {
+    "state_id": 3264,
+    "name": "Islamist Rebels (Syrian Civili War)",
+    "reason": "Decentralised armed rebel coalitions operating across northern and southern Syria"
+  },
+  {
+    "state_id": 3265,
+    "name": "Islamists (Libyan Civil War)",
+    "reason": "Shura council and militia coalitions in Benghazi and Derna without state capital"
+  },
+  {
+    "state_id": 3266,
+    "name": "Islamists (War of Dagestan)",
+    "reason": "Authentic non-capital territory, tribal polity, military occupation zone, or nomadic confederacy"
+  },
+  {
+    "state_id": 3272,
+    "name": "Israel (Military Occupation)",
+    "reason": "Israeli military governorate administering the Sinai Peninsula and West Bank"
+  },
+  {
+    "state_id": 3277,
+    "name": "Italian Concession in Tianjin",
+    "reason": "Foreign concession enclave in Tianjin administered by the Italian consul without an independent capital city"
+  },
+  {
+    "state_id": 3297,
+    "name": "Italy (Military Occupation)",
+    "reason": "Italian armed forces wartime military occupation administration"
+  },
+  {
+    "state_id": 3309,
+    "name": "Jacobite Rebels",
+    "reason": "Highland rebel army under Prince Charles Edward Stuart on military campaign without a fixed civil capital"
+  },
+  {
+    "state_id": 3318,
+    "name": "Spain (Military Occupation)",
+    "reason": "Spanish Army of Flanders military operational theater"
+  },
+  {
+    "state_id": 3338,
+    "name": "Holy Roman Empire and Spain (Military Occupation)",
+    "reason": "Habsburg imperial-Spanish joint military operational command"
+  },
+  {
+    "state_id": 3341,
+    "name": "Japan (Military Occupation)",
+    "reason": "External military operational theater and occupation zone without an independent capital city"
+  },
+  {
+    "state_id": 3342,
+    "name": "Japanese Concession in Tianjin",
+    "reason": "Japanese concession enclave in Tianjin administered by the Japanese consular municipal council"
+  },
+  {
+    "state_id": 3343,
+    "name": "Japanese Concession in Chongqing",
+    "reason": "Japanese treaty port concession in Chongqing under consular municipal oversight"
+  },
+  {
+    "state_id": 3344,
+    "name": "Japanese Concession in Hangzhou",
+    "reason": "Japanese treaty port concession in Hangzhou administered by consular authorities"
+  },
+  {
+    "state_id": 3345,
+    "name": "Japanese Concession in Hankou",
+    "reason": "Japanese concession enclave in Hankou administered by the Japanese municipal council"
+  },
+  {
+    "state_id": 3346,
+    "name": "Japanese Concession in Shashi",
+    "reason": "Japanese treaty port concession in Shashi under consular administration"
+  },
+  {
+    "state_id": 3347,
+    "name": "Japanese Concession in Suzhou",
+    "reason": "Japanese treaty port concession in Suzhou administered by consular authorities"
+  },
+  {
+    "state_id": 3350,
+    "name": "Spain and Habsburg (Military Occupation)",
+    "reason": "Combined Spanish-Austrian Habsburg military theater in Italy"
+  },
+  {
+    "state_id": 3352,
+    "name": "Spain and Holy Roman Empire (Military Occupation)",
+    "reason": "Imperial-Spanish military operational alliance during European campaigns"
+  },
+  {
+    "state_id": 3354,
+    "name": "Joint Spain and GB CO",
+    "reason": "Joint Anglo-Spanish territorial condominium in Nootka Sound"
+  },
+  {
+    "state_id": 3355,
+    "name": "Spain and Great Britain Military Occupation",
+    "reason": "Joint Anglo-Spanish naval expedition occupying Veracruz"
+  },
+  {
+    "state_id": 3356,
+    "name": "Spain and Great Britain",
+    "reason": "Allied Anglo-Spanish-Portuguese army under Wellington invading southern France"
+  },
+  {
+    "state_id": 3369,
+    "name": "Jewish militias",
+    "reason": "Paramilitary defense forces (Haganah, Irgun, Lehi) operating in Mandatory Palestine without state apparatus"
+  },
+  {
+    "state_id": 3376,
+    "name": "Sweden (Military Occupation)",
+    "reason": "Swedish imperial military occupation command across the Baltic and Germany"
+  },
+  {
+    "state_id": 3399,
+    "name": "Old Swiss Confederacy (Military Occupation)",
+    "reason": "Swiss Confederate expeditionary forces occupying Milanese bailiwicks"
+  },
+  {
+    "state_id": 3401,
+    "name": "Switzerland and Holy Roman Empire (Military Occupation)",
+    "reason": "Joint Swiss-Imperial defensive campaign forces during the Swabian War"
+  },
+  {
+    "state_id": 3413,
+    "name": "Joint Rule Byzantine Empire-Caliphate",
+    "reason": "Condominium over Cyprus paying joint tribute to Constantinople and Damascus without independent capital"
+  },
+  {
+    "state_id": 3415,
+    "name": "Joint Tang and Silla (Military Occupation)",
+    "reason": "Tang-Silla allied military forces occupying Baekje and Goguryeo"
+  },
+  {
+    "state_id": 3421,
+    "name": "Juan de Nova",
+    "reason": "Isolated coral island in the Mozambique Channel without permanent municipal settlement"
+  },
+  {
+    "state_id": 3443,
+    "name": "Kabul Khel",
+    "reason": "Pashtun tribal territory in the North-West Frontier without a permanent municipal capital"
+  },
+  {
+    "state_id": 3495,
+    "name": "Ottoman Empire and Crimean Khanate (Military Occupation)",
+    "reason": "Ottoman-Crimean joint military campaign operational theater in Podolia"
+  },
+  {
+    "state_id": 3503,
+    "name": "Madisonville",
+    "reason": "Temporary American naval encampment on Nuku Hiva during the War of 1812"
+  },
+  {
+    "state_id": 3508,
+    "name": "Western Indian Confederacy",
+    "reason": "Loose pan-tribal alliance of Native American nations in the Northwest Territory without a fixed capital"
+  },
+  {
+    "state_id": 3581,
+    "name": "Unorganized Territory",
+    "reason": "Unorganized and unpopulated western federal frontier territory of the United States without civil capital"
+  },
+  {
+    "state_id": 3587,
+    "name": "USA and GB Cnd.",
+    "reason": "Joint Oregon Country condominium of the United States and Great Britain without a centralized civil capital"
+  },
+  {
+    "state_id": 3596,
+    "name": "Valois-Burgundy (Military Occupation)",
+    "reason": "Burgundian ducal armed forces military occupation of Lorraine"
+  },
+  {
+    "state_id": 3599,
+    "name": "Venice (Military Occupation)",
+    "reason": "Venetian maritime expeditionary force occupying the Morea"
+  },
+  {
+    "state_id": 3614,
+    "name": "Vientiane Kingdom and Champasak Kingdom (Military Occupation)",
+    "reason": "Allied Lao military forces operating during regional conflicts in the middle Mekong"
+  },
+  {
+    "state_id": 3616,
+    "name": "Lê Dynasty (Military Occupation)",
+    "reason": "Vietnamese royal military expedition in Champa"
+  },
+  {
+    "state_id": 3626,
+    "name": "Kerguelen Islands",
+    "reason": "Subantarctic archipelago with scientific research stations but no sovereign capital"
+  },
+  {
+    "state_id": 3643,
+    "name": "Zulu Kingdom (Military Occupation)",
+    "reason": "Zulu impis military operational raiding zone during the Mfecane"
+  },
+  {
+    "state_id": 3644,
+    "name": "Brazil and Colorados",
+    "reason": "Joint Brazilian and Colorado army military forces besieging Paysandú"
+  },
+  {
+    "state_id": 3645,
+    "name": "Catholic League",
+    "reason": "Catholic League army under Tilly occupying the Electoral Palatinate"
+  },
+  {
+    "state_id": 3648,
+    "name": "First Coalition",
+    "reason": "Allied army of the First Coalition occupying frontier fortresses in northern France"
+  },
+  {
+    "state_id": 3659,
+    "name": "Kharijites",
+    "reason": "Radical egalitarian Islamic schismatic faction encampment at Nahrawan without state capital"
+  },
+  {
+    "state_id": 3816,
+    "name": "Balliol Loyalists",
+    "reason": "Disinherited Anglo-Scottish army supporting Edward Balliol on military campaign"
+  },
+  {
+    "state_id": 3973,
+    "name": "Catholic Cantons",
+    "reason": "Five Catholic Cantons allied military army in the Second War of Kappel"
+  },
+  {
+    "state_id": 4051,
+    "name": "Colorados",
+    "reason": "Uruguayan revolutionary forces led by Venancio Flores during the 1864–1865 civil war"
+  },
+  {
+    "state_id": 4091,
+    "name": "Crusaders (Antioch)",
+    "reason": "Crusader expeditionary army operating in the Principality of Antioch defense sector"
+  },
+  {
+    "state_id": 4093,
+    "name": "Crusaders (Aydin)",
+    "reason": "Smyrniote crusade allied maritime naval league operating off Aydin"
+  },
+  {
+    "state_id": 4097,
+    "name": "Crusaders (Baltic Region)",
+    "reason": "Livonian and Prussian crusader armies operating in the Baltic pagan frontier"
+  },
+  {
+    "state_id": 4098,
+    "name": "Crusaders (Crusade of 1101)",
+    "reason": "Crusade of 1101 expeditionary military army traversing Anatolia without territorial capital"
+  },
+  {
+    "state_id": 4099,
+    "name": "Crusaders (Fifth Crusade)",
+    "reason": "Fifth Crusade allied expeditionary army besieging Damietta in Egypt"
+  },
+  {
+    "state_id": 4101,
+    "name": "Crusaders (Jerusalem)",
+    "reason": "First Crusade main army on expedition to capture Jerusalem"
+  },
+  {
+    "state_id": 4102,
+    "name": "Cuman-Kipchak confederation",
+    "reason": "Decentralised Turkic nomadic tribal confederacy across the Pontic-Caspian steppe without a permanent capital"
+  },
+  {
+    "state_id": 4425,
+    "name": "Kuwait and Saudi Arabia Cnd.",
+    "reason": "Neutral Zone partition condominium between Kuwait and Saudi Arabia without civil capital"
+  },
+  {
+    "state_id": 4581,
+    "name": "Liberatores",
+    "reason": "Wartime Roman republican civil war faction under Brutus and Cassius without sovereign capital"
+  },
+  {
+    "state_id": 4586,
+    "name": "Garibaldi's Volunteers",
+    "reason": "Expeditionary volunteer military army of Giuseppe Garibaldi during the Risorgimento"
+  },
+  {
+    "state_id": 4605,
+    "name": "Liugong Island Concession",
+    "reason": "British naval coaling station and leased anchorage on Liugong Island"
+  },
+  {
+    "state_id": 4641,
+    "name": "LRA",
+    "reason": "Non-state insurgent guerrilla group operating in Central Africa"
+  },
+  {
+    "state_id": 4655,
+    "name": "LURD",
+    "reason": "Rebel militant faction during the Second Liberian Civil War"
+  },
+  {
+    "state_id": 4667,
+    "name": "M23",
+    "reason": "Non-state rebel militia operating in North Kivu, DR Congo"
+  },
+  {
+    "state_id": 4687,
+    "name": "Magnentius",
+    "reason": "Short-lived Roman imperial usurper military force"
+  },
+  {
+    "state_id": 4786,
+    "name": "Ioannis Reign in Thrace",
+    "reason": "Byzantine civil war territorial faction under John VI Kantakouzenos"
+  },
+  {
+    "state_id": 4799,
+    "name": "Islands of Refreshment",
+    "reason": "Short-lived informal settlement of three sailors on Tristan da Cunha"
+  },
+  {
+    "state_id": 4843,
+    "name": "Maya States",
+    "reason": "Indigenous rebel Maya factions during the Caste War of Yucatán without single capital seat"
+  },
+  {
+    "state_id": 4923,
+    "name": "Mexico (Military Occupation)",
+    "reason": "Mexican army military operational command during regional pacification"
+  },
+  {
+    "state_id": 4934,
+    "name": "Military Administration in the Aegean",
+    "reason": "British military administration command over the Dodecanese following German surrender"
+  },
+  {
+    "state_id": 4948,
+    "name": "Missionaries in East Africa",
+    "reason": "Christian missionary exploration stations and settlements in East Africa"
+  },
+  {
+    "state_id": 4963,
+    "name": "MLCJ",
+    "reason": "Rebel armed group operating in the northern Central African Republic"
+  },
+  {
+    "state_id": 4966,
+    "name": "MODEL",
+    "reason": "Rebel militia faction in the Second Liberian Civil War"
+  },
+  {
+    "state_id": 5006,
+    "name": "Mongolia (Military Occupation)",
+    "reason": "Mongolian armed forces military operational theater in Khovd"
+  },
+  {
+    "state_id": 5024,
+    "name": "Montenegro (Military Occupation)",
+    "reason": "Military field campaign and occupation line during the Montenegrin-Ottoman War"
+  },
+  {
+    "state_id": 5030,
+    "name": "Morazan Forces",
+    "reason": "Liberal military expeditionary army under Francisco Morazán without fixed civil capital"
+  },
+  {
+    "state_id": 5032,
+    "name": "Morocco (Military Occupation)",
+    "reason": "Moroccan Saadi expeditionary army occupying Timbuktu and Gao"
+  },
+  {
+    "state_id": 5038,
+    "name": "Kalina",
+    "reason": "Indigenous Carib/Kalina tribal communities without centralized capital seat"
+  },
+  {
+    "state_id": 5046,
+    "name": "MPC",
+    "reason": "Central African Patriotic Movement rebel guerrilla faction without sovereign capital"
+  },
+  {
+    "state_id": 5047,
+    "name": "Kalinagos",
+    "reason": "Island Carib tribal society without permanent centralized administrative seat"
+  },
+  {
+    "state_id": 5061,
+    "name": "Mujahideen",
+    "reason": "Loose anti-Soviet guerrilla combat groups without unified seat of civil governance"
+  },
+  {
+    "state_id": 5067,
+    "name": "Muscat and Oman (Military Occupation)",
+    "reason": "Omani maritime military garrison in East Africa"
+  },
+  {
+    "state_id": 5070,
+    "name": "Muslim Rebel Groups",
+    "reason": "Decentralized local anti-government insurgent factions without single capital seat"
+  },
+  {
+    "state_id": 5071,
+    "name": "Muslim Rebels (China)",
+    "reason": "Panthay and Dungan Muslim insurgent forces during the mid-Qing rebellions"
+  },
+  {
+    "state_id": 5121,
+    "name": "Najaf Rebels",
+    "reason": "Anti-British uprising in the holy city of Najaf under military siege"
+  },
+  {
+    "state_id": 5160,
+    "name": "National Liberation Movement",
+    "reason": "Yugoslav Partisan national liberation military resistance army without fixed civil capital"
+  },
+  {
+    "state_id": 5162,
+    "name": "Nationalists",
+    "reason": "Nationalist military insurgent faction during the Spanish Civil War prior to total victory"
+  },
+  {
+    "state_id": 5207,
+    "name": "Netherlands (Military Occupation)",
+    "reason": "Royal Netherlands East Indies Army military expedition in Aceh"
+  },
+  {
+    "state_id": 5232,
+    "name": "New Spain Rebels",
+    "reason": "Insurgent rebel forces during the Mexican War of Independence operating as decentralized mobile divisions without a unified capital seat"
+  },
+  {
+    "state_id": 5281,
+    "name": "Noble Rebels",
+    "reason": "Aristocratic Fronde coalition operating through autonomous regional armies and provincial parlements without a centralized civil administrative capital"
+  },
+  {
+    "state_id": 5354,
+    "name": "Northern Xiongnu",
+    "reason": "Nomadic steppe tribal confederacy in the northern Mongolian plateau without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 5390,
+    "name": "Occupied Enemy Territory Administration in Ethiopia",
+    "reason": "British wartime military occupation administration following the East African campaign without a separate civil sovereign capital"
+  },
+  {
+    "state_id": 5422,
+    "name": "OLA",
+    "reason": "Non-state armed insurgent movement operating in rural Oromia without a sovereign civil capital seat"
+  },
+  {
+    "state_id": 5437,
+    "name": "Omar Samatar's Rebels",
+    "reason": "Anti-colonial Somali insurgent guerrilla uprising in Italian Somaliland without a permanent capital seat"
+  },
+  {
+    "state_id": 5443,
+    "name": "Operational Zone of the Adriatic Littoral",
+    "reason": "German World War II military operational zone administered directly under High Commissioner Friedrich Rainer in Trieste"
+  },
+  {
+    "state_id": 5444,
+    "name": "Operational Zone of the Alpine Foothills",
+    "reason": "German World War II military operational zone administered under High Commissioner Franz Hofer in Bolzano"
+  },
+  {
+    "state_id": 5459,
+    "name": "Organization of American States peacekeeping forces",
+    "reason": "Multinational Inter-American Peace Force military peacekeeping task force operating in Santo Domingo without civil administrative governance"
+  },
+  {
+    "state_id": 5504,
+    "name": "Pakistan (Military Occupation)",
+    "reason": "Territory under Pakistani military operational control during the Indo-Pakistani War without a distinct sovereign capital"
+  },
+  {
+    "state_id": 5519,
+    "name": "Israeli administered Palestinian territories",
+    "reason": "Territory under Israeli military and civil administration in the West Bank and Gaza Strip pursuant to the Oslo Accords"
+  },
+  {
+    "state_id": 5598,
+    "name": "Penon de Velez de la Gomera",
+    "reason": "Spanish military garrison fortress islet and plaza de soberanía without a civilian permanent capital"
+  },
+  {
+    "state_id": 5621,
+    "name": "Perejil (Spain)",
+    "reason": "Uninhabited Spanish coastal islet without human settlement or civil governance"
+  },
+  {
+    "state_id": 5632,
+    "name": "Persia (Military Occupation)",
+    "reason": "Persian military occupation forces in Ottoman Mesopotamia and the Caucasus without a separate civil capital seat"
+  },
+  {
+    "state_id": 5635,
+    "name": "Peruvian and Chilean Rebels",
+    "reason": "Joint Chilean and Argentine liberation expeditionary army under José de San Martín without a civilian administrative capital"
+  },
+  {
+    "state_id": 5636,
+    "name": "Peruvian Rebels",
+    "reason": "Decentralized local anti-Spanish guerrilla factions during the Peruvian War of Independence without a unified capital"
+  },
+  {
+    "state_id": 5730,
+    "name": "Pontiac's Rebels",
+    "reason": "Pan-tribal Native American warrior confederacy in the Great Lakes region without a permanent urban capital seat"
+  },
+  {
+    "state_id": 5868,
+    "name": "League of the Three Cities",
+    "reason": "Wartime alliance of Alajuela, Heredia, and San José during the Costa Rican League War without a unified capital seat"
+  },
+  {
+    "state_id": 5874,
+    "name": "Little Jüz",
+    "reason": "Nomadic tribal union of the Junior Kazakh Jüz operating across the western Kazakh steppe without a permanent fixed capital"
+  },
+  {
+    "state_id": 5876,
+    "name": "Principality of Trinidad",
+    "reason": "Unrecognized short-lived micronational claim on the uninhabited oceanic island of Trindade without civil administrative settlements"
+  },
+  {
+    "state_id": 5908,
+    "name": "Prisici Latini League",
+    "reason": "Tribal and religious league of ancient Latin cities centered at the sanctuary of Diana Nemorensis without a permanent urban capital"
+  },
+  {
+    "state_id": 5913,
+    "name": "Pro-Russian Rebels",
+    "reason": "Initial separatist militant movement occupying administrative buildings in the Donbas without recognized capital"
+  },
+  {
+    "state_id": 5920,
+    "name": "Proto Nazca Culture",
+    "reason": "Pre-urban Andean archaeological culture based on ceremonial complexes without centralized capital"
+  },
+  {
+    "state_id": 5950,
+    "name": "Martaban Rebels",
+    "reason": "Mon rebellion against the Pagan Kingdom led by Wareru along the Gulf of Martaban"
+  },
+  {
+    "state_id": 5953,
+    "name": "Matilde Loyalists",
+    "reason": "Angevin forces fighting the civil war of the Anarchy across England and Normandy"
+  },
+  {
+    "state_id": 5986,
+    "name": "Mergid",
+    "reason": "Nomadic steppe confederation in the Selenga and Orkhon basins without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 5987,
+    "name": "Middle Jüz",
+    "reason": "Nomadic steppe tribal confederation of the Middle Kazakh Jüz roaming the central steppes without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 5999,
+    "name": "Qing Dynasty (Military Occupation)",
+    "reason": "Eight Banners imperial military occupation in Dzungaria and Xinjiang"
+  },
+  {
+    "state_id": 6010,
+    "name": "Missouri State Guard",
+    "reason": "Confederate state military expeditionary force under Sterling Price operating as a mobile field army without a permanent capital seat"
+  },
+  {
+    "state_id": 6061,
+    "name": "RCD",
+    "reason": "Congolese armed rebel movement operating in eastern DRC without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6062,
+    "name": "RCD-Goma",
+    "reason": "Congolese armed rebel faction operating from Goma without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6063,
+    "name": "RCD-Kisingani",
+    "reason": "Congolese armed rebel faction operating in Kisangani without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6064,
+    "name": "RCD-ML",
+    "reason": "Congolese armed rebel faction in northeastern DRC without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6065,
+    "name": "RCD-N",
+    "reason": "Congolese armed rebel movement operating in northern DRC without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6066,
+    "name": "Rebel Poleis",
+    "reason": "Maritime alliance of revolting Ionian and Carian Greek poleis during the Ionian Revolt without a centralized civil capital"
+  },
+  {
+    "state_id": 6068,
+    "name": "Rebel Satrapies",
+    "reason": "Coalition of insurgent eastern Achaemenid satrapies resisting Macedonian conquest without a centralized capital seat"
+  },
+  {
+    "state_id": 6069,
+    "name": "Rebels (Acre War)",
+    "reason": "Brazilian rubber tapper secessionist forces in the Acre Territory during the Acre War"
+  },
+  {
+    "state_id": 6070,
+    "name": "Rebels (Brazil)",
+    "reason": "Provincial rebel forces during nineteenth-century regional Brazilian uprisings"
+  },
+  {
+    "state_id": 6071,
+    "name": "Rebels (Yucatán)",
+    "reason": "Indigenous Maya rebel forces during the Caste War of Yucatán"
+  },
+  {
+    "state_id": 6072,
+    "name": "Rebels (Colombia)",
+    "reason": "Liberal insurgent forces operating during the Thousand Days' War in Colombia"
+  },
+  {
+    "state_id": 6074,
+    "name": "Rebels (Libya)",
+    "reason": "Armed revolutionary rebel forces fighting during the 2011 Libyan Civil War"
+  },
+  {
+    "state_id": 6075,
+    "name": "Rebels (Mad War)",
+    "reason": "Feudal aristocratic rebellion against French royal authority during the Mad War"
+  },
+  {
+    "state_id": 6076,
+    "name": "Rebels (Mexican-American War)",
+    "reason": "Californio and New Mexican guerrilla resistance forces during American occupation"
+  },
+  {
+    "state_id": 6077,
+    "name": "Rebels (Peru 1884-1885)",
+    "reason": "Huaraz peasant rebellion led by Pedro Pablo Atusparia in Ancash"
+  },
+  {
+    "state_id": 6078,
+    "name": "Rebels (Peru 1865)",
+    "reason": "Restorationist revolutionary movement led by Mariano Ignacio Prado in Peru"
+  },
+  {
+    "state_id": 6079,
+    "name": "Rebels (Peru 1867)",
+    "reason": "Constitutionalist insurrectionary movement centered in Arequipa against the Peruvian presidency"
+  },
+  {
+    "state_id": 6080,
+    "name": "Rebels (Peru 1894-1895)",
+    "reason": "Civil war revolutionary movement led by Nicolás de Piérola in Peru"
+  },
+  {
+    "state_id": 6081,
+    "name": "Rebels (Philippine Revolution)",
+    "reason": "Katipunan revolutionary forces fighting the Spanish colonial authorities in the Philippines"
+  },
+  {
+    "state_id": 6082,
+    "name": "Rebels (Second Ivorian Civil War)",
+    "reason": "Republican forces fighting during the 2010–2011 Second Ivorian Civil War"
+  },
+  {
+    "state_id": 6113,
+    "name": "Republic of Bolivia (Military Occupation)",
+    "reason": "Bolivian army military occupation in Tacna and Arica"
+  },
+  {
+    "state_id": 6119,
+    "name": "Naiman Confederation",
+    "reason": "Nomadic Turco-Mongol steppe confederation in the Altai and Irtysh regions without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 6126,
+    "name": "Republic of Colombia (Military Occupation)",
+    "reason": "Colombian military expeditionary forces during regional campaigns"
+  },
+  {
+    "state_id": 6164,
+    "name": "Republic of Korea (Military Occupation)",
+    "reason": "South Korean military operational forces in northern Vietnam"
+  },
+  {
+    "state_id": 6204,
+    "name": "Republic of Peru (Military Occupation)",
+    "reason": "Peruvian army military occupation in Guayaquil and Bolivia"
+  },
+  {
+    "state_id": 6245,
+    "name": "Neutral Ground",
+    "reason": "Disputed neutral border territory between Spanish Texas and the United States without civil administrative governance"
+  },
+  {
+    "state_id": 6246,
+    "name": "New Grenada Semi-Independent Juntas",
+    "reason": "Decentralized autonomous provincial juntas in the United Provinces of New Granada without a single sovereign capital"
+  },
+  {
+    "state_id": 6267,
+    "name": "Nikapitiya's Rebels",
+    "reason": "Anti-Portuguese rebellion in the Kingdom of Kandy led by pretender Nikapitiya Bandara"
+  },
+  {
+    "state_id": 6312,
+    "name": "RJ",
+    "reason": "Non-state armed rebel faction operating in northwestern Central African Republic without a civil capital seat"
+  },
+  {
+    "state_id": 6319,
+    "name": "Romania (Military Occupation)",
+    "reason": "Romanian army military administration in Transnistria during World War II"
+  },
+  {
+    "state_id": 6331,
+    "name": "RPRC",
+    "reason": "Armed insurgent political-military movement in Bria without a sovereign civil capital seat"
+  },
+  {
+    "state_id": 6342,
+    "name": "Russia (Military Occupation)",
+    "reason": "Russian armed forces military operational zone during conflict"
+  },
+  {
+    "state_id": 6344,
+    "name": "Russian Concession in Tianjin",
+    "reason": "Russian concession enclave in Tianjin administered by Russian imperial consular authorities"
+  },
+  {
+    "state_id": 6345,
+    "name": "Russian Concession in Hankou",
+    "reason": "Russian treaty port concession in Hankou administered by consular municipal administration"
+  },
+  {
+    "state_id": 6348,
+    "name": "Russian Empire and Romania (Military Occupation)",
+    "reason": "Joint Russian-Romanian military front during World War I"
+  },
+  {
+    "state_id": 6349,
+    "name": "Russian Empire (Military Occupation)",
+    "reason": "Imperial Russian army military governorate in occupied East Prussia"
+  },
+  {
+    "state_id": 6356,
+    "name": "Rwandan Patriotic Front",
+    "reason": "Armed rebel insurgent movement operating from mobile guerrilla bases in the Virunga mountains without a civil capital seat"
+  },
+  {
+    "state_id": 6369,
+    "name": "Oirat Federation",
+    "reason": "Nomadic Western Mongolian confederation roaming the Dzungarian basin without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 6382,
+    "name": "Sahrawi Arab Democratic Republic (Military Occupation)",
+    "reason": "Polisario Front military operational command in the Free Zone of Western Sahara"
+  },
+  {
+    "state_id": 6418,
+    "name": "Saint-Paul Island",
+    "reason": "Uninhabited volcanic subantarctic island without permanent human civil settlement"
+  },
+  {
+    "state_id": 6427,
+    "name": "Saladoid",
+    "reason": "Archaeological pre-Columbian tribal culture of the Caribbean islands without centralized urban capital governance"
+  },
+  {
+    "state_id": 6428,
+    "name": "Saladoid-Barrancoid",
+    "reason": "Archaeological pre-Columbian ceramic culture of the Orinoco basin without centralized state institutions"
+  },
+  {
+    "state_id": 6434,
+    "name": "Pecheneg Khanates",
+    "reason": "Nomadic steppe tribal confederation inhabiting the Pontic-Caspian steppe without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 6437,
+    "name": "Salihid Confederation",
+    "reason": "Nomadic Arab foederati confederation in the Syrian desert borderlands without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 6452,
+    "name": "SAMO",
+    "reason": "Non-state clan-based insurgent militia operating in southern Somalia without a civil capital seat"
+  },
+  {
+    "state_id": 6477,
+    "name": "Santa Lucia Bay",
+    "reason": "Short-lived German trading station and colonial protectorate claim on the Zululand coast without an urban capital"
+  },
+  {
+    "state_id": 6488,
+    "name": "Saqqawist Rebels",
+    "reason": "Tajik peasant rebel movement in Afghanistan led by Habibullāh Kalakāni"
+  },
+  {
+    "state_id": 6503,
+    "name": "Saseno",
+    "reason": "Italian naval and military garrison station on Sazan Island without civilian civil governance"
+  },
+  {
+    "state_id": 6509,
+    "name": "Saudi Arabia (Military Occupation)",
+    "reason": "Saudi armed forces military intervention zone in Yemen"
+  },
+  {
+    "state_id": 6522,
+    "name": "SDM",
+    "reason": "Clan-based insurgent militia operating in Baidoa and the Bay region without a sovereign civil capital seat"
+  },
+  {
+    "state_id": 6526,
+    "name": "Schmalkaldic League",
+    "reason": "Military defensive alliance of Protestant princes and imperial cities without a permanent civil capital"
+  },
+  {
+    "state_id": 6548,
+    "name": "Seleka Militia",
+    "reason": "Armed rebel insurgent coalition operating in the bush and regional prefectures of the CAR without a recognized sovereign capital"
+  },
+  {
+    "state_id": 6566,
+    "name": "Serbia and Montenegro (Military Occupation)",
+    "reason": "Serbian and Montenegrin joint military administration in northern Albania"
+  },
+  {
+    "state_id": 6567,
+    "name": "Serbia and Romania (Military Occupation)",
+    "reason": "Allied military occupation of the Banat following World War I"
+  },
+  {
+    "state_id": 6568,
+    "name": "Serbia (Military Occupation)",
+    "reason": "Serbian royal army military administration in Macedonia during the Balkan Wars"
+  },
+  {
+    "state_id": 6583,
+    "name": "Seventh Coalition",
+    "reason": "Allied army under Wellington and Blücher invading France after Waterloo"
+  },
+  {
+    "state_id": 6611,
+    "name": "Sheikhdom of Kuwait (Military Occupation)",
+    "reason": "Kuwaiti armed tribal forces military operational theater"
+  },
+  {
+    "state_id": 6639,
+    "name": "Rebels (Huang Chao Rebellion)",
+    "reason": "Mass peasant insurgent movement led by Huang Chao that sacked major Tang Dynasty cities"
+  },
+  {
+    "state_id": 6664,
+    "name": "Simba Rebels",
+    "reason": "Left-wing Simba rebel insurgency across eastern Congo during the Congo Crisis"
+  },
+  {
+    "state_id": 6704,
+    "name": "Slave Rebels",
+    "reason": "Insurrectionary slave armies in northern Saint-Domingue initiating the Haitian Revolution"
+  },
+  {
+    "state_id": 6709,
+    "name": "SNF",
+    "reason": "Somali National Front clan-based insurgent militia operating in Gedo without a sovereign civil capital seat"
+  },
+  {
+    "state_id": 6715,
+    "name": "Sixth Coalition",
+    "reason": "Allied armies of the Sixth Coalition invading northeastern France in 1814"
+  },
+  {
+    "state_id": 6729,
+    "name": "Somalia (Military Occupation)",
+    "reason": "Somali National Army military operational zone in the Ogaden during the Ogaden War"
+  },
+  {
+    "state_id": 6744,
+    "name": "South African Republic and Free State of Orange (Military Occupation)",
+    "reason": "Boer commandos military operational theater during the Second Boer War"
+  },
+  {
+    "state_id": 6752,
+    "name": "South Sudan (Military Occupation)",
+    "reason": "SPLA military operational command in the Heglig oil fields during border clashes"
+  },
+  {
+    "state_id": 6753,
+    "name": "South West Africa (Military Occupation)",
+    "reason": "South African military administration over captured German South West Africa"
+  },
+  {
+    "state_id": 6755,
+    "name": "South Yemen (Military Occupation)",
+    "reason": "South Yemeni armed forces border military operational zone"
+  },
+  {
+    "state_id": 6769,
+    "name": "Soviet Concession in Dalian",
+    "reason": "Soviet special naval port and municipal concession zone in Dalian and Port Arthur"
+  },
+  {
+    "state_id": 6792,
+    "name": "SPM",
+    "reason": "Somali Patriotic Movement clan-based rebel faction operating in Lower Juba without a sovereign civil capital seat"
+  },
+  {
+    "state_id": 6795,
+    "name": "SSDF",
+    "reason": "Somali Salvation Democratic Front insurgent faction operating in northeastern Somalia without a recognized sovereign civil capital"
+  },
+  {
+    "state_id": 6959,
+    "name": "Swabian League",
+    "reason": "Defensive military alliance of Swabian imperial estates and cities during the Swabian War without a permanent civil capital"
+  },
+  {
+    "state_id": 6962,
+    "name": "Swedish Rebels",
+    "reason": "Anti-Union Swedish rebel forces led by Svante Nilsson and later Gustav Vasa"
+  },
+  {
+    "state_id": 6974,
+    "name": "Syria (Military Occupation)",
+    "reason": "Syrian armed forces military administration in Lebanon during the Lebanese Civil War"
+  },
+  {
+    "state_id": 6986,
+    "name": "Skewbald Horde",
+    "reason": "Nomadic Samoyedic and Selkup tribal confederacy in the middle Ob and Narym basin without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 7073,
+    "name": "Tanukhid Confederation",
+    "reason": "Nomadic Arab tribal confederation in the Syrian desert borderlands without a permanent fixed urban capital"
+  },
+  {
+    "state_id": 7136,
+    "name": "Texian Rebels",
+    "reason": "Provisional revolutionary army of Texian colonists before formal declaration of independence"
+  },
+  {
+    "state_id": 7191,
+    "name": "Tibet (Military Occupation)",
+    "reason": "Tibetan army military operational zone in Kham during border skirmishes"
+  },
+  {
+    "state_id": 7195,
+    "name": "Tiele Confederation",
+    "reason": "Authentic nomadic confederation of Turkic/Tiele tribes across the Altai and Siberian steppe without a fixed urban capital."
+  },
+  {
+    "state_id": 7237,
+    "name": "Toquz Oghuz",
+    "reason": "Authentic nomadic tribal confederation of Nine Oghuz tribes across the Mongolian steppe without a fixed urban capital."
+  },
+  {
+    "state_id": 7266,
+    "name": "Transnistria Governatorate (Romania Military Occupation)",
+    "reason": "Romanian civil-military occupation administration of Transnistria Governorate"
+  },
+  {
+    "state_id": 7272,
+    "name": "Trapezuntine Civil War Rebels",
+    "reason": "Scholarioi aristocratic rebel faction in the Empire of Trebizond civil war"
+  },
+  {
+    "state_id": 7278,
+    "name": "Tribal Confederation of the Saxons",
+    "reason": "Authentic tribal confederacy of Saxon pagi united by annual Marklo diet without a fixed permanent capital."
+  },
+  {
+    "state_id": 7281,
+    "name": "Tribal Kingdom of the Lazyges",
+    "reason": "Authentic nomadic Sarmatian tribal alliance settled between the Danube and Tisza rivers without permanent urban capital."
+  },
+  {
+    "state_id": 7299,
+    "name": "Tromelin Island",
+    "reason": "Authentic uninhabited coralline island and French overseas possession under TAAF district administration without a permanent capital."
+  },
+  {
+    "state_id": 7312,
+    "name": "Tuareg",
+    "reason": "Authentic nomadic Tuareg tribal confederation in the Sahara without a fixed permanent capital."
+  },
+  {
+    "state_id": 7320,
+    "name": "Tatar Confederation",
+    "reason": "Authentic nomadic Mongolic/Tatar confederacy in the Hulunbuir steppe without a permanent capital."
+  },
+  {
+    "state_id": 7324,
+    "name": "Turkey (Military Occupation)",
+    "reason": "Turkish armed forces military administration in northern Cyprus"
+  },
+  {
+    "state_id": 7357,
+    "name": "Uganda (Military Occupation)",
+    "reason": "Ugandan military intervention command in eastern Zaire"
+  },
+  {
+    "state_id": 7363,
+    "name": "UK and USA (Military Occupation)",
+    "reason": "Allied Military Government for Occupied Territories in Sicily and southern Italy"
+  },
+  {
+    "state_id": 7381,
+    "name": "Union of South Africa (Military Occupation)",
+    "reason": "South African military forces operational command in southern Africa"
+  },
+  {
+    "state_id": 7386,
+    "name": "United Arab Emirates (Military Occupation)",
+    "reason": "Emirati military forces operational zone in southern Yemen"
+  },
+  {
+    "state_id": 7397,
+    "name": "United Nations Buffer Zone in Cyprus",
+    "reason": "Authentic demilitarised buffer zone patrolled by UNFICYP across Cyprus without an administrative state capital."
+  },
+  {
+    "state_id": 7407,
+    "name": "United Republic of Tanzania (Military Occupation)",
+    "reason": "Tanzanian People's Defence Force military occupation in Uganda during the Uganda-Tanzania War"
+  },
+  {
+    "state_id": 7431,
+    "name": "Tlingit Tribes",
+    "reason": "Indigenous clan-based confederacy of coastal Southeast Alaska without a centralised capital"
+  },
+  {
+    "state_id": 7433,
+    "name": "USSR (Military Occupation)",
+    "reason": "Soviet military administration in eastern Germany and Manchuria"
+  },
+  {
+    "state_id": 7440,
+    "name": "USA minor islands",
+    "reason": "Authentic collection of unorganized, unincorporated island territories and wildlife refuges without a permanent capital."
+  },
+  {
+    "state_id": 7441,
+    "name": "USA (Military Occupation)",
+    "reason": "United States military government in occupied Germany and Japan"
+  },
+  {
+    "state_id": 7485,
+    "name": "Veracruz Culture",
+    "reason": "Regional Mesoamerican archaeological culture characterized by decentralized ceremonial centers"
+  },
+  {
+    "state_id": 7499,
+    "name": "Vietnam (Military Occupation)",
+    "reason": "People's Army of Vietnam military administration over Cambodia during the Cambodian-Vietnamese War"
+  },
+  {
+    "state_id": 7500,
+    "name": "United Tribes of New Zealand",
+    "reason": "Confederation of northern Māori iwi chiefs without a permanent capital city"
+  },
+  {
+    "state_id": 7548,
+    "name": "Warlords (Chinese Warlords Era)",
+    "reason": "Authentic multi-faction militarist fragmentation era across China without a unified national capital."
+  },
+  {
+    "state_id": 7550,
+    "name": "Warsaw Pact",
+    "reason": "Authentic joint Warsaw Pact military occupation forces in Czechoslovakia without a permanent political state capital."
+  },
+  {
+    "state_id": 7561,
+    "name": "Welsh Rebels",
+    "reason": "Welsh national rebellion under Owain Glyndŵr operating from mountain strongholds"
+  },
+  {
+    "state_id": 7593,
+    "name": "Wabash Confederacy",
+    "reason": "Authentic Native American tribal confederacy along the Wabash River without a permanent central capital."
+  },
+  {
+    "state_id": 7626,
+    "name": "Xianbei Confederation",
+    "reason": "Authentic nomadic tribal confederation of Xianbei clans in the northern steppe without permanent urban capital."
+  },
+  {
+    "state_id": 7636,
+    "name": "Xueyantuo Khanate",
+    "reason": "Authentic nomadic steppe khaganate along the Tuul and Orkhon rivers without a permanent urban capital."
+  },
+  {
+    "state_id": 7682,
+    "name": "Yuezhi",
+    "reason": "Authentic nomadic pastoralist confederation in Central Asia and Bactria without a permanent urban capital."
+  },
+  {
+    "state_id": 7684,
+    "name": "Yugoslavia (Military Occupation)",
+    "reason": "Yugoslav People's Army military occupation in Zone B of the Free Territory of Trieste"
+  },
+  {
+    "state_id": 7692,
+    "name": "Yaqui Tribes",
+    "reason": "Independent confederation of eight autonomous Yaqui pueblos in Sonora without a capital city"
+  },
+  {
+    "state_id": 7695,
+    "name": "Yenisei Kyrgyz Khaganate",
+    "reason": "Authentic nomadic Yenisei Kyrgyz Khaganate centered in the upper Yenisei valley without a permanent urban capital."
+  },
+  {
+    "state_id": 7747,
+    "name": "Zviadist Rebels",
+    "reason": "Armed loyalist partisans of ousted president Zviad Gamsakhurdia in western Georgia"
+  },
+  {
+    "state_id": 7773,
+    "name": "Lithuanian Tribes",
+    "reason": "Decentralised Baltic pagan tribal communities prior to medieval state unification"
+  },
+  {
+    "state_id": 7777,
+    "name": "Old Prussian Tribes",
+    "reason": "Autonomous Baltic pagan tribal clans across the Baltic littoral without a centralized capital"
+  },
+  {
+    "state_id": 7779,
+    "name": "Rani Tribes",
+    "reason": "West Slavic pagan Rani tribal principality on Rügen without a unified capital"
+  },
+  {
+    "state_id": 7781,
+    "name": "Kingdom of Sicily (Military Occupation)",
+    "reason": "Sicilian-Aragonese fleet military operational command in Malta during the War of the Sicilian Vespers"
+  },
+  {
+    "state_id": 7791,
+    "name": "Slavic Tribes",
+    "reason": "Dispersed Polabian and Pomeranian Slavic tribal clans in northern Germany"
+  },
+  {
+    "state_id": 7831,
+    "name": "Chin Brotherhood Alliance",
+    "reason": "Authentic revolutionary military alliance of Chin regional defence forces without a single permanent capital."
+  },
+  {
+    "state_id": 7832,
+    "name": "Chin forces",
+    "reason": "Authentic combined anti-junta ethnic armed resistance forces operating across Chin State without a fixed administrative capital."
+  },
+  {
+    "state_id": 7844,
+    "name": "People's Defence Force",
+    "reason": "Authentic nationwide network of anti-junta resistance defense forces organized under the NUG without a centralized territorial capital city."
+  }
+]

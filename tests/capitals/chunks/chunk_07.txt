@@ -1,0 +1,3903 @@
+# ==============================================================================
+# STATE CAPITALS CURATION CHUNK 07 / 12
+# States: 3919 to 4571 (Count: 653)
+# Format:
+#   STATE: [ID] Name (start_date -> stop_date) [fill: #HEX]
+#   STATUS: CAPITAL | ACAPITAL
+#   TIMELINE: (for CAPITAL)
+#     start_date -> stop_date: City Name [city_key]
+#   REASON: (for ACAPITAL) Reason for acapital status
+# ==============================================================================
+
+STATE: [3919] Kingdom of Israel (Assyria) (-731.1.1 -> -719.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -731.1.1 -> -719.1.1: Samaria [stadester-Samaria-Palestine]
+---
+
+STATE: [3920] Bidar Sultanate (1493.1.1 -> 1620.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1493.1.1 -> 1620.1.1: Bidar [ghsl-Bidar-India]
+---
+
+STATE: [3921] Bijapur Sultanate (1519.1.1 -> 1765.7.4) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1519.1.1 -> 1765.7.4: Bijapur [stadester-Bijapur-India]
+---
+
+STATE: [3922] Kingdom of Janjero (1501.1.1 -> 1895.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1895.1.1: Fofa [stadester-Fofa-Ethiopia]
+---
+
+STATE: [3923] Kingdom of Jarin (701.1.1 -> 1001.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  701.1.1 -> 1001.1.1: Jarin [stadester-Jarin-Sudan]
+---
+
+STATE: [3924] Kingdom of Jerusalem (1099.7.22 -> 1302.9.26) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1099.7.22 -> 1302.9.26: Jerusalem [stadester-Yerushalayim-Israel]
+---
+
+STATE: [3925] Kingdom of Jimma (1791.1.1 -> 1890.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1791.1.1 -> 1890.1.1: Jimma [ghsl-Jimma-Ethiopia]
+---
+
+STATE: [3926] Kingdom of Jimma (Ethiopian Empire) (1890.1.1 -> 1932.5.12) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1890.1.1 -> 1932.5.12: Jimma [ghsl-Jimma-Ethiopia]
+---
+
+STATE: [3927] Kingdom of Jinshan (911.1.1 -> 915.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  911.1.1 -> 915.1.1: Dunhuang [stadester-Dunhuang-China]
+---
+
+STATE: [3928] Bijawar State (1766.1.1 -> 1801.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1765.1.1 -> 1801.1.1: Bijawar [ghsl-Bijawar-#N/A]
+---
+
+STATE: [3929] Kingdom of Judah (-929.1.1 -> -731.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -929.1.1 -> -731.1.1: Jerusalem [stadester-Yerushalayim-Israel]
+---
+
+STATE: [3930] Kingdom of Judah (Babylonian Vassal) (-596.1.1 -> -585.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -596.1.1 -> -585.1.1: Jerusalem [stadester-Yerushalayim-Israel]
+---
+
+STATE: [3931] Kingdom of Judah (Assyria) (-731.1.1 -> -609.6.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -731.1.1 -> -609.6.1: Jerusalem [stadester-Yerushalayim-Israel]
+---
+
+STATE: [3932] Kingdom of Jugurtha (-115.1.1 -> -111.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -115.1.1 -> -111.1.1: Constantine [stadester-Constantine-Algeria]
+---
+
+STATE: [3933] Kingdom of Kaffa (1391.1.1 -> 1898.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1391.1.1 -> 1898.1.1: Bonga [stadester-Bonga-Ethiopia]
+---
+
+STATE: [3934] Bikaner State (1466.1.1 -> 1818.9.3) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1466.1.1 -> 1818.9.3: Bikaner [ghsl-Bikaner-India]
+---
+
+STATE: [3935] Bima Kingdom (1351.1.1 -> 1621.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1351.1.1 -> 1621.1.1: Bima [ghsl-Bima-Indonesia]
+---
+
+STATE: [3936] Bima Sultanate (1621.1.1 -> 1669.12.8) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1621.1.1 -> 1669.12.8: Bima [ghsl-Bima-Indonesia]
+---
+
+STATE: [3937] Kingdom of Kalinga (-499.1.1 -> 1375.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -499.1.1 -> 1375.1.1: Bhubaneswar [stadester-Bhubaneshwar-India]
+---
+
+STATE: [3938] Kingdom of Kalingga (601.1.1 -> 756.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  601.1.1 -> 756.1.1: Jepara [stadester-Jepara-Indonesia]
+---
+
+STATE: [3939] Kingdom of Kampuchea (1945.8.15 -> 1945.10.16) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1945.8.15 -> 1945.10.16: Phnom Penh [stadester-Phnom Penh-Cambodia]
+---
+
+STATE: [3940] Kingdom of Kampuchea (Japan) (1945.3.13 -> 1945.8.15) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1945.3.13 -> 1945.8.15: Phnom Penh [stadester-Phnom Penh-Cambodia]
+---
+
+STATE: [3941] Kingdom of Kandy (1470.1.1 -> 1815.3.2) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1470.1.1 -> 1815.3.2: Kandy [stadester-Kandy-Sri Lanka]
+---
+
+STATE: [3942] Bohemian Confederation (1619.7.31 -> 1621.5.7) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1619.7.31 -> 1621.5.7: Prague [stadester-Praha-Czech Republic]
+---
+
+STATE: [3943] Bonai State (1151.1.1 -> 1802.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1802.1.1: Bonaigarh [stadester-Bonaigarh-India]
+---
+
+STATE: [3944] Bono State (1201.1.1 -> 1724.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1724.1.1: Bono Manso [stadester-Bono-Manso-Ghana]
+---
+
+STATE: [3945] Burgundy (Rudolph) (888.1.13 -> 934.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  888.1.13 -> 934.1.1: Vienne [stadester-Vienne-France]
+---
+
+STATE: [3946] Kingdom of Kapisa (-599.1.1 -> 701.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> 701.1.1: Begram [stadester-Begram-Afghanistan]
+---
+
+STATE: [3947] Kingdom of Karagwe (1451.1.1 -> 1890.7.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1451.1.1 -> 1890.7.1: Bweranyange [stadester-Bweranyange-Tanzania]
+---
+
+STATE: [3948] Bora Bora (1761.1.1 -> 1848.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1761.1.1 -> 1848.1.1: Vaitape [stadester-Vaitape-French Polynesia]
+---
+
+STATE: [3949] Buleleng (1687.1.1 -> 1849.8.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1687.1.1 -> 1849.8.1: Singaraja [stadester-Singaraja-Indonesia]
+---
+
+STATE: [3950] Bulungan Sultanate (1732.1.1 -> 1851.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1732.1.1 -> 1851.1.1: Tanjung Selor [ghsl-Tanjung Selor; Jl. Serindit-Indonesia]
+---
+
+STATE: [3951] Bundi State (1343.1.1 -> 1713.8.9) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1343.1.1 -> 1713.8.9: Bundi [ghsl-Bundi-India]
+---
+
+STATE: [3952] Bundu (1651.1.1 -> 1859.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1651.1.1 -> 1859.1.1: Bulibani [stadester-Bulibani-Senegal]
+---
+
+STATE: [3953] Buyid Dynasty (935.1.1 -> 1056.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  935.1.1 -> 1056.1.1: Shiraz [ghsl-Shiraz-Iran]
+---
+
+STATE: [3954] Kingdom of Kashi (-599.1.1 -> -412.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -412.1.1: Varanasi [ghsl-Varanasi; Mughal Sarai-India]
+---
+
+STATE: [3955] Kingdom of Kazembe (1741.1.1 -> 1900.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1741.1.1 -> 1900.1.1: Mwansabombwe [stadester-Mwansabombwe-Zambia]
+---
+
+STATE: [3956] Kingdom of Kebbi (1517.1.1 -> 1806.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1517.1.1 -> 1806.1.1: Birnin Kebbi [stadester-Birnin Kebbi-Nigeria]
+---
+
+STATE: [3957] Kingdom of Kedah (-787.1.1 -> 331.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -787.1.1 -> 331.1.1: Alor Setar [stadester-Alor Setar-Malaysia]
+---
+
+STATE: [3958] Kingdom of Kent (456.1.1 -> 799.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  456.1.1 -> 799.1.1: Canterbury [stadester-Canterbury-United Kingdom]
+---
+
+STATE: [3959] Kingdom of Kent (Mercia) (765.1.1 -> 826.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  765.1.1 -> 826.1.1: Canterbury [stadester-Canterbury-United Kingdom]
+---
+
+STATE: [3960] Kingdom of Kent (Wessex) (826.1.1 -> 872.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  826.1.1 -> 872.1.1: Canterbury [stadester-Canterbury-United Kingdom]
+---
+
+STATE: [3961] Kingdom of Kerma (-2499.1.1 -> -1523.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -2499.1.1 -> -1523.1.1: Kerma [stadester-Kerma-Sudan]
+---
+
+STATE: [3962] Kingdom of Khana (-1760.1.1 -> -1720.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  -1760.1.1 -> -1720.1.1: Terqa [stadester-Terqa-Syria]
+---
+
+STATE: [3963] California Republic (1846.6.14 -> 1846.7.9) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1846.6.14 -> 1846.7.9: Sonoma [stadester-Sonoma-United States]
+---
+
+STATE: [3964] Khotan Kingdom (China) (128.1.1 -> 631.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  128.1.1 -> 631.1.1: Hotan [stadester-Hotan-China]
+---
+
+STATE: [3965] Kingdom of Kibi (301.1.1 -> 401.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  301.1.1 -> 401.1.1: Okayama [stadester-Okayama-Japan]
+---
+
+STATE: [3966] Kingdom of Kiga (1801.1.1 -> 1901.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1901.1.1: Kabale [stadester-Kabale-Uganda]
+---
+
+STATE: [3967] Caliphate of Córdoba (929.1.16 -> 1032.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  929.1.16 -> 1032.1.1: Córdoba [stadester-Córdoba-Spain]
+---
+
+STATE: [3968] Kingdom of Kongo (Portugal) (1858.1.1 -> 1885.2.26) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1858.1.1 -> 1885.2.26: M'banza-Kongo [stadester-M'banza-Kongo-Angola]
+---
+
+STATE: [3969] Kingdom of Kotte (1409.1.1 -> 1552.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1409.1.1 -> 1552.1.1: Kotte [stadester-Kotte-Sri Lanka]
+---
+
+STATE: [3970] Cambay State (1731.1.1 -> 1781.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1731.1.1 -> 1781.1.1: Khambhat [ghsl-Khambhat-India]
+---
+
+STATE: [3971] Kingdom of Koya (1451.1.1 -> 1896.8.31) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1451.1.1 -> 1896.8.31: Port Loko [stadester-Port Loko-Sierra Leone]
+---
+
+STATE: [3972] Caracas Junta (1810.4.19 -> 1811.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1810.4.19 -> 1811.1.1: Caracas [ghsl-Caracas-Venezuela]
+---
+
+STATE: [3973] Catholic Cantons (1531.10.9 -> 1531.11.20) [fill: #E0C25E]
+STATUS: ACAPITAL
+REASON: Five Catholic Cantons allied military army in the Second War of Kappel
+---
+
+STATE: [3974] Caucasian Imamate (1829.1.1 -> 1860.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1829.1.1 -> 1860.1.1: Vedeno [stadester-Vedeno-Russia]
+---
+
+STATE: [3975] Kingdom of Kurdistan (1922.10.1 -> 1924.8.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1922.10.1 -> 1924.8.1: Sulaymaniyah [stadester-Sulaymaniyah-Iraq]
+---
+
+STATE: [3976] Kingdom of Kush (-1069.1.1 -> 351.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -1069.1.1 -> 351.1.1: Meroë [stadester-Meroë-Sudan]
+---
+
+STATE: [3977] Centralist Republic of Mexico (1835.10.23 -> 1846.8.22) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1835.10.23 -> 1846.8.22: Mexico City [ghsl-Mexico City; Ecatepec; Nezahualc�yotl; Naucalpan de Ju�rez; Tlalnepantla; Chimalhuac�n; Atizap�n de Zaragoza; Ciudad L�pez Mateos; Cuautitlan Izcalli; Ojo de Agua; Xico; Ixtapaluca; Nicol�s Romero; Coacalco; Buenavista; Chalco de D�az Covarrubias; Huixquilucan de Degollado; Santa Fe; Interlomas-M�xico]
+---
+
+STATE: [3978] Kingdom of Lâm Ấp (193.1.1 -> 530.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  193.1.1 -> 530.1.1: Trà Kiệu [stadester-Trà-Kiệu-Vietnam]
+---
+
+STATE: [3979] Chagatai Khanate (1261.1.1 -> 1348.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1261.1.1 -> 1348.1.1: Almaliq [stadester-Almaliq-China]
+---
+
+STATE: [3980] Kingdom of Langu (1883.1.1 -> 1891.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1883.1.1 -> 1891.1.1: Langu [stadester-Langu-Sudan]
+---
+
+STATE: [3981] Kingdom of Laos (1953.11.9 -> 1975.12.2) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1953.11.9 -> 1975.12.2: Vientiane [stadester-Vientiane-Laos]
+---
+
+STATE: [3982] Chahamanas of Naddula (951.1.1 -> 1198.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  951.1.1 -> 1198.1.1: Nadol [stadester-Nadol-India]
+---
+
+STATE: [3983] Chahamanas of Ranastambhapura (1216.1.1 -> 1302.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1216.1.1 -> 1302.1.1: Ranthambore [stadester-Ranthambore-India]
+---
+
+STATE: [3984] Kingdom of Lesotho (1966.10.4 -> 2026.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1966.10.4 -> 2026.1.1: Maseru [stadester-Maseru-Lesotho]
+---
+
+STATE: [3985] Kingdom of Lesser Armenia (-329.1.1 -> -105.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -329.1.1 -> -105.1.1: Sivas [stadester-Sivas-Turkey]
+---
+
+STATE: [3986] Chahamanas of Shakambhari (951.1.1 -> 1193.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  951.1.1 -> 1193.1.1: Ajmer [stadester-Ajmer-India]
+---
+
+STATE: [3987] Kingdom of Licchavi (465.1.1 -> 1201.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  465.1.1 -> 1201.1.1: Kathmandu [stadester-Kathmandu-Nepal]
+---
+
+STATE: [3988] Kingdom of Limmu-Ennarea (1791.1.1 -> 1831.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1791.1.1 -> 1831.1.1: Saqa [stadester-Saqa-Ethiopia]
+---
+
+STATE: [3989] Kingdom of Lindsey (501.1.1 -> 631.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  501.1.1 -> 631.1.1: Lincoln [stadester-Lincoln-United Kingdom]
+---
+
+STATE: [3990] Chalukyas of Lata (971.1.1 -> 1071.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  971.1.1 -> 1071.1.1: Navsari [ghsl-Navsari-India]
+---
+
+STATE: [3991] Kingdom of Lithuania (Germany) (1918.2.16 -> 1918.11.2) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1918.2.16 -> 1918.11.2: Vilnius [stadester-Vilnius-Lithuania]
+---
+
+STATE: [3992] Kingdom of Loango (1401.1.1 -> 1884.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1401.1.1 -> 1884.1.1: Bwali [stadester-Bwali-Republic of the Congo]
+---
+
+STATE: [3993] Chandelas of Jejakabhukti (926.1.1 -> 1316.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  926.1.1 -> 1316.1.1: Khajuraho [stadester-Khajuraho-India]
+---
+
+STATE: [3994] Chandra dynasty (901.1.1 -> 1050.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  901.1.1 -> 1050.1.1: Vikramapura [stadester-Vikramapura-Bangladesh]
+---
+
+STATE: [3995] Changbhakar State (1791.1.1 -> 1822.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1791.1.1 -> 1822.1.1: Janakpur [stadester-Janakpur-Nepal]
+---
+
+STATE: [3996] Kingdom of Luang Phrabang (Siam) (1779.1.1 -> 1893.10.3) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1779.1.1 -> 1893.10.3: Luang Prabang [stadester-Louang Phabang-Laos]
+---
+
+STATE: [3997] Kingdom of Luwu (1301.1.1 -> 1906.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1906.1.1: Palopo [stadester-Palopo-Indonesia]
+---
+
+STATE: [3998] Kingdom of Libya (1951.12.24 -> 1969.9.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1951.12.24 -> 1969.9.1: Tripoli [stadester-Tarâbulus-Libya]
+---
+
+STATE: [3999] Kingdom of Lydia (-679.1.1 -> -546.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -679.1.1 -> -546.1.1: Sardis [stadester-Sardis-Turkey]
+---
+
+STATE: [4000] Kingdom of Lysimachos (-315.4.1 -> -281.4.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -315.4.1 -> -281.4.1: Lysimachia [stadester-Lysimachia-Turkey]
+---
+
+STATE: [4001] Kingdom of Macedonia (-807.1.1 -> -315.4.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -807.1.1 -> -315.4.1: Pella (Macedon) [stadester-Pella--Macedon--Greece]
+---
+
+STATE: [4002] Kingdom of Macedonia (Dardania) (-391.1.1 -> -390.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -391.1.1 -> -390.1.1: Pella (Macedon) [stadester-Pella--Macedon--Greece]
+---
+
+STATE: [4003] Kingdom of Macedonia (Persia) (-510.1.1 -> -478.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -510.1.1 -> -478.1.1: Pella (Macedon) [stadester-Pella--Macedon--Greece]
+---
+
+STATE: [4004] Kingdom of Madagascar (1817.10.27 -> 1895.10.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1817.10.27 -> 1895.10.1: Antananarivo [ghsl-Antananarivo-Madagascar]
+---
+
+STATE: [4005] Kingdom of Makuria (401.1.1 -> 1519.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  401.1.1 -> 1519.1.1: Old Dongola [stadester-Old-Dongola-Sudan]
+---
+
+STATE: [4006] Charkhari State (1766.1.1 -> 1802.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1766.1.1 -> 1802.1.1: Charkhari [stadester-Charkhari-India]
+---
+
+STATE: [4007] Chaulukya dynasty (943.1.1 -> 1245.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  943.1.1 -> 1245.1.1: Anhilwad Patan [stadester-Anhilwad-Patan-India]
+---
+
+STATE: [4008] Kingdom of Mambo a Chidima (1760.1.1 -> 1918.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1760.1.1 -> 1918.1.1: Chidima [stadester-Chidima-Mozambique]
+---
+
+STATE: [4009] Chera-Perumal Kingdom (801.1.1 -> 951.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  801.1.1 -> 951.1.1: Kodungallur [stadester-Kodungallur-India]
+---
+
+STATE: [4010] Kingdom of Mangareva (France) (1844.1.16 -> 1881.7.5) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1844.1.16 -> 1881.7.5: Rikitea [stadester-Rikitea-French Polynesia]
+---
+
+STATE: [4011] Kingdom of Manipur (36.1.1 -> 1891.4.27) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  36.1.1 -> 1891.4.27: Imphal [ghsl-Imphal-India]
+---
+
+STATE: [4012] Chero dynasty (1151.1.1 -> 1608.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1151.1.1 -> 1608.1.1: Palamu [stadester-Palamu-India]
+---
+
+STATE: [4013] Kingdom of Maravi (1481.1.1 -> 1892.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1481.1.1 -> 1892.1.1: Mankhamba [stadester-Mankhamba-Malawi]
+---
+
+STATE: [4014] Kingdom of Margiana (51.1.1 -> 201.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  51.1.1 -> 201.1.1: Merv [stadester-Mary-Turkmenistan]
+---
+
+STATE: [4015] Kingdom of Margiana (Parthia) (201.1.1 -> 224.4.28) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  201.1.1 -> 224.4.28: Merv [stadester-Mary-Turkmenistan]
+---
+
+STATE: [4016] Kingdom of Margiana (Sasanids) (224.4.28 -> 261.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  224.4.28 -> 261.1.1: Merv [stadester-Mary-Turkmenistan]
+---
+
+STATE: [4017] Cherokee Nation (1794.11.7 -> 1861.12.31) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1794.11.7 -> 1861.12.31: New Echota [stadester-New-Echota-United States]
+---
+
+STATE: [4018] Kingdom of Matamba (Portugal) (1745.1.1 -> 1901.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1745.1.1 -> 1901.1.1: Matamba [stadester-Matamba-Angola]
+---
+
+STATE: [4019] Kingdom of Mercia (528.1.1 -> 880.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  528.1.1 -> 880.1.1: Tamworth [stadester-Tamworth-United Kingdom]
+---
+
+STATE: [4020] Kingdom of Mercia (Wessex) (830.1.1 -> 919.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  830.1.1 -> 919.1.1: Tamworth [stadester-Tamworth-United Kingdom]
+---
+
+STATE: [4021] Kingdom of Metz (Sigebert) (561.11.29 -> 594.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  561.11.29 -> 594.1.1: Metz [stadester-Metz-France]
+---
+
+STATE: [4022] Kingdom of Metz (Theudebert II) (594.1.1 -> 613.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  594.1.1 -> 613.1.1: Metz [stadester-Metz-France]
+---
+
+STATE: [4023] Kingdom of Middag (1541.1.1 -> 1733.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1541.1.1 -> 1733.1.1: Dadu [stadester-Dadu-Taiwan]
+---
+
+STATE: [4024] Kingdom of Middag (Dutch) (1646.1.1 -> 1663.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1646.1.1 -> 1663.1.1: Dadu [stadester-Dadu-Taiwan]
+---
+
+STATE: [4025] Kingdom of Midhe (401.1.1 -> 1174.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  401.1.1 -> 1174.1.1: Tara (Midhe) [stadester-Tara--Midhe--Ireland]
+---
+
+STATE: [4026] Kingdom of Moab (-1299.1.1 -> -399.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -1299.1.1 -> -399.1.1: Al-Karak [stadester-Al-Karak-Jordan]
+---
+
+STATE: [4027] Kingdom of Molon (-221.1.1 -> -220.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -221.1.1 -> -220.1.1: Seleucia on the Tigris [stadester-Seleucia-on-the-Tigris-Iraq]
+---
+
+STATE: [4028] Kingdom of Montenegro (1910.8.28 -> 1918.11.28) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1910.8.28 -> 1918.11.28: Cetinje [stadester-Cetinje-Serbia]
+---
+
+STATE: [4029] Kingdom of Morgannwg (631.1.1 -> 1092.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  631.1.1 -> 1092.1.1: Cardiff [stadester-Cardiff-United Kingdom]
+---
+
+STATE: [4030] Kingdom of Morocco (1956.4.7 -> 2026.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1956.4.7 -> 2026.1.1: Rabat [stadester-Rabat-Morocco]
+---
+
+STATE: [4031] Kingdom of Mpororo (1651.1.1 -> 1901.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1651.1.1 -> 1901.1.1: Mpororo [stadester-Mpororo-Uganda]
+---
+
+STATE: [4032] Chhatarpur State (1786.1.1 -> 1807.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1807.1.1: Chhatarpur [stadester-Chhatarpur-India]
+---
+
+STATE: [4033] Kingdom of Mthwakazi (1841.1.1 -> 1893.12.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1841.1.1 -> 1893.12.1: Bulawayo [stadester-Bulawayo-Zimbabwe]
+---
+
+STATE: [4034] Chhaya State (1575.1.1 -> 1786.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1575.1.1 -> 1786.1.1: Chhaya [stadester-Chhaya-India]
+---
+
+STATE: [4035] Chhota Udaipur State (1744.1.1 -> 1802.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1744.1.1 -> 1802.1.1: Chhota Udaipur [stadester-Chhota-Udaipur-India]
+---
+
+STATE: [4036] Chimor (851.1.1 -> 1439.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  851.1.1 -> 1439.1.1: Chan Chan [stadester-Chan-Chan-Peru]
+---
+
+STATE: [4037] Chindaka Naga (1024.1.1 -> 1115.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1024.1.1 -> 1115.1.1: Chakrakota [stadester-Chakrakota-India]
+---
+
+STATE: [4038] Kingdom of Mysore (Princely State) (1799.6.30 -> 1947.8.9) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1799.6.30 -> 1947.8.9: Mysore [stadester-Mysore-India]
+---
+
+STATE: [4039] Chitral State (1699.1.1 -> 1779.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1699.1.1 -> 1779.1.1: Chitral [ghsl-Chitral-Pakistan]
+---
+
+STATE: [4040] Kingdom of Namayan (1176.1.1 -> 1572.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1176.1.1 -> 1572.1.1: Namayan [stadester-Namayan-Philippines]
+---
+
+STATE: [4041] Kingdom of Nanzan (1315.1.1 -> 1430.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1315.1.1 -> 1430.1.1: Ozato [stadester-Ozato-Japan]
+---
+
+STATE: [4042] Chobanids (1225.1.1 -> 1357.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1225.1.1 -> 1357.1.1: Tabriz [ghsl-Tabriz-Iran]
+---
+
+STATE: [4043] Chowta Dynasty (1161.1.1 -> 1823.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1161.1.1 -> 1823.1.1: Moodabidri (Chowta) [stadester-Moodabidri--Chowta--India]
+---
+
+STATE: [4044] Chowta Dynasty of Puttige (1545.1.1 -> 1604.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1545.1.1 -> 1604.1.1: Puttige [stadester-Puttige-India]
+---
+
+STATE: [4045] Chowta Dynasty of Ullal (1545.1.1 -> 1604.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1545.1.1 -> 1604.1.1: Moodabidri [stadester-Moodabidri-India]
+---
+
+STATE: [4046] Chudasama Dynasty (1037.1.1 -> 1473.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1037.1.1 -> 1473.1.1: Junagadh [ghsl-Junagadh-India]
+---
+
+STATE: [4047] Chutia Kingdom (1188.1.1 -> 1524.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1188.1.1 -> 1524.1.1: Sadiya [stadester-Sadiya-India]
+---
+
+STATE: [4048] Circassian Confederation (1454.1.1 -> 1865.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1454.1.1 -> 1865.1.1: Sochi [stadester-So`'ci-Russia]
+---
+
+STATE: [4049] Kingdom of Nauru (1851.1.1 -> 1886.4.6) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1851.1.1 -> 1886.4.6: Yaren [stadester-Yaren-Nauru]
+---
+
+STATE: [4050] Kingdom of Nauru (Germany) (1886.4.6 -> 1889.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1886.4.6 -> 1889.1.1: Yaren [stadester-Yaren-Nauru]
+---
+
+STATE: [4051] Colorados (1864.10.24 -> 1865.2.20) [fill: #AEC76D]
+STATUS: ACAPITAL
+REASON: Uruguayan revolutionary forces led by Venancio Flores during the 1864–1865 civil war
+---
+
+STATE: [4052] Commonwealth of England (1650.1.1 -> 1654.4.12) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1650.1.1 -> 1654.4.12: London [stadester-London-United Kingdom]
+---
+
+STATE: [4053] Commonwealth of England, Scotland and Ireland (1654.4.12 -> 1659.5.25) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1654.4.12 -> 1659.5.25: London [stadester-London-United Kingdom]
+---
+
+STATE: [4054] Kingdom of Nédjeh (-1569.1.1 -> -1559.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -1569.1.1 -> -1559.1.1: Riyadh [stadester-Riyadh-Saudi Arabia]
+---
+
+STATE: [4055] Kingdom of Nejd and Hejaz (1927.5.20 -> 1932.9.23) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1926.1.8 -> 1932.9.23: Riyadh [stadester-Riyadh-Saudi Arabia]
+---
+
+STATE: [4056] Kingdom of Nejd and Hejaz (Great Britain) (1925.12.19 -> 1927.5.20) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1925.12.19 -> 1927.5.20: Riyadh [stadester-Riyadh-Saudi Arabia]
+---
+
+STATE: [4057] Emirate of Nekor (711.1.1 -> 1020.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  711.1.1 -> 1020.1.1: Nekor [stadester-Nekor-Morocco]
+---
+
+STATE: [4058] Kingdom of Nepal (1770.1.1 -> 2008.5.28) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1770.1.1 -> 2008.5.28: Kathmandu [stadester-Kathmandu-Nepal]
+---
+
+STATE: [4059] Kingdom of Ngari Khorsum (926.1.1 -> 1843.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  926.1.1 -> 1843.1.1: Purang (Ngari Khorsum) [stadester-Purang--Ngari-Khorsum--China]
+---
+
+STATE: [4060] Confederate States of America (1861.2.4 -> 1865.5.13) [fill: #8C5A37]
+STATUS: CAPITAL
+TIMELINE:
+  1861.2.4 -> 1865.5.13: Richmond [stadester-Richmond-Virginia]
+---
+
+STATE: [4061] Kingdom of Niue (1701.1.1 -> 1898.6.30) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.1 -> 1898.6.30: Alofi [stadester-Alofi-Niue]
+---
+
+STATE: [4062] Kingdom of Norway (873.1.1 -> 2026.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  873.1.1 -> 2026.1.1: Oslo [stadester-Oslo-Norway]
+---
+
+STATE: [4063] Confederated Estates of the Kingdom of Hungary (1705.10.1 -> 1711.2.21) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1705.10.1 -> 1711.2.21: Bratislava [stadester-Bratislava-Slovakia]
+---
+
+STATE: [4064] Confederation of the Seven Kingdoms of Kongo dia Nlaza (1501.1.1 -> 1581.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1581.1.1: Kongo dia Nlaza [stadester-Kongo-dia-Nlaza-Angola]
+---
+
+STATE: [4065] Kingdom of Nri (1044.1.1 -> 1912.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1044.1.1 -> 1912.1.1: Igbo-Ukwu [stadester-Igbo-Ukwu-Nigeria]
+---
+
+STATE: [4066] Kingdom of Nshenyi (1753.1.1 -> 1902.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1753.1.1 -> 1902.1.1: Nshenyi [stadester-Nshenyi-Uganda]
+---
+
+STATE: [4067] Cooch Behar State (1587.1.1 -> 1601.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1587.1.1 -> 1601.1.1: Cooch Behar [ghsl-Cooch Behar-India]
+---
+
+STATE: [4068] Kingdom of Odoacer (476.9.4 -> 493.3.5) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  476.9.4 -> 493.3.5: Ravenna [stadester-Ravenna-Italy]
+---
+
+STATE: [4069] Kingdom of Orleans (Guntram) (561.11.29 -> 593.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  561.11.29 -> 593.1.1: Orléans [stadester-Orléans-France]
+---
+
+STATE: [4070] Kingdom of Orleans (Theuderic II) (594.1.1 -> 614.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  594.1.1 -> 614.1.1: Orléans [stadester-Orléans-France]
+---
+
+STATE: [4071] Cossack Hetmanate (1649.8.18 -> 1654.1.18) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1649.8.18 -> 1654.1.18: Baturyn [stadester-Baturyn-Ukraine]
+---
+
+STATE: [4072] Kingdom of Orungu (1701.1.1 -> 1874.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.1 -> 1874.1.1: Port-Gentil [stadester-Port-Gentil-Gabon]
+---
+
+STATE: [4073] Kingdom of Ösung (843.1.1 -> 926.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  842.1.1 -> 926.1.1: Lhasa [stadester-Lhasa-China]
+---
+
+STATE: [4074] County of Apulia and Calabria (1042.10.1 -> 1059.8.25) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1042.10.1 -> 1059.8.25: Melfi [stadester-Melfi-Italy]
+---
+
+STATE: [4075] Kingdom of Palmyra (270.11.1 -> 274.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  270.11.1 -> 274.1.1: Palmyra [stadester-Palmyra-Syria]
+---
+
+STATE: [4076] Kingdom of Paris (561.11.29 -> 568.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  561.11.29 -> 568.1.1: Paris [stadester-Paris-France]
+---
+
+STATE: [4077] Kingdom of Pelagonia (-168.6.22 -> -146.12.31) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -168.6.22 -> -146.12.31: Pelagonia [stadester-Pelagonia-North Macedonia]
+---
+
+STATE: [4078] Kingdom of Pella (-168.6.22 -> -146.12.31) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -168.6.22 -> -146.12.31: Pella (Macedon) [stadester-Pella--Macedon--Greece]
+---
+
+STATE: [4079] Kingdom of Pergamon (-262.1.1 -> -128.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -262.1.1 -> -128.1.1: Pergamon [stadester-Bergama-Turkey]
+---
+
+STATE: [4080] Kingdom of Pergamon (Seleucid) (-281.1.1 -> -262.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -281.1.1 -> -262.1.1: Pergamon [stadester-Bergama-Turkey]
+---
+
+STATE: [4081] Kingdom of Philip the Tetrarch (-3.1.1 -> 35.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -3.1.1 -> 35.1.1: Caesarea Philippi [stadester-Caesarea-Philippi-Israel]
+---
+
+STATE: [4082] County Palatine of Cephalonia and Zakynthos (1186.1.1 -> 1484.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1186.1.1 -> 1484.1.1: Argostoli [stadester-Argostoli-Greece]
+---
+
+STATE: [4083] Kingdom of Pleistarchus (-301.9.1 -> -301.11.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -301.9.1 -> -301.11.1: Heraclea by Latmus [stadester-Heraclea-by-Latmus-Turkey]
+---
+
+STATE: [4084] Couto Misto (1148.1.1 -> 1864.9.29) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1864.9.29: Santiago de Rubiás [stadester-Santiago-de-Rubi-s-Spain]
+---
+
+STATE: [4085] Crimean Khanate (1431.1.1 -> 1629.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1431.1.1 -> 1629.1.1: Bakhchysarai [stadester-Bakhchysarai-Ukraine]
+---
+
+STATE: [4086] Kingdom of Polonnaruwa (1056.1.1 -> 1233.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1056.1.1 -> 1233.1.1: Polonnaruwa [stadester-Polonaruwa-Sri Lanka]
+---
+
+STATE: [4087] Kingdom of Polyperchon (-318.9.1 -> -316.11.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -318.9.1 -> -316.11.1: Megalopolis [stadester-Megalopolis-Greece]
+---
+
+STATE: [4088] Kingdom of Pontus (-301.11.1 -> -47.8.9) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -301.11.1 -> -47.8.9: Amasya [stadester-Amasya-Turkey]
+---
+
+STATE: [4089] Kingdom of Pontus (Rome) (-62.1.1 -> 63.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -62.1.1 -> 63.1.1: Amasya [stadester-Amasya-Turkey]
+---
+
+STATE: [4090] Kingdom of Portugal (1139.7.25 -> 1910.10.5) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1139.7.25 -> 1910.10.5: Lisbon [stadester-Lisboa-Portugal]
+---
+
+STATE: [4091] Crusaders (Antioch) (1097.9.21 -> 1100.6.1) [fill: #B5ABCC]
+STATUS: ACAPITAL
+REASON: Crusader expeditionary army operating in the Principality of Antioch defense sector
+---
+
+STATE: [4092] Kingdom of Powys (448.1.1 -> 856.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  448.1.1 -> 856.1.1: Mathrafal [stadester-Mathrafal-United Kingdom]
+---
+
+STATE: [4093] Crusaders (Aydin) (1344.11.1 -> 1403.1.1) [fill: #EBBCC5]
+STATUS: ACAPITAL
+REASON: Smyrniote crusade allied maritime naval league operating off Aydin
+---
+
+STATE: [4094] Kingdom of Ptolemy Ceraunus (-281.4.1 -> -278.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -281.4.1 -> -278.1.1: Lysimachia [stadester-Lysimachia-Turkey]
+---
+
+STATE: [4095] Kingdom of Purang (1073.1.1 -> 1255.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1073.1.1 -> 1255.1.1: Purang [stadester-Purang-China]
+---
+
+STATE: [4096] Kingdom of Qatna (-1999.1.1 -> -1321.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -1999.1.1 -> -1321.1.1: Qatna [stadester-Qatanâ-Syria]
+---
+
+STATE: [4097] Crusaders (Baltic Region) (1202.1.1 -> 1203.1.1) [fill: #E0A348]
+STATUS: ACAPITAL
+REASON: Livonian and Prussian crusader armies operating in the Baltic pagan frontier
+---
+
+STATE: [4098] Crusaders (Crusade of 1101) (1101.6.23 -> 1101.8.5) [fill: #4E825E]
+STATUS: ACAPITAL
+REASON: Crusade of 1101 expeditionary military army traversing Anatolia without territorial capital
+---
+
+STATE: [4099] Crusaders (Fifth Crusade) (1218.8.25 -> 1222.1.1) [fill: #AD2845]
+STATUS: ACAPITAL
+REASON: Fifth Crusade allied expeditionary army besieging Damietta in Egypt
+---
+
+STATE: [4101] Crusaders (Jerusalem) (1099.3.1 -> 1099.7.22) [fill: #4E825E]
+STATUS: ACAPITAL
+REASON: First Crusade main army on expedition to capture Jerusalem
+---
+
+STATE: [4102] Cuman-Kipchak confederation (1001.1.1 -> 1236.11.1) [fill: #B37B50]
+STATUS: ACAPITAL
+REASON: Decentralised Turkic nomadic tribal confederacy across the Pontic-Caspian steppe without a permanent capital
+---
+
+STATE: [4103] Cutch State (1148.1.1 -> 1820.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1820.1.1: Bhuj [stadester-Bhuj-India]
+---
+
+STATE: [4104] Kingdom of Rapa Nui (401.1.1 -> 1501.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  401.1.1 -> 1501.1.1: Hanga Roa [stadester-Hanga-Roa-Chile]
+---
+
+STATE: [4105] Kingdom of Rarotonga (1859.1.1 -> 1889.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1859.1.1 -> 1889.1.1: Avarua [stadester-Avarua-Cook Islands]
+---
+
+STATE: [4106] Kingdom of Rarotonga (Great Britain) (1889.1.1 -> 1894.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1889.1.1 -> 1894.1.1: Avarua [stadester-Avarua-Cook Islands]
+---
+
+STATE: [4107] Kingdom of Reman (1811.1.1 -> 1907.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1811.1.1 -> 1907.1.1: Raman [stadester-Raman-Thailand]
+---
+
+STATE: [4108] Kingdom of Rheged (501.1.1 -> 639.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  501.1.1 -> 639.1.1: Carlisle [stadester-Carlisle-United Kingdom]
+---
+
+STATE: [4109] Kingdom of Rimatara (1801.1.1 -> 1889.3.29) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1889.3.29: Amaru [stadester-Amaru-French Polynesia]
+---
+
+STATE: [4110] Kingdom of Rimatara (France) (1889.3.29 -> 1901.9.2) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1889.3.29 -> 1901.9.2: Amaru [stadester-Amaru-French Polynesia]
+---
+
+STATE: [4111] Cuzcatlecs (951.1.1 -> 1526.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  951.1.1 -> 1526.1.1: Cuzcatlan [stadester-Cuzcatlan-El Salvador]
+---
+
+STATE: [4112] Kingdom of Romania (1881.3.14 -> 1947.12.30) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1881.3.14 -> 1947.12.30: Bucharest [ghsl-Bucharest-Romania]
+---
+
+STATE: [4113] Kingdom of Rome (-753.4.21 -> -508.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -753.4.21 -> -509.1.1: Rome
+---
+
+STATE: [4114] Kingdom of Rujumbura (1753.1.1 -> 1902.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1753.1.1 -> 1902.1.1: Rujumbura [stadester-Rujumbura-Uganda]
+---
+
+STATE: [4115] Kingdom of Rurutu (1853.1.1 -> 1890.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1853.1.1 -> 1890.1.1: Moerai [stadester-Moerai-French Polynesia]
+---
+
+STATE: [4116] Kingdom of Rurutu (France) (1890.1.1 -> 1900.8.25) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1890.1.1 -> 1900.8.25: Moerai [stadester-Moerai-French Polynesia]
+---
+
+STATE: [4117] Dachange (903.1.1 -> 929.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  903.1.1 -> 929.1.1: Dachange [stadester-Dachange-China]
+---
+
+STATE: [4118] Daju kingdom (1201.1.1 -> 1501.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1501.1.1: Nyala [stadester-Nyala-Sudan]
+---
+
+STATE: [4119] Dali Kingdom (938.1.1 -> 1254.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  938.1.1 -> 1254.1.1: Dali [stadester-Dali-Yunnan-China]
+---
+
+STATE: [4120] Kingdom of Rwanda (1501.1.1 -> 1962.7.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1962.7.1: Nyanza [stadester-Nyanza-Rwanda]
+---
+
+STATE: [4121] Kingdom of Saloum (1495.1.1 -> 1851.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1495.1.1 -> 1851.1.1: Kahone [stadester-Kahone-Senegal]
+---
+
+STATE: [4122] Kingdom of Sam'al (-1179.1.1 -> -739.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -1179.1.1 -> -739.1.1: Zincirli [stadester-Zincirli-Turkey]
+---
+
+STATE: [4123] Danelaw (865.4.1 -> 955.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  865.4.1 -> 955.1.1: York [stadester-York-United Kingdom]
+---
+
+STATE: [4124] Kingdom of Sanwi (France) (1843.9.23 -> 1960.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1843.9.23 -> 1960.1.1: Krindjabo [stadester-Krindjabo-Ivory Coast]
+---
+
+STATE: [4125] Danta State (1069.1.1 -> 1802.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1069.1.1 -> 1802.1.1: Danta [stadester-Danta-India]
+---
+
+STATE: [4126] Daspalla State (1499.1.1 -> 1802.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1499.1.1 -> 1802.1.1: Daspalla [stadester-Daspalla-India]
+---
+
+STATE: [4127] Kingdom of Saudi Arabia (1932.9.23 -> 2026.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1932.9.23 -> 2026.1.1: Riyadh [stadester-Riyadh-Saudi Arabia]
+---
+
+STATE: [4128] Datarpur State (1551.1.1 -> 1850.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1551.1.1 -> 1850.1.1: Datarpur [stadester-Datarpur-India]
+---
+
+STATE: [4129] Datia State (1627.1.1 -> 1802.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1627.1.1 -> 1802.1.1: Datia [stadester-Datia-India]
+---
+
+STATE: [4130] Kingdom of Seisyllwg (681.1.1 -> 921.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  681.1.1 -> 921.1.1: Cardigan [stadester-Cardigan-United Kingdom]
+---
+
+STATE: [4131] Kingdom of Serbia (1882.3.6 -> 1918.12.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1882.3.6 -> 1918.12.1: Belgrade [stadester-Beograd-Serbia]
+---
+
+STATE: [4132] Datianxing (929.1.1 -> 930.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  929.1.1 -> 930.1.1: Dali [stadester-Dali-Yunnan-China]
+---
+
+STATE: [4133] Kingdom of Serbs, Croats and Slovenes (1918.12.1 -> 1929.10.3) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1918.12.1 -> 1929.10.3: Belgrade [stadester-Beograd-Serbia]
+---
+
+STATE: [4134] Kingdom of Setul Mambang Segara (1809.1.1 -> 1893.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1809.1.1 -> 1893.1.1: Satun [stadester-Satun-Thailand]
+---
+
+STATE: [4135] Kingdom of Shewa (1840.1.1 -> 1889.3.10) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1840.1.1 -> 1889.3.10: Addis Ababa [stadester-Adis Abeba-Ethiopia]
+---
+
+STATE: [4136] Kingdom of Shupria (-1399.1.1 -> -1299.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -1399.1.1 -> -1299.1.1: Til-Abni [stadester-Til-Abni-Turkey]
+---
+
+STATE: [4137] Kingdom of Siang (1001.1.1 -> 1551.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1551.1.1: Siang [stadester-Siang-Indonesia]
+---
+
+STATE: [4138] Kingdom of Sicily (1130.12.25 -> 1815.5.20) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1130.12.25 -> 1815.5.20: Palermo [stadester-Palermo-Italy]
+---
+
+STATE: [4139] Dayining (930.1.1 -> 938.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  930.1.1 -> 938.1.1: Dali [stadester-Dali-Yunnan-China]
+---
+
+STATE: [4140] Dazhong Kingdom (1095.1.1 -> 1097.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1095.1.1 -> 1097.1.1: Dali [stadester-Dali-Yunnan-China]
+---
+
+STATE: [4141] North Sea Empire (Denmark-England) (1019.1.1 -> 1042.6.8) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1019.1.1 -> 1042.6.8: Winchester [stadester-Winchester-United Kingdom]
+---
+
+STATE: [4142] Denmark-Norway (1001.1.1 -> 1814.1.14) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1814.1.14: Copenhagen [stadester-Copenhagen-Denmark]
+---
+
+STATE: [4143] North Sea Empire (Denmark-Norway-England) (1013.12.25 -> 1035.11.12) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1013.12.25 -> 1035.11.12: Winchester [stadester-Winchester-United Kingdom]
+---
+
+STATE: [4144] Despotate of Angelokastron and Lepanto (1359.1.1 -> 1375.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1359.1.1 -> 1375.1.1: Nafpaktos [stadester-Nafpaktos-Greece]
+---
+
+STATE: [4145] Kingdom of Sigave (1785.1.1 -> 1887.11.29) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1785.1.1 -> 1887.11.29: Leava [stadester-Leava-Wallis and Futuna]
+---
+
+STATE: [4146] Kingdom of Sigave (France) (1887.11.29 -> 1888.3.5) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1887.11.29 -> 1888.3.5: Leava [stadester-Leava-Wallis and Futuna]
+---
+
+STATE: [4147] Kingdom of Sikkim (1643.1.1 -> 1951.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1643.1.1 -> 1951.1.1: Gangtok [stadester-Gangtok-India]
+---
+
+STATE: [4148] Kingdom of Sikkim (Great Britain) (1861.3.1 -> 1947.8.15) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1861.3.1 -> 1947.8.15: Gangtok [stadester-Gangtok-India]
+---
+
+STATE: [4149] Kingdom of Sikkim (India) (1951.1.1 -> 1975.5.16) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1951.1.1 -> 1975.5.16: Gangtok [stadester-Gangtok-India]
+---
+
+STATE: [4150] Despotate of Arta (1359.5.25 -> 1417.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1359.5.25 -> 1417.1.1: Arta [stadester-Arta-Greece]
+---
+
+STATE: [4151] Despotate of Dobruja (1357.1.1 -> 1444.11.10) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1357.1.1 -> 1444.11.10: Kaliakra [stadester-Kaliakra-Bulgaria]
+---
+
+STATE: [4152] Kingdom of Sitawaka (1522.1.1 -> 1594.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1522.1.1 -> 1594.1.1: Sitawaka [stadester-Sitawaka-Sri Lanka]
+---
+
+STATE: [4153] Teutonic Order in Transylvania (1212.1.1 -> 1226.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1212.1.1 -> 1226.1.1: Marienburg [stadester-Marienburg-Romania]
+---
+
+STATE: [4154] Kingdom of Soissons (Chilperic I) (561.11.29 -> 614.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  561.11.29 -> 614.1.1: Soissons [stadester-Soissons-France]
+---
+
+STATE: [4155] Kingdom of Solimana (1801.1.1 -> 1879.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1879.1.1: Falaba [stadester-Falaba-Sierra Leone]
+---
+
+STATE: [4156] Kingdom of Soukouma (1801.1.1 -> 1890.7.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1890.7.1: Mwanza [stadester-Mwanza-Tanzania]
+---
+
+STATE: [4157] Kingdom of Spain (1715.6.9 -> 2026.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1715.6.9 -> 2026.1.1: Madrid [stadester-Madrid-Spain]
+---
+
+STATE: [4158] Deva dynasty (1231.1.1 -> 1295.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1231.1.1 -> 1295.1.1: Bikrampur [stadester-Bikrampur-Bangladesh]
+---
+
+STATE: [4159] Dewas State (1729.1.1 -> 1802.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1729.1.1 -> 1802.1.1: Dewas [ghsl-Dewas-India]
+---
+
+STATE: [4160] Dhar State (1731.1.1 -> 1819.10.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1731.1.1 -> 1819.10.1: Dhar [ghsl-Dhar-India]
+---
+
+STATE: [4161] Kingdom of Strathclyde (411.1.1 -> 1035.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  411.1.1 -> 1035.1.1: Dumbarton [stadester-Dumbarton-United Kingdom]
+---
+
+STATE: [4162] Kingdom of Sumer (-2349.1.1 -> -2333.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -2349.1.1 -> -2333.1.1: Ur [stadester-Ur-Iraq]
+---
+
+STATE: [4163] Kingdom of Sussex (478.1.1 -> 828.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  478.1.1 -> 828.1.1: Chichester [stadester-Chichester-United Kingdom]
+---
+
+STATE: [4164] Kingdom of Sussex (Mercia) (772.1.1 -> 797.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  772.1.1 -> 797.1.1: Chichester [stadester-Chichester-United Kingdom]
+---
+
+STATE: [4165] Kingdom of Sussex (Wessex) (687.1.1 -> 861.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  687.1.1 -> 861.1.1: Chichester [stadester-Chichester-United Kingdom]
+---
+
+STATE: [4166] Kingdom of Swaziland (1746.1.1 -> 2018.4.19) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1746.1.1 -> 2018.4.19: Mbabane [stadester-Mbabane-Eswatini]
+---
+
+STATE: [4167] Kingdom of Sweden (1156.1.1 -> 2026.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1156.1.1 -> 2026.1.1: Stockholm [stadester-Stockholm-Sweden]
+---
+
+STATE: [4168] Dharampur State (1263.1.1 -> 1764.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1263.1.1 -> 1764.1.1: Dharampur [stadester-Dharampur-India]
+---
+
+STATE: [4169] Dharmasraya (1184.1.1 -> 1201.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1184.1.1 -> 1201.1.1: Dharmasraya [stadester-Dharmasraya-Indonesia]
+---
+
+STATE: [4170] Dhaulpur State (1807.1.1 -> 1819.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1807.1.1 -> 1819.1.1: Dholpur [stadester-Dholpur-India]
+---
+
+STATE: [4171] Dhenkanal State (1530.1.1 -> 1802.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1530.1.1 -> 1802.1.1: Dhenkanal [ghsl-Dhenkanal-India]
+---
+
+STATE: [4172] Dhrangadhra State (1743.1.1 -> 1802.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1743.1.1 -> 1802.1.1: Dhrangadhra [ghsl-Dhrangadhra-India]
+---
+
+STATE: [4173] Dhrol State (1596.1.1 -> 1808.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1596.1.1 -> 1808.1.1: Dhrol [stadester-Dhrol-India]
+---
+
+STATE: [4174] Dhundhar State (1094.1.1 -> 1351.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1094.1.1 -> 1351.1.1: Amber [ghsl-Amber; Kunda; Amer Chak No. 1-India]
+---
+
+STATE: [4175] Dhurwai State (1813.1.1 -> 1824.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1813.1.1 -> 1824.1.1: Dhurwai [stadester-Dhurwai-India]
+---
+
+STATE: [4176] Kingdom of Taiohae (France) (1842.5.1 -> 1901.7.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1842.5.1 -> 1901.7.1: Taiohae [stadester-Taiohae-French Polynesia]
+---
+
+STATE: [4177] Kingdom of Tallo (1451.1.1 -> 1502.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1451.1.1 -> 1502.1.1: Tallo [stadester-Tallo-Indonesia]
+---
+
+STATE: [4178] Kingdom of Tambapanni (-542.1.1 -> -504.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -542.1.1 -> -504.1.1: Tambapanni [stadester-Tambapanni-Sri Lanka]
+---
+
+STATE: [4179] Dimasa Kingdom (1301.1.1 -> 1822.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1301.1.1 -> 1822.1.1: Maibang [stadester-Maibang-India]
+---
+
+STATE: [4180] Đinh dynasty (968.2.1 -> 981.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  968.2.1 -> 981.1.1: Hoa Lư [stadester-Hoa-L--Vietnam]
+---
+
+STATE: [4181] Kingdom of Tawana (1796.1.1 -> 1895.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1796.1.1 -> 1895.1.1: Maun [stadester-Maun-Botswana]
+---
+
+STATE: [4182] Kingdom of Taytay (1501.1.1 -> 1624.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1624.1.1: Taytay [stadester-Taytay-Philippines]
+---
+
+STATE: [4183] Kingdom of Thailand (1932.6.24 -> 2026.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1932.6.24 -> 2026.1.1: Bangkok [ghsl-Bangkok; Nonthaburi; Pak Kret; Rangsit; Samut Sakhon; Om Noi; Samut Prakan-Thailand]
+---
+
+STATE: [4184] Kingdom of the Alans in Spain (409.11.1 -> 415.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  409.11.1 -> 415.1.1: Mérida [stadester-Mérida-Spain]
+---
+
+STATE: [4185] Kingdom of the Alemanni (214.1.1 -> 497.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  214.1.1 -> 497.1.1: Augsburg [stadester-Augsburg-Germany]
+---
+
+STATE: [4186] Kingdom of the Alemanni (Frankish) (497.1.1 -> 747.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  497.1.1 -> 747.1.1: Augsburg [stadester-Augsburg-Germany]
+---
+
+STATE: [4187] Kingdom of the Aures (481.1.1 -> 704.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  481.1.1 -> 704.1.1: Arris [stadester-Arris-Algeria]
+---
+
+STATE: [4188] Kingdom of the Bavarians (552.1.1 -> 789.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  552.1.1 -> 789.1.1: Regensburg [stadester-Regensburg-Germany]
+---
+
+STATE: [4190] Kingdom of the Burgundians (487.1.1 -> 535.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  487.1.1 -> 535.1.1: Lyon [stadester-Lyon-France]
+---
+
+STATE: [4191] Kingdom of the Burgundians (Foederati) (444.1.1 -> 487.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  444.1.1 -> 487.1.1: Lyon [stadester-Lyon-France]
+---
+
+STATE: [4192] Kingdom of the Burgundians in Rhineland (412.1.1 -> 455.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  412.1.1 -> 455.1.1: Lyon [stadester-Lyon-France]
+---
+
+STATE: [4193] Kingdom of the Dorsale (579.1.1 -> 709.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  579.1.1 -> 709.1.1: Tébessa [stadester-T-bessa-Algeria]
+---
+
+STATE: [4194] Kingdom of the Franks (359.1.1 -> 800.12.25) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  359.1.1 -> 508.1.1: Tournai [stadester-Tournai-Belgium]
+  508.1.1 -> 794.1.1: Paris [stadester-Paris-France]
+  794.1.1 -> 800.12.25: Aachen [stadester-Aachen-Germany]
+---
+
+STATE: [4195] Kingdom of the Garamantes (151.1.1 -> 670.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  151.1.1 -> 670.1.1: Garama [stadester-Garama-Libya]
+---
+
+STATE: [4196] Kingdom of the Gepids (First Kingdom) (351.1.1 -> 377.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  351.1.1 -> 377.1.1: Sirmium [stadester-Sirmium-Serbia]
+---
+
+STATE: [4197] Kingdom of the Gepids (Second Kingdom) (455.1.1 -> 568.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  455.1.1 -> 568.1.1: Sirmium [stadester-Sirmium-Serbia]
+---
+
+STATE: [4198] Kingdom of the Heruls (455.1.1 -> 509.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  455.1.1 -> 509.1.1: Belgrade [stadester-Beograd-Serbia]
+---
+
+STATE: [4199] Kingdom of the Hodna (579.1.1 -> 709.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  579.1.1 -> 709.1.1: M'Sila [ghsl-M'Sila-Algeria]
+---
+
+STATE: [4200] Kingdom of the Hwicce (578.1.1 -> 629.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  578.1.1 -> 629.1.1: Worcester [stadester-Worcester-United Kingdom]
+---
+
+STATE: [4201] Domain of Braničevo (1274.1.1 -> 1295.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1274.1.1 -> 1295.1.1: Braničevo [stadester-Brani-evo-Serbia]
+---
+
+STATE: [4202] Domain of Branković (1371.9.26 -> 1413.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1371.9.26 -> 1413.1.1: Pristina [stadester-Pri`stina-Serbia]
+---
+
+STATE: [4203] Kingdom of the Lombards (568.5.1 -> 775.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  568.5.1 -> 775.1.1: Pavia [stadester-Pavia-Italy]
+---
+
+STATE: [4204] Kingdom of the Lombards in Noricum (488.1.1 -> 569.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  488.1.1 -> 569.1.1: Pavia [stadester-Pavia-Italy]
+---
+
+STATE: [4205] Kingdom of the Maldives (-268.1.1 -> 1154.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -268.1.1 -> 1154.1.1: Malé [ghsl-Mal�-Maldives]
+---
+
+STATE: [4206] Kingdom of the Mannai (-899.1.1 -> -611.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -899.1.1 -> -611.1.1: Izirtu [stadester-Izirtu-Iran]
+---
+
+STATE: [4207] Kingdom of the Mannai (Assyria) (-716.1.1 -> -629.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -716.1.1 -> -629.1.1: Izirtu [stadester-Izirtu-Iran]
+---
+
+STATE: [4208] Kingdom of the Nemencha (579.1.1 -> 709.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  579.1.1 -> 709.1.1: Khenchela [ghsl-Khenchela-Algeria]
+---
+
+STATE: [4209] Kingdom of the Netherlands (1839.4.19 -> 2026.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1839.4.19 -> 2026.1.1: Amsterdam [stadester-Amsterdam-Netherlands]
+---
+
+STATE: [4210] Kingdom of the Ostrogoths (403.1.1 -> 563.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  403.1.1 -> 563.1.1: Ravenna [stadester-Ravenna-Italy]
+---
+
+STATE: [4211] Kingdom of the Ostrogoths in Dacia (272.1.1 -> 377.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  272.1.1 -> 377.1.1: Olbia [stadester-Olbia-Ukraine]
+---
+
+STATE: [4212] Kingdom of the Ostrogoths in Moesia (382.10.3 -> 403.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  382.10.3 -> 403.1.1: Svishtov [stadester-Svishtov-Bulgaria]
+---
+
+STATE: [4213] Kingdom of the Ourasenis (579.1.1 -> 709.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  579.1.1 -> 709.1.1: Ouarsenis [stadester-Ouarsenis-Algeria]
+---
+
+STATE: [4214] Kingdom of the Picts (585.1.1 -> 844.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  585.1.1 -> 844.1.1: Scone [stadester-Scone-United Kingdom]
+---
+
+STATE: [4215] Kingdom of the Rugii (455.1.1 -> 488.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  455.1.1 -> 488.1.1: Krems [stadester-Krems-Austria]
+---
+
+STATE: [4216] Kingdom of the Scirii (455.1.1 -> 468.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  455.1.1 -> 468.1.1: Szeged [stadester-Szeged-Hungary]
+---
+
+STATE: [4217] Kingdom of the Siraces (-309.1.1 -> 194.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -309.1.1 -> 194.1.1: Krasnodar [stadester-Krasnodar-Russia]
+---
+
+STATE: [4218] Kingdom of the Suebi in Galicia (409.11.1 -> 586.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  409.11.1 -> 586.1.1: Braga [stadester-Braga-Portugal]
+---
+
+STATE: [4219] Kingdom of the Suebi on the Danube (455.1.1 -> 468.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  455.1.1 -> 468.1.1: Carnuntum [stadester-Petronell-Carnuntum-Austria]
+---
+
+STATE: [4220] Domain of Jan Conny (1717.1.1 -> 1725.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1717.1.1 -> 1725.1.1: Princess Town [stadester-Princess-Town-Ghana]
+---
+
+STATE: [4221] Kingdom of the Tui Manuʻa (1831.1.1 -> 1900.2.16) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1831.1.1 -> 1900.2.16: Taʻu [stadester-Ta-u-American Samoa]
+---
+
+STATE: [4222] Domain of Hayreddin Barbarossa (1515.1.1 -> 1522.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1515.1.1 -> 1522.1.1: Algiers [stadester-Algiers-Algeria]
+---
+
+STATE: [4223] Domain of Leo Gabalas (1204.1.1 -> 1241.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1204.1.1 -> 1241.1.1: Rhodes [stadester-Rhodes-Greece]
+---
+
+STATE: [4224] Kingdom of the Vandals (430.1.1 -> 535.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  430.1.1 -> 535.1.1: Carthage [stadester-Carthage-Tunisia]
+---
+
+STATE: [4225] Kingdom of the Vandals Hasdingi in Spain (409.11.1 -> 421.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  409.11.1 -> 421.1.1: Braga (Vandals Hasdingi) [stadester-Braga--Vandals-Hasdingi--Portugal]
+---
+
+STATE: [4226] Kingdom of the Vandals in Betica (421.1.1 -> 430.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  421.1.1 -> 430.1.1: Seville [stadester-Sevilla-Spain]
+---
+
+STATE: [4227] Kingdom of the Vandals in Dacia (170.1.1 -> 336.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  170.1.1 -> 336.1.1: Sarmizegetusa [stadester-Sarmizegetusa-Romania]
+---
+
+STATE: [4228] Kingdom of the Vandals in Pannonia (336.1.1 -> 401.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  336.1.1 -> 401.1.1: Aquincum [stadester-Budapest-Hungary]
+---
+
+STATE: [4229] Kingdom of the Vandals Silingi in Spain (409.11.1 -> 415.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  409.11.1 -> 415.1.1: Córdoba [stadester-Crdoba-Spain]
+---
+
+STATE: [4230] Kingdom of the Visigoths (419.1.1 -> 726.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  419.1.1 -> 726.1.1: Toledo [stadester-Toledo-Spain]
+---
+
+STATE: [4231] Kingdom of the Visigoths (Ostrogoths) (511.1.1 -> 527.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  511.1.1 -> 527.1.1: Toledo [stadester-Toledo-Spain]
+---
+
+STATE: [4232] Kingdom of Thessalonica (1204.10.1 -> 1225.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1204.10.1 -> 1225.1.1: Thessaloniki [stadester-Thessaloniki (agglomeration)-Greece]
+---
+
+STATE: [4233] Kingdom of Thessalonike (-168.6.22 -> -146.12.31) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -168.6.22 -> -146.12.31: Thessaloniki [stadester-Thessaloniki (agglomeration)-Greece]
+---
+
+STATE: [4234] Domain of Teresa and Henry (1110.1.1 -> 1122.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1110.1.1 -> 1122.1.1: Guimarães [stadester-Guimaraes-Portugal]
+---
+
+STATE: [4235] Kingdom of Thuringia (470.1.1 -> 720.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  470.1.1 -> 720.1.1: Erfurt [stadester-Erfurt-Germany]
+---
+
+STATE: [4236] Kingdom of Thuringia (Franks) (642.1.1 -> 843.9.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  642.1.1 -> 843.9.1: Erfurt [stadester-Erfurt-Germany]
+---
+
+STATE: [4237] Kingdom of Timarchus (-162.1.1 -> -159.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -162.1.1 -> -159.1.1: Hamadan [stadester-Hamadan-Iran]
+---
+
+STATE: [4238] Domain of Thessaly (1372.1.1 -> 1383.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1372.1.1 -> 1383.1.1: Hypata [stadester-Hypata-Greece]
+---
+
+STATE: [4239] Domain of Ugrin Csak (1302.1.1 -> 1312.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1302.1.1 -> 1312.1.1: Ilok [stadester-Ilok-Croatia]
+---
+
+STATE: [4240] Dompu Kingdom (1351.1.1 -> 1700.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1351.1.1 -> 1700.1.1: Dompu [ghsl-Dompu-Indonesia]
+---
+
+STATE: [4241] Doura Kingdom (1501.1.1 -> 1806.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1806.1.1: Daura [stadester-Daura-Nigeria]
+---
+
+STATE: [4242] Kingdom of Tonga (901.1.1 -> 2026.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  901.1.1 -> 2026.1.1: Nuku'alofa [stadester-Nuku'alofa-Tonga]
+---
+
+STATE: [4243] Kingdom of Tooro (1831.1.1 -> 1897.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1831.1.1 -> 1897.1.1: Fort Portal [stadester-Fort Portal-Uganda]
+---
+
+STATE: [4244] Duchy of Bohemia (963.1.1 -> 1199.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  963.1.1 -> 1199.1.1: Prague [stadester-Praha-Czech Republic]
+---
+
+STATE: [4245] Duchy of Croatia (880.1.1 -> 926.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  880.1.1 -> 926.1.1: Knin [stadester-Knin (municip.)-Croatia]
+---
+
+STATE: [4246] Duchy of Lithuania (1238.1.1 -> 1251.7.17) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1238.1.1 -> 1251.7.17: Kernavė [stadester-Kernave-Lithuania]
+---
+
+STATE: [4247] Duchy of Masovia (1139.1.1 -> 1527.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1139.1.1 -> 1527.1.1: Płock [stadester-Plock-Poland]
+---
+
+STATE: [4248] Duchy of Normandy (987.7.3 -> 1106.9.28) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  987.7.3 -> 1106.9.28: Rouen [stadester-Rouen-France]
+---
+
+STATE: [4249] Kingdom of Tungning (1662.2.1 -> 1683.9.5) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1662.2.1 -> 1683.9.5: Tainan [stadester-T'ainan-Taiwan]
+---
+
+STATE: [4250] Kingdom of Tunisia (1956.3.20 -> 1957.7.25) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1956.3.20 -> 1957.7.25: Tunis [stadester-Tunis-Tunisia]
+---
+
+STATE: [4251] Kingdom of Tylis (-276.1.1 -> -211.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -276.1.1 -> -211.1.1: Tylis [stadester-Tylis-Bulgaria]
+---
+
+STATE: [4252] Kingdom of Uí Failghe (508.1.1 -> 1551.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  508.1.1 -> 1551.1.1: Rathangan [stadester-Rathangan-Ireland]
+---
+
+STATE: [4253] Kingdom of Ulaid (579.1.1 -> 583.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  579.1.1 -> 583.1.1: Downpatrick [stadester-Downpatrick-UK]
+---
+
+STATE: [4254] Kingdom of Unyanyembe (1801.1.1 -> 1890.7.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1890.7.1: Tabora [stadester-Tabora-Tanzania]
+---
+
+STATE: [4255] Kingdom of Upatissa Nuwara (-504.1.1 -> -376.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -504.1.1 -> -376.1.1: Upatissa Nuwara [stadester-Upatissa-Nuwara-Sri Lanka]
+---
+
+STATE: [4256] Kingdom of Upper Mesopotamia (-1808.1.1 -> -1807.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -1808.1.1 -> -1807.1.1: Shubat-Enlil [stadester-Shubat-Enlil-Syria]
+---
+
+STATE: [4257] Kingdom of Urartu (-999.1.1 -> -669.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -999.1.1 -> -669.1.1: Van [stadester-Van-Turkey]
+---
+
+STATE: [4258] Kingdom of 'Uvea (1451.1.1 -> 1887.4.5) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1451.1.1 -> 1887.4.5: Mata-Utu [stadester-Mata-Utu-Wallis and Futuna]
+---
+
+STATE: [4259] Kingdom of 'Uvea (France) (1887.4.5 -> 1888.3.5) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1887.4.5 -> 1888.3.5: Mata-Utu [stadester-Mata-Utu-Wallis and Futuna]
+---
+
+STATE: [4260] Duchy of Poland (961.1.1 -> 1026.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  961.1.1 -> 1026.1.1: Kraków [stadester-Kraków-Poland]
+---
+
+STATE: [4261] Duchy of Saint Sava (1436.1.1 -> 1483.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1436.1.1 -> 1483.1.1: Mostar [stadester-Mostar-Bosnia and Herzegovina]
+---
+
+STATE: [4262] Kingdom of Vạn Xuân (542.1.1 -> 603.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  542.1.1 -> 603.1.1: Hanoi [stadester-Ha nôi-Vietnam]
+---
+
+STATE: [4263] Duchy of Sorrento (840.1.1 -> 1036.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  840.1.1 -> 1036.1.1: Sorrento [stadester-Sorrento-Italy]
+---
+
+STATE: [4264] Duchy of Surabaya (1547.1.1 -> 1626.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1547.1.1 -> 1626.1.1: Surabaya [stadester-Surabaya-Indonesia]
+---
+
+STATE: [4265] Dughlat State (1466.1.1 -> 1515.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1466.1.1 -> 1515.1.1: Yarkand [ghsl-Yarkand-China]
+---
+
+STATE: [4266] Dulafid Dynasty (862.1.1 -> 899.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  862.1.1 -> 899.1.1: Karaj Abi Dulaf [stadester-Karaj-Abi-Dulaf-Iran]
+---
+
+STATE: [4267] East Francia (843.9.1 -> 962.2.2) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  843.9.1 -> 962.2.2: Frankfurt [ghsl-Frankfurt; Offenbach am Main-Germany]
+---
+
+STATE: [4268] East Francia (Arnulf) (887.11.17 -> 899.12.8) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  887.11.17 -> 899.12.8: Frankfurt [ghsl-Frankfurt; Offenbach am Main-Germany]
+---
+
+STATE: [4269] East Francia (Louis II of Italy) (899.12.8 -> 900.8.13) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  899.12.8 -> 900.8.13: Frankfurt [ghsl-Frankfurt; Offenbach am Main-Germany]
+---
+
+STATE: [4270] Kingdom of Wajoq (1401.1.1 -> 1907.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1401.1.1 -> 1907.1.1: Tosora [stadester-Tosora-Indonesia]
+---
+
+STATE: [4271] Kingdom of Wala (1318.1.1 -> 1902.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1318.1.1 -> 1902.1.1: Wa [stadester-Wa-Ghana]
+---
+
+STATE: [4272] Kingdom of Wessex (520.1.1 -> 928.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  520.1.1 -> 928.1.1: Winchester [stadester-Winchester-United Kingdom]
+---
+
+STATE: [4273] Dungarpur State (1198.1.1 -> 1651.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1198.1.1 -> 1651.1.1: Dungarpur [ghsl-Dungarpur-India]
+---
+
+STATE: [4274] Durrani Empire (1748.1.1 -> 1824.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1748.1.1 -> 1824.1.1: Kandahar [ghsl-Kandahar-Afghanistan]
+---
+
+STATE: [4275] Dutch Gold Coast (Independent) (1802.1.1 -> 1815.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1802.1.1 -> 1815.1.1: Elmina [stadester-Elmina-Ghana]
+---
+
+STATE: [4276] Kingdom of Wihtwara (513.1.1 -> 687.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  513.1.1 -> 687.1.1: Carisbrooke [stadester-Carisbrooke-United Kingdom]
+---
+
+STATE: [4277] Kingdom of Yugoslavia (1929.10.3 -> 1941.4.20) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1929.10.3 -> 1941.4.20: Belgrade [stadester-Beograd-Serbia]
+---
+
+STATE: [4278] Kingdom of Yumtän (843.1.1 -> 911.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  843.1.1 -> 911.1.1: Lhasa [stadester-Lhasa-China]
+---
+
+STATE: [4279] Kingdom of Zhangzhung (-499.1.1 -> 626.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -499.1.1 -> 626.1.1: Khyunglung [stadester-Khyunglung-China]
+---
+
+STATE: [4280] Dzungar Khanate (1635.1.1 -> 1756.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1635.1.1 -> 1756.1.1: Ghulja [stadester-Ghulja-China]
+---
+
+STATE: [4281] Early Lê dynasty (981.1.1 -> 1009.11.21) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  981.1.1 -> 1009.11.21: Hoa Lư [stadester-Hoa-L--Vietnam]
+---
+
+STATE: [4282] Kingdom of Deheubart (921.1.1 -> 1198.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  921.1.1 -> 1198.1.1: Carmarthen [stadester-Carmarthen-UK]
+---
+
+STATE: [4283] Eastern Court (1405.1.1 -> 1407.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1405.1.1 -> 1407.1.1: Nanjing [stadester-Nanjing-China]
+---
+
+STATE: [4284] Kingdom of Kooki (1721.1.1 -> 1897.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1721.1.1 -> 1897.1.1: Rakai [stadester-Rakai-Uganda]
+---
+
+STATE: [4285] Eastern Hungarian Kingdom (1526.11.1 -> 1530.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1526.11.1 -> 1530.1.1: Alba Iulia [stadester-Alba Iulia-Romania]
+---
+
+STATE: [4286] Kingdom of Ngoenyang (639.1.1 -> 1293.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  639.1.1 -> 1293.1.1: Chiang Saen [stadester-Chiang-Saen-Thailand]
+---
+
+STATE: [4287] Kingogo (1701.1.1 -> 1926.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.1 -> 1926.1.1: Kingogo [stadester-Kingogo-Rwanda]
+---
+
+STATE: [4288] Kinolis (-699.1.1 -> -549.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -549.1.1: Kinolis [stadester-Kinolis-Turkey]
+---
+
+STATE: [4289] Kinyps (-500.1.1 -> -315.4.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -500.1.1 -> -315.4.1: Kinyps [stadester-Kinyps-Libya]
+---
+
+STATE: [4290] Kios (-624.1.1 -> -498.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  -624.1.1 -> -498.1.1: Cius [stadester-Cius-Turkey]
+---
+
+STATE: [4291] Kipembawe (1801.1.1 -> 1891.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1891.1.1: Kipembawe [stadester-Kipembawe-Tanzania]
+---
+
+STATE: [4292] Kirata Kingdom (-1149.1.1 -> 301.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -1149.1.1 -> 301.1.1: Kathmandu [stadester-Kathmandu-Nepal]
+---
+
+STATE: [4293] Kirrha (-799.1.1 -> -584.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -584.1.1: Kirrha [stadester-Kirrha-Greece]
+---
+
+STATE: [4294] Kirua (1761.1.1 -> 1891.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1761.1.1 -> 1891.1.1: Kirua Vunjo [stadester-Kirua-Vunjo-Tanzania]
+---
+
+STATE: [4295] Kish (-2899.1.1 -> -2047.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -2899.1.1 -> -2047.1.1: Kish [stadester-Kish-Iraq]
+---
+
+STATE: [4296] Eastern Kara-Khanid Khanate (1042.1.1 -> 1103.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1042.1.1 -> 1103.1.1: Kashgar [ghsl-Kashgar-China]
+---
+
+STATE: [4297] Kishangarh State (Princely State) (1818.3.26 -> 1948.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1818.3.26 -> 1948.1.1: Kishangarh [stadester-Kishangarh-India]
+---
+
+STATE: [4298] Kisthene (-599.1.1 -> -559.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -559.1.1: Kisthene [stadester-Kisthene-Turkey]
+---
+
+STATE: [4299] Kisurra (-2699.1.1 -> -2349.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -2699.1.1 -> -2349.1.1: Kisurra [stadester-Kisurra-Iraq]
+---
+
+STATE: [4300] Kitangonya Sheikdom (1751.1.1 -> 1907.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1751.1.1 -> 1907.1.1: Kitangonya [stadester-Kitangonya-Mozambique]
+---
+
+STATE: [4301] Kithas (-699.1.1 -> -477.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -477.1.1: Kithas [stadester-Kithas-Greece]
+---
+
+STATE: [4302] Kition (-1299.1.1 -> -569.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -1299.1.1 -> -569.1.1: Citium [stadester-Citium-Cyprus]
+---
+
+STATE: [4303] Kiyanja (1811.1.1 -> 1901.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1811.1.1 -> 1901.1.1: Kiyanja [stadester-Kiyanja-Tanzania]
+---
+
+STATE: [4304] Kiziba (1801.1.1 -> 1901.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1901.1.1: Kiziba [stadester-Kiziba-Tanzania]
+---
+
+STATE: [4305] Kizzuwatna (-1999.1.1 -> -1650.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -1999.1.1 -> -1650.1.1: Kummanni [stadester-Kummanni-Turkey]
+---
+
+STATE: [4306] Klazomenai (-799.1.1 -> -386.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -386.1.1: Clazomenae [stadester-Clazomenae-Turkey]
+---
+
+STATE: [4307] Eastern Xia (1214.11.1 -> 1234.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1214.11.1 -> 1234.1.1: Dongjing (Eastern Xia) [stadester-Dongjing--Eastern-Xia--China]
+---
+
+STATE: [4308] Klein Vrystaat (1887.1.1 -> 1891.8.2) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1887.1.1 -> 1891.8.2: Piet Retief [stadester-Piet-Retief-South Africa]
+---
+
+STATE: [4309] Kleitor (-699.1.1 -> -369.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -369.1.1: Kleitor [stadester-Kleitor-Greece]
+---
+
+STATE: [4310] Kleonai (Argolis) (-430.1.1 -> -234.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -430.1.1 -> -234.1.1: Kleonai (Argolis) [stadester-Kleonai--Argolis--Greece]
+---
+
+STATE: [4311] Kleonai (Chalkidike) (-699.1.1 -> -477.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -477.1.1: Kleonai (Chalkidike) [stadester-Kleonai--Chalkidike--Greece]
+---
+
+STATE: [4312] Kletsk Principality (1148.1.1 -> 1401.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1148.1.1 -> 1401.1.1: Kletsk [stadester-Kletsk-Belarus]
+---
+
+STATE: [4313] Klipdrift Republic (1870.7.30 -> 1871.10.27) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1870.7.30 -> 1871.10.27: Klipdrift [stadester-Klipdrift-South Africa]
+---
+
+STATE: [4314] Klungkung (1687.1.1 -> 1908.5.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1687.1.1 -> 1908.5.1: Klungkung [stadester-Klungkung-Indonesia]
+---
+
+STATE: [4315] Knemides (-799.1.1 -> -445.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -445.1.1: Knemides [stadester-Knemides-Greece]
+---
+
+STATE: [4316] Knidos (-849.1.1 -> -559.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -559.1.1: Cnidus [stadester-Cnidus-Turkey]
+---
+
+STATE: [4317] Edessa (Thoros) (1096.1.1 -> 1099.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1096.1.1 -> 1099.1.1: Şanlıurfa [stadester-Sanliurfa-Turkey]
+---
+
+STATE: [4318] Knosos (-849.1.1 -> -68.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -68.1.1: Knossos [stadester-Knossos-Greece]
+---
+
+STATE: [4319] Koba (1751.1.1 -> 1892.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1751.1.1 -> 1892.1.1: Koba [stadester-Koba-Indonesia]
+---
+
+STATE: [4320] Eldiguzids (1144.1.1 -> 1225.12.25) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1144.1.1 -> 1225.12.25: Nakhchivan [ghsl-Nakhchivan-Azerbaijan]
+---
+
+STATE: [4321] Emirate of Abdelkader (1832.11.27 -> 1847.12.23) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1832.11.27 -> 1847.12.23: Mascara [ghsl-Mascara-Algeria]
+---
+
+STATE: [4322] Emirate of Ajiman (1817.1.1 -> 1820.2.5) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1817.1.1 -> 1820.2.5: Ajman [stadester-Ajman-United Arab Emirates]
+---
+
+STATE: [4323] Kokoro (1701.1.1 -> 1900.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.1 -> 1900.1.1: Kokoro [stadester-Kokoro-Benin]
+---
+
+STATE: [4324] Kokylion (-599.1.1 -> -386.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -386.1.1: Kokylion [stadester-Kokylion-Turkey]
+---
+
+STATE: [4325] Kolathunadu (701.1.1 -> 1780.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  701.1.1 -> 1780.1.1: Kannur [stadester-Kannur (KER)-India]
+---
+
+STATE: [4326] Emirate of Bukhara (1786.1.1 -> 1868.5.20) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1868.5.20: Bukhara [ghsl-Bukhara-Uzbekistan]
+---
+
+STATE: [4327] Kolhapur State (Princely State) (1813.1.1 -> 1947.8.14) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1813.1.1 -> 1947.8.14: Kolhapur [ghsl-Kolhapur-India]
+---
+
+STATE: [4328] Koliyrgeis (-699.1.1 -> -559.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -559.1.1: Koliyrgeis [stadester-Koliyrgeis-Turkey]
+---
+
+STATE: [4329] Kolomna Principality (1166.1.1 -> 1302.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1166.1.1 -> 1302.1.1: Kolomna [stadester-Kolomna-Russia]
+---
+
+STATE: [4330] Kolonai (Asia Minor) (-599.1.1 -> -386.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -386.1.1: Kolonai (Asia Minor) [stadester-Kolonai--Asia-Minor--Turkey]
+---
+
+STATE: [4331] Kolonai (Troas) (-599.1.1 -> -398.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -398.1.1: Kolonai (Troas) [stadester-Kolonai--Troas--Turkey]
+---
+
+STATE: [4332] Kolophon (-849.1.1 -> -386.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -386.1.1: Colophon [stadester-Colophon-Turkey]
+---
+
+STATE: [4333] Koloussa (-699.1.1 -> -549.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -549.1.1: Koloussa [stadester-Koloussa-Turkey]
+---
+
+STATE: [4334] Kom (1756.1.1 -> 1901.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1756.1.1 -> 1901.1.1: Laikom [stadester-Laikom-Cameroon]
+---
+
+STATE: [4335] Koma (1801.1.1 -> 1896.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1896.1.1: Koma [stadester-Koma-Nigeria]
+---
+
+STATE: [4336] Komancza Republic (1918.11.4 -> 1919.1.24) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1918.11.4 -> 1919.1.24: Komańcza [stadester-Koma-cza-Poland]
+---
+
+STATE: [4337] Kombo (1626.1.1 -> 1840.8.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1626.1.1 -> 1840.8.1: Yundum [stadester-Yundum-Gambia]
+---
+
+STATE: [4338] Kome (1801.1.1 -> 1891.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1891.1.1: Kome [stadester-Kome-Tanzania]
+---
+
+STATE: [4339] Konbaung Dynasty (1753.1.1 -> 1885.11.29) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1753.1.1 -> 1885.11.29: Mandalay [stadester-Mandalay-Myanmar]
+---
+
+STATE: [4340] Emirate of Diriyah (1745.1.1 -> 1818.10.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1745.1.1 -> 1818.10.1: Diriyah [stadester-Diriyah-Saudi Arabia]
+---
+
+STATE: [4341] Kondaia (-699.1.1 -> -373.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -373.1.1: Kondaia [stadester-Kondaia-Greece]
+---
+
+STATE: [4342] Kondinskoe Principality (1451.1.1 -> 1595.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1451.1.1 -> 1595.1.1: Kondinskoe [stadester-Kondinskoe-Russia]
+---
+
+STATE: [4343] Kong Empire (1711.1.1 -> 1899.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1711.1.1 -> 1899.1.1: Kong [stadester-Kong-Ivory Coast]
+---
+
+STATE: [4344] Koninskoe Principality (1351.1.1 -> 1451.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1351.1.1 -> 1451.1.1: Koninskoe [stadester-Koninskoe-Russia]
+---
+
+STATE: [4345] Konta (1616.1.1 -> 1890.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1616.1.1 -> 1890.1.1: Ameya [stadester-Ameya-Ethiopia]
+---
+
+STATE: [4346] Kontagora (1865.1.1 -> 1901.1.31) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1865.1.1 -> 1901.1.31: Kontagora [stadester-Kontagora-Nigeria]
+---
+
+STATE: [4347] Kopai (-799.1.1 -> -445.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -445.1.1: Copae [stadester-Copae-Greece]
+---
+
+STATE: [4348] Emirate of Hakkari (1381.1.1 -> 1451.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1381.1.1 -> 1451.1.1: Hakkâri [stadester-Hakkâri-Turkey]
+---
+
+STATE: [4349] Korea State (British Protectorate) (1819.12.24 -> 1949.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1819.12.24 -> 1949.1.1: Baikunthpur [stadester-Baikunthpur-India]
+---
+
+STATE: [4350] Korean Empire (1897.10.13 -> 1905.11.17) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1897.10.13 -> 1905.11.17: Seoul [ghsl-Seoul; Incheon; Suwon; Goyang; Seongnam; Bucheon; Namyangju; Ansan-si; Anyang; Uijeongbu; Siheung; Gwangmyeong; Gunpo; Hanam; Osan; Guri; Uiwang; Gwacheon-South Korea]
+---
+
+STATE: [4351] Korean Empire (Japan) (1905.11.17 -> 1910.8.29) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1905.11.17 -> 1910.8.29: Seoul [ghsl-Seoul; Incheon; Suwon; Goyang; Seongnam; Bucheon; Namyangju; Ansan-si; Anyang; Uijeongbu; Siheung; Gwangmyeong; Gunpo; Hanam; Osan; Guri; Uiwang; Gwacheon-South Korea]
+---
+
+STATE: [4352] Koresia (-699.1.1 -> -199.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -199.1.1: Koresia [stadester-Koresia-Greece]
+---
+
+STATE: [4353] Korinthos (-849.1.1 -> -196.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -196.1.1: Corinth [stadester-Kórinthos-Greece]
+---
+
+STATE: [4354] Korkyra (-732.1.1 -> -228.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -732.1.1 -> -228.1.1: Corfu [stadester-Corfu-Greece]
+---
+
+STATE: [4355] Korone (-368.1.1 -> -181.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -368.1.1 -> -181.1.1: Koroni [stadester-Koroni-Greece]
+---
+
+STATE: [4356] Koroneia (-849.1.1 -> -445.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -445.1.1: Coronea [stadester-Coronea-Greece]
+---
+
+STATE: [4357] Koronta (-428.1.1 -> -399.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -428.1.1 -> -399.1.1: Koronta [stadester-Koronta-Greece]
+---
+
+STATE: [4358] Kos (-849.1.1 -> -498.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -498.1.1: Kos [stadester-Kos-Greece]
+---
+
+STATE: [4359] Kos Meropis (-849.1.1 -> -498.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -498.1.1: Astypalaia (Kos)
+---
+
+STATE: [4360] Kosala Kingdom (-1149.1.1 -> -449.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -1149.1.1 -> -449.1.1: Ayodhya [stadester-Ayodhya-India]
+---
+
+STATE: [4361] Kossyra (-699.1.1 -> -499.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -499.1.1: Cossyra [stadester-Cossyra-Italy]
+---
+
+STATE: [4362] Kostroma Principality (1248.1.1 -> 1321.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1248.1.1 -> 1321.1.1: Kostroma [stadester-Kostroma-Russia]
+---
+
+STATE: [4363] Emirate of Hasankeyf (1233.1.1 -> 1525.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1233.1.1 -> 1525.1.1: Hasankeyf [stadester-Hasankeyf-Turkey]
+---
+
+STATE: [4364] Kota State (Princely State) (1817.12.26 -> 1950.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1817.12.26 -> 1950.1.1: Kota [stadester-Kota-India]
+---
+
+STATE: [4365] Emirate of Mecca (1201.1.1 -> 1351.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1351.1.1: Mecca [stadester-Mecca-Saudi Arabia]
+---
+
+STATE: [4366] Emirate of Melitene (841.1.1 -> 863.9.3) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  841.1.1 -> 863.9.3: Malatya [stadester-Malatya-Turkey]
+---
+
+STATE: [4367] Kothi State (Princely State) (1802.1.1 -> 1950.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1802.1.1 -> 1950.1.1: Kothi [stadester-Kothi-India]
+---
+
+STATE: [4368] Emirate of Palu (1496.1.1 -> 1508.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1496.1.1 -> 1508.1.1: Palu [stadester-Palu-Turkey]
+---
+
+STATE: [4369] Kotokoli (1786.1.1 -> 1896.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1896.1.1: Sokodé [stadester-Sokodé-Togo]
+---
+
+STATE: [4370] Koton Karifi (1851.1.1 -> 1900.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1851.1.1 -> 1900.1.1: Koton Karifi [stadester-Koton-Karifi-Nigeria]
+---
+
+STATE: [4371] Kotyora (-699.1.1 -> -549.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -549.1.1: Ordu [stadester-Ordu-Turkey]
+---
+
+STATE: [4372] Kou Goa (1801.1.1 -> 1896.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1896.1.1: Kou Goa [stadester-Kou-Goa-Burkina Faso]
+---
+
+STATE: [4373] Kourion (-1154.1.1 -> -569.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -1154.1.1 -> -569.1.1: Kourion [stadester-Kourion-Cyprus]
+---
+
+STATE: [4374] Kowoj State (1442.1.1 -> 1698.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1442.1.1 -> 1698.1.1: Topoxte [stadester-Topoxte-Guatemala]
+---
+
+STATE: [4375] Kozelsk Principality (1236.1.1 -> 1446.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1236.1.1 -> 1446.1.1: Kozelsk [stadester-Kozelsk-Russia]
+---
+
+STATE: [4376] Kpando (1807.1.1 -> 1902.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1807.1.1 -> 1902.1.1: Kpando [ghsl-Kpando-Ghana]
+---
+
+STATE: [4377] Kpangalam (1786.1.1 -> 1896.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1786.1.1 -> 1896.1.1: Kpangalam [stadester-Kpangalam-Togo]
+---
+
+STATE: [4378] Kpessi (1801.1.1 -> 1896.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1896.1.1: Kpessi [stadester-Kpessi-Togo]
+---
+
+STATE: [4379] Krachi (1871.1.1 -> 1896.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1871.1.1 -> 1896.1.1: Kete Krachi [stadester-Kete-Krachi-Ghana]
+---
+
+STATE: [4380] Kranioi (-430.1.1 -> -188.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -430.1.1 -> -188.1.1: Argostoli [stadester-Argostoli-Greece]
+---
+
+STATE: [4381] Krannon (-699.1.1 -> -373.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -373.1.1: Crannon [stadester-Crannon-Greece]
+---
+
+STATE: [4382] Emirate of Pazooka (1500.1.1 -> 1588.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1500.1.1 -> 1588.1.1: Pazooka [stadester-Pazooka-Turkey]
+---
+
+STATE: [4383] Krenides (-359.1.1 -> -355.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -359.1.1 -> -355.1.1: Philippi [stadester-Philippi-Greece]
+---
+
+STATE: [4384] Kressa (-599.1.1 -> -559.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -559.1.1: Kressa [stadester-Kressa-Turkey]
+---
+
+STATE: [4385] Krithote (-600.1.1 -> -559.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -600.1.1 -> -559.1.1: Krithote [stadester-Krithote-Turkey]
+---
+
+STATE: [4386] Kromna (-849.1.1 -> -549.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -549.1.1: Cromna [stadester-Cromna-Turkey]
+---
+
+STATE: [4387] Kromnos (-699.1.1 -> -599.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -599.1.1: Kromnos [stadester-Kromnos-Greece]
+---
+
+STATE: [4388] Kroton (-717.1.1 -> -276.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -717.1.1 -> -276.1.1: Crotone [stadester-Crotone-Italy]
+---
+
+STATE: [4389] Krya (-699.1.1 -> -559.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -559.1.1: Krya [stadester-Krya-Turkey]
+---
+
+STATE: [4390] Western Satraps in Malwa and Konkan. (41.1.1 -> 191.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  41.1.1 -> 191.1.1: Ujjain [stadester-Ujjain-India]
+---
+
+STATE: [4391] Ktimene (-699.1.1 -> -373.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -373.1.1: Ktimene [stadester-Ktimene-Greece]
+---
+
+STATE: [4392] Kuba Kingdom (1626.1.1 -> 1885.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1626.1.1 -> 1885.1.1: Nsheng [stadester-Nsheng-Democratic Republic of the Congo]
+---
+
+STATE: [4393] Kuban People's Republic (1918.1.28 -> 1919.4.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1918.1.28 -> 1919.4.1: Krasnodar [stadester-Krasnodar-Russia]
+---
+
+STATE: [4394] Kuban Rada (1917.5.1 -> 1918.1.28) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1917.5.1 -> 1918.1.28: Krasnodar [stadester-Krasnodar-Russia]
+---
+
+STATE: [4395] Kucha (112.1.1 -> 384.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  112.1.1 -> 384.1.1: Kucha [stadester-Kucha-China]
+---
+
+STATE: [4396] Kingdom of Kumaon (1101.1.1 -> 1792.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1101.1.1 -> 1792.1.1: Almora [ghsl-Almora-India]
+---
+
+STATE: [4397] Emirate of Sicily (949.1.1 -> 1091.3.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  949.1.1 -> 1091.3.1: Palermo [stadester-Palermo-Italy]
+---
+
+STATE: [4398] Kumarsain State (Princely State) (1816.1.1 -> 1948.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1816.1.1 -> 1948.1.1: Kumharsain [stadester-Kumharsain-India]
+---
+
+STATE: [4399] Kummuh (-899.1.1 -> -707.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -899.1.1 -> -707.1.1: Samosata [stadester-Samosata-Turkey]
+---
+
+STATE: [4400] Kumul Khanate (Qing) (1697.1.1 -> 1931.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1697.1.1 -> 1931.1.1: Hami [ghsl-Hami; Yizhou-China]
+---
+
+STATE: [4401] Kuninda Kingdom (-249.1.1 -> 251.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -249.1.1 -> 251.1.1: Haridwar [ghsl-Haridwar-India]
+---
+
+STATE: [4402] Kuntala (-599.1.1 -> -272.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -272.1.1: Banavasi [stadester-Banavasi-India]
+---
+
+STATE: [4403] Kuomintang (1926.7.9 -> 1949.12.7) [fill: #AAC295]
+STATUS: CAPITAL
+TIMELINE:
+  1926.7.9 -> 1949.12.7: Nanjing [stadester-Nanjing-China]
+---
+
+STATE: [4404] Kurbsk Principality (1426.1.1 -> 1456.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  1426.1.1 -> 1456.1.1: Kurba [stadester-Kurba-Russia]
+---
+
+STATE: [4405] Kurda (-1999.1.1 -> -1763.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -1999.1.1 -> -1763.1.1: Sinjar [stadester-Sinjar-Iraq]
+---
+
+STATE: [4406] Emirate of Trarza (1641.1.1 -> 1826.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1641.1.1 -> 1826.1.1: Mederdra [stadester-Mederdra-Mauritania]
+---
+
+STATE: [4407] Emirate of Umm Al Quwain (1769.1.1 -> 1820.2.5) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1769.1.1 -> 1820.2.5: Umm Al Quwain [stadester-Umm-Al-Quwain-United Arab Emirates]
+---
+
+STATE: [4408] Empire of Great Fulo (1491.1.1 -> 1777.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1491.1.1 -> 1777.1.1: Anyam-Godo [stadester-Anyam-Godo-Senegal]
+---
+
+STATE: [4409] Empire of Mali (1201.1.1 -> 1671.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1201.1.1 -> 1671.1.1: Niani [stadester-Niani-Guinea]
+---
+
+STATE: [4410] Kursk Principality (1133.1.1 -> 1276.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1133.1.1 -> 1276.1.1: Kursk [stadester-Kursk-Russia]
+---
+
+STATE: [4411] Kuru Kingdom (-1199.1.1 -> -499.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -1199.1.1 -> -499.1.1: Hastinapur [stadester-Hastinapur-India]
+---
+
+STATE: [4412] Empire of Simeon Uroš / Empire of the Serbs and the Greeks (1357.1.1 -> 1372.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1357.1.1 -> 1372.1.1: Trikala [stadester-Trikala-Greece]
+---
+
+STATE: [4413] Kurundvad State (Princely State) (1812.1.1 -> 1949.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1812.1.1 -> 1949.1.1: Kurundvad [stadester-Kurundvad-India]
+---
+
+STATE: [4414] Kushan Dynasty (31.1.1 -> 376.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  31.1.1 -> 376.1.1: Peshawar [ghsl-Peshawar-Pakistan]
+---
+
+STATE: [4415] Kushano-Sasanian Kingdom (228.1.1 -> 371.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  228.1.1 -> 371.1.1: Balkh [stadester-Balkh-Afghanistan]
+---
+
+STATE: [4416] Kussara (-1799.1.1 -> -1650.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -1799.1.1 -> -1650.1.1: Kussara [stadester-Kussara-Turkey]
+---
+
+STATE: [4417] Eretnids (1329.1.1 -> 1382.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1329.1.1 -> 1382.1.1: Sivas [stadester-Sivas-Turkey]
+---
+
+STATE: [4418] Eshrefids (1281.1.1 -> 1327.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1281.1.1 -> 1327.1.1: Beyşehir [stadester-Bey-ehir-Turkey]
+---
+
+STATE: [4419] Kutai Martadipura (401.1.1 -> 1651.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  401.1.1 -> 1651.1.1: Muara Kaman [stadester-Muara-Kaman-Indonesia]
+---
+
+STATE: [4420] Kutha (-2899.1.1 -> -2349.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -2899.1.1 -> -2349.1.1: Kutha [stadester-Kutha-Iraq]
+---
+
+STATE: [4422] Kuthar State (Princely State) (1851.1.1 -> 1947.8.15) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1851.1.1 -> 1947.8.15: Kuthar [stadester-Kuthar-India]
+---
+
+STATE: [4423] Kutlehar State (751.1.1 -> 1826.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  751.1.1 -> 1826.1.1: Kot Kutlehar [stadester-Kot-Kutlehar-India]
+---
+
+STATE: [4424] Kutlehar State (Princely State) (1826.1.1 -> 1958.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1826.1.1 -> 1958.1.1: Kot Kutlehar [stadester-Kot-Kutlehar-India]
+---
+
+STATE: [4425] Kuwait and Saudi Arabia Cnd. (1922.12.2 -> 1970.1.18) [fill: #9CBED9]
+STATUS: ACAPITAL
+REASON: Neutral Zone partition condominium between Kuwait and Saudi Arabia without civil capital
+---
+
+STATE: [4426] Kwande (1791.1.1 -> 1895.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1791.1.1 -> 1895.1.1: Kwande [stadester-Kwande-Nigeria]
+---
+
+STATE: [4427] KwaNdebele (1981.4.1 -> 1994.4.27) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1981.4.1 -> 1994.4.27: KwaMhlanga [ghsl-KwaMhlanga-South Africa]
+---
+
+STATE: [4428] Kwantung Leased Territory (1905.9.5 -> 1945.8.14) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1905.9.5 -> 1945.8.14: Dalian [stadester-Dalian-China]
+---
+
+STATE: [4429] Kwararafa Confederacy (1501.1.1 -> 1841.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1501.1.1 -> 1841.1.1: Wukari [ghsl-Wukari-Nigeria]
+---
+
+STATE: [4430] KwaZulu (1977.2.1 -> 1994.4.27) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1977.2.1 -> 1994.4.27: Ulundi [stadester-Ulundi-South Africa]
+---
+
+STATE: [4431] Greater Kyamutwara (1651.1.1 -> 1701.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1651.1.1 -> 1701.1.1: Bukoba [stadester-Bukoba-Tanzania]
+---
+
+STATE: [4432] Lesser Kyamutwara (1701.1.1 -> 1891.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1701.1.1 -> 1891.1.1: Bukoba [stadester-Bukoba-Tanzania]
+---
+
+STATE: [4433] Kyawkku (1601.1.1 -> 1886.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1601.1.1 -> 1886.1.1: Kyawkku [stadester-Kyawkku-Myanmar]
+---
+
+STATE: [4434] Kydonia (-500.1.1 -> -68.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -500.1.1 -> -68.1.1: Cydonia [stadester-Cydonia-Greece]
+---
+
+STATE: [4435] Kyllandos (-699.1.1 -> -559.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -559.1.1: Kyllandos [stadester-Kyllandos-Turkey]
+---
+
+STATE: [4436] Kyllene (Aiolis) (-599.1.1 -> -559.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -559.1.1: Kyllene (Aiolis) [stadester-Kyllene--Aiolis--Turkey]
+---
+
+STATE: [4437] Kyllene (Elis) (-799.1.1 -> -499.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -499.1.1: Kyllene (Elis) [stadester-Kyllene--Elis--Greece]
+---
+
+STATE: [4438] Kyme (Aiolis) (-849.1.1 -> -386.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -386.1.1: Cyme (Aiolis) [stadester-Cyme--Aiolis--Turkey]
+---
+
+STATE: [4439] Kyme (Magna Graecia) (-749.1.1 -> -420.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -749.1.1 -> -420.1.1: Cumae [stadester-Cumae-Italy]
+---
+
+STATE: [4440] Kynaitha (-699.1.1 -> -369.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -369.1.1: Cynaetha [stadester-Cynaetha-Greece]
+---
+
+STATE: [4441] Kynos (-849.1.1 -> -445.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -445.1.1: Cynus [stadester-Cynus-Greece]
+---
+
+STATE: [4442] Kyong (1801.1.1 -> 1886.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1801.1.1 -> 1886.1.1: Kyong [stadester-Kyong-Myanmar]
+---
+
+STATE: [4443] Kypaira (-699.1.1 -> -249.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -249.1.1: Kypaira [stadester-Kypaira-Greece]
+---
+
+STATE: [4444] Kyparissos (-799.1.1 -> -719.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -719.1.1: Kyparissia [stadester-Kyparissia-Greece]
+---
+
+STATE: [4445] Kyphanta (-699.1.1 -> -599.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -599.1.1: Kyphanta [stadester-Kyphanta-Greece]
+---
+
+STATE: [4446] Kypsela (-499.1.1 -> -349.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -499.1.1 -> -349.1.1: Cypsela [stadester-Cypsela-Turkey]
+---
+
+STATE: [4447] Kyrene (-629.1.1 -> -299.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -629.1.1 -> -299.1.1: Cyrene [stadester-Shahat-Libya]
+---
+
+STATE: [4448] Kyrgyz Republic (1993.5.5 -> 2026.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1993.5.5 -> 2026.1.1: Bishkek [stadester-Bi`skek-Kyrgyzstan]
+---
+
+STATE: [4449] Kyrrhos (-599.1.1 -> -430.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -599.1.1 -> -430.1.1: Cyrrhus [stadester-Cyrrhus-Syria]
+---
+
+STATE: [4450] Kytaia (-480.1.1 -> -437.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -480.1.1 -> -437.1.1: Kytaia [stadester-Kytaia-Georgia]
+---
+
+STATE: [4451] Kytaion (-574.1.1 -> -68.1.1) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  -574.1.1 -> -68.1.1: Kytaion [stadester-Kytaion-Greece]
+---
+
+STATE: [4452] Kythera (-699.1.1 -> -146.12.31) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -146.12.31: Kythira [stadester-Kythira-Greece]
+---
+
+STATE: [4453] Kythnos (-699.1.1 -> -199.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -199.1.1: Kythnos [stadester-Kythnos-Greece]
+---
+
+STATE: [4454] Kytinion (-699.1.1 -> -250.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -250.1.1: Cytinium [stadester-Cytinium-Greece]
+---
+
+STATE: [4455] Kytoros (-849.1.1 -> -549.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -549.1.1: Cytorus [stadester-Cytorus-Turkey]
+---
+
+STATE: [4456] Kyzikos (-755.1.1 -> -386.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -755.1.1 -> -386.1.1: Cyzicus [stadester-Cyzicus-Turkey]
+---
+
+STATE: [4457] Faroes islands (Norse polity) (801.1.1 -> 1036.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  801.1.1 -> 1036.1.1: Tórshavn [stadester-Tórshavn-Faroe Islands]
+---
+
+STATE: [4458] Läänema (1001.1.1 -> 1208.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1001.1.1 -> 1208.1.1: Haapsalu [stadester-Haapsalu-Estonia]
+---
+
+STATE: [4459] Labrys (-549.1.1 -> -309.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -549.1.1 -> -309.1.1: Labrys [stadester-Labrys-Russia]
+---
+
+STATE: [4460] Fatimid Caliphate (909.3.25 -> 1172.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  909.3.25 -> 1172.1.1: Cairo [stadester-Cairo-Egypt]
+---
+
+STATE: [4461] Lac Viet (41.1.1 -> 44.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  41.1.1 -> 44.1.1: Hanoi [stadester-Ha nôi-Vietnam]
+---
+
+STATE: [4462] Federal Republic of Central America (1823.7.1 -> 1847.3.21) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1823.7.1 -> 1847.3.21: Guatemala City [ghsl-Guatemala City; Villa Nueva; Mixco; San Jos� Pinula-Guatemala]
+---
+
+STATE: [4463] Lafia (1805.1.1 -> 1901.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1805.1.1 -> 1901.1.1: Lafia [stadester-Lafia-Nigeria]
+---
+
+STATE: [4464] Lafiagi (1825.1.1 -> 1901.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1825.1.1 -> 1901.1.1: Lafiagi [ghsl-Lafiagi-Nigeria]
+---
+
+STATE: [4465] Lagash (-2499.1.1 -> -2123.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -2499.1.1 -> -2123.1.1: Lagash [stadester-Lagash-Iraq]
+---
+
+STATE: [4466] First Dominican Republic (1844.2.27 -> 1861.3.18) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1844.2.27 -> 1861.3.18: Santo Domingo [stadester-Santo Domingo-Dominican Republic]
+---
+
+STATE: [4467] Lagos (1601.1.1 -> 1801.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1601.1.1 -> 1801.1.1: Lagos [stadester-Lagos-Nigeria]
+---
+
+STATE: [4468] Lagos Colony (1861.8.6 -> 1906.3.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1861.8.6 -> 1906.3.1: Lagos [stadester-Lagos-Nigeria]
+---
+
+STATE: [4469] Lai (-1044.1.1 -> -566.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -1044.1.1 -> -566.1.1: Laiwu [stadester-Laiwu-China]
+---
+
+STATE: [4470] Laihka (1506.1.1 -> 1558.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1506.1.1 -> 1558.1.1: Laihka [stadester-Laihka-Myanmar]
+---
+
+STATE: [4471] Laihka (Burma) (1558.1.1 -> 1886.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1558.1.1 -> 1886.1.1: Laihka [stadester-Laihka-Myanmar]
+---
+
+STATE: [4472] Lakhmid Kingdom (301.1.1 -> 603.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  301.1.1 -> 603.1.1: Al-Hirah [ghsl-Al-Hirah; Al-Manathera-Iraq]
+---
+
+STATE: [4473] First Empire of Haiti (1804.9.22 -> 1806.10.17) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1804.9.22 -> 1806.10.17: Port-au-Prince [ghsl-Port-au-Prince; Carrefour; Delmas; P�tion-Ville; Croix-des-Bouquets; Cit� Soleil; Tabarre-Haiti]
+---
+
+STATE: [4474] Lalangina Kingdom (1751.1.1 -> 1811.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1751.1.1 -> 1811.1.1: Fianarantsoa [stadester-Fianarantsoa-Madagascar]
+---
+
+STATE: [4475] First French Empire (1804.5.18 -> 1815.7.8) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1804.5.18 -> 1815.3.20: Paris [stadester-Paris-France]
+  1815.3.20 -> 1815.7.8: Paris [stadester-Paris-France]
+---
+
+STATE: [4476] First French Republic (1792.9.22 -> 1804.5.18) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1792.9.22 -> 1804.5.18: Paris [stadester-Paris-France]
+---
+
+STATE: [4477] Lamia (-499.1.1 -> -234.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -499.1.1 -> -234.1.1: Lamia [stadester-Lamia-Greece]
+---
+
+STATE: [4478] Lamjung (1551.1.1 -> 1783.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  1551.1.1 -> 1783.1.1: Lamjung [stadester-Lamjung-Nepal]
+---
+
+STATE: [4479] Lamponeia (-530.1.1 -> -386.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -530.1.1 -> -386.1.1: Lamponeia [stadester-Lamponeia-Turkey]
+---
+
+STATE: [4480] Lampsakos (-699.1.1 -> -386.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -386.1.1: Lampsacus [stadester-Lampsacus-Turkey]
+---
+
+STATE: [4481] First Junta of Chile (1810.9.18 -> 1814.10.2) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1810.9.18 -> 1814.10.2: Santiago [stadester-Santiago-Chile]
+---
+
+STATE: [4482] Lan (-780.1.1 -> -520.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -780.1.1 -> -520.1.1: Lan State [stadester-Lan-State-China]
+---
+
+STATE: [4483] First Mexican Empire (1821.8.24 -> 1823.4.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1821.8.24 -> 1823.4.1: Mexico City [ghsl-Mexico City; Ecatepec; Nezahualc�yotl; Naucalpan de Ju�rez; Tlalnepantla; Chimalhuac�n; Atizap�n de Zaragoza; Ciudad L�pez Mateos; Cuautitlan Izcalli; Ojo de Agua; Xico; Ixtapaluca; Nicol�s Romero; Coacalco; Buenavista; Chalco de D�az Covarrubias; Huixquilucan de Degollado; Santa Fe; Interlomas-M�xico]
+---
+
+STATE: [4484] First Mexican Republic (1824.10.10 -> 1835.10.23) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1824.10.10 -> 1835.10.23: Mexico City [ghsl-Mexico City; Ecatepec; Nezahualc�yotl; Naucalpan de Ju�rez; Tlalnepantla; Chimalhuac�n; Atizap�n de Zaragoza; Ciudad L�pez Mateos; Cuautitlan Izcalli; Ojo de Agua; Xico; Ixtapaluca; Nicol�s Romero; Coacalco; Buenavista; Chalco de D�az Covarrubias; Huixquilucan de Degollado; Santa Fe; Interlomas-M�xico]
+---
+
+STATE: [4485] First Republic of Venezuela (1811.7.5 -> 1812.7.25) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1811.7.5 -> 1812.7.25: Caracas [ghsl-Caracas-Venezuela]
+---
+
+STATE: [4486] Land Chenla (708.1.1 -> 803.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  708.1.1 -> 803.1.1: Champasak [stadester-Champasak-Laos]
+---
+
+STATE: [4487] Land of Punt (-2499.1.1 -> -921.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  -2499.1.1 -> -921.1.1: Suakin [stadester-Suakin-Sudan]
+---
+
+STATE: [4488] Landuma (1751.1.1 -> 1892.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1751.1.1 -> 1892.1.1: Boké [stadester-Boké-Guinea]
+---
+
+STATE: [4489] Lanfang Republic (1778.1.1 -> 1885.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1778.1.1 -> 1885.1.1: Mandor [stadester-Mandor-Indonesia]
+---
+
+STATE: [4490] Friuli (Berengario) (889.2.16 -> 905.7.21) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  889.2.16 -> 905.7.21: Cividale del Friuli [stadester-Cividale-del-Friuli-Italy]
+---
+
+STATE: [4491] Langkasuka Kingdom (151.1.1 -> 751.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  151.1.1 -> 751.1.1: Yarang [stadester-Yarang-Thailand]
+---
+
+STATE: [4492] Langkat Sultanate (1569.1.1 -> 1888.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  1569.1.1 -> 1888.1.1: Tanjung Pura [stadester-Tanjung-Pura-Indonesia]
+---
+
+STATE: [4493] Lanka (-1149.1.1 -> -999.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  -1149.1.1 -> -999.1.1: Anuradhapura [ghsl-Anuradhapura-Sri Lanka]
+---
+
+STATE: [4494] Lao Issara (1945.10.12 -> 1946.4.24) [fill: #95C0C2]
+STATUS: CAPITAL
+TIMELINE:
+  1945.10.12 -> 1946.4.24: Vientiane [stadester-Vientiane-Laos]
+---
+
+STATE: [4495] Laos (Japan) (1945.4.8 -> 1945.6.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  1945.4.8 -> 1945.6.1: Vientiane [stadester-Vientiane-Laos]
+---
+
+STATE: [4496] Laos People's Democratic Republic (1975.12.2 -> 2026.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  1975.12.2 -> 2026.1.1: Vientiane [stadester-Vientiane-Laos]
+---
+
+STATE: [4497] Lapai (1826.1.1 -> 1898.6.24) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1826.1.1 -> 1898.6.24: Lapai [ghsl-Lapai-Nigeria]
+---
+
+STATE: [4498] Lapethos (-749.1.1 -> -569.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  -749.1.1 -> -569.1.1: Lapithos [stadester-Lapithos-Cyprus]
+---
+
+STATE: [4499] Lappa (-574.1.1 -> -68.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  -574.1.1 -> -68.1.1: Lappa [stadester-Lappa-Greece]
+---
+
+STATE: [4500] Laqi (-999.1.1 -> -894.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -999.1.1 -> -894.1.1: Laqi [stadester-Laqi-Syria]
+---
+
+STATE: [4501] Free and Independent State of Cundinamarca (1811.4.1 -> 1815.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1811.4.1 -> 1815.1.1: Bogotá [stadester-Bogot--Colombia]
+---
+
+STATE: [4502] Larisa (Achaia Phthiotis) (-699.1.1 -> -249.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -249.1.1: Larisa Kremaste [stadester-Larisa-Kremaste-Greece]
+---
+
+STATE: [4503] Larisa (Aiolis) (-849.1.1 -> -386.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -386.1.1: Larisa (Aiolis) [stadester-Larisa--Aiolis--Turkey]
+---
+
+STATE: [4504] Larisa (Thessalia) (-699.1.1 -> -373.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -373.1.1: Larissa [stadester-Larissa-Greece]
+---
+
+STATE: [4505] Larisa (Troas) (-799.1.1 -> -386.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -386.1.1: Larisa (Troas) [stadester-Larisa--Troas--Turkey]
+---
+
+STATE: [4506] Larissa (-799.1.1 -> -499.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -499.1.1: Larissa [stadester-Larissa-Greece]
+---
+
+STATE: [4507] Larsa (-2899.1.1 -> -1762.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -2899.1.1 -> -1762.1.1: Larsa [stadester-Larsa-Iraq]
+---
+
+STATE: [4508] Larymna (-799.1.1 -> -445.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -445.1.1: Larymna [stadester-Larymna-Greece]
+---
+
+STATE: [4509] Las (-699.1.1 -> -599.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -599.1.1: Las (Laconia) [stadester-Las--Laconia--Greece]
+---
+
+STATE: [4510] Las Bela (1743.1.1 -> 1952.3.10) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1743.1.1 -> 1952.3.10: Bela [stadester-Bela-Pakistan]
+---
+
+STATE: [4511] Lasion (-799.1.1 -> -499.1.1) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -499.1.1: Lasion [stadester-Lasion-Greece]
+---
+
+STATE: [4512] Late Nazca Culture (551.1.1 -> 601.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  551.1.1 -> 601.1.1: Cahuachi [stadester-Cahuachi-Peru]
+---
+
+STATE: [4513] Later Baekje (893.1.1 -> 937.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  893.1.1 -> 937.1.1: Jeonju [ghsl-Jeonju-South Korea]
+---
+
+STATE: [4514] Later Gupta (648.1.1 -> 651.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  648.1.1 -> 651.1.1: Patna [stadester-Patna-India]
+---
+
+STATE: [4515] Later Gupta (Pushyabhuti dynasty) (551.1.1 -> 648.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  551.1.1 -> 648.1.1: Patna [stadester-Patna-India]
+---
+
+STATE: [4516] Later Han (947.3.10 -> 951.2.13) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  947.3.10 -> 951.2.13: Luoyang [stadester-Luoyang-China]
+---
+
+STATE: [4517] Free Province of Guayaquil (1820.11.8 -> 1822.6.16) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1820.11.8 -> 1822.6.16: Guayaquil [stadester-Guayaquil-Ecuador]
+---
+
+STATE: [4518] Later Jìn (936-947) (942.7.28 -> 947.1.11) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  942.7.28 -> 947.1.11: Kaifeng [stadester-Kaifeng-China]
+---
+
+STATE: [4519] Later Jìn (936-947, Liao Dynasty) (936.11.28 -> 942.7.28) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  936.11.28 -> 942.7.28: Kaifeng [stadester-Kaifeng-China]
+---
+
+STATE: [4520] Free State of Cartagena (1811.11.11 -> 1811.11.27) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1811.11.11 -> 1811.11.27: Cartagena de Indias [stadester-Cartagena-de-Indias-Colombia]
+---
+
+STATE: [4521] Free State of Jones (1863.10.13 -> 1865.11.30) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  1863.10.13 -> 1865.11.30: Ellisville [stadester-Ellisville-United States]
+---
+
+STATE: [4522] Later Liang (388.1.1 -> 923.11.19) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  388.1.1 -> 923.11.19: Kaifeng [stadester-Kaifeng-China]
+---
+
+STATE: [4523] Later Qin (385.1.1 -> 418.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  385.1.1 -> 418.1.1: Xi'an [stadester-Xi'an-China]
+---
+
+STATE: [4524] Later Shu (934.6.1 -> 966.1.1) [fill: #CF658F]
+STATUS: CAPITAL
+TIMELINE:
+  934.6.1 -> 966.1.1: Chengdu [stadester-Chengdu-China]
+---
+
+STATE: [4525] Later Tang (923.6.1 -> 936.11.28) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  923.6.1 -> 936.11.28: Luoyang [stadester-Luoyang-China]
+---
+
+STATE: [4526] Later Yan (385.1.1 -> 408.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  385.1.1 -> 408.1.1: Chaoyang [ghsl-Chaoyang; Shuangta; Longcheng-China]
+---
+
+STATE: [4527] Later Zhao (320.1.1 -> 351.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  320.1.1 -> 351.1.1: Xingtai [stadester-Xingtai-China]
+---
+
+STATE: [4528] Later Zhou (951.2.13 -> 960.2.4) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  951.2.13 -> 960.2.4: Kaifeng [stadester-Kaifeng-China]
+---
+
+STATE: [4529] Lathi (Princely State) (1804.1.1 -> 1947.8.15) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1804.1.1 -> 1947.8.15: Lathi [stadester-Lathi-India]
+---
+
+STATE: [4530] French Second Republic (1848.2.25 -> 1852.12.2) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1848.2.25 -> 1852.12.2: Paris [stadester-Paris-France]
+---
+
+STATE: [4531] Latin Empire (1204.4.13 -> 1261.7.25) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  1204.4.13 -> 1261.7.25: Constantinople [stadester-Constantinople-Turkey]
+---
+
+STATE: [4532] Latmos/Herakleia (-699.1.1 -> -559.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -559.1.1: Heraclea by Latmus [stadester-Heraclea-by-Latmus-Turkey]
+---
+
+STATE: [4533] Lato (-574.1.1 -> -68.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -574.1.1 -> -68.1.1: Lato [stadester-Lato-Greece]
+---
+
+STATE: [4534] Latvia (Germany) (1919.4.16 -> 1919.7.8) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1919.4.16 -> 1919.7.8: Riga [stadester-Riga-Latvia]
+---
+
+STATE: [4535] Latvia (USSR Protectorate) (1939.6.16 -> 1940.8.5) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1939.6.16 -> 1940.8.5: Riga [stadester-Riga-Latvia]
+---
+
+STATE: [4536] Laur Kingdom (631.1.1 -> 1566.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  631.1.1 -> 1566.1.1: Laur [stadester-Laur-Bangladesh]
+---
+
+STATE: [4537] Laus (-509.1.1 -> -389.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -509.1.1 -> -389.1.1: Laus [stadester-Laus-Italy]
+---
+
+STATE: [4538] Lavo Kingdom (451.1.1 -> 1409.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  451.1.1 -> 1409.1.1: Lopburi [stadester-Lopburi-Thailand]
+---
+
+STATE: [4539] Funj Sultanate (1505.1.1 -> 1821.6.14) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1505.1.1 -> 1821.6.14: Sennar [stadester-Sinnar-Sudan]
+---
+
+STATE: [4540] Lawa Thikana (Princel State) (1868.1.1 -> 1948.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1868.1.1 -> 1948.1.1: Lawa [stadester-Lawa-India]
+---
+
+STATE: [4541] Lawksawk (1631.1.1 -> 1886.1.1) [fill: #E0C25E]
+STATUS: CAPITAL
+TIMELINE:
+  1631.1.1 -> 1886.1.1: Lawksawk [ghsl-Lawksawk-Myanmar]
+---
+
+STATE: [4542] Lazica (Rome) (251.1.1 -> 563.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  251.1.1 -> 563.1.1: Archaeopolis [stadester-Archaeopolis-Georgia]
+---
+
+STATE: [4543] Gahadavala Dynasty (1091.1.1 -> 1198.1.1) [fill: #EBBCC5]
+STATUS: CAPITAL
+TIMELINE:
+  1091.1.1 -> 1198.1.1: Kannauj [stadester-Kannauj-India]
+---
+
+STATE: [4544] Gajapati Kingdom (1435.1.1 -> 1542.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  1435.1.1 -> 1542.1.1: Cuttack [stadester-Cuttack-India]
+---
+
+STATE: [4545] Ganzhou Uyghur Kingdom (867.1.1 -> 1029.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  867.1.1 -> 1029.1.1: Zhangye [stadester-Zhangye-China]
+---
+
+STATE: [4546] League of the Messapian City-States (-399.1.1 -> -259.1.1) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  -399.1.1 -> -259.1.1: Uria (Messapia) [stadester-Uria--Messapia--Italy]
+---
+
+STATE: [4547] Gao Empire (851.1.1 -> 1201.1.1) [fill: #AEC76D]
+STATUS: CAPITAL
+TIMELINE:
+  851.1.1 -> 1201.1.1: Gao [stadester-Gao-Mali]
+---
+
+STATE: [4548] Lebadeia (-849.1.1 -> -445.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -445.1.1: Lebadeia [stadester-Lebadeia-Greece]
+---
+
+STATE: [4549] Lebanese Republic (1946.4.17 -> 2026.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1946.4.17 -> 2026.1.1: Beirut [stadester-Bayrût-Lebanon]
+---
+
+STATE: [4550] Lebanese Republic (France) (1926.5.23 -> 1946.4.17) [fill: #B5ABCC]
+STATUS: CAPITAL
+TIMELINE:
+  1926.5.23 -> 1946.4.17: Beirut [stadester-Bayrût-Lebanon]
+---
+
+STATE: [4551] Lebang (1851.1.1 -> 1901.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1851.1.1 -> 1901.1.1: Lebang [stadester-Lebang-Indonesia]
+---
+
+STATE: [4552] Lebanon (Military Occupation) (1948.6.6 -> 1949.7.20) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  1948.6.6 -> 1949.7.20: Beirut [stadester-Bayrût-Lebanon]
+---
+
+STATE: [4553] Lebedos (-799.1.1 -> -386.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -386.1.1: Lebedos [stadester-Lebedos-Turkey]
+---
+
+STATE: [4554] Lebena (-574.1.1 -> -68.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -574.1.1 -> -68.1.1: Lebena [stadester-Lebena-Greece]
+---
+
+STATE: [4555] Lebowa (1972.10.2 -> 1994.4.27) [fill: #D1453B]
+STATUS: CAPITAL
+TIMELINE:
+  1972.10.2 -> 1994.4.27: Lebowakgomo [stadester-Lebowakgomo-South Africa]
+---
+
+STATE: [4556] Ledon (-799.1.1 -> -195.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -195.1.1: Ledon [stadester-Ledon-Greece]
+---
+
+STATE: [4557] Ledrai (-749.1.1 -> -569.1.1) [fill: #405F85]
+STATUS: CAPITAL
+TIMELINE:
+  -749.1.1 -> -569.1.1: Nicosia [stadester-Lefkosa-Cyprus]
+---
+
+STATE: [4558] Leibethra (-699.1.1 -> -630.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -630.1.1: Leibethra [stadester-Leibethra-Greece]
+---
+
+STATE: [4559] Leinster (186.1.1 -> 1176.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  186.1.1 -> 1176.1.1: Kilkenny [stadester-Kilkenny-Ireland]
+---
+
+STATE: [4560] Lemko Republic (1918.12.5 -> 1920.4.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  1918.12.5 -> 1920.4.1: Florynka [stadester-Florynka-Poland]
+---
+
+STATE: [4561] Leontinoi (-727.1.1 -> -489.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -727.1.1 -> -489.1.1: Leontinoi [stadester-Leontinoi-Italy]
+---
+
+STATE: [4562] Leontion (-799.1.1 -> -279.1.1) [fill: #687FAD]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -279.1.1: Leontion [stadester-Leontion-Greece]
+---
+
+STATE: [4563] Leontopolys (-753.1.1 -> -714.1.1) [fill: #90A16A]
+STATUS: CAPITAL
+TIMELINE:
+  -753.1.1 -> -714.1.1: Leontopolis [stadester-Leontopolis-Egypt]
+---
+
+STATE: [4564] Lepreon (-799.1.1 -> -367.1.1) [fill: #E0A348]
+STATUS: CAPITAL
+TIMELINE:
+  -799.1.1 -> -367.1.1: Lepreon [stadester-Lepreon-Greece]
+---
+
+STATE: [4565] Lepsimandos (-699.1.1 -> -559.1.1) [fill: #283C70]
+STATUS: CAPITAL
+TIMELINE:
+  -699.1.1 -> -559.1.1: Lepsimandos [stadester-Lepsimandos-Turkey]
+---
+
+STATE: [4566] Leptis (-649.1.1 -> -499.1.1) [fill: #4E825E]
+STATUS: CAPITAL
+TIMELINE:
+  -649.1.1 -> -499.1.1: Leptis Magna [stadester-Leptis-Magna-Libya]
+---
+
+STATE: [4567] Leqa Naqamte (1872.1.1 -> 1883.1.1) [fill: #944481]
+STATUS: CAPITAL
+TIMELINE:
+  1872.1.1 -> 1883.1.1: Nekemte [stadester-Nekemte-Ethiopia]
+---
+
+STATE: [4568] Leqa Qellam (1871.1.1 -> 1883.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  1871.1.1 -> 1883.1.1: Dembidolo [stadester-Dembidolo-Ethiopia]
+---
+
+STATE: [4569] Leros (-849.1.1 -> -498.1.1) [fill: #B37B50]
+STATUS: CAPITAL
+TIMELINE:
+  -849.1.1 -> -498.1.1: Leros [stadester-Leros-Greece]
+---
+
+STATE: [4570] Kingdom of Lesser Armenia (Roman Vassal) (-64.1.1 -> 73.1.1) [fill: #AD2845]
+STATUS: CAPITAL
+TIMELINE:
+  -64.1.1 -> 73.1.1: Kozan [stadester-Kozan-Turkey]
+---
+
+STATE: [4571] Lete (-499.1.1 -> -399.1.1) [fill: #9CBED9]
+STATUS: CAPITAL
+TIMELINE:
+  -499.1.1 -> -399.1.1: Lete [stadester-Lete-Greece]
+---

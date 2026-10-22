@@ -24,7 +24,8 @@ dist-ssr
 docs
 exports
 scratch
-tests
+tests/*
+!tests/capitals/
 *.local
 
 # Editor directories and files

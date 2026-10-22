@@ -72,6 +72,14 @@
         "key": "stadester-Aquileia-Italy",
         "start": "1078.1.1",
         "start_frac": 1078.0027397260274,
+        "stop": "1238.1.1",
+        "stop_frac": 1238.0027397260274
+      },
+      {
+        "city": "Udine",
+        "key": "stadester-Udine-Italy",
+        "start": "1238.1.1",
+        "start_frac": 1238.0027397260274,
         "stop": "1544.1.1",
         "stop_frac": 1544.0027397260274
       }
@@ -85,6 +93,14 @@
         "key": "stadester-Augsburg-Germany",
         "start": "1259.1.1",
         "start_frac": 1259.0027397260274,
+        "stop": "1276.1.1",
+        "stop_frac": 1276.0027397260274
+      },
+      {
+        "city": "Dillingen an der Donau",
+        "key": "stadester-DillingenanderDonau-Germany",
+        "start": "1276.1.1",
+        "start_frac": 1276.0027397260274,
         "stop": "1803.1.1",
         "stop_frac": 1803.0027397260274
       }
@@ -111,6 +127,14 @@
         "key": "stadester-Basel-Switzerland",
         "start": "1033.1.1",
         "start_frac": 1033.0027397260274,
+        "stop": "1528.1.1",
+        "stop_frac": 1528.0027397260274
+      },
+      {
+        "city": "Porrentruy",
+        "key": "stadester-Porrentruy-Switzerland",
+        "start": "1528.1.1",
+        "start_frac": 1528.0027397260274,
         "stop": "1580.1.1",
         "stop_frac": 1580.0027397260274
       }
@@ -176,6 +200,14 @@
         "key": "stadester-Bremen-Germany",
         "start": "1181.1.1",
         "start_frac": 1181.0027397260274,
+        "stop": "1219.1.1",
+        "stop_frac": 1219.0027397260274
+      },
+      {
+        "city": "Bremervörde",
+        "key": "stadester-Bremervorde-Germany",
+        "start": "1219.1.1",
+        "start_frac": 1219.0027397260274,
         "stop": "1649.1.1",
         "stop_frac": 1649.0027397260274
       }
@@ -352,7 +384,17 @@
     ]
   },
   "25": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Engelberg",
+        "key": "stadester-Engelberg-Switzerland",
+        "start": "1121.1.1",
+        "start_frac": 1121.0027397260274,
+        "stop": "1426.1.1",
+        "stop_frac": 1426.0027397260274
+      }
+    ]
   },
   "26": {
     "acapital": false,
@@ -544,6 +586,14 @@
         "key": "ghsl-Cologne; Leverkusen; Bergisch Gladbach-Germany",
         "start": "1065.1.1",
         "start_frac": 1065.0027397260274,
+        "stop": "1288.6.5",
+        "stop_frac": 1288.4246575342465
+      },
+      {
+        "city": "Bonn",
+        "key": "stadester-Bonn-Germany",
+        "start": "1288.6.5",
+        "start_frac": 1288.4246575342465,
         "stop": "1807.7.9",
         "stop_frac": 1807.517808219178
       }
@@ -557,6 +607,14 @@
         "key": "stadester-Konstanz-Germany",
         "start": "1156.1.1",
         "start_frac": 1156.0027397260274,
+        "stop": "1526.1.1",
+        "stop_frac": 1526.0027397260274
+      },
+      {
+        "city": "Meersburg",
+        "key": "stadester-Meersburg-Germany",
+        "start": "1526.1.1",
+        "start_frac": 1526.0027397260274,
         "stop": "1804.1.1",
         "stop_frac": 1804.0027397260274
       }
@@ -576,7 +634,17 @@
     ]
   },
   "43": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Lausanne",
+        "key": "stadester-Lausanne-Switzerland",
+        "start": "1033.1.1",
+        "start_frac": 1033.0027397260274,
+        "stop": "1537.1.1",
+        "stop_frac": 1537.0027397260274
+      }
+    ]
   },
   "44": {
     "acapital": false,
@@ -657,7 +725,17 @@
     ]
   },
   "50": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Meissen",
+        "key": "stadester-Meissen-Germany",
+        "start": "1181.1.1",
+        "start_frac": 1181.0027397260274,
+        "stop": "1667.1.1",
+        "stop_frac": 1667.0027397260274
+      }
+    ]
   },
   "51": {
     "acapital": false,
@@ -793,7 +871,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Prüm Abbey",
+        "city": "Prüm",
+        "key": "stadester-Prum-Germany",
         "start": "1223.1.1",
         "start_frac": 1223.0027397260274,
         "stop": "1795.1.1",
@@ -893,7 +972,17 @@
     ]
   },
   "69": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Salzburg",
+        "key": "stadester-Salzburg-Austria",
+        "start": "962.2.2",
+        "start_frac": 962.0876712328767,
+        "stop": "1803.2.11",
+        "stop_frac": 1803.1123287671232
+      }
+    ]
   },
   "70": {
     "acapital": false,
@@ -981,6 +1070,22 @@
         "key": "stadester-Speyer-Germany",
         "start": "1087.1.1",
         "start_frac": 1087.0027397260274,
+        "stop": "1371.1.1",
+        "stop_frac": 1371.0027397260274
+      },
+      {
+        "city": "Philippsburg",
+        "key": "stadester-Philippsburg-Germany",
+        "start": "1371.1.1",
+        "start_frac": 1371.0027397260274,
+        "stop": "1723.1.1",
+        "stop_frac": 1723.0027397260274
+      },
+      {
+        "city": "Bruchsal",
+        "key": "stadester-Bruchsal-Germany",
+        "start": "1723.1.1",
+        "start_frac": 1723.0027397260274,
         "stop": "1804.1.1",
         "stop_frac": 1804.0027397260274
       }
@@ -1096,6 +1201,22 @@
         "key": "stadester-Strasbourg-France",
         "start": "776.1.1",
         "start_frac": 776.0027397260274,
+        "stop": "1262.3.8",
+        "stop_frac": 1262.186301369863
+      },
+      {
+        "city": "Saverne",
+        "key": "stadester-Saverne-France",
+        "start": "1262.3.8",
+        "start_frac": 1262.186301369863,
+        "stop": "1790.1.1",
+        "stop_frac": 1790.0027397260274
+      },
+      {
+        "city": "Strasbourg",
+        "key": "stadester-Strasbourg-France",
+        "start": "1790.1.1",
+        "start_frac": 1790.0027397260274,
         "stop": "1804.1.1",
         "stop_frac": 1804.0027397260274
       }
@@ -1141,7 +1262,17 @@
     ]
   },
   "87": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Utrecht",
+        "key": "stadester-Utrecht-Netherlands",
+        "start": "1025.1.1",
+        "start_frac": 1025.0027397260274,
+        "stop": "1528.10.20",
+        "stop_frac": 1528.7945205479452
+      }
+    ]
   },
   "88": {
     "acapital": false,
@@ -1222,7 +1353,17 @@
     ]
   },
   "94": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Werden",
+        "key": "stadester-Essen-Germany",
+        "start": "962.2.2",
+        "start_frac": 962.0876712328767,
+        "stop": "1804.1.1",
+        "stop_frac": 1804.0027397260274
+      }
+    ]
   },
   "95": {
     "acapital": false,
@@ -1322,7 +1463,17 @@
     ]
   },
   "104": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Aalen",
+        "key": "stadester-Aalen-Germany",
+        "start": "1361.1.1",
+        "start_frac": 1361.0027397260274,
+        "stop": "1803.1.1",
+        "stop_frac": 1803.0027397260274
+      }
+    ]
   },
   "105": {
     "acapital": false,
@@ -1546,7 +1697,17 @@
     ]
   },
   "122": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Duisburg",
+        "key": "stadester-Duisburg-Germany",
+        "start": "962.2.2",
+        "start_frac": 962.0876712328767,
+        "stop": "1291.1.1",
+        "stop_frac": 1291.0027397260274
+      }
+    ]
   },
   "123": {
     "acapital": false,
@@ -1774,6 +1935,7 @@
     "timeline": [
       {
         "city": "Kempten im Allgäu",
+        "key": "stadester-Kempten (Allgäu)-Germany",
         "start": "1290.1.1",
         "start_frac": 1290.0027397260274,
         "stop": "1804.1.1",
@@ -1877,6 +2039,7 @@
     "timeline": [
       {
         "city": "Maastricht City Hall",
+        "key": "stadester-Maastricht-Netherlands",
         "start": "1205.1.1",
         "start_frac": 1205.0027397260274,
         "stop": "1579.7.1",
@@ -2096,7 +2259,17 @@
     ]
   },
   "166": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Reutlingen",
+        "key": "stadester-Reutlingen-Germany",
+        "start": "1241.1.1",
+        "start_frac": 1241.0027397260274,
+        "stop": "1803.2.25",
+        "stop_frac": 1803.150684931507
+      }
+    ]
   },
   "167": {
     "acapital": false,
@@ -2151,7 +2324,17 @@
     ]
   },
   "171": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Schaffhausen",
+        "key": "stadester-Schaffhausen-Switzerland",
+        "start": "1419.1.1",
+        "start_frac": 1419.0027397260274,
+        "stop": "1455.1.1",
+        "stop_frac": 1455.0027397260274
+      }
+    ]
   },
   "172": {
     "acapital": false,
@@ -2310,7 +2493,17 @@
     ]
   },
   "184": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Wangen im Allgäu",
+        "key": "stadester-WangenimAllgu-Germany",
+        "start": "1287.1.1",
+        "start_frac": 1287.0027397260274,
+        "stop": "1803.1.1",
+        "stop_frac": 1803.0027397260274
+      }
+    ]
   },
   "185": {
     "acapital": false,
@@ -2579,7 +2772,17 @@
     ]
   },
   "207": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Ahaus",
+        "key": "stadester-Ahaus-Germany",
+        "start": "1031.1.1",
+        "start_frac": 1031.0027397260274,
+        "stop": "1355.1.1",
+        "stop_frac": 1355.0027397260274
+      }
+    ]
   },
   "208": {
     "acapital": false,
@@ -2803,7 +3006,17 @@
     ]
   },
   "225": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Aschaffenburg",
+        "key": "stadester-Aschaffenburg-Germany",
+        "start": "1804.1.1",
+        "start_frac": 1804.0027397260274,
+        "stop": "1810.2.16",
+        "stop_frac": 1810.1260273972603
+      }
+    ]
   },
   "226": {
     "acapital": false,
@@ -4073,7 +4286,17 @@
     ]
   },
   "325": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Correggio",
+        "key": "stadester-Correggio-Italy",
+        "start": "1010.1.1",
+        "start_frac": 1010.0027397260274,
+        "stop": "1660.1.1",
+        "stop_frac": 1660.0027397260274
+      }
+    ]
   },
   "326": {
     "acapital": false,
@@ -4274,10 +4497,30 @@
     ]
   },
   "342": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Desana",
+        "key": "stadester-Desana-Italy",
+        "start": "1511.1.1",
+        "start_frac": 1511.0027397260274,
+        "stop": "1694.1.1",
+        "stop_frac": 1694.0027397260274
+      }
+    ]
   },
   "343": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Desana",
+        "key": "stadester-Desana-Italy",
+        "start": "1412.1.1",
+        "start_frac": 1412.0027397260274,
+        "stop": "1511.1.1",
+        "stop_frac": 1511.0027397260274
+      }
+    ]
   },
   "344": {
     "acapital": false,
@@ -4713,6 +4956,7 @@
     "timeline": [
       {
         "city": "Weißenhorn",
+        "key": "stadester-Weissenhorn-Germany",
         "start": "1478.1.1",
         "start_frac": 1478.0027397260274,
         "stop": "1807.1.1",
@@ -6199,10 +6443,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "München",
-        "key": "stadester-Mnchen-Germany",
+        "city": "Regensburg",
+        "key": "stadester-Regensburg-Germany",
         "start": "962.2.2",
         "start_frac": 962.0876712328767,
+        "stop": "1255.1.1",
+        "stop_frac": 1255.0027397260274
+      },
+      {
+        "city": "München",
+        "key": "stadester-Mnchen-Germany",
+        "start": "1255.1.1",
+        "start_frac": 1255.0027397260274,
         "stop": "1777.12.30",
         "stop_frac": 1777.986301369863
       }
@@ -8179,10 +8431,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Karlsruhe",
-        "key": "stadester-Karlsruhe-Germany",
+        "city": "Baden-Baden",
+        "key": "stadester-Baden-Baden-Germany",
         "start": "1113.1.1",
         "start_frac": 1113.0027397260274,
+        "stop": "1715.6.17",
+        "stop_frac": 1715.4575342465753
+      },
+      {
+        "city": "Karlsruhe",
+        "key": "stadester-Karlsruhe-Germany",
+        "start": "1715.6.17",
+        "start_frac": 1715.4575342465753,
         "stop": "1803.4.27",
         "stop_frac": 1803.3205479452056
       }
@@ -12759,8 +13019,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dum Dum",
-        "key": "stadester-Dum Dum-India",
+        "city": "Nashik",
+        "key": "stadester-Nashik-India",
         "start": "249.1.1",
         "start_frac": 249.0027397260274,
         "stop": "416.1.1",
@@ -12772,8 +13032,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dum Dum",
-        "key": "stadester-Dum Dum-India",
+        "city": "Nashik",
+        "key": "stadester-Nashik-India",
         "start": "200.1.1",
         "start_frac": 200.0027397260274,
         "stop": "371.1.1",
@@ -12876,10 +13136,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Persepolis",
-        "key": "stadester-Persepolis-Iran",
+        "city": "Pasargadae",
+        "key": "stadester-Pasargadae-Iran",
         "start": "-549.1.1",
         "start_frac": -548.9972602739726,
+        "stop": "-518.1.1",
+        "stop_frac": -517.9972602739726
+      },
+      {
+        "city": "Persepolis",
+        "key": "stadester-Persepolis-Iran",
+        "start": "-518.1.1",
+        "start_frac": -517.9972602739726,
         "stop": "-330.8.1",
         "stop_frac": -329.4219178082192
       }
@@ -13288,7 +13556,7 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Cairo",
+        "city": "Fustat",
         "key": "stadester-Cairo-Egypt",
         "start": "936.1.1",
         "start_frac": 936.0027397260274,
@@ -13379,8 +13647,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Hamadan",
-        "key": "stadester-Hamadan-Iran",
+        "city": "Nishapur",
+        "key": "stadester-Nishapur-Iran",
         "start": "822.1.1",
         "start_frac": 822.0027397260274,
         "stop": "874.1.1",
@@ -13775,8 +14043,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Babylon",
-        "key": "stadester-Hillah-Iraq",
+        "city": "Akkad",
+        "key": "stadester-Akkad-Iraq",
         "start": "-2333.1.1",
         "start_frac": -2332.9972602739726,
         "stop": "-2198.1.1",
@@ -14184,8 +14452,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Luton",
-        "key": "stadester-Luton-United Kingdom",
+        "city": "Lugdunum",
+        "key": "stadester-Lyon-France",
         "start": "193.3.28",
         "start_frac": 193.24109589041095,
         "stop": "197.2.19",
@@ -14413,10 +14681,34 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Madrid",
-        "key": "stadester-Madrid-Spain",
+        "city": "Valladolid",
+        "key": "stadester-Valladolid-Spain",
         "start": "1517.1.1",
         "start_frac": 1517.0027397260274,
+        "stop": "1528.1.1",
+        "stop_frac": 1528.0027397260274
+      },
+      {
+        "city": "Toledo",
+        "key": "stadester-Toledo-Spain",
+        "start": "1528.1.1",
+        "start_frac": 1528.0027397260274,
+        "stop": "1535.1.1",
+        "stop_frac": 1535.0027397260274
+      },
+      {
+        "city": "Valladolid",
+        "key": "stadester-Valladolid-Spain",
+        "start": "1535.1.1",
+        "start_frac": 1535.0027397260274,
+        "stop": "1545.1.1",
+        "stop_frac": 1545.0027397260274
+      },
+      {
+        "city": "Toledo",
+        "key": "stadester-Toledo-Spain",
+        "start": "1545.1.1",
+        "start_frac": 1545.0027397260274,
         "stop": "1556.1.16",
         "stop_frac": 1556.0438356164384
       }
@@ -14689,8 +14981,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Amastris",
-        "key": "stadester-Amastris-Turkey",
+        "city": "Darband",
+        "key": "stadester-Darband-Pakistan",
         "start": "1859.1.1",
         "start_frac": 1859.0027397260274,
         "stop": "1947.8.15",
@@ -14754,8 +15046,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Alkmaar",
-        "key": "stadester-Alkmaar-Netherlands",
+        "city": "Ambliara",
+        "key": "stadester-Ambliara-India",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1943.10.7",
@@ -14767,8 +15059,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ambroz",
-        "key": "stadester-Ambroz-Spain",
+        "city": "Ambohidratrimo",
+        "key": "stadester-Ambohidratrimo-Madagascar",
         "start": "1301.1.1",
         "start_frac": 1301.0027397260274,
         "stop": "1551.1.1",
@@ -14832,8 +15124,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Amorgos",
-        "key": "stadester-Amorgos-Greece",
+        "city": "Kimanis",
+        "key": "stadester-Kimanis-Malaysia",
         "start": "1866.1.1",
         "start_frac": 1866.0027397260274,
         "stop": "1878.1.1",
@@ -14845,8 +15137,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Amorgos",
-        "key": "stadester-Amorgos-Greece",
+        "city": "Multan",
+        "key": "stadester-Multan-Pakistan",
         "start": "751.1.1",
         "start_frac": 751.0027397260274,
         "stop": "951.1.1",
@@ -14858,8 +15150,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Amphikleia",
-        "key": "stadester-Amphikleia-Greece",
+        "city": "Samsun",
+        "key": "stadester-Samsun-Turkey",
         "start": "-559.1.1",
         "start_frac": -558.9972602739726,
         "stop": "-549.1.1",
@@ -14884,8 +15176,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Amphissa",
-        "key": "stadester-Amphissa-Greece",
+        "city": "Amphanai",
+        "key": "stadester-Amphanai-Greece",
         "start": "-699.1.1",
         "start_frac": -698.9972602739726,
         "stop": "-373.1.1",
@@ -14936,8 +15228,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Sumur",
-        "key": "stadester-Sumur-Syria",
+        "city": "Amphissa",
+        "key": "stadester-Amfissa-Greece",
         "start": "-328.1.1",
         "start_frac": -327.9972602739726,
         "stop": "-299.1.1",
@@ -15095,8 +15387,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Anaphe",
-        "key": "stadester-Anaphe-Greece",
+        "city": "Vadnagar",
+        "key": "stadester-Vadnagar-India",
         "start": "-1149.1.1",
         "start_frac": -1148.9972602739726,
         "stop": "-499.1.1",
@@ -15108,10 +15400,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Cairo",
-        "key": "stadester-Cairo-Egypt",
+        "city": "Thinis",
+        "key": "stadester-Girga-Egypt",
         "start": "-3149.1.1",
         "start_frac": -3148.9972602739726,
+        "stop": "-2686.1.1",
+        "stop_frac": -2685.9972602739726
+      },
+      {
+        "city": "Memphis",
+        "key": "stadester-Memphis-Egypt",
+        "start": "-2686.1.1",
+        "start_frac": -2685.9972602739726,
+        "stop": "-2181.1.1",
+        "stop_frac": -2180.9972602739726
+      },
+      {
+        "city": "Herakleopolis Magna",
+        "key": "stadester-Ihnasya-el-Madina-Egypt",
+        "start": "-2181.1.1",
+        "start_frac": -2180.9972602739726,
         "stop": "-2055.1.1",
         "stop_frac": -2054.9972602739726
       },
@@ -15214,8 +15522,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Angeia",
-        "key": "stadester-Angeia-Greece",
+        "city": "Aného",
+        "key": "stadester-Aného-Togo",
         "start": "1661.1.1",
         "start_frac": 1661.0027397260274,
         "stop": "1885.1.1",
@@ -15227,8 +15535,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Santo Tomás",
-        "key": "stadester-Santo Tomás-El Salvador",
+        "city": "Aného",
+        "key": "stadester-Aného-Togo",
         "start": "1885.1.1",
         "start_frac": 1885.0027397260274,
         "stop": "1885.12.24",
@@ -15279,8 +15587,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Andhra",
-        "key": "stadester-Andhra-India",
+        "city": "Mrauk-U",
+        "key": "stadester-Mrauk-U-Myanmar",
         "start": "1431.1.1",
         "start_frac": 1431.0027397260274,
         "stop": "1532.1.1",
@@ -15292,8 +15600,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Andros",
-        "key": "stadester-Andros-Greece",
+        "city": "Cooch Behar",
+        "key": "stadester-Koch-Bihar-India",
         "start": "1681.1.1",
         "start_frac": 1681.0027397260274,
         "stop": "1765.12.8",
@@ -15415,8 +15723,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Koenigswinter",
-        "key": "stadester-Königswinter-Germany",
+        "city": "Mutsamudu",
+        "key": "stadester-Mutsamudu-Comoros",
         "start": "1998.1.1",
         "start_frac": 1998.0027397260274,
         "stop": "1999.8.1",
@@ -15428,8 +15736,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ankole",
-        "key": "stadester-Ankole-Uganda",
+        "city": "Mutsamudu",
+        "key": "stadester-Mutsamudu-Comoros",
         "start": "2007.4.26",
         "start_frac": 2007.317808219178,
         "stop": "2008.3.25",
@@ -15454,8 +15762,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bakhchysarai",
-        "key": "stadester-Bakhchysarai-Ukraine",
+        "city": "Anloga",
+        "key": "stadester-Anloga-Ghana",
         "start": "1651.1.1",
         "start_frac": 1651.0027397260274,
         "stop": "1902.1.1",
@@ -15506,8 +15814,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Anjouan",
-        "key": "stadester-Anjouan-Comoros",
+        "city": "Anomabu",
+        "key": "stadester-Anomabu-Ghana",
         "start": "1709.1.1",
         "start_frac": 1709.0027397260274,
         "stop": "1902.1.1",
@@ -15532,8 +15840,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Portoviejo",
-        "key": "stadester-Portoviejo-Ecuador",
+        "city": "Fianarantsoa",
+        "key": "stadester-Fianarantsoa-Madagascar",
         "start": "1751.1.1",
         "start_frac": 1751.0027397260274,
         "stop": "1825.1.1",
@@ -15561,8 +15869,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antandroy",
-        "key": "stadester-Antandroy-Madagascar",
+        "city": "Ambilobe",
+        "key": "stadester-Ambilobe-Madagascar",
         "start": "1698.1.1",
         "start_frac": 1698.0027397260274,
         "stop": "1844.1.1",
@@ -15574,8 +15882,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antankarana",
-        "key": "stadester-Antankarana-Madagascar",
+        "city": "Ambilobe",
+        "key": "stadester-Ambilobe-Madagascar",
         "start": "1844.1.1",
         "start_frac": 1844.0027397260274,
         "stop": "1896.1.1",
@@ -15720,8 +16028,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antiphellos",
-        "key": "stadester-Antiphellos-Turkey",
+        "city": "Antissa",
+        "key": "stadester-Mytilini-Greece",
         "start": "-699.1.1",
         "start_frac": -698.9972602739726,
         "stop": "-334.12.31",
@@ -15733,8 +16041,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antequera",
-        "key": "stadester-Antequera-Spain",
+        "city": "Louisbourg",
+        "key": "stadester-Sydney-Canada",
         "start": "1773.4.1",
         "start_frac": 1773.2493150684932,
         "stop": "1779.7.1",
@@ -15759,8 +16067,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antrim",
-        "key": "stadester-Antrim-United Kingdom",
+        "city": "Monsol",
+        "key": "stadester-Brazzaville-Republic of the Congo",
         "start": "1631.1.1",
         "start_frac": 1631.0027397260274,
         "stop": "1882.11.12",
@@ -16048,8 +16356,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Apt",
-        "key": "stadester-Apt-France",
+        "city": "Aramoko-Ekiti",
+        "key": "stadester-Aramoko-Ekiti-Nigeria",
         "start": "1855.1.1",
         "start_frac": 1855.0027397260274,
         "stop": "1891.1.1",
@@ -16122,8 +16430,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Zwolle",
-        "key": "ghsl-Zwolle-Netherlands",
+        "city": "Princes Town",
+        "key": "stadester-Axim-Ghana",
         "start": "1701.1.15",
         "start_frac": 1701.041095890411,
         "stop": "1722.1.1",
@@ -16167,8 +16475,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Jiangling",
-        "key": "stadester-Jiangling-China",
+        "city": "Argilos",
+        "key": "stadester-Argilos-Greece",
         "start": "-653.1.1",
         "start_frac": -652.9972602739726,
         "stop": "-361.1.1",
@@ -16260,10 +16568,34 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Phoenix",
-        "key": "stadester-Phoenix-Arizona",
+        "city": "Prescott",
+        "key": "stadester-Prescott-United States",
         "start": "1863.2.24",
         "start_frac": 1863.1479452054793,
+        "stop": "1867.11.1",
+        "stop_frac": 1867.8246575342466
+      },
+      {
+        "city": "Tucson",
+        "key": "stadester-Tucson-United States",
+        "start": "1867.11.1",
+        "start_frac": 1867.8246575342466,
+        "stop": "1877.1.1",
+        "stop_frac": 1877.0027397260274
+      },
+      {
+        "city": "Prescott",
+        "key": "stadester-Prescott-United States",
+        "start": "1877.1.1",
+        "start_frac": 1877.0027397260274,
+        "stop": "1889.2.4",
+        "stop_frac": 1889.0931506849315
+      },
+      {
+        "city": "Phoenix",
+        "key": "stadester-Phoenix-Arizona",
+        "start": "1889.2.4",
+        "start_frac": 1889.0931506849315,
         "stop": "1912.2.14",
         "stop_frac": 1912.1205479452055
       }
@@ -16273,8 +16605,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ardea",
-        "key": "stadester-Ardea-Italy",
+        "city": "Alwar",
+        "key": "stadester-Alwar-India",
         "start": "-72.1.1",
         "start_frac": -71.9972602739726,
         "stop": "351.1.1",
@@ -16832,8 +17164,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Jaén",
-        "key": "stadester-Jaén-Spain",
+        "city": "Astakos",
+        "key": "stadester-Izmit-Turkey",
         "start": "-699.1.1",
         "start_frac": -698.9972602739726,
         "stop": "-386.1.1",
@@ -17341,8 +17673,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "San Luis",
-        "key": "stadester-San Luis-Argentina",
+        "city": "Vryburg",
+        "key": "stadester-Vryburg-South Africa",
         "start": "1701.1.1",
         "start_frac": 1701.0027397260274,
         "stop": "1896.1.1",
@@ -17354,8 +17686,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "La Rioja",
-        "key": "stadester-La Rioja-Argentina",
+        "city": "Awing",
+        "key": "stadester-Bamenda-Cameroon",
         "start": "1801.1.1",
         "start_frac": 1801.0027397260274,
         "stop": "1901.1.1",
@@ -17367,8 +17699,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Catamarca",
-        "key": "stadester-Catamarca-Argentina",
+        "city": "Awo-Ekiti",
+        "key": "stadester-Ado-Ekiti-Nigeria",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1891.1.1",
@@ -17535,8 +17867,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Baghdād",
-        "key": "stadester-Baghdád-Iraq",
+        "city": "Azoros",
+        "key": "stadester-Elassona-Greece",
         "start": "-699.1.1",
         "start_frac": -698.9972602739726,
         "stop": "-373.1.1",
@@ -17600,8 +17932,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bilston",
-        "key": "stadester-Bilston-UK",
+        "city": "Babungo",
+        "key": "ghsl-Ndop-Cameroon",
         "start": "1646.1.1",
         "start_frac": 1646.0027397260274,
         "stop": "1901.1.1",
@@ -17665,8 +17997,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Badalona",
-        "key": "stadester-Badalona-Spain",
+        "city": "Badenkop",
+        "key": "stadester-Dschang-Cameroon",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1901.1.1",
@@ -17746,8 +18078,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bagansiapiapi",
-        "key": "stadester-Bagansiapiapi-Indonesia",
+        "city": "Bafou",
+        "key": "stadester-Dschang-Cameroon",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1901.1.1",
@@ -17798,8 +18130,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bagrevand",
-        "key": "stadester-Bagrevand-Armenia",
+        "city": "Solan",
+        "key": "ghsl-Solan-India",
         "start": "1840.1.1",
         "start_frac": 1840.0027397260274,
         "stop": "1948.4.15",
@@ -17941,8 +18273,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bai",
-        "key": "stadester-Bai-China",
+        "city": "Fort Jacob",
+        "key": "stadester-Plymouth-Trinidad and Tobago",
         "start": "1638.1.1",
         "start_frac": 1638.0027397260274,
         "stop": "1691.1.1",
@@ -17996,8 +18328,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bakhtiyari",
-        "key": "stadester-Bakhtiyari-Iran",
+        "city": "Mochudi",
+        "key": "stadester-Mochudi-Botswana",
         "start": "1701.1.1",
         "start_frac": 1701.0027397260274,
         "stop": "1885.3.23",
@@ -18009,8 +18341,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bakonybél",
-        "key": "stadester-Bakonybél-Hungary",
+        "city": "Bakong",
+        "key": "stadester-Siemréab-Cambodia",
         "start": "1801.1.1",
         "start_frac": 1801.0027397260274,
         "stop": "1901.1.1",
@@ -18048,8 +18380,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Balhae",
-        "key": "stadester-Balhae-China",
+        "city": "Molepolole",
+        "key": "stadester-Molepolole-Botswana",
         "start": "1571.1.1",
         "start_frac": 1571.0027397260274,
         "stop": "1885.3.23",
@@ -18116,8 +18448,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bale",
-        "key": "stadester-Bale-Ethiopia",
+        "city": "Ramotswa",
+        "key": "stadester-Ramotswa-Botswana",
         "start": "1471.1.1",
         "start_frac": 1471.0027397260274,
         "stop": "1885.3.23",
@@ -18181,8 +18513,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Vladivostok",
-        "key": "stadester-Vladivostok-Russia",
+        "city": "Ballabhgarh",
+        "key": "stadester-Faridabad-India",
         "start": "1858.1.1",
         "start_frac": 1858.0027397260274,
         "stop": "1947.8.14",
@@ -18272,8 +18604,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bambrugge",
-        "key": "stadester-Bambrugge-Belgium",
+        "city": "Isabel Segunda",
+        "key": "stadester-Vieques-Puerto Rico",
         "start": "1699.1.1",
         "start_frac": 1699.0027397260274,
         "stop": "1701.1.1",
@@ -18285,8 +18617,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bamenda",
-        "key": "stadester-Bamenda-Cameroon",
+        "city": "Deogarh",
+        "key": "stadester-Debagarh-India",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1948.1.1",
@@ -18496,8 +18828,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bangassou",
-        "key": "stadester-Bangassou-Central African Republic",
+        "city": "Bangou",
+        "key": "stadester-Bafoussam-Cameroon",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1901.1.1",
@@ -18509,8 +18841,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bangli",
-        "key": "stadester-Bangli-Indonesia",
+        "city": "Bangoua",
+        "key": "stadester-Bangangte-Cameroon",
         "start": "1851.1.1",
         "start_frac": 1851.0027397260274,
         "stop": "1901.1.1",
@@ -18522,8 +18854,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bangkalan",
-        "key": "stadester-Bangkalan-Indonesia",
+        "city": "Bang Phli",
+        "key": "stadester-Samut Prakan-Thailand",
         "start": "1551.1.1",
         "start_frac": 1551.0027397260274,
         "stop": "1787.1.1",
@@ -18548,8 +18880,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bani",
-        "key": "stadester-Bani-Dominican Republic",
+        "city": "Serowe",
+        "key": "stadester-Serowe-Botswana",
         "start": "1611.1.1",
         "start_frac": 1611.0027397260274,
         "stop": "1885.3.23",
@@ -18652,8 +18984,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bantam",
-        "key": "stadester-Bantam-Indonesia",
+        "city": "Manavadar",
+        "key": "stadester-Manavadar-India",
         "start": "1819.1.1",
         "start_frac": 1819.0027397260274,
         "stop": "1947.9.14",
@@ -18717,8 +19049,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barawa",
-        "key": "ghsl-Barawa-Somalia",
+        "city": "Kadaura",
+        "key": "stadester-Kadaura-India",
         "start": "1807.1.1",
         "start_frac": 1807.0027397260274,
         "stop": "1947.8.15",
@@ -18980,10 +19312,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barbastro",
-        "key": "stadester-Barbastro-Spain",
+        "city": "Kalomo",
+        "key": "stadester-Kalomo-Zambia",
         "start": "1899.11.28",
         "start_frac": 1899.8986301369864,
+        "stop": "1907.1.1",
+        "stop_frac": 1907.0027397260274
+      },
+      {
+        "city": "Livingstone",
+        "key": "stadester-Livingstone-Zambia",
+        "start": "1907.1.1",
+        "start_frac": 1907.0027397260274,
         "stop": "1911.8.17",
         "stop_frac": 1911.6219178082192
       }
@@ -18993,8 +19333,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barbastro",
-        "key": "stadester-Barbastro-Spain",
+        "city": "Essau",
+        "key": "stadester-Essau-Gambia",
         "start": "1651.1.1",
         "start_frac": 1651.0027397260274,
         "stop": "1893.1.1",
@@ -19006,8 +19346,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Baris",
-        "key": "stadester-Baris-Turkey",
+        "city": "Limassol",
+        "key": "stadester-Limassol-Cyprus",
         "start": "1191.5.1",
         "start_frac": 1191.331506849315,
         "stop": "1192.1.1",
@@ -19071,8 +19411,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bar-le-Duc",
-        "key": "stadester-Bar-le-Duc-France",
+        "city": "Ganj Basoda",
+        "key": "stadester-Ganj-Basoda-India",
         "start": "1823.1.1",
         "start_frac": 1823.0027397260274,
         "stop": "1948.1.1",
@@ -19084,8 +19424,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barru",
-        "key": "stadester-Barru-Indonesia",
+        "city": "Roanoke",
+        "key": "stadester-Roanoke-Virginia",
         "start": "1586.1.1",
         "start_frac": 1586.0027397260274,
         "stop": "1591.1.1",
@@ -19097,8 +19437,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barth",
-        "key": "stadester-Barth-Germany",
+        "city": "Road Town",
+        "key": "stadester-Road-Town-British Virgin Islands",
         "start": "1601.1.1",
         "start_frac": 1601.0027397260274,
         "stop": "1603.3.24",
@@ -19669,7 +20009,7 @@
     "timeline": [
       {
         "city": "Kasama",
-        "key": "stadester-Kasama-Japan",
+        "key": "stadester-Kasama-Zambia",
         "start": "1701.1.1",
         "start_frac": 1701.0027397260274,
         "stop": "1891.1.1",
@@ -20257,7 +20597,7 @@
     "timeline": [
       {
         "city": "Isabela",
-        "key": "stadester-Isabela-Puerto Rico",
+        "key": "stadester-Isabela-City-Philippines",
         "start": "1845.2.20",
         "start_frac": 1845.13698630137,
         "stop": "1845.8.5",
@@ -20529,8 +20869,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Doncaster",
-        "key": "stadester-Doncaster-United Kingdom",
+        "city": "Diyarbakır",
+        "key": "stadester-Diyarbakır-Turkey",
         "start": "-1299.1.1",
         "start_frac": -1298.9972602739726,
         "stop": "-855.1.1",
@@ -20568,8 +20908,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bingen",
-        "key": "stadester-Bingen am Rhein-Germany",
+        "city": "Bizerte",
+        "key": "stadester-Bizerte-Tunisia",
         "start": "1956.3.20",
         "start_frac": 1956.2191780821918,
         "stop": "1963.10.16",
@@ -20883,8 +21223,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Carapeguá",
-        "key": "stadester-Carapeguá-Paraguay",
+        "city": "Douala",
+        "key": "stadester-Douala-Cameroon",
         "start": "1793.1.1",
         "start_frac": 1793.0027397260274,
         "stop": "1901.1.1",
@@ -20896,8 +21236,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Carapeguá",
-        "key": "stadester-Carapeguá-Paraguay",
+        "city": "Douala",
+        "key": "stadester-Douala-Cameroon",
         "start": "1795.1.1",
         "start_frac": 1795.0027397260274,
         "stop": "1901.1.1",
@@ -21357,8 +21697,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dabhoi",
-        "key": "stadester-Dabhoi-India",
+        "city": "Dalian",
+        "key": "stadester-Dalian-China",
         "start": "1859.1.1",
         "start_frac": 1859.0027397260274,
         "stop": "1861.1.1",
@@ -21370,8 +21710,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Sion",
-        "key": "stadester-Sion-Switzerland",
+        "city": "Shanghai",
+        "key": "stadester-Shanghai-China",
         "start": "1846.11.20",
         "start_frac": 1846.876712328767,
         "stop": "1863.9.21",
@@ -21383,8 +21723,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Metz",
-        "key": "stadester-Metz-France",
+        "city": "Tianjin",
+        "key": "stadester-Tianjin-China",
         "start": "1860.10.24",
         "start_frac": 1860.805479452055,
         "stop": "1941.12.7",
@@ -21396,8 +21736,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Clausthal Zellerfeld",
-        "key": "stadester-Clausthal Zellerfeld-Germany",
+        "city": "Hankou",
+        "key": "stadester-Wuhan-China",
         "start": "1861.3.21",
         "start_frac": 1861.2219178082191,
         "stop": "1927.1.4",
@@ -21448,8 +21788,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Hamilton",
-        "key": "stadester-Hamilton-New Zealand",
+        "city": "Victoria",
+        "key": "stadester-Victoria-Seychelles",
         "start": "1757.1.1",
         "start_frac": 1757.0027397260274,
         "stop": "1794.5.17",
@@ -21484,7 +21824,25 @@
     ]
   },
   "1718": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Calcutta",
+        "key": "stadester-Kolkata-India",
+        "start": "1858.8.2",
+        "start_frac": 1858.5808219178082,
+        "stop": "1911.12.12",
+        "stop_frac": 1911.9369863013699
+      },
+      {
+        "city": "New Delhi",
+        "key": "stadester-Delhi-India",
+        "start": "1911.12.12",
+        "start_frac": 1911.9369863013699,
+        "stop": "1947.8.15",
+        "stop_frac": 1947.6164383561643
+      }
+    ]
   },
   "1719": {
     "acapital": false,
@@ -21542,8 +21900,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Hastings",
-        "key": "stadester-Hastings-New Zealand",
+        "city": "Hargeisa",
+        "key": "stadester-Hargeysa-Somalia",
         "start": "1941.2.25",
         "start_frac": 1941.150684931507,
         "stop": "1950.4.1",
@@ -21808,8 +22166,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Goulburn",
-        "key": "stadester-Goulburn-Australia",
+        "city": "Buea",
+        "key": "stadester-Buea-Cameroon",
         "start": "1751.1.1",
         "start_frac": 1751.0027397260274,
         "stop": "1901.1.1",
@@ -22675,7 +23033,7 @@
     "timeline": [
       {
         "city": "Basse-Terre",
-        "key": "stadester-Basse-Terre-Guadeloupe",
+        "key": "stadester-Tortuga-Haiti",
         "start": "1626.1.1",
         "start_frac": 1626.0027397260274,
         "stop": "1661.1.1",
@@ -22884,8 +23242,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Monòpoli",
-        "key": "stadester-Monòpoli-Italy",
+        "city": "Armazi",
+        "key": "stadester-Armazi-Georgia",
         "start": "-64.1.1",
         "start_frac": -63.9972602739726,
         "stop": "528.1.1",
@@ -23442,8 +23800,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Janakpur",
-        "key": "stadester-Janakpur-Nepal",
+        "city": "Bharatpur",
+        "key": "stadester-Bharatpur-India",
         "start": "1822.1.1",
         "start_frac": 1822.0027397260274,
         "stop": "1948.1.1",
@@ -25343,8 +25701,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Verdun",
-        "key": "stadester-Verdun-France",
+        "city": "Cooch Behar",
+        "key": "stadester-Cooch Behar-India",
         "start": "1765.12.8",
         "start_frac": 1765.9260273972602,
         "stop": "1950.1.1",
@@ -25356,8 +25714,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Silves",
-        "key": "stadester-Silves-Portugal",
+        "city": "Avarua",
+        "key": "stadester-Avarua-Cook Islands",
         "start": "1894.1.1",
         "start_frac": 1894.0027397260274,
         "stop": "1902.1.1",
@@ -25369,8 +25727,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Novara",
-        "key": "stadester-Novara-Italy",
+        "city": "Georgetown",
+        "key": "stadester-Georgetown-Guyana",
         "start": "1970.2.23",
         "start_frac": 1970.145205479452,
         "stop": "2026.1.1",
@@ -25447,8 +25805,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Orléans",
-        "key": "stadester-Orléans-France",
+        "city": "Campbell",
+        "key": "stadester-Kimberley-South Africa",
         "start": "1824.6.1",
         "start_frac": 1824.4136986301369,
         "stop": "1858.1.1",
@@ -25584,7 +25942,7 @@
     "timeline": [
       {
         "city": "San José",
-        "key": "stadester-San José-Guatemala",
+        "key": "stadester-Hospital-Costa Rica",
         "start": "1921.3.5",
         "start_frac": 1921.1780821917807,
         "stop": "1922.1.1",
@@ -27498,8 +27856,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Chieri",
-        "key": "stadester-Chieri-Italy",
+        "city": "Corinth",
+        "key": "stadester-Kórinthos-Greece",
         "start": "1204.10.1",
         "start_frac": 1204.7424657534248,
         "stop": "1206.1.1",
@@ -27517,16 +27875,16 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Alkmaar",
-        "key": "stadester-Alkmaar-Netherlands",
+        "city": "Arta",
+        "key": "stadester-Árta-Greece",
         "start": "1205.9.1",
         "start_frac": 1205.6602739726027,
         "stop": "1318.1.1",
         "stop_frac": 1318.0027397260274
       },
       {
-        "city": "Issoudun",
-        "key": "stadester-Issoudun-France",
+        "city": "Ioannina",
+        "key": "stadester-Ioánnina-Greece",
         "start": "1318.1.1",
         "start_frac": 1318.0027397260274,
         "stop": "1412.1.1",
@@ -27635,8 +27993,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Wanganui",
-        "key": "stadester-Wanganui-New Zealand",
+        "city": "Gustavia",
+        "key": "stadester-Zone en litige-Guadeloupe",
         "start": "1651.5.24",
         "start_frac": 1651.3945205479451,
         "stop": "1665.8.10",
@@ -27661,8 +28019,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Gonaïves",
-        "key": "stadester-Gonaïves-Haiti",
+        "city": "Marigot",
+        "key": "stadester-Marigot-Guadeloupe",
         "start": "1651.5.24",
         "start_frac": 1651.3945205479451,
         "stop": "1666.1.4",
@@ -27687,8 +28045,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Cartagena",
-        "key": "stadester-Cartagena-Colombia",
+        "city": "Basseterre",
+        "key": "stadester-Basseterre-Saint Kitts and Nevis",
         "start": "1651.5.24",
         "start_frac": 1651.3945205479451,
         "stop": "1666.1.4",
@@ -27888,8 +28246,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Llíria",
-        "key": "stadester-Llíria-Spain",
+        "city": "Jinning",
+        "key": "ghsl-Jinning-China",
         "start": "-278.1.1",
         "start_frac": -277.9972602739726,
         "stop": "-108.1.1",
@@ -27966,8 +28324,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Nice",
-        "key": "stadester-Nice-France",
+        "city": "Nicosia",
+        "key": "stadester-Lefkosa-Cyprus",
         "start": "1427.1.1",
         "start_frac": 1427.0027397260274,
         "stop": "1489.2.27",
@@ -27992,8 +28350,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Guantánamo",
-        "key": "stadester-Guantánamo (agglom./municip.)-Cuba",
+        "city": "Dongola",
+        "key": "stadester-Dunqulah-Sudan",
         "start": "1266.1.1",
         "start_frac": 1266.0027397260274,
         "stop": "1318.1.1",
@@ -28005,8 +28363,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Jaén",
-        "key": "stadester-Jaén-Spain",
+        "city": "Nicomedia",
+        "key": "stadester-Izmit-Turkey",
         "start": "286.1.1",
         "start_frac": 286.0027397260274,
         "stop": "306.1.1",
@@ -28070,8 +28428,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Székesfehérvár",
-        "key": "stadester-Székesfehérvár-Hungary",
+        "city": "Sukhumi",
+        "key": "stadester-Suchumi-Georgia",
         "start": "-540.1.1",
         "start_frac": -539.9972602739726,
         "stop": "-485.1.1",
@@ -28714,8 +29072,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Vélez-Málaga",
-        "key": "stadester-Vélez-Málaga-Spain",
+        "city": "Wenzhou",
+        "key": "stadester-Wenzhou-China",
         "start": "-333.1.1",
         "start_frac": -332.9972602739726,
         "stop": "-137.1.1",
@@ -28727,8 +29085,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Araure",
-        "key": "stadester-Araure-Venezuela",
+        "city": "Dorogobuzh",
+        "key": "stadester-Dorogobuzh-Russia",
         "start": "1344.1.1",
         "start_frac": 1344.0027397260274,
         "stop": "1405.1.1",
@@ -28899,8 +29257,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dôle",
-        "key": "stadester-Dole-France",
+        "city": "Dubrovnik",
+        "key": "stadester-Dubrovnik (town)-Croatia",
         "start": "1991.10.15",
         "start_frac": 1991.7808219178082,
         "stop": "1992.6.21",
@@ -28912,8 +29270,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ancona",
-        "key": "stadester-Ancona-Italy",
+        "city": "Amalfi",
+        "key": "stadester-Amalfi-Italy",
         "start": "955.1.1",
         "start_frac": 955.0027397260274,
         "stop": "1132.1.1",
@@ -28933,8 +29291,8 @@
         "stop_frac": 1077.0027397260274
       },
       {
-        "city": "Santander",
-        "key": "stadester-Santander-Spain",
+        "city": "Salerno",
+        "key": "stadester-Salerno-Italy",
         "start": "1077.1.1",
         "start_frac": 1077.0027397260274,
         "stop": "1128.1.1",
@@ -29037,8 +29395,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Beaucaire",
-        "key": "stadester-Beaucaire-France",
+        "city": "Benevento",
+        "key": "stadester-Benevento-Italy",
         "start": "577.1.1",
         "start_frac": 577.0027397260274,
         "stop": "730.1.1",
@@ -29115,8 +29473,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Mirabella Eclano",
-        "key": "stadester-Mirabella Eclano-Italy",
+        "city": "Mitau",
+        "key": "stadester-Jelgava-Latvia",
         "start": "1918.3.8",
         "start_frac": 1918.186301369863,
         "stop": "1918.12.7",
@@ -29128,8 +29486,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Tomar",
-        "key": "stadester-Tomar-Portugal",
+        "city": "Tlemcen",
+        "key": "stadester-Tilimsen-Algeria",
         "start": "1390.1.1",
         "start_frac": 1390.0027397260274,
         "stop": "1425.1.1",
@@ -29154,8 +29512,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bansberia",
-        "key": "stadester-Bansberia-India",
+        "city": "Madurai",
+        "key": "stadester-Madurai-India",
         "start": "1690.1.1",
         "start_frac": 1690.0027397260274,
         "stop": "1737.1.1",
@@ -29167,8 +29525,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Florence",
-        "key": "stadester-Firenze-Italy",
+        "city": "Gaeta",
+        "key": "stadester-Gaeta-Italy",
         "start": "840.1.1",
         "start_frac": 840.0027397260274,
         "stop": "1141.1.1",
@@ -29180,16 +29538,16 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bâpatla",
-        "key": "stadester-Bâpatla-India",
+        "city": "Faizabad",
+        "key": "stadester-Faizâbâd-India",
         "start": "1733.1.1",
         "start_frac": 1733.0027397260274,
         "stop": "1775.1.1",
         "stop_frac": 1775.0027397260274
       },
       {
-        "city": "Mâcon",
-        "key": "stadester-Mâcon-France",
+        "city": "Lucknow",
+        "key": "stadester-Lucknow-India",
         "start": "1775.1.1",
         "start_frac": 1775.0027397260274,
         "stop": "1816.6.1",
@@ -29201,8 +29559,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bârâkpur",
-        "key": "stadester-Bârâkpur-India",
+        "city": "Cooch Behar",
+        "key": "ghsl-Cooch Behar-India",
         "start": "1601.1.1",
         "start_frac": 1601.0027397260274,
         "stop": "1681.1.1",
@@ -29217,8 +29575,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Vierzon",
-        "key": "stadester-Vierzon-France",
+        "city": "Argostoli",
+        "key": "stadester-Argostóli-Greece",
         "start": "1324.1.1",
         "start_frac": 1324.0027397260274,
         "stop": "1358.1.1",
@@ -29256,8 +29614,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Morcone",
-        "key": "stadester-Morcone-Italy",
+        "city": "Naples",
+        "key": "stadester-Napoli-Italy",
         "start": "764.1.1",
         "start_frac": 764.0027397260274,
         "stop": "1137.10.30",
@@ -29285,8 +29643,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dreux",
-        "key": "stadester-Dreux-France",
+        "city": "Durrës",
+        "key": "stadester-Durrës-Albania",
         "start": "1272.2.21",
         "start_frac": 1272.1397260273973,
         "stop": "1384.1.1",
@@ -29298,8 +29656,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dreux",
-        "key": "stadester-Dreux-France",
+        "city": "Durrës",
+        "key": "stadester-Durrës-Albania",
         "start": "1272.1.1",
         "start_frac": 1272.0027397260274,
         "stop": "1272.2.21",
@@ -29311,8 +29669,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Pesaro",
-        "key": "stadester-Pesaro-Italy",
+        "city": "Pau",
+        "key": "stadester-Pau-France",
         "start": "1480.1.1",
         "start_frac": 1480.0027397260274,
         "stop": "1620.11.1",
@@ -29324,8 +29682,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Pôrto",
-        "key": "stadester-Porto-Portugal",
+        "city": "Plovdiv",
+        "key": "stadester-Plovdiv-Bulgaria",
         "start": "1204.10.1",
         "start_frac": 1204.7424657534248,
         "stop": "1230.3.9",
@@ -29366,8 +29724,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "St Mihiel",
-        "key": "stadester-St Mihiel-France",
+        "city": "Spoleto",
+        "key": "stadester-Spoleto-Italy",
         "start": "571.1.1",
         "start_frac": 571.0027397260274,
         "stop": "777.1.1",
@@ -29379,8 +29737,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Campobasso",
-        "key": "stadester-Campobasso-Italy",
+        "city": "Cape Town",
+        "key": "stadester-Cape Town-South Africa",
         "start": "1652.4.6",
         "start_frac": 1652.2630136986302,
         "stop": "1806.1.18",
@@ -29392,8 +29750,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Carlisle",
-        "key": "stadester-Carlisle-United Kingdom",
+        "city": "Cayenne",
+        "key": "stadester-Cayenne-French Guiana",
         "start": "1659.1.1",
         "start_frac": 1659.0027397260274,
         "stop": "1664.5.15",
@@ -29405,8 +29763,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Montreux-Le Châtelard",
-        "key": "stadester-Montreux-Switzerland",
+        "city": "Nagasaki",
+        "key": "stadester-Nagasaki-Japan",
         "start": "1641.6.24",
         "start_frac": 1641.4767123287672,
         "stop": "1860.2.28",
@@ -29973,8 +30331,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Macerata",
-        "key": "stadester-Macerata-Italy",
+        "city": "London",
+        "key": "stadester-London-United Kingdom",
         "start": "1688.11.15",
         "start_frac": 1688.86301369863,
         "stop": "1702.3.19",
@@ -30012,8 +30370,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dax",
-        "key": "stadester-Dax-France",
+        "city": "Dili",
+        "key": "stadester-Dili-East Timor",
         "start": "1975.11.28",
         "start_frac": 1975.8986301369864,
         "stop": "1979.4.1",
@@ -30119,8 +30477,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Macerata",
-        "key": "stadester-Macerata-Italy",
+        "city": "London",
+        "key": "stadester-London-United Kingdom",
         "start": "1066.9.28",
         "start_frac": 1066.7342465753425,
         "stop": "1154.12.19",
@@ -30158,8 +30516,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Cherbourg",
-        "key": "stadester-Cherbourg-France",
+        "city": "Constantinople",
+        "key": "stadester-Istanbul-Turkey",
         "start": "395.1.17",
         "start_frac": 395.04657534246576,
         "stop": "610.10.5",
@@ -30171,8 +30529,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Valognes",
-        "key": "stadester-Valognes-France",
+        "city": "Vukovar",
+        "key": "stadester-Vukovar (town)-Croatia",
         "start": "1995.9.1",
         "start_frac": 1995.6602739726027,
         "stop": "1998.1.15",
@@ -30184,8 +30542,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Lentini",
-        "key": "stadester-Lentini-Italy",
+        "city": "Košice",
+        "key": "stadester-Ko`sice-Slovakia",
         "start": "1918.12.11",
         "start_frac": 1918.9342465753425,
         "stop": "1918.12.29",
@@ -30223,16 +30581,16 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Clausthal Zellerfeld",
-        "key": "stadester-Clausthal Zellerfeld-Germany",
+        "city": "Ezhou",
+        "key": "ghsl-Huanggang; Ezhou; Huangzhou District; Echeng District-China",
         "start": "221.1.1",
         "start_frac": 221.0027397260274,
         "stop": "229.1.1",
         "stop_frac": 229.0027397260274
       },
       {
-        "city": "Morón de la Frontera",
-        "key": "stadester-Morón de la Frontera-Spain",
+        "city": "Jianye",
+        "key": "stadester-Nanjing-China",
         "start": "229.1.1",
         "start_frac": 229.0027397260274,
         "stop": "280.5.31",
@@ -30244,8 +30602,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Barîsâl",
-        "key": "stadester-Barîsâl-Bangladesh",
+        "city": "Guwahati",
+        "key": "stadester-Guwahati-India",
         "start": "901.1.1",
         "start_frac": 901.0027397260274,
         "stop": "1001.1.1",
@@ -30325,8 +30683,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Drobeta-Turnu Severin",
-        "key": "stadester-Drobeta-Turnu Severin-Romania",
+        "city": "Edessa",
+        "key": "stadester-Sanliurfa-Turkey",
         "start": "-599.1.1",
         "start_frac": -598.9972602739726,
         "stop": "-430.1.1",
@@ -30409,8 +30767,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ganeriwala",
-        "key": "stadester-Ganeriwala-Pakistan",
+        "city": "Beijing",
+        "key": "stadester-Beijing-China",
         "start": "1900.6.10",
         "start_frac": 1900.4383561643835,
         "stop": "1901.9.7",
@@ -30529,8 +30887,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Taormina",
-        "key": "stadester-Taormina-Italy",
+        "city": "Susa",
+        "key": "stadester-Shûsh-Iran",
         "start": "-2699.1.1",
         "start_frac": -2698.9972602739726,
         "stop": "-611.1.1",
@@ -31273,8 +31631,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Erebuni",
-        "key": "stadester-Erebuni-Armenia",
+        "city": "Lankaran",
+        "key": "ghsl-Lankaran-Azerbaijan",
         "start": "1748.1.1",
         "start_frac": 1748.0027397260274,
         "stop": "1813.1.13",
@@ -31286,8 +31644,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Eresos",
-        "key": "stadester-Eresos-Greece",
+        "city": "Mederdra",
+        "key": "stadester-Rosso-Mauritania",
         "start": "1826.1.1",
         "start_frac": 1826.0027397260274,
         "stop": "1903.1.1",
@@ -31299,8 +31657,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Eretria",
-        "key": "stadester-Eretria-Greece",
+        "city": "Zanjan",
+        "key": "ghsl-Zanjan-Iran",
         "start": "1748.1.1",
         "start_frac": 1748.0027397260274,
         "stop": "1811.1.1",
@@ -31312,8 +31670,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ergasteria",
-        "key": "stadester-Ergasteria-Turkey",
+        "city": "Wana",
+        "key": "stadester-Dera Ismâîl Khân-Pakistan",
         "start": "2002.1.1",
         "start_frac": 2002.0027397260274,
         "stop": "2006.9.5",
@@ -31325,8 +31683,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ergiske",
-        "key": "stadester-Ergiske-Turkey",
+        "city": "Tidjikja",
+        "key": "stadester-Tidjikdja-Mauritania",
         "start": "1581.1.1",
         "start_frac": 1581.0027397260274,
         "stop": "1906.1.1",
@@ -31351,8 +31709,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Eridu",
-        "key": "stadester-Eridu-Iraq",
+        "city": "Ardabil",
+        "key": "ghsl-Ardabil-Iran",
         "start": "1748.1.1",
         "start_frac": 1748.0027397260274,
         "stop": "1809.1.1",
@@ -31390,8 +31748,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Erythrai",
-        "key": "stadester-Erythrai-Turkey",
+        "city": "Palu",
+        "key": "stadester-Palu-Indonesia",
         "start": "1508.1.1",
         "start_frac": 1508.0027397260274,
         "stop": "1515.1.1",
@@ -31403,8 +31761,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Erzincan",
-        "key": "stadester-Erzincan-Turkey",
+        "city": "Kutaisi",
+        "key": "ghsl-Kutaisi-Georgia",
         "start": "1555.5.29",
         "start_frac": 1555.4082191780822,
         "stop": "1576.9.1",
@@ -31416,8 +31774,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Eshnunna",
-        "key": "stadester-Eshnunna-Iraq",
+        "city": "Nicaea",
+        "key": "stadester-Iznik-Turkey",
         "start": "1204.11.1",
         "start_frac": 1204.8246575342466,
         "stop": "1261.7.25",
@@ -31429,8 +31787,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Esmeraldas",
-        "key": "stadester-Esmeraldas-Ecuador",
+        "city": "Gremi",
+        "key": "stadester-Telavi-Georgia",
         "start": "1504.1.1",
         "start_frac": 1504.0027397260274,
         "stop": "1748.1.1",
@@ -31507,8 +31865,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Guacara",
-        "key": "stadester-Guacara-Venezuela",
+        "city": "Hue",
+        "key": "stadester-Hue-Vietnam",
         "start": "1945.3.11",
         "start_frac": 1945.194520547945,
         "stop": "1945.8.23",
@@ -31533,8 +31891,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Etulia",
-        "key": "stadester-Etulia-Moldova",
+        "city": "Gyumri",
+        "key": "stadester-Kumajri-Armenia",
         "start": "1748.1.1",
         "start_frac": 1748.0027397260274,
         "stop": "1805.4.1",
@@ -31543,24 +31901,14 @@
     ]
   },
   "2541": {
-    "acapital": false,
-    "timeline": [
-      {
-        "city": "Eua",
-        "key": "stadester-Eua-Tonga",
-        "start": "1837.11.14",
-        "start_frac": 1837.8602739726027,
-        "stop": "1837.12.27",
-        "stop_frac": 1837.978082191781
-      }
-    ]
+    "acapital": true
   },
   "2542": {
     "acapital": false,
     "timeline": [
       {
-        "city": "Euboia",
-        "key": "stadester-Euboia-Greece",
+        "city": "Toungoo",
+        "key": "stadester-Toungoo-Myanmar",
         "start": "1359.1.1",
         "start_frac": 1359.0027397260274,
         "stop": "1364.2.26",
@@ -31572,8 +31920,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Beauvais",
-        "key": "stadester-Beauvais-France",
+        "city": "Troina",
+        "key": "stadester-Troina-Italy",
         "start": "-340.1.1",
         "start_frac": -339.9972602739726,
         "stop": "-316.1.1",
@@ -31585,8 +31933,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Casalmaggiore",
-        "key": "stadester-Casalmaggiore-Italy",
+        "city": "Saka",
+        "key": "stadester-Jima-Ethiopia",
         "start": "1401.1.1",
         "start_frac": 1401.0027397260274,
         "stop": "1711.1.1",
@@ -31715,8 +32063,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Jambol",
-        "key": "stadester-Jambol-Bulgaria",
+        "city": "Malabo",
+        "key": "stadester-Malabo-Equatorial Guinea",
         "start": "1968.10.12",
         "start_frac": 1968.772602739726,
         "stop": "2026.1.1",
@@ -31741,8 +32089,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Fatagar",
-        "key": "stadester-Fatagar-Ethiopia",
+        "city": "Stockholm",
+        "key": "stadester-Stockholm-Sweden",
         "start": "1592.11.17",
         "start_frac": 1592.868493150685,
         "stop": "1600.6.1",
@@ -31832,8 +32180,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Esztergom",
-        "key": "stadester-Esztergom-Hungary",
+        "city": "Myggbukta",
+        "key": "stadester-Scoresbysund-Greenland",
         "start": "1931.7.10",
         "start_frac": 1931.5205479452054,
         "stop": "1933.4.5",
@@ -31855,17 +32203,7 @@
     ]
   },
   "2565": {
-    "acapital": false,
-    "timeline": [
-      {
-        "city": "Sint-Gillis",
-        "key": "stadester-Sint-Gillis-Belgium",
-        "start": "1995.12.17",
-        "start_frac": 1995.9506849315069,
-        "stop": "2026.1.1",
-        "stop_frac": 2026.0027397260274
-      }
-    ]
+    "acapital": true
   },
   "2566": {
     "acapital": false,
@@ -31939,8 +32277,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Flavias",
-        "key": "stadester-Flavias-Turkey",
+        "city": "Riga",
+        "key": "stadester-Riga-Latvia",
         "start": "1561.11.28",
         "start_frac": 1561.8986301369864,
         "stop": "1629.9.26",
@@ -31952,8 +32290,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Flavionavia",
-        "key": "stadester-Flavionavia-Spain",
+        "city": "Riga",
+        "key": "stadester-Riga-Latvia",
         "start": "1557.9.14",
         "start_frac": 1557.695890410959,
         "stop": "1561.11.28",
@@ -31965,8 +32303,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Évreux",
-        "key": "stadester-Évreux-France",
+        "city": "Tallinn",
+        "key": "stadester-Tallinn-Estonia",
         "start": "1939.6.16",
         "start_frac": 1939.454794520548,
         "stop": "1940.8.6",
@@ -31978,8 +32316,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Faenza",
-        "key": "stadester-Faenza-Italy",
+        "city": "Esu",
+        "key": "stadester-Wum-Cameroon",
         "start": "1801.1.1",
         "start_frac": 1801.0027397260274,
         "stop": "1901.1.1",
@@ -31991,8 +32329,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Nik`si`c",
-        "key": "stadester-Nik`si`c-Serbia",
+        "city": "Papeete",
+        "key": "stadester-Papeete-French Polynesia",
         "start": "1880.12.30",
         "start_frac": 1880.986301369863,
         "stop": "1946.10.27",
@@ -32004,8 +32342,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Fogha",
-        "key": "stadester-Fogha-Niger",
+        "city": "Papeete",
+        "key": "stadester-Papeete-French Polynesia",
         "start": "1946.10.27",
         "start_frac": 1946.813698630137,
         "stop": "1957.7.22",
@@ -32031,6 +32369,7 @@
     "timeline": [
       {
         "city": "Arkaseia",
+        "key": "stadester-Ródos-Greece",
         "start": "-849.1.1",
         "start_frac": -848.9972602739726,
         "stop": "-498.1.1",
@@ -33158,6 +33497,7 @@
     "timeline": [
       {
         "city": "Ambohimahasoa",
+        "key": "stadester-Fianarantsoa-Madagascar",
         "start": "1751.1.1",
         "start_frac": 1751.0027397260274,
         "stop": "1825.1.1",
@@ -33768,10 +34108,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Brazzaville",
-        "key": "stadester-Brazzaville-Republic of the Congo",
+        "city": "Libreville",
+        "key": "stadester-Libreville-Gabon",
         "start": "1842.1.1",
         "start_frac": 1842.0027397260274,
+        "stop": "1880.10.3",
+        "stop_frac": 1880.7479452054795
+      },
+      {
+        "city": "Brazzaville",
+        "key": "stadester-Brazzaville-Republic of the Congo",
+        "start": "1880.10.3",
+        "start_frac": 1880.7479452054795,
         "stop": "1960.8.15",
         "stop_frac": 1960.6164383561643
       }
@@ -34850,6 +35198,7 @@
     "timeline": [
       {
         "city": "Naosanabis",
+        "key": "stadester-Windhoek-Namibia",
         "start": "1815.1.1",
         "start_frac": 1815.0027397260274,
         "stop": "1894.3.20",
@@ -36682,6 +37031,30 @@
         "key": "stadester-Patna-India",
         "start": "251.1.1",
         "start_frac": 251.0027397260274,
+        "stop": "380.1.1",
+        "stop_frac": 380.0027397260274
+      },
+      {
+        "city": "Ujjain",
+        "key": "stadester-Ujjain-India",
+        "start": "380.1.1",
+        "start_frac": 380.0027397260274,
+        "stop": "455.1.1",
+        "stop_frac": 455.0027397260274
+      },
+      {
+        "city": "Ayodhya",
+        "key": "stadester-Ayodhya-India",
+        "start": "455.1.1",
+        "start_frac": 455.0027397260274,
+        "stop": "467.1.1",
+        "stop_frac": 467.0027397260274
+      },
+      {
+        "city": "Pataliputra",
+        "key": "stadester-Patna-India",
+        "start": "467.1.1",
+        "start_frac": 467.0027397260274,
         "stop": "551.1.1",
         "stop_frac": 551.0027397260274
       }
@@ -37264,6 +37637,7 @@
     "timeline": [
       {
         "city": "Mitsoudjé",
+        "key": "stadester-Moroni-Comoros",
         "start": "1501.1.1",
         "start_frac": 1501.0027397260274,
         "stop": "1887.1.1",
@@ -37353,7 +37727,7 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Xi'an",
+        "city": "Chang'an",
         "key": "stadester-Xi'an-China",
         "start": "-205.1.1",
         "start_frac": -204.9972602739726,
@@ -37361,10 +37735,34 @@
         "stop_frac": 9.027397260273972
       },
       {
+        "city": "Chang'an",
+        "key": "stadester-Xi'an-China",
+        "start": "23.3.11",
+        "start_frac": 23.194520547945206,
+        "stop": "25.11.27",
+        "stop_frac": 25.895890410958906
+      },
+      {
         "city": "Luoyang",
         "key": "stadester-Luoyang-China",
-        "start": "25.1.1",
-        "start_frac": 25.002739726027396,
+        "start": "25.11.27",
+        "start_frac": 25.895890410958906,
+        "stop": "190.4.9",
+        "stop_frac": 190.27123287671233
+      },
+      {
+        "city": "Chang'an",
+        "key": "stadester-Xi'an-China",
+        "start": "190.4.9",
+        "start_frac": 190.27123287671233,
+        "stop": "196.10.7",
+        "stop_frac": 196.75890410958905
+      },
+      {
+        "city": "Xuchang",
+        "key": "stadester-Xuchang-China",
+        "start": "196.10.7",
+        "start_frac": 196.75890410958905,
         "stop": "220.12.11",
         "stop_frac": 220.93424657534246
       }
@@ -37466,6 +37864,7 @@
     "timeline": [
       {
         "city": "Varbola",
+        "key": "stadester-Tallinn-Estonia",
         "start": "1001.1.1",
         "start_frac": 1001.0027397260274,
         "stop": "1220.1.1",
@@ -40052,7 +40451,7 @@
     "timeline": [
       {
         "city": "Mahdia",
-        "key": "stadester-Mahdia-Algeria",
+        "key": "stadester-Al Mahdîyah-Tunisia",
         "start": "1136.1.1",
         "start_frac": 1136.0027397260274,
         "stop": "1160.2.1",
@@ -40702,7 +41101,7 @@
     "timeline": [
       {
         "city": "Isma",
-        "key": "stadester-Isma-Greece",
+        "key": "stadester-Tansen-Nepal",
         "start": "1551.1.1",
         "start_frac": 1551.0027397260274,
         "stop": "1787.1.1",
@@ -41449,7 +41848,17 @@
     ]
   },
   "3332": {
-    "acapital": true
+    "acapital": false,
+    "timeline": [
+      {
+        "city": "Srinagar",
+        "key": "stadester-Srînagar-India",
+        "start": "1847.1.1",
+        "start_frac": 1847.0027397260274,
+        "stop": "1947.8.15",
+        "stop_frac": 1947.6164383561643
+      }
+    ]
   },
   "3333": {
     "acapital": false,
@@ -41737,7 +42146,7 @@
     "timeline": [
       {
         "city": "Jehari",
-        "key": "stadester-Jehari-Pakistan",
+        "key": "ghsl-Nepalgunj-Nepal",
         "start": "1401.1.1",
         "start_frac": 1401.0027397260274,
         "stop": "1787.1.1",
@@ -42162,14 +42571,22 @@
         "key": "stadester-Luoyang-China",
         "start": "266.8.2",
         "start_frac": 266.58082191780824,
-        "stop": "317.1.1",
-        "stop_frac": 317.0027397260274
+        "stop": "311.6.1",
+        "stop_frac": 311.413698630137
+      },
+      {
+        "city": "Chang'an",
+        "key": "stadester-Xi'an-China",
+        "start": "311.6.1",
+        "start_frac": 311.413698630137,
+        "stop": "316.12.11",
+        "stop_frac": 316.93424657534246
       },
       {
         "city": "Nanjing",
         "key": "stadester-Nanjing-China",
-        "start": "317.1.1",
-        "start_frac": 317.0027397260274,
+        "start": "317.4.26",
+        "start_frac": 317.31780821917806,
         "stop": "420.7.7",
         "stop_frac": 420.5123287671233
       }
@@ -43995,9 +44412,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Parihaspur",
+        "city": "Srinagar",
+        "key": "stadester-Srinagar-India",
         "start": "626.1.1",
         "start_frac": 626.0027397260274,
+        "stop": "725.1.1",
+        "stop_frac": 725.0027397260274
+      },
+      {
+        "city": "Parihaspur",
+        "key": "stadester-Parihaspur-India",
+        "start": "725.1.1",
+        "start_frac": 725.0027397260274,
         "stop": "856.1.1",
         "stop_frac": 856.0027397260274
       }
@@ -46396,10 +46822,42 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Yerevan",
-        "key": "ghsl-Yerevan-Armenia",
+        "city": "Artashat",
+        "key": "stadester-Artashat-Armenia",
         "start": "-189.1.1",
         "start_frac": -188.9972602739726,
+        "stop": "-77.1.1",
+        "stop_frac": -76.9972602739726
+      },
+      {
+        "city": "Tigranocerta",
+        "key": "stadester-Silvan-Turkey",
+        "start": "-77.1.1",
+        "start_frac": -76.9972602739726,
+        "stop": "-69.1.1",
+        "stop_frac": -68.9972602739726
+      },
+      {
+        "city": "Artashat",
+        "key": "stadester-Artashat-Armenia",
+        "start": "-69.1.1",
+        "start_frac": -68.9972602739726,
+        "stop": "120.1.1",
+        "stop_frac": 120.0027397260274
+      },
+      {
+        "city": "Vagharshapat",
+        "key": "stadester-Vagharshapat-Armenia",
+        "start": "120.1.1",
+        "start_frac": 120.0027397260274,
+        "stop": "336.1.1",
+        "stop_frac": 336.0027397260274
+      },
+      {
+        "city": "Dvin",
+        "key": "stadester-Dvin-Armenia",
+        "start": "336.1.1",
+        "start_frac": 336.0027397260274,
         "stop": "706.1.1",
         "stop_frac": 706.0027397260274
       }
@@ -46422,10 +46880,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Oviedo",
-        "key": "stadester-Oviedo-Spain",
+        "city": "Cangas de Onís",
+        "key": "stadester-Cangas-de-Onis-Spain",
         "start": "719.1.1",
         "start_frac": 719.0027397260274,
+        "stop": "774.1.1",
+        "stop_frac": 774.0027397260274
+      },
+      {
+        "city": "Pravia",
+        "key": "stadester-Pravia-Spain",
+        "start": "774.1.1",
+        "start_frac": 774.0027397260274,
+        "stop": "791.1.1",
+        "stop_frac": 791.0027397260274
+      },
+      {
+        "city": "Oviedo",
+        "key": "stadester-Oviedo-Spain",
+        "start": "791.1.1",
+        "start_frac": 791.0027397260274,
         "stop": "911.1.1",
         "stop_frac": 911.0027397260274
       }
@@ -46656,8 +47130,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Dobo",
-        "key": "ghsl-Dobo-Indonesia",
+        "city": "Medan",
+        "key": "stadester-Medan-Indonesia",
         "start": "1226.1.1",
         "start_frac": 1226.0027397260274,
         "stop": "1614.1.1",
@@ -47556,10 +48030,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Copenhagen",
-        "key": "stadester-Copenhagen-Denmark",
+        "city": "Jelling",
+        "key": "stadester-Jelling-Denmark",
         "start": "961.1.1",
         "start_frac": 961.0027397260274,
+        "stop": "986.1.1",
+        "stop_frac": 986.0027397260274
+      },
+      {
+        "city": "Roskilde",
+        "key": "stadester-Roskilde-Denmark",
+        "start": "986.1.1",
+        "start_frac": 986.0027397260274,
+        "stop": "1443.1.1",
+        "stop_frac": 1443.0027397260274
+      },
+      {
+        "city": "Copenhagen",
+        "key": "stadester-Copenhagen-Denmark",
+        "start": "1443.1.1",
+        "start_frac": 1443.0027397260274,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -48505,10 +48995,74 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Budapest",
-        "key": "stadester-Budapest-Hungary",
+        "city": "Esztergom",
+        "key": "stadester-Esztergom-Hungary",
         "start": "1000.12.25",
         "start_frac": 1000.972602739726,
+        "stop": "1256.1.1",
+        "stop_frac": 1256.0027397260274
+      },
+      {
+        "city": "Buda",
+        "key": "stadester-Budapest-Hungary",
+        "start": "1256.1.1",
+        "start_frac": 1256.0027397260274,
+        "stop": "1323.1.1",
+        "stop_frac": 1323.0027397260274
+      },
+      {
+        "city": "Visegrád",
+        "key": "stadester-Visegrad-Hungary",
+        "start": "1323.1.1",
+        "start_frac": 1323.0027397260274,
+        "stop": "1408.1.1",
+        "stop_frac": 1408.0027397260274
+      },
+      {
+        "city": "Buda",
+        "key": "stadester-Budapest-Hungary",
+        "start": "1408.1.1",
+        "start_frac": 1408.0027397260274,
+        "stop": "1536.1.1",
+        "stop_frac": 1536.0027397260274
+      },
+      {
+        "city": "Pozsony",
+        "key": "stadester-Bratislava-Slovakia",
+        "start": "1536.1.1",
+        "start_frac": 1536.0027397260274,
+        "stop": "1784.1.1",
+        "stop_frac": 1784.0027397260274
+      },
+      {
+        "city": "Buda",
+        "key": "stadester-Budapest-Hungary",
+        "start": "1784.1.1",
+        "start_frac": 1784.0027397260274,
+        "stop": "1849.1.1",
+        "stop_frac": 1849.0027397260274
+      },
+      {
+        "city": "Debrecen",
+        "key": "stadester-Debrecen-Hungary",
+        "start": "1849.1.1",
+        "start_frac": 1849.0027397260274,
+        "stop": "1849.5.31",
+        "stop_frac": 1849.4136986301369
+      },
+      {
+        "city": "Buda",
+        "key": "stadester-Budapest-Hungary",
+        "start": "1849.5.31",
+        "start_frac": 1849.4136986301369,
+        "stop": "1873.11.17",
+        "stop_frac": 1873.868493150685
+      },
+      {
+        "city": "Budapest",
+        "key": "stadester-Budapest-Hungary",
+        "start": "1873.11.17",
+        "start_frac": 1873.868493150685,
         "stop": "1944.3.19",
         "stop_frac": 1944.2164383561644
       }
@@ -48769,6 +49323,46 @@
         "key": "stadester-Yerushalayim-Israel",
         "start": "1099.7.22",
         "start_frac": 1099.5534246575342,
+        "stop": "1187.10.2",
+        "stop_frac": 1187.7452054794521
+      },
+      {
+        "city": "Tyre",
+        "key": "stadester-Tyre-Lebanon",
+        "start": "1187.10.2",
+        "start_frac": 1187.7452054794521,
+        "stop": "1191.7.12",
+        "stop_frac": 1191.5260273972603
+      },
+      {
+        "city": "Acre",
+        "key": "stadester-Acre-Israel",
+        "start": "1191.7.12",
+        "start_frac": 1191.5260273972603,
+        "stop": "1229.2.18",
+        "stop_frac": 1229.131506849315
+      },
+      {
+        "city": "Jerusalem",
+        "key": "stadester-Yerushalayim-Israel",
+        "start": "1229.2.18",
+        "start_frac": 1229.131506849315,
+        "stop": "1244.8.23",
+        "stop_frac": 1244.6383561643836
+      },
+      {
+        "city": "Acre",
+        "key": "stadester-Acre-Israel",
+        "start": "1244.8.23",
+        "start_frac": 1244.6383561643836,
+        "stop": "1291.5.18",
+        "stop_frac": 1291.3780821917808
+      },
+      {
+        "city": "Ruad",
+        "key": "stadester-Arwad-Syria",
+        "start": "1291.5.18",
+        "start_frac": 1291.3780821917808,
         "stop": "1302.9.26",
         "stop_frac": 1302.7287671232878
       }
@@ -49431,10 +50025,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Meroë",
-        "key": "stadester-Meroë-Sudan",
+        "city": "Napata",
+        "key": "stadester-Karima-Sudan",
         "start": "-1069.1.1",
         "start_frac": -1068.9972602739726,
+        "stop": "-591.1.1",
+        "stop_frac": -590.9972602739726
+      },
+      {
+        "city": "Meroë",
+        "key": "stadester-Meroë-Sudan",
+        "start": "-591.1.1",
+        "start_frac": -590.9972602739726,
         "stop": "351.1.1",
         "stop_frac": 351.0027397260274
       }
@@ -49678,8 +50280,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Janakpur",
-        "key": "stadester-Janakpur-Nepal",
+        "city": "Bharatpur",
+        "key": "stadester-Bharatpur-India",
         "start": "1791.1.1",
         "start_frac": 1791.0027397260274,
         "stop": "1822.1.1",
@@ -49756,10 +50358,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Pella (Macedon)",
-        "key": "stadester-Pella--Macedon--Greece",
+        "city": "Aegae",
+        "key": "stadester-Vergina-Greece",
         "start": "-807.1.1",
         "start_frac": -806.9972602739726,
+        "stop": "-399.1.1",
+        "stop_frac": -398.9972602739726
+      },
+      {
+        "city": "Pella (Macedon)",
+        "key": "stadester-Pella--Macedon--Greece",
+        "start": "-399.1.1",
+        "start_frac": -398.9972602739726,
         "stop": "-315.4.1",
         "stop_frac": -314.75068493150684
       }
@@ -49782,8 +50392,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Pella (Macedon)",
-        "key": "stadester-Pella--Macedon--Greece",
+        "city": "Aegae",
+        "key": "stadester-Vergina-Greece",
         "start": "-510.1.1",
         "start_frac": -509.9972602739726,
         "stop": "-478.1.1",
@@ -50435,8 +51045,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Riyadh",
-        "key": "stadester-Riyadh-Saudi Arabia",
+        "city": "Avaris",
+        "key": "stadester-Avaris-Egypt",
         "start": "-1569.1.1",
         "start_frac": -1568.9972602739726,
         "stop": "-1559.1.1",
@@ -50539,10 +51149,50 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Oslo",
-        "key": "stadester-Oslo-Norway",
+        "city": "Avaldsnes",
+        "key": "stadester-Karmoy-Norway",
         "start": "873.1.1",
         "start_frac": 873.0027397260274,
+        "stop": "997.1.1",
+        "stop_frac": 997.0027397260274
+      },
+      {
+        "city": "Nidaros",
+        "key": "stadester-Trondheim-Norway",
+        "start": "997.1.1",
+        "start_frac": 997.0027397260274,
+        "stop": "1016.1.1",
+        "stop_frac": 1016.0027397260274
+      },
+      {
+        "city": "Borg",
+        "key": "stadester-Sarpsborg-Norway",
+        "start": "1016.1.1",
+        "start_frac": 1016.0027397260274,
+        "stop": "1030.1.1",
+        "stop_frac": 1030.0027397260274
+      },
+      {
+        "city": "Nidaros",
+        "key": "stadester-Trondheim-Norway",
+        "start": "1030.1.1",
+        "start_frac": 1030.0027397260274,
+        "stop": "1217.1.1",
+        "stop_frac": 1217.0027397260274
+      },
+      {
+        "city": "Bergen",
+        "key": "stadester-Bergen-Norway",
+        "start": "1217.1.1",
+        "start_frac": 1217.0027397260274,
+        "stop": "1299.1.1",
+        "stop_frac": 1299.0027397260274
+      },
+      {
+        "city": "Oslo",
+        "key": "stadester-Oslo-Norway",
+        "start": "1299.1.1",
+        "start_frac": 1299.0027397260274,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -50656,8 +51306,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Baturyn",
-        "key": "stadester-Baturyn-Ukraine",
+        "city": "Chyhyryn",
+        "key": "stadester-Cherkasy-Ukraine",
         "start": "1649.8.18",
         "start_frac": 1649.6246575342466,
         "stop": "1654.1.18",
@@ -50903,10 +51553,34 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Lisbon",
-        "key": "stadester-Lisboa-Portugal",
+        "city": "Coimbra",
+        "key": "stadester-Coimbra-Portugal",
         "start": "1139.7.25",
         "start_frac": 1139.5616438356165,
+        "stop": "1255.12.1",
+        "stop_frac": 1255.9068493150685
+      },
+      {
+        "city": "Lisbon",
+        "key": "stadester-Lisboa-Portugal",
+        "start": "1255.12.1",
+        "start_frac": 1255.9068493150685,
+        "stop": "1807.11.27",
+        "stop_frac": 1807.8958904109588
+      },
+      {
+        "city": "Rio de Janeiro",
+        "key": "stadester-Rio de Janeiro-Brazil",
+        "start": "1807.11.27",
+        "start_frac": 1807.8958904109588,
+        "stop": "1821.4.26",
+        "stop_frac": 1821.317808219178
+      },
+      {
+        "city": "Lisbon",
+        "key": "stadester-Lisboa-Portugal",
+        "start": "1821.4.26",
+        "start_frac": 1821.317808219178,
         "stop": "1910.10.5",
         "stop_frac": 1910.7534246575342
       }
@@ -51821,10 +52495,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Stockholm",
-        "key": "stadester-Stockholm-Sweden",
+        "city": "Sigtuna",
+        "key": "stadester-Sigtuna-Sweden",
         "start": "1156.1.1",
         "start_frac": 1156.0027397260274,
+        "stop": "1252.1.1",
+        "stop_frac": 1252.0027397260274
+      },
+      {
+        "city": "Stockholm",
+        "key": "stadester-Stockholm-Sweden",
+        "start": "1252.1.1",
+        "start_frac": 1252.0027397260274,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -52133,8 +52815,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Lyon",
-        "key": "stadester-Lyon-France",
+        "city": "Worms",
+        "key": "stadester-Worms-Germany",
         "start": "412.1.1",
         "start_frac": 412.0027397260274,
         "stop": "455.1.1",
@@ -54321,6 +55003,7 @@
     "timeline": [
       {
         "city": "Astypalaia (Kos)",
+        "key": "stadester-Kos-Greece",
         "start": "-849.1.1",
         "start_frac": -848.9972602739726,
         "stop": "-498.1.1",
@@ -55034,10 +55717,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Peshawar",
-        "key": "ghsl-Peshawar-Pakistan",
+        "city": "Begram",
+        "key": "stadester-Begram-Afghanistan",
         "start": "31.1.1",
         "start_frac": 31.002739726027396,
+        "stop": "127.1.1",
+        "stop_frac": 127.0027397260274
+      },
+      {
+        "city": "Peshawar",
+        "key": "ghsl-Peshawar-Pakistan",
+        "start": "127.1.1",
+        "start_frac": 127.0027397260274,
         "stop": "376.1.1",
         "stop_frac": 376.0027397260274
       }
@@ -55466,8 +56157,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Cyrrhus",
-        "key": "stadester-Cyrrhus-Syria",
+        "city": "Kyrrhos",
+        "key": "stadester-Kilis-Turkey",
         "start": "-599.1.1",
         "start_frac": -598.9972602739726,
         "stop": "-430.1.1",
@@ -57181,6 +57872,7 @@
     "timeline": [
       {
         "city": "Chandpur Garhi",
+        "key": "stadester-Chandpur-India",
         "start": "824.1.1",
         "start_frac": 824.0027397260274,
         "stop": "1512.1.1",
@@ -57188,6 +57880,7 @@
       },
       {
         "city": "Dewalgarh",
+        "key": "stadester-Pauri-India",
         "start": "1512.1.1",
         "start_frac": 1512.0027397260274,
         "stop": "1517.1.1",
@@ -57537,6 +58230,7 @@
     "timeline": [
       {
         "city": "Golconda",
+        "key": "stadester-Hyderâbâd-India",
         "start": "1519.1.1",
         "start_frac": 1519.0027397260274,
         "stop": "1591.1.1",
@@ -57595,10 +58289,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Sarai",
-        "key": "stadester-Sarai-Russia",
+        "city": "Sarai Batu",
+        "key": "stadester-Sarai-Batu-Russia",
         "start": "1261.1.1",
         "start_frac": 1261.0027397260274,
+        "stop": "1340.1.1",
+        "stop_frac": 1340.0027397260274
+      },
+      {
+        "city": "Sarai Berke",
+        "key": "stadester-Sarai-Berke-Russia",
+        "start": "1340.1.1",
+        "start_frac": 1340.0027397260274,
         "stop": "1510.1.1",
         "stop_frac": 1510.0027397260274
       }
@@ -57755,6 +58457,14 @@
         "key": "stadester-Gorkha-Nepal",
         "start": "1560.1.1",
         "start_frac": 1560.0027397260274,
+        "stop": "1768.9.25",
+        "stop_frac": 1768.7260273972602
+      },
+      {
+        "city": "Kathmandu",
+        "key": "stadester-Kathmandu-Nepal",
+        "start": "1768.9.25",
+        "start_frac": 1768.7260273972602,
         "stop": "1770.1.1",
         "stop_frac": 1770.0027397260274
       }
@@ -57843,6 +58553,7 @@
     "timeline": [
       {
         "city": "Kernavė",
+        "key": "stadester-Vilnius-Lithuania",
         "start": "1263.12.1",
         "start_frac": 1263.9068493150685,
         "stop": "1321.1.1",
@@ -58078,17 +58789,7 @@
     ]
   },
   "4648": {
-    "acapital": false,
-    "timeline": [
-      {
-        "city": "Telmessos",
-        "key": "stadester-Telmessos-Turkey",
-        "start": "-1999.1.1",
-        "start_frac": -1998.9972602739726,
-        "stop": "-1199.1.1",
-        "stop_frac": -1198.9972602739726
-      }
-    ]
+    "acapital": true
   },
   "4649": {
     "acapital": false,
@@ -58236,6 +58937,7 @@
       },
       {
         "city": "Gogunda",
+        "key": "stadester-Udaipur-India",
         "start": "1568.2.23",
         "start_frac": 1568.145205479452,
         "stop": "1585.1.1",
@@ -58243,6 +58945,7 @@
       },
       {
         "city": "Chavand",
+        "key": "stadester-Udaipur-India",
         "start": "1585.1.1",
         "start_frac": 1585.0027397260274,
         "stop": "1615.1.1",
@@ -58409,6 +59112,7 @@
     "timeline": [
       {
         "city": "Sisoda",
+        "key": "stadester-Rajsamand-India",
         "start": "1151.1.1",
         "start_frac": 1151.0027397260274,
         "stop": "1568.1.1",
@@ -58703,6 +59407,7 @@
     "timeline": [
       {
         "city": "Aba Island",
+        "key": "stadester-Kûstî-Sudan",
         "start": "1881.8.25",
         "start_frac": 1881.6438356164383,
         "stop": "1883.1.19",
@@ -58874,6 +59579,7 @@
     "timeline": [
       {
         "city": "Qal'at Bani Hammad",
+        "key": "stadester-M'Sila-Algeria",
         "start": "1015.1.1",
         "start_frac": 1015.0027397260274,
         "stop": "1090.1.1",
@@ -58907,8 +59613,17 @@
     "timeline": [
       {
         "city": "Mottama",
+        "key": "stadester-Mawlamyine-Myanmar",
         "start": "1287.1.30",
         "start_frac": 1287.0821917808219,
+        "stop": "1364.1.1",
+        "stop_frac": 1364.0027397260274
+      },
+      {
+        "city": "Donwun",
+        "key": "stadester-Thaton-Myanmar",
+        "start": "1364.1.1",
+        "start_frac": 1364.0027397260274,
         "stop": "1369.1.1",
         "stop_frac": 1369.0027397260274
       },
@@ -58922,8 +59637,17 @@
       },
       {
         "city": "Mottama",
+        "key": "stadester-Mawlamyine-Myanmar",
         "start": "1539.1.1",
         "start_frac": 1539.0027397260274,
+        "stop": "1541.4.1",
+        "stop_frac": 1541.2493150684932
+      },
+      {
+        "city": "Bago",
+        "key": "stadester-Bago-Myanmar",
+        "start": "1550.8.1",
+        "start_frac": 1550.5780821917808,
         "stop": "1552.3.12",
         "stop_frac": 1552.1972602739727
       }
@@ -59067,6 +59791,7 @@
       },
       {
         "city": "Nandana",
+        "key": "stadester-Nandana-Pakistan",
         "start": "1001.11.27",
         "start_frac": 1001.8958904109589,
         "stop": "1027.1.1",
@@ -59519,6 +60244,7 @@
       },
       {
         "city": "Soltaniyeh",
+        "key": "stadester-Sultaniya-Iran",
         "start": "1306.1.1",
         "start_frac": 1306.0027397260274,
         "stop": "1335.1.1",
@@ -60235,6 +60961,7 @@
     "timeline": [
       {
         "city": "Tenenkou",
+        "key": "stadester-Mopti-Mali",
         "start": "1401.1.1",
         "start_frac": 1401.0027397260274,
         "stop": "1820.1.1",
@@ -61031,6 +61758,7 @@
       },
       {
         "city": "Watugaluh",
+        "key": "stadester-Jombang-Indonesia",
         "start": "929.1.1",
         "start_frac": 929.0027397260274,
         "stop": "1007.1.1",
@@ -61246,6 +61974,7 @@
       },
       {
         "city": "Dharmasraya",
+        "key": "stadester-Padang-Indonesia",
         "start": "1347.1.1",
         "start_frac": 1347.0027397260274,
         "stop": "1378.1.1",
@@ -61578,6 +62307,7 @@
       },
       {
         "city": "Balat",
+        "key": "stadester-Didim-Turkey",
         "start": "1340.1.1",
         "start_frac": 1340.0027397260274,
         "stop": "1415.1.1",
@@ -61947,6 +62677,7 @@
     "timeline": [
       {
         "city": "Shangjing",
+        "key": "stadester-Chifeng-China",
         "start": "1116.1.1",
         "start_frac": 1116.0027397260274,
         "stop": "1153.4.21",
@@ -61970,6 +62701,7 @@
       },
       {
         "city": "Caizhou",
+        "key": "ghsl-Runan-China",
         "start": "1233.1.1",
         "start_frac": 1233.0027397260274,
         "stop": "1234.2.9",
@@ -62068,6 +62800,7 @@
       },
       {
         "city": "Mandore",
+        "key": "stadester-Jodhpur-India",
         "start": "1395.1.1",
         "start_frac": 1395.0027397260274,
         "stop": "1459.5.12",
@@ -62101,6 +62834,7 @@
     "timeline": [
       {
         "city": "Johor Lama",
+        "key": "stadester-Kota Tinggi-Malaysia",
         "start": "1529.1.1",
         "start_frac": 1529.0027397260274,
         "stop": "1630.1.1",
@@ -62343,6 +63077,7 @@
     "timeline": [
       {
         "city": "Sounsan",
+        "key": "stadester-Kita-Mali",
         "start": "1651.1.1",
         "start_frac": 1651.0027397260274,
         "stop": "1754.1.1",
@@ -62566,6 +63301,7 @@
     "timeline": [
       {
         "city": "Hanamkonda",
+        "key": "stadester-Warangal-India",
         "start": "1164.1.1",
         "start_frac": 1164.0027397260274,
         "stop": "1199.1.1",
@@ -62807,6 +63543,7 @@
     "timeline": [
       {
         "city": "Mongnawng",
+        "key": "stadester-Taunggyi-Myanmar",
         "start": "1886.1.1",
         "start_frac": 1886.0027397260274,
         "stop": "1948.1.4",
@@ -63030,6 +63767,7 @@
     "timeline": [
       {
         "city": "Bannack",
+        "key": "stadester-Butte-Montana",
         "start": "1864.5.26",
         "start_frac": 1864.4,
         "stop": "1865.2.7",
@@ -63037,6 +63775,7 @@
       },
       {
         "city": "Virginia City",
+        "key": "stadester-Bozeman-Montana",
         "start": "1865.2.7",
         "start_frac": 1865.1013698630136,
         "stop": "1875.1.1",
@@ -63057,6 +63796,7 @@
     "timeline": [
       {
         "city": "Monte Alban",
+        "key": "stadester-Oaxaca de Juárez-Mexico",
         "start": "751.1.1",
         "start_frac": 751.0027397260274,
         "stop": "901.1.1",
@@ -63106,6 +63846,7 @@
       },
       {
         "city": "Brades",
+        "key": "stadester-Plymouth-Montserrat",
         "start": "1997.8.4",
         "start_frac": 1997.5863013698631,
         "stop": "2026.1.1",
@@ -63338,6 +64079,7 @@
     "timeline": [
       {
         "city": "Island of Mozambique",
+        "key": "ghsl-Nampula-Mozambique",
         "start": "1501.1.1",
         "start_frac": 1501.0027397260274,
         "stop": "1898.12.1",
@@ -63415,8 +64157,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Kalmar",
-        "key": "stadester-Kalmar-Sweden",
+        "city": "Roskilde",
+        "key": "stadester-Roskilde-Denmark",
         "start": "1397.6.17",
         "start_frac": 1397.4575342465753,
         "stop": "1443.1.1",
@@ -64284,6 +65026,7 @@
     "timeline": [
       {
         "city": "Keladi",
+        "key": "stadester-Shimoga-India",
         "start": "1500.1.1",
         "start_frac": 1500.0027397260274,
         "stop": "1560.1.1",
@@ -64299,6 +65042,7 @@
       },
       {
         "city": "Bidanur",
+        "key": "stadester-Shimoga-India",
         "start": "1640.1.1",
         "start_frac": 1640.0027397260274,
         "stop": "1764.1.1",
@@ -64327,6 +65071,7 @@
     "timeline": [
       {
         "city": "Kota Jelasin",
+        "key": "ghsl-Kota Bharu-Malaysia",
         "start": "1512.1.1",
         "start_frac": 1512.0027397260274,
         "stop": "1551.1.1",
@@ -64521,6 +65266,7 @@
     "timeline": [
       {
         "city": "Kota Jelasin",
+        "key": "ghsl-Kota Bharu-Malaysia",
         "start": "1268.1.1",
         "start_frac": 1268.0027397260274,
         "stop": "1756.1.1",
@@ -64528,6 +65274,7 @@
       },
       {
         "city": "Kota Kubang Labu",
+        "key": "ghsl-Kota Bharu-Malaysia",
         "start": "1756.1.1",
         "start_frac": 1756.0027397260274,
         "stop": "1782.1.1",
@@ -64535,6 +65282,7 @@
       },
       {
         "city": "Kota Pangkalan Datu",
+        "key": "ghsl-Kota Bharu-Malaysia",
         "start": "1782.1.1",
         "start_frac": 1782.0027397260274,
         "stop": "1813.1.1",
@@ -65016,6 +65764,7 @@
     "timeline": [
       {
         "city": "Nayakot",
+        "key": "stadester-Kathmandu-Nepal",
         "start": "1551.1.1",
         "start_frac": 1551.0027397260274,
         "stop": "1783.1.1",
@@ -65187,6 +65936,7 @@
     "timeline": [
       {
         "city": "Thalner",
+        "key": "stadester-Dhûle-India",
         "start": "1383.1.1",
         "start_frac": 1383.0027397260274,
         "stop": "1399.1.1",
@@ -65207,6 +65957,7 @@
     "timeline": [
       {
         "city": "Seri Menanti",
+        "key": "stadester-Kuala Pilah-Malaysia",
         "start": "1774.1.1",
         "start_frac": 1774.0027397260274,
         "stop": "1874.1.1",
@@ -65456,6 +66207,7 @@
     "timeline": [
       {
         "city": "Sozak",
+        "key": "stadester-Sozak-Kazakhstan",
         "start": "1468.1.1",
         "start_frac": 1468.0027397260274,
         "stop": "1469.1.1",
@@ -65463,6 +66215,7 @@
       },
       {
         "city": "Sygnak",
+        "key": "stadester-Sighnaq-Kazakhstan",
         "start": "1469.1.1",
         "start_frac": 1469.0027397260274,
         "stop": "1511.1.1",
@@ -65470,6 +66223,7 @@
       },
       {
         "city": "Sozak",
+        "key": "stadester-Sozak-Kazakhstan",
         "start": "1511.1.1",
         "start_frac": 1511.0027397260274,
         "stop": "1521.1.1",
@@ -65477,6 +66231,7 @@
       },
       {
         "city": "Sygnak",
+        "key": "stadester-Sighnaq-Kazakhstan",
         "start": "1521.1.1",
         "start_frac": 1521.0027397260274,
         "stop": "1599.1.1",
@@ -66091,7 +66846,7 @@
     "timeline": [
       {
         "city": "León",
-        "key": "stadester-León-Spain",
+        "key": "stadester-Leon-Nicaragua",
         "start": "1838.5.31",
         "start_frac": 1838.4136986301369,
         "stop": "1852.1.1",
@@ -66224,6 +66979,7 @@
     "timeline": [
       {
         "city": "Magas",
+        "key": "stadester-Nazran-Russia",
         "start": "901.1.1",
         "start_frac": 901.0027397260274,
         "stop": "1239.1.1",
@@ -66261,20 +67017,20 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Zaragoza",
-        "key": "stadester-Zaragoza-Spain",
-        "start": "1118.12.18",
-        "start_frac": 1118.9534246575342,
-        "stop": "1479.1.20",
-        "stop_frac": 1479.054794520548
-      },
-      {
         "city": "Jaca",
         "key": "stadester-Jaca-Spain",
         "start": "821.1.1",
         "start_frac": 821.0027397260274,
         "stop": "1118.12.18",
         "stop_frac": 1118.9534246575342
+      },
+      {
+        "city": "Zaragoza",
+        "key": "stadester-Zaragoza-Spain",
+        "start": "1118.12.18",
+        "start_frac": 1118.9534246575342,
+        "stop": "1479.1.20",
+        "stop_frac": 1479.054794520548
       }
     ]
   },
@@ -66439,6 +67195,7 @@
     "timeline": [
       {
         "city": "Faras",
+        "key": "stadester-Wadi Halfa-Sudan",
         "start": "401.1.1",
         "start_frac": 401.0027397260274,
         "stop": "643.1.1",
@@ -66467,6 +67224,7 @@
     "timeline": [
       {
         "city": "Khachen",
+        "key": "stadester-Xankändi-Azerbaijan",
         "start": "1046.1.1",
         "start_frac": 1046.0027397260274,
         "stop": "1121.8.12",
@@ -67494,6 +68252,14 @@
         "key": "stadester-Burgos-Spain",
         "start": "1036.1.1",
         "start_frac": 1036.0027397260274,
+        "stop": "1085.5.25",
+        "stop_frac": 1085.3972602739725
+      },
+      {
+        "city": "Toledo",
+        "key": "stadester-Toledo-Spain",
+        "start": "1085.5.25",
+        "start_frac": 1085.3972602739725,
         "stop": "1479.1.20",
         "stop_frac": 1479.054794520548
       }
@@ -67647,6 +68413,7 @@
     "timeline": [
       {
         "city": "Tunip",
+        "key": "stadester-Hamâh-Syria",
         "start": "-1999.1.1",
         "start_frac": -1998.9972602739726,
         "stop": "-1809.1.1",
@@ -68609,10 +69376,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "London",
-        "key": "stadester-London-United Kingdom",
+        "city": "Winchester",
+        "key": "stadester-Winchester-United Kingdom",
         "start": "928.1.1",
         "start_frac": 928.0027397260274,
+        "stop": "1066.12.25",
+        "stop_frac": 1066.972602739726
+      },
+      {
+        "city": "London",
+        "key": "stadester-London-United Kingdom",
+        "start": "1066.12.25",
+        "start_frac": 1066.972602739726,
         "stop": "1603.3.24",
         "stop_frac": 1603.2301369863014
       }
@@ -68863,6 +69638,38 @@
         "key": "stadester-Paris-France",
         "start": "987.7.3",
         "start_frac": 987.5013698630137,
+        "stop": "1422.10.21",
+        "stop_frac": 1422.7972602739726
+      },
+      {
+        "city": "Bourges",
+        "key": "stadester-Bourges-France",
+        "start": "1422.10.21",
+        "start_frac": 1422.7972602739726,
+        "stop": "1436.4.13",
+        "stop_frac": 1436.282191780822
+      },
+      {
+        "city": "Paris",
+        "key": "stadester-Paris-France",
+        "start": "1436.4.13",
+        "start_frac": 1436.282191780822,
+        "stop": "1682.5.6",
+        "stop_frac": 1682.345205479452
+      },
+      {
+        "city": "Versailles",
+        "key": "stadester-Versailles-France",
+        "start": "1682.5.6",
+        "start_frac": 1682.345205479452,
+        "stop": "1789.10.6",
+        "stop_frac": 1789.7561643835616
+      },
+      {
+        "city": "Paris",
+        "key": "stadester-Paris-France",
+        "start": "1789.10.6",
+        "start_frac": 1789.7561643835616,
         "stop": "1792.9.21",
         "stop_frac": 1792.7150684931507
       },
@@ -68901,10 +69708,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bursa",
-        "key": "stadester-Bursa-Turkey",
+        "city": "Söğüt",
+        "key": "stadester-Sogut-Turkey",
         "start": "1291.1.1",
         "start_frac": 1291.0027397260274,
+        "stop": "1335.1.1",
+        "stop_frac": 1335.0027397260274
+      },
+      {
+        "city": "Bursa",
+        "key": "stadester-Bursa-Turkey",
+        "start": "1335.1.1",
+        "start_frac": 1335.0027397260274,
+        "stop": "1369.1.1",
+        "stop_frac": 1369.0027397260274
+      },
+      {
+        "city": "Edirne",
+        "key": "stadester-Edirne-Turkey",
+        "start": "1369.1.1",
+        "start_frac": 1369.0027397260274,
         "stop": "1384.1.1",
         "stop_frac": 1384.0027397260274
       }
@@ -70020,9 +70843,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ctesiphon",
+        "city": "Nisa",
+        "key": "stadester-Nisa-Turkmenistan",
         "start": "-246.1.1",
         "start_frac": -245.9972602739726,
+        "stop": "-217.1.1",
+        "stop_frac": -216.9972602739726
+      },
+      {
+        "city": "Hecatompylos",
+        "key": "stadester-Damghan-Iran",
+        "start": "-217.1.1",
+        "start_frac": -216.9972602739726,
+        "stop": "-141.1.1",
+        "stop_frac": -140.9972602739726
+      },
+      {
+        "city": "Ctesiphon",
+        "key": "stadester-Ctesiphon-Iraq",
+        "start": "-141.1.1",
+        "start_frac": -140.9972602739726,
         "stop": "224.4.28",
         "stop_frac": 224.3232876712329
       }
@@ -70491,6 +71331,14 @@
         "key": "stadester-Pamplona-Spain",
         "start": "1036.1.1",
         "start_frac": 1036.0027397260274,
+        "stop": "1512.7.25",
+        "stop_frac": 1512.5616438356165
+      },
+      {
+        "city": "Pau",
+        "key": "stadester-Pau-France",
+        "start": "1512.7.25",
+        "start_frac": 1512.5616438356165,
         "stop": "1589.8.2",
         "stop_frac": 1589.5808219178082
       }
@@ -70983,10 +71831,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Kraków",
-        "key": "ghsl-Krakow-Poland",
+        "city": "Gniezno",
+        "key": "stadester-Gniezno-Poland",
         "start": "1026.1.1",
         "start_frac": 1026.0027397260274,
+        "stop": "1038.1.1",
+        "stop_frac": 1038.0027397260274
+      },
+      {
+        "city": "Kraków",
+        "key": "ghsl-Krakow-Poland",
+        "start": "1038.1.1",
+        "start_frac": 1038.0027397260274,
         "stop": "1385.8.14",
         "stop_frac": 1385.613698630137
       }
@@ -72772,6 +73628,7 @@
     "timeline": [
       {
         "city": "Andravida",
+        "key": "stadester-Amaliada-Greece",
         "start": "1205.9.1",
         "start_frac": 1205.6602739726027,
         "stop": "1261.7.25",
@@ -73121,10 +73978,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Valletta",
-        "key": "stadester-Valletta-Malta",
+        "city": "Rhodes",
+        "key": "stadester-Rhodes-Greece",
         "start": "1310.8.15",
         "start_frac": 1310.6164383561643,
+        "stop": "1522.12.22",
+        "stop_frac": 1522.964383561644
+      },
+      {
+        "city": "Valletta",
+        "key": "stadester-Valletta-Malta",
+        "start": "1522.12.22",
+        "start_frac": 1522.964383561644,
         "stop": "1798.6.12",
         "stop_frac": 1798.4438356164383
       }
@@ -74379,6 +75244,7 @@
     "timeline": [
       {
         "city": "Lunawada",
+        "key": "ghsl-Lunavada-India",
         "start": "1435.1.1",
         "start_frac": 1435.0027397260274,
         "stop": "1827.1.1",
@@ -74566,6 +75432,7 @@
     "timeline": [
       {
         "city": "Trowulan",
+        "key": "stadester-Mojokerto-Indonesia",
         "start": "1293.11.12",
         "start_frac": 1293.854794520548,
         "stop": "1518.1.1",
@@ -74620,6 +75487,7 @@
     "timeline": [
       {
         "city": "Makrai",
+        "key": "stadester-Makrai-India",
         "start": "1664.1.1",
         "start_frac": 1664.0027397260274,
         "stop": "1751.1.1",
@@ -74684,6 +75552,7 @@
     "timeline": [
       {
         "city": "Malpur",
+        "key": "ghsl-Modasa-India",
         "start": "1467.1.1",
         "start_frac": 1467.0027397260274,
         "stop": "1802.1.1",
@@ -74748,7 +75617,7 @@
     "timeline": [
       {
         "city": "Mora",
-        "key": "stadester-Mora-Sweden",
+        "key": "stadester-Mora-Cameroon",
         "start": "1460.1.1",
         "start_frac": 1460.0027397260274,
         "stop": "1501.1.1",
@@ -74761,6 +75630,7 @@
     "timeline": [
       {
         "city": "Mandi",
+        "key": "stadester-Mandi-India",
         "start": "1291.1.1",
         "start_frac": 1291.0027397260274,
         "stop": "1802.1.1",
@@ -74997,6 +75867,7 @@
     "timeline": [
       {
         "city": "Diyarbakır",
+        "key": "stadester-Diyarbakir-Turkey",
         "start": "984.1.1",
         "start_frac": 984.0027397260274,
         "stop": "1086.1.1",
@@ -75009,6 +75880,7 @@
     "timeline": [
       {
         "city": "Kota Gede",
+        "key": "stadester-Yogyakarta-Indonesia",
         "start": "1587.1.1",
         "start_frac": 1587.0027397260274,
         "stop": "1613.1.1",
@@ -75016,6 +75888,7 @@
       },
       {
         "city": "Karta",
+        "key": "stadester-Yogyakarta-Indonesia",
         "start": "1613.1.1",
         "start_frac": 1613.0027397260274,
         "stop": "1646.1.1",
@@ -75031,6 +75904,7 @@
       },
       {
         "city": "Kartasura",
+        "key": "stadester-Surakarta-Indonesia",
         "start": "1680.1.1",
         "start_frac": 1680.0027397260274,
         "stop": "1745.2.17",
@@ -75501,10 +76375,50 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Beijing",
-        "key": "stadester-Beijing-China",
+        "city": "Nanjing",
+        "key": "stadester-Nanjing-China",
         "start": "1369.1.1",
         "start_frac": 1369.0027397260274,
+        "stop": "1421.1.1",
+        "stop_frac": 1421.0027397260274
+      },
+      {
+        "city": "Beijing",
+        "key": "stadester-Beijing-China",
+        "start": "1421.1.1",
+        "start_frac": 1421.0027397260274,
+        "stop": "1644.4.25",
+        "stop_frac": 1644.3150684931506
+      },
+      {
+        "city": "Nanjing",
+        "key": "stadester-Nanjing-China",
+        "start": "1644.4.25",
+        "start_frac": 1644.3150684931506,
+        "stop": "1645.6.8",
+        "stop_frac": 1645.4328767123288
+      },
+      {
+        "city": "Fuzhou",
+        "key": "stadester-Fuzhou-China",
+        "start": "1645.6.8",
+        "start_frac": 1645.4328767123288,
+        "stop": "1646.10.6",
+        "stop_frac": 1646.7561643835616
+      },
+      {
+        "city": "Zhaoqing",
+        "key": "stadester-Zhaoqing-China",
+        "start": "1646.10.6",
+        "start_frac": 1646.7561643835616,
+        "stop": "1662.6.1",
+        "stop_frac": 1662.4136986301369
+      },
+      {
+        "city": "Tainan",
+        "key": "stadester-Tainan-Taiwan",
+        "start": "1662.6.1",
+        "start_frac": 1662.4136986301369,
         "stop": "1664.1.1",
         "stop_frac": 1664.0027397260274
       }
@@ -75996,10 +76910,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Karakorum",
-        "key": "stadester-Kharkhorin-Mongolia",
+        "city": "Avraga",
+        "key": "stadester-Avraga-Mongolia",
         "start": "1207.1.1",
         "start_frac": 1207.0027397260274,
+        "stop": "1235.1.1",
+        "stop_frac": 1235.0027397260274
+      },
+      {
+        "city": "Karakorum",
+        "key": "stadester-Kharkhorin-Mongolia",
+        "start": "1235.1.1",
+        "start_frac": 1235.0027397260274,
         "stop": "1261.1.1",
         "stop_frac": 1261.0027397260274
       }
@@ -76201,8 +77123,8 @@
         "key": "stadester-Delhi-India",
         "start": "1648.1.1",
         "start_frac": 1648.0027397260274,
-        "stop": "1857.9.21",
-        "stop_frac": 1857.7150684931507
+        "stop": "1859.1.1",
+        "stop_frac": 1859.0027397260274
       }
     ]
   },
@@ -76336,6 +77258,7 @@
     "timeline": [
       {
         "city": "Mayurakhandi",
+        "key": "ghsl-Nashik-India",
         "start": "754.1.1",
         "start_frac": 754.0027397260274,
         "stop": "814.1.1",
@@ -77498,10 +78421,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Astana",
-        "key": "stadester-Astana-Kazakhstan",
+        "city": "Almaty",
+        "key": "stadester-Almaty-Kazakhstan",
         "start": "1991.12.16",
         "start_frac": 1991.9479452054795,
+        "stop": "1997.12.10",
+        "stop_frac": 1997.9315068493152
+      },
+      {
+        "city": "Astana",
+        "key": "stadester-Astana-Kazakhstan",
+        "start": "1997.12.10",
+        "start_frac": 1997.9315068493152,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -77735,10 +78666,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Lilongwe",
-        "key": "stadester-Lilongwe-Malawi",
+        "city": "Zomba",
+        "key": "stadester-Zomba-Malawi",
         "start": "1964.7.6",
         "start_frac": 1964.509589041096,
+        "stop": "1975.1.1",
+        "stop_frac": 1975.0027397260274
+      },
+      {
+        "city": "Lilongwe",
+        "key": "stadester-Lilongwe-Malawi",
+        "start": "1975.1.1",
+        "start_frac": 1975.0027397260274,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -78645,6 +79584,14 @@
         "key": "stadester-Rio de Janeiro-Brazil",
         "start": "1889.11.15",
         "start_frac": 1889.86301369863,
+        "stop": "1960.4.21",
+        "stop_frac": 1960.304109589041
+      },
+      {
+        "city": "Brasília",
+        "key": "stadester-Brasilia-Brazil",
+        "start": "1960.4.21",
+        "start_frac": 1960.304109589041,
         "stop": "1967.1.24",
         "stop_frac": 1967.0657534246575
       }
@@ -79504,6 +80451,14 @@
         "key": "stadester-Milano-Italy",
         "start": "286.1.1",
         "start_frac": 286.0027397260274,
+        "stop": "330.5.11",
+        "stop_frac": 330.35890410958905
+      },
+      {
+        "city": "Constantinople",
+        "key": "stadester-Istanbul-Turkey",
+        "start": "330.5.11",
+        "start_frac": 330.35890410958905,
         "stop": "395.1.17",
         "stop_frac": 395.04657534246576
       }
@@ -79660,6 +80615,7 @@
     "timeline": [
       {
         "city": "Karakorum",
+        "key": "stadester-Kharkhorin-Mongolia",
         "start": "1371.1.1",
         "start_frac": 1371.0027397260274,
         "stop": "1636.1.1",
@@ -81785,11 +82741,36 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ctesiphon",
+        "city": "Istakhr",
+        "key": "stadester-Marvdasht-Iran",
         "start": "224.4.28",
         "start_frac": 224.3232876712329,
+        "stop": "226.4.28",
+        "stop_frac": 226.3232876712329
+      },
+      {
+        "city": "Ctesiphon",
+        "key": "stadester-Ctesiphon-Iraq",
+        "start": "226.4.28",
+        "start_frac": 226.3232876712329,
+        "stop": "637.3.1",
+        "stop_frac": 637.1671232876712
+      },
+      {
+        "city": "Merv",
+        "key": "stadester-Mary-Turkmenistan",
+        "start": "637.3.1",
+        "start_frac": 637.1671232876712,
         "stop": "651.1.1",
         "stop_frac": 651.0027397260274
+      },
+      {
+        "city": "Zaranj",
+        "key": "stadester-Zaranj-Afghanistan",
+        "start": "651.1.1",
+        "start_frac": 651.0027397260274,
+        "stop": "671.1.1",
+        "stop_frac": 671.0027397260274
       }
     ]
   },
@@ -82213,6 +83194,30 @@
         "key": "stadester-Madrid-Spain",
         "start": "1931.4.14",
         "start_frac": 1931.2849315068493,
+        "stop": "1936.11.6",
+        "stop_frac": 1936.8383561643836
+      },
+      {
+        "city": "Valencia",
+        "key": "stadester-Valencia-Spain",
+        "start": "1936.11.6",
+        "start_frac": 1936.8383561643836,
+        "stop": "1937.10.31",
+        "stop_frac": 1937.8246575342466
+      },
+      {
+        "city": "Barcelona",
+        "key": "stadester-Barcelona-Spain",
+        "start": "1937.10.31",
+        "start_frac": 1937.8246575342466,
+        "stop": "1939.1.26",
+        "stop_frac": 1939.0712328767124
+      },
+      {
+        "city": "Madrid",
+        "key": "stadester-Madrid-Spain",
+        "start": "1939.1.26",
+        "start_frac": 1939.0712328767124,
         "stop": "1939.4.1",
         "stop_frac": 1939.2493150684932
       }
@@ -82300,8 +83305,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Kuala Lumpur",
-        "key": "stadester-Kuala Lumpur-Malaysia",
+        "city": "Kuala Selangor",
+        "key": "stadester-Kuala-Selangor-Malaysia",
         "start": "1744.1.1",
         "start_frac": 1744.0027397260274,
         "stop": "1874.1.20",
@@ -82355,10 +83360,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Antakya",
-        "key": "stadester-Hatay-Turkey",
+        "city": "Seleucia",
+        "key": "stadester-Seleucia-Iraq",
         "start": "-313.1.1",
         "start_frac": -312.9972602739726,
+        "stop": "-300.1.1",
+        "stop_frac": -299.9972602739726
+      },
+      {
+        "city": "Antakya",
+        "key": "stadester-Hatay-Turkey",
+        "start": "-300.1.1",
+        "start_frac": -299.9972602739726,
         "stop": "-82.1.1",
         "stop_frac": -81.9972602739726
       }
@@ -82507,6 +83520,7 @@
     "timeline": [
       {
         "city": "Balasagun",
+        "key": "stadester-Tokmok-Kyrgyzstan",
         "start": "1125.1.1",
         "start_frac": 1125.0027397260274,
         "stop": "1219.1.1",
@@ -82567,6 +83581,7 @@
     "timeline": [
       {
         "city": "Al-Hasa",
+        "key": "stadester-Hufûf-Saudi Arabia",
         "start": "900.1.1",
         "start_frac": 900.0027397260274,
         "stop": "1079.1.1",
@@ -82722,6 +83737,7 @@
     "timeline": [
       {
         "city": "Raghogarh",
+        "key": "stadester-Guna-India",
         "start": "1674.1.1",
         "start_frac": 1674.0027397260274,
         "stop": "1819.1.1",
@@ -82763,6 +83779,7 @@
     "timeline": [
       {
         "city": "Rairakhol",
+        "key": "stadester-Sambalpur-India",
         "start": "1751.1.1",
         "start_frac": 1751.0027397260274,
         "stop": "1802.1.1",
@@ -82905,6 +83922,7 @@
     "timeline": [
       {
         "city": "Ranasan",
+        "key": "stadester-Himmatnagar-India",
         "start": "1651.1.1",
         "start_frac": 1651.0027397260274,
         "stop": "1802.1.1",
@@ -82917,6 +83935,7 @@
     "timeline": [
       {
         "city": "Ranpur",
+        "key": "stadester-Ranpur-India",
         "start": "1308.1.1",
         "start_frac": 1308.0027397260274,
         "stop": "1804.1.1",
@@ -82941,10 +83960,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Anyang",
-        "key": "stadester-Anyang-China",
+        "city": "Zhengzhou",
+        "key": "stadester-Zhengzhou-China",
         "start": "-1599.1.1",
         "start_frac": -1598.9972602739726,
+        "stop": "-1300.1.1",
+        "stop_frac": -1299.9972602739726
+      },
+      {
+        "city": "Anyang",
+        "key": "stadester-Anyang-China",
+        "start": "-1300.1.1",
+        "start_frac": -1299.9972602739726,
         "stop": "-1045.1.1",
         "stop_frac": -1044.9972602739726
       }
@@ -82994,6 +84021,7 @@
     "timeline": [
       {
         "city": "Sa'dah",
+        "key": "ghsl-Sa`dah-Yemen",
         "start": "898.1.1",
         "start_frac": 898.0027397260274,
         "stop": "1063.1.1",
@@ -84304,8 +85332,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Bratislava",
-        "key": "stadester-Bratislava-Slovakia",
+        "city": "Prešov",
+        "key": "stadester-Presov-Slovakia",
         "start": "1919.6.16",
         "start_frac": 1919.454794520548,
         "stop": "1919.6.25",
@@ -84586,10 +85614,50 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Austin",
-        "key": "stadester-Austin-United States",
+        "city": "Washington-on-the-Brazos",
+        "key": "stadester-Washington-United States",
         "start": "1836.3.2",
         "start_frac": 1836.1698630136987,
+        "stop": "1836.10.22",
+        "stop_frac": 1836.8
+      },
+      {
+        "city": "Columbia",
+        "key": "stadester-West-Columbia-United States",
+        "start": "1836.10.22",
+        "start_frac": 1836.8,
+        "stop": "1837.4.19",
+        "stop_frac": 1837.2986301369863
+      },
+      {
+        "city": "Houston",
+        "key": "stadester-Houston-United States",
+        "start": "1837.4.19",
+        "start_frac": 1837.2986301369863,
+        "stop": "1839.10.1",
+        "stop_frac": 1839.7424657534248
+      },
+      {
+        "city": "Austin",
+        "key": "stadester-Austin-United States",
+        "start": "1839.10.1",
+        "start_frac": 1839.7424657534248,
+        "stop": "1842.3.5",
+        "stop_frac": 1842.1780821917807
+      },
+      {
+        "city": "Houston",
+        "key": "stadester-Houston-United States",
+        "start": "1842.3.5",
+        "start_frac": 1842.1780821917807,
+        "stop": "1845.7.4",
+        "stop_frac": 1845.504109589041
+      },
+      {
+        "city": "Austin",
+        "key": "stadester-Austin-United States",
+        "start": "1845.7.4",
+        "start_frac": 1845.504109589041,
         "stop": "1845.12.29",
         "stop_frac": 1845.9835616438356
       }
@@ -85212,10 +86280,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Esfahân",
-        "key": "stadester-Esfahân-Iran",
+        "city": "Tabriz",
+        "key": "stadester-Tabriz-Iran",
         "start": "1502.1.1",
         "start_frac": 1502.0027397260274,
+        "stop": "1555.5.29",
+        "stop_frac": 1555.4082191780822
+      },
+      {
+        "city": "Qazvin",
+        "key": "stadester-Qazvin-Iran",
+        "start": "1555.5.29",
+        "start_frac": 1555.4082191780822,
+        "stop": "1598.1.1",
+        "stop_frac": 1598.0027397260274
+      },
+      {
+        "city": "Esfahân",
+        "key": "stadester-Esfahân-Iran",
+        "start": "1598.1.1",
+        "start_frac": 1598.0027397260274,
         "stop": "1736.1.22",
         "stop_frac": 1736.0602739726028
       }
@@ -86119,6 +87203,14 @@
         "key": "stadester-Xian-China",
         "start": "582.1.1",
         "start_frac": 582.0027397260274,
+        "stop": "605.1.1",
+        "stop_frac": 605.0027397260274
+      },
+      {
+        "city": "Luoyang",
+        "key": "stadester-Luoyang-China",
+        "start": "605.1.1",
+        "start_frac": 605.0027397260274,
         "stop": "618.6.18",
         "stop_frac": 618.4602739726027
       }
@@ -87055,6 +88147,14 @@
         "key": "stadester-Beograd-Serbia",
         "start": "1403.1.1",
         "start_frac": 1403.0027397260274,
+        "stop": "1427.7.19",
+        "stop_frac": 1427.545205479452
+      },
+      {
+        "city": "Smederevo",
+        "key": "stadester-Smederevo-Serbia",
+        "start": "1427.7.19",
+        "start_frac": 1427.545205479452,
         "stop": "1459.6.20",
         "stop_frac": 1459.4657534246576
       }
@@ -87419,6 +88519,22 @@
         "key": "stadester-Xian-China",
         "start": "1644.3.1",
         "start_frac": 1644.1671232876713,
+        "stop": "1644.4.25",
+        "stop_frac": 1644.3150684931506
+      },
+      {
+        "city": "Beijing",
+        "key": "stadester-Beijing-China",
+        "start": "1644.4.25",
+        "start_frac": 1644.3150684931506,
+        "stop": "1644.6.4",
+        "stop_frac": 1644.4219178082192
+      },
+      {
+        "city": "Chang'an",
+        "key": "stadester-Xian-China",
+        "start": "1644.6.4",
+        "start_frac": 1644.4219178082192,
         "stop": "1645.10.1",
         "stop_frac": 1645.7424657534248
       }
@@ -88813,10 +89929,34 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Xi'an",
+        "city": "Chang'an",
         "key": "stadester-Xi'an-China",
         "start": "618.6.18",
         "start_frac": 618.4602739726027,
+        "stop": "684.1.1",
+        "stop_frac": 684.0027397260274
+      },
+      {
+        "city": "Luoyang",
+        "key": "stadester-Luoyang-China",
+        "start": "684.1.1",
+        "start_frac": 684.0027397260274,
+        "stop": "705.2.21",
+        "stop_frac": 705.1397260273973
+      },
+      {
+        "city": "Chang'an",
+        "key": "stadester-Xi'an-China",
+        "start": "705.2.21",
+        "start_frac": 705.1397260273973,
+        "stop": "904.1.1",
+        "stop_frac": 904.0027397260274
+      },
+      {
+        "city": "Luoyang",
+        "key": "stadester-Luoyang-China",
+        "start": "904.1.1",
+        "start_frac": 904.0027397260274,
         "stop": "907.6.1",
         "stop_frac": 907.413698630137
       }
@@ -90214,6 +91354,30 @@
         "key": "stadester-Delhi-India",
         "start": "1198.1.1",
         "start_frac": 1198.0027397260274,
+        "stop": "1327.1.1",
+        "stop_frac": 1327.0027397260274
+      },
+      {
+        "city": "Daulatabad",
+        "key": "stadester-Daulatabad-India",
+        "start": "1327.1.1",
+        "start_frac": 1327.0027397260274,
+        "stop": "1335.1.1",
+        "stop_frac": 1335.0027397260274
+      },
+      {
+        "city": "Delhi",
+        "key": "stadester-Delhi-India",
+        "start": "1335.1.1",
+        "start_frac": 1335.0027397260274,
+        "stop": "1504.1.1",
+        "stop_frac": 1504.0027397260274
+      },
+      {
+        "city": "Agra",
+        "key": "stadester-Agra-India",
+        "start": "1504.1.1",
+        "start_frac": 1504.0027397260274,
         "stop": "1527.1.1",
         "stop_frac": 1527.0027397260274
       }
@@ -90567,19 +91731,20 @@
     "acapital": false,
     "timeline": [
       {
+        "city": "Lifau",
+        "key": "stadester-Lifau-East Timor",
+        "start": "1521.1.1",
+        "start_frac": 1521.0027397260274,
+        "stop": "1769.1.1",
+        "stop_frac": 1769.0027397260274
+      },
+      {
         "city": "Dili",
         "key": "stadester-Dili-East Timor",
         "start": "1769.1.1",
         "start_frac": 1769.0027397260274,
         "stop": "1975.11.28",
         "stop_frac": 1975.8986301369864
-      },
-      {
-        "city": "Lifau",
-        "start": "1521.1.1",
-        "start_frac": 1521.0027397260274,
-        "stop": "1769.1.1",
-        "stop_frac": 1769.0027397260274
       }
     ]
   },
@@ -90666,6 +91831,7 @@
     "timeline": [
       {
         "city": "Dungannon",
+        "key": "stadester-Armagh-UK",
         "start": "1186.1.1",
         "start_frac": 1186.0027397260274,
         "stop": "1608.1.1",
@@ -90764,7 +91930,7 @@
     "timeline": [
       {
         "city": "Taman",
-        "key": "stadester-Taman-Indonesia",
+        "key": "stadester-Taman-Russia",
         "start": "1133.1.1",
         "start_frac": 1133.0027397260274,
         "stop": "1170.1.1",
@@ -90777,6 +91943,7 @@
     "timeline": [
       {
         "city": "Walale",
+        "key": "stadester-Addis Ababa-Ethiopia",
         "start": "897.1.1",
         "start_frac": 897.0027397260274,
         "stop": "1286.1.1",
@@ -91052,6 +92219,7 @@
     "timeline": [
       {
         "city": "Tori Fatehpur",
+        "key": "stadester-Fatehpur-India",
         "start": "1813.1.1",
         "start_frac": 1813.0027397260274,
         "stop": "1950.1.1",
@@ -91194,6 +92362,7 @@
     "timeline": [
       {
         "city": "Surgana",
+        "key": "stadester-Surgana-India",
         "start": "1751.1.1",
         "start_frac": 1751.0027397260274,
         "stop": "1819.1.1",
@@ -91258,6 +92427,7 @@
     "timeline": [
       {
         "city": "Aydın",
+        "key": "stadester-Aydin-Turkey",
         "start": "-699.1.1",
         "start_frac": -698.9972602739726,
         "stop": "-559.1.1",
@@ -91645,8 +92815,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Nishapur",
-        "key": "stadester-Nishapur-Iran",
+        "city": "Rada'a",
+        "key": "stadester-Rada-Yemen",
         "start": "1444.1.1",
         "start_frac": 1444.0027397260274,
         "stop": "1517.1.1",
@@ -92625,8 +93795,8 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Kyiv",
-        "key": "ghsl-Kyiv-Ukraine",
+        "city": "Kharkiv",
+        "key": "stadester-Kharkiv-Ukraine",
         "start": "1919.3.10",
         "start_frac": 1919.1917808219177,
         "stop": "1922.12.30",
@@ -93431,10 +94601,82 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Washington",
-        "key": "stadester-Washington-United States",
+        "city": "Philadelphia",
+        "key": "stadester-Philadelphia-United States",
         "start": "1776.7.4",
         "start_frac": 1776.504109589041,
+        "stop": "1777.9.18",
+        "stop_frac": 1777.7068493150684
+      },
+      {
+        "city": "Lancaster",
+        "key": "stadester-Lancaster-United States",
+        "start": "1777.9.18",
+        "start_frac": 1777.7068493150684,
+        "stop": "1777.9.27",
+        "stop_frac": 1777.731506849315
+      },
+      {
+        "city": "York",
+        "key": "stadester-York-United States",
+        "start": "1777.9.30",
+        "start_frac": 1777.7397260273972,
+        "stop": "1778.6.27",
+        "stop_frac": 1778.4849315068493
+      },
+      {
+        "city": "Philadelphia",
+        "key": "stadester-Philadelphia-United States",
+        "start": "1778.7.2",
+        "start_frac": 1778.4986301369863,
+        "stop": "1783.6.21",
+        "stop_frac": 1783.468493150685
+      },
+      {
+        "city": "Princeton",
+        "key": "stadester-Princeton-United States",
+        "start": "1783.6.30",
+        "start_frac": 1783.4931506849316,
+        "stop": "1783.11.4",
+        "stop_frac": 1783.8328767123287
+      },
+      {
+        "city": "Annapolis",
+        "key": "stadester-Annapolis-United States",
+        "start": "1783.11.26",
+        "start_frac": 1783.8931506849315,
+        "stop": "1784.8.13",
+        "stop_frac": 1784.6109589041096
+      },
+      {
+        "city": "Trenton",
+        "key": "stadester-Trenton-United States",
+        "start": "1784.11.1",
+        "start_frac": 1784.8246575342466,
+        "stop": "1784.12.24",
+        "stop_frac": 1784.9698630136986
+      },
+      {
+        "city": "New York",
+        "key": "stadester-New York-United States",
+        "start": "1785.1.11",
+        "start_frac": 1785.0301369863014,
+        "stop": "1790.12.5",
+        "stop_frac": 1790.9178082191781
+      },
+      {
+        "city": "Philadelphia",
+        "key": "stadester-Philadelphia-United States",
+        "start": "1790.12.6",
+        "start_frac": 1790.9205479452055,
+        "stop": "1800.11.17",
+        "stop_frac": 1800.868493150685
+      },
+      {
+        "city": "Washington",
+        "key": "stadester-Washington-United States",
+        "start": "1800.11.17",
+        "start_frac": 1800.868493150685,
         "stop": "2026.1.1",
         "stop_frac": 2026.0027397260274
       }
@@ -95123,6 +96365,7 @@
     "timeline": [
       {
         "city": "Hampi",
+        "key": "stadester-Vijayanagara-India",
         "start": "1336.1.1",
         "start_frac": 1336.0027397260274,
         "stop": "1565.1.26",
@@ -95130,6 +96373,7 @@
       },
       {
         "city": "Penukonda",
+        "key": "stadester-Penukonda-India",
         "start": "1565.1.26",
         "start_frac": 1565.0712328767124,
         "stop": "1592.1.1",
@@ -95137,10 +96381,19 @@
       },
       {
         "city": "Chandragiri",
+        "key": "stadester-Chandragiri-India",
         "start": "1592.1.1",
         "start_frac": 1592.0027397260274,
-        "stop": "1646.1.1",
-        "stop_frac": 1646.0027397260274
+        "stop": "1604.1.1",
+        "stop_frac": 1604.0027397260274
+      },
+      {
+        "city": "Vellore",
+        "key": "stadester-Vellore-India",
+        "start": "1604.1.1",
+        "start_frac": 1604.0027397260274,
+        "stop": "1647.1.1",
+        "stop_frac": 1647.0027397260274
       }
     ]
   },
@@ -95317,10 +96570,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Ravenna",
-        "key": "stadester-Ravenna-Italy",
+        "city": "Milano",
+        "key": "stadester-Milano-Italy",
         "start": "395.1.17",
         "start_frac": 395.04657534246576,
+        "stop": "402.1.1",
+        "stop_frac": 402.0027397260274
+      },
+      {
+        "city": "Ravenna",
+        "key": "stadester-Ravenna-Italy",
+        "start": "402.1.1",
+        "start_frac": 402.0027397260274,
         "stop": "476.9.4",
         "stop_frac": 476.6684931506849
       }
@@ -95950,10 +97211,18 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Paris",
-        "key": "stadester-Paris-France",
+        "city": "Compiègne",
+        "key": "stadester-Compiegne-France",
         "start": "843.9.1",
         "start_frac": 843.6602739726028,
+        "stop": "877.10.6",
+        "stop_frac": 877.7561643835617
+      },
+      {
+        "city": "Laon",
+        "key": "stadester-Laon-France",
+        "start": "877.10.6",
+        "start_frac": 877.7561643835617,
         "stop": "987.7.3",
         "stop_frac": 987.5013698630137
       }
@@ -96094,6 +97363,7 @@
     "timeline": [
       {
         "city": "Malkhed",
+        "key": "stadester-Manyakheta-India",
         "start": "974.1.1",
         "start_frac": 974.0027397260274,
         "stop": "1042.1.1",
@@ -96101,6 +97371,7 @@
       },
       {
         "city": "Basavakalyan",
+        "key": "ghsl-Basavakalyana-India",
         "start": "1042.1.1",
         "start_frac": 1042.0027397260274,
         "stop": "1190.1.1",
@@ -96657,10 +97928,42 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Beijing",
-        "key": "stadester-Beijing-China",
+        "city": "Shangdu",
+        "key": "stadester-Xilinhot-China",
         "start": "1261.1.1",
         "start_frac": 1261.0027397260274,
+        "stop": "1272.1.1",
+        "stop_frac": 1272.0027397260274
+      },
+      {
+        "city": "Khanbaliq",
+        "key": "stadester-Beijing-China",
+        "start": "1272.1.1",
+        "start_frac": 1272.0027397260274,
+        "stop": "1368.9.14",
+        "stop_frac": 1368.695890410959
+      },
+      {
+        "city": "Shangdu",
+        "key": "stadester-Xilinhot-China",
+        "start": "1368.9.14",
+        "start_frac": 1368.695890410959,
+        "stop": "1369.6.1",
+        "stop_frac": 1369.4136986301369
+      },
+      {
+        "city": "Yingchang",
+        "key": "stadester-Chifeng-China",
+        "start": "1369.6.1",
+        "start_frac": 1369.4136986301369,
+        "stop": "1370.6.10",
+        "stop_frac": 1370.4383561643835
+      },
+      {
+        "city": "Karakorum",
+        "key": "stadester-Kharkhorin-Mongolia",
+        "start": "1370.6.10",
+        "start_frac": 1370.4383561643835,
         "stop": "1371.1.1",
         "stop_frac": 1371.0027397260274
       }
@@ -97025,6 +98328,14 @@
         "key": "stadester-Xi-an-China",
         "start": "-1045.1.1",
         "start_frac": -1044.9972602739726,
+        "stop": "-771.1.1",
+        "stop_frac": -770.9972602739726
+      },
+      {
+        "city": "Luoyang",
+        "key": "stadester-Luoyang-China",
+        "start": "-771.1.1",
+        "start_frac": -770.9972602739726,
         "stop": "-248.1.1",
         "stop_frac": -247.9972602739726
       }
@@ -97336,10 +98647,26 @@
     "acapital": false,
     "timeline": [
       {
-        "city": "Istanbul",
+        "city": "Constantinople",
         "key": "stadester-Istanbul-Turkey",
         "start": "610.10.5",
         "start_frac": 610.7534246575342,
+        "stop": "1204.4.13",
+        "stop_frac": 1204.282191780822
+      },
+      {
+        "city": "Nicaea",
+        "key": "stadester-Iznik-Turkey",
+        "start": "1204.4.13",
+        "start_frac": 1204.282191780822,
+        "stop": "1261.7.25",
+        "stop_frac": 1261.5616438356165
+      },
+      {
+        "city": "Constantinople",
+        "key": "stadester-Istanbul-Turkey",
+        "start": "1261.7.25",
+        "start_frac": 1261.5616438356165,
         "stop": "1453.7.1",
         "stop_frac": 1453.495890410959
       }
@@ -97629,6 +98956,30 @@
         "key": "stadester-Roma-Italy",
         "start": "1871.2.3",
         "start_frac": 1871.0904109589042,
+        "stop": "1943.9.9",
+        "stop_frac": 1943.682191780822
+      },
+      {
+        "city": "Brindisi",
+        "key": "stadester-Brindisi-Italy",
+        "start": "1943.9.9",
+        "start_frac": 1943.682191780822,
+        "stop": "1944.2.11",
+        "stop_frac": 1944.1123287671232
+      },
+      {
+        "city": "Salerno",
+        "key": "stadester-Salerno-Italy",
+        "start": "1944.2.11",
+        "start_frac": 1944.1123287671232,
+        "stop": "1944.6.4",
+        "stop_frac": 1944.4219178082192
+      },
+      {
+        "city": "Rome",
+        "key": "stadester-Roma-Italy",
+        "start": "1944.6.4",
+        "start_frac": 1944.4219178082192,
         "stop": "1946.6.10",
         "stop_frac": 1946.4383561643835
       }

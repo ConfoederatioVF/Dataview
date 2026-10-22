@@ -2346,13 +2346,13 @@ export class AtlasBordersService {
    * @param {number} arg1_year_frac
    * @param {string} [arg2_entity_name]
    *
-   * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean }}
+   * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number }}
    */
   static getStateCapitalInfo (
     arg0_state_id: number,
     arg1_year_frac: number,
     arg2_entity_name?: string
-  ): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean } {
+  ): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number } {
     return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name)
   }
 

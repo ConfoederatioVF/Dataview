@@ -479,19 +479,19 @@ TIMELINE:
 STATE: [2039] Cooch Behar State (Princely State) (1765.12.8 -> 1950.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1765.12.8 -> 1950.1.1: Verdun [stadester-Verdun-France]
+  1765.12.8 -> 1950.1.1: Cooch Behar [stadester-Koch-Bihar-India]
 ---
 
 STATE: [2040] Cook Islands Federation (1894.1.1 -> 1902.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1894.1.1 -> 1902.1.1: Silves [stadester-Silves-Portugal]
+  1894.1.1 -> 1902.1.1: Avarua [stadester-Avarua-Cook Islands]
 ---
 
 STATE: [2041] Co-operative Republic of Guyana (1970.2.23 -> 2026.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1970.2.23 -> 2026.1.1: Novara [stadester-Novara-Italy]
+  1970.2.23 -> 2026.1.1: Georgetown [stadester-Georgetown-Guyana]
 ---
 
 STATE: [2042] Copán (451.1.1 -> 831.1.1) [fill: #D1453B]
@@ -527,7 +527,7 @@ TIMELINE:
 STATE: [2047] Cornelis Kok's Land (1824.6.1 -> 1858.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1824.6.1 -> 1858.1.1: Orléans [stadester-Orléans-France]
+  1824.6.1 -> 1858.1.1: Campbell [stadester-Campbell-South Africa]
 ---
 
 STATE: [2048] Cornouaille (501.1.1 -> 579.1.1) [fill: #E0A348]
@@ -1526,7 +1526,7 @@ REASON: Kandyan royal army military occupation in Portuguese coastal forts
 STATE: [2216] Despotate of Argolid, Corinthia and Central Greece (1204.10.1 -> 1206.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1204.10.1 -> 1206.1.1: Chieri [stadester-Chieri-Italy]
+  1204.10.1 -> 1206.1.1: Corinth [stadester-Korinthos-Greece]
 ---
 
 STATE: [2217] Kazan Khanate (Military Occupation) (1506.1.1 -> 1542.2.1) [fill: #AEC76D]
@@ -1542,8 +1542,8 @@ REASON: Khivan armed forces military operational theater in Khwarazm
 STATE: [2219] Despotate of Epirus (1205.9.1 -> 1412.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1205.9.1 -> 1318.1.1: Alkmaar [stadester-Alkmaar-Netherlands]
-  1318.1.1 -> 1412.1.1: Issoudun [stadester-Issoudun-France]
+  1205.9.1 -> 1318.1.1: Arta [stadester-Arta-Greece]
+  1318.1.1 -> 1412.1.1: Ioannina [stadester-Ioannina-Greece]
 ---
 
 STATE: [2220] Despotate of Morea (1453.5.29 -> 1460.5.31) [fill: #EBBCC5]
@@ -1773,13 +1773,13 @@ TIMELINE:
 STATE: [2258] Kingdom of Makuria (Mamluk) (1266.1.1 -> 1318.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1266.1.1 -> 1318.1.1: Guantánamo [stadester-Guantánamo (agglom./municip.)-Cuba]
+  1266.1.1 -> 1318.1.1: Dongola [stadester-Dongola-Sudan]
 ---
 
 STATE: [2259] Diocletian: East (286.1.1 -> 306.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  286.1.1 -> 306.1.1: Jaén [stadester-Jaén-Spain]
+  286.1.1 -> 306.1.1: Nicomedia [stadester-Izmit-Turkey]
 ---
 
 STATE: [2260] Dion (Chalkidike) (-699.1.1 -> -477.1.1) [fill: #9CBED9]
@@ -2213,14 +2213,14 @@ TIMELINE:
 STATE: [2332] Duchy of Amalfi (955.1.1 -> 1132.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  955.1.1 -> 1132.1.1: Ancona [stadester-Ancona-Italy]
+  955.1.1 -> 1132.1.1: Amalfi [stadester-Amalfi-Italy]
 ---
 
 STATE: [2333] Duchy of Apulia and Calabria (1059.8.25 -> 1128.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
   1059.8.25 -> 1077.1.1: Melfi [stadester-Melfi-Italy]
-  1077.1.1 -> 1128.1.1: Santander [stadester-Santander-Spain]
+  1077.1.1 -> 1128.1.1: Salerno [stadester-Salerno-Italy]
 ---
 
 STATE: [2334] Duchy of Athens (1261.7.25 -> 1445.1.1) [fill: #E0A348]
@@ -2268,7 +2268,7 @@ TIMELINE:
 STATE: [2341] Duchy of Benevento (577.1.1 -> 730.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  577.1.1 -> 730.1.1: Beaucaire [stadester-Beaucaire-France]
+  577.1.1 -> 730.1.1: Benevento [stadester-Benevento-Italy]
 ---
 
 STATE: [2342] Kingdom of Rus' (1254.1.1 -> 1257.1.1) [fill: #405F85]
@@ -2304,7 +2304,7 @@ TIMELINE:
 STATE: [2347] Duchy of Courland and Semigallia (Germany) (1918.3.8 -> 1918.12.7) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1918.3.8 -> 1918.12.7: Mirabella Eclano [stadester-Mirabella Eclano-Italy]
+  1918.3.8 -> 1918.12.7: Mitau [stadester-Jelgava-Latvia]
 ---
 
 STATE: [2348] Kingdom of Tlemcen (Marinid Vassal) (1390.1.1 -> 1425.1.1) [fill: #E0A348]
@@ -2328,14 +2328,14 @@ TIMELINE:
 STATE: [2352] Duchy of Gaeta (840.1.1 -> 1141.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  840.1.1 -> 1141.1.1: Florence [stadester-Firenze-Italy]
+  840.1.1 -> 1141.1.1: Gaeta [stadester-Gaeta-Italy]
 ---
 
 STATE: [2353] Oudh State (Mughal Empire) (1733.1.1 -> 1816.6.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1733.1.1 -> 1775.1.1: Bâpatla [stadester-Bâpatla-India]
-  1775.1.1 -> 1816.6.1: Mâcon [stadester-Mâcon-France]
+  1733.1.1 -> 1775.1.1: Faizabad [stadester-Faizabad-India]
+  1775.1.1 -> 1816.6.1: Lucknow [stadester-Lucknow-India]
 ---
 
 STATE: [2354] Principality of Cooch Behar (Mughal Empire) (1601.1.1 -> 1681.1.1) [fill: #405F85]
@@ -2370,7 +2370,7 @@ TIMELINE:
 STATE: [2359] Duchy of Naples (764.1.1 -> 1137.10.30) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  764.1.1 -> 1137.10.30: Morcone [stadester-Morcone-Italy]
+  764.1.1 -> 1137.10.30: Naples [stadester-Napoli-Italy]
 ---
 
 STATE: [2360] Duchy of Neopatras (1320.1.1 -> 1391.1.1) [fill: #90A16A]
@@ -2387,13 +2387,13 @@ REASON: Bourbon Neapolitan military occupation forces in Sicily
 STATE: [2362] Kingdom of Albania (Anjou of Naples) (1272.2.21 -> 1384.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1272.2.21 -> 1384.1.1: Dreux [stadester-Dreux-France]
+  1272.2.21 -> 1384.1.1: Durazzo [stadester-Durres-Albania]
 ---
 
 STATE: [2363] Sicilian Dependencies in Albania (1272.1.1 -> 1272.2.21) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1272.1.1 -> 1272.2.21: Dreux [stadester-Dreux-France]
+  1272.1.1 -> 1272.2.21: Durazzo [stadester-Durres-Albania]
 ---
 
 STATE: [2364] Viscounty of Béarn (Union with Navarre) (1480.1.1 -> 1620.11.1) [fill: #944481]
@@ -2405,7 +2405,7 @@ TIMELINE:
 STATE: [2365] Duchy of Philippopolis (1204.10.1 -> 1230.3.9) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1204.10.1 -> 1230.3.9: Pôrto [stadester-Porto-Portugal]
+  1204.10.1 -> 1230.3.9: Philippopolis [stadester-Plovdiv-Bulgaria]
 ---
 
 STATE: [2366] Nepal (Military Occupation) (1789.1.1 -> 1856.3.24) [fill: #E0C25E]
@@ -2428,25 +2428,25 @@ TIMELINE:
 STATE: [2369] Duchy of Spoleto (571.1.1 -> 777.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  571.1.1 -> 777.1.1: St Mihiel [stadester-St Mihiel-France]
+  571.1.1 -> 777.1.1: Spoleto [stadester-Spoleto-Italy]
 ---
 
 STATE: [2370] Cape Colony (1652.4.6 -> 1806.1.18) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1652.4.6 -> 1806.1.18: Campobasso [stadester-Campobasso-Italy]
+  1652.4.6 -> 1806.1.18: Cape Town [stadester-Cape-Town-South Africa]
 ---
 
 STATE: [2371] Cayenne (Netherlands) (1659.1.1 -> 1664.5.15) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1659.1.1 -> 1664.5.15: Carlisle [stadester-Carlisle-United Kingdom]
+  1659.1.1 -> 1664.5.15: Cayenne [stadester-Cayenne-French Guiana]
 ---
 
 STATE: [2372] Dejima Factory (Netherlands) (1641.6.24 -> 1860.2.28) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1641.6.24 -> 1860.2.28: Montreux-Le Châtelard [stadester-Montreux-Switzerland]
+  1641.6.24 -> 1860.2.28: Nagasaki [stadester-Nagasaki-Japan]
 ---
 
 STATE: [2373] Duchy of the Archipelago (Achea) (1311.1.1 -> 1404.1.1) [fill: #B37B50]
@@ -2710,7 +2710,7 @@ REASON: Dutch States Army military operational command during European wars
 STATE: [2416] Kingdom of Great Britain (Dutch Republic) (1688.11.15 -> 1702.3.19) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1688.11.15 -> 1702.3.19: Macerata [stadester-Macerata-Italy]
+  1688.11.15 -> 1702.3.19: London [stadester-London-United Kingdom]
 ---
 
 STATE: [2417] East Indonesia (1947.1.1 -> 1950.1.1) [fill: #B5ABCC]
@@ -2728,7 +2728,7 @@ TIMELINE:
 STATE: [2419] East Timor (1975.11.28 -> 1979.4.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1975.11.28 -> 1979.4.1: Dax [stadester-Dax-France]
+  1975.11.28 -> 1979.4.1: Dili [stadester-Dili-Timor-Leste]
 ---
 
 STATE: [2420] East Ussuwi (1854.1.1 -> 1891.1.1) [fill: #944481]
@@ -2781,7 +2781,8 @@ REASON: Combined Tatar and Nogai cavalry raiding coalition across the Pontic ste
 STATE: [2428] Kingdom of England (Normandy) (1066.9.28 -> 1154.12.19) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1066.9.28 -> 1154.12.19: Macerata [stadester-Macerata-Italy]
+  1066.9.28 -> 1100.8.2: Winchester [stadester-Winchester-United Kingdom]
+  1100.8.2 -> 1154.12.19: London [stadester-London-United Kingdom]
 ---
 
 STATE: [2429] Greenland (Kingdom of Norway possession) (1262.1.1 -> 1541.1.1) [fill: #944481]
@@ -2799,19 +2800,19 @@ TIMELINE:
 STATE: [2431] Eastern Roman Empire (395.1.17 -> 610.10.5) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  395.1.17 -> 610.10.5: Cherbourg [stadester-Cherbourg-France]
+  395.1.17 -> 610.10.5: Constantinople [stadester-Istanbul-Turkey]
 ---
 
 STATE: [2432] Eastern Slavonia, Baranja and Western Syrmia (1995.9.1 -> 1998.1.15) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1995.9.1 -> 1998.1.15: Valognes [stadester-Valognes-France]
+  1995.9.1 -> 1998.1.15: Vukovar [stadester-Vukovar-Croatia]
 ---
 
 STATE: [2433] Eastern Slovak Republic (1918.12.11 -> 1918.12.29) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1918.12.11 -> 1918.12.29: Lentini [stadester-Lentini-Italy]
+  1918.12.11 -> 1918.12.29: Košice [stadester-Kosice-Slovakia]
 ---
 
 STATE: [2434] Eastern Turkic Khaganate (582.1.1 -> 646.1.1) [fill: #9CBED9]
@@ -2829,8 +2830,8 @@ TIMELINE:
 STATE: [2436] Eastern Wu (221.1.1 -> 280.5.31) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  221.1.1 -> 229.1.1: Clausthal Zellerfeld [stadester-Clausthal Zellerfeld-Germany]
-  229.1.1 -> 280.5.31: Morón de la Frontera [stadester-Morón de la Frontera-Spain]
+  221.1.1 -> 229.1.1: Wuchang [stadester-Ezhou-China]
+  229.1.1 -> 280.5.31: Jianye [stadester-Nanjing-China]
 ---
 
 STATE: [2437] Kamarupa Kingdom (Pala Empire) (901.1.1 -> 1001.1.1) [fill: #944481]
@@ -2877,13 +2878,13 @@ REASON: Ecuadorian armed forces military occupation of disputed Amazonian border
 STATE: [2444] Edessa (-599.1.1 -> -430.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  -599.1.1 -> -430.1.1: Drobeta-Turnu Severin [stadester-Drobeta-Turnu Severin-Romania]
+  -599.1.1 -> -430.1.1: Edessa [stadester-Edessa-Greece]
 ---
 
 STATE: [2445] Edina (1833.1.1 -> 1838.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1833.1.1 -> 1838.1.1: Edina [stadester-Edina-Minnesota]
+  1833.1.1 -> 1838.1.1: Edina [stadester-Edina-Liberia]
 ---
 
 STATE: [2446] Effutu (1401.1.1 -> 1736.1.1) [fill: #CF658F]
@@ -2921,9 +2922,8 @@ REASON: Paraguayan armed forces military occupation in Mato Grosso and Corriente
 ---
 
 STATE: [2452] Eight Nations Alliance (1900.6.10 -> 1901.9.7) [fill: #687FAD]
-STATUS: CAPITAL
-TIMELINE:
-  1900.6.10 -> 1901.9.7: Ganeriwala [stadester-Ganeriwala-Pakistan]
+STATUS: ACAPITAL
+REASON: Allied expeditionary coalition during the Boxer Rebellion without a sovereign civilian capital
 ---
 
 STATE: [2453] Eion (-480.1.1 -> -400.1.1) [fill: #90A16A]
@@ -2982,7 +2982,7 @@ TIMELINE:
 STATE: [2462] Elam (-2699.1.1 -> -611.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  -2699.1.1 -> -611.1.1: Taormina [stadester-Taormina-Italy]
+  -2699.1.1 -> -611.1.1: Susa [stadester-Shush-Iran]
 ---
 
 STATE: [2463] Elateia (Epeiros) (-400.1.1 -> -369.1.1) [fill: #9CBED9]
@@ -3395,13 +3395,13 @@ TIMELINE:
 STATE: [2531] Empire of Nicaea (1204.11.1 -> 1261.7.25) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1204.11.1 -> 1261.7.25: Eshnunna [stadester-Eshnunna-Iraq]
+  1204.11.1 -> 1261.7.25: Nicaea [stadester-Iznik-Turkey]
 ---
 
 STATE: [2532] Kingdom of Kakheti (Persia) (1504.1.1 -> 1748.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1504.1.1 -> 1748.1.1: Esmeraldas [stadester-Esmeraldas-Ecuador]
+  1504.1.1 -> 1748.1.1: Gremi [stadester-Telavi-Georgia]
 ---
 
 STATE: [2533] Empire of Thessalonica (1225.1.1 -> 1247.1.1) [fill: #4E825E]
@@ -3437,7 +3437,7 @@ TIMELINE:
 STATE: [2538] Empire of Vietnam (Japanese Puppet) (1945.3.11 -> 1945.8.23) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1945.3.11 -> 1945.8.23: Guacara [stadester-Guacara-Venezuela]
+  1945.3.11 -> 1945.8.23: Huế [stadester-Huê'-Vietnam]
 ---
 
 STATE: [2539] Emporion (-574.1.1 -> -217.1.1) [fill: #944481]
@@ -3682,7 +3682,7 @@ TIMELINE:
 STATE: [2579] Eteokarpathioi (-849.1.1 -> -498.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  -849.1.1 -> -498.1.1: Arkaseia
+  -849.1.1 -> -498.1.1: Arkaseia [stadester-Ródos-Greece]
 ---
 
 STATE: [2580] Ethiopia (Military Occupation) (1895.1.13 -> 2009.1.1) [fill: #D1453B]

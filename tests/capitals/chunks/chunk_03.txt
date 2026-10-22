@@ -578,7 +578,7 @@ TIMELINE:
 STATE: [1403] Azoros (-699.1.1 -> -373.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  -699.1.1 -> -373.1.1: Baghdād [stadester-Baghdád-Iraq]
+  -699.1.1 -> -373.1.1: Azoros [stadester-Azoros-Greece]
 ---
 
 STATE: [1404] Khanate of Kokand (Qing) (1775.1.1 -> 1799.1.1) [fill: #AD2845]
@@ -798,7 +798,7 @@ TIMELINE:
 STATE: [1440] BaKgatla (1701.1.1 -> 1885.3.23) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1701.1.1 -> 1885.3.23: Bakhtiyari [stadester-Bakhtiyari-Iran]
+  1701.1.1 -> 1885.3.23: Mochudi [stadester-Mochudi-Botswana]
 ---
 
 STATE: [1441] Bakong (1801.1.1 -> 1901.1.1) [fill: #9CBED9]
@@ -822,7 +822,7 @@ TIMELINE:
 STATE: [1444] BaKwêna (1571.1.1 -> 1885.3.23) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1571.1.1 -> 1885.3.23: Balhae [stadester-Balhae-China]
+  1571.1.1 -> 1885.3.23: Molepolole [stadester-Molepolole-Botswana]
 ---
 
 STATE: [1445] Delhi Sultanate (Military Occupation) (1354.1.1 -> 1371.1.1) [fill: #E0C25E]
@@ -857,7 +857,7 @@ TIMELINE:
 STATE: [1450] BaLete (1471.1.1 -> 1885.3.23) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1471.1.1 -> 1885.3.23: Bale [stadester-Bale-Ethiopia]
+  1471.1.1 -> 1885.3.23: Ramotswa [stadester-Ramotswa-Botswana]
 ---
 
 STATE: [1451] Balhae Kingdom (699.1.1 -> 927.1.1) [fill: #4E825E]
@@ -887,7 +887,7 @@ TIMELINE:
 STATE: [1455] Ballabhgarh Kingdom (Princely State) (1858.1.1 -> 1947.8.14) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1858.1.1 -> 1947.8.14: Vladivostok [stadester-Vladivostok-Russia]
+  1858.1.1 -> 1947.8.14: Ballabhgarh [stadester-Faridabad-India]
 ---
 
 STATE: [1456] Danish Gold Coast (1658.1.1 -> 1850.3.30) [fill: #9CBED9]
@@ -1060,7 +1060,7 @@ TIMELINE:
 STATE: [1484] BaNgwato (1611.1.1 -> 1885.3.23) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1611.1.1 -> 1885.3.23: Bani [stadester-Bani-Dominican Republic]
+  1611.1.1 -> 1885.3.23: Serowe [stadester-Serowe-Botswana]
 ---
 
 STATE: [1485] Duchy of Estonia (Denmark) (1220.1.1 -> 1347.1.1) [fill: #9CBED9]
@@ -1257,7 +1257,7 @@ TIMELINE:
 STATE: [1517] BaRôlông (1471.1.1 -> 1885.3.23) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1471.1.1 -> 1885.3.23: Barkuer [stadester-Barkuer-India]
+  1471.1.1 -> 1885.3.23: Mafikeng [stadester-Mahikeng-South Africa]
 ---
 
 STATE: [1518] Barotziland-North-Western Rhodesia (1899.11.28 -> 1911.8.17) [fill: #EBBCC5]
@@ -1305,7 +1305,7 @@ TIMELINE:
 STATE: [1525] Basoda State (Princely State) (1823.1.1 -> 1948.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1823.1.1 -> 1948.1.1: Bar-le-Duc [stadester-Bar-le-Duc-France]
+  1823.1.1 -> 1948.1.1: Basoda [stadester-Ganj-Basoda-India]
 ---
 
 STATE: [1526] Roanoke Colony (1586.1.1 -> 1591.1.1) [fill: #EBBCC5]
@@ -1595,7 +1595,7 @@ TIMELINE:
 STATE: [1575] Bemba (1701.1.1 -> 1891.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1701.1.1 -> 1891.1.1: Kasama [stadester-Kasama-Japan]
+  1701.1.1 -> 1891.1.1: Kasama [stadester-Kasama-Zambia]
 ---
 
 STATE: [1576] Bemihisatra Kingdom (1870.1.1 -> 1886.1.1) [fill: #D1453B]
@@ -2395,19 +2395,19 @@ TIMELINE:
 STATE: [1709] British Concession in Shanghai (1846.11.20 -> 1863.9.21) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1846.11.20 -> 1863.9.21: Sion [stadester-Sion-Switzerland]
+  1846.11.20 -> 1863.9.21: Shanghai [stadester-Shanghai-China]
 ---
 
 STATE: [1710] British Concession in Tianjin (1860.10.24 -> 1941.12.7) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1860.10.24 -> 1941.12.7: Metz [stadester-Metz-France]
+  1860.10.24 -> 1941.12.7: Tianjin [stadester-Tianjin-China]
 ---
 
 STATE: [1711] British Concession in Hankou (1861.3.21 -> 1927.1.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1861.3.21 -> 1927.1.4: Clausthal Zellerfeld [stadester-Clausthal Zellerfeld-Germany]
+  1861.3.21 -> 1927.1.4: Hankou [stadester-Wuhan-China]
 ---
 
 STATE: [1712] British Concession in Jiujiang (1862.1.1 -> 1928.1.1) [fill: #EBBCC5]
@@ -2431,7 +2431,7 @@ TIMELINE:
 STATE: [1715] Seychelles (France) (1757.1.1 -> 1794.5.17) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1757.1.1 -> 1794.5.17: Hamilton [stadester-Hamilton-New Zealand]
+  1757.1.1 -> 1794.5.17: Victoria [stadester-Victoria-Seychelles]
 ---
 
 STATE: [1716] British Guiana (1831.7.21 -> 1970.2.23) [fill: #EBBCC5]
@@ -2480,7 +2480,7 @@ TIMELINE:
 STATE: [1723] British Military Administration in Somaliland (1941.2.25 -> 1950.4.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1941.2.25 -> 1950.4.1: Hastings [stadester-Hastings-New Zealand]
+  1941.2.25 -> 1950.4.1: Hargeisa [stadester-Hargeysa-Somalia]
 ---
 
 STATE: [1724] British Military Administration of Libya (1943.5.13 -> 1951.12.24) [fill: #283C70]
@@ -2610,7 +2610,7 @@ TIMELINE:
 STATE: [1745] Buea (1751.1.1 -> 1901.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1751.1.1 -> 1901.1.1: Goulburn [stadester-Goulburn-Australia]
+  1751.1.1 -> 1901.1.1: Buea [stadester-Buea-Cameroon]
 ---
 
 STATE: [1746] Bugando (1851.1.1 -> 1891.1.1) [fill: #D1453B]
@@ -2756,7 +2756,7 @@ TIMELINE:
 STATE: [1770] Burkina Faso (1984.8.4 -> 2026.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1984.8.4 -> 2026.1.1: Ouagadougou
+  1984.8.4 -> 2026.1.1: Ouagadougou [stadester-Ouagadoudou-Burkina Faso]
 ---
 
 STATE: [1771] State of Burma (Japanese Puppet) (1943.8.1 -> 1945.8.14) [fill: #B37B50]
@@ -3150,7 +3150,7 @@ TIMELINE:
 STATE: [1838] Caucasian Iberia (Roman Empire) (-64.1.1 -> 528.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -64.1.1 -> 528.1.1: Monòpoli [stadester-Monòpoli-Italy]
+  -64.1.1 -> 528.1.1: Mtskheta [stadester-Mtskheta-Georgia]
 ---
 
 STATE: [1839] Caucasian Iberia (Sasanian Empire) (261.1.1 -> 581.1.1) [fill: #E0C25E]
@@ -3387,7 +3387,11 @@ TIMELINE:
 STATE: [1878] Champa Kingdom (530.1.1 -> 1833.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  530.1.1 -> 1833.1.1: Indrapura [stadester-Indrapura-Vietnam]
+  530.1.1 -> 757.1.1: Kandapurpura [stadester-Tra-Kieu-Vietnam]
+  757.1.1 -> 875.1.1: Virapura [stadester-Phan-Rang-Vietnam]
+  875.1.1 -> 982.1.1: Indrapura [stadester-Indrapura-Vietnam]
+  982.1.1 -> 1471.1.1: Vijaya [stadester-Vijaya-Vietnam]
+  1471.1.1 -> 1833.1.1: Panduranga [stadester-Phan-Rang-Vietnam]
 ---
 
 STATE: [1879] Chan Santa Cruz (1847.8.26 -> 1936.1.1) [fill: #90A16A]

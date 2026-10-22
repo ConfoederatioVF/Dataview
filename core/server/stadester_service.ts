@@ -1455,7 +1455,7 @@ export let StadesterService = {
           }
 
           if (best_city) {
-            let cap_color_val = p.symbol?.polygonFill || p.symbol?.fillColor || p.color || p.fillColor || '#FFDC00'
+            let cap_color_val = p.fill_color || p.fillColor || p.symbol?.polygonFill || p.symbol?.fillColor || p.color || (p.state_id ? StadesterService.getStateById(p.state_id)?.fill_color : null) || (p.gwcode ? StadesterService.getStateById(p.gwcode)?.fill_color : null) || '#FFDC00'
             let feat_area = p.area !== undefined ? Number(p.area) : 0
             if (!feat_area && feat.bbox)
               feat_area = Math.max(0, (feat.bbox[2] - feat.bbox[0])*(feat.bbox[3] - feat.bbox[1]))
@@ -1824,7 +1824,9 @@ export let StadesterService = {
       if (!is_capital_val && pop < min_pop)
         continue
 
-      let cap_color_val = cs_cap?.color || cap_state?.fill_color || null
+      let cap_color_val = (cs_cap?.color && cs_cap.color !== '#FFDC00')
+        ? cs_cap.color
+        : (cap_state?.fill_color || cs_cap?.color || null)
       let cap_state_id = cs_cap?.state_id || cap_rec?.state_id || undefined
       let polity_name = cs_cap?.name || cap_state?.name || undefined
 
@@ -1844,13 +1846,17 @@ export let StadesterService = {
           cap_state_id = cap_rec?.state_id ?? undefined
           polity_name = cap_state.name
         } else if (!state_matches && cs_matches) {
-          cap_color_val = cs_cap.color || cap_color_val
+          cap_color_val = (cs_cap.color && cs_cap.color !== '#FFDC00') ? cs_cap.color : (cs_state?.fill_color || cap_color_val)
           cap_state_id = cs_cap.state_id
           polity_name = cs_cap.name
         } else if (state_bbox_area > cs_bbox_area) {
           cap_color_val = cap_state.fill_color || cap_color_val
           cap_state_id = cap_rec?.state_id ?? undefined
           polity_name = cap_state.name
+        } else {
+          cap_color_val = (cs_cap.color && cs_cap.color !== '#FFDC00') ? cs_cap.color : (cs_state?.fill_color || cap_color_val)
+          cap_state_id = cs_cap.state_id
+          polity_name = cs_cap.name
         }
       }
       let resolved_date = (options.month !== undefined || options.day !== undefined)

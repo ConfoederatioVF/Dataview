@@ -124,7 +124,7 @@ TIMELINE:
 STATE: [3285] Italian Republic (1946.6.10 -> 2026.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1946.6.10 -> 2026.1.1: Rome
+  1946.6.10 -> 2026.1.1: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [3286] Italian Social Republic (1943.9.23 -> 1945.5.2) [fill: #283C70]
@@ -1498,7 +1498,7 @@ TIMELINE:
 STATE: [3518] Arkansaw Territory (1819.7.4 -> 1820.4.21) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1819.7.4 -> 1820.4.21: Little Rock [stadester-Little Rock-Arkansas]
+  1819.7.4 -> 1820.4.21: Arkansas Post [stadester-Arkansas-Post-United States]
 ---
 
 STATE: [3519] Florida Territory (1822.3.30 -> 1845.3.3) [fill: #944481]
@@ -2363,7 +2363,9 @@ TIMELINE:
 STATE: [3664] Khazar Khaganate (651.1.1 -> 970.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  651.1.1 -> 970.1.1: Astrakhan [stadester-Astrachan'-Russia]
+  651.1.1 -> 720.1.1: Balanjar [stadester-Balanjar-Russia]
+  720.1.1 -> 750.1.1: Samandar [stadester-Makhachkala-Russia]
+  750.1.1 -> 970.1.1: Atil [stadester-Astrachan'-Russia]
 ---
 
 STATE: [3665] Ahmadnagar Sultanate (1490.5.28 -> 1637.1.1) [fill: #EBBCC5]
@@ -2387,7 +2389,11 @@ TIMELINE:
 STATE: [3668] Ahom Kingdom (1228.12.2 -> 1822.8.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1228.12.2 -> 1822.8.1: Jorhat [ghsl-Jorhat-India]
+  1228.12.2 -> 1397.1.1: Charaideo [stadester-Charaideo-India]
+  1397.1.1 -> 1539.1.1: Chargua [stadester-Chargua-India]
+  1539.1.1 -> 1695.1.1: Garhgaon [stadester-Garhgaon-India]
+  1695.1.1 -> 1794.1.1: Rangpur [stadester-Sivasagar-India]
+  1794.1.1 -> 1822.8.1: Jorhat [ghsl-Jorhat-India]
 ---
 
 STATE: [3669] Khivan Khanate (1512.1.1 -> 1873.8.12) [fill: #AD2845]
@@ -2813,7 +2819,11 @@ TIMELINE:
 STATE: [3740] Kingdom of Armenia (-189.1.1 -> 706.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  -189.1.1 -> 706.1.1: Yerevan [ghsl-Yerevan-Armenia]
+  -189.1.1 -> -77.1.1: Artashat [stadester-Artashat-Armenia]
+  -77.1.1 -> -69.1.1: Tigranocerta [stadester-Silvan-Turkey]
+  -69.1.1 -> 120.1.1: Artashat [stadester-Artashat-Armenia]
+  120.1.1 -> 335.1.1: Vagharshapat [stadester-Vagharshapat-Armenia]
+  335.1.1 -> 706.1.1: Dvin [stadester-Dvin-Armenia]
 ---
 
 STATE: [3741] Aq Qoyunlu (1341.1.1 -> 1509.1.1) [fill: #D1453B]
@@ -3352,7 +3362,9 @@ TIMELINE:
 STATE: [3831] Kingdom of Denmark (961.1.1 -> 2026.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  961.1.1 -> 2026.1.1: Copenhagen [stadester-Copenhagen-Denmark]
+  961.1.1 -> 986.1.1: Jelling [stadester-Jelling-Denmark]
+  986.1.1 -> 1443.1.1: Roskilde [stadester-Roskilde-Denmark]
+  1443.1.1 -> 2026.1.1: Copenhagen [stadester-Copenhagen-Denmark]
 ---
 
 STATE: [3832] Kingdom of Detsugon (931.1.1 -> 968.1.1) [fill: #E0A348]
@@ -3790,7 +3802,16 @@ TIMELINE:
 STATE: [3904] Kingdom of Hungary (1000.12.25 -> 1944.3.19) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1000.12.25 -> 1944.3.19: Budapest [stadester-Budapest-Hungary]
+  1000.12.25 -> 1256.1.1: Esztergom [stadester-Esztergom-Hungary]
+  1256.1.1 -> 1315.1.1: Buda [stadester-Budapest-Hungary]
+  1315.1.1 -> 1323.1.1: Temesvár [stadester-Timisoara-Romania]
+  1323.1.1 -> 1408.1.1: Visegrád [stadester-Visegrad-Hungary]
+  1408.1.1 -> 1536.1.1: Buda [stadester-Budapest-Hungary]
+  1536.1.1 -> 1783.1.1: Pressburg [stadester-Bratislava-Slovakia]
+  1783.1.1 -> 1849.1.5: Buda [stadester-Budapest-Hungary]
+  1849.1.5 -> 1849.5.31: Debrecen [stadester-Debrecen-Hungary]
+  1849.5.31 -> 1873.11.17: Buda [stadester-Budapest-Hungary]
+  1873.11.17 -> 1944.3.19: Budapest [stadester-Budapest-Hungary]
 ---
 
 STATE: [3905] Berar Sultanate (1491.1.1 -> 1575.1.1) [fill: #E0A348]

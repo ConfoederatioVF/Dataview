@@ -148,7 +148,7 @@ export function createHistoricalBordersDeckLayer (
     getLineWidth: stroke_width,
     getLineColor: base_rgba,
     getFillColor: (arg0_d: any) => {
-      let polity_color = arg0_d.properties?.symbol?.polygonFill || arg0_d.properties?.symbol?.fillColor || arg0_d.properties?.fillColor || arg0_d.properties?.color
+      let polity_color = arg0_d.properties?.fill_color || arg0_d.properties?.fillColor || arg0_d.properties?.symbol?.polygonFill || arg0_d.properties?.symbol?.fillColor || arg0_d.properties?.color
       if (polity_color && fill_alpha > 0)
         return parseHexToRgba(polity_color, fill_alpha)
 

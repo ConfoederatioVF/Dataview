@@ -235,7 +235,9 @@ function reconcileCapitalWithAuthoritativeBorders (
 
   //4. If matched with authoritative capital, ensure isCapital is true with enriched metadata
   if (match) {
-    resolved_color = match.color || city.capitalColor || city.capital_color || '#FFDC00'
+    resolved_color = (match.color && match.color !== '#FFDC00')
+      ? match.color
+      : (city.capitalColor || city.capital_color || match.color || '#FFDC00')
     return {
       ...city,
       capitalColor: resolved_color,
@@ -625,10 +627,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           if (s_id)
             acapital_state_ids.add(s_id)
         } else if (p.capname || p.capkey || p.cap_coords || (p.caplong !== undefined && p.caplat !== undefined)) {
-          let polity_color = p.symbol?.polygonFill ||
-            p.symbol?.fillColor ||
+          let polity_color = p.fill_color ||
             p.fillColor ||
             p.color ||
+            p.symbol?.polygonFill ||
+            p.symbol?.fillColor ||
             p.symbol?.strokeColor ||
             p.strokeColor
 
@@ -1869,6 +1872,9 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 } else {
                   cap_rgb = hexToRgb(constant_color)
                 }
+                if (color_mode === 'state')
+                  return [cap_rgb[0], cap_rgb[1], cap_rgb[2], 255]
+
                 let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
                 return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
               },
@@ -1889,6 +1895,9 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 } else {
                   cap_rgb = hexToRgb(constant_color)
                 }
+                if (color_mode === 'state')
+                  return [cap_rgb[0], cap_rgb[1], cap_rgb[2], 255]
+
                 let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
                 return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
               },

@@ -42,7 +42,12 @@ TIMELINE:
 STATE: [3924] Kingdom of Jerusalem (1099.7.22 -> 1302.9.26) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1099.7.22 -> 1302.9.26: Jerusalem [stadester-Yerushalayim-Israel]
+  1099.7.22 -> 1187.10.2: Jerusalem [stadester-Yerushalayim-Israel]
+  1187.10.2 -> 1191.7.12: Tyre [stadester-Tyre-Lebanon]
+  1191.7.12 -> 1229.2.18: Acre [stadester-Akko-Israel]
+  1229.2.18 -> 1244.8.23: Jerusalem [stadester-Yerushalayim-Israel]
+  1244.8.23 -> 1291.5.18: Acre [stadester-Akko-Israel]
+  1291.5.18 -> 1302.9.26: Ruad [stadester-Arwad-Syria]
 ---
 
 STATE: [3925] Kingdom of Jimma (1791.1.1 -> 1890.1.1) [fill: #687FAD]
@@ -868,7 +873,10 @@ TIMELINE:
 STATE: [4062] Kingdom of Norway (873.1.1 -> 2026.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  873.1.1 -> 2026.1.1: Oslo [stadester-Oslo-Norway]
+  873.1.1 -> 997.1.1: Avaldsnes [stadester-Haugesund-Norway]
+  997.1.1 -> 1217.1.1: Nidaros [stadester-Trondheim-Norway]
+  1217.1.1 -> 1314.1.1: Bergen [stadester-Bergen-Norway]
+  1314.1.1 -> 2026.1.1: Oslo [stadester-Oslo-Norway]
 ---
 
 STATE: [4063] Confederated Estates of the Kingdom of Hungary (1705.10.1 -> 1711.2.21) [fill: #E0C25E]
@@ -1036,7 +1044,10 @@ TIMELINE:
 STATE: [4090] Kingdom of Portugal (1139.7.25 -> 1910.10.5) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1139.7.25 -> 1910.10.5: Lisbon [stadester-Lisboa-Portugal]
+  1139.7.25 -> 1255.1.1: Coimbra [stadester-Coimbra-Portugal]
+  1255.1.1 -> 1808.11.29: Lisbon [stadester-Lisboa-Portugal]
+  1808.11.29 -> 1821.4.26: Rio de Janeiro [stadester-Rio de Janeiro-Brazil]
+  1821.4.26 -> 1910.10.5: Lisbon [stadester-Lisboa-Portugal]
 ---
 
 STATE: [4091] Crusaders (Antioch) (1097.9.21 -> 1100.6.1) [fill: #B5ABCC]
@@ -1161,7 +1172,7 @@ TIMELINE:
 STATE: [4113] Kingdom of Rome (-753.4.21 -> -508.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -753.4.21 -> -509.1.1: Rome
+  -753.4.21 -> -509.1.1: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [4114] Kingdom of Rujumbura (1753.1.1 -> 1902.1.1) [fill: #687FAD]
@@ -1335,7 +1346,8 @@ TIMELINE:
 STATE: [4142] Denmark-Norway (1001.1.1 -> 1814.1.14) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1001.1.1 -> 1814.1.14: Copenhagen [stadester-Copenhagen-Denmark]
+  1001.1.1 -> 1443.1.1: Roskilde [stadester-Roskilde-Denmark]
+  1443.1.1 -> 1814.1.14: Copenhagen [stadester-Copenhagen-Denmark]
 ---
 
 STATE: [4143] North Sea Empire (Denmark-Norway-England) (1013.12.25 -> 1035.11.12) [fill: #AD2845]
@@ -1485,7 +1497,8 @@ TIMELINE:
 STATE: [4167] Kingdom of Sweden (1156.1.1 -> 2026.1.1) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1156.1.1 -> 2026.1.1: Stockholm [stadester-Stockholm-Sweden]
+  1156.1.1 -> 1252.1.1: Sigtuna [stadester-Sigtuna-Sweden]
+  1252.1.1 -> 2026.1.1: Stockholm [stadester-Stockholm-Sweden]
 ---
 
 STATE: [4168] Dharampur State (1263.1.1 -> 1764.1.1) [fill: #687FAD]
@@ -1629,7 +1642,8 @@ TIMELINE:
 STATE: [4192] Kingdom of the Burgundians in Rhineland (412.1.1 -> 455.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  412.1.1 -> 455.1.1: Lyon [stadester-Lyon-France]
+  412.1.1 -> 443.1.1: Worms [stadester-Worms-Germany]
+  443.1.1 -> 455.1.1: Geneva [stadester-Geneve-Switzerland]
 ---
 
 STATE: [4193] Kingdom of the Dorsale (579.1.1 -> 709.1.1) [fill: #B5ABCC]
@@ -1859,7 +1873,10 @@ TIMELINE:
 STATE: [4230] Kingdom of the Visigoths (419.1.1 -> 726.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  419.1.1 -> 726.1.1: Toledo [stadester-Toledo-Spain]
+  419.1.1 -> 507.1.1: Toulouse [stadester-Toulouse-France]
+  507.1.1 -> 531.1.1: Narbonne [stadester-Narbonne-France]
+  531.1.1 -> 549.1.1: Barcelona [stadester-Barcelona-Spain]
+  549.1.1 -> 726.1.1: Toledo [stadester-Toledo-Spain]
 ---
 
 STATE: [4231] Kingdom of the Visigoths (Ostrogoths) (511.1.1 -> 527.1.1) [fill: #B5ABCC]
@@ -2633,7 +2650,7 @@ TIMELINE:
 STATE: [4359] Kos Meropis (-849.1.1 -> -498.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  -849.1.1 -> -498.1.1: Astypalaia (Kos)
+  -849.1.1 -> -498.1.1: Astypalaia (Kos) [stadester-Kos-Greece]
 ---
 
 STATE: [4360] Kosala Kingdom (-1149.1.1 -> -449.1.1) [fill: #EBBCC5]
@@ -3232,7 +3249,10 @@ TIMELINE:
 STATE: [4460] Fatimid Caliphate (909.3.25 -> 1172.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  909.3.25 -> 1172.1.1: Cairo [stadester-Cairo-Egypt]
+  909.3.25 -> 921.1.1: Raqqada [stadester-Kairouan-Tunisia]
+  921.1.1 -> 948.1.1: Mahdia [stadester-Mahdia-Tunisia]
+  948.1.1 -> 973.6.10: Al-Mansuriya [stadester-Kairouan-Tunisia]
+  973.6.10 -> 1172.1.1: Cairo [stadester-Cairo-Egypt]
 ---
 
 STATE: [4461] Lac Viet (41.1.1 -> 44.1.1) [fill: #E0A348]

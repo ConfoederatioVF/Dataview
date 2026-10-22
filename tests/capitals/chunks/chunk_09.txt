@@ -145,7 +145,7 @@ TIMELINE:
 STATE: [5247] Kingdom of Ngoyo (1501.1.1 -> 1885.2.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1501.1.1 -> 1885.2.1: Cabinda
+  1501.1.1 -> 1885.2.1: Cabinda [stadester-Cabinda-Angola]
 ---
 
 STATE: [5248] Nguru (1801.1.1 -> 1891.1.1) [fill: #90A16A]
@@ -157,7 +157,7 @@ TIMELINE:
 STATE: [5249] Nguyễn Dynasty (1802.6.1 -> 1883.8.25) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1802.6.1 -> 1883.8.25: Huế
+  1802.6.1 -> 1883.8.25: Huế [ghsl-Hu?-Vietnam]
 ---
 
 STATE: [5250] Ngweshe (1801.1.1 -> 1885.11.1) [fill: #B5ABCC]
@@ -193,8 +193,8 @@ TIMELINE:
 STATE: [5255] Nicaragua (1838.5.31 -> 2026.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1838.5.31 -> 1852.1.1: León
-  1852.1.1 -> 2026.1.1: Managua
+  1838.5.31 -> 1852.1.1: León [stadester-León-Spain]
+  1852.1.1 -> 2026.1.1: Managua [stadester-Managua-Nicaragua]
 ---
 
 STATE: [5256] Nicaragua (USA Protectorate) (1916.6.19 -> 1934.1.1) [fill: #944481]
@@ -218,8 +218,8 @@ TIMELINE:
 STATE: [5259] Niger (French Colony) (1922.10.13 -> 1960.8.3) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1922.10.13 -> 1926.12.28: Zinder
-  1926.12.28 -> 1960.8.3: Niamey
+  1922.10.13 -> 1926.12.28: Zinder [stadester-Zinder-Niger]
+  1926.12.28 -> 1960.8.3: Niamey [stadester-Niamey-Niger]
 ---
 
 STATE: [5260] Niger Coast (1892.5.20 -> 1900.1.1) [fill: #EBBCC5]
@@ -249,13 +249,13 @@ TIMELINE:
 STATE: [5264] Kingdom of Alania (901.1.1 -> 1239.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  901.1.1 -> 1239.1.1: Magas
+  901.1.1 -> 1239.1.1: Magas [stadester-Nazran-Russia]
 ---
 
 STATE: [5265] Nikki (1751.1.1 -> 1895.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1751.1.1 -> 1895.1.1: Nikki
+  1751.1.1 -> 1895.1.1: Nikki [ghsl-Nikki-Benin]
 ---
 
 STATE: [5266] Nikonion (-500.1.1 -> -249.1.1) [fill: #CF658F]
@@ -267,8 +267,8 @@ TIMELINE:
 STATE: [5267] Kingdom of Aragon (821.1.1 -> 1479.1.20) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1118.12.18 -> 1479.1.20: Zaragoza
-  821.1.1 -> 1118.12.18: Jaca
+  1118.12.18 -> 1479.1.20: Zaragoza [stadester-Zaragoza-Spain]
+  821.1.1 -> 1118.12.18: Jaca [stadester-Jaca-Spain]
 ---
 
 STATE: [5268] Nilgiri State (Princely State) (1851.1.1 -> 1948.1.1) [fill: #EBBCC5]
@@ -286,7 +286,7 @@ TIMELINE:
 STATE: [5270] Nippur (-2899.1.1 -> -2449.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  -2899.1.1 -> -2449.1.1: Nippur
+  -2899.1.1 -> -2449.1.1: Nippur [stadester-Babylon-Iraq]
 ---
 
 STATE: [5271] Nisyros (-849.1.1 -> -498.1.1) [fill: #AEC76D]
@@ -322,7 +322,7 @@ TIMELINE:
 STATE: [5276] Nizhny Novgorod-Suzdal Grand Duchy (1341.11.1 -> 1425.1.1) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1341.11.1 -> 1425.1.1: Nizhny Novgorod
+  1341.11.1 -> 1425.1.1: Nizhny Novgorod [stadester-Ni`'znij Novgorod-Russia]
 ---
 
 STATE: [5277] Njirong (1851.1.1 -> 1901.1.1) [fill: #405F85]
@@ -346,7 +346,7 @@ TIMELINE:
 STATE: [5280] Nobatia (401.1.1 -> 643.1.1) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  401.1.1 -> 643.1.1: Faras
+  401.1.1 -> 643.1.1: Faras [stadester-Wadi Halfa-Sudan]
 ---
 
 STATE: [5281] Noble Rebels (1649.1.6 -> 1652.10.13) [fill: #AD2845]
@@ -357,19 +357,19 @@ REASON: Aristocratic Fronde coalition operating through autonomous regional armi
 STATE: [5282] Kingdom of Ardra (1301.1.1 -> 1725.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1301.1.1 -> 1725.1.1: Allada
+  1301.1.1 -> 1725.1.1: Allada [stadester-Allada-Benin]
 ---
 
 STATE: [5283] Kingdom of Artsakh (1046.1.1 -> 1121.8.12) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1046.1.1 -> 1121.8.12: Khachen
+  1046.1.1 -> 1121.8.12: Khachen [stadester-Xankändi-Azerbaijan]
 ---
 
 STATE: [5284] Nojpetén Kingdom (1451.1.1 -> 1697.3.13) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1451.1.1 -> 1697.3.13: Flores
+  1451.1.1 -> 1697.3.13: Flores [stadester-Flores-Guatemala]
 ---
 
 STATE: [5285] White Walls Land (-3499.1.1 -> 1463.1.2) [fill: #9CBED9]
@@ -753,7 +753,7 @@ TIMELINE:
 STATE: [5348] Northern Qi (551.1.1 -> 577.2.28) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  551.1.1 -> 577.2.28: Anyang
+  551.1.1 -> 577.2.28: Anyang [stadester-Anyang-China]
 ---
 
 STATE: [5349] Northern Rhodesia (1900.1.29 -> 1964.10.24) [fill: #EBBCC5]
@@ -783,8 +783,8 @@ TIMELINE:
 STATE: [5353] Northern Wei (387.1.1 -> 534.11.8) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  387.1.1 -> 494.1.1: Datong
-  494.1.1 -> 534.11.8: Luoyang
+  387.1.1 -> 494.1.1: Datong [stadester-Datong-China]
+  494.1.1 -> 534.11.8: Luoyang [stadester-Luoyang-China]
 ---
 
 STATE: [5354] Northern Xiongnu (49.1.1 -> 156.1.1) [fill: #E0C25E]
@@ -837,7 +837,9 @@ TIMELINE:
 STATE: [5362] Kingdom of Castile (1036.1.1 -> 1479.1.20) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1036.1.1 -> 1479.1.20: Burgos [stadester-Burgos-Spain]
+  1036.1.1 -> 1085.5.25: Burgos [stadester-Burgos-Spain]
+  1085.5.25 -> 1350.1.1: Toledo [stadester-Toledo-Spain]
+  1350.1.1 -> 1479.1.20: Valladolid [stadester-Valladolid-Spain]
 ---
 
 STATE: [5363] Notion (-699.1.1 -> -386.1.1) [fill: #EBBCC5]
@@ -885,7 +887,7 @@ TIMELINE:
 STATE: [5370] Nso (1401.1.1 -> 1901.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1867.7.1 -> 1871.1.18: Berlin
+  1401.1.1 -> 1901.1.1: Kimbo [stadester-Kumbo-Cameroon]
 ---
 
 STATE: [5371] Kingdom of Champasak (1714.1.1 -> 1779.1.1) [fill: #944481]
@@ -909,7 +911,7 @@ TIMELINE:
 STATE: [5374] Nuḫašše (-1999.1.1 -> -1809.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  -1999.1.1 -> -1809.1.1: Tunip
+  -1999.1.1 -> -1809.1.1: Tunip [stadester-Hamâh-Syria]
 ---
 
 STATE: [5375] Kingdom of Coorg (1601.1.1 -> 1790.10.26) [fill: #CF658F]
@@ -933,7 +935,7 @@ TIMELINE:
 STATE: [5378] Kingdom of Numidia (-201.2.1 -> -105.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  -201.2.1 -> -105.1.1: Constantine
+  -201.2.1 -> -105.1.1: Constantine [stadester-Qacentina-Algeria]
 ---
 
 STATE: [5379] Numidia (Rome) (-105.1.1 -> -24.1.1) [fill: #AD2845]
@@ -1372,7 +1374,8 @@ TIMELINE:
 STATE: [5452] Kingdom of England (928.1.1 -> 1603.3.24) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  928.1.1 -> 1603.3.24: London [stadester-London-United Kingdom]
+  928.1.1 -> 1066.12.25: Winchester [stadester-Winchester-United Kingdom]
+  1066.12.25 -> 1603.3.24: London [stadester-London-United Kingdom]
 ---
 
 STATE: [5453] Orchha State (Princely State) (1812.1.1 -> 1951.1.1) [fill: #EBBCC5]
@@ -1491,9 +1494,13 @@ TIMELINE:
 STATE: [5472] Kingdom of France (987.7.3 -> 1848.2.25) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  987.7.3 -> 1792.9.21: Paris
-  1814.4.6 -> 1815.3.20: Paris
-  1815.7.8 -> 1848.2.24: Paris
+  987.7.3 -> 1682.5.6: Paris [stadester-Paris-France]
+  1682.5.6 -> 1715.9.1: Versailles [stadester-Versailles-France]
+  1715.9.1 -> 1722.6.15: Paris [stadester-Paris-France]
+  1722.6.15 -> 1789.10.6: Versailles [stadester-Versailles-France]
+  1789.10.6 -> 1792.9.21: Paris [stadester-Paris-France]
+  1814.4.6 -> 1815.3.20: Paris [stadester-Paris-France]
+  1815.7.8 -> 1848.2.24: Paris [stadester-Paris-France]
 ---
 
 STATE: [5473] Ota (1622.1.1 -> 1891.1.1) [fill: #687FAD]
@@ -1505,7 +1512,9 @@ TIMELINE:
 STATE: [5474] Ottoman Beylik (1291.1.1 -> 1384.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1291.1.1 -> 1384.1.1: Bursa [stadester-Bursa-Turkey]
+  1291.1.1 -> 1326.4.6: Söğüt [stadester-Sogut-Turkey]
+  1326.4.6 -> 1363.1.1: Bursa [stadester-Bursa-Turkey]
+  1363.1.1 -> 1384.1.1: Edirne [stadester-Edirne-Turkey]
 ---
 
 STATE: [5475] Kingdom of Galam (1708.1.1 -> 1831.1.1) [fill: #4E825E]
@@ -1769,7 +1778,7 @@ TIMELINE:
 STATE: [5518] Palenque (-225.1.1 -> 800.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  -225.1.1 -> 800.1.1: Palenque
+  -225.1.1 -> 800.1.1: Palenque [stadester-Palenque-Mexico]
 ---
 
 STATE: [5519] Israeli administered Palestinian territories (1993.9.13 -> 2026.1.1) [fill: #90A16A]
@@ -1858,7 +1867,7 @@ TIMELINE:
 STATE: [5533] Pandya Kingdom (-249.1.1 -> 1331.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  -249.1.1 -> 1331.1.1: Madurai
+  -249.1.1 -> 1331.1.1: Madurai [stadester-Madurai-India]
 ---
 
 STATE: [5534] Pangmi (Princely State) (1886.1.1 -> 1948.1.4) [fill: #EBBCC5]
@@ -2026,7 +2035,7 @@ TIMELINE:
 STATE: [5561] Parthian Empire (-246.1.1 -> 224.4.28) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  -246.1.1 -> 224.4.28: Ctesiphon
+  -246.1.1 -> 224.4.28: Ctesiphon [stadester-Baghdád-Iraq]
 ---
 
 STATE: [5562] Parvatadvaraka Dynasty (601.1.1 -> 651.1.1) [fill: #95C0C2]
@@ -2489,7 +2498,8 @@ TIMELINE:
 STATE: [5639] Kingdom of Poland (1026.1.1 -> 1385.8.14) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1026.1.1 -> 1385.8.14: Kraków [ghsl-Krakow-Poland]
+  1026.1.1 -> 1038.1.1: Gniezno [stadester-Gniezno-Poland]
+  1038.1.1 -> 1385.8.14: Kraków [ghsl-Krakow-Poland]
 ---
 
 STATE: [5640] Petra (-574.1.1 -> -215.1.1) [fill: #687FAD]
@@ -2942,8 +2952,8 @@ TIMELINE:
 STATE: [5714] Kingdom of Serbia (Medieval) (1218.1.1 -> 1346.4.16) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1218.1.1 -> 1300.1.1: Novi Pazar
-  1300.1.1 -> 1346.4.16: Skopje
+  1218.1.1 -> 1300.1.1: Novi Pazar [stadester-Novi Pazar-Serbia]
+  1300.1.1 -> 1346.4.16: Skopje [stadester-Skopje-North Macedonia]
 ---
 
 STATE: [5715] Polichne (-574.1.1 -> -68.1.1) [fill: #CF658F]
@@ -2961,7 +2971,7 @@ TIMELINE:
 STATE: [5717] Kingdom of Sicily (1848) (1848.3.25 -> 1849.5.15) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1848.3.25 -> 1849.5.15: Palermo
+  1848.3.25 -> 1849.5.15: Palermo [stadester-Palermo-Italy]
 ---
 
 STATE: [5718] Polish Liquidation Committee (1918.10.28 -> 1919.3.27) [fill: #AD2845]
@@ -3083,7 +3093,7 @@ TIMELINE:
 STATE: [5737] Kingdom of the Two Sicilies (1816.12.8 -> 1861.3.20) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1816.12.8 -> 1861.3.20: Naples
+  1816.12.8 -> 1861.3.20: Naples [stadester-Napoli-Italy]
 ---
 
 STATE: [5738] Kingdom of Thonburi (1767.12.28 -> 1782.4.6) [fill: #283C70]
@@ -3299,7 +3309,7 @@ TIMELINE:
 STATE: [5773] Principality of Achaea (Latin Empire) (1205.9.1 -> 1261.7.25) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1205.9.1 -> 1261.7.25: Andravida
+  1205.9.1 -> 1261.7.25: Andravida [stadester-Amaliada-Greece]
 ---
 
 STATE: [5774] Kingdom of Vursut (1501.1.1 -> 1713.1.1) [fill: #687FAD]
@@ -3737,7 +3747,7 @@ TIMELINE:
 STATE: [5846] Later Jin (1617.1.1 -> 1636.5.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1617.1.1 -> 1636.5.1: Shenyang
+  1617.1.1 -> 1636.5.1: Shenyang [stadester-Shenyang-China]
 ---
 
 STATE: [5847] Principality of Pronsk (1133.1.1 -> 1484.1.1) [fill: #E0A348]
@@ -3803,7 +3813,7 @@ TIMELINE:
 STATE: [5857] Principality of Serbia (Early Medieval) (731.1.1 -> 972.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  731.1.1 -> 972.1.1: Novi Pazar
+  731.1.1 -> 972.1.1: Novi Pazar [stadester-Novi Pazar-Serbia]
 ---
 
 STATE: [5858] Principality of Serbia (1867.4.18 -> 1882.3.6) [fill: #B37B50]
@@ -3886,7 +3896,7 @@ TIMELINE:
 STATE: [5871] Liao Dynasty (909.1.1 -> 1123.4.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  909.1.1 -> 1123.4.1: Chifeng
+  909.1.1 -> 1123.4.1: Chifeng [stadester-Chifeng-China]
 ---
 
 STATE: [5872] Limbda State (1781.1.1 -> 1802.1.1) [fill: #283C70]

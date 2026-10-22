@@ -2604,7 +2604,7 @@ TIMELINE:
 STATE: [1091] Akkadian Empire (-2333.1.1 -> -2198.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  -2333.1.1 -> -2198.1.1: Babylon [stadester-Hillah-Iraq]
+  -2333.1.1 -> -2198.1.1: Akkad [stadester-Akkad-Iraq]
 ---
 
 STATE: [1092] United Provinces of the Rio de la Plata (Military Occupation) (1819.4.25 -> 1827.1.1) [fill: #CF658F]
@@ -2800,7 +2800,7 @@ TIMELINE:
 STATE: [1124] Albino (193.3.28 -> 197.2.19) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  193.3.28 -> 197.2.19: Luton [stadester-Luton-United Kingdom]
+  193.3.28 -> 197.2.19: Lugdunum [stadester-Lyon-France]
 ---
 
 STATE: [1125] Albona Republic (1921.3.2 -> 1921.4.8) [fill: #E0C25E]
@@ -3060,15 +3060,13 @@ TIMELINE:
 ---
 
 STATE: [1169] Amb State (Princely State) (1859.1.1 -> 1947.8.15) [fill: #EBBCC5]
-STATUS: CAPITAL
-TIMELINE:
-  1859.1.1 -> 1947.8.15: Amastris [stadester-Amastris-Turkey]
+STATUS: ACAPITAL
+REASON: Feudal princely state; seat was Darband which was inundated by Tarbela Dam and not a major settlement
 ---
 
 STATE: [1170] Kingdom of Amb (1648.1.1 -> 1969.7.28) [fill: #AD2845]
-STATUS: CAPITAL
-TIMELINE:
-  1648.1.1 -> 1969.7.28: Mansehra [stadester-Mansehra-Pakistan]
+STATUS: ACAPITAL
+REASON: Feudal princely state; seat was Darband which is not an independent capital in Stadestér
 ---
 
 STATE: [1171] Duchy of Syrmia (Austria) (1531.1.1 -> 1533.1.1) [fill: #AEC76D]
@@ -3092,13 +3090,13 @@ TIMELINE:
 STATE: [1174] Ambliara State (Princely State) (1851.1.1 -> 1943.10.7) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1851.1.1 -> 1943.10.7: Alkmaar [stadester-Alkmaar-Netherlands]
+  1851.1.1 -> 1943.10.7: Ambliara [stadester-Ambliara-India]
 ---
 
 STATE: [1175] Ambohidratrimo Kingdom (1301.1.1 -> 1551.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1301.1.1 -> 1551.1.1: Ambroz [stadester-Ambroz-Spain]
+  1301.1.1 -> 1551.1.1: Ambohidratrimo [stadester-Ambohidratrimo-Madagascar]
 ---
 
 STATE: [1176] Ambrakia (-624.1.1 -> -337.1.1) [fill: #CF658F]
@@ -3128,13 +3126,13 @@ TIMELINE:
 STATE: [1180] American Trading Company of Borneo (1866.1.1 -> 1878.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1866.1.1 -> 1878.1.1: Amorgos [stadester-Amorgos-Greece]
+  1866.1.1 -> 1878.1.1: Kimanis [stadester-Kimanis-Malaysia]
 ---
 
 STATE: [1181] Amirate of Banu Munabbih (751.1.1 -> 951.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  751.1.1 -> 951.1.1: Amorgos [stadester-Amorgos-Greece]
+  751.1.1 -> 951.1.1: Multan [stadester-Multan-Pakistan]
 ---
 
 STATE: [1182] Amisos (-559.1.1 -> -549.1.1) [fill: #D1453B]
@@ -3176,7 +3174,7 @@ TIMELINE:
 STATE: [1188] Amphissa (-328.1.1 -> -299.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  -328.1.1 -> -299.1.1: Sumur [stadester-Sumur-Syria]
+  -328.1.1 -> -299.1.1: Amphissa [stadester-Amphissa-Greece]
 ---
 
 STATE: [1189] Amsterdam Island (1843.6.8 -> 1955.8.6) [fill: #B5ABCC]
@@ -3281,13 +3279,13 @@ TIMELINE:
 STATE: [1204] Kingdom of Aneho (1661.1.1 -> 1885.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1661.1.1 -> 1885.1.1: Angeia [stadester-Angeia-Greece]
+  1661.1.1 -> 1885.1.1: Aného [stadester-Aneho-Togo]
 ---
 
 STATE: [1205] Kingdom of Aneho (France) (1885.1.1 -> 1885.12.24) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1885.1.1 -> 1885.12.24: Santo Tomás [stadester-Santo Tomás-El Salvador]
+  1885.1.1 -> 1885.12.24: Aného [stadester-Aneho-Togo]
 ---
 
 STATE: [1206] Anga Kingdom (-1099.1.1 -> -499.1.1) [fill: #B5ABCC]
@@ -3311,13 +3309,13 @@ TIMELINE:
 STATE: [1209] Kingdom of Arakan (Bengal Vassal) (1431.1.1 -> 1532.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1431.1.1 -> 1532.1.1: Andhra [stadester-Andhra-India]
+  1431.1.1 -> 1532.1.1: Mrauk U [stadester-Mrauk-U-Myanmar]
 ---
 
 STATE: [1210] Principality of Cooch Behar (Bhutan) (1681.1.1 -> 1765.12.8) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1681.1.1 -> 1765.12.8: Andros [stadester-Andros-Greece]
+  1681.1.1 -> 1765.12.8: Cooch Behar [stadester-Koch-Bihar-India]
 ---
 
 STATE: [1211] Anglo-Egyptian Sudan (1899.6.19 -> 1925.1.1) [fill: #EBBCC5]
@@ -3381,13 +3379,13 @@ TIMELINE:
 STATE: [1221] Anjouan (1998.1.1 -> 1999.8.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1998.1.1 -> 1999.8.1: Koenigswinter [stadester-Königswinter-Germany]
+  1998.1.1 -> 1999.8.1: Mutsamudu [stadester-Mutsamudu-Comoros]
 ---
 
 STATE: [1222] Anjouan (2007) (2007.4.26 -> 2008.3.25) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  2007.4.26 -> 2008.3.25: Ankole [stadester-Ankole-Uganda]
+  2007.4.26 -> 2008.3.25: Mutsamudu [stadester-Mutsamudu-Comoros]
 ---
 
 STATE: [1223] Ankon (-386.1.1 -> -201.1.1) [fill: #95C0C2]
@@ -3399,7 +3397,7 @@ TIMELINE:
 STATE: [1224] Anlo (1651.1.1 -> 1902.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1651.1.1 -> 1902.1.1: Bakhchysarai [stadester-Bakhchysarai-Ukraine]
+  1651.1.1 -> 1902.1.1: Anloga [stadester-Anloga-Ghana]
 ---
 
 STATE: [1225] Poland (Bohemia) (1300.7.25 -> 1306.8.4) [fill: #95C0C2]
@@ -3535,7 +3533,7 @@ TIMELINE:
 STATE: [1247] Antongila Kingdom (1773.4.1 -> 1779.7.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1773.4.1 -> 1779.7.1: Antequera [stadester-Antequera-Spain]
+  1773.4.1 -> 1779.7.1: Maroantsetra [stadester-Maroantsetra-Madagascar]
 ---
 
 STATE: [1248] Antron (-849.1.1 -> -362.1.1) [fill: #405F85]
@@ -3547,7 +3545,7 @@ TIMELINE:
 STATE: [1249] Anziku Kingdom (1631.1.1 -> 1882.11.12) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1631.1.1 -> 1882.11.12: Antrim [stadester-Antrim-United Kingdom]
+  1631.1.1 -> 1882.11.12: Monsol [stadester-Mbe-Congo]
 ---
 
 STATE: [1250] Apellonia (-574.1.1 -> -68.1.1) [fill: #AD2845]
@@ -3684,7 +3682,7 @@ TIMELINE:
 STATE: [1272] Aramoko-Ekiti (1855.1.1 -> 1891.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1855.1.1 -> 1891.1.1: Apt [stadester-Apt-France]
+  1855.1.1 -> 1891.1.1: Aramoko-Ekiti [stadester-Aramoko-Ekiti-Nigeria]
 ---
 
 STATE: [1273] Arguin (Brandenburg) (1686.1.1 -> 1725.1.1) [fill: #283C70]
@@ -3729,7 +3727,7 @@ REASON: Argentine military occupation of the Falkland and South Georgia Islands
 STATE: [1280] Prussian Gold Coast (1701.1.15 -> 1722.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1701.1.15 -> 1722.1.1: Zwolle [ghsl-Zwolle-Netherlands]
+  1701.1.15 -> 1722.1.1: Princes Town [stadester-Axim-Ghana]
 ---
 
 STATE: [1281] St. Thomas (Brandenburg) (1685.11.24 -> 1694.1.1) [fill: #283C70]
@@ -3757,7 +3755,7 @@ REASON: Short-lived Caribbean colonial trading outpost of Brandenburg-Prussia
 STATE: [1285] Argilos (-653.1.1 -> -361.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  -653.1.1 -> -361.1.1: Jiangling [stadester-Jiangling-China]
+  -653.1.1 -> -361.1.1: Argilos [stadester-Argilos-Greece]
 ---
 
 STATE: [1286] Argos (Akarnania) (-439.1.1 -> -399.1.1) [fill: #E0C25E]
@@ -3775,7 +3773,7 @@ TIMELINE:
 STATE: [1288] Argoussa (-699.1.1 -> -373.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  -699.1.1 -> -373.1.1: Arcadia [stadester-Arcadia-California]
+  -699.1.1 -> -373.1.1: Argoussa [stadester-Argoussa-Greece]
 ---
 
 STATE: [1289] Brandenburg-Prussia (Military Occupation) (1675.9.28 -> 1679.7.28) [fill: #283C70]
@@ -3818,7 +3816,11 @@ TIMELINE:
 STATE: [1296] Arizona Territory (1863.2.24 -> 1912.2.14) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1863.2.24 -> 1912.2.14: Phoenix [stadester-Phoenix-Arizona]
+  1863.2.24 -> 1864.5.18: Fort Whipple [stadester-Prescott-United States]
+  1864.5.18 -> 1867.11.1: Prescott [stadester-Prescott-United States]
+  1867.11.1 -> 1877.1.1: Tucson [stadester-Tucson-United States]
+  1877.1.1 -> 1889.2.4: Prescott [stadester-Prescott-United States]
+  1889.2.4 -> 1912.2.14: Phoenix [stadester-Phoenix-Arizona]
 ---
 
 STATE: [1297] Arjunayana Republic (-72.1.1 -> 351.1.1) [fill: #B5ABCC]

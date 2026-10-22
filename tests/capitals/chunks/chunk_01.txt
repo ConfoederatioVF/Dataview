@@ -42,25 +42,29 @@ TIMELINE:
 STATE: [6] Aquileia Patriarchate (1078.1.1 -> 1544.1.1) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1078.1.1 -> 1544.1.1: Aquileia [stadester-Aquileia-Italy]
+  1078.1.1 -> 1238.1.1: Aquileia [stadester-Aquileia-Italy]
+  1238.1.1 -> 1251.1.1: Cividale del Friuli [stadester-Cividale-del-Friuli-Italy]
+  1251.1.1 -> 1544.1.1: Udine [stadester-Udine-Italy]
 ---
 
 STATE: [7] Augsburg Prince-Bishopric (1259.1.1 -> 1803.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1259.1.1 -> 1803.1.1: Augsburg
+  1259.1.1 -> 1450.1.1: Augsburg [stadester-Augsburg-Germany]
+  1450.1.1 -> 1803.1.1: Dillingen an der Donau [stadester-Dillingen-an-der-Donau-Germany]
 ---
 
 STATE: [8] Bamberg Prince-Bishopric (1008.1.1 -> 1803.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1008.1.1 -> 1803.1.1: Bamberg
+  1008.1.1 -> 1803.1.1: Bamberg [stadester-Bamberg-Germany]
 ---
 
 STATE: [9] Prince-Bishopric of Basel (1033.1.1 -> 1580.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1033.1.1 -> 1580.1.1: Basel
+  1033.1.1 -> 1528.1.1: Basel [stadester-Basel-Switzerland]
+  1528.1.1 -> 1580.1.1: Porrentruy [stadester-Porrentruy-Switzerland]
 ---
 
 STATE: [10] Belluno Prince-Bishopric (962.2.2 -> 1389.1.1) [fill: #95C0C2]
@@ -90,7 +94,8 @@ TIMELINE:
 STATE: [14] Archbishopric of Bremen (1181.1.1 -> 1649.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1181.1.1 -> 1649.1.1: Bremen
+  1181.1.1 -> 1345.1.1: Bremen [stadester-Bremen-Germany]
+  1345.1.1 -> 1649.1.1: Bremervörde [stadester-Bremervorde-Germany]
 ---
 
 STATE: [15] Brixen Prince-Bishopric (1180.1.1 -> 1803.2.25) [fill: #CF658F]
@@ -114,7 +119,7 @@ TIMELINE:
 STATE: [18] Chur Bishopric (962.2.2 -> 1367.1.29) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  962.2.2 -> 1367.1.29: Chur
+  962.2.2 -> 1367.1.29: Chur [stadester-Chur-Switzerland]
 ---
 
 STATE: [19] Corvey Abbey (1151.1.1 -> 1793.1.1) [fill: #E0A348]
@@ -251,13 +256,14 @@ TIMELINE:
 STATE: [40] Archbishopric of Cologne (1065.1.1 -> 1807.7.9) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1065.1.1 -> 1807.7.9: Köln
+  1065.1.1 -> 1288.6.5: Köln [stadester-Koln-Germany]
+  1288.6.5 -> 1807.7.9: Bonn [stadester-Bonn-Germany]
 ---
 
 STATE: [41] Konstanz Prince-Bishopric (1156.1.1 -> 1804.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1156.1.1 -> 1804.1.1: Konstanz
+  1156.1.1 -> 1804.1.1: Konstanz [stadester-Konstanz-Germany]
 ---
 
 STATE: [42] Kornelimünster Imperial Abbey (962.2.2 -> 1794.12.28) [fill: #AD2845]
@@ -281,7 +287,7 @@ TIMELINE:
 STATE: [45] Lübeck Prince-Bishopric (1181.1.1 -> 1804.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1181.1.1 -> 1804.1.1: Lübeck
+  1181.1.1 -> 1804.1.1: Lübeck [stadester-Lübeck-Germany]
 ---
 
 STATE: [46] Liege Prince-Bishopric (986.1.1 -> 1794.12.28) [fill: #D1453B]
@@ -335,7 +341,7 @@ TIMELINE:
 STATE: [54] Münster Prince-Bishopric (1181.1.1 -> 1806.3.15) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1181.1.1 -> 1806.3.15: Münster
+  1181.1.1 -> 1806.3.15: Münster [stadester-Münster-Germany]
 ---
 
 STATE: [55] Murbach Abbey (793.1.1 -> 1648.10.24) [fill: #AD2845]
@@ -425,7 +431,7 @@ TIMELINE:
 STATE: [69] Salzburg Prince-Bishopric (962.2.2 -> 1803.2.11) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  962.2.2 -> 1803.2.11: Salzburg
+  962.2.2 -> 1803.2.11: Salzburg [stadester-Salzburg-Austria]
 ---
 
 STATE: [70] San Colombano Abbey (973.1.1 -> 1228.1.1) [fill: #EBBCC5]
@@ -467,7 +473,8 @@ TIMELINE:
 STATE: [76] Speyer Prince-Bishopric (1087.1.1 -> 1804.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1087.1.1 -> 1804.1.1: Speyer
+  1087.1.1 -> 1723.1.1: Speyer [stadester-Speyer-Germany]
+  1723.1.1 -> 1804.1.1: Bruchsal [stadester-Bruchsal-Germany]
 ---
 
 STATE: [77] St. Blasien Abbey (962.2.2 -> 1379.1.1) [fill: #283C70]
@@ -503,16 +510,19 @@ TIMELINE:
 STATE: [82] Papal States (729.1.1 -> 1870.4.20) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  754.1.1 -> 1798.2.15: Rome
-  1799.10.1 -> 1809.5.17: Rome
-  1814.5.24 -> 1849.2.9: Rome
-  1849.7.3 -> 1870.9.20: Rome
+  754.1.1 -> 1309.3.9: Rome [stadester-Roma-Italy]
+  1309.3.9 -> 1377.1.17: Avignon [stadester-Avignon-France]
+  1377.1.17 -> 1798.2.15: Rome [stadester-Roma-Italy]
+  1799.10.1 -> 1809.5.17: Rome [stadester-Roma-Italy]
+  1814.5.24 -> 1849.2.9: Rome [stadester-Roma-Italy]
+  1849.7.3 -> 1870.9.20: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [83] Strassburg Prince-Bishopric (776.1.1 -> 1804.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  776.1.1 -> 1804.1.1: Strasbourg
+  776.1.1 -> 1525.1.1: Strasbourg [stadester-Strasbourg-France]
+  1525.1.1 -> 1804.1.1: Saverne [stadester-Saverne-France]
 ---
 
 STATE: [84] Toul Prince-Bishopric (1049.1.1 -> 1553.1.1) [fill: #687FAD]
@@ -530,7 +540,8 @@ TIMELINE:
 STATE: [86] Trier Archbishopric (962.2.2 -> 1806.8.30) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  962.2.2 -> 1806.8.30: Trier [stadester-Trier-Germany]
+  962.2.2 -> 1629.1.1: Trier [stadester-Trier-Germany]
+  1629.1.1 -> 1806.8.30: Koblenz [stadester-Koblenz-Germany]
 ---
 
 STATE: [87] Utrecht Prince-Bishopric (1025.1.1 -> 1528.10.20) [fill: #4E825E]
@@ -3388,7 +3399,7 @@ TIMELINE:
 STATE: [563] Austrian Empire (1804.8.11 -> 1867.6.12) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1804.8.11 -> 1867.6.12: Wien
+  1804.8.11 -> 1867.6.12: Wien [stadester-Wien-Austria]
 ---
 
 STATE: [564] Austrian Empire (Territories outside German Confederation) (1815.6.9 -> 1866.8.23) [fill: #AEC76D]
@@ -3416,8 +3427,8 @@ TIMELINE:
 STATE: [568] Kingdom of Sardinia (1721.1.1 -> 1861.3.17) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1720.8.24 -> 1798.12.9: Torino
-  1814.5.30 -> 1861.3.17: Torino
+  1720.8.24 -> 1798.12.9: Torino [stadester-Torino-Italy]
+  1814.5.30 -> 1861.3.17: Torino [stadester-Torino-Italy]
 ---
 
 STATE: [569] Kirchberg County (1088.1.1 -> 1511.1.1) [fill: #E0C25E]
@@ -3483,7 +3494,7 @@ TIMELINE:
 STATE: [579] Kingdom of Prussia (1701.1.18 -> 1871.1.18) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1701.1.18 -> 1871.1.18: Berlin
+  1701.1.18 -> 1871.1.18: Berlin [stadester-Berlin-Germany]
 ---
 
 STATE: [580] Kingdom of Prussia (Territories outside the German Confederation) (1815.6.9 -> 1866.8.23) [fill: #283C70]
@@ -3880,7 +3891,8 @@ TIMELINE:
 STATE: [645] Margraviate of Baden (1113.1.1 -> 1803.4.27) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1113.1.1 -> 1803.4.27: Karlsruhe [stadester-Karlsruhe-Germany]
+  1113.1.1 -> 1715.6.17: Baden-Baden [stadester-Baden-Baden-Germany]
+  1715.6.17 -> 1803.4.27: Karlsruhe [stadester-Karlsruhe-Germany]
 ---
 
 STATE: [646] Margraviate of Brandenburg (1158.1.1 -> 1324.1.1) [fill: #AD2845]

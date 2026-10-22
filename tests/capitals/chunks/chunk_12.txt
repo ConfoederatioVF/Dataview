@@ -100,7 +100,7 @@ TIMELINE:
 STATE: [7199] Tikal (-349.1.1 -> 1001.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  -349.1.1 -> 950.1.1: Tikal
+  -349.1.1 -> 950.1.1: Tikal [stadester-Tikal-Guatemala]
 ---
 
 STATE: [7200] Til-Abni (-999.1.1 -> -876.1.1) [fill: #9CBED9]
@@ -130,14 +130,14 @@ TIMELINE:
 STATE: [7204] Portuguese Timor (1521.1.1 -> 1975.11.28) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1769.1.1 -> 1975.11.28: Dili
-  1521.1.1 -> 1769.1.1: Lifau
+  1521.1.1 -> 1769.1.1: Lifau [stadester-Pantemakassar-East Timor]
+  1769.1.1 -> 1975.11.28: Dili [stadester-Dili-East Timor]
 ---
 
 STATE: [7205] Sultanate of Lahej (1732.1.1 -> 1839.1.19) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1732.1.1 -> 1839.1.19: Lahej
+  1732.1.1 -> 1839.1.19: Lahej [stadester-Lahej-Yemen]
 ---
 
 STATE: [7206] Tinde (-699.1.1 -> -477.1.1) [fill: #687FAD]
@@ -149,13 +149,13 @@ TIMELINE:
 STATE: [7207] Tingis (-799.1.1 -> -499.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  -799.1.1 -> -499.1.1: Tangier
+  -799.1.1 -> -499.1.1: Tangier [stadester-Tanger-Morocco]
 ---
 
 STATE: [7208] Tĩnh Hải quân (908.1.1 -> 930.11.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  908.1.1 -> 930.11.1: Hanoi
+  908.1.1 -> 930.11.1: Hanoi [stadester-Ha nôi-Vietnam]
 ---
 
 STATE: [7209] Tinos (1580.1.1 -> 1716.1.1) [fill: #D1453B]
@@ -173,7 +173,7 @@ TIMELINE:
 STATE: [7211] Tír Eoghain (1186.1.1 -> 1608.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1186.1.1 -> 1608.1.1: Dungannon
+  1186.1.1 -> 1608.1.1: Dungannon [stadester-Belfast-United Kingdom]
 ---
 
 STATE: [7212] Tiryns (-849.1.1 -> -459.1.1) [fill: #CF658F]
@@ -191,14 +191,14 @@ TIMELINE:
 STATE: [7214] Tiwanaku Empire (111.1.1 -> 1001.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  111.1.1 -> 1000.1.1: Tiwanaku
+  111.1.1 -> 1000.1.1: Tiwanaku [stadester-Tiwanaku-Bolivia]
 ---
 
 STATE: [7215] Sultanate of Rum (1078.1.1 -> 1243.6.26) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1078.1.1 -> 1097.6.19: Iznik
-  1097.6.19 -> 1243.6.26: Konya
+  1078.1.1 -> 1097.6.19: Iznik [stadester-Iznik-Turkey]
+  1097.6.19 -> 1243.6.26: Konya [stadester-Konya-Turkey]
 ---
 
 STATE: [7216] Tlaxiaco (-399.1.1 -> 1522.1.1) [fill: #D1453B]
@@ -210,25 +210,25 @@ TIMELINE:
 STATE: [7217] Sultanate of Satgaon (1339.1.1 -> 1353.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1339.1.1 -> 1353.1.1: Saptagram
+  1339.1.1 -> 1353.1.1: Saptagram [stadester-Saptagram-India]
 ---
 
 STATE: [7218] Tmutarakan Principality (1133.1.1 -> 1170.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1133.1.1 -> 1170.1.1: Taman
+  1133.1.1 -> 1170.1.1: Taman [stadester-Taman-Indonesia]
 ---
 
 STATE: [7219] Sultanate of Showa (897.1.1 -> 1286.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  897.1.1 -> 1286.1.1: Walale
+  897.1.1 -> 1286.1.1: Walale [stadester-Addis Ababa-Ethiopia]
 ---
 
 STATE: [7220] Sultanate of Singora (1606.1.1 -> 1681.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1606.1.1 -> 1681.1.1: Songkhla
+  1606.1.1 -> 1681.1.1: Songkhla [stadester-Songkhla-Thailand]
 ---
 
 STATE: [7221] Tobago (Great Britain) (1667.1.1 -> 1889.1.1) [fill: #EBBCC5]
@@ -276,13 +276,13 @@ TIMELINE:
 STATE: [7228] Sultanate of Sonargaon (1339.1.1 -> 1353.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1339.1.1 -> 1353.1.1: Sonargaon
+  1339.1.1 -> 1353.1.1: Sonargaon [stadester-Sonargaon-Bangladesh]
 ---
 
 STATE: [7229] Sultanate of Sulu (1579.1.1 -> 1851.4.30) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1579.1.1 -> 1851.4.30: Jolo
+  1579.1.1 -> 1851.4.30: Jolo [stadester-Jolo-Philippines]
 ---
 
 STATE: [7230] Tomis (-632.1.1 -> -71.1.1) [fill: #283C70]
@@ -294,7 +294,7 @@ TIMELINE:
 STATE: [7231] Tondo (901.1.1 -> 1571.5.19) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  901.1.1 -> 1571.5.19: Manila
+  901.1.1 -> 1571.5.19: Manila [stadester-Manila-Philippines]
 ---
 
 STATE: [7232] Tonga (British Protectorate) (1953.1.1 -> 1970.6.4) [fill: #EBBCC5]
@@ -306,19 +306,19 @@ TIMELINE:
 STATE: [7233] Sultanate of Ternate (1258.1.1 -> 1684.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1258.1.1 -> 1684.1.1: Ternate
+  1258.1.1 -> 1684.1.1: Ternate [stadester-Ternate-Indonesia]
 ---
 
 STATE: [7234] Tonk State (Princely State) (1818.1.1 -> 1949.7.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1818.1.1 -> 1949.7.4: Tonk
+  1818.1.1 -> 1949.7.4: Tonk [stadester-Tonk-India]
 ---
 
 STATE: [7235] Tonkin (1883.8.25 -> 1887.10.17) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1883.8.25 -> 1887.10.17: Hanoi
+  1883.8.25 -> 1887.10.17: Hanoi [stadester-Ha nôi-Vietnam]
 ---
 
 STATE: [7236] Toparchy of Jamnia (-3.1.1 -> 7.1.1) [fill: #AD2845]
@@ -335,7 +335,7 @@ REASON: Authentic nomadic tribal confederation of Nine Oghuz tribes across the M
 STATE: [7238] Sultanate of the Maldives (1154.1.1 -> 1559.1.1) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1154.1.1 -> 1559.1.1: Malé
+  1154.1.1 -> 1559.1.1: Malé [ghsl-Mal�-Maldives]
 ---
 
 STATE: [7239] Torawati State (Princely State) (1801.1.1 -> 1948.1.1) [fill: #EBBCC5]
@@ -347,13 +347,13 @@ TIMELINE:
 STATE: [7240] Sultanate of Tuggurt (1466.1.1 -> 1855.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1466.1.1 -> 1855.1.1: Touggourt
+  1466.1.1 -> 1855.1.1: Touggourt [stadester-Touggourt-Algeria]
 ---
 
 STATE: [7241] Tori Fatehpur (Princely State) (1813.1.1 -> 1950.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1813.1.1 -> 1950.1.1: Tori Fatehpur
+  1813.1.1 -> 1950.1.1: Tori Fatehpur [stadester-Fatehpur-India]
 ---
 
 STATE: [7242] Torone (Chalkidike) (-999.1.1 -> -477.1.1) [fill: #E0C25E]
@@ -383,7 +383,7 @@ TIMELINE:
 STATE: [7246] Sumedang Larang (1528.1.1 -> 1621.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1528.1.1 -> 1621.1.1: Sumedang
+  1528.1.1 -> 1621.1.1: Sumedang [stadester-Sumedang-Indonesia]
 ---
 
 STATE: [7247] Sur Empire (1540.5.17 -> 1556.1.1) [fill: #AAC295]
@@ -395,7 +395,7 @@ TIMELINE:
 STATE: [7248] Surakarta Sultanate (1746.1.1 -> 1755.2.13) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1746.1.1 -> 1755.2.13: Surakarta
+  1746.1.1 -> 1755.2.13: Surakarta [stadester-Surakarta-Indonesia]
 ---
 
 STATE: [7249] Torybeia (-450.1.1 -> -399.1.1) [fill: #944481]
@@ -419,7 +419,7 @@ TIMELINE:
 STATE: [7252] Surgana State (1751.1.1 -> 1819.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1751.1.1 -> 1819.1.1: Surgana
+  1751.1.1 -> 1819.1.1: Surgana [stadester-Surgana-India]
 ---
 
 STATE: [7253] Trachis (-799.1.1 -> -195.1.1) [fill: #AD2845]
@@ -449,7 +449,7 @@ TIMELINE:
 STATE: [7257] Tralleis (-699.1.1 -> -559.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  -699.1.1 -> -559.1.1: Aydın
+  -699.1.1 -> -559.1.1: Aydın [stadester-Aydin-Turkey]
 ---
 
 STATE: [7258] Surguja State (1614.1.1 -> 1819.1.1) [fill: #AD2845]
@@ -1265,7 +1265,7 @@ TIMELINE:
 STATE: [7396] United Monarchy of Israel (-1029.1.1 -> -929.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  -1029.1.1 -> -929.1.1: Jerusalem
+  -1029.1.1 -> -929.1.1: Jerusalem [stadester-Yerushalayim-Israel]
 ---
 
 STATE: [7397] United Nations Buffer Zone in Cyprus (1974.8.16 -> 2026.1.1) [fill: #E0A348]
@@ -1443,8 +1443,8 @@ TIMELINE:
 STATE: [7427] Timurid Empire (1364.1.1 -> 1508.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1370.1.1 -> 1405.2.18: Samarkand
-  1405.2.18 -> 1507.1.1: Herat
+  1370.1.1 -> 1405.2.18: Samarkand [stadester-Samarqand-Uzbekistan]
+  1405.2.18 -> 1507.1.1: Herat [stadester-Herât-Afghanistan]
 ---
 
 STATE: [7428] Tlaxcala Confederacy (1349.1.1 -> 1519.10.1) [fill: #405F85]
@@ -1473,7 +1473,7 @@ REASON: Indigenous clan-based confederacy of coastal Southeast Alaska without a 
 STATE: [7432] USSR (1922.12.30 -> 1991.12.12) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1922.12.30 -> 1991.12.26: Moscow
+  1922.12.30 -> 1991.12.26: Moscow [stadester-Moskva-Russia]
 ---
 
 STATE: [7433] USSR (Military Occupation) (1925.11.27 -> 1989.2.15) [fill: #D1453B]
@@ -1508,7 +1508,18 @@ TIMELINE:
 STATE: [7438] USA (1776.7.4 -> 2026.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1776.7.4 -> 2026.1.1: Washington [stadester-Washington-United States]
+  1776.7.4 -> 1776.12.12: Philadelphia [stadester-Philadelphia-United States]
+  1776.12.20 -> 1777.3.4: Baltimore [stadester-Baltimore-United States]
+  1777.3.5 -> 1777.9.18: Philadelphia [stadester-Philadelphia-United States]
+  1777.9.27 -> 1777.9.27: Lancaster [stadester-Lancaster-United States]
+  1777.9.30 -> 1778.6.27: York [stadester-York-United States]
+  1778.7.2 -> 1783.6.21: Philadelphia [stadester-Philadelphia-United States]
+  1783.6.30 -> 1783.11.4: Princeton [stadester-Princeton-United States]
+  1783.11.26 -> 1784.8.19: Annapolis [stadester-Annapolis-United States]
+  1784.11.1 -> 1784.12.24: Trenton [stadester-Trenton-United States]
+  1785.1.11 -> 1790.8.12: New York [stadester-New-York-United States]
+  1790.12.6 -> 1800.5.14: Philadelphia [stadester-Philadelphia-United States]
+  1800.11.17 -> 2026.1.1: Washington [stadester-Washington-United States]
 ---
 
 STATE: [7439] Tomara Dynasty (901.1.1 -> 1151.1.1) [fill: #EBBCC5]
@@ -1806,7 +1817,7 @@ TIMELINE:
 STATE: [7488] Vichy France (1940.6.25 -> 1942.11.27) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1940.7.10 -> 1944.8.20: Vichy
+  1940.7.10 -> 1944.8.20: Vichy [stadester-Vichy-France]
 ---
 
 STATE: [7489] Victoria (1851.7.1 -> 1901.1.1) [fill: #EBBCC5]
@@ -1842,14 +1853,14 @@ TIMELINE:
 STATE: [7494] United Kingdom of Portugal, Brazil and the Algarves (1815.12.16 -> 1825.8.29) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1815.12.16 -> 1821.4.26: Rio de Janeiro
-  1821.4.26 -> 1825.8.29: Lisbon
+  1815.12.16 -> 1821.4.26: Rio de Janeiro [stadester-Rio de Janeiro-Brazil]
+  1821.4.26 -> 1825.8.29: Lisbon [stadester-Lisboa-Portugal]
 ---
 
 STATE: [7495] United Kingdom of the Netherlands (1815.3.16 -> 1839.4.19) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1815.3.16 -> 1839.4.19: Amsterdam
+  1815.3.16 -> 1839.4.19: Amsterdam [stadester-Amsterdam-Netherlands]
 ---
 
 STATE: [7496] United Provinces of New Granada (1811.11.27 -> 1816.7.10) [fill: #283C70]
@@ -2235,7 +2246,7 @@ TIMELINE:
 STATE: [7560] Weimar Republic (1918.11.9 -> 1933.1.30) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1918.11.9 -> 1933.1.30: Berlin
+  1918.11.9 -> 1933.1.30: Berlin [stadester-Berlin-Germany]
 ---
 
 STATE: [7561] Welsh Rebels (1400.9.16 -> 1416.1.1) [fill: #4E825E]
@@ -2312,9 +2323,9 @@ TIMELINE:
 STATE: [7573] Vijayanagara Empire (1336.1.1 -> 1647.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1336.1.1 -> 1565.1.26: Hampi
-  1565.1.26 -> 1592.1.1: Penukonda
-  1592.1.1 -> 1646.1.1: Chandragiri
+  1336.1.1 -> 1565.1.26: Hampi [stadester-Vijayanagara-India]
+  1565.1.26 -> 1592.1.1: Penukonda [stadester-Hindupur-India]
+  1592.1.1 -> 1646.1.1: Chandragiri [stadester-Tirupati-India]
 ---
 
 STATE: [7574] Western Chu (-205.1.1 -> -201.1.1) [fill: #9CBED9]
@@ -2398,7 +2409,8 @@ TIMELINE:
 STATE: [7587] Western Roman Empire (395.1.17 -> 476.9.4) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  395.1.17 -> 476.9.4: Ravenna [stadester-Ravenna-Italy]
+  395.1.17 -> 402.1.1: Mediolanum [stadester-Milano-Italy]
+  402.1.1 -> 476.9.4: Ravenna [stadester-Ravenna-Italy]
 ---
 
 STATE: [7588] Western Roman Empire (Julius Nepos) (475.9.1 -> 480.12.9) [fill: #405F85]
@@ -2517,7 +2529,7 @@ TIMELINE:
 STATE: [7607] Wu Zhou (690.10.17 -> 705.2.21) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  690.10.17 -> 705.2.21: Luoyang
+  690.10.17 -> 705.2.21: Luoyang [stadester-Luoyang-China]
 ---
 
 STATE: [7608] Wudu Kingdom (449.1.1 -> 581.1.1) [fill: #283C70]
@@ -2619,7 +2631,7 @@ TIMELINE:
 STATE: [7624] Xia Dynasty (-2069.1.1 -> -1599.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -2069.1.1 -> -1599.1.1: Luoyang
+  -2069.1.1 -> -1599.1.1: Luoyang [stadester-Luoyang-China]
 ---
 
 STATE: [7625] Xian (-770.1.1 -> 62.1.1) [fill: #E0C25E]
@@ -2648,7 +2660,7 @@ TIMELINE:
 STATE: [7629] Xin Dynasty (9.1.10 -> 23.10.5) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  9.1.10 -> 23.10.5: Xi'an
+  9.1.10 -> 23.10.5: Xi'an [stadester-Xi'an-China]
 ---
 
 STATE: [7630] Xing (-1005.1.1 -> -631.1.1) [fill: #AEC76D]
@@ -2767,8 +2779,8 @@ TIMELINE:
 STATE: [7650] Western Chalukya Empire (974.1.1 -> 1190.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  974.1.1 -> 1042.1.1: Malkhed
-  1042.1.1 -> 1190.1.1: Basavakalyan
+  974.1.1 -> 1042.1.1: Malkhed [stadester-Manyakheta-India]
+  1042.1.1 -> 1190.1.1: Basavakalyan [ghsl-Basavakalyana-India]
 ---
 
 STATE: [7651] Western Kara-Khanid Khanate (1042.1.1 -> 1096.1.1) [fill: #944481]
@@ -2876,7 +2888,7 @@ TIMELINE:
 STATE: [7668] Western Xia (983.1.1 -> 1210.2.1) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  983.1.1 -> 1210.2.1: Yinchuan
+  983.1.1 -> 1210.2.1: Yinchuan [stadester-Yinchuan-China]
 ---
 
 STATE: [7669] Yilo Krobo (1736.1.1 -> 1902.1.1) [fill: #405F85]
@@ -3040,7 +3052,7 @@ REASON: Authentic nomadic Yenisei Kyrgyz Khaganate centered in the upper Yenisei
 STATE: [7696] Yuan Dynasty (1261.1.1 -> 1371.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1261.1.1 -> 1371.1.1: Beijing
+  1261.1.1 -> 1371.1.1: Beijing [stadester-Beijing-China]
 ---
 
 STATE: [7697] Yucatan Republic (1841.3.16 -> 1848.8.17) [fill: #4E825E]
@@ -3208,7 +3220,8 @@ TIMELINE:
 STATE: [7724] Zhou Dynasty (-1045.1.1 -> -248.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -1045.1.1 -> -248.1.1: Haojing [stadester-Xi-an-China]
+  -1045.1.1 -> -771.1.1: Haojing [stadester-Xi-an-China]
+  -771.1.1 -> -248.1.1: Luoyi [stadester-Luoyang-China]
 ---
 
 STATE: [7725] Zhoulai (-799.1.1 -> -527.1.1) [fill: #9CBED9]
@@ -3351,13 +3364,17 @@ REASON: Armed loyalist partisans of ousted president Zviad Gamsakhurdia in weste
 STATE: [7748] Kingdom of Naples (Austria) (1714.3.7 -> 1734.11.30) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1714.3.7 -> 1734.11.30: Naples
+  1714.3.7 -> 1734.11.30: Naples [stadester-Napoli-Italy]
 ---
 
 STATE: [7749] Byzantine Empire (610.10.5 -> 1453.7.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  610.10.5 -> 1453.7.1: Istanbul [stadester-Istanbul-Turkey]
+  610.10.5 -> 663.1.1: Constantinople [stadester-Istanbul-Turkey]
+  663.1.1 -> 668.7.15: Syracuse [stadester-Siracusa-Italy]
+  668.7.15 -> 1204.4.13: Constantinople [stadester-Istanbul-Turkey]
+  1204.4.13 -> 1261.7.25: Nicaea [stadester-Iznik-Turkey]
+  1261.7.25 -> 1453.7.1: Constantinople [stadester-Istanbul-Turkey]
 ---
 
 STATE: [7750] Cattaro (481.1.1 -> 1155.1.1) [fill: #E0A348]
@@ -3483,9 +3500,9 @@ TIMELINE:
 STATE: [7770] Kingdom of Italy (1861.3.17 -> 1946.6.10) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1861.3.17 -> 1865.2.3: Torino
-  1865.2.3 -> 1871.2.3: Florence
-  1871.2.3 -> 1946.6.10: Rome
+  1861.3.17 -> 1865.2.3: Torino [stadester-Torino-Italy]
+  1865.2.3 -> 1871.2.3: Florence [stadester-Firenze-Italy]
+  1871.2.3 -> 1946.6.10: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [7771] Kingdom of Italy (French Client) (1805.3.17 -> 1814.5.30) [fill: #B5ABCC]
@@ -3601,7 +3618,7 @@ TIMELINE:
 STATE: [7790] Roman Republic (Napoleonic) (1798.2.15 -> 1799.9.30) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1798.2.15 -> 1799.9.30: Rome
+  1798.2.15 -> 1799.9.30: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [7791] Slavic Tribes (962.2.2 -> 1246.1.1) [fill: #90A16A]
@@ -3666,7 +3683,7 @@ TIMELINE:
 STATE: [7801] Vatican City State (1929.6.7 -> 2026.1.1) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1929.6.7 -> 2026.1.1: Rome
+  1929.6.7 -> 2026.1.1: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [7802] Veglia (481.1.1 -> 1002.1.1) [fill: #AEC76D]
@@ -3780,7 +3797,7 @@ TIMELINE:
 STATE: [7820] Roman Republic (1849) (1849.2.9 -> 1849.7.2) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1849.2.9 -> 1849.7.2: Rome
+  1849.2.9 -> 1849.7.2: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [7821] Free City of Danzig (Napoleonic) (1807.7.9 -> 1813.1.1) [fill: #B5ABCC]

@@ -102,7 +102,7 @@ TIMELINE:
 STATE: [6546] Selangor Sultanate (1744.1.1 -> 1874.1.20) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1744.1.1 -> 1874.1.20: Kuala Lumpur [stadester-Kuala Lumpur-Malaysia]
+  1744.1.1 -> 1874.1.20: Kuala Selangor [stadester-Kuala-Selangor-Malaysia]
 ---
 
 STATE: [6547] Seleinous (-849.1.1 -> -337.1.1) [fill: #B37B50]
@@ -125,7 +125,8 @@ TIMELINE:
 STATE: [6550] Selengor (Great Britain) (1874.1.20 -> 1896.7.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1874.1.20 -> 1896.7.1: Kuala Lumpur [stadester-Kuala Lumpur-Malaysia]
+  1874.1.20 -> 1880.3.1: Klang [stadester-Klang-Malaysia]
+  1880.3.1 -> 1896.7.1: Kuala Lumpur [stadester-Kuala-Lumpur-Malaysia]
 ---
 
 STATE: [6551] Seleucid Kingdom (-313.1.1 -> -82.1.1) [fill: #E0C25E]
@@ -173,20 +174,20 @@ TIMELINE:
 STATE: [6558] Pudukkottai State (1681.1.1 -> 1801.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1681.1.1 -> 1801.1.1: Pudukkottai
+  1681.1.1 -> 1801.1.1: Pudukkottai [stadester-Pudukkottai-India]
 ---
 
 STATE: [6559] Senegal (French Colony) (1660.1.1 -> 1959.4.4) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1660.1.1 -> 1902.1.1: Saint-Louis
-  1902.1.1 -> 1959.4.4: Dakar
+  1660.1.1 -> 1902.1.1: Saint-Louis [stadester-Saint-Louis-Senegal]
+  1902.1.1 -> 1959.4.4: Dakar [stadester-Dakar-Senegal]
 ---
 
 STATE: [6560] Senegambia Confederation (1982.2.1 -> 1989.9.30) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1982.2.1 -> 1989.9.30: Dakar
+  1982.2.1 -> 1989.9.30: Dakar [stadester-Dakar-Senegal]
 ---
 
 STATE: [6561] Senussi (1915.1.1 -> 1918.12.1) [fill: #90A16A]
@@ -198,7 +199,7 @@ TIMELINE:
 STATE: [6562] Qara Khitai (1125.1.1 -> 1219.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1125.1.1 -> 1219.1.1: Balasagun
+  1125.1.1 -> 1219.1.1: Balasagun [stadester-Tokmok-Kyrgyzstan]
 ---
 
 STATE: [6563] Serb-Hungarian Baranya-Baja Republic (1921.8.14 -> 1921.8.20) [fill: #AD2845]
@@ -237,13 +238,13 @@ REASON: Serbian royal army military administration in Macedonia during the Balka
 STATE: [6569] Qarmatians (900.1.1 -> 1079.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  900.1.1 -> 1079.1.1: Al-Hasa
+  900.1.1 -> 1079.1.1: Al-Hasa [stadester-Hufûf-Saudi Arabia]
 ---
 
 STATE: [6570] Qasim Khanate (1453.1.1 -> 1553.1.1) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1453.1.1 -> 1553.1.1: Kasimov
+  1453.1.1 -> 1553.1.1: Kasimov [stadester-Kasimov-Russia]
 ---
 
 STATE: [6571] Seriphos (-699.1.1 -> -199.1.1) [fill: #AD2845]
@@ -279,13 +280,13 @@ TIMELINE:
 STATE: [6576] Quilombo dos Palmares (1606.1.1 -> 1695.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1606.1.1 -> 1695.1.1: União dos Palmares
+  1606.1.1 -> 1695.1.1: União dos Palmares [stadester-União dos Palmares-Brazil]
 ---
 
 STATE: [6577] Radhanpur State (1754.1.1 -> 1813.12.16) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1754.1.1 -> 1813.12.16: Radhanpur
+  1754.1.1 -> 1813.12.16: Radhanpur [ghsl-Radhanpur-India]
 ---
 
 STATE: [6578] Severo (193.3.28 -> 193.6.1) [fill: #D1453B]
@@ -309,7 +310,7 @@ TIMELINE:
 STATE: [6581] Raghogarh State (1674.1.1 -> 1819.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1674.1.1 -> 1819.1.1: Raghogarh
+  1674.1.1 -> 1819.1.1: Raghogarh [stadester-Guna-India]
 ---
 
 STATE: [6582] Seychelles (Great Britain) (1794.5.17 -> 1977.1.1) [fill: #EBBCC5]
@@ -326,49 +327,49 @@ REASON: Allied army under Wellington and Blücher invading France after Waterloo
 STATE: [6584] Raigarh State (1626.1.1 -> 1851.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1626.1.1 -> 1851.1.1: Raigarh
+  1626.1.1 -> 1851.1.1: Raigarh [stadester-Raigarh-India]
 ---
 
 STATE: [6585] Rairakhol State (1751.1.1 -> 1802.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1751.1.1 -> 1802.1.1: Rairakhol
+  1751.1.1 -> 1802.1.1: Rairakhol [stadester-Sambalpur-India]
 ---
 
 STATE: [6586] Rajgarh State (1682.1.1 -> 1802.1.1) [fill: #AAC295]
 STATUS: CAPITAL
 TIMELINE:
-  1682.1.1 -> 1802.1.1: Rajgarh
+  1682.1.1 -> 1802.1.1: Rajgarh [stadester-Raigarh-India]
 ---
 
 STATE: [6587] Rajkot State (1621.1.1 -> 1851.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1621.1.1 -> 1851.1.1: Rajkot
+  1621.1.1 -> 1851.1.1: Rajkot [stadester-Râjkot-India]
 ---
 
 STATE: [6588] Rajpipla State (1341.1.1 -> 1801.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1341.1.1 -> 1801.1.1: Rajpipla
+  1341.1.1 -> 1801.1.1: Rajpipla [ghsl-Rajpipla-India]
 ---
 
 STATE: [6589] Ramdurg State (1800.1.1 -> 1830.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1800.1.1 -> 1830.1.1: Ramdurg
+  1800.1.1 -> 1830.1.1: Ramdurg [ghsl-Ramdurg-India]
 ---
 
 STATE: [6590] Ramnad State (1602.1.1 -> 1796.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1602.1.1 -> 1796.1.1: Ramanathapuram
+  1602.1.1 -> 1796.1.1: Ramanathapuram [ghsl-Ramanathapuram-India]
 ---
 
 STATE: [6591] Shahpura State (Princely State) (1801.1.1 -> 1950.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1801.1.1 -> 1950.1.1: Shahpura
+  1801.1.1 -> 1950.1.1: Shahpura [ghsl-Shahpura-#N/A]
 ---
 
 STATE: [6592] Shailodbhava Dynasty (621.1.1 -> 776.1.1) [fill: #944481]
@@ -392,19 +393,19 @@ TIMELINE:
 STATE: [6595] Rampur State (1774.7.10 -> 1802.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1774.7.10 -> 1802.1.1: Rampur
+  1774.7.10 -> 1802.1.1: Rampur [stadester-Râmpur-India]
 ---
 
 STATE: [6596] Ranasan State (1651.1.1 -> 1802.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1651.1.1 -> 1802.1.1: Ranasan
+  1651.1.1 -> 1802.1.1: Ranasan [stadester-Himmatnagar-India]
 ---
 
 STATE: [6597] Ranpur State (1308.1.1 -> 1804.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1308.1.1 -> 1804.1.1: Ranpur
+  1308.1.1 -> 1804.1.1: Ranpur [stadester-Ranpur-India]
 ---
 
 STATE: [6598] Shan States Confederation (1527.3.15 -> 1607.1.1) [fill: #EBBCC5]
@@ -416,7 +417,7 @@ TIMELINE:
 STATE: [6599] Shang Dynasty (-1599.1.1 -> -1045.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -1599.1.1 -> -1045.1.1: Anyang
+  -1599.1.1 -> -1045.1.1: Anyang [stadester-Anyang-China]
 ---
 
 STATE: [6600] Shanghai International Settlement (1863.9.21 -> 1941.12.8) [fill: #EBBCC5]
@@ -440,7 +441,7 @@ TIMELINE:
 STATE: [6603] Rassids (898.1.1 -> 1063.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  898.1.1 -> 1063.1.1: Sa'dah
+  898.1.1 -> 1063.1.1: Sa'dah [stadester-Sa'dâh-Yemen]
 ---
 
 STATE: [6604] Shavasha (1701.1.1 -> 1890.1.1) [fill: #AD2845]
@@ -625,7 +626,7 @@ TIMELINE:
 STATE: [6634] Shu Han (222.1.1 -> 263.12.17) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  222.1.1 -> 263.12.17: Chengdu
+  222.1.1 -> 263.12.17: Chengdu [stadester-Chengdu-China]
 ---
 
 STATE: [6635] Shugab (-999.1.1 -> -899.1.1) [fill: #E0C25E]
@@ -660,7 +661,7 @@ REASON: Mass peasant insurgent movement led by Huang Chao that sacked major Tang
 STATE: [6640] Shunga Empire (-184.1.1 -> -74.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  -184.1.1 -> -74.1.1: Patna
+  -184.1.1 -> -74.1.1: Patna [stadester-Patna-India]
 ---
 
 STATE: [6641] Shupria (-1299.1.1 -> -1274.1.1) [fill: #944481]
@@ -798,7 +799,7 @@ TIMELINE:
 STATE: [6663] Silla (-56.1.1 -> 936.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  -56.1.1 -> 936.1.1: Gyeongju
+  -56.1.1 -> 936.1.1: Gyeongju [stadester-Kumsõng-South Korea]
 ---
 
 STATE: [6664] Simba Rebels (1964.5.25 -> 1965.12.1) [fill: #687FAD]
@@ -1231,7 +1232,7 @@ TIMELINE:
 STATE: [6736] Republic of the Seven United Netherlands (1581.7.26 -> 1795.1.19) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1581.7.26 -> 1795.1.19: The Hague
+  1581.7.26 -> 1795.1.19: The Hague [stadester-Gravenhage, 's--Netherlands]
 ---
 
 STATE: [6737] Sophene (-188.1.1 -> -94.1.1) [fill: #9CBED9]
@@ -1261,7 +1262,7 @@ TIMELINE:
 STATE: [6741] Republic of Gran Colombia (1819.12.17 -> 1831.11.19) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1819.12.17 -> 1831.11.19: Bogotá
+  1819.12.17 -> 1831.11.19: Bogotá [stadester-Bogotá-Colombia]
 ---
 
 STATE: [6742] Republica de Entre Rios (1820.9.29 -> 1821.9.28) [fill: #4E825E]
@@ -1314,7 +1315,7 @@ TIMELINE:
 STATE: [6750] South Russia (Whites) (1919.1.8 -> 1920.11.22) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1919.1.8 -> 1920.11.22: Taganrog
+  1919.1.8 -> 1920.11.22: Taganrog [stadester-Taganrog-Russia]
 ---
 
 STATE: [6751] South Seas Mandate (1919.6.28 -> 1944.11.27) [fill: #B37B50]
@@ -1383,7 +1384,7 @@ TIMELINE:
 STATE: [6762] Southern Qi (479.5.31 -> 502.4.30) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  479.5.31 -> 502.4.30: Nanjing
+  479.5.31 -> 502.4.30: Nanjing [stadester-Nanjing-China]
 ---
 
 STATE: [6763] Southern Rhodesia (1923.9.12 -> 1965.11.11) [fill: #EBBCC5]
@@ -1508,7 +1509,9 @@ TIMELINE:
 STATE: [6783] Safavid dynasty (1502.1.1 -> 1736.1.22) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1502.1.1 -> 1736.1.22: Esfahân [stadester-Esfahân-Iran]
+  1502.1.1 -> 1555.5.29: Tabriz [stadester-Tabriz-Iran]
+  1555.5.29 -> 1598.1.1: Qazvin [stadester-Qazvin-Iran]
+  1598.1.1 -> 1736.1.22: Esfahân [stadester-Esfahân-Iran]
 ---
 
 STATE: [6784] Spanish Guinea (1927.1.1 -> 1968.10.12) [fill: #E0C25E]
@@ -2346,7 +2349,10 @@ TIMELINE:
 STATE: [6923] Seljuk Empire (1036.1.1 -> 1158.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1036.1.1 -> 1158.1.1: Esfahân [stadester-Esfahân-Iran]
+  1036.1.1 -> 1043.1.1: Nishapur [stadester-Nishapur-Iran]
+  1043.1.1 -> 1051.1.1: Rey [stadester-Rayy-Iran]
+  1051.1.1 -> 1118.1.1: Esfahân [stadester-Esfahân-Iran]
+  1118.1.1 -> 1158.1.1: Hamadan [stadester-Hamadan-Iran]
 ---
 
 STATE: [6924] Sena Dynasty (1151.1.1 -> 1231.1.1) [fill: #405F85]
@@ -2364,7 +2370,9 @@ TIMELINE:
 STATE: [6926] Serbian Despotate (1403.1.1 -> 1459.6.20) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1403.1.1 -> 1459.6.20: Belgrade [stadester-Beograd-Serbia]
+  1403.1.1 -> 1427.7.19: Belgrade [stadester-Beograd-Serbia]
+  1427.7.19 -> 1430.1.1: Krusevac [stadester-Krusevac-Serbia]
+  1430.1.1 -> 1459.6.20: Smederevo [stadester-Smederevo-Serbia]
 ---
 
 STATE: [6927] Serbian Empire (1346.4.16 -> 1371.9.26) [fill: #B37B50]
@@ -3189,7 +3197,10 @@ TIMELINE:
 STATE: [7066] Tang Dynasty (618.6.18 -> 907.6.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  618.6.18 -> 907.6.1: Xi'an [stadester-Xi'an-China]
+  618.6.18 -> 684.10.19: Chang'an [stadester-Xian-China]
+  684.10.19 -> 705.3.3: Luoyang [stadester-Luoyang-China]
+  705.3.3 -> 904.1.1: Chang'an [stadester-Xian-China]
+  904.1.1 -> 907.6.1: Luoyang [stadester-Luoyang-China]
 ---
 
 STATE: [7067] Tang mb /Donga and Mantung (1501.1.1 -> 1901.1.1) [fill: #B5ABCC]
@@ -3709,7 +3720,7 @@ TIMELINE:
 STATE: [7153] Thebai (Boiotia) (-849.1.1 -> -456.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  -849.1.1 -> -456.1.1: Thívai
+  -849.1.1 -> -456.1.1: Thívai [stadester-Thiva-Greece]
 ---
 
 STATE: [7154] Thebai (Ionia) (-699.1.1 -> -559.1.1) [fill: #4E825E]
@@ -3727,13 +3738,13 @@ TIMELINE:
 STATE: [7156] Thebes (Egypt) (-1621.1.1 -> -720.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  -1621.1.1 -> -720.1.1: Luxor
+  -1621.1.1 -> -720.1.1: Luxor [stadester-Uqsur, Al--Egypt]
 ---
 
 STATE: [7157] Thebes (Mycenean Period) (-1599.1.1 -> -1099.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  -1599.1.1 -> -1099.1.1: Thívai
+  -1599.1.1 -> -1099.1.1: Thívai [stadester-Thiva-Greece]
 ---
 
 STATE: [7158] Thelphousa (-699.1.1 -> -369.1.1) [fill: #405F85]

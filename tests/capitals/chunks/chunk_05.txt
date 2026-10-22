@@ -328,7 +328,7 @@ TIMELINE:
 STATE: [2665] Fisikana Kingdom (1751.1.1 -> 1825.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1751.1.1 -> 1825.1.1: Ambohimahasoa
+  1751.1.1 -> 1825.1.1: Ambohimahasoa [stadester-Fianarantsoa-Madagascar]
 ---
 
 STATE: [2666] Ceuta (Portugal) (1415.8.21 -> 1641.1.1) [fill: #90A16A]
@@ -707,7 +707,8 @@ STATE: [2729] French Indochina (1887.10.17 -> 1953.11.9) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
   1887.10.17 -> 1902.1.1: Saigon [stadester-Thành Phô Hô' Chí Minh-Vietnam]
-  1902.1.1 -> 1953.11.9: Hanoi [stadester-Ha nôi-Vietnam]
+  1902.1.1 -> 1945.3.9: Hanoi [stadester-Ha nôi-Vietnam]
+  1945.3.9 -> 1953.11.9: Saigon [stadester-Thành Phô Hô' Chí Minh-Vietnam]
 ---
 
 STATE: [2730] French Lebanon (Vichy France) (1940.7.10 -> 1941.7.12) [fill: #283C70]
@@ -1142,7 +1143,7 @@ TIMELINE:
 STATE: [2802] Gei-Khauan (1815.1.1 -> 1894.3.20) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1815.1.1 -> 1894.3.20: Naosanabis
+  1815.1.1 -> 1894.3.20: Naosanabis [stadester-Windhoek-Namibia]
 ---
 
 STATE: [2803] Gela (-649.1.1 -> -310.1.1) [fill: #AEC76D]
@@ -2275,7 +2276,7 @@ TIMELINE:
 STATE: [2992] Hambuu (1501.1.1 -> 1887.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1501.1.1 -> 1887.1.1: Mitsoudjé
+  1501.1.1 -> 1887.1.1: Mitsoudjé [stadester-Moroni-Comoros]
 ---
 
 STATE: [2993] Principality of Wallachia (Russia Protectorate) (1829.9.14 -> 1853.6.1) [fill: #D1453B]
@@ -2317,8 +2318,8 @@ TIMELINE:
 STATE: [2999] Han Dynasty (-205.1.1 -> 220.12.11) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -205.1.1 -> 9.1.10: Xi'an
-  25.1.1 -> 220.12.11: Luoyang
+  -205.1.1 -> 9.1.10: Xi'an [stadester-Xi'an-China]
+  25.1.1 -> 220.12.11: Luoyang [stadester-Luoyang-China]
 ---
 
 STATE: [3000] Hann (-205.1.1 -> -205.4.1) [fill: #D1453B]
@@ -2366,7 +2367,7 @@ TIMELINE:
 STATE: [3007] Harjumaa (1001.1.1 -> 1220.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1001.1.1 -> 1220.1.1: Varbola
+  1001.1.1 -> 1220.1.1: Varbola [stadester-Rapla-Estonia]
 ---
 
 STATE: [3008] Harpagion (-599.1.1 -> -386.1.1) [fill: #4E825E]
@@ -3400,7 +3401,8 @@ TIMELINE:
 STATE: [3181] Kingdom of Cambodia (Siam) (1594.1.3 -> 1841.11.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1594.1.3 -> 1841.11.1: Phnom Penh [stadester-Phnom Penh-Cambodia]
+  1594.1.3 -> 1618.1.1: Srei Santhor [stadester-Kampong-Cham-Cambodia]
+  1618.1.1 -> 1841.11.1: Oudong [stadester-Oudong-Cambodia]
 ---
 
 STATE: [3182] Kingdom of Champasak (Siam) (1779.1.1 -> 1829.1.1) [fill: #283C70]

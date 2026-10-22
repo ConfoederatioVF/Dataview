@@ -844,7 +844,7 @@ let getStateCapitalInfo = function (
   arg0_state_id: number,
   arg1_year_frac: number,
   arg2_entity_name?: string
-): { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean } {
+): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number } {
   //Convert from parameters
   let entity_name = arg2_entity_name
   let state_id = arg0_state_id
@@ -857,9 +857,14 @@ let getStateCapitalInfo = function (
   let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
   let clean_e: string
   let diff: number
+  let effective_state_id: number
   let file_path: string
-  let info: { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
-  let res_info: { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }
+  let fill_color: string | undefined
+  let info: { acapital: boolean; fill?: string; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
+  let is_name_plausible: boolean = true
+  let is_state_temporal_match: boolean = true
+  let matched_state_id: number | undefined
+  let res_info: { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number }
   let state: any
   let state_bbox: [number, number, number, number] | undefined
   let states_path: string
@@ -883,9 +888,23 @@ let getStateCapitalInfo = function (
     }
   }
 
-  info = state_capitals_data ? state_capitals_data[state_id] : undefined
+  state = AtlasBordersService.getStateById(state_id)
+  if (state && (state.start_year !== undefined || state.stop_year !== undefined)) {
+    if (year_frac < (state.start_year ?? -99999) - 5 || year_frac > (state.stop_year ?? 99999) + 5)
+      is_state_temporal_match = false
+  }
+  if (state && entity_name) {
+    let s_name = (state.name || '').toLowerCase().trim()
+    let e_name = entity_name.toLowerCase().trim()
+    if (!s_name.includes(e_name) && !e_name.includes(s_name))
+      is_name_plausible = false
+  }
 
-  //Fallback to match by entity name if state_id has no direct capital record
+  if (is_state_temporal_match && is_name_plausible) {
+    info = state_capitals_data ? state_capitals_data[state_id] : undefined
+  }
+
+  //Fallback to match by entity name if state_id has no direct capital record or belongs to another polity
   if (!info && entity_name) {
     if (!states_name_map) {
       states_name_map = new Map()
@@ -959,26 +978,30 @@ let getStateCapitalInfo = function (
         let candidate_info = state_capitals_data[candidates[k].state_id]
         if (candidate_info) {
           info = candidate_info
+          matched_state_id = candidates[k].state_id
           break
         }
       }
     }
   }
 
+  effective_state_id = matched_state_id || state_id
+  state = AtlasBordersService.getStateById(effective_state_id)
+  fill_color = state?.fill_color || (info as any)?.fill
+
   if (!info) {
-    res_info = { is_acapital: false }
+    res_info = { fill_color: state?.fill_color, is_acapital: false, state_id: effective_state_id }
     capital_info_cache.set(cache_k, res_info)
     return res_info
   }
 
   if (info.acapital) {
-    res_info = { is_acapital: true }
+    res_info = { fill_color: fill_color, is_acapital: true, state_id: effective_state_id }
     capital_info_cache.set(cache_k, res_info)
     return res_info
   }
 
   if (info.timeline && info.timeline.length > 0) {
-    state = AtlasBordersService.getStateById(state_id)
     state_bbox = state?.bbox
 
     //Filter out timeline items whose cities are geographically impossible for this state
@@ -999,7 +1022,7 @@ let getStateCapitalInfo = function (
     }
 
     if (valid_timeline.length === 0) {
-      res_info = { is_acapital: false }
+      res_info = { fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
       capital_info_cache.set(cache_k, res_info)
       return res_info
     }
@@ -1017,7 +1040,7 @@ let getStateCapitalInfo = function (
               contemp.key = by_name.key
           }
         }
-        res_info = { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, is_acapital: false }
+        res_info = { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
         capital_info_cache.set(cache_k, res_info)
         return res_info
       }
@@ -1034,7 +1057,7 @@ let getStateCapitalInfo = function (
       }
     }
     if (year_frac < best_iv.start_frac - 2 || year_frac > best_iv.stop_frac + 2) {
-      res_info = { is_acapital: true }
+      res_info = { fill_color: fill_color, is_acapital: true, state_id: effective_state_id }
       capital_info_cache.set(cache_k, res_info)
       return res_info
     }
@@ -1049,12 +1072,12 @@ let getStateCapitalInfo = function (
           contemp_best.key = by_name.key
       }
     }
-    res_info = { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, is_acapital: false }
+    res_info = { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
     capital_info_cache.set(cache_k, res_info)
     return res_info
   }
 
-  res_info = { is_acapital: false }
+  res_info = { fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
   capital_info_cache.set(cache_k, res_info)
 
   //Return statement
@@ -1899,6 +1922,7 @@ export class AtlasBordersService {
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
         let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
+        let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
 
         features.push({
           bbox: geom_bbox,
@@ -1912,7 +1936,10 @@ export class AtlasBordersService {
             caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
             caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
             capname: cap_info.capname,
+            color: feat_fill,
             date: UfDate.formatDate(resolved_date_obj),
+            fillColor: feat_fill,
+            fill_color: feat_fill,
             flags: current_props.flags,
             id: ent_id,
             is_acapital: cap_info.is_acapital,
@@ -1953,8 +1980,11 @@ export class AtlasBordersService {
 
         let gw = p.gwcode
         let keyframes = gw !== undefined ? cached_cshapes_keyframes_by_gwcode.get(gw) : undefined
-        let cs_cap_coords = (p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined
-        let cs_cap_key = cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined
+        let cap_info = getStateCapitalInfo(p.gwcode, target_year, p.cntry_name)
+        let cs_cap_coords = cap_info.cap_coords || ((p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined)
+        let cs_cap_name = cap_info.capname || p.capname
+        let cs_cap_key = cap_info.capkey || (cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined)
+        let cs_fill = cap_info.fill_color || (cap_info.state_id ? AtlasBordersService.getStateById(cap_info.state_id)?.fill_color : undefined)
 
         features.push({
           bbox: geom_bbox,
@@ -1965,9 +1995,10 @@ export class AtlasBordersService {
             area: p.area,
             cap_coords: cs_cap_coords,
             capkey: cs_cap_key,
-            caplat: p.caplat,
-            caplong: p.caplong,
-            capname: p.capname,
+            caplat: cs_cap_coords ? cs_cap_coords[1] : p.caplat,
+            caplong: cs_cap_coords ? cs_cap_coords[0] : p.caplong,
+            capname: cs_cap_name,
+            color: cs_fill,
             date: UfDate.formatDate({
               day: p.gwsday || 1,
               month: p.gwsmonth || 1,
@@ -1975,15 +2006,18 @@ export class AtlasBordersService {
             }),
             endDate: p.gwedate,
             endYear: p.gweyear,
+            fillColor: cs_fill,
+            fill_color: cs_fill,
             gwcode: p.gwcode,
             id: p.gwcode,
+            is_acapital: cap_info.is_acapital,
             iso_a3: p.cntry_name,
             keyframes: keyframes || [],
             name: p.cntry_name,
             name_long: p.cntry_name,
             startDate: p.gwsdate,
             startYear: p.gwsyear,
-            state_id: p.gwcode,
+            state_id: cap_info.state_id || p.gwcode,
           },
           type: 'Feature',
         })
@@ -2045,6 +2079,7 @@ export class AtlasBordersService {
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(ent_id)
         let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
+        let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
 
         features.push({
           bbox: geom_bbox,
@@ -2055,7 +2090,10 @@ export class AtlasBordersService {
             cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
             capname: cap_info.capname,
+            color: feat_fill,
             date: UfDate.formatDate(resolved_date_obj),
+            fillColor: feat_fill,
+            fill_color: feat_fill,
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
@@ -2308,13 +2346,13 @@ export class AtlasBordersService {
    * @param {number} arg1_year_frac
    * @param {string} [arg2_entity_name]
    *
-   * @returns {{ capkey?: string; capname?: string; is_acapital: boolean }}
+   * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean }}
    */
   static getStateCapitalInfo (
     arg0_state_id: number,
     arg1_year_frac: number,
     arg2_entity_name?: string
-  ): { capkey?: string; capname?: string; is_acapital: boolean } {
+  ): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean } {
     return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name)
   }
 

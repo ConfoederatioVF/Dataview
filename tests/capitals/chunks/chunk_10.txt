@@ -138,7 +138,7 @@ TIMELINE:
 STATE: [5900] Lunavada State (1435.1.1 -> 1827.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1435.1.1 -> 1827.1.1: Lunawada
+  1435.1.1 -> 1827.1.1: Lunawada [ghsl-Lunavada-India]
 ---
 
 STATE: [5901] Lupah Sug (1201.1.1 -> 1405.11.17) [fill: #CF658F]
@@ -156,7 +156,7 @@ TIMELINE:
 STATE: [5903] Madurai Nayak dynasty (1647.1.1 -> 1690.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1647.1.1 -> 1690.1.1: Madurai
+  1647.1.1 -> 1690.1.1: Madurai [stadester-Madurai-India]
 ---
 
 STATE: [5904] Madurai Sultanate (1335.1.1 -> 1379.1.1) [fill: #687FAD]
@@ -203,7 +203,7 @@ TIMELINE:
 STATE: [5911] Maihar State (1779.1.1 -> 1802.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1779.1.1 -> 1802.1.1: Maihar
+  1779.1.1 -> 1802.1.1: Maihar [ghsl-Maihar-India]
 ---
 
 STATE: [5912] Pronnoi (-330.1.1 -> -188.1.1) [fill: #687FAD]
@@ -232,7 +232,7 @@ TIMELINE:
 STATE: [5916] Majapahit Empire (1293.11.12 -> 1518.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1293.11.12 -> 1518.1.1: Trowulan
+  1293.11.12 -> 1518.1.1: Trowulan [stadester-Mojokerto-Indonesia]
 ---
 
 STATE: [5917] Protectorate of South Arabia (1963.1.18 -> 1967.11.30) [fill: #EBBCC5]
@@ -261,7 +261,7 @@ REASON: Pre-urban Andean archaeological culture based on ceremonial complexes wi
 STATE: [5921] Makrai State (1664.1.1 -> 1751.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1664.1.1 -> 1751.1.1: Makrai
+  1664.1.1 -> 1751.1.1: Makrai [stadester-Makrai-India]
 ---
 
 STATE: [5922] Makran State (1751.1.1 -> 1840.1.1) [fill: #E0C25E]
@@ -285,13 +285,13 @@ TIMELINE:
 STATE: [5925] Malerkotla State (1658.1.1 -> 1802.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1658.1.1 -> 1802.1.1: Malerkotla
+  1658.1.1 -> 1802.1.1: Malerkotla [ghsl-Malerkotla-India]
 ---
 
 STATE: [5926] Malpur State (1467.1.1 -> 1802.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1467.1.1 -> 1802.1.1: Malpur
+  1467.1.1 -> 1802.1.1: Malpur [ghsl-Modasa-India]
 ---
 
 STATE: [5927] Maluka State (1812.1.1 -> 1817.1.1) [fill: #CF658F]
@@ -315,19 +315,19 @@ TIMELINE:
 STATE: [5930] Ma'munids (996.1.1 -> 1018.1.1) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  996.1.1 -> 1018.1.1: Konye-Urgench
+  996.1.1 -> 1018.1.1: Konye-Urgench [ghsl-Konye-Urgench-Turkmenistan]
 ---
 
 STATE: [5931] Mandara Kingdom (1460.1.1 -> 1501.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1460.1.1 -> 1501.1.1: Mora
+  1460.1.1 -> 1501.1.1: Mora [stadester-Mora-Sweden]
 ---
 
 STATE: [5932] Mandi State (1291.1.1 -> 1802.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1291.1.1 -> 1802.1.1: Mandi
+  1291.1.1 -> 1802.1.1: Mandi [stadester-Mandi-India]
 ---
 
 STATE: [5933] Marashis (1360.1.1 -> 1597.1.1) [fill: #B5ABCC]
@@ -357,7 +357,7 @@ TIMELINE:
 STATE: [5937] Provisional All-Russian Government (1918.11.1 -> 1920.1.31) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1918.11.1 -> 1920.1.31: Omsk
+  1918.11.1 -> 1920.1.31: Omsk [stadester-Omsk-Russia]
 ---
 
 STATE: [5938] Provisional Government of Hawaii (1893.1.17 -> 1894.7.4) [fill: #283C70]
@@ -440,17 +440,17 @@ REASON: Mon rebellion against the Pagan Kingdom led by Wareru along the Gulf of 
 STATE: [5951] Marwanids (984.1.1 -> 1086.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  984.1.1 -> 1086.1.1: Diyarbakır
+  984.1.1 -> 1086.1.1: Diyarbakır [stadester-Diyarbakir-Turkey]
 ---
 
 STATE: [5952] Mataram Sultanate (1587.1.1 -> 1755.2.13) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  1587.1.1 -> 1613.1.1: Kota Gede
-  1613.1.1 -> 1646.1.1: Karta
-  1646.1.1 -> 1677.6.28: Plered
-  1680.1.1 -> 1745.2.17: Kartasura
-  1745.2.17 -> 1755.2.13: Surakarta
+  1587.1.1 -> 1613.1.1: Kota Gede [stadester-Yogyakarta-Indonesia]
+  1613.1.1 -> 1646.1.1: Karta [stadester-Yogyakarta-Indonesia]
+  1646.1.1 -> 1677.6.28: Plered [stadester-Plered-Indonesia]
+  1680.1.1 -> 1745.2.17: Kartasura [stadester-Surakarta-Indonesia]
+  1745.2.17 -> 1755.2.13: Surakarta [stadester-Surakarta-Indonesia]
 ---
 
 STATE: [5953] Matilde Loyalists (1135.1.1 -> 1145.1.1) [fill: #405F85]
@@ -467,13 +467,13 @@ TIMELINE:
 STATE: [5955] Mayurbhanj State (1201.1.1 -> 1751.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1201.1.1 -> 1751.1.1: Baripada
+  1201.1.1 -> 1751.1.1: Baripada [ghsl-Baripada-India]
 ---
 
 STATE: [5956] Mbata Kingdom (1301.1.1 -> 1376.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1301.1.1 -> 1376.1.1: Mbanza Kongo
+  1301.1.1 -> 1376.1.1: Mbanza Kongo [stadester-Mbanza Kongo-Angola]
 ---
 
 STATE: [5957] Przemysl Principality (1381.1.1 -> 1409.1.1) [fill: #EBBCC5]
@@ -515,7 +515,7 @@ TIMELINE:
 STATE: [5963] Middle Francia (843.9.1 -> 855.9.19) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  843.9.1 -> 855.9.19: Aachen
+  843.9.1 -> 855.9.19: Aachen [stadester-Aachen-Germany]
 ---
 
 STATE: [5964] Pudukkottai State (Princely State) (1801.1.1 -> 1949.1.1) [fill: #EBBCC5]
@@ -675,7 +675,8 @@ TIMELINE:
 STATE: [5990] Ming Dynasty (1369.1.1 -> 1664.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1369.1.1 -> 1664.1.1: Beijing [stadester-Beijing-China]
+  1369.1.1 -> 1421.2.2: Nanjing [stadester-Nanjing-China]
+  1421.2.2 -> 1664.1.1: Beijing [stadester-Beijing-China]
 ---
 
 STATE: [5991] Qataban (-799.1.1 -> 151.1.1) [fill: #E0C25E]
@@ -986,11 +987,11 @@ TIMELINE:
 STATE: [6042] Mughal Empire (1526.4.21 -> 1859.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1526.4.21 -> 1571.1.1: Agra
-  1571.1.1 -> 1585.1.1: Fatehpur Sikri
-  1585.1.1 -> 1598.1.1: Lahore
-  1598.1.1 -> 1648.1.1: Agra
-  1648.1.1 -> 1857.9.21: Delhi
+  1526.4.21 -> 1571.1.1: Agra [stadester-Agra-India]
+  1571.1.1 -> 1585.1.1: Fatehpur Sikri [stadester-Fatehpur-Sikri-India]
+  1585.1.1 -> 1598.1.1: Lahore [stadester-Lahore-Pakistan]
+  1598.1.1 -> 1648.1.1: Agra [stadester-Agra-India]
+  1648.1.1 -> 1859.1.1: Delhi [stadester-Delhi-India]
 ---
 
 STATE: [6043] Ranasan State (Princely State) (1802.1.1 -> 1943.10.7) [fill: #EBBCC5]
@@ -1044,14 +1045,14 @@ TIMELINE:
 STATE: [6051] Rashidun Caliphate (632.6.8 -> 657.1.1) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  632.6.8 -> 656.1.1: Medina
-  656.1.1 -> 657.1.1: Kufa
+  632.6.8 -> 656.1.1: Medina [stadester-Madînah-Saudi Arabia]
+  656.1.1 -> 657.1.1: Kufa [stadester-Kufa-Iraq]
 ---
 
 STATE: [6052] Rashtrakuta Dynasty (754.1.1 -> 983.1.1) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  754.1.1 -> 814.1.1: Mayurakhandi
+  754.1.1 -> 814.1.1: Mayurakhandi [ghsl-Nashik-India]
   814.1.1 -> 983.1.1: Malkhed [stadester-Malkhed-India]
 ---
 
@@ -2513,13 +2514,13 @@ TIMELINE:
 STATE: [6300] Rhodes (-407.1.1 -> -163.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  -407.1.1 -> -163.1.1: Rhodes
+  -407.1.1 -> -163.1.1: Rhodes [stadester-Ródos-Greece]
 ---
 
 STATE: [6301] Rhodes (Rome) (-163.1.1 -> 75.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -163.1.1 -> 75.1.1: Rhodes
+  -163.1.1 -> 75.1.1: Rhodes [stadester-Ródos-Greece]
 ---
 
 STATE: [6302] Rhoiteion (-530.1.1 -> -386.1.1) [fill: #95C0C2]
@@ -2608,14 +2609,14 @@ TIMELINE:
 STATE: [6316] Roman Empire (-27.1.16 -> 395.1.17) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -27.1.16 -> 286.1.1: Rome
-  286.1.1 -> 395.1.17: Milano
+  -27.1.16 -> 286.1.1: Rome [stadester-Roma-Italy]
+  286.1.1 -> 395.1.17: Milano [stadester-Milano-Italy]
 ---
 
 STATE: [6317] Roman Republic (-508.1.1 -> -27.1.16) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  -509.1.1 -> -27.1.16: Rome
+  -509.1.1 -> -27.1.16: Rome [stadester-Roma-Italy]
 ---
 
 STATE: [6318] Romania (1989.12.29 -> 2026.1.1) [fill: #E0A348]
@@ -2686,7 +2687,7 @@ TIMELINE:
 STATE: [6329] Northern Yuan dynasty (1371.1.1 -> 1636.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1371.1.1 -> 1636.1.1: Karakorum
+  1371.1.1 -> 1636.1.1: Karakorum [stadester-Kharkhorin-Mongolia]
 ---
 
 STATE: [6330] Northumbria (Norway) (948.1.1 -> 955.1.1) [fill: #944481]
@@ -2809,7 +2810,7 @@ REASON: Imperial Russian army military governorate in occupied East Prussia
 STATE: [6350] Russian Federation (1991.12.12 -> 2026.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1991.12.26 -> 2026.1.1: Moscow
+  1991.12.26 -> 2026.1.1: Moscow [stadester-Moskva-Russia]
 ---
 
 STATE: [6351] Russian Republic (1917.9.14 -> 1918.2.25) [fill: #D1453B]
@@ -3687,7 +3688,9 @@ TIMELINE:
 STATE: [6498] Principality of Moldavia (1360.1.1 -> 1575.1.1) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1360.1.1 -> 1575.1.1: Iasi [stadester-Iasi-Romania]
+  1360.1.1 -> 1388.1.1: Siret [stadester-Siret-Romania]
+  1388.1.1 -> 1564.1.1: Suceava [stadester-Suceava-Romania]
+  1564.1.1 -> 1575.1.1: Iasi [stadester-Iasi-Romania]
 ---
 
 STATE: [6499] Sarir (501.1.1 -> 1101.1.1) [fill: #D1453B]
@@ -3722,7 +3725,7 @@ REASON: Italian naval and military garrison station on Sazan Island without civi
 STATE: [6504] Sasanian Empire (224.4.28 -> 671.1.1) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  224.4.28 -> 651.1.1: Ctesiphon
+  224.4.28 -> 651.1.1: Ctesiphon [stadester-Baghdád-Iraq]
 ---
 
 STATE: [6505] Satahung (1551.1.1 -> 1783.1.1) [fill: #EBBCC5]
@@ -3734,7 +3737,7 @@ TIMELINE:
 STATE: [6506] Satavahana Empire (-149.1.1 -> 228.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  -149.1.1 -> 228.1.1: Paithan
+  -149.1.1 -> 228.1.1: Paithan [stadester-Paithan-India]
 ---
 
 STATE: [6507] Sattala (1551.1.1 -> 1787.1.1) [fill: #944481]
@@ -3817,7 +3820,8 @@ TIMELINE:
 STATE: [6520] Principality of Wallachia (1311.1.1 -> 1416.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1311.1.1 -> 1416.1.1: Bucuresti [stadester-Bucuresti-Romania]
+  1311.1.1 -> 1396.1.1: Curtea de Arges [stadester-Curtea-de-Arges-Romania]
+  1396.1.1 -> 1416.1.1: Târgoviste [stadester-Targoviste-Romania]
 ---
 
 STATE: [6521] Scythian Kingdom (-799.1.1 -> 194.1.1) [fill: #687FAD]
@@ -3840,7 +3844,7 @@ TIMELINE:
 STATE: [6524] Second Athenian Empire (-377.1.1 -> -354.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  -377.1.1 -> -354.1.1: Athens
+  -377.1.1 -> -354.1.1: Athens [stadester-Athínai-Greece]
 ---
 
 STATE: [6525] Second Aulikara dynasty of Malwa (401.1.1 -> 551.1.1) [fill: #CF658F]

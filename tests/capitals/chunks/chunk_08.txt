@@ -529,7 +529,7 @@ TIMELINE:
 STATE: [4659] Guhila Chitrakuta (1151.1.1 -> 1303.9.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1151.1.1 -> 1303.9.1: Chittorgarh
+  1151.1.1 -> 1303.9.1: Chittorgarh [ghsl-Chittorgarh-India]
 ---
 
 STATE: [4660] Guhila Dynasty (1037.1.1 -> 1807.1.1) [fill: #AEC76D]
@@ -612,7 +612,7 @@ TIMELINE:
 STATE: [4673] Guhila Sisioda (1151.1.1 -> 1568.1.1) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1151.1.1 -> 1568.1.1: Sisoda
+  1151.1.1 -> 1568.1.1: Sisoda [stadester-Rajsamand-India]
 ---
 
 STATE: [4674] Gujarat Sultanate (1408.1.1 -> 1573.1.1) [fill: #4E825E]
@@ -1509,7 +1509,8 @@ TIMELINE:
 STATE: [4824] French Mauritania (1903.5.21 -> 1960.11.28) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1903.5.21 -> 1960.11.28: Nouakchott [stadester-Nouakchott-Mauritania]
+  1903.5.21 -> 1957.7.24: Saint-Louis [stadester-Saint-Louis-Senegal]
+  1957.7.24 -> 1960.11.28: Nouakchott [stadester-Nouakchott-Mauritania]
 ---
 
 STATE: [4825] Mauritania (Military Occupation) (1975.12.20 -> 1979.8.14) [fill: #405F85]
@@ -2184,7 +2185,10 @@ TIMELINE:
 STATE: [4937] Jin dynasty (1115-1234) (1116.1.1 -> 1234.2.9) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1116.1.1 -> 1234.2.9: Beijing [stadester-Beijing-China]
+  1116.1.1 -> 1153.4.21: Shangjing [stadester-Harbin-China]
+  1153.4.21 -> 1214.6.27: Zhongdu [stadester-Beijing-China]
+  1214.6.27 -> 1232.12.25: Bianjing [stadester-Kaifeng-China]
+  1232.12.25 -> 1234.2.9: Caizhou [stadester-Zhumadian-China]
 ---
 
 STATE: [4938] Mining State of South Kasai (1960.8.8 -> 1962.10.5) [fill: #E0A348]
@@ -2565,7 +2569,7 @@ TIMELINE:
 STATE: [5002] Mongnawng (Princely State) (1886.1.1 -> 1948.1.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1886.1.1 -> 1948.1.4: Mongnawng
+  1886.1.1 -> 1948.1.4: Mongnawng [stadester-Taunggyi-Myanmar]
 ---
 
 STATE: [5003] Mongnawng (Burma) (1852.1.1 -> 1886.1.1) [fill: #E0C25E]
@@ -2672,15 +2676,15 @@ TIMELINE:
 STATE: [5020] Montana Territory (1864.5.26 -> 1889.11.8) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1864.5.26 -> 1865.2.7: Bannack
-  1865.2.7 -> 1875.1.1: Virginia City
-  1875.1.1 -> 1889.11.8: Helena
+  1864.5.26 -> 1865.2.7: Bannack [stadester-Butte-Montana]
+  1865.2.7 -> 1875.1.1: Virginia City [stadester-Helena-Montana]
+  1875.1.1 -> 1889.11.8: Helena [stadester-Helena-Montana]
 ---
 
 STATE: [5021] Monte Alban (751.1.1 -> 901.1.1) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  751.1.1 -> 901.1.1: Monte Alban
+  751.1.1 -> 901.1.1: Monte Alban [stadester-Oaxaca de Juárez-Mexico]
 ---
 
 STATE: [5022] Montenegro (Italy) (1941.4.20 -> 1943.9.12) [fill: #E0A348]
@@ -2703,7 +2707,7 @@ REASON: Military field campaign and occupation line during the Montenegrin-Ottom
 STATE: [5025] Montserrat (1633.1.1 -> 2026.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1633.1.1 -> 2026.1.1: Plymouth
+  1633.1.1 -> 2026.1.1: Plymouth [stadester-Plymouth-United Kingdom]
 ---
 
 STATE: [5026] Monyul Kingdom (-499.1.1 -> 619.1.1) [fill: #90A16A]
@@ -2727,7 +2731,7 @@ TIMELINE:
 STATE: [5029] Kalachuris of Ratnapura (1001.1.1 -> 1226.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1001.1.1 -> 1226.1.1: Ratanpur
+  1001.1.1 -> 1226.1.1: Ratanpur [ghsl-Ratanpur; Bishanpur; Sidhauli; Pator; Shobhnathpatti-India]
 ---
 
 STATE: [5030] Morazan Forces (1827.11.11 -> 1829.4.12) [fill: #E0C25E]
@@ -2749,13 +2753,13 @@ REASON: Moroccan Saadi expeditionary army occupying Timbuktu and Gao
 STATE: [5033] Kalachuris of Tripuri (991.1.1 -> 1251.1.1) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  991.1.1 -> 1251.1.1: Jabalpur
+  991.1.1 -> 1251.1.1: Jabalpur [stadester-Jabalpur-India]
 ---
 
 STATE: [5034] Morvi State (Princely State) (1808.1.1 -> 1948.2.15) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1808.1.1 -> 1948.2.15: Morbi
+  1808.1.1 -> 1948.2.15: Morbi [stadester-Morbi-India]
 ---
 
 STATE: [5035] Mosalsk Principality (1351.1.1 -> 1401.1.1) [fill: #687FAD]
@@ -2773,7 +2777,7 @@ TIMELINE:
 STATE: [5037] Kalahandi State (1006.1.1 -> 1802.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1006.1.1 -> 1802.1.1: Bhawanipatna
+  1006.1.1 -> 1802.1.1: Bhawanipatna [ghsl-Bhawanipatna-India]
 ---
 
 STATE: [5038] Kalina (1401.1.1 -> 1493.12.1) [fill: #B37B50]
@@ -2784,7 +2788,7 @@ REASON: Indigenous Carib/Kalina tribal communities without centralized capital s
 STATE: [5039] Mosquito Reserve (1860.1.28 -> 1895.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1860.1.28 -> 1895.1.1: Bluefields
+  1860.1.28 -> 1895.1.1: Bluefields [stadester-Bluefields-Nicaragua]
 ---
 
 STATE: [5040] Mossi Kingdom (1201.1.1 -> 1897.1.1) [fill: #E0C25E]
@@ -2814,7 +2818,8 @@ TIMELINE:
 STATE: [5044] Portuguese Mozambique (1501.1.1 -> 1975.6.25) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1501.1.1 -> 1975.6.25: Maputo [stadester-Maputo-Mozambique]
+  1501.1.1 -> 1898.12.1: Ilha de Moçambique [stadester-Ilha-de-Mocambique-Mozambique]
+  1898.12.1 -> 1975.6.25: Maputo [stadester-Maputo-Mozambique]
 ---
 
 STATE: [5045] Mozhaisk Principality (1278.1.1 -> 1304.1.1) [fill: #E0C25E]
@@ -3162,7 +3167,7 @@ TIMELINE:
 STATE: [5103] Nabatean Kingdom (-399.1.1 -> 106.3.22) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  -399.1.1 -> 106.3.22: Petra
+  -399.1.1 -> 106.3.22: Petra [stadester-Petra-Jordan]
 ---
 
 STATE: [5104] Kart dynasty (1336.1.1 -> 1381.5.1) [fill: #944481]
@@ -3461,7 +3466,7 @@ TIMELINE:
 STATE: [5154] Kerman Seljuks (1158.1.1 -> 1197.1.1) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1158.1.1 -> 1197.1.1: Kerman
+  1158.1.1 -> 1197.1.1: Kerman [stadester-Kermân-Iran]
 ---
 
 STATE: [5155] Nasos (-599.1.1 -> -559.1.1) [fill: #687FAD]
@@ -3591,7 +3596,7 @@ TIMELINE:
 STATE: [5177] Nayakot (1551.1.1 -> 1783.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1551.1.1 -> 1783.1.1: Nayakot
+  1551.1.1 -> 1783.1.1: Nayakot [stadester-Kathmandu-Nepal]
 ---
 
 STATE: [5178] Khanate of Bukhara (1501.1.1 -> 1786.1.1) [fill: #9CBED9]
@@ -3693,7 +3698,7 @@ TIMELINE:
 STATE: [5194] Neo-Babylonian Empire (-625.1.1 -> -539.10.12) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  -625.1.1 -> -539.10.12: Babylon
+  -625.1.1 -> -539.10.12: Babylon [stadester-Babylon-Iraq]
 ---
 
 STATE: [5195] Khandpara State (1600.1.1 -> 1802.1.1) [fill: #4E825E]
@@ -3854,7 +3859,7 @@ TIMELINE:
 STATE: [5221] Khoshut Khanate (1643.1.1 -> 1718.1.1) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1643.1.1 -> 1718.1.1: Lhasa
+  1643.1.1 -> 1718.1.1: Lhasa [stadester-Lhasa-China]
 ---
 
 STATE: [5222] Khurasanid Dynasty (1060.1.1 -> 1129.1.1) [fill: #95C0C2]
@@ -3872,6 +3877,7 @@ TIMELINE:
 STATE: [5224] Khwarazmian Empire (1142.1.1 -> 1231.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1212.1.1 -> 1220.3.1: Samarkand
-  1142.1.1 -> 1212.1.1: Konye-Urgench
+  1142.1.1 -> 1212.1.1: Konye-Urgench [stadester-Konye-Urgench-Turkmenistan]
+  1212.1.1 -> 1220.3.1: Samarkand [stadester-Samarkand-Uzbekistan]
+  1220.3.1 -> 1231.1.1: Tabriz [stadester-Tabriz-Iran]
 ---

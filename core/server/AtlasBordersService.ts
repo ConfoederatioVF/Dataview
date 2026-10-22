@@ -1033,6 +1033,12 @@ let getStateCapitalInfo = function (
         best_iv = iv
       }
     }
+    if (year_frac < best_iv.start_frac - 2 || year_frac > best_iv.stop_frac + 2) {
+      res_info = { is_acapital: true }
+      capital_info_cache.set(cache_k, res_info)
+      return res_info
+    }
+
     let contemp_best: { coords?: [number, number]; key?: string } = best_iv.key ? getContemporaneousCityKey(best_iv.key, year_frac) : { coords: undefined, key: best_iv.key }
     let best_coords = contemp_best.coords || (best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined)
     if (!best_coords && best_iv.city) {

@@ -39,12 +39,14 @@
             "### Detailed Borders",
             "De facto territorial frontiers from 3500BC to 2026AD.",
             "<details>",
+            "<summary>Data Caveats</summary>",
+            "Regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints via manual curation and adding diplomatic relations prior to a full release. Note that vassals, colonies, military occupations, parents, and state structures are already encoded.",
+            "</details>",
+            "<details>",
             "<summary>Methodology</summary>",
             "Largely based on presence modelling (convex hull) over a borderpool. This means there is a lot of work in terms of manually refining and iterating over the current data at hand, as many borders during conflict periods are poor interpolations which require fixing.",
             "",
             "A presence model is effectively a scrape of natural language text and web maps that is used to encode the presence of a state or entity at a set of given points (typically settlements), and often via LLMs. Territorial control is then inferred over a borderpool.",
-            "",
-            "In addition, regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints via manual curation and adding diplomatic relations prior to a full release. Note that vassals, colonies, military occupations, parents, and state structures are already encoded.",
             "</details>"
         ],
         filepaths: [

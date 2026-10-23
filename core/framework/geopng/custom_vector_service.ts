@@ -402,14 +402,14 @@ export let parseCustomVectorText = function (
           let val = Array.isArray(raw_val) ? raw_val : raw_val?.value
 
           if (Array.isArray(val)) {
-            let geom = val[0] ?? null
-            let symbol = (typeof val[1] === 'object' && val[1] !== null) ? val[1] : {}
-            let props = (typeof val[2] === 'object' && val[2] !== null) ? val[2] : {}
+            let geom = (val[0] === 'undefined') ? undefined : (val[0] ?? null)
+            let symbol = (val[1] === 'undefined') ? undefined : ((typeof val[1] === 'object' && val[1] !== null) ? val[1] : {})
+            let props = (val[2] === 'undefined') ? undefined : ((typeof val[2] === 'object' && val[2] !== null) ? val[2] : {})
             kf_items.push({ ts, val: [geom, symbol, props] })
           } else if (raw_val && typeof raw_val === 'object') {
-            let geom = raw_val.geometry || raw_val.feature || null
-            let symbol = raw_val.symbol || {}
-            let props = raw_val.properties || {}
+            let geom = (raw_val.geometry === 'undefined' || raw_val.feature === 'undefined') ? undefined : (raw_val.geometry || raw_val.feature || null)
+            let symbol = raw_val.symbol === 'undefined' ? undefined : (raw_val.symbol || {})
+            let props = raw_val.properties === 'undefined' ? undefined : (raw_val.properties || {})
             kf_items.push({ ts, val: [geom, symbol, props] })
           }
         }
@@ -598,11 +598,11 @@ export let sliceCustomVectorDataset = function (
       if (!kf)
         continue
 
-      if (kf[0] !== undefined)
+      if (kf[0] !== undefined && kf[0] !== 'undefined')
         current_geom = kf[0]
-      if (kf[1] !== undefined && typeof kf[1] === 'object' && kf[1] !== null)
+      if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
         current_symbol = { ...current_symbol, ...kf[1] }
-      if (kf[2] !== undefined && typeof kf[2] === 'object' && kf[2] !== null)
+      if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
         current_props = { ...current_props, ...kf[2] }
     }
 

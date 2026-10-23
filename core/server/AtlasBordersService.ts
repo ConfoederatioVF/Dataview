@@ -901,8 +901,15 @@ let getStateCapitalInfo = function (
   if (state && entity_name) {
     let s_name = (state.name || '').toLowerCase().trim()
     let e_name = entity_name.toLowerCase().trim()
-    if (!s_name.includes(e_name) && !e_name.includes(s_name))
+    let s_base = s_name.replace(/\(.*?\)/g, '').trim()
+    let e_base = e_name.replace(/\(.*?\)/g, '').trim()
+    if (
+      !s_name.includes(e_name) &&
+      !e_name.includes(s_name) &&
+      (!s_base || !e_base || (!s_base.includes(e_base) && !e_base.includes(s_base)))
+    ) {
       is_name_plausible = false
+    }
   }
 
   if (is_state_temporal_match && is_name_plausible) {
@@ -1321,11 +1328,18 @@ export class AtlasBordersService {
       }
 
       if (Array.isArray(val)) {
-        kf_items.push({ ts, val: val as [any, any, any] })
+        let geom = val[0]
+        if (geom === 'undefined')
+          geom = undefined
+        let symbol = (val[1] === 'undefined') ? undefined : val[1]
+        let props = (val[2] === 'undefined') ? undefined : val[2]
+        kf_items.push({ ts, val: [geom, symbol, props] as [any, any, any] })
       } else if (raw_val && typeof raw_val === 'object') {
         let geom = raw_val.geometry || raw_val.feature || null
-        let symbol = (typeof raw_val.symbol === 'object' && raw_val.symbol !== null) ? raw_val.symbol : {}
-        let props = (typeof raw_val.properties === 'object' && raw_val.properties !== null) ? raw_val.properties : {}
+        if (geom === 'undefined')
+          geom = undefined
+        let symbol = (typeof raw_val.symbol === 'object' && raw_val.symbol !== null) ? raw_val.symbol : (raw_val.symbol === 'undefined' ? undefined : {})
+        let props = (typeof raw_val.properties === 'object' && raw_val.properties !== null) ? raw_val.properties : (raw_val.properties === 'undefined' ? undefined : {})
         kf_items.push({ ts, val: [geom, symbol, props] })
       }
     }
@@ -1842,12 +1856,15 @@ export class AtlasBordersService {
         let is_valid_cache = Array.isArray(cached_json.features) &&
           (cached_json.features.length > 0 || target_year < -3000) &&
           (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
-        let is_missing_cap_coords = cached_json.v !== 2 &&
+        let is_cshapes_with_color = (source === 'cshapes' || cached_json.source === 'cshapes') &&
+          cached_json.features &&
+          cached_json.features.some((arg0_f: any) => arg0_f.properties?.fill_color || arg0_f.properties?.color || arg0_f.properties?.fillColor)
+        let is_missing_cap_coords = cached_json.v !== 3 &&
           cached_json.features &&
           cached_json.features.length > 20 &&
           !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
           cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
-        if (is_valid_cache && !is_missing_cap_coords) {
+        if (is_valid_cache && !is_missing_cap_coords && !is_cshapes_with_color && cached_json.v === 3) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
@@ -1903,11 +1920,11 @@ export class AtlasBordersService {
           if (!kf)
             continue
 
-          if (kf[0] !== undefined)
+          if (kf[0] !== undefined && kf[0] !== 'undefined')
             current_geom = kf[0]
-          if (kf[1] !== undefined && typeof kf[1] === 'object' && kf[1] !== null)
+          if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
             current_symbol = { ...current_symbol, ...kf[1] }
-          if (kf[2] !== undefined && typeof kf[2] === 'object' && kf[2] !== null)
+          if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
             current_props = { ...current_props, ...kf[2] }
         }
 
@@ -2002,8 +2019,6 @@ export class AtlasBordersService {
         let cs_cap_coords = cap_info.cap_coords || ((p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined)
         let cs_cap_name = cap_info.capname || p.capname
         let cs_cap_key = cap_info.capkey || (cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined)
-        let cs_fill = cap_info.fill_color || (cap_info.state_id ? AtlasBordersService.getStateById(cap_info.state_id)?.fill_color : undefined)
-
         features.push({
           bbox: geom_bbox,
           geometry: feat.geometry,
@@ -2016,7 +2031,6 @@ export class AtlasBordersService {
             caplat: cs_cap_coords ? cs_cap_coords[1] : p.caplat,
             caplong: cs_cap_coords ? cs_cap_coords[0] : p.caplong,
             capname: cs_cap_name,
-            color: cs_fill,
             date: UfDate.formatDate({
               day: p.gwsday || 1,
               month: p.gwsmonth || 1,
@@ -2024,8 +2038,6 @@ export class AtlasBordersService {
             }),
             endDate: p.gwedate,
             endYear: p.gweyear,
-            fillColor: cs_fill,
-            fill_color: cs_fill,
             gwcode: p.gwcode,
             id: p.gwcode,
             is_acapital: cap_info.is_acapital,
@@ -2065,11 +2077,11 @@ export class AtlasBordersService {
           if (!kf)
             continue
 
-          if (kf[0] !== undefined)
+          if (kf[0] !== undefined && kf[0] !== 'undefined')
             current_geom = kf[0]
-          if (kf[1] !== undefined && typeof kf[1] === 'object' && kf[1] !== null)
+          if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
             current_symbol = { ...current_symbol, ...kf[1] }
-          if (kf[2] !== undefined && typeof kf[2] === 'object' && kf[2] !== null)
+          if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
             current_props = { ...current_props, ...kf[2] }
         }
 
@@ -2143,7 +2155,7 @@ export class AtlasBordersService {
       try {
         fs.writeFile(
           disk_cache_path,
-          JSON.stringify({ date: UfDate.formatDate(target_date_obj), domain, features, source, timestamp: target_ts, v: 2, year: target_year }),
+          JSON.stringify({ date: UfDate.formatDate(target_date_obj), domain, features, source, timestamp: target_ts, v: 3, year: target_year }),
           'utf-8',
           () => {}
         )
@@ -2261,7 +2273,7 @@ export class AtlasBordersService {
 
           keyframes_detail.push({
             date: UfDate.formatDate(date_obj),
-            hasGeometry: Boolean(kf && kf[0] && kf[0] !== null),
+            hasGeometry: Boolean(kf && kf[0] && kf[0] !== null && kf[0] !== 'undefined'),
             properties: kf?.[2] || {},
             symbol: kf?.[1] || {},
             timestamp: ts,

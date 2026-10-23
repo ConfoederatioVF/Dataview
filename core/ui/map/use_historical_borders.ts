@@ -73,6 +73,7 @@ export let fetchHistoricalBordersAsync = async function (
     count?: number
     date?: string
     features: HistoricalBorderFeature[]
+    source?: 'cshapes' | 'naissance' | null
     tag?: string
     type: 'FeatureCollection'
     year?: number
@@ -81,6 +82,7 @@ export let fetchHistoricalBordersAsync = async function (
     count: data.count,
     date: data.date || data.features[0]?.properties?.date,
     features: data.features,
+    source: data.source,
     tag: cache_key,
     type: 'FeatureCollection',
     year: data.year,

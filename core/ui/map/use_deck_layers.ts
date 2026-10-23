@@ -1279,24 +1279,47 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
 
     //8d. In-Progress Polygon Draw Tool (Vertices, Elastic Path, and Area Fill Preview)
     if (is_drawing && draw_points.length > 0) {
-      let live_path_coords: [number, number][] = draw_points.map((arg0_pt) =>
+      let draw_points_layer_coords: [number, number][] = draw_points.map((arg0_pt) =>
         projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
       )
-      if (cursor_lng_lat && !is_editing_shape) {
-        live_path_coords.push(projectLngLatToLayerCoords(cursor_lng_lat[0], cursor_lng_lat[1], projection))
-      }
 
-      //Preview fill
-      if (live_path_coords.length >= 3) {
+      //Preview fill (only placed vertices, never rubberband cursor, with unique id per vertex count)
+      if (draw_points_layer_coords.length >= 3) {
+        let closed_preview_coords = [...draw_points_layer_coords, draw_points_layer_coords[0]]
+        let preview_geojson_data = [
+          {
+            geometry: {
+              coordinates: [closed_preview_coords],
+              type: 'Polygon',
+            },
+            properties: {},
+            type: 'Feature',
+          },
+        ]
+
         layers_array.push(
-          new PolygonLayer({
-            id: `draw-tool-preview-${projection}`,
-            data: [{ polygon: live_path_coords }],
-            getFillColor: [200, 40, 40, 30],
+          new GeoJsonLayer({
+            id: `draw-tool-preview-${projection}-${draw_points.length}`,
+            data: preview_geojson_data,
+            filled: true,
             stroked: false,
             pickable: false,
+            getFillColor: [200, 40, 40, 30],
             coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
+            updateTriggers: {
+              getFillColor: [draw_points.length, is_editing_shape],
+            },
+            _subLayerProps: {
+              'polygons-fill': {
+                parameters: {
+                  cullMode: 'none',
+                  depthMask: false,
+                  depthTest: false,
+                },
+              },
+            },
             parameters: {
+              cullMode: 'none',
               depthMask: false,
               depthTest: false,
             },
@@ -1305,9 +1328,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       }
 
       //Elastic path or closed polygon perimeter
-      let path_data = (is_editing_shape && live_path_coords.length >= 3)
-        ? [...live_path_coords, live_path_coords[0]]
-        : live_path_coords
+      let path_data = (is_editing_shape && draw_points_layer_coords.length >= 3)
+        ? [...draw_points_layer_coords, draw_points_layer_coords[0]]
+        : (cursor_lng_lat && !is_editing_shape
+          ? [...draw_points_layer_coords, projectLngLatToLayerCoords(cursor_lng_lat[0], cursor_lng_lat[1], projection)]
+          : draw_points_layer_coords)
 
       layers_array.push(
         new PathLayer({

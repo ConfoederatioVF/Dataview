@@ -298,6 +298,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let layers: any[]
   let pending_pointer_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let pending_touch_pos_ref = useRef<{ x: number; y: number } | null>(null)
+  let point_just_deleted_ref = useRef<boolean>(false)
   let safe_handle_view_state_change: (arg0_e: any) => void
   let sample_pointer_at: (arg0_x: number, arg1_y: number) => void
   let sample_raster_at: (coordX: number, coordY: number) => InspectionData | null
@@ -1526,20 +1527,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     return null
   }, [selected_historical_feature, selected_historical_anchor_coord, projection, proj_view_states])
 
-  //Compute screen anchor coordinates for origin point to display on-map Finish Selection button
-  let draw_origin_anchor = useMemo(() => {
-    if (!is_drawing || is_editing_shape || draw_points.length < 3 || !deck_ref.current)
-      return null
-    try {
-      let screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
-      if (screen && Number.isFinite(screen[0]) && Number.isFinite(screen[1])) {
-        return { x: screen[0], y: screen[1] }
-      }
-    } catch {
-      // Ignore projection errors
-    }
-    return null
-  }, [is_drawing, is_editing_shape, draw_points, projection, proj_view_states])
 
   handle_close_all_details = useCallback(() => {
     //Function body
@@ -1849,6 +1836,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }}
       onDoubleClickCapture={(e) => {
+        if (point_just_deleted_ref.current) {
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+
         let rect = e.currentTarget.getBoundingClientRect()
         let x = e.clientX - rect.left
         let y = e.clientY - rect.top
@@ -1858,6 +1851,10 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           if (v_idx >= 0) {
             e.preventDefault()
             e.stopPropagation()
+            point_just_deleted_ref.current = true
+            setTimeout(() => {
+              point_just_deleted_ref.current = false
+            }, 350)
             if (on_delete_draw_point)
               on_delete_draw_point(v_idx)
             return
@@ -2005,9 +2002,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
             ) {
               last_vertex_tap_ref.current = null
               suppress_click_ref.current = true
+              point_just_deleted_ref.current = true
               setTimeout(() => {
                 suppress_click_ref.current = false
-              }, 120)
+                point_just_deleted_ref.current = false
+              }, 350)
               if (on_delete_draw_point)
                 on_delete_draw_point(released_idx)
             } else {
@@ -2158,9 +2157,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
             ) {
               last_vertex_tap_ref.current = null
               suppress_click_ref.current = true
+              point_just_deleted_ref.current = true
               setTimeout(() => {
                 suppress_click_ref.current = false
-              }, 120)
+                point_just_deleted_ref.current = false
+              }, 350)
               if (on_delete_draw_point)
                 on_delete_draw_point(released_idx)
             } else {
@@ -2215,33 +2216,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }}
       />
 
-      {/* On-Map Floating Finish Selection Button Anchored to Origin Point */}
-      {draw_origin_anchor && (
-        <div
-          style={{
-            position: 'absolute',
-            left: `${draw_origin_anchor.x + 12}px`,
-            top: `${draw_origin_anchor.y - 14}px`,
-            zIndex: 35,
-          }}
-          className="pointer-events-auto select-none"
-        >
-          <button
-            type="button"
-            onClick={(arg0_e) => {
-              arg0_e.preventDefault()
-              arg0_e.stopPropagation()
-              if (on_finish_draw)
-                on_finish_draw()
-            }}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 shadow-lg border border-white/90 rounded-none cursor-pointer flex items-center gap-1.5 active:scale-95 transition-transform whitespace-nowrap"
-            title="Click to close shape"
-          >
-            <Icon name="check" className="text-xs" />
-            <span>Finish Selection</span>
-          </button>
-        </div>
-      )}
 
       {/* Unified Floating Tooltip Container (HUD Inspector & Stadestér City) */}
       {ui_visible && show_tooltips && !selected_city && !is_drawing && (

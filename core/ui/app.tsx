@@ -224,6 +224,7 @@ export let App: React.FC = function () {
   let [drawn_polygon_feature, set_drawn_polygon_feature] = useState<CountryFeature | null>(null)
   let [inspect_data, set_inspect_data] = useState<any>(null)
   let [is_drawing, set_is_drawing] = useState<boolean>(false)
+  let [is_editing_shape, set_is_editing_shape] = useState<boolean>(false)
 
   let [layers, set_layers] = useState<Record<string, ParsedDataLayer>>({})
   let [active_layer_id, set_active_layer_id] = useState<string | null>('default_basemap')
@@ -1137,6 +1138,7 @@ export let App: React.FC = function () {
 
   let handle_toggle_draw = useCallback(() => {
     //Function body
+    set_is_editing_shape(false)
     set_is_drawing((arg0_prev) => {
       let next = !arg0_prev
       if (next) {
@@ -1157,6 +1159,7 @@ export let App: React.FC = function () {
     set_cursor_lng_lat(null)
     set_draw_points([])
     set_is_drawing(false)
+    set_is_editing_shape(false)
   }, [])
 
   let handle_add_draw_point = useCallback((arg0_pt: [number, number]) => {
@@ -1167,10 +1170,66 @@ export let App: React.FC = function () {
     set_draw_points((arg0_prev) => [...arg0_prev, pt])
   }, [])
 
+  let handle_move_draw_point = useCallback((arg0_index: number, arg1_pt: [number, number]) => {
+    //Convert from parameters
+    let index = arg0_index
+    let pt = arg1_pt
+
+    //Guard clauses
+    if (!Number.isFinite(pt[0]) || !Number.isFinite(pt[1]))
+      return
+
+    //Function body
+    set_draw_points((arg0_prev) => {
+      if (index < 0 || index >= arg0_prev.length)
+        return arg0_prev
+      let next = arg0_prev.slice()
+      next[index] = [pt[0], pt[1]]
+      return next
+    })
+  }, [])
+
+  let handle_insert_draw_point = useCallback((arg0_index: number, arg1_pt: [number, number]) => {
+    //Convert from parameters
+    let index = arg0_index
+    let pt = arg1_pt
+
+    //Guard clauses
+    if (!Number.isFinite(pt[0]) || !Number.isFinite(pt[1]))
+      return
+
+    //Function body
+    set_draw_points((arg0_prev) => {
+      let next = arg0_prev.slice()
+      next.splice(index, 0, [pt[0], pt[1]])
+      return next
+    })
+  }, [])
+
+  let handle_delete_draw_point = useCallback((arg0_index: number) => {
+    //Convert from parameters
+    let index = arg0_index
+
+    //Function body
+    set_draw_points((arg0_prev) => {
+      if (is_editing_shape && arg0_prev.length <= 3)
+        return arg0_prev
+      if (index < 0 || index >= arg0_prev.length)
+        return arg0_prev
+      let next = arg0_prev.slice()
+      next.splice(index, 1)
+      return next
+    })
+  }, [is_editing_shape])
+
   let handle_delete_last_draw_point = useCallback(() => {
     //Function body
-    set_draw_points((arg0_prev) => arg0_prev.slice(0, -1))
-  }, [])
+    set_draw_points((arg0_prev) => {
+      if (is_editing_shape && arg0_prev.length <= 3)
+        return arg0_prev
+      return arg0_prev.slice(0, -1)
+    })
+  }, [is_editing_shape])
 
   let handle_edit_drawn_polygon = useCallback((arg0_feature?: CountryFeature) => {
     //Convert from parameters
@@ -1197,6 +1256,7 @@ export let App: React.FC = function () {
     set_draw_points(coords)
     set_drawn_polygon_feature(null)
     set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
+    set_is_editing_shape(true)
     set_is_drawing(true)
   }, [drawn_polygon_feature])
 
@@ -1209,6 +1269,7 @@ export let App: React.FC = function () {
     let polygon_feat = createDrawnPolygonFeature(draw_points)
     set_drawn_polygon_feature(polygon_feat)
     set_is_drawing(false)
+    set_is_editing_shape(false)
     set_draw_points([])
     set_cursor_lng_lat(null)
     handle_select_country(polygon_feat)
@@ -1217,6 +1278,7 @@ export let App: React.FC = function () {
   let handle_clear_drawn_polygon = useCallback(() => {
     //Function body
     set_drawn_polygon_feature(null)
+    set_is_editing_shape(false)
     set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
   }, [])
 
@@ -1401,13 +1463,17 @@ export let App: React.FC = function () {
           historicalBordersConfig={historical_borders_config}
           setHistoricalBordersConfig={set_historical_borders_config}
           isDrawing={is_drawing}
+          isEditingShape={is_editing_shape}
           isMobile={is_mobile}
           onAddDrawPoint={handle_add_draw_point}
           onCancelDraw={handle_cancel_draw}
           onClearDrawnPolygon={handle_clear_drawn_polygon}
+          onDeleteDrawPoint={handle_delete_draw_point}
           onDeleteLastDrawPoint={handle_delete_last_draw_point}
           onEditPolygon={handle_edit_drawn_polygon}
           onFinishDraw={handle_finish_draw}
+          onInsertDrawPoint={handle_insert_draw_point}
+          onMoveDrawPoint={handle_move_draw_point}
           onSetCursorLngLat={set_cursor_lng_lat}
           onToggleDraw={handle_toggle_draw}
           analyticsOpen={is_mobile ? active_mobile_tab === 'analytics' : analytics_open}

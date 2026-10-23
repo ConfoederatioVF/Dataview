@@ -187,6 +187,7 @@ export interface LocalisationConfig {
     drawPointsPrompt: string
     drawPolygon: string
     drawStartPrompt: string
+    editShapePrompt: string
     enterAbsoluteBreak: string
     finishDraw: string
     graticule: string

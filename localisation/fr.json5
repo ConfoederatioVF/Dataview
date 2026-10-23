@@ -206,6 +206,7 @@
     finishDraw: "Terminer la sélection",
     deleteLastPoint: "Supprimer le dernier point",
     drawStartPrompt: "Cliquez sur la carte pour dessiner la sélection",
+    editShapePrompt: "Faites glisser les carrés rouges pour ajuster. Touchez deux fois pour supprimer le point.",
     drawPointsPrompt: "£1£ sommets placés. Cliquez pour le sommet suivant ou sur le premier point pour fermer",
     drawClosingPrompt: "Cliquez pour fermer la sélection",
     undo: "Annuler",

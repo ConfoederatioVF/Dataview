@@ -206,6 +206,7 @@
     finishDraw: "Auswahl abschließen",
     deleteLastPoint: "Letzten Punkt löschen",
     drawStartPrompt: "Klicken Sie auf die Karte, um die Auswahl zu zeichnen",
+    editShapePrompt: "Rote Quadrate ziehen zum Anpassen. Doppeltippen zum Löschen eines Punkts.",
     drawPointsPrompt: "£1£ Eckpunkte gesetzt. Klicken Sie für den nächsten Punkt oder auf den ersten Punkt zum Schließen",
     drawClosingPrompt: "Klicken zum Schließen der Auswahl",
     undo: "Rückgängig",

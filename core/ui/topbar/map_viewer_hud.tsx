@@ -50,6 +50,7 @@ export interface MapViewerHUDProps {
   inspectData?: any
   invertPalette?: boolean
   isDrawing?: boolean
+  isEditingShape?: boolean
   isMobile?: boolean
   isTimelapseExporting?: boolean
   effectiveMapmodesBottom?: number
@@ -138,6 +139,7 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   let inspect_data = props.inspectData
   let invert_palette = props.invertPalette
   let is_drawing = Boolean(props.isDrawing)
+  let is_editing_shape = Boolean(props.isEditingShape)
   let is_timelapse_exporting = props.isTimelapseExporting
   let legend_breaks = props.legendBreaks
   let legend_country_name = props.legendCountryName
@@ -333,78 +335,80 @@ export let MapViewerHUD: React.FC<MapViewerHUDProps> = React.memo(function (
   //Return statement
   return (
     <>
+      {/* Standalone Drawing Mode Floating Action Banner (Top Center of Map) */}
+      {ui_visible && is_drawing && !is_timelapse_exporting && (
+        <div
+          id="dataview-drawing-hud-banner"
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-40 pointer-events-auto bg-card/95 backdrop-blur-md border border-[rgb(200,40,40)] shadow-2xl py-1.5 px-3.5 flex items-center gap-3 text-[var(--body-font-size)] font-sans select-none min-w-max max-w-[calc(100vw-32px)]"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+              <Icon name="edit" className="text-sm text-[rgb(200,40,40)]" />
+            </div>
+            {is_editing_shape ? (
+              <span className="font-semibold text-foreground whitespace-nowrap truncate text-xs">
+                {t.hud.editShapePrompt || 'Drag red squares to adjust shape. Double-tap to delete point.'}
+              </span>
+            ) : draw_points_count < 3 ? (
+              <span className="font-semibold text-foreground whitespace-nowrap truncate text-xs">
+                {draw_points_count === 0
+                  ? t.hud.drawStartPrompt
+                  : `${draw_points_count} ${t.mapPanels.historicalBorders.vertices || 'vertices'}`}
+              </span>
+            ) : (
+              <span className="font-semibold text-foreground whitespace-nowrap truncate text-xs">
+                {draw_points_count} {t.mapPanels.historicalBorders.vertices || 'vertices'}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 border-l border-border pl-2.5 shrink-0">
+            {draw_points_count >= 3 && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={on_finish_draw}
+                className="h-7 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-none cursor-pointer font-bold flex items-center gap-1.5 shadow-xs"
+              >
+                <Icon name="check" className="text-sm" />
+                <span>{t.hud.finishDraw}</span>
+              </Button>
+            )}
+            {draw_points_count > 0 && !is_editing_shape && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={on_delete_last_draw_point}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-none cursor-pointer flex items-center gap-1"
+                title={t.hud.deleteLastPoint}
+                aria-label={t.hud.deleteLastPoint}
+              >
+                <Icon name="undo" className="text-xs" />
+                <span>{t.hud.undo}</span>
+              </Button>
+            )}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={on_cancel_draw}
+              className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-none cursor-pointer flex items-center justify-center shrink-0"
+              title={t.hud.cancel}
+              aria-label={t.hud.cancel}
+            >
+              <Icon name="close" className="text-sm" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Floating Legend Container */}
-      {!is_timelapse_exporting && ui_visible && ((!hide_colourbar && (Boolean(raster) || Boolean(has_canvas))) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open) || Boolean(is_drawing)) && (
+      {!is_timelapse_exporting && ui_visible && ((!hide_colourbar && (Boolean(raster) || Boolean(has_canvas))) || Boolean(stadester_config?.enabled) || Boolean(info_panel_open)) && (
         <div
           id="dataview-legend-card-container"
           style={container_style}
           className={`absolute z-30 pointer-events-none flex flex-col gap-2 min-h-0 overflow-hidden ${is_bottom ? 'justify-end' : 'justify-start'
             }`}
         >
-          {/* Drawing Mode Measurement Toast */}
-          {is_drawing && (
-            <div className="pointer-events-auto w-full flex justify-center shrink-0">
-              <div
-                style={{
-                  width:
-                    is_mobile || is_center_pos || legend_position === 'bottom-right'
-                      ? '100%'
-                      : `${current_colourbar_width}px`,
-                }}
-                className="relative rounded-none border border-[rgb(200,40,40)] bg-card/95 backdrop-blur-md py-1.5 px-3 shadow-lg text-[var(--body-font-size)] font-sans flex items-center justify-between gap-2.5 whitespace-nowrap min-w-0"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                    <Icon name="edit" className="text-sm text-[rgb(200,40,40)]" />
-                  </div>
-                  {draw_points_count < 3 && (
-                    <span className="font-semibold text-foreground whitespace-nowrap truncate text-xs">
-                      {draw_points_count === 0
-                        ? t.hud.drawStartPrompt
-                        : `${draw_points_count} ${t.mapPanels.historicalBorders.vertices || 'vertices'}`}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {draw_points_count >= 3 && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={on_finish_draw}
-                      className="h-6 px-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded-none cursor-pointer whitespace-nowrap shrink-0"
-                    >
-                      <Icon name="check" className="text-xs mr-1" />
-                      <span>{t.hud.finishDraw}</span>
-                    </Button>
-                  )}
-                  {draw_points_count > 0 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={on_delete_last_draw_point}
-                      className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground rounded-none cursor-pointer whitespace-nowrap shrink-0"
-                      title={t.hud.deleteLastPoint}
-                    >
-                      <Icon name="undo" className="text-xs mr-1" />
-                      <span>{t.hud.undo}</span>
-                    </Button>
-                  )}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={on_cancel_draw}
-                    className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-none cursor-pointer flex items-center justify-center shrink-0"
-                    title={t.hud.cancel}
-                    aria-label={t.hud.cancel}
-                  >
-                    <Icon name="close" className="text-xs" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Main Raster ColourBar Legend */}
           {!hide_colourbar && legend_title !== 'None' && (Boolean(raster) || Boolean(has_canvas)) && (
             <div className="pointer-events-auto w-full flex justify-center shrink-0">

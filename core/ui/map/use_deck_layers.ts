@@ -26,6 +26,7 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer'
+import { SquareMarkerLayer } from './SquareMarkerLayer'
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
@@ -457,9 +458,12 @@ export interface UseDeckLayersParams {
   customVectorFeatures?: CountryFeature[]
   customVectorVisible?: boolean
   cursorLngLat?: [number, number] | null
+  draggedVertexIndex?: number | null
   drawPoints?: [number, number][]
   drawnPolygonFeature?: CountryFeature | null
+  hoveredVertexIndex?: number | null
   isDrawing?: boolean
+  isEditingShape?: boolean
   onFinishDraw?: () => void
   onHoverCustomVectorFeature?: (arg0_feature: CountryFeature | null, arg1_x?: number, arg2_y?: number) => void
   onSelectCustomVectorFeature?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
@@ -569,6 +573,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let cursor_lng_lat = options.cursorLngLat
     let custom_vector_features = options.customVectorFeatures
     let custom_vector_visible = options.customVectorVisible !== false
+    let dragged_vertex_index = options.draggedVertexIndex ?? null
     let draw_points = options.drawPoints || []
     let drawn_polygon_feature = options.drawnPolygonFeature
     let effective_selected_array: CountryFeature[] = []
@@ -580,9 +585,11 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let hov_key: string
     let hovered_country = options.hoveredCountry
     let hovered_data: any
+    let hovered_vertex_index = options.hoveredVertexIndex ?? null
     let invert_palette = options.invertPalette
     let is_cartesian: boolean
     let is_drawing = Boolean(options.isDrawing)
+    let is_editing_shape = Boolean(options.isEditingShape)
     let is_historical_hovered_selected: boolean
     let is_hovered_already_selected: boolean
     let is_mobile = Boolean(options.isMobile)
@@ -1275,7 +1282,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       let live_path_coords: [number, number][] = draw_points.map((arg0_pt) =>
         projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
       )
-      if (cursor_lng_lat) {
+      if (cursor_lng_lat && !is_editing_shape) {
         live_path_coords.push(projectLngLatToLayerCoords(cursor_lng_lat[0], cursor_lng_lat[1], projection))
       }
 
@@ -1297,11 +1304,15 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         )
       }
 
-      //Elastic path
+      //Elastic path or closed polygon perimeter
+      let path_data = (is_editing_shape && live_path_coords.length >= 3)
+        ? [...live_path_coords, live_path_coords[0]]
+        : live_path_coords
+
       layers_array.push(
         new PathLayer({
           id: `draw-tool-path-${projection}`,
-          data: [{ path: live_path_coords }],
+          data: [{ path: path_data }],
           getColor: [200, 40, 40, 220],
           getWidth: 2,
           widthUnits: 'pixels',
@@ -1314,7 +1325,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
         })
       )
 
-      //Vertices
+      //Vertices as sharp uniform red squares
       let vertex_data = draw_points.map((arg0_pt, arg1_idx) => {
         let coords = projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
         return {
@@ -1324,20 +1335,34 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       })
 
       layers_array.push(
-        new ScatterplotLayer({
+        new SquareMarkerLayer({
           id: `draw-tool-vertices-${projection}`,
           data: vertex_data,
           getPosition: (arg0_d: any) => arg0_d.position,
-          getRadius: (arg0_d: any) => (arg0_d.idx === 0 ? (draw_points.length >= 3 ? 12 : 8) : 5),
+          getRadius: (arg0_d: any) => {
+            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
+            return is_active ? 5.5 : 4.5
+          },
           radiusUnits: 'pixels',
-          getFillColor: (arg0_d: any) => (arg0_d.idx === 0 ? [255, 220, 0, 255] : [200, 40, 40, 255]),
+          getFillColor: [200, 40, 40, 255],
           stroked: true,
-          getLineColor: [255, 255, 255, 255],
-          getLineWidth: 2,
+          getLineColor: (arg0_d: any) => {
+            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
+            return is_active ? [255, 255, 255, 255] : [255, 255, 255, 220]
+          },
+          getLineWidth: (arg0_d: any) => {
+            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
+            return is_active ? 2 : 1.5
+          },
           lineWidthUnits: 'pixels',
           pickable: is_drawing,
+          updateTriggers: {
+            getLineColor: [hovered_vertex_index, dragged_vertex_index],
+            getLineWidth: [hovered_vertex_index, dragged_vertex_index],
+            getRadius: [hovered_vertex_index, dragged_vertex_index],
+          },
           onClick: (arg0_info: any) => {
-            if (is_drawing && draw_points.length >= 3 && arg0_info.object?.idx === 0) {
+            if (is_drawing && draw_points.length >= 3 && !is_editing_shape && arg0_info.object?.idx === 0) {
               if (options.onFinishDraw)
                 options.onFinishDraw()
               return true
@@ -1989,10 +2014,13 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     options.rasterVersion,
     options.customVectorFeatures,
     options.customVectorVisible,
+    options.draggedVertexIndex,
     options.drawnPolygonFeature,
-    options.isDrawing,
     options.drawPoints,
     options.cursorLngLat,
+    options.hoveredVertexIndex,
+    options.isDrawing,
+    options.isEditingShape,
     options.onFinishDraw,
     options.onSelectCustomVectorFeature,
     options.onHoverCustomVectorFeature,

@@ -206,6 +206,7 @@
     finishDraw: "Finish Selection",
     deleteLastPoint: "Delete Last Point",
     drawStartPrompt: "Click on map to draw selection",
+    editShapePrompt: "Drag vertices to adjust shape. Double-click to delete point.",
     drawPointsPrompt: "£1£ points placed. Click next point, or click first point to close",
     drawClosingPrompt: "Click to close selection",
     undo: "Undo",

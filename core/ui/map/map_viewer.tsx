@@ -34,6 +34,7 @@ import {
 } from '@framework/geopng/types.ts'
 import { MAP_CONFIG, getPixelOffset } from '@common'
 import { UI_LAYOUT } from '@framework/utils/ui_layout.ts'
+import { Icon } from '@ui/components/icon'
 import { ClickInfoPanel } from './click_info_panel'
 import { CityDetailsPanel } from './city_details_panel'
 import { MapmodesTray } from '@ui/rightbar/mapmodes_tray'
@@ -97,15 +98,19 @@ export interface MapViewerProps {
   hoveredCountry?: CountryFeature | null
   isCalculatingStats?: boolean
   isDrawing?: boolean
+  isEditingShape?: boolean
   onAddDrawPoint?: (arg0_point: [number, number]) => void
   onCancelDraw?: () => void
   onClearCountries?: () => void
   onClearDrawnPolygon?: () => void
+  onDeleteDrawPoint?: (arg0_index: number) => void
   onDeleteLastDrawPoint?: () => void
   onEditPolygon?: (arg0_feature: CountryFeature) => void
   onFinishDraw?: () => void
   onHoverCountry?: (country: CountryFeature | null) => void
+  onInsertDrawPoint?: (arg0_index: number, arg1_point: [number, number]) => void
   onInspect?: (data: InspectionData | null) => void
+  onMoveDrawPoint?: (arg0_index: number, arg1_point: [number, number]) => void
   onSelectCountry?: (country: CountryFeature | null) => void
   onSetCursorLngLat?: (arg0_coord: [number, number] | null) => void
   onToggleAnalytics: () => void
@@ -188,6 +193,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let invert_palette = props.invertPalette
   let is_calculating_stats = props.isCalculatingStats
   let is_drawing = Boolean(props.isDrawing)
+  let is_editing_shape = Boolean(props.isEditingShape)
   let is_mobile = props.isMobile ?? false
   let is_playing = props.isPlaying ?? false
   let is_timelapse_exporting = props.isTimelapseExporting ?? false
@@ -206,12 +212,15 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let on_clear_drawn_polygon = props.onClearDrawnPolygon
   let on_close_city_details = props.onCloseCityDetails
   let on_close_info_panel = props.onCloseInfoPanel
+  let on_delete_draw_point = props.onDeleteDrawPoint
   let on_delete_last_draw_point = props.onDeleteLastDrawPoint
   let on_edit_polygon = props.onEditPolygon
   let on_finish_draw = props.onFinishDraw
   let on_hover_city = props.onHoverCity
   let on_hover_country = props.onHoverCountry
+  let on_insert_draw_point = props.onInsertDrawPoint
   let on_inspect = props.onInspect
+  let on_move_draw_point = props.onMoveDrawPoint
   let on_reorder_map_modes = props.onReorderMapModes
   let on_resize_colourbar_width = props.onResizeColourbarWidth
   let on_select_city = props.onSelectCity
@@ -260,9 +269,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let deck_ref = useRef<any>(null)
   let default_desktop_pick_radius: number
   let default_touch_pick_radius: number
+  let drag_start_pos_ref = useRef<{ x: number; y: number } | null>(null)
+  let dragged_vertex_idx_ref = useRef<number | null>(null)
   let effective_pick_radius: number
   let elevation_spikes_data: any
   let equal_earth_land_geo_json: any
+  let get_edge_at_screen_pos: (arg0_x: number, arg1_y: number, arg2_threshold?: number) => number
+  let get_vertex_at_screen_pos: (arg0_x: number, arg1_y: number, arg2_threshold?: number) => number
   let graticule_paths: { path: [number, number][] }[]
   let handle_center_selected_city: () => void
   let handle_click: (info: any) => void
@@ -273,23 +286,32 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let handle_reset_view: () => void
   let handle_select_city_from_country: (arg0_city: CityPoint) => void
   let handle_select_country_from_city: (arg0_state_id?: number | string, arg0_country_name?: string) => void
+  let has_dragged_ref = useRef<boolean>(false)
   let hover_raf_ref = useRef<number | null>(null)
   let is_interacting_ref = useRef<boolean>(false)
   let last_centered_city_key_ref = useRef<string | null>(null)
   let last_country_ref = useRef<CountryFeature | null>(null)
   let last_hovered_country_code_ref = useRef<string | null | undefined>(null)
+  let last_map_click_pos_ref = useRef<{ x: number; y: number } | null>(null)
+  let last_map_click_time_ref = useRef<number>(0)
+  let last_vertex_tap_ref = useRef<{ index: number; time: number; x: number; y: number } | null>(null)
   let layers: any[]
   let pending_pointer_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let pending_touch_pos_ref = useRef<{ x: number; y: number } | null>(null)
+  let safe_handle_view_state_change: (arg0_e: any) => void
   let sample_pointer_at: (arg0_x: number, arg1_y: number) => void
   let sample_raster_at: (coordX: number, coordY: number) => InspectionData | null
   let sample_touch_at: (arg0_x: number, arg1_y: number) => void
+  let suppress_click_ref = useRef<boolean>(false)
   let touch_pick_raf_ref = useRef<number | null>(null)
 
   //Function body
   default_desktop_pick_radius = MAP_CONFIG.desktopPickRadius ?? 2
   default_touch_pick_radius = MAP_CONFIG.touchPickRadius ?? 18
   effective_pick_radius = (pick_radius !== undefined) ? pick_radius : (is_mobile ? default_touch_pick_radius : default_desktop_pick_radius)
+
+  let [dragged_vertex_idx, set_dragged_vertex_idx] = useState<number | null>(null)
+  let [hovered_vertex_idx, set_hovered_vertex_idx] = useState<number | null>(null)
 
   let [internal_flyout_open, set_internal_flyout_open] = useState(false)
   let flyout_open = (props.settingsDrawerOpen !== undefined) ? props.settingsDrawerOpen : internal_flyout_open
@@ -445,6 +467,118 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     setProjViewStates: set_proj_view_states,
     views,
   } = view_state_mgmt
+
+  safe_handle_view_state_change = useCallback(
+    (arg0_e: any) => {
+      //Convert from parameters
+      let e = arg0_e
+
+      //Guard clauses: do not pan or change view state when dragging a polygon vertex
+      if (dragged_vertex_idx_ref.current !== null)
+        return
+
+      //Function body
+      handle_view_state_change(e)
+    },
+    [handle_view_state_change]
+  )
+
+  get_vertex_at_screen_pos = useCallback(
+    (arg0_x: number, arg1_y: number, arg2_threshold?: number): number => {
+      //Convert from parameters
+      let threshold = arg2_threshold ?? (is_mobile ? 28 : 14)
+      let x = arg0_x
+      let y = arg1_y
+
+      //Guard clauses
+      if (!deck_ref.current || draw_points.length === 0)
+        return -1
+
+      //Declare local instance variables
+      let closest_dist_sq = threshold * threshold
+      let closest_idx = -1
+
+      //Function body
+      for (let i = 0; i < draw_points.length; i++) {
+        let pt_screen = projectLngLatToScreen(draw_points[i], deck_ref.current, projection)
+        if (pt_screen) {
+          let dist_sq = (x - pt_screen[0]) * (x - pt_screen[0]) + (y - pt_screen[1]) * (y - pt_screen[1])
+          if (dist_sq <= closest_dist_sq) {
+            closest_dist_sq = dist_sq
+            closest_idx = i
+          }
+        }
+      }
+
+      //Return statement
+      return closest_idx
+    },
+    [draw_points, is_mobile, projection]
+  )
+
+  get_edge_at_screen_pos = useCallback(
+    (arg0_x: number, arg1_y: number, arg2_threshold?: number): number => {
+      //Convert from parameters
+      let threshold = arg2_threshold ?? (is_mobile ? 20 : 10)
+      let x = arg0_x
+      let y = arg1_y
+
+      //Guard clauses
+      if (!deck_ref.current || draw_points.length < 3)
+        return -1
+
+      //Declare local instance variables
+      let closest_dist = threshold
+      let closest_edge_idx = -1
+
+      //Function body
+      for (let i = 0; i < draw_points.length; i++) {
+        let pt1_screen = projectLngLatToScreen(draw_points[i], deck_ref.current, projection)
+        let pt2_screen = projectLngLatToScreen(draw_points[(i + 1) % draw_points.length], deck_ref.current, projection)
+        if (pt1_screen && pt2_screen) {
+          let dx = pt2_screen[0] - pt1_screen[0]
+          let dy = pt2_screen[1] - pt1_screen[1]
+          let len_sq = dx * dx + dy * dy
+          let dist: number
+          if (len_sq === 0) {
+            dist = Math.hypot(x - pt1_screen[0], y - pt1_screen[1])
+          } else {
+            let t = Math.max(0, Math.min(1, ((x - pt1_screen[0]) * dx + (y - pt1_screen[1]) * dy) / len_sq))
+            dist = Math.hypot(x - (pt1_screen[0] + t * dx), y - (pt1_screen[1] + t * dy))
+          }
+          if (dist <= closest_dist) {
+            closest_dist = dist
+            closest_edge_idx = i
+          }
+        }
+      }
+
+      //Return statement
+      return closest_edge_idx
+    },
+    [draw_points, is_mobile, projection]
+  )
+
+  useEffect(() => {
+    let handleWindowPointerUp = () => {
+      if (dragged_vertex_idx_ref.current !== null) {
+        if (has_dragged_ref.current) {
+          suppress_click_ref.current = true
+          setTimeout(() => {
+            suppress_click_ref.current = false
+          }, 120)
+        }
+        dragged_vertex_idx_ref.current = null
+        drag_start_pos_ref.current = null
+        set_dragged_vertex_idx(null)
+      }
+    }
+
+    window.addEventListener('pointerup', handleWindowPointerUp)
+    return () => {
+      window.removeEventListener('pointerup', handleWindowPointerUp)
+    }
+  }, [])
 
   center_on_coordinates = useCallback(
     (arg0_lon: number, arg1_lat: number) => {
@@ -732,6 +866,9 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       }
 
       if (is_drawing) {
+        if (dragged_vertex_idx_ref.current !== null)
+          return
+
         if (deck_ref.current) {
           let draw_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
           if (draw_pt && on_set_cursor_lng_lat)
@@ -811,31 +948,62 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     (info: any) => {
       // 1. Drawing mode intercept
       if (is_drawing) {
+        if (suppress_click_ref.current || has_dragged_ref.current)
+          return
+
         let click_x = info.x
         let click_y = info.y
         if (click_x === undefined || click_y === undefined)
           return
 
-        // Check if clicking start vertex object or near start vertex to close loop (when points >= 3)
-        if (draw_points.length >= 3) {
-          if (info.object?.idx === 0) {
+        let now = Date.now()
+        let last_click_time = last_map_click_time_ref.current
+        let last_click_pos = last_map_click_pos_ref.current
+        last_map_click_time_ref.current = now
+        last_map_click_pos_ref.current = { x: click_x, y: click_y }
+
+        // Double-click on map to close polygon (when points >= 3 and not editing existing shape)
+        if (
+          !is_editing_shape &&
+          draw_points.length >= 3 &&
+          now - last_click_time < 400 &&
+          last_click_pos &&
+          Math.hypot(click_x - last_click_pos.x, click_y - last_click_pos.y) < 25
+        ) {
+          if (on_finish_draw)
+            on_finish_draw()
+          return
+        }
+
+        let clicked_vertex_idx = get_vertex_at_screen_pos(click_x, click_y, is_mobile ? 28 : 14)
+
+        // Check if clicking start vertex object or near start vertex to close loop (when points >= 3 and not editing existing shape)
+        if (draw_points.length >= 3 && !is_editing_shape) {
+          let origin_hit_radius = is_mobile ? 32 : 24
+          let is_origin_hit = clicked_vertex_idx === 0 || info.object?.idx === 0
+          if (!is_origin_hit && deck_ref.current) {
+            let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
+            if (start_screen) {
+              let dist = Math.hypot(click_x - start_screen[0], click_y - start_screen[1])
+              if (dist <= origin_hit_radius) {
+                is_origin_hit = true
+              }
+            }
+          }
+          if (is_origin_hit) {
             if (on_finish_draw)
               on_finish_draw()
             return
           }
-
-          if (deck_ref.current) {
-            let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
-            if (start_screen) {
-              let dist_sq = (click_x - start_screen[0]) ** 2 + (click_y - start_screen[1]) ** 2
-              if (dist_sq <= 32 * 32) {
-                if (on_finish_draw)
-                  on_finish_draw()
-                return
-              }
-            }
-          }
         }
+
+        // If clicked on an existing vertex, prevent placing duplicate vertices on top
+        if (clicked_vertex_idx >= 0)
+          return
+
+        // When editing an existing shape, do not append stray vertices on arbitrary map clicks
+        if (is_editing_shape)
+          return
 
         let map_pt = unprojectScreenToLngLat(click_x, click_y, deck_ref.current, projection)
         if (!map_pt && info.coordinate) {
@@ -984,7 +1152,9 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       draw_points,
       drawn_polygon_feature,
       effective_country_features,
+      get_vertex_at_screen_pos,
       is_drawing,
+      is_editing_shape,
       on_add_draw_point,
       on_close_city_details,
       on_finish_draw,
@@ -1184,9 +1354,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     cursorLngLat: cursor_lng_lat,
     customVectorFeatures: custom_vector_features,
     customVectorVisible: custom_vector_visible,
+    draggedVertexIndex: dragged_vertex_idx,
     drawPoints: draw_points,
     drawnPolygonFeature: drawn_polygon_feature,
+    hoveredVertexIndex: hovered_vertex_idx,
     isDrawing: is_drawing,
+    isEditingShape: is_editing_shape,
     onFinishDraw: on_finish_draw,
     onHoverCustomVectorFeature: (feat) => {
       if (is_drawing)
@@ -1352,6 +1525,21 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     }
     return null
   }, [selected_historical_feature, selected_historical_anchor_coord, projection, proj_view_states])
+
+  //Compute screen anchor coordinates for origin point to display on-map Finish Selection button
+  let draw_origin_anchor = useMemo(() => {
+    if (!is_drawing || is_editing_shape || draw_points.length < 3 || !deck_ref.current)
+      return null
+    try {
+      let screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
+      if (screen && Number.isFinite(screen[0]) && Number.isFinite(screen[1])) {
+        return { x: screen[0], y: screen[1] }
+      }
+    } catch {
+      // Ignore projection errors
+    }
+    return null
+  }, [is_drawing, is_editing_shape, draw_points, projection, proj_view_states])
 
   handle_close_all_details = useCallback(() => {
     //Function body
@@ -1580,12 +1768,107 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       className="relative w-full h-full overflow-hidden select-none bg-background font-sans"
       style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       onContextMenu={(e) => e.preventDefault()}
-      onDoubleClick={(e) => {
-        if (is_drawing && draw_points.length >= 3) {
-          e.preventDefault()
-          e.stopPropagation()
-          if (on_finish_draw)
-            on_finish_draw()
+      onPointerDownCapture={(e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse')
+          return
+
+        let rect = e.currentTarget.getBoundingClientRect()
+        let x = e.clientX - rect.left
+        let y = e.clientY - rect.top
+        let is_touch = e.pointerType === 'touch' || is_mobile
+        let hit_radius = is_touch ? 28 : 14
+
+        if (is_drawing && draw_points.length > 0) {
+          let v_idx = get_vertex_at_screen_pos(x, y, hit_radius)
+          if (v_idx >= 0) {
+            // Check if clicking start vertex object to close loop (when points >= 3 and not editing existing shape)
+            if (!is_editing_shape && draw_points.length >= 3 && v_idx === 0) {
+              // Do NOT capture as drag! Let the event proceed to close the polygon
+              return
+            }
+
+            e.stopPropagation()
+            try {
+              e.currentTarget.setPointerCapture(e.pointerId)
+            } catch {
+              // Ignore pointer capture error
+            }
+            dragged_vertex_idx_ref.current = v_idx
+            drag_start_pos_ref.current = { x, y }
+            has_dragged_ref.current = false
+            set_dragged_vertex_idx(v_idx)
+            return
+          }
+
+          if (is_editing_shape && on_insert_draw_point) {
+            let edge_idx = get_edge_at_screen_pos(x, y, is_touch ? 20 : 10)
+            if (edge_idx >= 0) {
+              let map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
+              if (map_pt) {
+                e.stopPropagation()
+                try {
+                  e.currentTarget.setPointerCapture(e.pointerId)
+                } catch {
+                  // Ignore pointer capture error
+                }
+                on_insert_draw_point(edge_idx + 1, map_pt)
+                dragged_vertex_idx_ref.current = edge_idx + 1
+                drag_start_pos_ref.current = { x, y }
+                has_dragged_ref.current = true
+                set_dragged_vertex_idx(edge_idx + 1)
+                return
+              }
+            }
+          }
+        }
+      }}
+      onTouchStartCapture={(e) => {
+        if (is_drawing && draw_points.length > 0) {
+          let touch = e.touches[0]
+          if (!touch)
+            return
+          let rect = e.currentTarget.getBoundingClientRect()
+          let x = touch.clientX - rect.left
+          let y = touch.clientY - rect.top
+          let v_idx = get_vertex_at_screen_pos(x, y, 28)
+          if (v_idx === 0 && !is_editing_shape && draw_points.length >= 3) {
+            // Do not stop propagation for origin point to close polygon
+            return
+          }
+          if (v_idx >= 0) {
+            e.stopPropagation()
+            return
+          }
+          if (is_editing_shape) {
+            let edge_idx = get_edge_at_screen_pos(x, y, 20)
+            if (edge_idx >= 0) {
+              e.stopPropagation()
+              return
+            }
+          }
+        }
+      }}
+      onDoubleClickCapture={(e) => {
+        let rect = e.currentTarget.getBoundingClientRect()
+        let x = e.clientX - rect.left
+        let y = e.clientY - rect.top
+        let v_idx = get_vertex_at_screen_pos(x, y, is_mobile ? 28 : 16)
+
+        if (is_drawing) {
+          if (v_idx >= 0) {
+            e.preventDefault()
+            e.stopPropagation()
+            if (on_delete_draw_point)
+              on_delete_draw_point(v_idx)
+            return
+          }
+
+          if (!is_editing_shape && draw_points.length >= 3) {
+            e.preventDefault()
+            e.stopPropagation()
+            if (on_finish_draw)
+              on_finish_draw()
+          }
         }
       }}
       onPointerLeave={() => {
@@ -1630,6 +1913,30 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         if (hovered_city_pos)
           set_hovered_city_pos({ x, y })
 
+        //Handle dragging active polygon vertices in drawing/editing mode
+        if (is_drawing) {
+          if (dragged_vertex_idx_ref.current !== null) {
+            let cur_idx = dragged_vertex_idx_ref.current
+            let start_pos = drag_start_pos_ref.current
+            if (start_pos) {
+              let dist_sq = (x - start_pos.x) ** 2 + (y - start_pos.y) ** 2
+              if (dist_sq > 4) {
+                has_dragged_ref.current = true
+              }
+            }
+
+            let new_map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
+            if (new_map_pt && on_move_draw_point) {
+              on_move_draw_point(cur_idx, new_map_pt)
+            }
+            return
+          }
+
+          let is_touch = e.pointerType === 'touch' || is_mobile
+          let hov_v = get_vertex_at_screen_pos(x, y, is_touch ? 28 : 14)
+          set_hovered_vertex_idx((arg0_prev) => (arg0_prev !== hov_v ? hov_v : arg0_prev))
+        }
+
         //Guard clauses: do not sample during dragging/panning
         if (e.buttons !== 0 || is_interacting_ref.current || (!show_tooltips && !is_drawing))
           return
@@ -1647,11 +1954,86 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
             sample_pointer_at(cur_pos.x, cur_pos.y)
         })
       }}
-      onPointerUp={() => {
+      onPointerUp={(e) => {
+        try {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId)
+          }
+        } catch {
+          // Ignore pointer capture release error
+        }
         is_interacting_ref.current = false
+
+        let is_touch = e.pointerType === 'touch' || is_mobile
+
+        // If clicking/releasing on origin point to close shape (when points >= 3 and !is_editing_shape)
+        if (is_drawing && !is_editing_shape && draw_points.length >= 3 && !has_dragged_ref.current) {
+          let origin_hit = get_vertex_at_screen_pos(x, y, is_touch ? 32 : 24) === 0 || dragged_vertex_idx_ref.current === 0
+          if (origin_hit) {
+            suppress_click_ref.current = true
+            setTimeout(() => {
+              suppress_click_ref.current = false
+            }, 120)
+            dragged_vertex_idx_ref.current = null
+            drag_start_pos_ref.current = null
+            set_dragged_vertex_idx(null)
+            if (on_finish_draw)
+              on_finish_draw()
+            return
+          }
+        }
+
+        if (dragged_vertex_idx_ref.current !== null) {
+          let released_idx = dragged_vertex_idx_ref.current
+          let did_drag = has_dragged_ref.current
+
+          if (did_drag) {
+            suppress_click_ref.current = true
+            setTimeout(() => {
+              suppress_click_ref.current = false
+            }, 120)
+            last_vertex_tap_ref.current = null
+          } else {
+            // Vertex tap without dragging - check for double tap/click
+            let now = Date.now()
+            let last_tap = last_vertex_tap_ref.current
+            if (
+              last_tap &&
+              last_tap.index === released_idx &&
+              now - last_tap.time < 380 &&
+              Math.hypot(x - last_tap.x, y - last_tap.y) < 25
+            ) {
+              last_vertex_tap_ref.current = null
+              suppress_click_ref.current = true
+              setTimeout(() => {
+                suppress_click_ref.current = false
+              }, 120)
+              if (on_delete_draw_point)
+                on_delete_draw_point(released_idx)
+            } else {
+              last_vertex_tap_ref.current = { index: released_idx, time: now, x, y }
+            }
+          }
+
+          dragged_vertex_idx_ref.current = null
+          drag_start_pos_ref.current = null
+          set_dragged_vertex_idx(null)
+        }
+      }}
+      onPointerCancel={(e) => {
+        try {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId)
+          }
+        } catch {
+          // Ignore pointer release error
+        }
+        dragged_vertex_idx_ref.current = null
+        drag_start_pos_ref.current = null
+        set_dragged_vertex_idx(null)
       }}
       onTouchStart={(e) => {
-        if (!show_tooltips)
+        if (!show_tooltips || is_drawing)
           return
         let touch = e.touches[0]
         if (!touch)
@@ -1676,6 +2058,31 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         })
       }}
       onTouchMove={(e) => {
+        if (is_drawing) {
+          if (dragged_vertex_idx_ref.current !== null) {
+            let touch = e.touches[0]
+            if (touch) {
+              let rect = e.currentTarget.getBoundingClientRect()
+              let x = touch.clientX - rect.left
+              let y = touch.clientY - rect.top
+              let cur_idx = dragged_vertex_idx_ref.current
+              let start_pos = drag_start_pos_ref.current
+              if (start_pos) {
+                let dist_sq = (x - start_pos.x) ** 2 + (y - start_pos.y) ** 2
+                if (dist_sq > 4) {
+                  has_dragged_ref.current = true
+                }
+              }
+
+              let new_map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
+              if (new_map_pt && on_move_draw_point) {
+                on_move_draw_point(cur_idx, new_map_pt)
+              }
+            }
+          }
+          return
+        }
+
         if (!show_tooltips)
           return
         let touch = e.touches[0]
@@ -1699,12 +2106,72 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
             sample_touch_at(cur_pos.x, cur_pos.y)
         })
       }}
-      onTouchEnd={() => {
+      onTouchEnd={(e) => {
         if (touch_pick_raf_ref.current !== null) {
           cancelAnimationFrame(touch_pick_raf_ref.current)
           touch_pick_raf_ref.current = null
         }
         pending_touch_pos_ref.current = null
+
+        if (is_drawing && !is_editing_shape && draw_points.length >= 3 && !has_dragged_ref.current) {
+          let touch = e.changedTouches ? e.changedTouches[0] : null
+          let rect = e.currentTarget.getBoundingClientRect()
+          let x = touch ? touch.clientX - rect.left : (drag_start_pos_ref.current?.x ?? 0)
+          let y = touch ? touch.clientY - rect.top : (drag_start_pos_ref.current?.y ?? 0)
+          let origin_hit = get_vertex_at_screen_pos(x, y, 32) === 0 || dragged_vertex_idx_ref.current === 0
+          if (origin_hit) {
+            suppress_click_ref.current = true
+            setTimeout(() => {
+              suppress_click_ref.current = false
+            }, 120)
+            dragged_vertex_idx_ref.current = null
+            drag_start_pos_ref.current = null
+            set_dragged_vertex_idx(null)
+            if (on_finish_draw)
+              on_finish_draw()
+            return
+          }
+        }
+
+        if (is_drawing && dragged_vertex_idx_ref.current !== null) {
+          let released_idx = dragged_vertex_idx_ref.current
+          let did_drag = has_dragged_ref.current
+
+          if (did_drag) {
+            suppress_click_ref.current = true
+            setTimeout(() => {
+              suppress_click_ref.current = false
+            }, 120)
+            last_vertex_tap_ref.current = null
+          } else {
+            let touch = e.changedTouches ? e.changedTouches[0] : null
+            let rect = e.currentTarget.getBoundingClientRect()
+            let x = touch ? touch.clientX - rect.left : (drag_start_pos_ref.current?.x ?? 0)
+            let y = touch ? touch.clientY - rect.top : (drag_start_pos_ref.current?.y ?? 0)
+            let now = Date.now()
+            let last_tap = last_vertex_tap_ref.current
+            if (
+              last_tap &&
+              last_tap.index === released_idx &&
+              now - last_tap.time < 380 &&
+              Math.hypot(x - last_tap.x, y - last_tap.y) < 25
+            ) {
+              last_vertex_tap_ref.current = null
+              suppress_click_ref.current = true
+              setTimeout(() => {
+                suppress_click_ref.current = false
+              }, 120)
+              if (on_delete_draw_point)
+                on_delete_draw_point(released_idx)
+            } else {
+              last_vertex_tap_ref.current = { index: released_idx, time: now, x, y }
+            }
+          }
+
+          dragged_vertex_idx_ref.current = null
+          drag_start_pos_ref.current = null
+          set_dragged_vertex_idx(null)
+        }
       }}
     >
       <DeckGL
@@ -1713,7 +2180,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         style={{ touchAction: 'none' }}
         views={views}
         viewState={effective_view_state}
-        onViewStateChange={handle_view_state_change}
+        onViewStateChange={safe_handle_view_state_change}
         onInteractionStateChange={(arg0_state: any) => {
           let state = arg0_state
           let is_active = Boolean(state.isDragging || state.isPanning || state.isRotating || state.isZooming)
@@ -1736,8 +2203,45 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               ; (window as any).deck = deck_ref.current
           }
         }}
-        getCursor={({ isHovering }) => (is_drawing ? 'crosshair' : ((isHovering) ? 'crosshair' : 'grab'))}
+        getCursor={({ isHovering }) => {
+          if (dragged_vertex_idx !== null)
+            return 'grabbing'
+          if (is_drawing) {
+            if (hovered_vertex_idx !== null && hovered_vertex_idx >= 0)
+              return 'grab'
+            return is_editing_shape ? 'default' : 'crosshair'
+          }
+          return isHovering ? 'crosshair' : 'grab'
+        }}
       />
+
+      {/* On-Map Floating Finish Selection Button Anchored to Origin Point */}
+      {draw_origin_anchor && (
+        <div
+          style={{
+            position: 'absolute',
+            left: `${draw_origin_anchor.x + 12}px`,
+            top: `${draw_origin_anchor.y - 14}px`,
+            zIndex: 35,
+          }}
+          className="pointer-events-auto select-none"
+        >
+          <button
+            type="button"
+            onClick={(arg0_e) => {
+              arg0_e.preventDefault()
+              arg0_e.stopPropagation()
+              if (on_finish_draw)
+                on_finish_draw()
+            }}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 shadow-lg border border-white/90 rounded-none cursor-pointer flex items-center gap-1.5 active:scale-95 transition-transform whitespace-nowrap"
+            title="Click to close shape"
+          >
+            <Icon name="check" className="text-xs" />
+            <span>Finish Selection</span>
+          </button>
+        </div>
+      )}
 
       {/* Unified Floating Tooltip Container (HUD Inspector & Stadestér City) */}
       {ui_visible && show_tooltips && !selected_city && !is_drawing && (
@@ -1848,6 +2352,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               inspectData={inspect_data}
               invertPalette={invert_palette}
               isDrawing={is_drawing}
+              isEditingShape={is_editing_shape}
               isMobile={is_mobile}
               isTimelapseExporting={is_timelapse_exporting}
               legendBreaks={legend_breaks}

@@ -5,17 +5,9 @@ import {
   GeoJsonLayer,
   PathLayer,
   PolygonLayer,
-  ScatterplotLayer,
-  SolidPolygonLayer,
-  TextLayer,
 } from '@deck.gl/layers'
 import { TileLayer } from '@deck.gl/geo-layers'
 import { CountryFeature } from '@framework/geopng/polygon_binning.ts'
-import {
-  transformGeometryToEqualEarth,
-  projectEqualEarth,
-} from '@framework/geopng/equal_earth.ts'
-import { projectLngLatToLayerCoords } from '@framework/geopng/polygon_draw_tool.ts'
 import {
   DecodedRaster,
   ProjectionType,
@@ -26,8 +18,6 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer'
-import { SquareMarkerLayer } from './SquareMarkerLayer'
-import { UnderlinedTextLayer } from './underlined_text_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import { normalizeCityKey } from '@framework/stadester/city_metadata_framework.ts'
@@ -39,365 +29,18 @@ import {
 } from './deck_layers'
 import { ElevationSpikePoint } from './use_elevation_spikes'
 import { CirclePixelPoint } from './use_circle_overlay'
-
-import * as d3Chromatic from 'd3-scale-chromatic'
-
 import {
-  ensureContrastAgainstDark,
-  getCapitalColorRgba,
-  hexToRgb,
-  resolveRegionColorHex,
-} from './deck_layer_palette_utils'
-
-function getShortCityLabel (arg0_name: string): string {
-  //Convert from parameters
-  let name = arg0_name
-
-  //Guard clauses
-  if (!name)
-    return ''
-
-  //Function body
-  let before_semi = name.split(';')[0].trim()
-  let first_word = before_semi.split(/[\s,]+/)[0].trim()
-
-  //Return statement
-  return first_word || before_semi
-}
-
-/**
- * Reconciles a city's capital status against authoritative active historical borders features.
- * Historical borders (state_capitals.json via AtlasBordersService) are the single source of truth.
- *
- * @param {any} arg0_city - City point object
- * @param {Map<string, any>} arg1_capitals_by_key - Authoritative active capitals indexed by key
- * @param {Map<string, any>} arg2_capitals_by_name - Authoritative active capitals indexed by name
- * @param {Set<string>} arg3_acapital_state_ids - State IDs explicitly marked as acapital
- * @param {Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
- * @param {Set<string>} [arg5_active_state_ids] - State IDs active in current historical borders
- * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
- * @param {Map<string, any>} [arg7_authoritative_capitals_by_city] - Pre-matched authoritative capitals by city key/id
- * @param {Array<any>} [arg8_active_capitals_list] - Authoritative active capitals list with coordinates
- *
- * @returns {any} Reconciled city object
- */
-function reconcileCapitalWithAuthoritativeBorders (
-  arg0_city: any,
-  arg1_capitals_by_key: Map<string, any>,
-  arg2_capitals_by_name: Map<string, any>,
-  arg3_acapital_state_ids: Set<string>,
-  arg4_state_capitals_by_sid: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>,
-  arg5_active_state_ids?: Set<string>,
-  arg6_active_polity_names?: Set<string>,
-  arg7_authoritative_capitals_by_city?: Map<string, any>,
-  arg8_active_capitals_list?: Array<any>
-): any {
-  //Convert from parameters
-  let acapital_state_ids = arg3_acapital_state_ids
-  let active_capitals_list = arg8_active_capitals_list
-  let active_polity_names = arg6_active_polity_names
-  let active_state_ids = arg5_active_state_ids
-  let authoritative_capitals_by_city = arg7_authoritative_capitals_by_city
-  let capitals_by_key = arg1_capitals_by_key
-  let capitals_by_name = arg2_capitals_by_name
-  let city = arg0_city
-  let state_capitals_by_sid = arg4_state_capitals_by_sid
-
-  //Guard clauses
-  if (!city)
-    return city
-
-  //Declare local instance variables
-  let active_cap: { cap_coords?: [number, number]; capkey?: string; capname?: string } | undefined
-  let best_cap: any = null
-  let best_dist: number = 999
-  let c_id = city.id ? String(city.id) : undefined
-  let c_key = city.key ? String(city.key) : undefined
-  let c_lat = city.rawCoords ? city.rawCoords[1] : (city.lat !== undefined ? city.lat : (city.coords ? city.coords[0] : undefined))
-  let c_lon = city.rawCoords ? city.rawCoords[0] : (city.lon !== undefined ? city.lon : (city.coords ? city.coords[1] : undefined))
-  let c_name = (city.name || '').toLowerCase().trim()
-  let c_name_nfd = c_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  let c_short = (city.shortName || getShortCityLabel(city.name || '')).toLowerCase().trim()
-  let c_short_nfd = c_short.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  let cand_country: string
-  let cap_dist: number
-  let has_polity_by_id: boolean
-  let has_polity_by_name: boolean
-  let is_capkey_match: boolean
-  let is_direct_polity_match: boolean
-  let is_same_key: boolean
-  let is_same_name: boolean
-  let match: any = null
-  let match_capkey: string
-  let match_polity: string
-  let pad: number = 3.5
-  let polity_name_lower: string
-  let resolved_color: any
-  let sid_str = city.capitalStateId !== undefined ? String(city.capitalStateId) : (city.capital_state_id !== undefined ? String(city.capital_state_id) : undefined)
-
-  //Function body
-  //0. Match by pre-computed authoritative capital
-  if (authoritative_capitals_by_city) {
-    if (c_key && authoritative_capitals_by_city.has(c_key)) {
-      match = authoritative_capitals_by_city.get(c_key)
-    } else if (c_id && authoritative_capitals_by_city.has(c_id)) {
-      match = authoritative_capitals_by_city.get(c_id)
-    }
-  }
-
-  //1. Match by authoritative capital key
-  if (!match) {
-    if (c_key && capitals_by_key.has(c_key)) {
-      match = capitals_by_key.get(c_key)
-    } else if (c_key && capitals_by_key.has(c_key.toLowerCase().trim())) {
-      match = capitals_by_key.get(c_key.toLowerCase().trim())
-    } else if (c_id && capitals_by_key.has(c_id)) {
-      match = capitals_by_key.get(c_id)
-    } else if (c_id && capitals_by_key.has(c_id.toLowerCase().trim())) {
-      match = capitals_by_key.get(c_id.toLowerCase().trim())
-    }
-  }
-
-  //2. Match by city name if no key match
-  if (!match && c_name) {
-    if (capitals_by_name.has(c_name)) {
-      match = capitals_by_name.get(c_name)
-    } else if (c_short && capitals_by_name.has(c_short)) {
-      match = capitals_by_name.get(c_short)
-    } else if (capitals_by_name.has(c_name_nfd)) {
-      match = capitals_by_name.get(c_name_nfd)
-    } else if (c_short_nfd && capitals_by_name.has(c_short_nfd)) {
-      match = capitals_by_name.get(c_short_nfd)
-    } else {
-      let clean_c = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-      if (clean_c && capitals_by_name.has(clean_c)) {
-        match = capitals_by_name.get(clean_c)
-      }
-    }
-    if (!match && city.other_names && Array.isArray(city.other_names)) {
-      for (let on of city.other_names) {
-        let on_clean = on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-        let on_lower = on_clean
-        let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-        if (capitals_by_name.has(on_lower)) {
-          match = capitals_by_name.get(on_lower)
-          break
-        } else if (capitals_by_name.has(on_nfd)) {
-          match = capitals_by_name.get(on_nfd)
-          break
-        } else if (clean_on && capitals_by_name.has(clean_on)) {
-          match = capitals_by_name.get(clean_on)
-          break
-        }
-      }
-    }
-  }
-
-  //3. If candidate match found, verify spatial plausibility against match.cap_coords, match.bbox and country compatibility
-  if (match && match.cap_coords && c_lon !== undefined && c_lat !== undefined) {
-    cap_dist = Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
-    if (cap_dist > 1.5) {
-      match = null
-    }
-  }
-
-  if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
-    if (
-      c_lon < match.bbox[0] - pad ||
-      c_lon > match.bbox[2] + pad ||
-      c_lat < match.bbox[1] - pad ||
-      c_lat > match.bbox[3] + pad
-    ) {
-      match = null
-    }
-  }
-
-  if (match) {
-    cand_country = (city.country || '').toLowerCase().trim()
-    match_polity = (match.polity_name || '').toLowerCase().trim()
-    match_capkey = (match.capkey || '').toLowerCase().trim()
-    if (cand_country && match_polity) {
-      is_direct_polity_match = cand_country === match_polity || match_polity.includes(cand_country) || cand_country.includes(match_polity)
-      is_capkey_match = Boolean(match_capkey && match_capkey.includes(cand_country))
-      if (!is_direct_polity_match && !is_capkey_match) {
-        let current_cap_of = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
-        if (current_cap_of && (current_cap_of === cand_country || current_cap_of.includes(cand_country) || cand_country.includes(current_cap_of))) {
-          match = null
-        } else {
-          cap_dist = (match.cap_coords && c_lon !== undefined && c_lat !== undefined)
-            ? Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
-            : 999
-          if (cap_dist > 0.5)
-            match = null
-        }
-      }
-    }
-  }
-
-  //4. If matched with authoritative capital, ensure isCapital is true with enriched metadata
-  if (match) {
-    resolved_color = (match.color && match.color !== '#FFDC00')
-      ? match.color
-      : (city.capitalColor || city.capital_color || match.color || '#FFDC00')
-    return {
-      ...city,
-      capitalColor: resolved_color,
-      capital_color: resolved_color,
-      capitalOf: match.polity_name || city.capitalOf || city.capital_state_name,
-      capitalStateId: match.state_id !== undefined ? match.state_id : city.capitalStateId,
-      capital_state_id: match.state_id !== undefined ? match.state_id : city.capital_state_id,
-      capital_state_name: match.polity_name || city.capital_state_name || city.capitalOf,
-      isCapital: true,
-      is_capital: true,
-    }
-  }
-
-  //5. If city claims isCapital but its polity no longer exists or has another authoritative capital:
-  if (city.isCapital || city.is_capital) {
-    //Verify that the claimed polity exists at this point in time
-    if (active_state_ids && active_state_ids.size > 0) {
-      polity_name_lower = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
-      has_polity_by_id = Boolean(sid_str && active_state_ids.has(sid_str))
-      has_polity_by_name = Boolean(polity_name_lower && active_polity_names && active_polity_names.has(polity_name_lower))
-
-      if (!has_polity_by_id && !has_polity_by_name) {
-        return {
-          ...city,
-          capitalColor: undefined,
-          capital_color: undefined,
-          capitalOf: undefined,
-          capitalStateId: undefined,
-          capital_state_id: undefined,
-          capital_state_name: undefined,
-          isCapital: false,
-          is_capital: false,
-        }
-      }
-    }
-
-    if (sid_str) {
-      if (acapital_state_ids.has(sid_str)) {
-        return {
-          ...city,
-          capitalColor: undefined,
-          capital_color: undefined,
-          capitalOf: undefined,
-          capitalStateId: undefined,
-          capital_state_id: undefined,
-          capital_state_name: undefined,
-          isCapital: false,
-          is_capital: false,
-        }
-      }
-
-      active_cap = state_capitals_by_sid.get(sid_str)
-      if (active_cap && (active_cap.capkey || active_cap.capname || active_cap.cap_coords)) {
-        let is_same_coord = false
-        if (active_cap.cap_coords && (c_lon !== undefined && c_lat !== undefined)) {
-          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.20
-        }
-        let clean_active_key = normalizeCityKey(active_cap.capkey || '')
-        let clean_c_key = normalizeCityKey(c_key || '')
-        is_same_key = Boolean(
-          (active_cap.capkey && (active_cap.capkey === c_key || active_cap.capkey === c_id)) ||
-          (clean_active_key && clean_c_key && clean_active_key === clean_c_key)
-        )
-        let clean_cap_name = (active_cap.capname || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
-        let clean_c_name = (c_name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
-        let clean_c_short = (c_short || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
-        is_same_name = Boolean(
-          clean_cap_name &&
-          (clean_cap_name === clean_c_name ||
-           clean_cap_name === clean_c_short ||
-           clean_c_name.startsWith(clean_cap_name) ||
-           clean_cap_name.startsWith(clean_c_name))
-        )
-        if (!is_same_key && !is_same_name && !is_same_coord) {
-          return {
-            ...city,
-            capitalColor: undefined,
-            capital_color: undefined,
-            capitalOf: undefined,
-            capitalStateId: undefined,
-            capital_state_id: undefined,
-            capital_state_name: undefined,
-            isCapital: false,
-            is_capital: false,
-          }
-        }
-      }
-    }
-  }
-
-  //Return statement
-  return city
-}
-
-
-let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
-  [0.08, [232, 121, 249]],
-  [0.06, [239, 68, 68]],
-  [0.03, [251, 146, 60]],
-  [0.01, [253, 224, 71]],
-  [0.00, [198, 219, 85]],
-  [-0.02, [69, 207, 119]],
-  [-0.04, [72, 156, 240]],
-  [-0.05, [93, 96, 226]],
-]
-
-
-
-function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
-  //Convert from parameters
-  let palette = arg1_palette || 'Rainbow'
-  let r = arg0_rate
-
-  //If Rainbow default, use calibrated heat/cool continuous piecewise interpolation matching Anita's cityhistory
-  if (palette === 'Rainbow' || !palette) {
-    if (r >= RAINBOW_GROWTH_STOPS[0][0])
-      return RAINBOW_GROWTH_STOPS[0][1]
-    let last_idx = RAINBOW_GROWTH_STOPS.length - 1
-    if (r <= RAINBOW_GROWTH_STOPS[last_idx][0])
-      return RAINBOW_GROWTH_STOPS[last_idx][1]
-
-    for (let i = 0; i < last_idx; i++) {
-      let hi = RAINBOW_GROWTH_STOPS[i][0]
-      let lo = RAINBOW_GROWTH_STOPS[i + 1][0]
-      if (r <= hi && r >= lo) {
-        let t = (hi === lo) ? 0 : (r - lo) / (hi - lo)
-        let c_hi = RAINBOW_GROWTH_STOPS[i][1]
-        let c_lo = RAINBOW_GROWTH_STOPS[i + 1][1]
-        let res_r = Math.round(c_lo[0] + t * (c_hi[0] - c_lo[0]))
-        let res_g = Math.round(c_lo[1] + t * (c_hi[1] - c_lo[1]))
-        let res_b = Math.round(c_lo[2] + t * (c_hi[2] - c_lo[2]))
-        return [res_r, res_g, res_b]
-      }
-    }
-    return RAINBOW_GROWTH_STOPS[4][1]
-  }
-
-  //D3 continuous colour interpolation from -0.05 to +0.08
-  let interpolator = (d3Chromatic as any)[`interpolate${palette}`]
-  if (interpolator) {
-    let t = Math.max(0, Math.min(1, (r - (-0.05))/(0.08 - (-0.05))))
-    let color_str = interpolator(t)
-    let match = color_str.match(/\d+/g)
-    if (match && match.length >= 3)
-      return [parseInt(match[0], 10), parseInt(match[1], 10), parseInt(match[2], 10)]
-  }
-
-  return [232, 121, 249]
-}
-
-function getPopRgb (arg0_pop: number): [number, number, number] {
-  let p = Math.max(1, arg0_pop)
-  let t = Math.max(0, Math.min(1, (Math.log10(p) - 3.7)/3.6))
-  let r = Math.round(Math.min(255, 13 + t*240))
-  let g = Math.round(Math.min(255, 8 + t*210))
-  let b = Math.round(Math.max(0, 135 - t*100))
-  return [r, g, b]
-}
+  buildStadesterCityLayers,
+  buildStadesterCityPoints,
+} from './deck_stadester_layers.ts'
+import {
+  buildCircleOverlayLayers,
+  buildCountryHighlightLayers,
+  buildCustomVectorLayer,
+  buildDrawToolLayers,
+  buildDrawnPolygonLayer,
+  buildElevationSpikesLayer,
+} from './deck_vector_and_draw_layers.ts'
 
 //Basemaps driven by MAP_CONFIG (config/map.json5)
 let esri_basemap_urls_obj: Record<string, string> = {}
@@ -409,38 +52,20 @@ for (let i = 0; i < MAP_CONFIG.basemapLayers.length; i++) {
 
 export interface UseDeckLayersParams {
   activeLayerId?: string | null
-  projection: ProjectionType
-  rasterVersion?: number
   basemap: string
-  landGeoJson: any
-  equalEarthLandGeoJson: any
-  showGraticule: boolean
-  graticulePaths: { path: [number, number][] }[]
-  renderedCanvas: HTMLCanvasElement | null
-  rasterBounds: [number, number, number, number]
-  opacity: number
-  heightmapConfig: HeightmapConfig
-  elevationSpikesData: { points: ElevationSpikePoint[] }
   circleOverlayConfig: CircleOverlayConfig
   circlePixelData: CirclePixelPoint[]
-  raster: DecodedRaster | null
-  palette: any
-  invertPalette?: boolean
-  isMobile?: boolean
-  minVal: number
-  maxVal: number
-  selectedCountries?: CountryFeature[]
-  selectedCountry?: CountryFeature | null
   countriesMode?: boolean
-  hoveredCountry?: CountryFeature | null
-  stadesterConfig?: StadesterConfig
-  stadesterCities?: CityPoint[]
-  stadesterLabels?: any[]
-  stadesterPoints?: any[]
-  selectedCityKey?: string | null
-  hoveredCity?: CityPoint | null
-  onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
-  onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
+  cursorLngLat?: [number, number] | null
+  customVectorFeatures?: CountryFeature[]
+  customVectorVisible?: boolean
+  draggedVertexIndex?: number | null
+  drawPoints?: [number, number][]
+  drawnPolygonFeature?: CountryFeature | null
+  elevationSpikesData: { points: ElevationSpikePoint[] }
+  equalEarthLandGeoJson: any
+  graticulePaths: { path: [number, number][] }[]
+  heightmapConfig: HeightmapConfig
   historicalBordersConfig?: HistoricalBordersConfig
   historicalBordersData?: {
     count?: number
@@ -451,26 +76,44 @@ export interface UseDeckLayersParams {
     year?: number
     [key: string]: any
   } | null
-  selectedHistoricalFeature?: HistoricalBorderFeature | null
+  hoveredCity?: CityPoint | null
+  hoveredCountry?: CountryFeature | null
   hoveredHistoricalFeature?: HistoricalBorderFeature | null
-  onSelectHistoricalFeature?: (arg0_feature: HistoricalBorderFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
-  onHoverHistoricalFeature?: (arg0_feature: HistoricalBorderFeature | null, arg1_x?: number, arg2_y?: number) => void
-  customVectorFeatures?: CountryFeature[]
-  customVectorVisible?: boolean
-  cursorLngLat?: [number, number] | null
-  draggedVertexIndex?: number | null
-  drawPoints?: [number, number][]
-  drawnPolygonFeature?: CountryFeature | null
   hoveredVertexIndex?: number | null
+  invertPalette?: boolean
   isDrawing?: boolean
   isEditingShape?: boolean
+  isMobile?: boolean
+  landGeoJson: any
+  maxVal: number
+  minVal: number
   onFinishDraw?: () => void
+  onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   onHoverCustomVectorFeature?: (arg0_feature: CountryFeature | null, arg1_x?: number, arg2_y?: number) => void
+  onHoverHistoricalFeature?: (arg0_feature: HistoricalBorderFeature | null, arg1_x?: number, arg2_y?: number) => void
+  onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
   onSelectCustomVectorFeature?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
   onSelectDrawnPolygon?: (arg0_feature: CountryFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
+  onSelectHistoricalFeature?: (arg0_feature: HistoricalBorderFeature, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => void
+  opacity: number
+  palette: any
+  projection: ProjectionType
+  raster: DecodedRaster | null
+  rasterBounds: [number, number, number, number]
+  rasterVersion?: number
+  renderedCanvas: HTMLCanvasElement | null
+  selectedCityKey?: string | null
+  selectedCountries?: CountryFeature[]
+  selectedCountry?: CountryFeature | null
+  selectedHistoricalFeature?: HistoricalBorderFeature | null
+  showGraticule: boolean
+  stadesterCities?: CityPoint[]
+  stadesterConfig?: StadesterConfig
+  stadesterLabels?: any[]
+  stadesterPoints?: any[]
   timelineYear?: number
-  viewport?: any
   viewState?: any
+  viewport?: any
 }
 
 /**
@@ -478,9 +121,10 @@ export interface UseDeckLayersParams {
  * Composes basemaps, graticules, raster surface, elevation spikes, equal-area circles, and country masks.
  *
  * @param {UseDeckLayersParams} arg0_options
+ *
  * @returns {Array}
  */
-export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
+export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   //Convert from parameters
   let options = (arg0_options) ? arg0_options : ({} as UseDeckLayersParams)
 
@@ -494,54 +138,14 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
   let stadester_cities = options.stadesterCities
 
   let stadester_points_data = useMemo(() => {
-    if (!is_cities_enabled || !stadester_cities || stadester_cities.length === 0)
-      return []
-
-    return stadester_cities.map((city) => {
-      let c_lat = (city.lat !== undefined) ? city.lat : city.coords[0]
-      let c_lon = (city.lon !== undefined) ? city.lon : city.coords[1]
-      let fill_color: [number, number, number, number] = [255, 255, 255, 220]
-      let px = c_lon
-      let py = c_lat
-
-      if (projection === 'EqualEarth') {
-        let projected = projectEqualEarth(c_lon, c_lat)
-        px = projected[0]
-        py = projected[1]
-      }
-
-      // Equal-area pixel radius scaled by sqrt(population) with calibrated minimum bubble size for mobile / desktop
-      let min_radius = (is_mobile ? 2.0 : 3.25) * b_scale
-      let pop_scaled = (is_mobile ? 0.70 : 1.0) * b_scale
-      let pop_radius = Math.sqrt(Math.max(0, city.population)) * 0.0115 * pop_scaled
-      let max_radius = is_mobile ? 32.0 : 65.0
-      let pixel_radius = Math.max(min_radius, Math.min(max_radius, min_radius + pop_radius))
-
-      if (color_mode === 'growth') {
-        let growth_rate = (city.growthRate !== undefined) ? city.growthRate : 0
-        let growth_rgb = getGrowthRgb(growth_rate, growth_palette)
-        fill_color = [growth_rgb[0], growth_rgb[1], growth_rgb[2], 220]
-      } else if (color_mode === 'population') {
-        let pop_rgb = getPopRgb(city.population)
-        fill_color = [pop_rgb[0], pop_rgb[1], pop_rgb[2], 220]
-      } else if (color_mode === 'region' || color_mode === 'continent') {
-        let reg_hex = resolveRegionColorHex(city.region, [c_lat, c_lon])
-        let reg_rgb = hexToRgb(reg_hex)
-        fill_color = [reg_rgb[0], reg_rgb[1], reg_rgb[2], 220]
-      }
-
-      // Truncate name to the first word prior to semicolon
-      let short_name = getShortCityLabel(city.name)
-
-      return {
-        ...city,
-        color: fill_color,
-        pixelRadius: pixel_radius,
-        position: [px, py, 0] as [number, number, number],
-        projection: projection,
-        rawCoords: [c_lon, c_lat],
-        shortName: short_name,
-      }
+    return buildStadesterCityPoints({
+      b_scale,
+      color_mode,
+      growth_palette,
+      is_cities_enabled,
+      is_mobile,
+      projection,
+      stadester_cities,
     })
   }, [
     is_cities_enabled,
@@ -580,18 +184,14 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let elevation_spikes_data = options.elevationSpikesData
     let equal_earth_land_geo_json = options.equalEarthLandGeoJson
     let graticule_paths = options.graticulePaths
-    let halo_w: number
     let heightmap_config = options.heightmapConfig
-    let hov_key: string
     let hovered_country = options.hoveredCountry
-    let hovered_data: any
     let hovered_vertex_index = options.hoveredVertexIndex ?? null
     let invert_palette = options.invertPalette
     let is_cartesian: boolean
     let is_drawing = Boolean(options.isDrawing)
     let is_editing_shape = Boolean(options.isEditingShape)
     let is_historical_hovered_selected: boolean
-    let is_hovered_already_selected: boolean
     let is_mobile = Boolean(options.isMobile)
     let land_data: any
     let land_geo_json = options.landGeoJson
@@ -606,11 +206,7 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     let rendered_canvas = options.renderedCanvas
     let selected_countries = options.selectedCountries
     let selected_country = options.selectedCountry
-    let selected_data: any
-    let selected_key: string
     let show_graticule = options.showGraticule
-    let spike_key: string
-    let stroke_w: number
 
     is_cartesian = (projection === 'Equirectangular' || projection === 'EqualEarth')
 
@@ -913,80 +509,30 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     }
 
     //4. 3D Elevation Spikes
-    if (heightmap_config.enabled && elevation_spikes_data.points && elevation_spikes_data.points.length > 0) {
-      spike_key = (countries_mode && effective_selected_array.length > 0)
-        ? `iso-${effective_selected_array.map((c) => c.properties.iso_a3 || c.properties.name).sort().join('_') || 'empty'}`
-        : 'global'
-
-      layers_array.push(
-        new SolidPolygonLayer({
-          id: `elevation-spikes-${projection}-${spike_key}-${heightmap_config.resolutionArcmin ?? 60}-${heightmap_config.heightScaleMode ?? 'linear'}-${heightmap_config.blendWeight ?? 0.5}`,
-          data: elevation_spikes_data.points,
-          getPolygon: (d: any) => d.polygon,
-          getElevation: (d: any) => d.elevation,
-          getFillColor: (d: any) => d.color,
-          updateTriggers: {
-            getPolygon: [elevation_spikes_data.points, spike_key, countries_mode, effective_selected_array.length, heightmap_config.resolutionArcmin],
-            getElevation: [elevation_spikes_data.points, spike_key, heightmap_config.elevationScale, heightmap_config.resolutionArcmin, heightmap_config.heightScaleMode, heightmap_config.blendWeight],
-            getFillColor: [elevation_spikes_data.points, spike_key, palette, invert_palette, heightmap_config.opacity, heightmap_config.opacityByPercentile, heightmap_config.opacityByPercentileStrength],
-          },
-          extruded: true,
-          flatShading: true,
-          opacity: 1,
-          elevationScale: 1,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          pickable: !is_drawing,
-          material: {
-            ambient: 0.35,
-            diffuse: 0.7,
-            shininess: 40,
-            specularColor: [85, 90, 100],
-          },
-        })
-      )
-    }
+    let elevation_spikes_layer = buildElevationSpikesLayer({
+      countries_mode,
+      effective_selected_array,
+      elevation_spikes_data,
+      heightmap_config,
+      invert_palette,
+      is_cartesian,
+      is_drawing,
+      palette,
+      projection,
+    })
+    if (elevation_spikes_layer)
+      layers_array.push(elevation_spikes_layer)
 
     //5. High-Value Equal-Area Circle Pixels
-    if (circle_pixel_data.length > 0) {
-      stroke_w = circle_overlay_config.strokeWidth || 2
-      halo_w = circle_overlay_config.haloWidth ?? 1
-
-      layers_array.push(
-        new ScatterplotLayer({
-          id: `circle-pixels-halo-${projection}-${stroke_w}-${halo_w}`,
-          data: circle_pixel_data,
-          getPosition: (d: any) => d.position,
-          getRadius: (d: any) => d.radius,
-          filled: false,
-          stroked: true,
-          getLineColor: [0, 0, 0, 255],
-          getLineWidth: stroke_w + halo_w*2,
-          lineWidthUnits: 'pixels',
-          radiusUnits: (is_cartesian) ? 'common' : 'meters',
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          pickable: false,
-          parameters: { depthTest: false },
-        })
-      )
-
-      layers_array.push(
-        new ScatterplotLayer({
-          id: `circle-pixels-stroke-${projection}-${stroke_w}`,
-          data: circle_pixel_data,
-          getPosition: (d: any) => d.position,
-          getRadius: (d: any) => d.radius,
-          filled: false,
-          stroked: true,
-          getLineColor: (d: any) => d.color,
-          getLineWidth: stroke_w,
-          lineWidthUnits: 'pixels',
-          radiusUnits: (is_cartesian) ? 'common' : 'meters',
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          pickable: !is_drawing,
-          parameters: { depthTest: false },
-        })
-      )
-    }
+    let circle_layers = buildCircleOverlayLayers({
+      circle_overlay_config,
+      circle_pixel_data,
+      is_cartesian,
+      is_drawing,
+      projection,
+    })
+    for (let i = 0; i < circle_layers.length; i++)
+      layers_array.push(circle_layers[i])
 
     //6. Historical Statistical Borders (CShapes-2.0 & atlas.naissance)
     is_historical_hovered_selected = Boolean(
@@ -1024,384 +570,55 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
     }
 
     //8b. Custom Vector Layer (.naissance / .geojson)
-    if (custom_vector_features && custom_vector_features.length > 0 && custom_vector_visible) {
-      let custom_vector_data = (projection === 'EqualEarth')
-        ? custom_vector_features.map((arg0_f) => ({
-            ...arg0_f,
-            geometry: transformGeometryToEqualEarth(arg0_f.geometry),
-          }))
-        : custom_vector_features
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `custom-vector-layer-${projection}`,
-          data: custom_vector_data,
-          pickable: !is_drawing,
-          stroked: true,
-          filled: true,
-          getFillColor: (arg0_d: any) => {
-            let alpha = 110
-            if (arg0_d.properties?.symbol?.polygonOpacity !== undefined) {
-              alpha = Math.round(arg0_d.properties.symbol.polygonOpacity * 255)
-            }
-            if (arg0_d.properties?.color) {
-              let c = arg0_d.properties.color
-              if (Array.isArray(c) && c.length >= 3)
-                return [c[0], c[1], c[2], alpha]
-              if (typeof c === 'string' && c.startsWith('#')) {
-                let rgb = hexToRgb(c)
-                return [rgb[0], rgb[1], rgb[2], alpha]
-              }
-            }
-            return [56, 189, 248, alpha]
-          },
-          getLineColor: (arg0_d: any) => {
-            if (arg0_d.properties?.color) {
-              let c = arg0_d.properties.color
-              if (Array.isArray(c) && c.length >= 3)
-                return [c[0], c[1], c[2], 220]
-              if (typeof c === 'string' && c.startsWith('#')) {
-                let rgb = hexToRgb(c)
-                return [rgb[0], rgb[1], rgb[2], 220]
-              }
-            }
-            return [56, 189, 248, 220]
-          },
-          getLineWidth: 1.5,
-          lineWidthUnits: 'pixels',
-          autoHighlight: true,
-          highlightColor: [255, 255, 255, 70],
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          onClick: (arg0_info: any) => {
-            if (is_drawing)
-              return false
-            if (arg0_info.object && options.onSelectCustomVectorFeature) {
-              options.onSelectCustomVectorFeature(
-                arg0_info.object,
-                arg0_info.coordinate ? [arg0_info.coordinate[0], arg0_info.coordinate[1]] : undefined,
-                arg0_info.x,
-                arg0_info.y
-              )
-            }
-            return true
-          },
-          onHover: (arg0_info: any) => {
-            if (is_drawing)
-              return
-            if (options.onHoverCustomVectorFeature) {
-              options.onHoverCustomVectorFeature(arg0_info.object || null, arg0_info.x, arg0_info.y)
-            }
-          },
-          _subLayerProps: {
-            'polygons-fill': {
-              pickable: !is_drawing,
-              parameters: {
-                cullMode: 'none',
-                depthMask: false,
-                depthTest: false,
-              },
-            },
-            'polygons-stroke': {
-              pickable: !is_drawing,
-              parameters: {
-                depthMask: false,
-                depthTest: false,
-              },
-            },
-          },
-          parameters: {
-            cullMode: 'none',
-            depthMask: false,
-            depthTest: false,
-          },
-        })
-      )
-    }
+    let custom_vector_layer = buildCustomVectorLayer({
+      custom_vector_features,
+      custom_vector_visible,
+      is_cartesian,
+      is_drawing,
+      onHoverCustomVectorFeature: options.onHoverCustomVectorFeature,
+      onSelectCustomVectorFeature: options.onSelectCustomVectorFeature,
+      projection,
+    })
+    if (custom_vector_layer)
+      layers_array.push(custom_vector_layer)
 
     //8c. Finalized User-Drawn Measurement Polygon
-    if (drawn_polygon_feature && !is_drawing) {
-      let drawn_data = (projection === 'EqualEarth')
-        ? [{
-            ...drawn_polygon_feature,
-            geometry: transformGeometryToEqualEarth(drawn_polygon_feature.geometry),
-          }]
-        : [drawn_polygon_feature]
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `drawn-polygon-layer-${projection}`,
-          data: drawn_data,
-          pickable: !is_drawing,
-          autoHighlight: !is_drawing,
-          highlightColor: [255, 255, 255, 70],
-          stroked: true,
-          filled: true,
-          getFillColor: [200, 40, 40, 45],
-          getLineColor: [200, 40, 40, 255],
-          getLineWidth: 2,
-          lineWidthUnits: 'pixels',
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          onClick: (arg0_info: any) => {
-            if (is_drawing)
-              return false
-            if (arg0_info.object && options.onSelectDrawnPolygon) {
-              options.onSelectDrawnPolygon(
-                arg0_info.object,
-                arg0_info.coordinate ? [arg0_info.coordinate[0], arg0_info.coordinate[1]] : undefined,
-                arg0_info.x,
-                arg0_info.y
-              )
-            }
-            return true
-          },
-          _subLayerProps: {
-            'polygons-fill': {
-              pickable: !is_drawing,
-              parameters: {
-                cullMode: 'none',
-                depthMask: false,
-                depthTest: false,
-              },
-            },
-            'polygons-stroke': {
-              pickable: !is_drawing,
-              parameters: {
-                depthMask: false,
-                depthTest: false,
-              },
-            },
-          },
-          parameters: {
-            cullMode: 'none',
-            depthMask: false,
-            depthTest: false,
-          },
-        })
-      )
-    }
-
-    //8c-2. Selected Countries Highlight (Unified across Modern Natural Earth and Atlas Historical Borders)
-    if (effective_selected_array.length > 0) {
-      selected_data = (projection === 'EqualEarth')
-        ? effective_selected_array.map((arg0_c: any) => {
-            let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
-            return {
-              ...arg0_c,
-              geometry: transformGeometryToEqualEarth(geom),
-            }
-          })
-        : effective_selected_array.map((arg0_c: any) => {
-            let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
-            return {
-              ...arg0_c,
-              geometry: { ...geom },
-            }
-          })
-
-      selected_key = effective_selected_array
-        .map((arg0_c: any) => {
-          let iso = arg0_c.properties?.iso_a3
-          if (iso && iso !== '-99')
-            return iso
-          if (arg0_c.properties?.gwcode !== undefined && arg0_c.properties?.gwcode !== null)
-            return `gw_${arg0_c.properties.gwcode}`
-          if (arg0_c.id !== undefined && arg0_c.id !== null)
-            return String(arg0_c.id)
-          if (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null)
-            return String(arg0_c.properties.id)
-          return arg0_c.properties?.name || 'sel'
-        })
-        .join('_')
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `countries-selected-${projection}-${selected_key}`,
-          data: selected_data,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          filled: true,
-          getFillColor: [200, 40, 40, 35],
-          stroked: true,
-          getLineColor: [200, 40, 40, 255],
-          getLineWidth: 2.5,
-          lineWidthUnits: 'pixels',
-          lineWidthMinPixels: 2,
-          updateTriggers: {
-            getFillColor: [selected_key],
-            getLineColor: [selected_key],
-          },
-          parameters: { depthTest: false },
-          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
-        })
-      )
-    }
-
-    //8c-3. Hovered Country Highlight in Countries Mode
-    is_hovered_already_selected = effective_selected_array.some((arg0_c: any) => {
-      if (!hovered_country)
-        return false
-      return (
-        (arg0_c.properties?.iso_a3 && arg0_c.properties.iso_a3 !== '-99' && arg0_c.properties.iso_a3 === hovered_country.properties?.iso_a3) ||
-        (arg0_c.id !== undefined && hovered_country.id !== undefined && arg0_c.id === hovered_country.id) ||
-        (arg0_c.properties?.id !== undefined && hovered_country.properties?.id !== undefined && arg0_c.properties.id === hovered_country.properties.id) ||
-        (arg0_c.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hovered_country.properties.gwcode) ||
-        Boolean(arg0_c.properties?.name && hovered_country.properties?.name && arg0_c.properties.name === hovered_country.properties.name)
-      )
+    let drawn_polygon_layer = buildDrawnPolygonLayer({
+      drawn_polygon_feature,
+      is_cartesian,
+      is_drawing,
+      onSelectDrawnPolygon: options.onSelectDrawnPolygon,
+      projection,
     })
+    if (drawn_polygon_layer)
+      layers_array.push(drawn_polygon_layer)
 
-    if (!is_drawing && countries_mode && hovered_country && !is_hovered_already_selected) {
-      hov_key = (hovered_country.properties?.iso_a3 && hovered_country.properties.iso_a3 !== '-99')
-        ? hovered_country.properties.iso_a3
-        : (hovered_country.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== null)
-          ? `gw_${hovered_country.properties.gwcode}`
-          : (hovered_country.properties?.adm0_a3 || (hovered_country.id !== undefined && hovered_country.id !== null ? String(hovered_country.id) : '') || hovered_country.properties?.name || 'hov')
-
-      let hov_geom = (hovered_country as any).raw_feature?.geometry || hovered_country.geometry
-      hovered_data = (projection === 'EqualEarth')
-        ? [{ ...hovered_country, geometry: transformGeometryToEqualEarth(hov_geom) }]
-        : [{ ...hovered_country, geometry: { ...hov_geom } }]
-
-      layers_array.push(
-        new GeoJsonLayer({
-          id: `country-hovered-${projection}-${hov_key}`,
-          data: hovered_data,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          filled: true,
-          getFillColor: [255, 255, 255, 45],
-          stroked: true,
-          getLineColor: [255, 255, 255, 220],
-          getLineWidth: 1.5,
-          lineWidthUnits: 'pixels',
-          parameters: { depthTest: false },
-          extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
-        })
-      )
-    }
+    //8c-2 / 8c-3. Country Highlights
+    let highlight_layers = buildCountryHighlightLayers({
+      countries_mode,
+      effective_selected_array,
+      hovered_country,
+      is_cartesian,
+      is_drawing,
+      projection,
+    })
+    for (let i = 0; i < highlight_layers.length; i++)
+      layers_array.push(highlight_layers[i])
 
     //8d. In-Progress Polygon Draw Tool (Vertices, Elastic Path, and Area Fill Preview)
-    if (is_drawing && draw_points.length > 0) {
-      let draw_points_layer_coords: [number, number][] = draw_points.map((arg0_pt) =>
-        projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
-      )
-
-      //Preview fill (only placed vertices, never rubberband cursor, with unique id per vertex count)
-      if (draw_points_layer_coords.length >= 3) {
-        let closed_preview_coords = [...draw_points_layer_coords, draw_points_layer_coords[0]]
-        let preview_geojson_data = [
-          {
-            geometry: {
-              coordinates: [closed_preview_coords],
-              type: 'Polygon',
-            },
-            properties: {},
-            type: 'Feature',
-          },
-        ]
-
-        layers_array.push(
-          new GeoJsonLayer({
-            id: `draw-tool-preview-${projection}-${draw_points.length}`,
-            data: preview_geojson_data,
-            filled: true,
-            stroked: false,
-            pickable: false,
-            getFillColor: [200, 40, 40, 30],
-            coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-            updateTriggers: {
-              getFillColor: [draw_points.length, is_editing_shape],
-            },
-            _subLayerProps: {
-              'polygons-fill': {
-                parameters: {
-                  cullMode: 'none',
-                  depthMask: false,
-                  depthTest: false,
-                },
-              },
-            },
-            parameters: {
-              cullMode: 'none',
-              depthMask: false,
-              depthTest: false,
-            },
-          })
-        )
-      }
-
-      //Elastic path or closed polygon perimeter
-      let path_data = (is_editing_shape && draw_points_layer_coords.length >= 3)
-        ? [...draw_points_layer_coords, draw_points_layer_coords[0]]
-        : (cursor_lng_lat && !is_editing_shape
-          ? [...draw_points_layer_coords, projectLngLatToLayerCoords(cursor_lng_lat[0], cursor_lng_lat[1], projection)]
-          : draw_points_layer_coords)
-
-      layers_array.push(
-        new PathLayer({
-          id: `draw-tool-path-${projection}`,
-          data: [{ path: path_data }],
-          getColor: [200, 40, 40, 220],
-          getWidth: 2,
-          widthUnits: 'pixels',
-          pickable: false,
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          parameters: {
-            depthMask: false,
-            depthTest: false,
-          },
-        })
-      )
-
-      //Vertices as sharp uniform red squares
-      let vertex_data = draw_points.map((arg0_pt, arg1_idx) => {
-        let coords = projectLngLatToLayerCoords(arg0_pt[0], arg0_pt[1], projection)
-        return {
-          idx: arg1_idx,
-          position: [coords[0], coords[1], 0],
-        }
-      })
-
-      layers_array.push(
-        new SquareMarkerLayer({
-          id: `draw-tool-vertices-${projection}`,
-          data: vertex_data,
-          getPosition: (arg0_d: any) => arg0_d.position,
-          getRadius: (arg0_d: any) => {
-            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
-            return is_active ? 5.5 : 4.5
-          },
-          radiusUnits: 'pixels',
-          getFillColor: [200, 40, 40, 255],
-          stroked: true,
-          getLineColor: (arg0_d: any) => {
-            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
-            return is_active ? [255, 255, 255, 255] : [255, 255, 255, 220]
-          },
-          getLineWidth: (arg0_d: any) => {
-            let is_active = (arg0_d.idx === hovered_vertex_index || arg0_d.idx === dragged_vertex_index)
-            return is_active ? 2 : 1.5
-          },
-          lineWidthUnits: 'pixels',
-          pickable: is_drawing,
-          updateTriggers: {
-            getLineColor: [hovered_vertex_index, dragged_vertex_index],
-            getLineWidth: [hovered_vertex_index, dragged_vertex_index],
-            getRadius: [hovered_vertex_index, dragged_vertex_index],
-          },
-          onClick: (arg0_info: any) => {
-            if (is_drawing && draw_points.length >= 3 && !is_editing_shape && arg0_info.object?.idx === 0) {
-              if (options.onFinishDraw)
-                options.onFinishDraw()
-              return true
-            }
-            return false
-          },
-          coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-          parameters: {
-            depthMask: false,
-            depthTest: false,
-          },
-        })
-      )
-    }
+    let draw_tool_layers = buildDrawToolLayers({
+      cursor_lng_lat,
+      dragged_vertex_index,
+      draw_points,
+      hovered_vertex_index,
+      is_cartesian,
+      is_drawing,
+      is_editing_shape,
+      onFinishDraw: options.onFinishDraw,
+      projection,
+    })
+    for (let i = 0; i < draw_tool_layers.length; i++)
+      layers_array.push(draw_tool_layers[i])
 
     //9. Stadestér Historical Cities
     let is_worker_points_matching_proj = Boolean(
@@ -1533,7 +750,6 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
           if (c_lat === undefined || c_lon === undefined)
             continue
 
-          //Skip temporally displaced cities (cities from another era/time period)
           if (timeline_yr !== undefined) {
             if (c.min_year !== undefined && timeline_yr < c.min_year)
               continue
@@ -1574,8 +790,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
 
           let is_name_match = false
           if (cap_name_lower) {
-            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
+            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
             if (
               c_name_lower === cap_name_lower ||
               c_name_nfd === cap_name_nfd ||
@@ -1587,9 +803,8 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
             } else if (c.other_names && Array.isArray(c.other_names)) {
               is_name_match = c.other_names.some((arg0_on: string) => {
                 let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-                let on_lower = on_clean
                 let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
                 return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
               })
             }
@@ -1642,357 +857,29 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
       }
     }
 
-    //Reconcile capital cities isomorphically with authoritative historical border features
-    if ((active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) && effective_points && effective_points.length > 0) {
-      effective_points = effective_points.map((arg0_c: any) =>
-        reconcileCapitalWithAuthoritativeBorders(
-          arg0_c,
-          active_capitals_by_key,
-          active_capitals_by_name,
-          acapital_state_ids,
-          active_state_capitals_by_sid,
-          active_state_ids,
-          active_polity_names,
-          authoritative_capitals_by_city,
-          active_capitals_list
-        )
-      )
-    }
-
-    if (options.stadesterConfig?.enabled && effective_points.length > 0) {
-      let is_firefox = typeof navigator !== 'undefined' && /firefox|fxios/i.test(navigator.userAgent)
-      let is_halo = options.stadesterConfig.halo !== false && !options.stadesterConfig.filled
-      let is_labels_visible = (options.stadesterConfig.showLabels !== undefined) ? options.stadesterConfig.showLabels : true
-
-      let circle_opacity = (options.stadesterConfig.opacity !== undefined) ? options.stadesterConfig.opacity : 0.7
-      let fill_alpha = Math.round(255 * circle_opacity)
-      let stroke_alpha = Math.min(255, Math.round(255 * Math.min(1.0, circle_opacity * 1.25)))
-
-      // City circles layer (ScatterplotLayer for Chrome/WebKit, TextLayer for Firefox)
-      if (is_firefox) {
-        layers_array.push(
-          new TextLayer({
-            id: `stadester-cities-${projection}`,
-            data: effective_points,
-            getText: () => (is_halo) ? '○' : '●',
-            characterSet: ['●', '○'],
-            fontFamily: 'Segoe UI Symbol, Arial, sans-serif',
-            fontSettings: { buffer: 8, fontSize: 128, sdf: true },
-            getPosition: (d: any) => d.position,
-            getSize: (d: any) => d.pixelRadius * 2,
-            getColor: (d: any) => {
-              let is_region_highlighted = Boolean(
-                options.hoveredCity?.region &&
-                d.region &&
-                (d.region === options.hoveredCity.region ||
-                 d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-                 options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-              )
-              if (is_region_highlighted) {
-                let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
-                let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
-                let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
-                return [r, g, b, Math.min(255, fill_alpha + 35)]
-              }
-              return [d.color[0], d.color[1], d.color[2], (is_halo) ? stroke_alpha : fill_alpha]
-            },
-            getTextAnchor: 'middle',
-            getAlignmentBaseline: 'center',
-            sizeUnits: 'pixels',
-            sizeScale: 1,
-            sizeMinPixels: is_mobile ? 4.5 : 6.5,
-            sizeMaxPixels: is_mobile ? 65.0 : 130.0,
-            coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-            billboard: true,
-            pickable: !is_drawing,
-            autoHighlight: !is_drawing,
-            highlightColor: [255, 255, 255, 100],
-            background: false,
-            onClick: (info: any) => {
-              if (is_drawing)
-                return false
-              if (info.object && options.onSelectCity)
-                options.onSelectCity(
-                  info.object,
-                  info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
-                  info.x,
-                  info.y
-                )
-              return true
-            },
-            onHover: (info: any) => {
-              if (is_drawing)
-                return
-              if (options.onHoverCity)
-                options.onHoverCity(info.object || null, info.x, info.y)
-            },
-            parameters: {
-              cullMode: 'none',
-              depthMask: false,
-              depthTest: false,
-            },
-          })
-        )
-      } else {
-        layers_array.push(
-          new ScatterplotLayer({
-            id: `stadester-cities-${projection}`,
-            data: effective_points,
-            getPosition: (d: any) => d.position,
-            getRadius: (d: any) => d.pixelRadius,
-            getFillColor: (d: any) => {
-              let is_region_highlighted = Boolean(
-                options.hoveredCity?.region &&
-                d.region &&
-                (d.region === options.hoveredCity.region ||
-                 d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-                 options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-              )
-              if (is_region_highlighted) {
-                let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
-                let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
-                let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
-                return [r, g, b, Math.min(255, fill_alpha + 35)]
-              }
-              return [d.color[0], d.color[1], d.color[2], fill_alpha]
-            },
-            getLineColor: (d: any) => {
-              let is_region_highlighted = Boolean(
-                options.hoveredCity?.region &&
-                d.region &&
-                (d.region === options.hoveredCity.region ||
-                 d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-                 options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-              )
-              if (is_region_highlighted) {
-                let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
-                let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
-                let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
-                return [r, g, b, 255]
-              }
-              return [d.color[0], d.color[1], d.color[2], stroke_alpha]
-            },
-            getLineWidth: 1.5,
-            lineWidthUnits: 'pixels',
-            lineWidthMinPixels: 1.5,
-            stroked: is_halo,
-            filled: !is_halo,
-            radiusUnits: 'pixels',
-            radiusMinPixels: is_mobile ? 2.0 : 3.25,
-            radiusMaxPixels: is_mobile ? 32.0 : 65.0,
-            coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-            billboard: true,
-            pickable: !is_drawing,
-            autoHighlight: !is_drawing,
-            highlightColor: [255, 255, 255, 100],
-            onClick: (info: any) => {
-              if (is_drawing)
-                return false
-              if (info.object && options.onSelectCity)
-                options.onSelectCity(
-                  info.object,
-                  info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
-                  info.x,
-                  info.y
-                )
-              return true
-            },
-            onHover: (info: any) => {
-              if (is_drawing)
-                return
-              if (options.onHoverCity)
-                options.onHoverCity(info.object || null, info.x, info.y)
-            },
-            parameters: {
-              cullMode: 'none',
-              depthMask: false,
-              depthTest: false,
-            },
-          })
-        )
-      }
-
-      // City selection highlight ring
-      if (options.selectedCityKey) {
-        let selected_city_item = effective_points.find((c: any) => c.key === options.selectedCityKey)
-        if (selected_city_item) {
-          if (is_firefox) {
-            layers_array.push(
-              new TextLayer({
-                id: `stadester-selected-ring-${projection}`,
-                data: [selected_city_item],
-                getText: () => '○',
-                characterSet: ['○'],
-                fontFamily: 'Segoe UI Symbol, Arial, sans-serif',
-                fontSettings: { buffer: 8, fontSize: 128, sdf: true },
-                getPosition: (d: any) => d.position,
-                getSize: (d: any) => (is_mobile ? (d.pixelRadius * 0.70 + 2.5) : (d.pixelRadius + 4)) * 2,
-                getColor: [239, 68, 68, 255],
-                getTextAnchor: 'middle',
-                getAlignmentBaseline: 'center',
-                sizeUnits: 'pixels',
-                sizeScale: 1,
-                coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-                billboard: true,
-                background: false,
-                parameters: {
-                  cullMode: 'none',
-                  depthMask: false,
-                  depthTest: false,
-                },
-                pickable: false,
-              })
-            )
-          } else {
-            layers_array.push(
-              new ScatterplotLayer({
-                id: `stadester-selected-ring-${projection}`,
-                data: [selected_city_item],
-                getPosition: (d: any) => d.position,
-                getRadius: (d: any) => is_mobile ? (d.pixelRadius * 0.70 + 2.5) : (d.pixelRadius + 4),
-                stroked: true,
-                filled: false,
-                getLineColor: [239, 68, 68, 255],
-                getLineWidth: 2.5,
-                lineWidthUnits: 'pixels',
-                radiusUnits: 'pixels',
-                coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-                billboard: true,
-                parameters: {
-                  cullMode: 'none',
-                  depthMask: false,
-                  depthTest: false,
-                },
-                pickable: false,
-              })
-            )
-          }
-        }
-      }
-
-      // City text labels
-      if (is_labels_visible) {
-        let visible_label_cities = options.stadesterLabels
-
-        if (visible_label_cities && visible_label_cities.length > 0) {
-          if (visible_label_cities[0]?.projection && visible_label_cities[0].projection !== projection)
-            visible_label_cities = undefined
-        }
-
-        if (visible_label_cities && visible_label_cities.length > 0) {
-          visible_label_cities = visible_label_cities.filter((arg0_c: any) =>
-            arg0_c &&
-            arg0_c.position &&
-            Number.isFinite(arg0_c.position[0]) &&
-            Number.isFinite(arg0_c.position[1]) &&
-            typeof arg0_c.shortName === 'string' &&
-            arg0_c.shortName.trim().length > 0
-          )
-
-          //Reconcile capital cities isomorphically with authoritative historical border features
-          if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
-            visible_label_cities = visible_label_cities.map((arg0_c: any) =>
-              reconcileCapitalWithAuthoritativeBorders(
-                arg0_c,
-                active_capitals_by_key,
-                active_capitals_by_name,
-                acapital_state_ids,
-                active_state_capitals_by_sid,
-                active_state_ids,
-                active_polity_names,
-                authoritative_capitals_by_city,
-                active_capitals_list
-              )
-            )
-          }
-        }
-
-        if (visible_label_cities && visible_label_cities.length > 0) {
-          layers_array.push(
-            new UnderlinedTextLayer({
-              id: `stadester-labels-${projection}`,
-              data: visible_label_cities,
-              getPosition: (d: any) => d.position,
-              getText: (d: any) => d.shortName,
-              getSize: (d: any) => Math.max(10, Math.min(15, 9 + Math.log10(Math.max(1000, d.population))*0.9)),
-              sizeUnits: 'pixels',
-              sizeMinPixels: 9,
-              isUnderlined: (d: any) => Boolean(d.isCapital && options.stadesterConfig?.showCapitals !== false && options.stadesterConfig?.showCapitalUnderlines !== false),
-              getUnderlineColor: (d: any) => {
-                if (!d.isCapital || options.stadesterConfig?.showCapitals === false || options.stadesterConfig?.showCapitalUnderlines === false)
-                  return [0, 0, 0, 0]
-
-                return getCapitalColorRgba(d, options.stadesterConfig)
-              },
-              getColor: (d: any) => {
-                if (!d.isCapital || options.stadesterConfig?.showCapitals === false)
-                  return [255, 255, 255, 255]
-
-                return getCapitalColorRgba(d, options.stadesterConfig)
-              },
-              getTextAnchor: 'start',
-              getAlignmentBaseline: 'center',
-              updateTriggers: {
-                getColor: [
-                  visible_label_cities,
-                  options.stadesterConfig?.showCapitals,
-                  options.stadesterConfig?.capitalColorMode,
-                  options.stadesterConfig?.capitalConstantColor,
-                ],
-                getUnderlineColor: [
-                  visible_label_cities,
-                  options.stadesterConfig?.showCapitals,
-                  options.stadesterConfig?.showCapitalUnderlines,
-                  options.stadesterConfig?.capitalColorMode,
-                  options.stadesterConfig?.capitalConstantColor,
-                ],
-                isUnderlined: [
-                  visible_label_cities,
-                  options.stadesterConfig?.showCapitals,
-                  options.stadesterConfig?.showCapitalUnderlines,
-                ],
-              },
-              getPixelOffset: (d: any) => [d.pixelRadius + 8, 0],
-              background: true,
-              getBackgroundColor: [10, 15, 25, 220],
-              backgroundPadding: [4, 2],
-              backgroundBorderRadius: 2,
-              fontFamily: 'Karla, sans-serif',
-              fontWeight: 600,
-              billboard: true,
-              coordinateSystem: (is_cartesian) ? COORDINATE_SYSTEM.CARTESIAN : COORDINATE_SYSTEM.LNGLAT,
-              characterSet: 'auto',
-              pickable: !is_drawing,
-              autoHighlight: !is_drawing,
-              highlightColor: [255, 255, 255, 60],
-              onClick: (info: any) => {
-                if (is_drawing)
-                  return false
-                if (info.object && options.onSelectCity)
-                  options.onSelectCity(
-                    info.object,
-                    info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
-                    info.x,
-                    info.y
-                  )
-                return true
-              },
-              onHover: (info: any) => {
-                if (is_drawing)
-                  return
-                if (options.onHoverCity)
-                  options.onHoverCity(info.object || null, info.x, info.y)
-              },
-              parameters: {
-                cullMode: 'none',
-                depthMask: false,
-                depthTest: false,
-              },
-            })
-          )
-        }
-      }
-    }
+    let city_layers = buildStadesterCityLayers({
+      acapital_state_ids,
+      active_capitals_by_key,
+      active_capitals_by_name,
+      active_capitals_list,
+      active_polity_names,
+      active_state_capitals_by_sid,
+      active_state_ids,
+      authoritative_capitals_by_city,
+      effective_points,
+      hoveredCity: options.hoveredCity,
+      is_cartesian,
+      is_drawing,
+      is_mobile,
+      onHoverCity: options.onHoverCity,
+      onSelectCity: options.onSelectCity,
+      projection,
+      selectedCityKey: options.selectedCityKey,
+      stadesterConfig: options.stadesterConfig,
+      stadesterLabels: options.stadesterLabels,
+    })
+    for (let i = 0; i < city_layers.length; i++)
+      layers_array.push(city_layers[i])
 
     //Return statement
     return layers_array

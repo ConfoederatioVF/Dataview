@@ -1,40 +1,16 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DeckGL from '@deck.gl/react'
 import {
   CountryFeature,
-  CountryStats,
   loadCountriesGeoJson,
-  findCountryAtLngLat,
-  isPointInGeometry,
 } from '@framework/geopng/polygon_binning.ts'
-import { sampleRasterAt } from '@framework/geopng/sample_raster'
 import {
-  invertEqualEarth,
-  projectEqualEarth,
-  transformGeometryToEqualEarth,
   generateEqualEarthGraticule,
+  transformGeometryToEqualEarth,
 } from '@framework/geopng/equal_earth.ts'
-import {
-  projectLngLatToScreen,
-  unprojectScreenToLngLat,
-} from '@framework/geopng/polygon_draw_tool.ts'
-import { isGlobePointVisible } from '@framework/stadester/stadester_heuristics'
-import {
-  DecodedRaster,
-  InspectionData,
-  ProjectionType,
-  HeightmapConfig,
-  CircleOverlayConfig,
-  MapModeItem,
-  MapModeId,
-  CityPoint,
-  CityFullRecord,
-  HistoricalBordersConfig,
-  StadesterConfig,
-} from '@framework/geopng/types.ts'
-import { MAP_CONFIG, getPixelOffset } from '@common'
+import type { CityPoint } from '@framework/geopng/types.ts'
+import { MAP_CONFIG } from '@common'
 import { UI_LAYOUT } from '@framework/utils/ui_layout.ts'
-import { Icon } from '@ui/components/icon'
 import { ClickInfoPanel } from './click_info_panel'
 import { CityDetailsPanel } from './city_details_panel'
 import { MapmodesTray } from '@ui/rightbar/mapmodes_tray'
@@ -43,132 +19,28 @@ import { useMapClearance } from './use_map_clearance'
 import { useMapViewState } from './use_map_view_state'
 import { resetSmoothPinchState } from './smooth_controllers'
 import { useElevationSpikes } from './use_elevation_spikes'
-import { ParsedDataLayer } from '@server/layer_parser.ts'
-import { UserRole } from '@common'
 import { useCircleOverlay } from './use_circle_overlay'
 import { useDeckLayers } from './use_deck_layers'
 import { useStadesterWorker } from '@framework/stadester/use_stadester_worker'
 import { useHistoricalBorders } from './use_historical_borders'
 import { HistoricalBorderDetailsPanel } from './historical_border_details_panel'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
+import { useMapViewerDrawing } from './use_map_viewer_drawing.ts'
+import { useMapViewerSampling } from './use_map_viewer_sampling.ts'
+import { useMapViewerDetailsNav } from './use_map_viewer_details_nav.ts'
+import { useMapViewerContainerEvents } from './use_map_viewer_container_events.ts'
+import type { MapViewerProps } from './map_viewer_types.ts'
 
-let EMPTY_ARRAY: any[] = [], NOOP_FN = () => { }
+export type { MapViewerProps }
 
-export interface MapViewerProps {
-  raster: DecodedRaster | null
-  renderedCanvas: HTMLCanvasElement | null
-  rasterBounds: [number, number, number, number]
-  projection: ProjectionType
-  setProjection: (p: ProjectionType) => void
-  opacity: number
-  palette: any
-  invertPalette?: boolean
-  maxVal: number
-  midpoint?: number | null
-  minVal: number
-  isMobile?: boolean
-  isPlaying?: boolean
-  isTimelapseExporting?: boolean
-  legendSubtitle?: string
-  legendTitle: string
-  hideColourbar?: boolean
-  scaleType: string
-  logSigma: number
-  breaks?: number[]
-  onUpdateBreaks?: (breaks: number[]) => void
-  mapModes: MapModeItem[]
-  onToggleMapMode: (id: MapModeId) => void
-  onReorderMapModes: (newModes: MapModeItem[]) => void
-  heightmapConfig: HeightmapConfig
-  setHeightmapConfig?: React.Dispatch<React.SetStateAction<HeightmapConfig>>
-  historicalBordersConfig?: HistoricalBordersConfig
-  historicalBordersEnabled?: boolean
-  setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
-  analyticsOpen: boolean
-  circleOverlayConfig: CircleOverlayConfig
-  setCircleOverlayConfig?: React.Dispatch<React.SetStateAction<CircleOverlayConfig>>
-  countriesMode?: boolean
-  countryStats?: CountryStats | null
-  cursorLngLat?: [number, number] | null
-  customVectorFeatures?: CountryFeature[]
-  customVectorVisible?: boolean
-  deferredSelectedCountries?: CountryFeature[]
-  drawPoints?: [number, number][]
-  drawnPolygonFeature?: CountryFeature | null
-  hoveredCountry?: CountryFeature | null
-  isCalculatingStats?: boolean
-  isDrawing?: boolean
-  isEditingShape?: boolean
-  onAddDrawPoint?: (arg0_point: [number, number]) => void
-  onCancelDraw?: () => void
-  onClearCountries?: () => void
-  onClearDrawnPolygon?: () => void
-  onDeleteDrawPoint?: (arg0_index: number) => void
-  onDeleteLastDrawPoint?: () => void
-  onEditPolygon?: (arg0_feature: CountryFeature) => void
-  onFinishDraw?: () => void
-  onHoverCountry?: (country: CountryFeature | null) => void
-  onInsertDrawPoint?: (arg0_index: number, arg1_point: [number, number]) => void
-  onInspect?: (data: InspectionData | null) => void
-  onMoveDrawPoint?: (arg0_index: number, arg1_point: [number, number]) => void
-  onSelectCountry?: (country: CountryFeature | null) => void
-  onSetCursorLngLat?: (arg0_coord: [number, number] | null) => void
-  onToggleAnalytics: () => void
-  onToggleCountriesMode?: (enabled: boolean) => void
-  onToggleCountry?: (country: CountryFeature) => void
-  onToggleDraw?: () => void
-  selectedCountries?: CountryFeature[]
-  selectedCountry?: CountryFeature | null
-  settingsDrawerOpen?: boolean
-  onToggleSettingsDrawer?: (open: boolean) => void
-  sidebarWidth?: number
-  snapToKeyframes?: boolean
-  colourbarWidth?: number
-  onResizeColourbarWidth?: (width: number) => void
-  infoPanelOpen?: boolean
-  onToggleInfoPanel?: () => void
-  onCloseInfoPanel?: () => void
-  activeLayerId?: string | null
-  activeVariableSelectors?: Record<string, string | string[]>
-  dataLayers?: Record<string, ParsedDataLayer>
-  isLoadingLayers?: boolean
-  onChangeVariableSelector?: (arg0_key: string, arg1_option: string | string[]) => void
-  onSelectLayer?: (arg0_layer_id: string) => void
-  legendPosition?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-centre' | 'bottom-centre'
-  onChangeLegendPosition?: (pos: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right') => void
-  onCloseCityDetails?: () => void
-  onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
-  onSelectCity?: (city: CityPoint) => void
-  onTogglePerformantMode?: (enabled: boolean) => void
-  onToggleUi?: () => void
-  performantMode?: boolean
-  pickRadius?: number
-  rasterVersion?: number
-  selectedCity?: CityFullRecord | null
-  selectedCityKey?: string | null
-  setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
-  stadesterCities?: CityPoint[]
-  stadesterConfig?: StadesterConfig
-  timelineYear?: number
-  uiVisible?: boolean
-  userRole?: UserRole
-  onChangeYear?: (arg0_year: number) => void
-  onToggleHistoricalBorders?: (arg0_enabled: boolean) => void
-}
-
-interface MapDetailsNavEntry {
-  anchorCoord?: [number, number] | null
-  anchorScreen?: { x: number; y: number } | null
-  city?: CityPoint | CityFullRecord | null
-  cityKey?: string | null
-  countryFeature?: HistoricalBorderFeature | null
-  type: 'city' | 'country'
-}
+let EMPTY_ARRAY: any[] = []
+let NOOP_FN = () => { }
 
 /**
  * Main map viewer component rendering multi-projection deck.gl views with 2D/3D overlays.
  *
  * @param {MapViewerProps} arg0_props
+ *
  * @returns {React.ReactElement}
  */
 export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewerProps) {
@@ -263,72 +135,31 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   //Declare local instance variables
   let active_layer: any = null
-  let center_on_coordinates: (arg0_lon: number, arg1_lat: number) => void
   let circle_pixel_data: any
   let container_ref = useRef<HTMLDivElement>(null)
   let deck_ref = useRef<any>(null)
   let default_desktop_pick_radius: number
   let default_touch_pick_radius: number
-  let drag_end_time_ref = useRef<number>(0)
-  let drag_start_pos_ref = useRef<{ x: number; y: number } | null>(null)
-  let dragged_vertex_idx_ref = useRef<number | null>(null)
   let effective_pick_radius: number
   let elevation_spikes_data: any
   let equal_earth_land_geo_json: any
-  let get_edge_at_screen_pos: (arg0_x: number, arg1_y: number, arg2_threshold?: number) => number
-  let get_vertex_at_screen_pos: (arg0_x: number, arg1_y: number, arg2_threshold?: number) => number
   let graticule_paths: { path: [number, number][] }[]
-  let handle_center_selected_city: () => void
-  let handle_click: (info: any) => void
-  let handle_close_all_details: () => void
-  let handle_hover: (info: any) => void
-  let handle_map_select_city: (arg0_city: CityPoint, arg1_coord?: [number, number], arg2_screen_x?: number, arg3_screen_y?: number) => void
-  let handle_nav_back: () => void
   let handle_reset_view: () => void
-  let handle_select_city_from_country: (arg0_city: CityPoint) => void
-  let handle_select_country_from_city: (arg0_state_id?: number | string, arg0_country_name?: string) => void
-  let has_dragged_ref = useRef<boolean>(false)
-  let hover_raf_ref = useRef<number | null>(null)
-  let is_interacting_ref = useRef<boolean>(false)
-  let last_centered_city_key_ref = useRef<string | null>(null)
-  let last_country_ref = useRef<CountryFeature | null>(null)
-  let last_hovered_country_code_ref = useRef<string | null | undefined>(null)
-  let last_map_click_pos_ref = useRef<{ x: number; y: number } | null>(null)
-  let last_map_click_time_ref = useRef<number>(0)
-  let last_vertex_tap_ref = useRef<{ index: number; time: number; x: number; y: number } | null>(null)
   let layers: any[]
-  let pending_pointer_pos_ref = useRef<{ x: number; y: number } | null>(null)
-  let pending_touch_pos_ref = useRef<{ x: number; y: number } | null>(null)
-  let point_just_deleted_ref = useRef<boolean>(false)
   let safe_handle_view_state_change: (arg0_e: any) => void
-  let sample_pointer_at: (arg0_x: number, arg1_y: number) => void
-  let sample_raster_at: (coordX: number, coordY: number) => InspectionData | null
-  let sample_touch_at: (arg0_x: number, arg1_y: number) => void
-  let suppress_click_ref = useRef<boolean>(false)
-  let touch_pick_raf_ref = useRef<number | null>(null)
 
   //Function body
   default_desktop_pick_radius = MAP_CONFIG.desktopPickRadius ?? 2
   default_touch_pick_radius = MAP_CONFIG.touchPickRadius ?? 18
   effective_pick_radius = (pick_radius !== undefined) ? pick_radius : (is_mobile ? default_touch_pick_radius : default_desktop_pick_radius)
 
-  let [dragged_vertex_idx, set_dragged_vertex_idx] = useState<number | null>(null)
-  let [hovered_vertex_idx, set_hovered_vertex_idx] = useState<number | null>(null)
-
   let [internal_flyout_open, set_internal_flyout_open] = useState(false)
   let flyout_open = (props.settingsDrawerOpen !== undefined) ? props.settingsDrawerOpen : internal_flyout_open
   let set_flyout_open = on_toggle_settings_drawer || set_internal_flyout_open
 
-  let [active_panel_type, set_active_panel_type] = useState<'city' | 'country' | null>(null)
   let [hovered_city, set_hovered_city] = useState<CityPoint | null>(null)
   let [hovered_city_pos, set_hovered_city_pos] = useState<{ x: number; y: number } | null>(null)
   let [hovered_historical_feature, set_hovered_historical_feature] = useState<HistoricalBorderFeature | null>(null)
-  let [nav_history, set_nav_history] = useState<MapDetailsNavEntry[]>([])
-  let [selected_city_anchor_coord, set_selected_city_anchor_coord] = useState<[number, number] | null>(null)
-  let [selected_city_anchor_screen, set_selected_city_anchor_screen] = useState<{ x: number; y: number } | null>(null)
-  let [selected_historical_feature, set_selected_historical_feature] = useState<HistoricalBorderFeature | null>(null)
-  let [selected_historical_anchor_coord, set_selected_historical_anchor_coord] = useState<[number, number] | null>(null)
-  let [selected_historical_anchor_screen, set_selected_historical_anchor_screen] = useState<{ x: number; y: number } | null>(null)
 
   let border_dataset = historical_borders_config?.dataset || (props.activeLayerId && props.activeLayerId.includes('border') ? props.activeLayerId : 'statistical_borders')
   let is_historical_borders_active = Boolean(
@@ -349,87 +180,36 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     { isPlaying: is_playing, snapToKeyframes: snap_to_keyframes }
   )
 
-  //Dismiss city hover tooltip when cities overlay is disabled or mode changes
+  let drawing_system = useMapViewerDrawing({
+    deck_ref,
+    draw_points,
+    is_drawing,
+    is_editing_shape,
+    is_mobile,
+    on_add_draw_point,
+    on_cancel_draw,
+    on_delete_draw_point,
+    on_delete_last_draw_point,
+    on_finish_draw,
+    on_insert_draw_point,
+    on_move_draw_point,
+    on_set_cursor_lng_lat,
+    projection,
+  })
+  let {
+    dragged_vertex_idx,
+    dragged_vertex_idx_ref,
+    handleDoubleClickCapture,
+    handleMapClick,
+    handlePointerDownCapture,
+    handleTouchStartCapture,
+    hovered_vertex_idx,
+  } = drawing_system
+
   useEffect(() => {
     set_hovered_city(null)
     set_hovered_city_pos(null)
   }, [stadester_config?.enabled, props.activeLayerId, map_modes, projection])
-
-  useEffect(() => {
-    if (!selected_countries || selected_countries.length === 0) {
-      if (!selected_country && active_panel_type !== 'country')
-        set_selected_historical_feature(null)
-    }
-  }, [selected_countries, selected_country, active_panel_type])
-
-  useEffect(() => {
-    if (selected_city && !selected_historical_feature && !active_panel_type) {
-      set_active_panel_type('city')
-    } else if (!selected_city && active_panel_type === 'city' && nav_history.length === 0) {
-      set_active_panel_type(null)
-    }
-  }, [selected_city, selected_historical_feature, active_panel_type, nav_history.length])
-
-  useEffect(() => {
-    if (!selected_historical_feature && active_panel_type === 'country' && nav_history.length === 0) {
-      set_active_panel_type(null)
-    }
-  }, [selected_historical_feature, active_panel_type, nav_history.length])
-
-  useEffect(() => {
-    if (is_drawing) {
-      set_selected_historical_feature(null)
-      set_active_panel_type(null)
-    }
-  }, [is_drawing])
-
-  useEffect(() => {
-    if (drawn_polygon_feature && !is_drawing) {
-      let hist_feat = drawn_polygon_feature as unknown as HistoricalBorderFeature
-      set_selected_historical_feature(hist_feat)
-      set_active_panel_type('country')
-      if (drawn_polygon_feature.geometry?.coordinates?.[0]?.[0]) {
-        let first_pt = drawn_polygon_feature.geometry.coordinates[0][0]
-        set_selected_historical_anchor_coord([first_pt[0], first_pt[1]])
-        if (deck_ref.current) {
-          let screen = projectLngLatToScreen([first_pt[0], first_pt[1]], deck_ref.current, projection)
-          if (screen) {
-            set_selected_historical_anchor_screen({ x: screen[0], y: screen[1] })
-          }
-        }
-      }
-    }
-  }, [drawn_polygon_feature, is_drawing, projection])
-
-  useEffect(() => {
-    if (selected_historical_feature && historical_borders_result.bordersData) {
-      let current_gw = selected_historical_feature.properties?.gwcode
-      let current_id = selected_historical_feature.id || selected_historical_feature.properties?.id
-      let current_name = selected_historical_feature.properties?.name
-      let updated_feat = historical_borders_result.bordersData.features.find(
-        (arg0_f) =>
-          arg0_f.id === current_id ||
-          (current_gw !== undefined && arg0_f.properties?.gwcode === current_gw) ||
-          (current_id !== undefined && arg0_f.properties?.id === current_id) ||
-          (current_name && arg0_f.properties?.name === current_name)
-      )
-      if (updated_feat && updated_feat !== selected_historical_feature) {
-        let is_same_identity =
-          updated_feat.id === selected_historical_feature.id &&
-          updated_feat.properties?.name === selected_historical_feature.properties?.name &&
-          updated_feat.geometry === selected_historical_feature.geometry
-
-        set_selected_historical_feature(updated_feat)
-        if (!is_same_identity) {
-          if (on_select_country) {
-            on_select_country(updated_feat as unknown as CountryFeature)
-          } else if (on_toggle_country) {
-            on_toggle_country(updated_feat as unknown as CountryFeature)
-          }
-        }
-      }
-    }
-  }, [selected_historical_feature, historical_borders_result.bordersData, on_select_country, on_toggle_country])
 
   let clearance = useMapClearance({
     analyticsOpen: analytics_open,
@@ -458,13 +238,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let {
     cameraTilt: camera_tilt,
     effectiveViewState: effective_view_state,
-    handleDoubleClick: handle_double_click,
-    handleResetNorth: handle_reset_north,
     handleResetView: raw_handle_reset_view,
-    handleToggleTilt: handle_toggle_tilt,
     handleViewStateChange: handle_view_state_change,
-    handleZoomIn: handle_zoom_in,
-    handleZoomOut: handle_zoom_out,
     projViewStates: proj_view_states,
     setProjViewStates: set_proj_view_states,
     views,
@@ -472,238 +247,60 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   safe_handle_view_state_change = useCallback(
     (arg0_e: any) => {
-      //Convert from parameters
       let e = arg0_e
-
-      //Guard clauses: do not pan or change view state when dragging a polygon vertex
       if (dragged_vertex_idx_ref.current !== null)
         return
-
-      //Function body
       handle_view_state_change(e)
     },
-    [handle_view_state_change]
+    [dragged_vertex_idx_ref, handle_view_state_change]
   )
 
-  get_vertex_at_screen_pos = useCallback(
-    (arg0_x: number, arg1_y: number, arg2_threshold?: number): number => {
-      //Convert from parameters
-      let threshold = arg2_threshold ?? (is_mobile ? 28 : 14)
-      let x = arg0_x
-      let y = arg1_y
-
-      //Guard clauses
-      if (!deck_ref.current || draw_points.length === 0)
-        return -1
-
-      //Declare local instance variables
-      let closest_dist_sq = threshold * threshold
-      let closest_idx = -1
-
-      //Function body
-      for (let i = 0; i < draw_points.length; i++) {
-        let pt_screen = projectLngLatToScreen(draw_points[i], deck_ref.current, projection)
-        if (pt_screen) {
-          let dist_sq = (x - pt_screen[0]) * (x - pt_screen[0]) + (y - pt_screen[1]) * (y - pt_screen[1])
-          if (dist_sq <= closest_dist_sq) {
-            closest_dist_sq = dist_sq
-            closest_idx = i
-          }
-        }
-      }
-
-      //Return statement
-      return closest_idx
-    },
-    [draw_points, is_mobile, projection]
-  )
-
-  get_edge_at_screen_pos = useCallback(
-    (arg0_x: number, arg1_y: number, arg2_threshold?: number): number => {
-      //Convert from parameters
-      let threshold = arg2_threshold ?? (is_mobile ? 20 : 10)
-      let x = arg0_x
-      let y = arg1_y
-
-      //Guard clauses
-      if (!deck_ref.current || draw_points.length < 3)
-        return -1
-
-      //Declare local instance variables
-      let closest_dist = threshold
-      let closest_edge_idx = -1
-
-      //Function body
-      for (let i = 0; i < draw_points.length; i++) {
-        let pt1_screen = projectLngLatToScreen(draw_points[i], deck_ref.current, projection)
-        let pt2_screen = projectLngLatToScreen(draw_points[(i + 1) % draw_points.length], deck_ref.current, projection)
-        if (pt1_screen && pt2_screen) {
-          let dx = pt2_screen[0] - pt1_screen[0]
-          let dy = pt2_screen[1] - pt1_screen[1]
-          let len_sq = dx * dx + dy * dy
-          let dist: number
-          if (len_sq === 0) {
-            dist = Math.hypot(x - pt1_screen[0], y - pt1_screen[1])
-          } else {
-            let t = Math.max(0, Math.min(1, ((x - pt1_screen[0]) * dx + (y - pt1_screen[1]) * dy) / len_sq))
-            dist = Math.hypot(x - (pt1_screen[0] + t * dx), y - (pt1_screen[1] + t * dy))
-          }
-          if (dist <= closest_dist) {
-            closest_dist = dist
-            closest_edge_idx = i
-          }
-        }
-      }
-
-      //Return statement
-      return closest_edge_idx
-    },
-    [draw_points, is_mobile, projection]
-  )
-
-  useEffect(() => {
-    let handleWindowPointerUp = () => {
-      if (dragged_vertex_idx_ref.current !== null) {
-        if (has_dragged_ref.current) {
-          drag_end_time_ref.current = Date.now()
-          suppress_click_ref.current = true
-          setTimeout(() => {
-            suppress_click_ref.current = false
-          }, 450)
-          last_vertex_tap_ref.current = null
-        }
-        dragged_vertex_idx_ref.current = null
-        drag_start_pos_ref.current = null
-        has_dragged_ref.current = false
-        set_dragged_vertex_idx(null)
-      }
-    }
-
-    window.addEventListener('pointerup', handleWindowPointerUp)
-    return () => {
-      window.removeEventListener('pointerup', handleWindowPointerUp)
-    }
-  }, [])
-
-  center_on_coordinates = useCallback(
-    (arg0_lon: number, arg1_lat: number) => {
-      //Convert from parameters
-      let c_lat = arg1_lat
-      let c_lon = arg0_lon
-
-      //Guard clauses
-      if (!Number.isFinite(c_lon) || !Number.isFinite(c_lat))
-        return
-
-      //Function body
-      set_proj_view_states((arg0_prev) => {
-        let current = arg0_prev[projection] || {}
-        let updated: any
-
-        if (projection === 'EqualEarth') {
-          let proj = projectEqualEarth(c_lon, c_lat)
-          updated = {
-            ...current,
-            target: [proj[0], proj[1], 0],
-          }
-        } else if (projection === 'Equirectangular') {
-          updated = {
-            ...current,
-            target: [c_lon, c_lat, 0],
-          }
-        } else if (projection === 'Mercator') {
-          updated = {
-            ...current,
-            latitude: Math.max(-85, Math.min(85, c_lat)),
-            longitude: c_lon,
-          }
-        } else {
-          //Globe
-          updated = {
-            ...current,
-            latitude: c_lat,
-            longitude: c_lon,
-          }
-        }
-
-        return {
-          ...arg0_prev,
-          [projection]: updated,
-        }
-      })
-    },
-    [projection, set_proj_view_states]
-  )
-
-  handle_center_selected_city = useCallback(() => {
-    //Declare local instance variables
-    let c_lat: number | undefined
-    let c_lon: number | undefined
-
-    //Function body
-    if (selected_city_anchor_coord && Number.isFinite(selected_city_anchor_coord[0]) && Number.isFinite(selected_city_anchor_coord[1])) {
-      c_lon = selected_city_anchor_coord[0]
-      c_lat = selected_city_anchor_coord[1]
-    } else if (selected_city) {
-      let city_coords = (selected_city as any).coords
-      let city_raw = (selected_city as any).rawCoords
-
-      if (city_raw && Number.isFinite(city_raw[0]) && Number.isFinite(city_raw[1])) {
-        c_lon = city_raw[0]
-        c_lat = city_raw[1]
-      } else if (city_coords && Number.isFinite(city_coords[0]) && Number.isFinite(city_coords[1])) {
-        if (Math.abs(city_coords[0]) > 90 && Math.abs(city_coords[1]) <= 90) {
-          c_lon = city_coords[0]
-          c_lat = city_coords[1]
-        } else {
-          c_lat = city_coords[0]
-          c_lon = city_coords[1]
-        }
-      }
-    }
-
-    if (c_lon !== undefined && c_lat !== undefined)
-      center_on_coordinates(c_lon, c_lat)
-  }, [center_on_coordinates, selected_city, selected_city_anchor_coord])
-
-  useEffect(() => {
-    if (selected_city && selected_city.key && selected_city.key !== last_centered_city_key_ref.current) {
-      last_centered_city_key_ref.current = selected_city.key
-
-      if (!selected_city_anchor_screen) {
-        let c_lat: number | undefined
-        let c_lon: number | undefined
-        let city_coords = (selected_city as any).coords
-        let city_raw = (selected_city as any).rawCoords
-
-        if (city_raw && Number.isFinite(city_raw[0]) && Number.isFinite(city_raw[1])) {
-          c_lon = city_raw[0]
-          c_lat = city_raw[1]
-        } else if (city_coords && Number.isFinite(city_coords[0]) && Number.isFinite(city_coords[1])) {
-          if (Math.abs(city_coords[0]) > 90 && Math.abs(city_coords[1]) <= 90) {
-            c_lon = city_coords[0]
-            c_lat = city_coords[1]
-          } else {
-            c_lat = city_coords[0]
-            c_lon = city_coords[1]
-          }
-        }
-
-        if (c_lon !== undefined && c_lat !== undefined) {
-          set_selected_city_anchor_coord([c_lon, c_lat])
-          center_on_coordinates(c_lon, c_lat)
-        }
-      }
-    } else if (!selected_city) {
-      last_centered_city_key_ref.current = null
-    }
-  }, [selected_city, selected_city_anchor_screen, center_on_coordinates])
-
+  let details_nav = useMapViewerDetailsNav({
+    deck_ref,
+    drawn_polygon_feature,
+    historical_borders_result,
+    is_drawing,
+    on_clear_countries,
+    on_clear_drawn_polygon,
+    on_close_city_details,
+    on_edit_polygon,
+    on_select_city,
+    on_select_country,
+    on_toggle_country,
+    proj_view_states,
+    projection,
+    selected_city,
+    selected_city_key,
+    selected_countries,
+    selected_country,
+    set_proj_view_states,
+    timeline_year,
+  })
+  let {
+    active_panel_type,
+    handle_center_selected_city,
+    handle_clear_polygon,
+    handle_close_all_details,
+    handle_edit_polygon,
+    handle_map_select_city,
+    handle_nav_back,
+    handle_select_city_from_country,
+    handle_select_country_from_city,
+    nav_history,
+    selected_city_anchor,
+    selected_historical_anchor,
+    selected_historical_feature,
+    set_active_panel_type,
+    set_nav_history,
+    set_selected_historical_anchor_coord,
+    set_selected_historical_anchor_screen,
+    set_selected_historical_feature,
+  } = details_nav
 
   let [basemap, set_basemap] = useState<string>(MAP_CONFIG.basemapLayers[0]?.id || 'dark')
   let [show_graticule, set_show_graticule] = useState(true)
   let [show_tooltips, set_show_tooltips] = useState(true)
-  let [inspect_data, set_inspect_data] = useState<InspectionData | null>(null)
+  let [inspect_data, set_inspect_data] = useState<any>(null)
   let [cursor_pos, set_cursor_pos] = useState<{ x: number; y: number } | null>(null)
 
   let [land_geo_json, set_land_geo_json] = useState<any>(null)
@@ -718,73 +315,16 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     loadCountriesGeoJson().then((feats) => set_country_features(feats))
   }, [])
 
-  useEffect(() => {
-    //Guard clauses
-    if (!is_drawing)
-      return
-
-    let handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        if (on_cancel_draw)
-          on_cancel_draw()
-      } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        e.preventDefault()
-        if (on_delete_last_draw_point)
-          on_delete_last_draw_point()
-      } else if (e.key === 'Enter') {
-        e.preventDefault()
-        if (draw_points.length >= 3 && on_finish_draw)
-          on_finish_draw()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [is_drawing, draw_points.length, on_cancel_draw, on_delete_last_draw_point, on_finish_draw])
-
-  handle_reset_view = useCallback(() => {
-    //1. Clear smooth pinch and two-finger gesture state
-    resetSmoothPinchState()
-
-    //2. Cancel any active touch or hover RAF picking
-    if (hover_raf_ref.current !== null) {
-      cancelAnimationFrame(hover_raf_ref.current)
-      hover_raf_ref.current = null
-    }
-    if (touch_pick_raf_ref.current !== null) {
-      cancelAnimationFrame(touch_pick_raf_ref.current)
-      touch_pick_raf_ref.current = null
-    }
-
-    //3. Clear pending touch & pointer position & interaction flags
-    pending_pointer_pos_ref.current = null
-    pending_touch_pos_ref.current = null
-    is_interacting_ref.current = false
-
-    //4. Dismiss any active inspection tooltips and cursor positions
-    set_inspect_data(null)
-    set_cursor_pos(null)
-    set_hovered_city(null)
-    set_hovered_city_pos(null)
-    set_hovered_historical_feature(null)
-
-    //5. Invoke underlying view state reset
-    raw_handle_reset_view()
-  }, [raw_handle_reset_view])
-
   equal_earth_land_geo_json = useMemo(() => {
     if (!land_geo_json)
       return null
     try {
       return {
-        type: 'FeatureCollection',
         features: land_geo_json.features.map((f: any) => ({
           ...f,
           geometry: transformGeometryToEqualEarth(f.geometry),
         })),
+        type: 'FeatureCollection',
       }
     } catch {
       return land_geo_json
@@ -822,457 +362,124 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     return country_features
   }, [is_historical_borders_active, historical_borders_result.bordersData, country_features])
 
-  sample_raster_at = useCallback(
-    (coordX: number, coordY: number): InspectionData | null => {
-      return sampleRasterAt(
-        coordX,
-        coordY,
-        raster,
-        projection,
-        effective_country_features,
-        Boolean(countries_mode || is_historical_borders_active),
-        last_country_ref.current
-      )
-    },
-    [raster, effective_country_features, projection, countries_mode, is_historical_borders_active]
-  )
+  let sampling_system = useMapViewerSampling({
+    countries_mode,
+    country_features,
+    custom_vector_features,
+    custom_vector_visible,
+    deck_ref,
+    drawn_polygon_feature,
+    effective_country_features,
+    handleMapClick,
+    is_drawing,
+    is_editing_shape,
+    is_historical_borders_active,
+    on_close_city_details,
+    on_hover_country,
+    on_inspect,
+    on_select_country,
+    on_set_cursor_lng_lat,
+    on_toggle_country,
+    projection,
+    raster,
+    set_active_panel_type,
+    set_cursor_pos,
+    set_hovered_city,
+    set_hovered_city_pos,
+    set_hovered_historical_feature,
+    set_inspect_data,
+    set_nav_history,
+    set_selected_historical_anchor_coord,
+    set_selected_historical_anchor_screen,
+    set_selected_historical_feature,
+  })
+  let {
+    handle_click,
+    handle_hover,
+    hover_raf_ref,
+    is_interacting_ref,
+    pending_pointer_pos_ref,
+    pending_touch_pos_ref,
+    sample_pointer_at,
+    touch_pick_raf_ref,
+  } = sampling_system
 
-  sample_pointer_at = useCallback(
-    (arg0_x: number, arg1_y: number) => {
-      //Convert from parameters
-      let x = arg0_x
-      let y = arg1_y
+  let container_events = useMapViewerContainerEvents({
+    countries_mode,
+    drawing_system,
+    hover_raf_ref,
+    hovered_city_pos,
+    is_drawing,
+    is_interacting_ref,
+    on_hover_country,
+    pending_pointer_pos_ref,
+    pending_touch_pos_ref,
+    sample_pointer_at,
+    set_cursor_pos,
+    set_hovered_city,
+    set_hovered_city_pos,
+    set_hovered_historical_feature,
+    set_inspect_data,
+    show_tooltips,
+    touch_pick_raf_ref,
+  })
+  let {
+    on_pointer_cancel,
+    on_pointer_leave,
+    on_pointer_move,
+    on_pointer_up,
+    on_touch_end,
+    on_touch_move,
+    on_touch_start,
+  } = container_events
 
-      //Guard clauses
-      if (!deck_ref.current)
-        return
-
-      //Declare local instance variables
-      let deck_inst: any
-      let insp: InspectionData | null = null
-      let pick_info: any
-      let unprojected_coord: [number, number] | null = null
-      let viewports: any[]
-      let vp: any
-
-      //Function body
-      deck_inst = deck_ref.current?.deck || deck_ref.current
-      viewports = deck_inst?.getViewports ? deck_inst.getViewports() : []
-      vp = viewports[0]
-
-      if (vp && typeof vp.unproject === 'function') {
-        try {
-          let pt = vp.unproject([x, y], { targetZ: 0 })
-          if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]))
-            unprojected_coord = [pt[0], pt[1]]
-        } catch {
-          // Ignore unproject calculation errors
-        }
-      }
-
-      if (is_drawing) {
-        if (dragged_vertex_idx_ref.current !== null)
-          return
-
-        if (deck_ref.current) {
-          let draw_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
-          if (draw_pt && on_set_cursor_lng_lat)
-            on_set_cursor_lng_lat(draw_pt)
-        }
-        set_inspect_data(null)
-        set_hovered_city(null)
-        set_hovered_city_pos(null)
-        set_hovered_historical_feature(null)
-        last_hovered_country_code_ref.current = null
-        if (on_hover_country)
-          on_hover_country(null)
-        return
-      }
-
-      if (unprojected_coord) {
-        insp = sample_raster_at(unprojected_coord[0], unprojected_coord[1])
-        set_inspect_data(insp)
-      } else {
-        set_inspect_data(null)
-      }
-
-      pick_info = deck_ref.current.pickObject({ x, y })
-      if (pick_info) {
-        if (pick_info.coordinate && !unprojected_coord) {
-          insp = sample_raster_at(pick_info.coordinate[0], pick_info.coordinate[1])
-          set_inspect_data(insp)
-        }
-        if (
-          pick_info.layer?.id?.includes('historical-borders') ||
-          pick_info.layer?.id?.includes('custom-vector') ||
-          pick_info.layer?.id?.includes('drawn-polygon') ||
-          (pick_info.object && (
-            pick_info.object.properties?.gwcode !== undefined ||
-            pick_info.object.properties?.keyframes !== undefined ||
-            pick_info.object.properties?.is_custom !== undefined ||
-            pick_info.object.properties?.is_drawn !== undefined
-          ))
-        ) {
-          set_hovered_historical_feature(pick_info.object || null)
-        } else if (insp && custom_vector_visible && custom_vector_features.length > 0) {
-          let hover_custom = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
-          set_hovered_historical_feature(hover_custom as unknown as HistoricalBorderFeature || null)
-        } else if (insp && drawn_polygon_feature && isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
-          set_hovered_historical_feature(drawn_polygon_feature as unknown as HistoricalBorderFeature)
-        } else {
-          set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
-        }
-      } else {
-        if (insp && custom_vector_visible && custom_vector_features.length > 0) {
-          let hover_custom = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
-          set_hovered_historical_feature(hover_custom as unknown as HistoricalBorderFeature || null)
-        } else if (insp && drawn_polygon_feature && isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
-          set_hovered_historical_feature(drawn_polygon_feature as unknown as HistoricalBorderFeature)
-        } else {
-          set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
-        }
-      }
-
-      if ((countries_mode || is_historical_borders_active) && on_hover_country) {
-        let next_code = insp?.countryName || null
-        if (last_hovered_country_code_ref.current !== next_code) {
-          last_hovered_country_code_ref.current = next_code
-          let local_country = (insp && effective_country_features.length > 0)
-            ? findCountryAtLngLat(insp.lng, insp.lat, effective_country_features)
-            : null
-          on_hover_country(local_country)
-        }
-      }
-    },
-    [countries_mode, custom_vector_features, custom_vector_visible, drawn_polygon_feature, effective_country_features, is_drawing, is_historical_borders_active, on_hover_country, on_set_cursor_lng_lat, projection, sample_raster_at]
-  )
-
-  sample_touch_at = sample_pointer_at
-
-  handle_click = useCallback(
-    (info: any) => {
-      // 1. Drawing mode intercept
-      if (is_drawing) {
-        if (suppress_click_ref.current || has_dragged_ref.current || Date.now() - drag_end_time_ref.current < 450)
-          return
-
-        let click_x = info.x
-        let click_y = info.y
-        if (click_x === undefined || click_y === undefined)
-          return
-
-        let now = Date.now()
-        let last_click_time = last_map_click_time_ref.current
-        let last_click_pos = last_map_click_pos_ref.current
-        last_map_click_time_ref.current = now
-        last_map_click_pos_ref.current = { x: click_x, y: click_y }
-
-        // Double-click on map to close polygon (when points >= 3 and not editing existing shape)
-        if (
-          !is_editing_shape &&
-          draw_points.length >= 3 &&
-          now - last_click_time < 400 &&
-          last_click_pos &&
-          Math.hypot(click_x - last_click_pos.x, click_y - last_click_pos.y) < 25
-        ) {
-          if (on_finish_draw)
-            on_finish_draw()
-          return
-        }
-
-        let clicked_vertex_idx = get_vertex_at_screen_pos(click_x, click_y, is_mobile ? 28 : 14)
-
-        // Check if clicking start vertex object or near start vertex to close loop (when points >= 3 and not editing existing shape)
-        if (draw_points.length >= 3 && !is_editing_shape) {
-          let origin_hit_radius = is_mobile ? 32 : 24
-          let is_origin_hit = clicked_vertex_idx === 0 || info.object?.idx === 0
-          if (!is_origin_hit && deck_ref.current) {
-            let start_screen = projectLngLatToScreen(draw_points[0], deck_ref.current, projection)
-            if (start_screen) {
-              let dist = Math.hypot(click_x - start_screen[0], click_y - start_screen[1])
-              if (dist <= origin_hit_radius) {
-                is_origin_hit = true
-              }
-            }
-          }
-          if (is_origin_hit) {
-            if (on_finish_draw)
-              on_finish_draw()
-            return
-          }
-        }
-
-        // If clicked on an existing vertex, prevent placing duplicate vertices on top
-        if (clicked_vertex_idx >= 0)
-          return
-
-        // When editing an existing shape, do not append stray vertices on arbitrary map clicks
-        if (is_editing_shape)
-          return
-
-        let map_pt = unprojectScreenToLngLat(click_x, click_y, deck_ref.current, projection)
-        if (!map_pt && info.coordinate) {
-          if (projection === 'EqualEarth') {
-            map_pt = invertEqualEarth(info.coordinate[0], info.coordinate[1])
-          } else {
-            map_pt = [info.coordinate[0], info.coordinate[1]]
-          }
-        }
-        if (map_pt && on_add_draw_point) {
-          on_add_draw_point(map_pt)
-        }
-        return
-      }
-
-      // Guard clauses: if a city or higher z-index overlay was clicked, intercept and do not click the country behind it
-      if (info.layer?.id?.includes('stadester') || (info.object && (info.object.coords || info.object.rawCoords)))
-        return
-
-      if (
-        info.layer?.id?.includes('historical-borders') ||
-        info.layer?.id?.includes('custom-vector') ||
-        info.layer?.id?.includes('drawn-polygon') ||
-        (info.object && (
-          info.object.properties?.gwcode !== undefined ||
-          info.object.properties?.keyframes !== undefined ||
-          info.object.properties?.is_custom !== undefined ||
-          info.object.properties?.is_drawn !== undefined
-        ))
-      ) {
-        let hist_feat = ((info.object && info.object.raw_feature) ? info.object.raw_feature : info.object) as HistoricalBorderFeature
-        set_nav_history([])
-        set_active_panel_type('country')
-        if (on_close_city_details)
-          on_close_city_details()
-        set_selected_historical_feature(hist_feat)
-        if (info.coordinate) {
-          set_selected_historical_anchor_coord([info.coordinate[0], info.coordinate[1]])
-        }
-        if (info.x !== undefined && info.y !== undefined) {
-          set_selected_historical_anchor_screen({ x: info.x, y: info.y })
-        }
-        if (on_select_country) {
-          on_select_country(hist_feat as unknown as CountryFeature)
-        } else if (on_toggle_country) {
-          on_toggle_country(hist_feat as unknown as CountryFeature)
-        }
-        return
-      }
-
-      let deck_inst: any
-      let insp: InspectionData | null
-      let viewports: any[]
-      let vp: any
-      let x_coord: number | null = null
-      let y_coord: number | null = null
-
-      if (info.coordinate) {
-        x_coord = info.coordinate[0]
-        y_coord = info.coordinate[1]
-      } else if (info.x !== undefined && info.y !== undefined && deck_ref.current) {
-        deck_inst = deck_ref.current?.deck || deck_ref.current
-        viewports = deck_inst?.getViewports ? deck_inst.getViewports() : []
-        vp = viewports[0]
-        if (vp && typeof vp.unproject === 'function') {
-          try {
-            let pt = vp.unproject([info.x, info.y], { targetZ: 0 })
-            if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) {
-              x_coord = pt[0]
-              y_coord = pt[1]
-            }
-          } catch {
-            // Ignore unproject calculation errors
-          }
-        }
-      }
-
-      if (x_coord === null || y_coord === null)
-        return
-
-      insp = sample_raster_at(x_coord, y_coord)
-      set_inspect_data(insp)
-      set_cursor_pos({ x: info.x, y: info.y })
-      if (on_inspect)
-        on_inspect(insp)
-
-      if (insp && custom_vector_visible && custom_vector_features.length > 0) {
-        let custom_feat = findCountryAtLngLat(insp.lng, insp.lat, custom_vector_features)
-        if (custom_feat) {
-          let hist_feat = custom_feat as unknown as HistoricalBorderFeature
-          set_nav_history([])
-          set_active_panel_type('country')
-          if (on_close_city_details)
-            on_close_city_details()
-          set_selected_historical_feature(hist_feat)
-          set_selected_historical_anchor_coord([insp.lng, insp.lat])
-          if (info.x !== undefined && info.y !== undefined) {
-            set_selected_historical_anchor_screen({ x: info.x, y: info.y })
-          }
-          if (on_select_country) {
-            on_select_country(custom_feat)
-          } else if (on_toggle_country) {
-            on_toggle_country(custom_feat)
-          }
-          return
-        }
-      }
-
-      if (insp && drawn_polygon_feature) {
-        if (isPointInGeometry(insp.lng, insp.lat, drawn_polygon_feature.geometry)) {
-          let hist_feat = drawn_polygon_feature as unknown as HistoricalBorderFeature
-          set_nav_history([])
-          set_active_panel_type('country')
-          if (on_close_city_details)
-            on_close_city_details()
-          set_selected_historical_feature(hist_feat)
-          set_selected_historical_anchor_coord([insp.lng, insp.lat])
-          if (info.x !== undefined && info.y !== undefined) {
-            set_selected_historical_anchor_screen({ x: info.x, y: info.y })
-          }
-          if (on_select_country) {
-            on_select_country(drawn_polygon_feature)
-          } else if (on_toggle_country) {
-            on_toggle_country(drawn_polygon_feature)
-          }
-          return
-        }
-      }
-
-      let target_countries = effective_country_features.length > 0 ? effective_country_features : country_features
-      if (insp && target_countries.length > 0) {
-        let local_country = findCountryAtLngLat(insp.lng, insp.lat, target_countries)
-        if (local_country) {
-          if (on_toggle_country) {
-            on_toggle_country(local_country)
-          } else if (on_select_country) {
-            on_select_country(local_country)
-          }
-        }
-      }
-    },
-    [
-      country_features,
-      custom_vector_features,
-      custom_vector_visible,
-      draw_points,
-      drawn_polygon_feature,
-      effective_country_features,
-      get_vertex_at_screen_pos,
-      is_drawing,
-      is_editing_shape,
-      on_add_draw_point,
-      on_close_city_details,
-      on_finish_draw,
-      on_inspect,
-      on_select_country,
-      on_toggle_country,
-      projection,
-      sample_raster_at,
-      set_cursor_pos,
-      set_inspect_data,
-    ]
-  )
-
-  handle_hover = useCallback(
-    (arg0_info: any) => {
-      //Convert from parameters
-      let info = arg0_info
-
-      //Guard clauses
-      if (is_drawing || is_interacting_ref.current || !info)
-        return
-
-      //Function body
-      if (
-        info.layer?.id?.includes('historical-borders') ||
-        info.layer?.id?.includes('custom-vector') ||
-        info.layer?.id?.includes('drawn-polygon') ||
-        (info.object && (
-          info.object.properties?.gwcode !== undefined ||
-          info.object.properties?.keyframes !== undefined ||
-          info.object.properties?.is_custom !== undefined ||
-          info.object.properties?.is_drawn !== undefined
-        ))
-      ) {
-        set_hovered_historical_feature(info.object || null)
-      } else {
-        set_hovered_historical_feature((arg0_prev) => (arg0_prev ? null : null))
-      }
-    },
-    [is_drawing]
-  )
-
-  handle_map_select_city = useCallback(
-    (arg0_city: CityPoint, arg1_coord?: [number, number], arg2_screen_x?: number, arg3_screen_y?: number) => {
-      //Convert from parameters
-      let city = arg0_city
-      let coord = arg1_coord
-      let screen_x = arg2_screen_x
-      let screen_y = arg3_screen_y
-
-      //Guard clauses
-      if (is_drawing)
-        return
-
-      //Declare local instance variables
-      let city_anchor_coord: [number, number] | null = null
-
-      //Function body
-      if (coord && Number.isFinite(coord[0]) && Number.isFinite(coord[1])) {
-        city_anchor_coord = [coord[0], coord[1]]
-      } else if ((city as any).rawCoords && Number.isFinite((city as any).rawCoords[0]) && Number.isFinite((city as any).rawCoords[1])) {
-        city_anchor_coord = [(city as any).rawCoords[0], (city as any).rawCoords[1]]
-      } else if (city.coords && Number.isFinite(city.coords[0]) && Number.isFinite(city.coords[1])) {
-        if (Math.abs(city.coords[0]) > 90 && Math.abs(city.coords[1]) <= 90) {
-          city_anchor_coord = [city.coords[0], city.coords[1]]
-        } else {
-          city_anchor_coord = [city.coords[1], city.coords[0]]
-        }
-      }
-
-      set_nav_history([])
-      set_active_panel_type('city')
-      set_selected_city_anchor_coord(city_anchor_coord)
-      if (screen_x !== undefined && screen_y !== undefined && Number.isFinite(screen_x) && Number.isFinite(screen_y)) {
-        set_selected_city_anchor_screen({ x: screen_x, y: screen_y })
-      } else {
-        set_selected_city_anchor_screen(null)
-      }
-      set_selected_historical_feature(null)
-      set_selected_historical_anchor_coord(null)
-      set_selected_historical_anchor_screen(null)
-      if (on_select_city)
-        on_select_city(city)
-    },
-    [is_drawing, on_select_city]
-  )
+  handle_reset_view = useCallback(() => {
+    resetSmoothPinchState()
+    if (hover_raf_ref.current !== null) {
+      cancelAnimationFrame(hover_raf_ref.current)
+      hover_raf_ref.current = null
+    }
+    if (touch_pick_raf_ref.current !== null) {
+      cancelAnimationFrame(touch_pick_raf_ref.current)
+      touch_pick_raf_ref.current = null
+    }
+    pending_pointer_pos_ref.current = null
+    pending_touch_pos_ref.current = null
+    is_interacting_ref.current = false
+    set_inspect_data(null)
+    set_cursor_pos(null)
+    set_hovered_city(null)
+    set_hovered_city_pos(null)
+    set_hovered_historical_feature(null)
+    raw_handle_reset_view()
+  }, [hover_raf_ref, is_interacting_ref, pending_pointer_pos_ref, pending_touch_pos_ref, raw_handle_reset_view, touch_pick_raf_ref])
 
   elevation_spikes_data = useElevationSpikes({
-    heightmapConfig: heightmap_config,
-    raster,
-    minVal: min_val,
-    maxVal: max_val,
-    scaleType: scale_type,
-    logSigma: log_sigma,
-    palette,
-    invertPalette: invert_palette,
-    projection,
     countriesMode: countries_mode,
     countryStats: country_stats,
+    heightmapConfig: heightmap_config,
+    invertPalette: invert_palette,
+    logSigma: log_sigma,
+    maxVal: max_val,
+    minVal: min_val,
+    palette,
+    projection,
+    raster,
+    scaleType: scale_type,
     selectedCountries: selected_countries,
     selectedCountry: selected_country,
   })
 
   circle_pixel_data = useCircleOverlay({
     circleOverlayConfig: circle_overlay_config,
-    raster,
-    palette,
-    invertPalette: invert_palette,
-    minVal: min_val,
-    maxVal: max_val,
-    projection,
-    heightmapConfig: heightmap_config,
     countriesMode: countries_mode,
+    heightmapConfig: heightmap_config,
+    invertPalette: invert_palette,
+    maxVal: max_val,
+    minVal: min_val,
+    palette,
+    projection,
+    raster,
     selectedCountries: selected_countries,
     selectedCountry: selected_country,
   })
@@ -1287,31 +494,34 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   layers = useDeckLayers({
     activeLayerId: props.activeLayerId,
-    projection,
-    rasterVersion: raster_version,
     basemap,
-    isMobile: is_mobile,
-    landGeoJson: land_geo_json,
-    equalEarthLandGeoJson: equal_earth_land_geo_json,
-    showGraticule: show_graticule,
-    graticulePaths: graticule_paths,
-    renderedCanvas: rendered_canvas,
-    rasterBounds: raster_bounds,
-    opacity,
-    heightmapConfig: heightmap_config,
-    elevationSpikesData: elevation_spikes_data,
     circleOverlayConfig: circle_overlay_config,
     circlePixelData: circle_pixel_data,
-    raster,
-    palette,
-    invertPalette: invert_palette,
-    minVal: min_val,
-    maxVal: max_val,
-    selectedCountries: selected_countries,
-    selectedCountry: selected_country,
     countriesMode: countries_mode,
-    hoveredCountry: hovered_country,
+    cursorLngLat: cursor_lng_lat,
+    customVectorFeatures: custom_vector_features,
+    customVectorVisible: custom_vector_visible,
+    draggedVertexIndex: dragged_vertex_idx,
+    drawPoints: draw_points,
+    drawnPolygonFeature: drawn_polygon_feature,
+    elevationSpikesData: elevation_spikes_data,
+    equalEarthLandGeoJson: equal_earth_land_geo_json,
+    graticulePaths: graticule_paths,
+    heightmapConfig: heightmap_config,
+    historicalBordersConfig: historical_borders_config,
+    historicalBordersData: is_historical_borders_active ? historical_borders_result.bordersData : null,
     hoveredCity: hovered_city,
+    hoveredCountry: hovered_country,
+    hoveredHistoricalFeature: hovered_historical_feature,
+    hoveredVertexIndex: hovered_vertex_idx,
+    invertPalette: invert_palette,
+    isDrawing: is_drawing,
+    isEditingShape: is_editing_shape,
+    isMobile: is_mobile,
+    landGeoJson: land_geo_json,
+    maxVal: max_val,
+    minVal: min_val,
+    onFinishDraw: on_finish_draw,
     onHoverCity: (arg0_city, arg1_x, arg2_y) => {
       if (is_drawing)
         return
@@ -1321,56 +531,17 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       if (on_hover_city)
         on_hover_city(arg0_city, arg1_x, arg2_y)
     },
-    onSelectCity: handle_map_select_city,
-    selectedCityKey: selected_city_key,
-    stadesterCities: stadester_cities,
-    stadesterConfig: stadester_config,
-    stadesterLabels: worker_result.labels,
-    stadesterPoints: worker_result.points,
-    historicalBordersConfig: historical_borders_config,
-    historicalBordersData: is_historical_borders_active ? historical_borders_result.bordersData : null,
-    selectedHistoricalFeature: selected_historical_feature,
-    hoveredHistoricalFeature: hovered_historical_feature,
-    onSelectHistoricalFeature: (feat, coord, x, y) => {
+    onHoverCustomVectorFeature: (feat) => {
       if (is_drawing)
         return
-      set_nav_history([])
-      set_active_panel_type('country')
-      if (on_close_city_details)
-        on_close_city_details()
-      set_selected_historical_feature(feat)
-      if (coord) {
-        set_selected_historical_anchor_coord([coord[0], coord[1]])
-      }
-      if (x !== undefined && y !== undefined) {
-        set_selected_historical_anchor_screen({ x, y })
-      }
-      if (on_toggle_country) {
-        on_toggle_country(feat as unknown as CountryFeature)
-      } else if (on_select_country) {
-        on_select_country(feat as unknown as CountryFeature)
-      }
+      set_hovered_historical_feature(feat as unknown as HistoricalBorderFeature | null)
     },
     onHoverHistoricalFeature: (feat) => {
       if (is_drawing)
         return
       set_hovered_historical_feature(feat)
     },
-    cursorLngLat: cursor_lng_lat,
-    customVectorFeatures: custom_vector_features,
-    customVectorVisible: custom_vector_visible,
-    draggedVertexIndex: dragged_vertex_idx,
-    drawPoints: draw_points,
-    drawnPolygonFeature: drawn_polygon_feature,
-    hoveredVertexIndex: hovered_vertex_idx,
-    isDrawing: is_drawing,
-    isEditingShape: is_editing_shape,
-    onFinishDraw: on_finish_draw,
-    onHoverCustomVectorFeature: (feat) => {
-      if (is_drawing)
-        return
-      set_hovered_historical_feature(feat as unknown as HistoricalBorderFeature | null)
-    },
+    onSelectCity: handle_map_select_city,
     onSelectCustomVectorFeature: (feat, coord, x, y) => {
       if (is_drawing)
         return
@@ -1407,6 +578,39 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       else if (on_select_country)
         on_select_country(feat)
     },
+    onSelectHistoricalFeature: (feat, coord, x, y) => {
+      if (is_drawing)
+        return
+      set_nav_history([])
+      set_active_panel_type('country')
+      if (on_close_city_details)
+        on_close_city_details()
+      set_selected_historical_feature(feat)
+      if (coord)
+        set_selected_historical_anchor_coord([coord[0], coord[1]])
+      if (x !== undefined && y !== undefined)
+        set_selected_historical_anchor_screen({ x, y })
+      if (on_toggle_country)
+        on_toggle_country(feat as unknown as CountryFeature)
+      else if (on_select_country)
+        on_select_country(feat as unknown as CountryFeature)
+    },
+    opacity,
+    palette,
+    projection,
+    raster,
+    rasterBounds: raster_bounds,
+    rasterVersion: raster_version,
+    renderedCanvas: rendered_canvas,
+    selectedCityKey: selected_city_key,
+    selectedCountries: selected_countries,
+    selectedCountry: selected_country,
+    selectedHistoricalFeature: selected_historical_feature,
+    showGraticule: show_graticule,
+    stadesterCities: stadester_cities,
+    stadesterConfig: stadester_config,
+    stadesterLabels: worker_result.labels,
+    stadesterPoints: worker_result.points,
     timelineYear: timeline_year || 1950,
   })
 
@@ -1421,336 +625,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     }
   }
 
-  //Compute screen anchor coordinates for selected city panel
-  let selected_city_anchor = useMemo(() => {
-    let current_view_state = proj_view_states[projection]
-    if (!current_view_state)
-      return null
-    if (!selected_city && !selected_city_anchor_coord)
-      return null
-    if (!deck_ref.current)
-      return null
-
-    try {
-      let vp = deck_ref.current.deck?.getViewports?.()[0]
-      if (!vp)
-        return null
-
-      let c_lat: number | undefined
-      let c_lon: number | undefined
-
-      if (selected_city_anchor_coord && Number.isFinite(selected_city_anchor_coord[0]) && Number.isFinite(selected_city_anchor_coord[1])) {
-        c_lon = selected_city_anchor_coord[0]
-        c_lat = selected_city_anchor_coord[1]
-      } else if (selected_city) {
-        let city_raw = (selected_city as any).rawCoords
-        let city_coords = (selected_city as any).coords
-        if (city_raw && Number.isFinite(city_raw[0]) && Number.isFinite(city_raw[1])) {
-          c_lon = city_raw[0]
-          c_lat = city_raw[1]
-        } else if (city_coords && Number.isFinite(city_coords[0]) && Number.isFinite(city_coords[1])) {
-          if (Math.abs(city_coords[0]) > 90 && Math.abs(city_coords[1]) <= 90) {
-            c_lon = city_coords[0]
-            c_lat = city_coords[1]
-          } else {
-            c_lat = city_coords[0]
-            c_lon = city_coords[1]
-          }
-        }
-      }
-
-      if (c_lon === undefined || c_lat === undefined || !Number.isFinite(c_lon) || !Number.isFinite(c_lat))
-        return null
-
-      let px = c_lon
-      let py = c_lat
-      if (projection === 'EqualEarth') {
-        let proj = projectEqualEarth(c_lon, c_lat)
-        px = proj[0]
-        py = proj[1]
-      } else if (projection === 'Globe') {
-        if (!isGlobePointVisible(c_lon, c_lat, vp, -0.005))
-          return null
-      }
-      let projected = vp.project(projection === 'EqualEarth' ? [px, py, 0] : [px, py])
-      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1])) {
-        let is_in_viewport = (
-          projected[0] >= 0 &&
-          projected[0] <= vp.width &&
-          projected[1] >= 0 &&
-          projected[1] <= vp.height
-        )
-        if (is_in_viewport)
-          return { x: projected[0], y: projected[1] }
-      }
-      return null
-    } catch {
-      // Ignore projection errors
-    }
-    return null
-  }, [selected_city, selected_city_anchor_coord, projection, proj_view_states])
-
-  //Compute screen anchor coordinates for selected historical borders panel
-  let selected_historical_anchor = useMemo(() => {
-    let current_view_state = proj_view_states[projection]
-    if (!current_view_state)
-      return null
-    if (!selected_historical_feature || !deck_ref.current)
-      return null
-    if (!selected_historical_anchor_coord)
-      return null
-    try {
-      let vp = deck_ref.current.deck?.getViewports?.()[0]
-      if (!vp)
-        return null
-      let [c_lon, c_lat] = selected_historical_anchor_coord
-      let px = c_lon
-      let py = c_lat
-      if (projection === 'EqualEarth') {
-        let proj = projectEqualEarth(c_lon, c_lat)
-        px = proj[0]
-        py = proj[1]
-      } else if (projection === 'Globe') {
-        if (!isGlobePointVisible(c_lon, c_lat, vp, -0.005))
-          return null
-      }
-      let projected = vp.project(projection === 'EqualEarth' ? [px, py, 0] : [px, py])
-      if (projected && projected.length >= 2 && Number.isFinite(projected[0]) && Number.isFinite(projected[1])) {
-        let is_in_viewport = (
-          projected[0] >= 0 &&
-          projected[0] <= vp.width &&
-          projected[1] >= 0 &&
-          projected[1] <= vp.height
-        )
-        if (is_in_viewport)
-          return { x: projected[0], y: projected[1] }
-      }
-    } catch {
-      // Ignore projection errors
-    }
-    return null
-  }, [selected_historical_feature, selected_historical_anchor_coord, projection, proj_view_states])
-
-
-  handle_close_all_details = useCallback(() => {
-    //Function body
-    set_nav_history([])
-    set_active_panel_type(null)
-    set_selected_city_anchor_coord(null)
-    set_selected_city_anchor_screen(null)
-    set_selected_historical_feature(null)
-    set_selected_historical_anchor_coord(null)
-    set_selected_historical_anchor_screen(null)
-    if (on_close_city_details)
-      on_close_city_details()
-    if (on_clear_countries) {
-      on_clear_countries()
-    } else if (on_select_country) {
-      on_select_country(null)
-    }
-  }, [on_close_city_details, on_clear_countries, on_select_country])
-
-  let handle_clear_polygon = useCallback(() => {
-    //Function body
-    if (on_clear_drawn_polygon)
-      on_clear_drawn_polygon()
-    handle_close_all_details()
-  }, [on_clear_drawn_polygon, handle_close_all_details])
-
-  let handle_edit_polygon = useCallback((arg0_feat: CountryFeature) => {
-    //Function body
-    if (on_edit_polygon)
-      on_edit_polygon(arg0_feat)
-    handle_close_all_details()
-  }, [on_edit_polygon, handle_close_all_details])
-
-  handle_nav_back = useCallback(() => {
-    //Guard clauses
-    if (nav_history.length === 0)
-      return
-
-    //Function body
-    let last_index = nav_history.length - 1
-    let previous_entry = nav_history[last_index]
-    set_nav_history((arg0_prev) => arg0_prev.slice(0, -1))
-
-    if (previous_entry.type === 'city') {
-      set_selected_historical_feature(null)
-      set_selected_historical_anchor_coord(null)
-      set_selected_historical_anchor_screen(null)
-      set_active_panel_type('city')
-      set_selected_city_anchor_coord(previous_entry.anchorCoord || null)
-      set_selected_city_anchor_screen(previous_entry.anchorScreen || null)
-      if (previous_entry.city && on_select_city)
-        on_select_city(previous_entry.city as CityPoint)
-    } else if (previous_entry.type === 'country') {
-      set_selected_city_anchor_coord(null)
-      set_selected_city_anchor_screen(null)
-      if (on_close_city_details)
-        on_close_city_details()
-      set_active_panel_type('country')
-      if (previous_entry.countryFeature) {
-        set_selected_historical_feature(previous_entry.countryFeature)
-        set_selected_historical_anchor_coord(previous_entry.anchorCoord || null)
-        set_selected_historical_anchor_screen(previous_entry.anchorScreen || null)
-        if (on_select_country) {
-          on_select_country(previous_entry.countryFeature as unknown as CountryFeature)
-        } else if (on_toggle_country) {
-          on_toggle_country(previous_entry.countryFeature as unknown as CountryFeature)
-        }
-      }
-    }
-  }, [nav_history, on_select_city, on_close_city_details, on_select_country, on_toggle_country])
-
-  handle_select_city_from_country = useCallback(
-    (arg0_city: CityPoint) => {
-      //Convert from parameters
-      let city = arg0_city
-
-      //Declare local instance variables
-      let city_anchor_coord: [number, number] | null = null
-
-      //Function body
-      if ((city as any).rawCoords && Number.isFinite((city as any).rawCoords[0]) && Number.isFinite((city as any).rawCoords[1])) {
-        city_anchor_coord = [(city as any).rawCoords[0], (city as any).rawCoords[1]]
-      } else if (city.coords && Number.isFinite(city.coords[0]) && Number.isFinite(city.coords[1])) {
-        if (Math.abs(city.coords[0]) > 90 && Math.abs(city.coords[1]) <= 90) {
-          city_anchor_coord = [city.coords[0], city.coords[1]]
-        } else {
-          city_anchor_coord = [city.coords[1], city.coords[0]]
-        }
-      }
-
-      if (selected_historical_feature) {
-        set_nav_history((arg0_prev) => [
-          ...arg0_prev,
-          {
-            anchorCoord: selected_historical_anchor_coord || null,
-            anchorScreen: selected_historical_anchor_screen || null,
-            countryFeature: selected_historical_feature,
-            type: 'country',
-          },
-        ])
-      }
-      set_active_panel_type('city')
-      set_selected_city_anchor_coord(city_anchor_coord)
-      set_selected_city_anchor_screen(null)
-
-      if (city_anchor_coord)
-        center_on_coordinates(city_anchor_coord[0], city_anchor_coord[1])
-
-      if (on_select_city)
-        on_select_city(city)
-    },
-    [selected_historical_feature, selected_historical_anchor_coord, selected_historical_anchor_screen, center_on_coordinates, on_select_city]
-  )
-
-  handle_select_country_from_city = useCallback(
-    (arg0_state_id?: number | string, arg0_country_name?: string) => {
-      //Convert from parameters
-      let country_name = arg0_country_name
-      let state_id = arg0_state_id
-
-      //Declare local instance variables
-      let applyTargetFeature = function (arg0_feat: any) {
-        if (selected_city) {
-          let city_coord: [number, number] | null = selected_city_anchor_coord
-          if (!city_coord) {
-            let raw = (selected_city as any).rawCoords
-            let coords = (selected_city as any).coords
-            if (raw && Number.isFinite(raw[0]) && Number.isFinite(raw[1])) {
-              city_coord = [raw[0], raw[1]]
-            } else if (coords && Number.isFinite(coords[0]) && Number.isFinite(coords[1])) {
-              city_coord = Math.abs(coords[0]) > 90 ? [coords[0], coords[1]] : [coords[1], coords[0]]
-            }
-          }
-          set_nav_history((arg0_prev) => [
-            ...arg0_prev,
-            {
-              anchorCoord: city_coord,
-              anchorScreen: selected_city_anchor || selected_city_anchor_screen || null,
-              city: selected_city,
-              cityKey: selected_city_key,
-              type: 'city',
-            },
-          ])
-        }
-        set_active_panel_type('country')
-        set_selected_historical_feature(arg0_feat)
-        if (selected_city_anchor) {
-          set_selected_historical_anchor_screen(selected_city_anchor)
-        } else if (selected_city_anchor_screen) {
-          set_selected_historical_anchor_screen(selected_city_anchor_screen)
-        }
-        if (selected_city_anchor_coord)
-          set_selected_historical_anchor_coord(selected_city_anchor_coord)
-        if (on_select_country) {
-          on_select_country(arg0_feat as unknown as CountryFeature)
-        } else if (on_toggle_country) {
-          on_toggle_country(arg0_feat as unknown as CountryFeature)
-        }
-      }
-      let features = historical_borders_result?.bordersData?.features
-      let target_feat: any = null
-
-      //Function body
-      if (features && features.length > 0) {
-        target_feat = features.find((arg0_f: any) => {
-          if (state_id !== undefined && state_id !== null) {
-            let sid_str = String(state_id)
-            if (String(arg0_f.id) === sid_str ||
-                String(arg0_f.properties?.id) === sid_str ||
-                String(arg0_f.properties?.state_id) === sid_str) {
-              return true
-            }
-          }
-          if (country_name && arg0_f.properties?.name) {
-            let fn = arg0_f.properties.name.toLowerCase().trim()
-            let cn = country_name.toLowerCase().trim()
-            if (fn === cn)
-              return true
-          }
-          return false
-        })
-        if (!target_feat && country_name) {
-          let cn = country_name.toLowerCase().trim()
-          target_feat = features.find((arg0_f: any) => {
-            if (arg0_f.properties?.name) {
-              let fn = arg0_f.properties.name.toLowerCase().trim()
-              if (fn.includes(cn) || cn.includes(fn))
-                return true
-            }
-            return false
-          })
-        }
-      }
-
-      if (target_feat) {
-        applyTargetFeature(target_feat)
-      } else {
-        //Asynchronously request border info from the server when detailed borders are not active
-        let params = new URLSearchParams()
-        params.set('year', String(timeline_year || 1950))
-        params.set('dataset', 'detailed_borders')
-        if (state_id !== undefined && state_id !== null)
-          params.set('state_id', String(state_id))
-        if (country_name)
-          params.set('name', country_name)
-
-        fetch(`/api/atlas/border?${params.toString()}`)
-          .then((arg0_res) => (arg0_res.ok ? arg0_res.json() : null))
-          .then((arg0_data) => {
-            if (arg0_data && (arg0_data.geometry || arg0_data.properties))
-              applyTargetFeature(arg0_data)
-          })
-          .catch((arg0_err) => {
-            console.error('[MapViewer] Failed to request border info:', arg0_err)
-          })
-      }
-    },
-    [historical_borders_result, selected_city, selected_city_anchor, selected_city_anchor_coord, selected_city_anchor_screen, selected_city_key, timeline_year, on_select_country, on_toggle_country]
-  )
-
   //Return statement
   return (
     <div
@@ -1759,442 +633,16 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       className="relative w-full h-full overflow-hidden select-none bg-background font-sans"
       style={{ imageRendering: 'pixelated', touchAction: 'none' }}
       onContextMenu={(e) => e.preventDefault()}
-      onPointerDownCapture={(e) => {
-        if (e.button !== 0 && e.pointerType === 'mouse')
-          return
-
-        let rect = e.currentTarget.getBoundingClientRect()
-        let x = e.clientX - rect.left
-        let y = e.clientY - rect.top
-        let is_touch = e.pointerType === 'touch' || is_mobile
-        let hit_radius = is_touch ? 28 : 14
-
-        if (is_drawing && draw_points.length > 0) {
-          let v_idx = get_vertex_at_screen_pos(x, y, hit_radius)
-          if (v_idx >= 0) {
-            // Check if clicking start vertex object to close loop (when points >= 3 and not editing existing shape)
-            if (!is_editing_shape && draw_points.length >= 3 && v_idx === 0) {
-              // Do NOT capture as drag! Let the event proceed to close the polygon
-              return
-            }
-
-            e.stopPropagation()
-            try {
-              e.currentTarget.setPointerCapture(e.pointerId)
-            } catch {
-              // Ignore pointer capture error
-            }
-            dragged_vertex_idx_ref.current = v_idx
-            drag_start_pos_ref.current = { x, y }
-            has_dragged_ref.current = false
-            set_dragged_vertex_idx(v_idx)
-            return
-          }
-
-          if (is_editing_shape && on_insert_draw_point) {
-            let edge_idx = get_edge_at_screen_pos(x, y, is_touch ? 20 : 10)
-            if (edge_idx >= 0) {
-              let map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
-              if (map_pt) {
-                e.stopPropagation()
-                try {
-                  e.currentTarget.setPointerCapture(e.pointerId)
-                } catch {
-                  // Ignore pointer capture error
-                }
-                on_insert_draw_point(edge_idx + 1, map_pt)
-                dragged_vertex_idx_ref.current = edge_idx + 1
-                drag_start_pos_ref.current = { x, y }
-                has_dragged_ref.current = true
-                set_dragged_vertex_idx(edge_idx + 1)
-                return
-              }
-            }
-          }
-        }
-      }}
-      onTouchStartCapture={(e) => {
-        if (is_drawing && draw_points.length > 0) {
-          let touch = e.touches[0]
-          if (!touch)
-            return
-          let rect = e.currentTarget.getBoundingClientRect()
-          let x = touch.clientX - rect.left
-          let y = touch.clientY - rect.top
-          let v_idx = get_vertex_at_screen_pos(x, y, 28)
-          if (v_idx === 0 && !is_editing_shape && draw_points.length >= 3) {
-            // Do not stop propagation for origin point to close polygon
-            return
-          }
-          if (v_idx >= 0) {
-            e.stopPropagation()
-            return
-          }
-          if (is_editing_shape) {
-            let edge_idx = get_edge_at_screen_pos(x, y, 20)
-            if (edge_idx >= 0) {
-              e.stopPropagation()
-              return
-            }
-          }
-        }
-      }}
-      onDoubleClickCapture={(e) => {
-        let now = Date.now()
-        if (point_just_deleted_ref.current || now - drag_end_time_ref.current < 450) {
-          e.preventDefault()
-          e.stopPropagation()
-          return
-        }
-
-        let rect = e.currentTarget.getBoundingClientRect()
-        let x = e.clientX - rect.left
-        let y = e.clientY - rect.top
-        let v_idx = get_vertex_at_screen_pos(x, y, is_mobile ? 28 : 16)
-
-        if (is_drawing) {
-          if (v_idx >= 0) {
-            e.preventDefault()
-            e.stopPropagation()
-            point_just_deleted_ref.current = true
-            setTimeout(() => {
-              point_just_deleted_ref.current = false
-            }, 350)
-            if (on_delete_draw_point)
-              on_delete_draw_point(v_idx)
-            return
-          }
-
-          if (!is_editing_shape && draw_points.length >= 3) {
-            e.preventDefault()
-            e.stopPropagation()
-            if (on_finish_draw)
-              on_finish_draw()
-          }
-        }
-      }}
-      onPointerLeave={() => {
-        if (hover_raf_ref.current !== null) {
-          cancelAnimationFrame(hover_raf_ref.current)
-          hover_raf_ref.current = null
-        }
-        pending_pointer_pos_ref.current = null
-        set_cursor_pos(null)
-        set_hovered_city(null)
-        set_hovered_city_pos(null)
-        set_hovered_historical_feature(null)
-        set_inspect_data(null)
-        last_hovered_country_code_ref.current = null
-        if (countries_mode && on_hover_country)
-          on_hover_country(null)
-      }}
-      onPointerMove={(e) => {
-        let rect = e.currentTarget.getBoundingClientRect()
-        let x = e.clientX - rect.left
-        let y = e.clientY - rect.top
-
-        //Check if cursor is directly over map vs HUD/controls
-        let target_el = e.target as HTMLElement | null
-        let is_over_map = target_el ? Boolean(target_el.closest('#deckgl-overlay') || target_el.id === 'dataview-map-container') : true
-
-        if (!is_over_map) {
-          if (hover_raf_ref.current !== null) {
-            cancelAnimationFrame(hover_raf_ref.current)
-            hover_raf_ref.current = null
-          }
-          pending_pointer_pos_ref.current = null
-          set_cursor_pos(null)
-          set_hovered_city(null)
-          set_hovered_city_pos(null)
-          set_hovered_historical_feature(null)
-          set_inspect_data(null)
-          return
-        }
-
-        set_cursor_pos({ x, y })
-        if (hovered_city_pos)
-          set_hovered_city_pos({ x, y })
-
-        //Handle dragging active polygon vertices in drawing/editing mode
-        if (is_drawing) {
-          if (dragged_vertex_idx_ref.current !== null) {
-            let cur_idx = dragged_vertex_idx_ref.current
-            let start_pos = drag_start_pos_ref.current
-            if (start_pos) {
-              let dist_sq = (x - start_pos.x) ** 2 + (y - start_pos.y) ** 2
-              if (dist_sq > 4) {
-                has_dragged_ref.current = true
-              }
-            }
-
-            let new_map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
-            if (new_map_pt && on_move_draw_point) {
-              on_move_draw_point(cur_idx, new_map_pt)
-            }
-            return
-          }
-
-          let is_touch = e.pointerType === 'touch' || is_mobile
-          let hov_v = get_vertex_at_screen_pos(x, y, is_touch ? 28 : 14)
-          set_hovered_vertex_idx((arg0_prev) => (arg0_prev !== hov_v ? hov_v : arg0_prev))
-        }
-
-        //Guard clauses: do not sample during dragging/panning
-        if (e.buttons !== 0 || is_interacting_ref.current || (!show_tooltips && !is_drawing))
-          return
-
-        pending_pointer_pos_ref.current = { x, y }
-        if (hover_raf_ref.current !== null)
-          return
-
-        hover_raf_ref.current = requestAnimationFrame(() => {
-          hover_raf_ref.current = null
-          if (is_interacting_ref.current)
-            return
-          let cur_pos = pending_pointer_pos_ref.current
-          if (cur_pos)
-            sample_pointer_at(cur_pos.x, cur_pos.y)
-        })
-      }}
-      onPointerUp={(e) => {
-        try {
-          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-            e.currentTarget.releasePointerCapture(e.pointerId)
-          }
-        } catch {
-          // Ignore pointer capture release error
-        }
-        is_interacting_ref.current = false
-
-        let is_touch = e.pointerType === 'touch' || is_mobile
-
-        // If clicking/releasing on origin point to close shape (when points >= 3 and !is_editing_shape)
-        if (is_drawing && !is_editing_shape && draw_points.length >= 3 && !has_dragged_ref.current) {
-          let origin_hit = get_vertex_at_screen_pos(x, y, is_touch ? 32 : 24) === 0 || dragged_vertex_idx_ref.current === 0
-          if (origin_hit) {
-            suppress_click_ref.current = true
-            setTimeout(() => {
-              suppress_click_ref.current = false
-            }, 120)
-            dragged_vertex_idx_ref.current = null
-            drag_start_pos_ref.current = null
-            set_dragged_vertex_idx(null)
-            if (on_finish_draw)
-              on_finish_draw()
-            return
-          }
-        }
-
-        if (dragged_vertex_idx_ref.current !== null) {
-          let released_idx = dragged_vertex_idx_ref.current
-          let did_drag = has_dragged_ref.current
-
-          if (did_drag) {
-            drag_end_time_ref.current = Date.now()
-            suppress_click_ref.current = true
-            setTimeout(() => {
-              suppress_click_ref.current = false
-            }, 450)
-            last_vertex_tap_ref.current = null
-          } else {
-            // Vertex tap without dragging - check for double tap/click
-            let now = Date.now()
-            if (now - drag_end_time_ref.current < 450) {
-              dragged_vertex_idx_ref.current = null
-              drag_start_pos_ref.current = null
-              has_dragged_ref.current = false
-              set_dragged_vertex_idx(null)
-              return
-            }
-            let last_tap = last_vertex_tap_ref.current
-            if (
-              last_tap &&
-              last_tap.index === released_idx &&
-              now - last_tap.time < 380 &&
-              Math.hypot(x - last_tap.x, y - last_tap.y) < 25
-            ) {
-              last_vertex_tap_ref.current = null
-              suppress_click_ref.current = true
-              point_just_deleted_ref.current = true
-              setTimeout(() => {
-                suppress_click_ref.current = false
-                point_just_deleted_ref.current = false
-              }, 350)
-              if (on_delete_draw_point)
-                on_delete_draw_point(released_idx)
-            } else {
-              last_vertex_tap_ref.current = { index: released_idx, time: now, x, y }
-            }
-          }
-
-          dragged_vertex_idx_ref.current = null
-          drag_start_pos_ref.current = null
-          set_dragged_vertex_idx(null)
-        }
-      }}
-      onPointerCancel={(e) => {
-        try {
-          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-            e.currentTarget.releasePointerCapture(e.pointerId)
-          }
-        } catch {
-          // Ignore pointer release error
-        }
-        dragged_vertex_idx_ref.current = null
-        drag_start_pos_ref.current = null
-        set_dragged_vertex_idx(null)
-      }}
-      onTouchStart={(e) => {
-        if (!show_tooltips || is_drawing)
-          return
-        let touch = e.touches[0]
-        if (!touch)
-          return
-        let rect = e.currentTarget.getBoundingClientRect()
-        let x = touch.clientX - rect.left
-        let y = touch.clientY - rect.top
-        set_cursor_pos({ x, y })
-        if (hovered_city_pos)
-          set_hovered_city_pos({ x, y })
-
-        pending_touch_pos_ref.current = { x, y }
-        if (touch_pick_raf_ref.current !== null) {
-          cancelAnimationFrame(touch_pick_raf_ref.current)
-          touch_pick_raf_ref.current = null
-        }
-        touch_pick_raf_ref.current = requestAnimationFrame(() => {
-          touch_pick_raf_ref.current = null
-          let cur_pos = pending_touch_pos_ref.current
-          if (cur_pos)
-            sample_touch_at(cur_pos.x, cur_pos.y)
-        })
-      }}
-      onTouchMove={(e) => {
-        if (is_drawing) {
-          if (dragged_vertex_idx_ref.current !== null) {
-            let touch = e.touches[0]
-            if (touch) {
-              let rect = e.currentTarget.getBoundingClientRect()
-              let x = touch.clientX - rect.left
-              let y = touch.clientY - rect.top
-              let cur_idx = dragged_vertex_idx_ref.current
-              let start_pos = drag_start_pos_ref.current
-              if (start_pos) {
-                let dist_sq = (x - start_pos.x) ** 2 + (y - start_pos.y) ** 2
-                if (dist_sq > 4) {
-                  has_dragged_ref.current = true
-                }
-              }
-
-              let new_map_pt = unprojectScreenToLngLat(x, y, deck_ref.current, projection)
-              if (new_map_pt && on_move_draw_point) {
-                on_move_draw_point(cur_idx, new_map_pt)
-              }
-            }
-          }
-          return
-        }
-
-        if (!show_tooltips)
-          return
-        let touch = e.touches[0]
-        if (!touch)
-          return
-        let rect = e.currentTarget.getBoundingClientRect()
-        let x = touch.clientX - rect.left
-        let y = touch.clientY - rect.top
-        set_cursor_pos({ x, y })
-        if (hovered_city_pos)
-          set_hovered_city_pos({ x, y })
-
-        pending_touch_pos_ref.current = { x, y }
-        if (touch_pick_raf_ref.current !== null)
-          return
-
-        touch_pick_raf_ref.current = requestAnimationFrame(() => {
-          touch_pick_raf_ref.current = null
-          let cur_pos = pending_touch_pos_ref.current
-          if (cur_pos)
-            sample_touch_at(cur_pos.x, cur_pos.y)
-        })
-      }}
-      onTouchEnd={(e) => {
-        if (touch_pick_raf_ref.current !== null) {
-          cancelAnimationFrame(touch_pick_raf_ref.current)
-          touch_pick_raf_ref.current = null
-        }
-        pending_touch_pos_ref.current = null
-
-        if (is_drawing && !is_editing_shape && draw_points.length >= 3 && !has_dragged_ref.current) {
-          let touch = e.changedTouches ? e.changedTouches[0] : null
-          let rect = e.currentTarget.getBoundingClientRect()
-          let x = touch ? touch.clientX - rect.left : (drag_start_pos_ref.current?.x ?? 0)
-          let y = touch ? touch.clientY - rect.top : (drag_start_pos_ref.current?.y ?? 0)
-          let origin_hit = get_vertex_at_screen_pos(x, y, 32) === 0 || dragged_vertex_idx_ref.current === 0
-          if (origin_hit) {
-            suppress_click_ref.current = true
-            setTimeout(() => {
-              suppress_click_ref.current = false
-            }, 120)
-            dragged_vertex_idx_ref.current = null
-            drag_start_pos_ref.current = null
-            set_dragged_vertex_idx(null)
-            if (on_finish_draw)
-              on_finish_draw()
-            return
-          }
-        }
-
-        if (is_drawing && dragged_vertex_idx_ref.current !== null) {
-          let released_idx = dragged_vertex_idx_ref.current
-          let did_drag = has_dragged_ref.current
-
-          if (did_drag) {
-            drag_end_time_ref.current = Date.now()
-            suppress_click_ref.current = true
-            setTimeout(() => {
-              suppress_click_ref.current = false
-            }, 450)
-            last_vertex_tap_ref.current = null
-          } else {
-            let touch = e.changedTouches ? e.changedTouches[0] : null
-            let rect = e.currentTarget.getBoundingClientRect()
-            let x = touch ? touch.clientX - rect.left : (drag_start_pos_ref.current?.x ?? 0)
-            let y = touch ? touch.clientY - rect.top : (drag_start_pos_ref.current?.y ?? 0)
-            let now = Date.now()
-            if (now - drag_end_time_ref.current < 450) {
-              dragged_vertex_idx_ref.current = null
-              drag_start_pos_ref.current = null
-              has_dragged_ref.current = false
-              set_dragged_vertex_idx(null)
-              return
-            }
-            let last_tap = last_vertex_tap_ref.current
-            if (
-              last_tap &&
-              last_tap.index === released_idx &&
-              now - last_tap.time < 380 &&
-              Math.hypot(x - last_tap.x, y - last_tap.y) < 25
-            ) {
-              last_vertex_tap_ref.current = null
-              suppress_click_ref.current = true
-              point_just_deleted_ref.current = true
-              setTimeout(() => {
-                suppress_click_ref.current = false
-                point_just_deleted_ref.current = false
-              }, 350)
-              if (on_delete_draw_point)
-                on_delete_draw_point(released_idx)
-            } else {
-              last_vertex_tap_ref.current = { index: released_idx, time: now, x, y }
-            }
-          }
-
-          dragged_vertex_idx_ref.current = null
-          drag_start_pos_ref.current = null
-          set_dragged_vertex_idx(null)
-        }
-      }}
+      onPointerDownCapture={handlePointerDownCapture}
+      onTouchStartCapture={handleTouchStartCapture}
+      onDoubleClickCapture={handleDoubleClickCapture}
+      onPointerLeave={on_pointer_leave}
+      onPointerMove={on_pointer_move}
+      onPointerUp={on_pointer_up}
+      onPointerCancel={on_pointer_cancel}
+      onTouchStart={on_touch_start}
+      onTouchMove={on_touch_move}
+      onTouchEnd={on_touch_end}
     >
       <DeckGL
         ref={deck_ref}
@@ -2236,7 +684,6 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           return isHovering ? 'crosshair' : 'grab'
         }}
       />
-
 
       {/* Unified Floating Tooltip Container (HUD Inspector & Stadestér City) */}
       {ui_visible && show_tooltips && !selected_city && !is_drawing && (
@@ -2295,112 +742,112 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
       {/* Top Left: Value Colourbar & Information Flyout Container, Top Right Tools */}
       {(() => {
-          let has_canvas = Boolean(rendered_canvas)
-          let is_country_relative = Boolean(
-            countries_mode &&
-            ((selected_countries && selected_countries.length > 0) || Boolean(hovered_country)) &&
-            country_stats &&
-            country_stats.validCount > 0 &&
-            Number.isFinite(country_stats.min) &&
-            Number.isFinite(country_stats.max) &&
-            country_stats.max > country_stats.min
-          )
-          let legend_min = (is_country_relative) ? country_stats!.min : min_val
-          let legend_max = (is_country_relative) ? country_stats!.max : max_val
-          if (is_country_relative && midpoint === 0) {
-            let abs_max = Math.max(Math.abs(legend_min), Math.abs(legend_max))
-            if (abs_max === 0)
-              abs_max = 1
-            legend_min = -abs_max
-            legend_max = abs_max
-          }
-          let legend_breaks = (is_country_relative) ? undefined : breaks
-          let legend_country_name = (is_country_relative) ? country_stats!.name : undefined
+        let has_canvas = Boolean(rendered_canvas)
+        let is_country_relative = Boolean(
+          countries_mode &&
+          ((selected_countries && selected_countries.length > 0) || Boolean(hovered_country)) &&
+          country_stats &&
+          country_stats.validCount > 0 &&
+          Number.isFinite(country_stats.min) &&
+          Number.isFinite(country_stats.max) &&
+          country_stats.max > country_stats.min
+        )
+        let legend_min = (is_country_relative) ? country_stats!.min : min_val
+        let legend_max = (is_country_relative) ? country_stats!.max : max_val
+        if (is_country_relative && midpoint === 0) {
+          let abs_max = Math.max(Math.abs(legend_min), Math.abs(legend_max))
+          if (abs_max === 0)
+            abs_max = 1
+          legend_min = -abs_max
+          legend_max = abs_max
+        }
+        let legend_breaks = (is_country_relative) ? undefined : breaks
+        let legend_country_name = (is_country_relative) ? country_stats!.name : undefined
 
-          let current_sidebar_width = sidebar_width ?? UI_LAYOUT.sidebarWidth
-          if (is_timelapse_exporting || is_mobile)
-            current_sidebar_width = 0
-          let current_colourbar_width = colourbar_width ?? 336
-          let colourbar_left = (is_timelapse_exporting || is_mobile)
-            ? UI_LAYOUT.margin
-            : UI_LAYOUT.margin + current_sidebar_width + UI_LAYOUT.gap
+        let current_sidebar_width = sidebar_width ?? UI_LAYOUT.sidebarWidth
+        if (is_timelapse_exporting || is_mobile)
+          current_sidebar_width = 0
+        let current_colourbar_width = colourbar_width ?? 336
+        let colourbar_left = (is_timelapse_exporting || is_mobile)
+          ? UI_LAYOUT.margin
+          : UI_LAYOUT.margin + current_sidebar_width + UI_LAYOUT.gap
 
-          return (
-            <MapViewerHUD
-              activeLayerId={props.activeLayerId}
-              analyticsOpen={analytics_open}
-              basemap={basemap}
-              cameraTilt={camera_tilt}
-              circleOverlayConfig={circle_overlay_config}
-              colorPalette={palette}
-              colourbarLeft={colourbar_left}
-              colourbarWidth={current_colourbar_width}
-              drawPointsCount={draw_points.length}
-              effectiveMapmodesBottom={effective_mapmodes_bottom}
-              flyoutOpen={flyout_open}
-              hasCanvas={has_canvas}
-              hasDrawnPolygon={Boolean(drawn_polygon_feature)}
-              heightmapConfig={heightmap_config}
-              hideColourbar={hide_colourbar}
-              hoveredCity={hovered_city}
-              infoPanelOpen={info_panel_open}
-              inspectData={inspect_data}
-              invertPalette={invert_palette}
-              isDrawing={is_drawing}
-              isEditingShape={is_editing_shape}
-              isMobile={is_mobile}
-              isTimelapseExporting={is_timelapse_exporting}
-              legendBreaks={legend_breaks}
-              legendCountryName={legend_country_name || undefined}
-              legendMax={legend_max}
-              legendMin={legend_min}
-              midpoint={midpoint}
-              legendPosition={legend_position}
-              legendSubtitle={legend_subtitle}
-              legendTitle={legend_title}
-              logSigma={log_sigma}
-              mapModes={map_modes}
-              mapmodesBounds={mapmodes_bounds}
-              mapmodesClearance={mapmodes_clearance}
-              mapmodesHeight={mapmodes_height}
-              mapmodesTakenRight={mapmodes_taken_right}
-              mapmodesWidth={mapmodes_width}
-              onCancelDraw={on_cancel_draw}
-              onChangeLegendPosition={on_change_legend_position}
-              onClearDrawnPolygon={on_clear_drawn_polygon}
-              onCloseInfoPanel={on_close_info_panel}
-              onDeleteLastDrawPoint={on_delete_last_draw_point}
-              onDoubleClick={handle_reset_view}
-              onFinishDraw={on_finish_draw}
-              onResizeColourbarWidth={on_resize_colourbar_width}
-              onToggleAnalytics={on_toggle_analytics}
-              onToggleDraw={on_toggle_draw}
-              onTogglePerformantMode={on_toggle_performant_mode}
-              onToggleTooltips={() => set_show_tooltips((arg0_prev) => !arg0_prev)}
-              onToggleUi={on_toggle_ui}
-              onUpdateBreaks={on_update_breaks}
-              performantMode={performant_mode}
-              projection={projection}
-              raster={raster}
-              rasterVersion={raster_version}
-              scaleType={scale_type}
-              selectedCountries={selected_countries}
-              setBasemap={set_basemap}
-              setFlyoutOpen={set_flyout_open}
-              setProjection={set_projection}
-              setShowGraticule={set_show_graticule}
-              showGraticule={show_graticule}
-              showTooltips={show_tooltips}
-              stadesterCities={stadester_cities}
-              stadesterConfig={stadester_config}
-              timelineBounds={timeline_bounds}
-              timelineClearance={timeline_clearance}
-              topRightTaken={top_right_taken}
-              topbarClearance={topbar_clearance}
-              uiVisible={ui_visible}
-            />
-          )
-        })()}
+        return (
+          <MapViewerHUD
+            activeLayerId={props.activeLayerId}
+            analyticsOpen={analytics_open}
+            basemap={basemap}
+            cameraTilt={camera_tilt}
+            circleOverlayConfig={circle_overlay_config}
+            colorPalette={palette}
+            colourbarLeft={colourbar_left}
+            colourbarWidth={current_colourbar_width}
+            drawPointsCount={draw_points.length}
+            effectiveMapmodesBottom={effective_mapmodes_bottom}
+            flyoutOpen={flyout_open}
+            hasCanvas={has_canvas}
+            hasDrawnPolygon={Boolean(drawn_polygon_feature)}
+            heightmapConfig={heightmap_config}
+            hideColourbar={hide_colourbar}
+            hoveredCity={hovered_city}
+            infoPanelOpen={info_panel_open}
+            inspectData={inspect_data}
+            invertPalette={invert_palette}
+            isDrawing={is_drawing}
+            isEditingShape={is_editing_shape}
+            isMobile={is_mobile}
+            isTimelapseExporting={is_timelapse_exporting}
+            legendBreaks={legend_breaks}
+            legendCountryName={legend_country_name || undefined}
+            legendMax={legend_max}
+            legendMin={legend_min}
+            midpoint={midpoint}
+            legendPosition={legend_position}
+            legendSubtitle={legend_subtitle}
+            legendTitle={legend_title}
+            logSigma={log_sigma}
+            mapModes={map_modes}
+            mapmodesBounds={mapmodes_bounds}
+            mapmodesClearance={mapmodes_clearance}
+            mapmodesHeight={mapmodes_height}
+            mapmodesTakenRight={mapmodes_taken_right}
+            mapmodesWidth={mapmodes_width}
+            onCancelDraw={on_cancel_draw}
+            onChangeLegendPosition={on_change_legend_position}
+            onClearDrawnPolygon={on_clear_drawn_polygon}
+            onCloseInfoPanel={on_close_info_panel}
+            onDeleteLastDrawPoint={on_delete_last_draw_point}
+            onDoubleClick={handle_reset_view}
+            onFinishDraw={on_finish_draw}
+            onResizeColourbarWidth={on_resize_colourbar_width}
+            onToggleAnalytics={on_toggle_analytics}
+            onToggleDraw={on_toggle_draw}
+            onTogglePerformantMode={on_toggle_performant_mode}
+            onToggleTooltips={() => set_show_tooltips((arg0_prev) => !arg0_prev)}
+            onToggleUi={on_toggle_ui}
+            onUpdateBreaks={on_update_breaks}
+            performantMode={performant_mode}
+            projection={projection}
+            raster={raster}
+            rasterVersion={raster_version}
+            scaleType={scale_type}
+            selectedCountries={selected_countries}
+            setBasemap={set_basemap}
+            setFlyoutOpen={set_flyout_open}
+            setProjection={set_projection}
+            setShowGraticule={set_show_graticule}
+            showGraticule={show_graticule}
+            showTooltips={show_tooltips}
+            stadesterCities={stadester_cities}
+            stadesterConfig={stadester_config}
+            timelineBounds={timeline_bounds}
+            timelineClearance={timeline_clearance}
+            topRightTaken={top_right_taken}
+            topbarClearance={topbar_clearance}
+            uiVisible={ui_visible}
+          />
+        )
+      })()}
 
       {/* Bottom Right Tray: Unified Mapmodes with Inline Settings */}
       {ui_visible && (

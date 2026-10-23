@@ -1,104 +1,45 @@
-import React, { useState, useEffect, useMemo, useCallback, useDeferredValue, useRef } from 'react'
+import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppMode,
-  DataFormat,
-  ScaleType,
-  ColorPalette,
-  BoundsMode,
-  ProjectionType,
-  DecodedRaster,
   BinningConfig,
-  HeightmapConfig,
+  BoundsMode,
   CircleOverlayConfig,
-  MapModeItem,
-  MapModeId,
-  CityPoint,
   CityFullRecord,
-  HistoricalBordersConfig,
+  CityPoint,
+  ColorPalette,
+  DataFormat,
   DEFAULT_HISTORICAL_BORDERS_CONFIG,
+  DecodedRaster,
+  HeightmapConfig,
+  HistoricalBordersConfig,
+  MapModeId,
+  MapModeItem,
+  ProjectionType,
+  ScaleType,
   StadesterConfig,
-  isBorderDatasetMatch,
 } from '@framework/geopng/types.ts'
-import { decodeRawGeoPngBufferAsync, computeRasterDifference } from '@framework/geopng/decoder.ts'
-import { computeQuantiles } from '@framework/geopng/scales.ts'
-import { createBinnedRaster } from '@framework/geopng/downsampling.ts'
-import { CountryFeature } from '@framework/geopng/polygon_binning.ts'
 import { useCountryStatsAsync } from '@framework/geopng/use_country_stats_async.ts'
-import {
-  CustomVectorDataset,
-  parseCustomVectorText,
-  sliceCustomVectorDataset,
-} from '@framework/geopng/custom_vector_service.ts'
-import { createDrawnPolygonFeature } from '@framework/geopng/polygon_draw_tool.ts'
 import { MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
 import { SidebarControls } from '@ui/leftbar/sidebar_controls'
 import { MapViewer } from '@ui/map/map_viewer'
 import { AnalyticsDrawer } from '@ui/rightbar/analytics_drawer'
 import { TimelineBar } from '@ui/bottombar/timeline_bar'
 import { MobileNavBar } from '@ui/bottombar/mobile_nav_bar'
-import { VideoExportModal, type StartTimelapseExportOptions } from '@ui/export/video_export_modal'
-import { ParsedDataLayer } from '@server/layer_parser.ts'
+import { VideoExportModal } from '@ui/export/video_export_modal'
 import { Icon } from '@ui/components/icon'
-import { useStadesterCities, fetchStadesterCitiesAsync } from '@ui/map/use_stadester_cities'
-import { useRasterPipeline, fetchRasterKeyframe, fetchInterpolatedRasterAsync } from '@framework/raster/use_raster_pipeline.ts'
+import { useStadesterCities } from '@ui/map/use_stadester_cities'
+import { useRasterPipeline } from '@framework/raster/use_raster_pipeline.ts'
 import { useRasterRenderer } from '@framework/raster/use_raster_renderer.ts'
 import { useTimelapseExportOrchestrator } from '@ui/export/use_timelapse_export_orchestrator.ts'
-import { applyLayerLegend, getActiveLayerMidpoint } from '@framework/raster/legend_utils.ts'
 import { useLocalisation } from '@localisation'
 import { useAppLayoutState } from './use_app_layout_state'
 import { useHeadlessExport } from './export/use_headless_export'
-import { onConfigUpdate, onLayersUpdate } from '@framework/config/config_hot_reload'
+import { getDefaultSelectorsForLayer, useAppLayersSync } from './use_app_layers_sync'
+import { useAppDrawState } from './use_app_draw_state'
+import { useAppFileUpload } from './use_app_file_upload'
+import { useAppRasterBounds } from './use_app_raster_bounds'
 
-/**
- * Resolves the default variable selectors for a given data layer, preserving valid existing options.
- *
- * @param {ParsedDataLayer | null} arg0_layer
- * @param {Record<string, string | string[]>} [arg1_existing_selectors={}]
- *
- * @returns {Record<string, string[]>}
- */
-export let getDefaultSelectorsForLayer = function (
-  arg0_layer: ParsedDataLayer | null,
-  arg1_existing_selectors?: Record<string, string | string[]>
-): Record<string, string[]> {
-  //Convert from parameters
-  let existing_selectors = (arg1_existing_selectors) ? arg1_existing_selectors : {}
-  let layer = arg0_layer
-
-  //Declare local instance variables
-  let all_selector_keys: string[]
-  let default_selectors: Record<string, string[]> = {}
-
-  //Guard clauses
-  if (!layer || !layer.variable_selectors)
-    return default_selectors
-
-  //Function body
-  all_selector_keys = Object.keys(layer.variable_selectors)
-  for (let i = 0; i < all_selector_keys.length; i++) {
-    let local_curr: string | string[]
-    let local_def = layer.variable_selectors[all_selector_keys[i]]
-    let local_key = all_selector_keys[i]
-    let local_valid_options = (local_def && local_def.options) ? Object.keys(local_def.options) : []
-
-    local_curr = existing_selectors[local_key]
-    if (local_curr) {
-      let local_values = Array.isArray(local_curr) ? local_curr : [local_curr]
-      let local_valid_values = local_values.filter((arg0_val) => local_valid_options.includes(arg0_val))
-
-      if (local_valid_values.length > 0) {
-        default_selectors[local_key] = local_valid_values
-        continue
-      }
-    }
-
-    if (local_valid_options.length > 0)
-      default_selectors[local_key] = [local_valid_options[0]]
-  }
-
-  //Return statement
-  return default_selectors
-}
+export { getDefaultSelectorsForLayer }
 
 /**
  * Main application root component managing raster datasets, map layers, and reactive view state.
@@ -114,9 +55,6 @@ export let App: React.FC = function () {
     colourbarWidth: colourbar_width,
     isHeadlessExport: is_headless_export,
     isMobile: is_mobile,
-    isSmallScreen: is_small_screen,
-    isTablet: is_tablet,
-    isTouch: is_touch,
     legendPosition: legend_position,
     setActiveMobileTab: set_active_mobile_tab,
     setColourbarWidth: set_colourbar_width,
@@ -128,31 +66,32 @@ export let App: React.FC = function () {
     sidebarWidth: sidebar_width,
     uiVisible: ui_visible,
   } = layout_state
-  let [app_mode, set_app_mode] = useState<AppMode>('Single Image')
-  let [data_format, set_data_format] = useState<DataFormat>('float32')
-  let [projection, set_projection] = useState<ProjectionType>('Mercator')
-  let [scale_type, set_scale_type] = useState<ScaleType>('pseudo-log')
-  let [log_sigma, set_log_sigma] = useState<number>(1.0)
-  let [color_palette, set_color_palette] = useState<ColorPalette>('Plasma')
-  let [invert_palette, set_invert_palette] = useState<boolean>(false)
-  let [bounds_mode, set_bounds_mode] = useState<BoundsMode>('Manual')
-  let [min_val_override, set_min_val_override] = useState<string>('')
-  let [max_val_override, set_max_val_override] = useState<string>('')
-  let [percentile_list, set_percentile_list] = useState<string>(
-    MAP_CONFIG.defaultPercentileBreaks || '0, 1, 5, 25, 50, 75, 95, 99, 100'
-  )
-  let [absolute_breaks, set_absolute_breaks] = useState<string>('0, 10, 50, 100, 500, 1000')
-  let [legend_title, set_legend_title] = useState<string>('Value')
-  let [legend_subtitle, set_legend_subtitle] = useState<string>('')
-  let [opacity, set_opacity] = useState<number>(0.85)
-  let [performant_mode, set_performant_mode] = useState<boolean>(false)
 
+  let [absolute_breaks, set_absolute_breaks] = useState<string>('0, 10, 50, 100, 500, 1000')
+  let [analytics_open, set_analytics_open] = useState<boolean>(false)
+  let [app_mode, set_app_mode] = useState<AppMode>('Single Image')
   let [binning_config, set_binning_config] = useState<BinningConfig>({
     enabled: false,
     height: 360,
     method: 'average',
     width: 720,
   })
+  let [bounds_mode, set_bounds_mode] = useState<BoundsMode>('Manual')
+  let [circle_overlay_config, set_circle_overlay_config] = useState<CircleOverlayConfig>({
+    baseRadius: 1.0,
+    enabled: false,
+    haloWidth: 1,
+    percentileCutoff: 99,
+    strokeWidth: 2,
+  })
+  let [color_palette, set_color_palette] = useState<ColorPalette>('Plasma')
+  let [data_format, set_data_format] = useState<DataFormat>('float32')
+
+  let default_data_layers = useMemo(() => MAP_CONFIG.defaultDataLayers ?? ['detailed_borders', 'stadester'], [])
+  let default_borders_enabled = default_data_layers.includes('detailed_borders') || default_data_layers.includes('simplified_borders') || default_data_layers.includes('historical_borders') || default_data_layers.includes('statistical_borders')
+  let default_border_dataset = default_data_layers.includes('detailed_borders') ? 'detailed_borders' : (default_data_layers.includes('simplified_borders') ? 'simplified_borders' : 'detailed_borders')
+  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_1.1')
+
   let [heightmap_config, set_heightmap_config] = useState<HeightmapConfig>({
     blendWeight: 0.5,
     elevationScale: 800000,
@@ -163,20 +102,39 @@ export let App: React.FC = function () {
     opacityByPercentileStrength: 1.0,
     resolutionArcmin: 60,
   })
-
-  let [info_panel_open, set_info_panel_open] = useState<boolean>(false)
-  let default_data_layers = useMemo(() => MAP_CONFIG.defaultDataLayers ?? ['detailed_borders', 'stadester'], [])
-  let default_borders_enabled = default_data_layers.includes('detailed_borders') || default_data_layers.includes('simplified_borders') || default_data_layers.includes('historical_borders') || default_data_layers.includes('statistical_borders')
-  let default_border_dataset = default_data_layers.includes('detailed_borders') ? 'detailed_borders' : (default_data_layers.includes('simplified_borders') ? 'simplified_borders' : 'detailed_borders')
-  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_1.1')
-
-  let [circle_overlay_config, set_circle_overlay_config] = useState<CircleOverlayConfig>({
-    baseRadius: 1.0,
-    enabled: false,
-    haloWidth: 1,
-    percentileCutoff: 99,
-    strokeWidth: 2,
+  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
+    ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
+    dataset: default_border_dataset,
+    enabled: default_borders_enabled,
   })
+  let [info_panel_open, set_info_panel_open] = useState<boolean>(false)
+  let [inspect_data, set_inspect_data] = useState<any>(null)
+  let [invert_palette, set_invert_palette] = useState<boolean>(false)
+  let [is_playing, set_is_playing] = useState<boolean>(false)
+  let [legend_subtitle, set_legend_subtitle] = useState<string>('')
+  let [legend_title, set_legend_title] = useState<string>('Value')
+  let [log_sigma, set_log_sigma] = useState<number>(1.0)
+  let [map_modes, set_map_modes] = useState<MapModeItem[]>(() =>
+    MAPMODES_CONFIG.modes.map((arg0_m) => ({
+      active: arg0_m.active ?? false,
+      id: arg0_m.id,
+      label: arg0_m.label,
+    }))
+  )
+  let [max_val_override, set_max_val_override] = useState<string>('')
+  let [min_val_override, set_min_val_override] = useState<string>('')
+  let [opacity, set_opacity] = useState<number>(0.85)
+  let [percentile_list, set_percentile_list] = useState<string>(
+    MAP_CONFIG.defaultPercentileBreaks || '0, 1, 5, 25, 50, 75, 95, 99, 100'
+  )
+  let [performant_mode, set_performant_mode] = useState<boolean>(false)
+  let [playback_speed, set_playback_speed] = useState<number>(1)
+  let [projection, set_projection] = useState<ProjectionType>('Mercator')
+  let [scale_type, set_scale_type] = useState<ScaleType>('pseudo-log')
+  let [selected_city_key, set_selected_city_key] = useState<string | null>(null)
+  let [selected_city_point, set_selected_city_point] = useState<CityPoint | null>(null)
+  let [settings_drawer_open, set_settings_drawer_open] = useState<boolean>(false)
+  let [snap_to_keyframes, set_snap_to_keyframes] = useState<boolean>(false)
   let [stadester_config, set_stadester_config] = useState<StadesterConfig>(() => ({
     bubbleSize: 0.4,
     capitalColorMode: 'state',
@@ -196,70 +154,307 @@ export let App: React.FC = function () {
     showCapitalUnderlines: true,
     showLabels: true,
   }))
-  let [selected_city_key, set_selected_city_key] = useState<string | null>(null)
-  let [selected_city_point, set_selected_city_point] = useState<CityPoint | null>(null)
-  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
-    ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
-    dataset: default_border_dataset,
-    enabled: default_borders_enabled,
-  })
-
-  let [map_modes, set_map_modes] = useState<MapModeItem[]>(() =>
-    MAPMODES_CONFIG.modes.map((arg0_m) => ({
-      active: arg0_m.active ?? false,
-      id: arg0_m.id,
-      label: arg0_m.label,
-    }))
-  )
-
-  let [analytics_open, set_analytics_open] = useState<boolean>(false)
-  let [settings_drawer_open, set_settings_drawer_open] = useState<boolean>(false)
-  let [selected_countries, set_selected_countries] = useState<CountryFeature[]>([])
-  let [hovered_country, set_hovered_country] = useState<CountryFeature | null>(null)
-  let [countries_mode, set_countries_mode] = useState<boolean>(false)
-  let [cursor_lng_lat, set_cursor_lng_lat] = useState<[number, number] | null>(null)
-  let [custom_vector_dataset, set_custom_vector_dataset] = useState<CustomVectorDataset | null>(null)
-  let [custom_vector_visible, set_custom_vector_visible] = useState<boolean>(true)
-  let [draw_points, set_draw_points] = useState<[number, number][]>([])
-  let [drawn_polygon_feature, set_drawn_polygon_feature] = useState<CountryFeature | null>(null)
-  let [inspect_data, set_inspect_data] = useState<any>(null)
-  let [is_drawing, set_is_drawing] = useState<boolean>(false)
-  let [is_editing_shape, set_is_editing_shape] = useState<boolean>(false)
-
-  let [layers, set_layers] = useState<Record<string, ParsedDataLayer>>({})
-  let [active_layer_id, set_active_layer_id] = useState<string | null>('default_basemap')
-  let [active_variable_selectors, set_active_variable_selectors] = useState<Record<string, string | string[]>>({
-    gender: ['t'],
-    profession: ['agriculture'],
-  })
-  let [is_loading_layers, set_is_loading_layers] = useState<boolean>(false)
+  let [timeline_year, set_timeline_year] = useState<number>(1950)
   let default_app_role: UserRole = (PERMISSIONS_CONFIG.default_role as UserRole) || 'default'
   let [user_role, set_user_role] = useState<UserRole>(() => {
     if (isPublicBuild())
       return 'default'
     return isRoleAllowed(default_app_role) ? default_app_role : 'default'
   })
-  let [timeline_year, set_timeline_year] = useState<number>(1950)
-  let [is_playing, set_is_playing] = useState<boolean>(false)
-  let [playback_speed, set_playback_speed] = useState<number>(1)
-  let [snap_to_keyframes, set_snap_to_keyframes] = useState<boolean>(false)
   let [video_export_open, set_video_export_open] = useState<boolean>(false)
+
+  let raster_pipeline_ref = useRef<any>(null)
+
+  let {
+    active_layer,
+    active_layer_id,
+    active_variable_selectors,
+    available_keyframes,
+    handle_change_variable_selector,
+    handle_select_layer,
+    is_loading_layers,
+    layers,
+    set_active_layer_id,
+    set_active_variable_selectors,
+  } = useAppLayersSync({
+    default_data_layers,
+    default_stadester_enabled,
+    is_mobile,
+    raster_pipeline_ref,
+    set_color_palette,
+    set_data_format,
+    set_historical_borders_config,
+    set_invert_palette,
+    set_legend_subtitle,
+    set_legend_title,
+    set_log_sigma,
+    set_map_modes,
+    set_max_val_override,
+    set_min_val_override,
+    set_scale_type,
+    set_stadester_config,
+  })
+
+  let {
+    active_countries,
+    countries_mode,
+    cursor_lng_lat,
+    custom_vector_dataset,
+    custom_vector_features,
+    custom_vector_visible,
+    draw_points,
+    drawn_polygon_feature,
+    handle_add_draw_point,
+    handle_cancel_draw,
+    handle_clear_countries,
+    handle_clear_drawn_polygon,
+    handle_delete_draw_point,
+    handle_delete_last_draw_point,
+    handle_edit_drawn_polygon,
+    handle_finish_draw,
+    handle_insert_draw_point,
+    handle_move_draw_point,
+    handle_remove_custom_vector,
+    handle_select_country,
+    handle_toggle_countries_mode,
+    handle_toggle_country,
+    handle_toggle_draw,
+    handle_upload_custom_vector,
+    hovered_country,
+    is_drawing,
+    is_editing_shape,
+    selected_countries,
+    set_cursor_lng_lat,
+    set_custom_vector_visible,
+    set_hovered_country,
+  } = useAppDrawState({
+    set_inspect_data,
+    set_map_modes,
+    set_selected_city_key,
+    set_timeline_year,
+    timeline_year,
+  })
+
+  let deferred_selected_countries = useDeferredValue(selected_countries)
+
+  let {
+    activeFileName: active_file_name,
+    clearCache: clear_raster_cache,
+    diffNameA: diff_name_a,
+    diffNameB: diff_name_b,
+    displayRaster: pipeline_display_raster,
+    isLoadingRaster: is_loading_raster,
+    rasterA: raster_a,
+    rasterB: raster_b,
+    rasterCacheRef: raster_cache_ref,
+    rasterVersion: raster_version,
+    rawBytesA: raw_bytes_a,
+    rawBytesB: raw_bytes_b,
+    setActiveFileName: set_active_file_name,
+    setDiffNameA: set_diff_name_a,
+    setDiffNameB: set_diff_name_b,
+    setRasterA: set_raster_a,
+    setRasterB: set_raster_b,
+    setRasterVersion: set_raster_version,
+    setRawBytesA: set_raw_bytes_a,
+    setRawBytesB: set_raw_bytes_b,
+  } = useRasterPipeline({
+    activeLayer: active_layer,
+    activeLayerId: active_layer_id,
+    activeVariableSelectors: active_variable_selectors,
+    appMode: app_mode,
+    dataFormat: data_format,
+    isHeadlessExport: is_headless_export,
+    isPlaying: is_playing,
+    performantMode: performant_mode,
+    snapToKeyframes: snap_to_keyframes,
+    timelineYear: timeline_year,
+  })
+  raster_pipeline_ref.current = {
+    activeFileName: active_file_name,
+    diffNameA: diff_name_a,
+    diffNameB: diff_name_b,
+    setActiveFileName: set_active_file_name,
+    setDiffNameA: set_diff_name_a,
+    setDiffNameB: set_diff_name_b,
+    setRasterA: set_raster_a,
+    setRasterVersion: set_raster_version,
+  }
+
+  let {
+    active_midpoint,
+    active_raster,
+    breaks,
+    display_raster,
+    max_val,
+    min_val,
+  } = useAppRasterBounds({
+    absolute_breaks,
+    active_layer,
+    active_variable_selectors,
+    app_mode,
+    binning_config,
+    bounds_mode,
+    max_val_override,
+    min_val_override,
+    percentile_list,
+    pipeline_display_raster,
+    raster_a,
+    raster_b,
+  })
+
+  useEffect(() => {
+    clear_raster_cache()
+  }, [performant_mode, active_layer_id, clear_raster_cache])
+
+  let {
+    cancelTimelapseExport: handle_stop_timelapse_export,
+    isTimelapseExporting: is_timelapse_exporting,
+    startTimelapseExport: handle_start_timelapse_export,
+    timelapseExportPct: timelapse_export_pct,
+    timelapseExportResult: timelapse_export_result,
+    timelapseExportStatus: timelapse_export_status,
+  } = useTimelapseExportOrchestrator({
+    activeLayer: active_layer,
+    activeLayerId: active_layer_id,
+    activeVariableSelectors: active_variable_selectors,
+    layers: layers,
+    legendPosition: legend_position,
+    projection: projection,
+    setIsPlaying: set_is_playing,
+    setVideoExportOpen: set_video_export_open,
+  })
+
+  let stadester_result = useStadesterCities({
+    config: stadester_config,
+    isPlaying: is_playing,
+    performantMode: performant_mode,
+    selectedCityKey: selected_city_key,
+    year: timeline_year,
+  })
+  let stadester_cities: CityPoint[] = stadester_result.cities
+  let selected_city_record: CityFullRecord | null = stadester_result.selectedCity
+  let effective_selected_city = useMemo<CityFullRecord | null>(() => {
+    if (selected_city_record && selected_city_point && (selected_city_record.key === selected_city_point.key || String(selected_city_record.id) === String(selected_city_point.id))) {
+      return {
+        ...selected_city_point,
+        ...selected_city_record,
+        capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
+        capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
+        capitalStateId: (selected_city_record as any).capitalStateId || (selected_city_record as any).capital_state_id || (selected_city_point as any).capitalStateId || (selected_city_point as any).capital_state_id,
+        capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
+        capital_state_id: (selected_city_record as any).capital_state_id || (selected_city_record as any).capital_state_id || (selected_city_point as any).capital_state_id || (selected_city_point as any).capitalStateId,
+        capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
+        coords: selected_city_record.coords || selected_city_point.coords,
+        isCapital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital),
+        is_capital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital),
+        rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
+      } as unknown as CityFullRecord
+    }
+    if (selected_city_point)
+      return selected_city_point as unknown as CityFullRecord
+    if (selected_city_record)
+      return selected_city_record
+    return null
+  }, [selected_city_record, selected_city_point])
+
+  useEffect(() => {
+    ; (window as any).setStadesterConfig = set_stadester_config
+      ; (window as any).stadesterConfig = stadester_config
+      ; (window as any).setActiveLayerId = set_active_layer_id
+      ; (window as any).setSelectedCityKey = set_selected_city_key
+      ; (window as any).selectedCityRecord = effective_selected_city
+      ; (window as any).selectedCityKey = selected_city_key
+  }, [set_stadester_config, stadester_config, set_active_layer_id, set_selected_city_key, effective_selected_city, selected_city_key])
+
+  let handle_close_city_details = useCallback(() => {
+    set_selected_city_key(null)
+    set_selected_city_point(null)
+  }, [])
+
+  let handle_select_city = useCallback((arg0_city: CityPoint | null) => {
+    if (is_drawing)
+      return
+    let city = arg0_city
+    if (!city) {
+      set_selected_city_key(null)
+      set_selected_city_point(null)
+    } else {
+      set_selected_city_key(city.key)
+      set_selected_city_point(city)
+    }
+  }, [is_drawing])
+
+  let handle_app_inspect = useCallback(
+    (arg0_data: any) => {
+      let insp_data = arg0_data
+      if (!analytics_open)
+        return
+      set_inspect_data(insp_data)
+    },
+    [analytics_open]
+  )
+
+  useHeadlessExport({
+    activeLayer: active_layer,
+    dataFormat: data_format,
+    isHeadlessExport: is_headless_export,
+    layers: layers,
+    performantMode: performant_mode,
+    rasterCacheRef: raster_cache_ref,
+    setActiveLayerId: set_active_layer_id,
+    setActiveVariableSelectors: set_active_variable_selectors,
+    setColorPalette: set_color_palette,
+    setInvertPalette: set_invert_palette,
+    setLegendSubtitle: set_legend_subtitle,
+    setLegendTitle: set_legend_title,
+    setLogSigma: set_log_sigma,
+    setRasterA: set_raster_a,
+    setRasterB: set_raster_b,
+    setRasterVersion: set_raster_version,
+    setScaleType: set_scale_type,
+    setTimelineYear: set_timeline_year,
+    snapToKeyframes: snap_to_keyframes,
+    stadesterConfig: stadester_config,
+  })
+
+  let { countryStats: country_stats, isCalculatingStats: is_calculating_stats } = useCountryStatsAsync({
+    activeCountries: active_countries,
+    activeRaster: display_raster || active_raster,
+    isHoverOnly: false,
+  })
+
+  let { rasterBounds: raster_bounds, renderedCanvas: rendered_canvas } = useRasterRenderer({
+    activeCountries: active_countries,
+    activeLayerId: active_layer_id,
+    activeRaster: display_raster || active_raster,
+    breaks: breaks,
+    colorPalette: color_palette,
+    countriesMode: countries_mode,
+    countryStats: country_stats,
+    invertPalette: invert_palette,
+    logSigma: log_sigma,
+    maxVal: max_val,
+    midpoint: active_midpoint,
+    minVal: min_val,
+    projection: projection,
+    rasterVersion: raster_version,
+    scaleType: scale_type,
+  })
 
   let handle_change_year = useCallback((arg0_year: number) => {
     let yr = arg0_year === 0 ? 1 : arg0_year
     set_timeline_year(yr)
   }, [])
 
-  let handle_change_user_role = useCallback(
-    function (arg0_role: UserRole) {
-      let role = arg0_role
-      if (isRoleAllowed(role))
-        set_user_role(role)
-      else
-        console.warn(`[Permissions] Role switch to '${role}' not permitted in current instance.`)
-    },
-    []
-  )
+  let handle_change_user_role = useCallback((arg0_role: UserRole) => {
+    let role = arg0_role
+    if (isRoleAllowed(role))
+      set_user_role(role)
+    else
+      console.warn(`[Permissions] Role switch to '${role}' not permitted in current instance.`)
+  }, [])
+
   useEffect(() => {
     let search_params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
     let url_proj = search_params?.get('projection') as ProjectionType | null
@@ -307,562 +502,30 @@ export let App: React.FC = function () {
     }
   }, [])
 
-  let active_layer = useMemo<ParsedDataLayer | null>(() => {
-    if (!active_layer_id)
-      return null
-    if (layers[active_layer_id])
-      return layers[active_layer_id]
-    if (active_layer_id.includes('.')) {
-      let parent_id = active_layer_id.split('.')[0]
-      let parent = layers[parent_id]
-      if (parent && parent.sub_layers) {
-        let sub = parent.sub_layers.find((arg0_s) => arg0_s.id === active_layer_id)
-        if (sub)
-          return sub
-      }
-    }
-    return null
-  }, [active_layer_id, layers])
-
-  let available_keyframes = useMemo<number[]>(() => {
-    if (!active_layer || !active_layer.available_years)
-      return []
-    return active_layer.available_years
-  }, [active_layer])
-
-  //Raster pipeline hook: handles background loading, keyframes, caching, and downsampling
-  let {
-    activeFileName: active_file_name,
-    clearCache: clear_raster_cache,
-    diffNameA: diff_name_a,
-    diffNameB: diff_name_b,
-    displayRaster: pipeline_display_raster,
-    isLoadingRaster: is_loading_raster,
-    rasterA: raster_a,
-    rasterB: raster_b,
-    rasterCacheRef: raster_cache_ref,
-    rasterVersion: raster_version,
-    rawBytesA: raw_bytes_a,
-    rawBytesB: raw_bytes_b,
-    setActiveFileName: set_active_file_name,
-    setDiffNameA: set_diff_name_a,
-    setDiffNameB: set_diff_name_b,
-    setRasterA: set_raster_a,
-    setRasterB: set_raster_b,
-    setRasterVersion: set_raster_version,
-    setRawBytesA: set_raw_bytes_a,
-    setRawBytesB: set_raw_bytes_b,
-  } = useRasterPipeline({
-    activeLayer: active_layer,
-    activeLayerId: active_layer_id,
-    activeVariableSelectors: active_variable_selectors,
-    appMode: app_mode,
-    dataFormat: data_format,
-    isHeadlessExport: is_headless_export,
-    isPlaying: is_playing,
-    performantMode: performant_mode,
-    snapToKeyframes: snap_to_keyframes,
-    timelineYear: timeline_year,
-  })
-
-  useEffect(() => {
-    clear_raster_cache()
-  }, [performant_mode, active_layer_id, clear_raster_cache])
-
-  //Server-side timelapse export orchestrator hook
-  let {
-    cancelTimelapseExport: handle_stop_timelapse_export,
-    isTimelapseExporting: is_timelapse_exporting,
-    startTimelapseExport: handle_start_timelapse_export,
-    timelapseExportPct: timelapse_export_pct,
-    timelapseExportResult: timelapse_export_result,
-    timelapseExportStatus: timelapse_export_status,
-  } = useTimelapseExportOrchestrator({
-    activeLayer: active_layer,
-    activeLayerId: active_layer_id,
-    activeVariableSelectors: active_variable_selectors,
-    layers: layers,
-    legendPosition: legend_position,
-    projection: projection,
-    setIsPlaying: set_is_playing,
-    setVideoExportOpen: set_video_export_open,
-  })
-
-  let stadester_result = useStadesterCities({
-    config: stadester_config,
-    isPlaying: is_playing,
-    performantMode: performant_mode,
-    selectedCityKey: selected_city_key,
-    year: timeline_year,
-  })
-  let stadester_cities: CityPoint[] = stadester_result.cities
-  let selected_city_record: CityFullRecord | null = stadester_result.selectedCity
-  let effective_selected_city = useMemo<CityFullRecord | null>(() => {
-    if (selected_city_record && selected_city_point && (selected_city_record.key === selected_city_point.key || String(selected_city_record.id) === String(selected_city_point.id))) {
-      return {
-        ...selected_city_point,
-        ...selected_city_record,
-        coords: selected_city_record.coords || selected_city_point.coords,
-        rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
-        capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
-        capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
-        capitalStateId: (selected_city_record as any).capitalStateId || (selected_city_record as any).capital_state_id || (selected_city_point as any).capitalStateId || (selected_city_point as any).capital_state_id,
-        capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
-        capital_state_id: (selected_city_record as any).capital_state_id || (selected_city_record as any).capitalStateId || (selected_city_point as any).capital_state_id || (selected_city_point as any).capitalStateId,
-        capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
-        isCapital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital),
-        is_capital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital),
-      } as unknown as CityFullRecord
-    }
-    if (selected_city_point)
-      return selected_city_point as unknown as CityFullRecord
-    if (selected_city_record)
-      return selected_city_record
-    return null
-  }, [selected_city_record, selected_city_point])
-
-  useEffect(() => {
-    ; (window as any).setStadesterConfig = set_stadester_config
-      ; (window as any).stadesterConfig = stadester_config
-      ; (window as any).setActiveLayerId = set_active_layer_id
-      ; (window as any).setSelectedCityKey = set_selected_city_key
-      ; (window as any).selectedCityRecord = effective_selected_city
-      ; (window as any).selectedCityKey = selected_city_key
-  }, [set_stadester_config, stadester_config, set_active_layer_id, set_selected_city_key, effective_selected_city, selected_city_key])
-
-  let handle_close_city_details = useCallback(() => {
-    set_selected_city_key(null)
-    set_selected_city_point(null)
-  }, [])
-
-  let handle_select_city = useCallback((arg0_city: CityPoint | null) => {
-    //Guard clauses
-    if (is_drawing)
-      return
-
-    let city = arg0_city
-    if (!city) {
-      set_selected_city_key(null)
-      set_selected_city_point(null)
-    } else {
-      set_selected_city_key(city.key)
-      set_selected_city_point(city)
-    }
-  }, [is_drawing])
-
-  let handle_app_inspect = useCallback(
-    (arg0_data: any) => {
-      let insp_data = arg0_data
-      if (!analytics_open)
-        return
-      set_inspect_data(insp_data)
-    },
-    [analytics_open]
-  )
-
-  //Headless export hook for server render keyframes
-  useHeadlessExport({
-    activeLayer: active_layer,
-    dataFormat: data_format,
-    isHeadlessExport: is_headless_export,
-    layers: layers,
-    performantMode: performant_mode,
-    rasterCacheRef: raster_cache_ref,
-    setActiveLayerId: set_active_layer_id,
-    setActiveVariableSelectors: set_active_variable_selectors,
-    setColorPalette: set_color_palette,
-    setInvertPalette: set_invert_palette,
-    setLegendSubtitle: set_legend_subtitle,
-    setLegendTitle: set_legend_title,
-    setLogSigma: set_log_sigma,
-    setRasterA: set_raster_a,
-    setRasterB: set_raster_b,
-    setRasterVersion: set_raster_version,
-    setScaleType: set_scale_type,
-    setTimelineYear: set_timeline_year,
-    snapToKeyframes: snap_to_keyframes,
-    stadesterConfig: stadester_config,
-  })
-
-  let deferred_selected_countries = useDeferredValue(selected_countries)
-
-  let handle_change_variable_selector = useCallback((arg0_key: string, arg1_option: string | string[]) => {
-    //Convert from parameters
-    let key = arg0_key
-    let option = arg1_option
-
-    //Function body
-    set_active_variable_selectors((arg0_prev) => ({
-      ...arg0_prev,
-      [key]: option,
-    }))
-    set_max_val_override('')
-    set_min_val_override('')
-    set_raster_version((arg0_v: number) => arg0_v + 1)
-  }, [set_max_val_override, set_min_val_override, set_raster_version])
-
-  let handle_select_layer = useCallback((arg0_layer_id: string) => {
-    //Convert from parameters
-    let layer_id = arg0_layer_id
-
-    //Function body
-    if (layer_id === 'lfpr')
-      layer_id = 'lfpr.lfpr_female'
-    if (layer_id === 'statistical_borders' || layer_id === 'simplified_borders' || layer_id === 'detailed_borders') {
-      set_historical_borders_config((arg0_prev) => {
-        let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, layer_id)
-        if (is_currently_active) {
-          return {
-            ...arg0_prev,
-            enabled: false,
-          }
-        }
-        return {
-          ...arg0_prev,
-          dataset: layer_id,
-          enabled: true,
-        }
-      })
-      return
-    }
-
-    let target_layer = layers[layer_id]
-    if (layer_id.includes('.') && (!target_layer || !target_layer.variable_selectors)) {
-      let parent_id = layer_id.split('.')[0]
-      let parent = layers[parent_id]
-      if (parent && parent.sub_layers) {
-        let sub = parent.sub_layers.find((arg0_s) => arg0_s.id === layer_id)
-        if (sub)
-          target_layer = sub
-      }
-    }
-
-    let next_selectors = getDefaultSelectorsForLayer(target_layer, active_variable_selectors)
-
-    set_active_layer_id(layer_id)
-    set_active_variable_selectors(next_selectors)
-
-    if (target_layer) {
-      applyLayerLegend(
-        target_layer,
-        next_selectors,
-        set_color_palette,
-        set_invert_palette,
-        set_scale_type,
-        set_legend_title,
-        set_legend_subtitle,
-        set_log_sigma
-      )
-      if (target_layer.encoding)
-        set_data_format(target_layer.encoding)
-    }
-
-    if (target_layer?.type === 'vector.basemap' || layer_id === 'default_basemap' || layer_id === 'basemap_only')
-      set_raster_a(null)
-
-    set_active_file_name('')
-    set_diff_name_a('')
-    set_diff_name_b('')
-    set_max_val_override('')
-    set_min_val_override('')
-    set_raster_version((arg0_v: number) => arg0_v + 1)
-  }, [
-    active_variable_selectors,
-    layers,
+  let { handle_file_upload } = useAppFileUpload({
+    active_file_name,
+    app_mode,
+    data_format,
+    diff_name_a,
+    diff_name_b,
+    raw_bytes_a,
+    raw_bytes_b,
     set_active_file_name,
-    set_color_palette,
-    set_data_format,
+    set_active_layer_id,
+    set_bounds_mode,
     set_diff_name_a,
     set_diff_name_b,
-    set_historical_borders_config,
-    set_invert_palette,
     set_legend_subtitle,
     set_legend_title,
-    set_log_sigma,
     set_max_val_override,
     set_min_val_override,
     set_raster_a,
+    set_raster_b,
     set_raster_version,
-    set_scale_type,
-  ])
-
-  useEffect(() => {
-    if (active_file_name || diff_name_a || diff_name_b)
-      return
-    if (active_layer) {
-      applyLayerLegend(
-        active_layer,
-        active_variable_selectors,
-        set_color_palette,
-        set_invert_palette,
-        set_scale_type,
-        set_legend_title,
-        set_legend_subtitle,
-        set_log_sigma
-      )
-      if (active_layer.encoding)
-        set_data_format(active_layer.encoding)
-    }
-  }, [active_file_name, active_layer, active_variable_selectors, diff_name_a, diff_name_b])
-
-  useEffect(() => {
-    if (active_layer && active_layer.variable_selectors) {
-      let sel_keys = Object.keys(active_layer.variable_selectors)
-      set_active_variable_selectors((arg0_prev) => {
-        let changed = false
-        let updated = { ...arg0_prev }
-        for (let i = 0; i < sel_keys.length; i++) {
-          let sk = sel_keys[i]
-          let curr = updated[sk]
-          let is_empty = curr === undefined || curr === null || (Array.isArray(curr) && curr.length === 0) || curr === ''
-          let opt_keys = Object.keys(active_layer!.variable_selectors![sk].options)
-          let is_valid = false
-          if (!is_empty) {
-            let curr_arr = Array.isArray(curr) ? curr : [curr]
-            is_valid = curr_arr.some((arg0_val) => opt_keys.includes(arg0_val))
-          }
-          if (is_empty || !is_valid) {
-            if (opt_keys.length > 0) {
-              updated[sk] = [opt_keys[0]]
-              changed = true
-            }
-          }
-        }
-        return changed ? updated : arg0_prev
-      })
-    }
-  }, [active_layer])
-
-  useEffect(() => {
-    let cancelled = false
-    let fetchLayers = async function () {
-      set_is_loading_layers(true)
-      try {
-        let resp = await fetch('/api/layers')
-        if (resp.ok) {
-          let data = await resp.json()
-          if (!cancelled && data && data.layers) {
-            set_layers(data.layers)
-              ; (window as any).__layersLoaded = true
-            let layer_keys = Object.keys(data.layers)
-            let stadester_layer = data.layers.stadester || data.layers['stadester_1.1'] || data.layers['stadester_1.0']
-            if (stadester_layer && stadester_layer.display_options) {
-              let opts = stadester_layer.display_options
-              set_stadester_config((arg0_prev) => ({
-                ...arg0_prev,
-                bubbleSize: opts.bubble_size ?? opts.bubbleSize ?? arg0_prev.bubbleSize,
-                capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
-                capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
-                colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
-                dataset: opts.dataset ?? arg0_prev.dataset,
-                display_options: opts,
-                enabled: arg0_prev.enabled ?? default_stadester_enabled,
-                filled: opts.filled ?? arg0_prev.filled,
-                growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
-                halo: opts.halo ?? arg0_prev.halo,
-                heuristicCulling: is_mobile
-                  ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
-                  : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
-                labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
-                largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
-                maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
-                minPop: opts.min_pop ?? opts.minPop ?? arg0_prev.minPop,
-                opacity: opts.opacity ?? arg0_prev.opacity,
-                showCapitals: opts.show_capitals ?? opts.showCapitals ?? arg0_prev.showCapitals,
-                showCapitalUnderlines: opts.show_capital_underlines ?? opts.showCapitalUnderlines ?? arg0_prev.showCapitalUnderlines,
-                showLabels: opts.show_labels ?? opts.showLabels ?? arg0_prev.showLabels,
-              }))
-            }
-            if (layer_keys.length > 0) {
-              let configured_default_raster = default_data_layers.find((arg0_k) =>
-                layer_keys.includes(arg0_k) && !arg0_k.includes('border') && !arg0_k.includes('stadester')
-              )
-              let default_key = configured_default_raster || (layer_keys.includes('GDP_nominal_pc') ? 'GDP_nominal_pc' : layer_keys[0])
-              set_active_layer_id((arg0_prev) => (arg0_prev && data.layers[arg0_prev] ? arg0_prev : default_key))
-            }
-          }
-        }
-      } catch (arg0_err) {
-        console.error('Failed to fetch data layers:', arg0_err)
-      } finally {
-        if (!cancelled)
-          set_is_loading_layers(false)
-      }
-    }
-    fetchLayers()
-    return () => {
-      cancelled = true
-    }
-  }, [default_data_layers, default_stadester_enabled, is_mobile])
-
-  //Hot reload layers definitions and descriptions in real time without full-page reload
-  useEffect(() => {
-    let unsubscribe = onLayersUpdate((arg0_next_layers) => {
-      if (arg0_next_layers && typeof arg0_next_layers === 'object') {
-        set_layers(arg0_next_layers)
-        let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
-        if (stadester_layer && stadester_layer.display_options) {
-          let opts = stadester_layer.display_options
-          set_stadester_config((arg0_prev) => ({
-            ...arg0_prev,
-            bubbleSize: opts.bubble_size ?? opts.bubbleSize ?? arg0_prev.bubbleSize,
-            capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
-            capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
-            colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
-            dataset: opts.dataset ?? arg0_prev.dataset,
-            display_options: opts,
-            filled: opts.filled ?? arg0_prev.filled,
-            growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
-            halo: opts.halo ?? arg0_prev.halo,
-            heuristicCulling: is_mobile
-              ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
-              : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
-            labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
-            largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
-            maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
-            minPop: opts.min_pop ?? opts.minPop ?? arg0_prev.minPop,
-            opacity: opts.opacity ?? arg0_prev.opacity,
-            showCapitals: opts.show_capitals ?? opts.showCapitals ?? arg0_prev.showCapitals,
-            showCapitalUnderlines: opts.show_capital_underlines ?? opts.showCapitalUnderlines ?? arg0_prev.showCapitalUnderlines,
-            showLabels: opts.show_labels ?? opts.showLabels ?? arg0_prev.showLabels,
-          }))
-        }
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [is_mobile])
-
-  //Hot reload map modes descriptions and labels in real time
-  useEffect(() => {
-    let unsubscribe = onConfigUpdate('mapmodes', (arg0_next_mapmodes) => {
-      if (arg0_next_mapmodes && Array.isArray(arg0_next_mapmodes.modes)) {
-        set_map_modes((arg0_prev) => {
-          return arg0_next_mapmodes.modes.map((arg0_m: any) => {
-            let existing = arg0_prev.find((arg0_p) => arg0_p.id === arg0_m.id)
-            return {
-              active: existing ? existing.active : (arg0_m.active ?? false),
-              description: arg0_m.description,
-              id: arg0_m.id,
-              label: arg0_m.label,
-            }
-          })
-        })
-      }
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    let redecode = async function () {
-      if (raw_bytes_a) {
-        let decoded_a = await decodeRawGeoPngBufferAsync(raw_bytes_a, data_format)
-        if (!cancelled)
-          set_raster_a(decoded_a)
-      }
-      if (raw_bytes_b) {
-        let decoded_b = await decodeRawGeoPngBufferAsync(raw_bytes_b, data_format)
-        if (!cancelled)
-          set_raster_b(decoded_b)
-      }
-      if (!cancelled)
-        set_raster_version((arg0_v: number) => arg0_v + 1)
-    }
-    redecode()
-    return () => {
-      cancelled = true
-    }
-  }, [data_format, raw_bytes_a, raw_bytes_b, set_raster_a, set_raster_b, set_raster_version])
-
-  let handle_file_upload = useCallback(
-    async function (arg0_file: File, arg1_target: 'single' | 'diff_a' | 'diff_b') {
-      //Convert from parameters
-      let file = arg0_file
-      let target = arg1_target
-
-      //Declare local instance variables
-      let buffer: ArrayBuffer
-      let clean_a: string
-      let clean_b: string
-      let clean_name: string
-      let decoded: DecodedRaster
-      let uint8: Uint8Array
-
-      //Function body
-      try {
-        buffer = await file.arrayBuffer()
-        uint8 = new Uint8Array(buffer)
-        decoded = await decodeRawGeoPngBufferAsync(uint8, data_format)
-        clean_name = file.name.replace(/\.[^/.]+$/, '')
-
-        if (target === 'single') {
-          set_active_file_name(file.name)
-          set_raw_bytes_a(uint8)
-          set_raster_a(decoded)
-          set_legend_title(clean_name)
-          set_legend_subtitle(t.sidebar.upload.uploadedGeoPng || 'Uploaded GeoPNG')
-        } else if (target === 'diff_a') {
-          set_diff_name_a(file.name)
-          set_raw_bytes_a(uint8)
-          set_raster_a(decoded)
-          if (diff_name_b) {
-            clean_b = diff_name_b.replace(/\.[^/.]+$/, '')
-            set_legend_title(`${clean_name} vs ${clean_b}`)
-            set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
-          } else {
-            set_legend_title(clean_name)
-            set_legend_subtitle(t.sidebar.upload.differenceA || 'Difference (A)')
-          }
-        } else if (target === 'diff_b') {
-          set_diff_name_b(file.name)
-          set_raw_bytes_b(uint8)
-          set_raster_b(decoded)
-          if (diff_name_a) {
-            clean_a = diff_name_a.replace(/\.[^/.]+$/, '')
-            set_legend_title(`${clean_a} vs ${clean_name}`)
-            set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
-          } else {
-            set_legend_title(clean_name)
-            set_legend_subtitle(t.sidebar.upload.differenceB || 'Difference (B)')
-          }
-        }
-
-        set_active_layer_id('default_basemap')
-        set_bounds_mode('Manual')
-        set_min_val_override('')
-        set_max_val_override('')
-        set_raster_version((arg0_v: number) => arg0_v + 1)
-      } catch (arg0_err) {
-        console.error('Failed to load GeoPNG file:', arg0_err)
-      }
-    },
-    [
-      data_format,
-      diff_name_a,
-      diff_name_b,
-      set_active_file_name,
-      set_active_layer_id,
-      set_bounds_mode,
-      set_diff_name_a,
-      set_diff_name_b,
-      set_legend_subtitle,
-      set_legend_title,
-      set_max_val_override,
-      set_min_val_override,
-      set_raster_a,
-      set_raster_b,
-      set_raster_version,
-      set_raw_bytes_a,
-      set_raw_bytes_b,
-      t,
-    ]
-  )
+    set_raw_bytes_a,
+    set_raw_bytes_b,
+    t,
+  })
 
   let handle_toggle_snap_to_keyframes = useCallback(
     function (arg0_snap: boolean) {
@@ -887,408 +550,6 @@ export let App: React.FC = function () {
   let handle_force_refresh_analytics = useCallback(() => {
     set_raster_version((arg0_v: number) => arg0_v + 1)
   }, [set_raster_version])
-
-  let active_raster = useMemo<DecodedRaster | null>(() => {
-    if (app_mode === 'Single Image')
-      return raster_a
-    if (raster_a && raster_b)
-      return computeRasterDifference(raster_a, raster_b)
-    return raster_a || raster_b
-  }, [app_mode, raster_a, raster_b])
-
-  useEffect(() => {
-    if (app_mode === 'Single Image') {
-      if (active_file_name) {
-        set_legend_title(active_file_name.replace(/\.[^/.]+$/, ''))
-        set_legend_subtitle(t.sidebar.upload.uploadedGeoPng || 'Uploaded GeoPNG')
-      }
-    } else if (app_mode === 'Image Difference') {
-      if (diff_name_a && diff_name_b) {
-        let clean_a = diff_name_a.replace(/\.[^/.]+$/, '')
-        let clean_b = diff_name_b.replace(/\.[^/.]+$/, '')
-        set_legend_title(`${clean_a} vs ${clean_b}`)
-        set_legend_subtitle(t.sidebar.upload.differenceTitle || 'Difference')
-      } else if (diff_name_a) {
-        set_legend_title(diff_name_a.replace(/\.[^/.]+$/, ''))
-        set_legend_subtitle(t.sidebar.upload.differenceA || 'Difference (A)')
-      } else if (diff_name_b) {
-        set_legend_title(diff_name_b.replace(/\.[^/.]+$/, ''))
-        set_legend_subtitle(t.sidebar.upload.differenceB || 'Difference (B)')
-      }
-    }
-  }, [app_mode, active_file_name, diff_name_a, diff_name_b, t])
-
-  let display_raster = useMemo<DecodedRaster | null>(() => {
-    let base = pipeline_display_raster || active_raster
-    if (!base)
-      return null
-    if (!binning_config.enabled)
-      return base
-    try {
-      return createBinnedRaster(
-        base,
-        binning_config.width,
-        binning_config.height,
-        binning_config.method
-      )
-    } catch (arg0_e) {
-      console.error('Failed to bin raster:', arg0_e)
-      return base
-    }
-  }, [active_raster, binning_config, pipeline_display_raster])
-
-  let active_midpoint = useMemo(() => {
-    return getActiveLayerMidpoint(active_layer, active_variable_selectors)
-  }, [active_layer, active_variable_selectors])
-
-  let { breaks, maxVal: max_val, minVal: min_val } = useMemo(() => {
-    let r = display_raster || active_raster
-    if (!r)
-      return { breaks: [], maxVal: 1, minVal: 0 }
-
-    if (bounds_mode === 'Percentile') {
-      let parts = percentile_list
-        .split(',')
-        .map((arg0_s) => parseFloat(arg0_s.trim()))
-        .filter((arg0_n) => !Number.isNaN(arg0_n))
-        .map((arg0_p) => arg0_p / 100)
-
-      if (parts.length > 0) {
-        let q_breaks = computeQuantiles(r.data, parts)
-        let p_max = Math.max(...q_breaks)
-        let p_min = Math.min(...q_breaks)
-        if (active_midpoint === 0) {
-          let abs_max = Math.max(Math.abs(p_min), Math.abs(p_max))
-          if (abs_max === 0)
-            abs_max = 1
-          return { breaks: q_breaks, maxVal: abs_max, minVal: -abs_max }
-        }
-        return { breaks: q_breaks, maxVal: p_max, minVal: p_min }
-      }
-    } else if (bounds_mode === 'Absolute') {
-      let parts = absolute_breaks
-        .split(',')
-        .map((arg0_s) => parseFloat(arg0_s.trim()))
-        .filter((arg0_n) => !Number.isNaN(arg0_n))
-        .sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-
-      if (parts.length >= 2) {
-        return {
-          breaks: parts,
-          maxVal: parts[parts.length - 1],
-          minVal: parts[0],
-        }
-      }
-    }
-
-    let parsed_max = max_val_override !== '' ? parseFloat(max_val_override) : r.max
-    let parsed_min = min_val_override !== '' ? parseFloat(min_val_override) : r.min
-
-    let safe_max = Number.isFinite(parsed_max) ? parsed_max : r.max
-    let safe_min = Number.isFinite(parsed_min) ? parsed_min : r.min
-
-    if (active_midpoint === 0) {
-      if (max_val_override !== '' && min_val_override === '') {
-        let abs_max = Math.abs(safe_max) || 1
-        safe_min = -abs_max
-        safe_max = abs_max
-      } else if (min_val_override !== '' && max_val_override === '') {
-        let abs_max = Math.abs(safe_min) || 1
-        safe_min = -abs_max
-        safe_max = abs_max
-      } else if (min_val_override === '' && max_val_override === '') {
-        let abs_max = Math.max(Math.abs(safe_min), Math.abs(safe_max))
-        if (abs_max === 0)
-          abs_max = 1
-        safe_min = -abs_max
-        safe_max = abs_max
-      }
-    }
-
-    return { breaks: [], maxVal: safe_max, minVal: safe_min }
-  }, [
-    display_raster,
-    active_raster,
-    bounds_mode,
-    percentile_list,
-    absolute_breaks,
-    min_val_override,
-    max_val_override,
-    active_midpoint,
-  ])
-
-  let handle_toggle_country = useCallback((arg0_c: CountryFeature) => {
-    //Guard clauses
-    if (is_drawing)
-      return
-
-    let c = arg0_c
-    set_selected_countries((arg0_prev) => {
-      let matches = function (arg0_a: CountryFeature, arg1_b: CountryFeature): boolean {
-        let a = arg0_a
-        let b = arg1_b
-        if (a === b)
-          return true
-        if (a.id !== undefined && b.id !== undefined && a.id === b.id)
-          return true
-        if (a.properties?.id !== undefined && b.properties?.id !== undefined && a.properties.id === b.properties.id)
-          return true
-        if (a.properties?.gwcode !== undefined && b.properties?.gwcode !== undefined && a.properties.gwcode === b.properties.gwcode)
-          return true
-        if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
-          return true
-        return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
-      }
-
-      let exists = arg0_prev.some((arg0_x) => matches(arg0_x, c))
-      if (exists)
-        return arg0_prev.filter((arg0_x) => !matches(arg0_x, c))
-
-      return [...arg0_prev, c]
-    })
-  }, [is_drawing])
-
-  let handle_clear_countries = useCallback(() => {
-    set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
-    set_inspect_data(null)
-  }, [])
-
-  let handle_select_country = useCallback(
-    (arg0_c: CountryFeature | null) => {
-      //Guard clauses
-      if (is_drawing && arg0_c && !arg0_c.properties?.is_drawn)
-        return
-
-      let c = arg0_c
-      if (!c) {
-        set_selected_countries((arg0_prev) => (arg0_prev.length === 0 ? arg0_prev : []))
-        set_inspect_data(null)
-      } else {
-        set_selected_countries((arg0_prev) => {
-          let matches = function (arg0_a: CountryFeature, arg1_b: CountryFeature): boolean {
-            let a = arg0_a
-            let b = arg1_b
-            if (a === b)
-              return true
-            if (a.id !== undefined && b.id !== undefined && a.id === b.id)
-              return true
-            if (a.properties?.id !== undefined && b.properties?.id !== undefined && a.properties.id === b.properties.id)
-              return true
-            if (a.properties?.gwcode !== undefined && b.properties?.gwcode !== undefined && a.properties.gwcode === b.properties.gwcode)
-              return true
-            if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
-              return true
-            if (a.properties?.is_drawn || b.properties?.is_drawn)
-              return false
-            return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
-          }
-
-          if (arg0_prev.length === 1 && matches(arg0_prev[0], c))
-            return arg0_prev
-
-          return [c]
-        })
-      }
-    },
-    [is_drawing]
-  )
-
-  let custom_vector_features = useMemo<CountryFeature[]>(() => {
-    if (!custom_vector_dataset)
-      return []
-    return sliceCustomVectorDataset(custom_vector_dataset, timeline_year)
-  }, [custom_vector_dataset, timeline_year])
-
-  let handle_upload_custom_vector = useCallback(
-    (arg0_file: File) => {
-      //Convert from parameters
-      let file = arg0_file
-
-      //Declare local instance variables
-      let reader: FileReader
-
-      //Function body
-      reader = new FileReader()
-      reader.onload = (arg0_e) => {
-        let text = arg0_e.target?.result
-        if (typeof text === 'string') {
-          try {
-            let dataset = parseCustomVectorText(text, file.name)
-            set_custom_vector_dataset(dataset)
-            set_custom_vector_visible(true)
-            if (dataset.targetYear !== undefined) {
-              set_timeline_year(dataset.targetYear)
-            } else if (dataset.maxYear !== undefined) {
-              set_timeline_year(dataset.maxYear)
-            }
-          } catch (arg0_err) {
-            console.error('[CustomVector] Failed to parse file:', arg0_err)
-          }
-        }
-      }
-      reader.readAsText(file)
-    },
-    []
-  )
-
-  let handle_remove_custom_vector = useCallback(() => {
-    //Function body
-    set_custom_vector_dataset(null)
-  }, [])
-
-  let handle_toggle_draw = useCallback(() => {
-    //Function body
-    set_is_editing_shape(false)
-    set_is_drawing((arg0_prev) => {
-      let next = !arg0_prev
-      if (next) {
-        set_cursor_lng_lat(null)
-        set_draw_points([])
-        set_drawn_polygon_feature(null)
-        set_hovered_country(null)
-        set_inspect_data(null)
-        set_selected_city_key(null)
-        set_selected_countries([])
-      }
-      return next
-    })
-  }, [])
-
-  let handle_cancel_draw = useCallback(() => {
-    //Function body
-    set_cursor_lng_lat(null)
-    set_draw_points([])
-    set_is_drawing(false)
-    set_is_editing_shape(false)
-  }, [])
-
-  let handle_add_draw_point = useCallback((arg0_pt: [number, number]) => {
-    //Convert from parameters
-    let pt = arg0_pt
-
-    //Function body
-    set_draw_points((arg0_prev) => [...arg0_prev, pt])
-  }, [])
-
-  let handle_move_draw_point = useCallback((arg0_index: number, arg1_pt: [number, number]) => {
-    //Convert from parameters
-    let index = arg0_index
-    let pt = arg1_pt
-
-    //Guard clauses
-    if (!Number.isFinite(pt[0]) || !Number.isFinite(pt[1]))
-      return
-
-    //Function body
-    set_draw_points((arg0_prev) => {
-      if (index < 0 || index >= arg0_prev.length)
-        return arg0_prev
-      let next = arg0_prev.slice()
-      next[index] = [pt[0], pt[1]]
-      return next
-    })
-  }, [])
-
-  let handle_insert_draw_point = useCallback((arg0_index: number, arg1_pt: [number, number]) => {
-    //Convert from parameters
-    let index = arg0_index
-    let pt = arg1_pt
-
-    //Guard clauses
-    if (!Number.isFinite(pt[0]) || !Number.isFinite(pt[1]))
-      return
-
-    //Function body
-    set_draw_points((arg0_prev) => {
-      let next = arg0_prev.slice()
-      next.splice(index, 0, [pt[0], pt[1]])
-      return next
-    })
-  }, [])
-
-  let handle_delete_draw_point = useCallback((arg0_index: number) => {
-    //Convert from parameters
-    let index = arg0_index
-
-    //Function body
-    set_draw_points((arg0_prev) => {
-      if (is_editing_shape && arg0_prev.length <= 3)
-        return arg0_prev
-      if (index < 0 || index >= arg0_prev.length)
-        return arg0_prev
-      let next = arg0_prev.slice()
-      next.splice(index, 1)
-      return next
-    })
-  }, [is_editing_shape])
-
-  let handle_delete_last_draw_point = useCallback(() => {
-    //Function body
-    set_draw_points((arg0_prev) => {
-      if (is_editing_shape && arg0_prev.length <= 3)
-        return arg0_prev
-      return arg0_prev.slice(0, -1)
-    })
-  }, [is_editing_shape])
-
-  let handle_edit_drawn_polygon = useCallback((arg0_feature?: CountryFeature) => {
-    //Convert from parameters
-    let feat = arg0_feature || drawn_polygon_feature
-
-    //Guard clauses
-    if (!feat || !feat.geometry)
-      return
-
-    //Declare local instance variables
-    let coords: [number, number][] = []
-    let geom: any = feat.geometry
-
-    //Function body
-    if (geom.type === 'Polygon' && Array.isArray(geom.coordinates) && geom.coordinates[0]) {
-      let ring = geom.coordinates[0] as [number, number][]
-      if (ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1]) {
-        coords = ring.slice(0, -1)
-      } else {
-        coords = ring.slice()
-      }
-    }
-
-    set_draw_points(coords)
-    set_drawn_polygon_feature(null)
-    set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
-    set_is_editing_shape(true)
-    set_is_drawing(true)
-  }, [drawn_polygon_feature])
-
-  let handle_finish_draw = useCallback(() => {
-    //Guard clauses
-    if (draw_points.length < 3)
-      return
-
-    //Function body
-    let polygon_feat = createDrawnPolygonFeature(draw_points)
-    set_drawn_polygon_feature(polygon_feat)
-    set_is_drawing(false)
-    set_is_editing_shape(false)
-    set_draw_points([])
-    set_cursor_lng_lat(null)
-    handle_select_country(polygon_feat)
-  }, [draw_points, handle_select_country])
-
-  let handle_clear_drawn_polygon = useCallback(() => {
-    //Function body
-    set_drawn_polygon_feature(null)
-    set_is_editing_shape(false)
-    set_selected_countries((arg0_prev) => arg0_prev.filter((arg0_f) => !arg0_f.properties?.is_drawn))
-  }, [])
-
-  let handle_toggle_countries_mode = useCallback((arg0_enabled: boolean) => {
-    let enabled = arg0_enabled
-    set_countries_mode(enabled)
-    set_map_modes((arg0_prev) =>
-      arg0_prev.map((arg0_m) => (arg0_m.id === 'country_analysis' ? { ...arg0_m, active: enabled } : arg0_m))
-    )
-  }, [])
 
   useEffect(() => {
     set_map_modes((arg0_prev) =>
@@ -1316,12 +577,12 @@ export let App: React.FC = function () {
       spike_active = updated.find((arg0_m) => arg0_m.id === 'spike_map')?.active ?? false
       circle_active = updated.find((arg0_m) => arg0_m.id === 'circle_sizing')?.active ?? false
 
-      set_countries_mode(country_active)
+      handle_toggle_countries_mode(country_active)
       set_heightmap_config((arg0_h) => ({ ...arg0_h, enabled: spike_active }))
       set_circle_overlay_config((arg0_c) => ({ ...arg0_c, enabled: circle_active }))
       return updated
     })
-  }, [])
+  }, [handle_toggle_countries_mode])
 
   let handle_reorder_map_modes = useCallback((arg0_new_modes: MapModeItem[]) => {
     let new_modes = arg0_new_modes
@@ -1333,37 +594,6 @@ export let App: React.FC = function () {
     set_bounds_mode('Absolute')
     set_absolute_breaks(new_breaks.map((arg0_n) => (Math.round(arg0_n * 1000) / 1000).toString()).join(', '))
   }, [set_absolute_breaks, set_bounds_mode])
-
-  let active_countries = useMemo<CountryFeature[]>(() => {
-    if (selected_countries.length > 0)
-      return selected_countries
-    return []
-  }, [selected_countries])
-
-  let { countryStats: country_stats, isCalculatingStats: is_calculating_stats } = useCountryStatsAsync({
-    activeCountries: active_countries,
-    activeRaster: display_raster || active_raster,
-    isHoverOnly: false,
-  })
-
-  //Raster GPU-backed Canvas renderer hook with explicit texture release
-  let { rasterBounds: raster_bounds, renderedCanvas: rendered_canvas } = useRasterRenderer({
-    activeCountries: active_countries,
-    activeLayerId: active_layer_id,
-    activeRaster: display_raster || active_raster,
-    breaks: breaks,
-    colorPalette: color_palette,
-    countriesMode: countries_mode,
-    countryStats: country_stats,
-    invertPalette: invert_palette,
-    logSigma: log_sigma,
-    maxVal: max_val,
-    midpoint: active_midpoint,
-    minVal: min_val,
-    projection: projection,
-    rasterVersion: raster_version,
-    scaleType: scale_type,
-  })
 
   //Return statement
   return (

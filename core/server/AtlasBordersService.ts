@@ -2,47 +2,32 @@ import fs from 'fs'
 import path from 'path'
 import type { ServerResponse } from 'http'
 import { UfDate, type UfDateObject } from '../framework/utils/uf_date.ts'
+import {
+  computeGeometryBBox,
+  cullAndSimplifyGeometry,
+} from './atlas_geometry_utils.ts'
+import {
+  clearCityResolverCache,
+  findCityCoordsByName,
+  getCityCoordsByKey,
+  getContemporaneousCityKey,
+  getStateCapitalInfo,
+  type StateCapitalInfo,
+} from './atlas_city_resolver.ts'
+import {
+  clearNaissanceCache,
+  detailed_borders_slices,
+  getCShapesKeyframesByGwcode,
+  getEntityKeyframesSummary,
+  type HistoricalBorderFeature,
+  type HistoricalBorderKeyframe,
+  loadCShapes,
+  loadNaissance,
+  type NaissanceEntityRecord,
+  parseNaissanceKeyframes,
+} from './atlas_naissance_loader.ts'
 
-export interface HistoricalBorderKeyframe {
-  date: string
-  day?: number
-  label: string
-  month?: number
-  timestamp?: number
-  year: number
-}
-
-export interface HistoricalBorderFeature {
-  bbox?: [number, number, number, number]
-  geometry: {
-    coordinates: any
-    type: 'Polygon' | 'MultiPolygon'
-  }
-  id: string
-  properties: {
-    area?: number
-    cap_coords?: [number, number]
-    capkey?: string
-    caplat?: number
-    caplong?: number
-    capname?: string
-    date?: string
-    endDate?: string
-    endYear?: number
-    gwcode?: number
-    id: string | number
-    is_acapital?: boolean
-    keyframes?: HistoricalBorderKeyframe[]
-    name: string
-    startDate?: string
-    startYear?: number
-    state_id?: number
-    symbol?: Record<string, any>
-    timestamp?: number
-    [key: string]: any
-  }
-  type: 'Feature'
-}
+export type { HistoricalBorderFeature, HistoricalBorderKeyframe }
 
 export interface HistoricalBordersResponse {
   count: number
@@ -54,1065 +39,16 @@ export interface HistoricalBordersResponse {
   year: number
 }
 
-interface NaissanceEntityRecord {
-  class_name: string
-  id: string
-  keyframes: Map<number, [any, any, any]>
-  keyframes_summary?: HistoricalBorderKeyframe[]
-  max_ts: number
-  min_ts: number
-  name?: string
-  sorted_timestamps: number[]
-}
-
-let cached_cshapes_data: any = null
-let cached_cshapes_features: any[] = null as unknown as any[]
-let cached_cshapes_keyframes_by_gwcode: Map<number, HistoricalBorderKeyframe[]> = new Map()
-let cached_naissance_entities_by_path: Map<string, Map<string, NaissanceEntityRecord>> = new Map()
-let detailed_borders_slices = [
-  { domain: [-3500, 476], file: '0.476.1.1.naissance' },
-  { domain: [476, 1356], file: '1.1356.1.1.naissance' },
-  { domain: [1356, 1707], file: '2.1707.1.1.naissance' },
-  { domain: [1707, 1815], file: '3.1815.1.1.naissance' },
-  { domain: [1815, 1914], file: '4.1914.1.1.naissance' },
-  { domain: [1914, 1936], file: '5.1936.1.1.naissance' },
-  { domain: [1936, 1946], file: '6.1946.1.1.naissance' },
-  { domain: [1946, 1991], file: '7.1991.1.1.naissance' },
-  { domain: [1991, 2026], file: '8.2026.1.1.naissance' },
-]
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let max_lru_entries = 60
 
 /**
- * Generates or retrieves cached keyframes summary for a Naissance entity.
- *
- * @param {NaissanceEntityRecord} arg0_ent
- *
- * @returns {HistoricalBorderKeyframe[]}
- */
-export let getEntityKeyframesSummary = function (arg0_ent: NaissanceEntityRecord): HistoricalBorderKeyframe[] {
-  //Convert from parameters
-  let ent = arg0_ent
-
-  //Guard clauses
-  if (ent.keyframes_summary)
-    return ent.keyframes_summary
-
-  //Declare local instance variables
-  let keyframes_summary: HistoricalBorderKeyframe[] = []
-
-  //Function body
-  for (let k = 0; k < ent.sorted_timestamps.length; k++) {
-    let k_ts = ent.sorted_timestamps[k]
-    let date_obj = UfDate.convertTimestampToDate(k_ts)
-    let k_val = ent.keyframes.get(k_ts)
-    let label = 'Boundary keyframe'
-    if (k_val && (k_val[0] === null || k_val[2]?.hidden === true)) {
-      label = 'Boundary unrecorded / hidden'
-    } else if (k === 0) {
-      label = 'Recorded keyframe'
-    } else if (k_val && k_val[2] && k_val[2].name) {
-      label = `Renamed to ${String(k_val[2].name).replace(/\n+/g, ' ')}`
-    } else {
-      label = 'Boundary updated'
-    }
-
-    keyframes_summary.push({
-      date: UfDate.formatDate(date_obj),
-      day: date_obj.day,
-      label,
-      month: date_obj.month,
-      timestamp: k_ts,
-      year: date_obj.year,
-    })
-  }
-
-  ent.keyframes_summary = keyframes_summary
-
-  //Return statement
-  return keyframes_summary
-}
-
-
-/**
- * Computes a 2D bounding box [minLng, minLat, maxLng, maxLat] for a GeoJSON geometry.
- *
- * @param {any} arg0_geometry
- *
- * @returns {[number, number, number, number]}
- */
-export let computeGeometryBBox = function (arg0_geometry: any): [number, number, number, number] {
-  //Convert from parameters
-  let geometry = arg0_geometry
-
-  //Declare local instance variables
-  let max_x = -Infinity
-  let max_y = -Infinity
-  let min_x = Infinity
-  let min_y = Infinity
-  let scan_coords: (arg0_coords: any) => void
-
-  //Function body
-  scan_coords = function (arg0_coords: any) {
-    let coords = arg0_coords
-    if (typeof coords[0] === 'number' && typeof coords[1] === 'number') {
-      let x = coords[0]
-      let y = coords[1]
-      if (x < min_x)
-        min_x = x
-      if (x > max_x)
-        max_x = x
-      if (y < min_y)
-        min_y = y
-      if (y > max_y)
-        max_y = y
-      return
-    }
-    for (let i = 0; i < coords.length; i++)
-      scan_coords(coords[i])
-  }
-
-  if (geometry && geometry.coordinates)
-    scan_coords(geometry.coordinates)
-
-  //Return statement
-  return [
-    min_x === Infinity ? -180 : min_x,
-    min_y === Infinity ? -90 : min_y,
-    max_x === -Infinity ? 180 : max_x,
-    max_y === -Infinity ? 90 : max_y,
-  ]
-}
-
-/**
- * Recursively applies Ramer-Douglas-Peucker simplification step to an array of 2D points.
- *
- * @param {any[]} arg0_points
- * @param {number} arg1_first
- * @param {number} arg2_last
- * @param {number} arg3_sq_tol
- * @param {any[]} arg4_simplified
- *
- * @returns {void}
- */
-function simplifyRDPStep (
-  arg0_points: any[],
-  arg1_first: number,
-  arg2_last: number,
-  arg3_sq_tol: number,
-  arg4_simplified: any[]
-): void {
-  //Convert from parameters
-  let first = arg1_first
-  let last = arg2_last
-  let points = arg0_points
-  let simplified = arg4_simplified
-  let sq_tol = arg3_sq_tol
-
-  //Declare local instance variables
-  let dx: number
-  let dy: number
-  let index: number = -1
-  let max_sq_dist = sq_tol
-  let p: any
-  let p1: any
-  let p2: any
-  let proj_x: number
-  let proj_y: number
-  let sq_d: number
-  let t: number
-
-  //Function body
-  p1 = points[first]
-  p2 = points[last]
-  dx = p2[0] - p1[0]
-  dy = p2[1] - p1[1]
-
-  for (let i = first + 1; i < last; i++) {
-    p = points[i]
-    if (dx !== 0 || dy !== 0) {
-      t = ((p[0] - p1[0]) * dx + (p[1] - p1[1]) * dy) / (dx * dx + dy * dy)
-      t = Math.max(0, Math.min(1, t))
-      proj_x = p1[0] + t * dx
-      proj_y = p1[1] + t * dy
-    } else {
-      proj_x = p1[0]
-      proj_y = p1[1]
-    }
-    sq_d = (p[0] - proj_x) * (p[0] - proj_x) + (p[1] - proj_y) * (p[1] - proj_y)
-
-    if (sq_d > max_sq_dist) {
-      index = i
-      max_sq_dist = sq_d
-    }
-  }
-
-  if (index !== -1) {
-    if (index - first > 1)
-      simplifyRDPStep(points, first, index, sq_tol, simplified)
-    simplified.push(points[index])
-    if (last - index > 1)
-      simplifyRDPStep(points, index, last, sq_tol, simplified)
-  }
-}
-
-/**
- * Simplifies and deduplicates a polygon coordinate ring using Ramer-Douglas-Peucker algorithm.
- *
- * @param {any[]} arg0_ring
- * @param {number} [arg1_tolerance=0.01]
- *
- * @returns {any[]}
- */
-function simplifyRing (arg0_ring: any[], arg1_tolerance: number = 0.01): any[] {
-  //Convert from parameters
-  let ring = arg0_ring
-  let tol = arg1_tolerance
-
-  //Declare local instance variables
-  let chain1: any[]
-  let chain2: any[]
-  let clean_ring: any[] = []
-  let d: number
-  let dx: number
-  let dy: number
-  let far_idx: number = -1
-  let is_closed: boolean
-  let max_d: number = 0
-  let p0: any
-  let pt: any
-  let result: any[]
-  let sq_tol: number
-
-  //Guard clauses
-  if (!ring || ring.length <= 4)
-    return ring
-
-  //Function body
-  for (let i = 0; i < ring.length; i++) {
-    pt = ring[i]
-    if (
-      clean_ring.length === 0 ||
-      clean_ring[clean_ring.length - 1][0] !== pt[0] ||
-      clean_ring[clean_ring.length - 1][1] !== pt[1]
-    ) {
-      clean_ring.push(pt)
-    }
-  }
-
-  if (clean_ring.length <= 4)
-    return ring
-
-  is_closed = (
-    clean_ring[0][0] === clean_ring[clean_ring.length - 1][0] &&
-    clean_ring[0][1] === clean_ring[clean_ring.length - 1][1]
-  )
-  sq_tol = tol * tol
-
-  if (is_closed) {
-    p0 = clean_ring[0]
-    for (let i = 1; i < clean_ring.length - 1; i++) {
-      dx = clean_ring[i][0] - p0[0]
-      dy = clean_ring[i][1] - p0[1]
-      d = dx * dx + dy * dy
-      if (d > max_d) {
-        max_d = d
-        far_idx = i
-      }
-    }
-
-    if (far_idx <= 1 || far_idx >= clean_ring.length - 2)
-      return clean_ring
-
-    chain1 = [clean_ring[0]]
-    simplifyRDPStep(clean_ring, 0, far_idx, sq_tol, chain1)
-    chain1.push(clean_ring[far_idx])
-
-    chain2 = []
-    simplifyRDPStep(clean_ring, far_idx, clean_ring.length - 1, sq_tol, chain2)
-    chain2.push(clean_ring[clean_ring.length - 1])
-
-    result = chain1.concat(chain2)
-    if (result.length < 4)
-      return clean_ring
-
-    //Return statement
-    return result
-  }
-
-  result = [clean_ring[0]]
-  simplifyRDPStep(clean_ring, 0, clean_ring.length - 1, sq_tol, result)
-  result.push(clean_ring[clean_ring.length - 1])
-
-  //Return statement
-  return result
-}
-
-/**
- * Culls redundant and duplicate vertices in GeoJSON polygon geometries using Ramer-Douglas-Peucker algorithm.
- *
- * @param {any} arg0_geometry
- * @param {number} [arg1_tolerance=0.01]
- *
- * @returns {any}
- */
-export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_tolerance: number = 0.01): any {
-  //Convert from parameters
-  let geometry = arg0_geometry
-  let tol = arg1_tolerance
-
-  //Declare local instance variables
-  let new_coords: any[] = []
-  let new_poly: any[]
-  let poly: any[]
-  let type: string
-
-  //Guard clauses
-  if (!geometry || !geometry.coordinates || !geometry.type)
-    return geometry
-
-  //Function body
-  type = geometry.type
-
-  if (type === 'Polygon') {
-    for (let i = 0; i < geometry.coordinates.length; i++)
-      new_coords.push(simplifyRing(geometry.coordinates[i], tol))
-
-    //Return statement
-    return {
-      ...geometry,
-      coordinates: new_coords,
-    }
-  }
-
-  if (type === 'MultiPolygon') {
-    for (let i = 0; i < geometry.coordinates.length; i++) {
-      poly = geometry.coordinates[i]
-      new_poly = []
-      for (let x = 0; x < poly.length; x++)
-        new_poly.push(simplifyRing(poly[x], tol))
-      new_coords.push(new_poly)
-    }
-
-    //Return statement
-    return {
-      ...geometry,
-      coordinates: new_coords,
-    }
-  }
-
-  //Return statement
-  return geometry
-}
-
-interface CityCoordRecord {
-  coords: [number, number]
-  country?: string
-  key: string
-  name: string
-  other_names?: string[]
-}
-
-let capital_info_cache: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }> = new Map()
-let city_coords_by_key: Map<string, CityCoordRecord> = new Map()
-let city_coords_by_norm_name: Map<string, CityCoordRecord[]> = new Map()
-let city_coords_loaded = false
-let city_coords_spatial_grid: Map<string, CityCoordRecord[]> = new Map()
-let city_name_coords_cache: Map<string, { coords?: [number, number]; key?: string } | null> = new Map()
-let contemp_city_cache: Map<string, { coords?: [number, number]; key: string }> = new Map()
-let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
-let state_capitals_mtime = 0
-let states_by_clean_name: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> = new Map()
-let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
-
-let ensureCityCoordsLoaded = function (): void {
-  //Guard clauses
-  if (city_coords_loaded)
-    return
-
-  city_coords_loaded = true
-
-  //Declare local instance variables
-  let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
-  let list: any[]
-  let raw: any
-
-  //Guard clauses
-  if (!fs.existsSync(coords_path))
-    return
-
-  //Function body
-  try {
-    raw = JSON.parse(fs.readFileSync(coords_path, 'utf-8'))
-    list = Object.values(raw)
-
-    for (let i = 0; i < list.length; i++) {
-      let item = list[i]
-      if (!item || !item.key || !Array.isArray(item.coords) || item.coords.length < 2)
-        continue
-
-      let rec: CityCoordRecord = {
-        coords: [item.coords[0], item.coords[1]],
-        country: item.country,
-        key: item.key,
-        name: item.name || '',
-        other_names: item.other_names,
-      }
-
-      city_coords_by_key.set(item.key, rec)
-      city_coords_by_key.set(item.key.toLowerCase().trim(), rec)
-
-      let norm_key = item.key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
-      if (norm_key && !city_coords_by_key.has(norm_key))
-        city_coords_by_key.set(norm_key, rec)
-
-      let names_to_index: string[] = []
-      if (item.name)
-        names_to_index.push(item.name)
-      if (Array.isArray(item.other_names)) {
-        for (let x = 0; x < item.other_names.length; x++)
-          names_to_index.push(item.other_names[x])
-      }
-
-      for (let x = 0; x < names_to_index.length; x++) {
-        let n_str = names_to_index[x]
-        let n_clean = n_str.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-        let n_norm = n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-        let n_strip = n_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-
-        let add_name = function (arg0_key: string) {
-          if (!arg0_key)
-            return
-          let arr = city_coords_by_norm_name.get(arg0_key)
-          if (!arr) {
-            arr = []
-            city_coords_by_norm_name.set(arg0_key, arr)
-          }
-          if (!arr.includes(rec))
-            arr.push(rec)
-        }
-
-        add_name(n_clean)
-        add_name(n_norm)
-        add_name(n_strip)
-      }
-
-      let cell_x = Math.floor(rec.coords[0])
-      let cell_y = Math.floor(rec.coords[1])
-      let cell_key = `${cell_x}_${cell_y}`
-      let cell_bucket = city_coords_spatial_grid.get(cell_key)
-      if (!cell_bucket) {
-        cell_bucket = []
-        city_coords_spatial_grid.set(cell_key, cell_bucket)
-      }
-      cell_bucket.push(rec)
-    }
-
-    if (!city_coords_by_key.has('stadester-Macau-Macao')) {
-      let macau_rec: CityCoordRecord = {
-        coords: [113.5439, 22.1987],
-        country: 'Macao',
-        key: 'stadester-Macau-Macao',
-        name: 'Macau',
-        other_names: ['Macao', 'Aomen'],
-      }
-      city_coords_by_key.set('stadester-Macau-Macao', macau_rec)
-      city_coords_by_key.set('stadester-macau-macao', macau_rec)
-      city_coords_by_key.set('stadester-Macau-Macau', macau_rec)
-      city_coords_by_key.set('macaumacao', macau_rec)
-
-      let m_bucket = city_coords_spatial_grid.get('113_22')
-      if (!m_bucket) {
-        m_bucket = []
-        city_coords_spatial_grid.set('113_22', m_bucket)
-      }
-      m_bucket.push(macau_rec)
-    }
-
-    if (!city_coords_by_key.has('stadester-Vaduz-Liechtenstein')) {
-      let vaduz_rec: CityCoordRecord = {
-        coords: [9.521, 47.141],
-        country: 'Liechtenstein',
-        key: 'stadester-Vaduz-Liechtenstein',
-        name: 'Vaduz',
-        other_names: ['Vaduz'],
-      }
-      city_coords_by_key.set('stadester-Vaduz-Liechtenstein', vaduz_rec)
-      city_coords_by_key.set('stadester-vaduz-liechtenstein', vaduz_rec)
-      city_coords_by_key.set('vaduzliechtenstein', vaduz_rec)
-
-      let v_bucket = city_coords_spatial_grid.get('9_47')
-      if (!v_bucket) {
-        v_bucket = []
-        city_coords_spatial_grid.set('9_47', v_bucket)
-      }
-      v_bucket.push(vaduz_rec)
-    }
-  } catch (arg0_err) {
-    console.error('[AtlasBordersService] Error indexing all_cities_coords.json:', arg0_err)
-  }
-}
-
-let getCityCoordsByKey = function (arg0_key: string): [number, number] | null {
-  //Convert from parameters
-  let key = arg0_key
-
-  //Guard clauses
-  if (!key)
-    return null
-
-  //Function body
-  ensureCityCoordsLoaded()
-
-  let rec = city_coords_by_key.get(key) || city_coords_by_key.get(key.toLowerCase().trim())
-
-  //Return statement
-  return rec ? rec.coords : null
-}
-
-/**
- * Resolves contemporaneous city key and coordinates for a given key and calendar year.
- * Handles temporally displaced keys (such as modern GHSL keys assigned to pre-1975 historical intervals,
- * or historical Stadestér keys persisting into the post-1975 modern era).
- *
- * @param {string} arg0_key
- * @param {number} arg1_year
- * @param {[number, number]} [arg2_coords]
- *
- * @returns {{ coords?: [number, number]; key: string }}
- */
-let getContemporaneousCityKey = function (
-  arg0_key: string,
-  arg1_year: number,
-  arg2_coords?: [number, number]
-): { coords?: [number, number]; key: string } {
-  //Convert from parameters
-  let coords = arg2_coords
-  let key = arg0_key
-  let year = arg1_year
-
-  //Declare local instance variables
-  let best: CityCoordRecord | null = null
-  let cache_k: string
-  let direct_coords: [number, number] | null = null
-  let direct_rec: CityCoordRecord | undefined
-  let final_result: { coords?: [number, number]; key: string }
-  let is_ghsl = false
-  let is_stadester = false
-  let item: CityCoordRecord | undefined
-  let lat = 0
-  let lon = 0
-  let max_cell_x: number
-  let max_cell_y: number
-  let min_cell_x: number
-  let min_cell_y: number
-  let min_d = 999
-  let norm_target = ''
-  let ref_coords: [number, number] | null = null
-
-  //Guard clauses
-  if (!key && !coords)
-    return { key: '' }
-
-  cache_k = `${key}_${year < 1975 ? 'hist' : 'mod'}_${coords ? coords.join(',') : ''}`
-  if (contemp_city_cache.has(cache_k))
-    return contemp_city_cache.get(cache_k)!
-
-  //Function body
-  ensureCityCoordsLoaded()
-
-  is_ghsl = key.startsWith('ghsl-')
-  is_stadester = key.startsWith('stadester-')
-  direct_rec = city_coords_by_key.get(key) || city_coords_by_key.get(key.toLowerCase().trim())
-  direct_coords = coords || (direct_rec ? direct_rec.coords : null)
-
-  if (direct_coords && ((is_ghsl && year >= 1975) || (is_stadester && year < 1975))) {
-    final_result = { coords: direct_coords, key }
-    contemp_city_cache.set(cache_k, final_result)
-    return final_result
-  }
-
-  norm_target = key.replace(/^(stadester|ghsl|oxford)-/i, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
-  item = direct_rec || (norm_target ? city_coords_by_key.get(norm_target) : undefined)
-
-  ref_coords = direct_coords || (item ? item.coords : null)
-  if (!ref_coords) {
-    final_result = { coords: direct_coords || undefined, key }
-    contemp_city_cache.set(cache_k, final_result)
-    return final_result
-  }
-
-  lon = ref_coords[0]
-  lat = ref_coords[1]
-
-  min_cell_x = Math.floor(lon - 0.25)
-  max_cell_x = Math.floor(lon + 0.25)
-  min_cell_y = Math.floor(lat - 0.25)
-  max_cell_y = Math.floor(lat + 0.25)
-
-  for (let i = min_cell_x; i <= max_cell_x; i++) {
-    for (let x = min_cell_y; x <= max_cell_y; x++) {
-      let bucket = city_coords_spatial_grid.get(`${i}_${x}`)
-      if (!bucket)
-        continue
-      for (let y = 0; y < bucket.length; y++) {
-        let c = bucket[y]
-        if (year < 1975 && !c.key.startsWith('stadester-'))
-          continue
-        if (year >= 1975 && !c.key.startsWith('ghsl-'))
-          continue
-        let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
-        if (d < 0.20 && d < min_d) {
-          min_d = d
-          best = c
-        }
-      }
-    }
-  }
-
-  final_result = best
-    ? { coords: best.coords, key: best.key }
-    : { coords: ref_coords, key: item ? item.key : key }
-
-  contemp_city_cache.set(cache_k, final_result)
-
-  //Return statement
-  return final_result
-}
-
-let isCityCoordsInsideBbox = function (
-  arg0_coords: [number, number],
-  arg1_bbox: [number, number, number, number],
-  arg2_pad: number = 3.5
-): boolean {
-  //Convert from parameters
-  let bbox = arg1_bbox
-  let coords = arg0_coords
-  let pad = arg2_pad
-
-  //Declare local instance variables
-  let c_lat = coords[1]
-  let c_lng = coords[0]
-  let max_lat = bbox[3]
-  let max_lng = bbox[2]
-  let min_lat = bbox[1]
-  let min_lng = bbox[0]
-
-  //Return statement
-  return (
-    c_lng >= min_lng - pad &&
-    c_lng <= max_lng + pad &&
-    c_lat >= min_lat - pad &&
-    c_lat <= max_lat + pad
-  )
-}
-
-/**
- * Resolves city coordinates and key from city name and optional country.
- *
- * @param {string} arg0_city_name
- * @param {string} [arg1_country]
- *
- * @returns {{ coords?: [number, number]; key?: string } | null}
- */
-let findCityCoordsByName = function (
-  arg0_city_name: string,
-  arg1_country?: string
-): { coords?: [number, number]; key?: string } | null {
-  //Convert from parameters
-  let city_name = arg0_city_name
-  let country = arg1_country
-
-  //Declare local instance variables
-  let best_match: CityCoordRecord | null = null
-  let best_score = -1
-  let c_clean: string
-  let c_lower: string
-  let c_norm: string
-  let cache_k: string
-  let candidate_set = new Set<CityCoordRecord>()
-  let clean_matches: CityCoordRecord[] | undefined
-  let country_lower: string
-  let key_match: CityCoordRecord | undefined
-  let lower_matches: CityCoordRecord[] | undefined
-  let norm_matches: CityCoordRecord[] | undefined
-  let result: { coords?: [number, number]; key?: string } | null = null
-
-  //Guard clauses
-  if (!city_name)
-    return null
-
-  cache_k = `${city_name}|${country || ''}`
-  if (city_name_coords_cache.has(cache_k))
-    return city_name_coords_cache.get(cache_k)!
-
-  //Function body
-  ensureCityCoordsLoaded()
-
-  c_lower = city_name.toLowerCase().trim()
-  c_norm = c_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-  c_clean = c_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-  country_lower = country ? country.toLowerCase().trim() : ''
-
-  if (!c_norm) {
-    city_name_coords_cache.set(cache_k, null)
-    return null
-  }
-
-  key_match = city_coords_by_key.get(city_name) || city_coords_by_key.get(c_lower)
-  if (key_match)
-    candidate_set.add(key_match)
-
-  norm_matches = city_coords_by_norm_name.get(c_norm)
-  if (norm_matches) {
-    for (let i = 0; i < norm_matches.length; i++)
-      candidate_set.add(norm_matches[i])
-  }
-
-  clean_matches = city_coords_by_norm_name.get(c_clean)
-  if (clean_matches) {
-    for (let i = 0; i < clean_matches.length; i++)
-      candidate_set.add(clean_matches[i])
-  }
-
-  lower_matches = city_coords_by_norm_name.get(c_lower)
-  if (lower_matches) {
-    for (let i = 0; i < lower_matches.length; i++)
-      candidate_set.add(lower_matches[i])
-  }
-
-  let all_candidates = Array.from(candidate_set)
-  for (let i = 0; i < all_candidates.length; i++) {
-    let item = all_candidates[i]
-    let score = 0
-    let i_name = (item.name || '').toLowerCase().trim()
-    let i_norm = i_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-    let clean_i = i_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-    let has_exact = (i_norm === c_norm || i_name === c_lower || (c_clean && c_clean === clean_i))
-
-    if (has_exact) {
-      score += 1000
-    } else if (item.other_names && Array.isArray(item.other_names)) {
-      if (item.other_names.some((arg0_on: string) => {
-        let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-        let on_norm = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-        let clean_on = on_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
-        return on_clean === c_lower || on_norm === c_norm || (c_clean && c_clean === clean_on)
-      })) {
-        score += 850
-      }
-    }
-
-    if (item.key && (item.key === city_name || item.key.toLowerCase().trim() === c_lower))
-      score += 2000
-
-    if (score === 0)
-      continue
-
-    if (country_lower && item.country) {
-      let i_c = item.country.toLowerCase().trim()
-      if (i_c === country_lower || country_lower.includes(i_c) || i_c.includes(country_lower))
-        score += 200
-    }
-
-    if (item.key && item.key.startsWith('stadester-'))
-      score += 50
-
-    if (score > best_score) {
-      best_score = score
-      best_match = item
-    }
-  }
-
-  result = best_match ? { coords: best_match.coords, key: best_match.key } : null
-  city_name_coords_cache.set(cache_k, result)
-
-  //Return statement
-  return result
-}
-
-/**
- * Resolves the capital information for a state at a specific fractional year.
- *
- * @param {number} arg0_state_id
- * @param {number} arg1_year_frac
- * @param {string} [arg2_entity_name]
- *
- * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; is_acapital: boolean }}
- */
-let getStateCapitalInfo = function (
-  arg0_state_id: number,
-  arg1_year_frac: number,
-  arg2_entity_name?: string
-): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number } {
-  //Convert from parameters
-  let entity_name = arg2_entity_name
-  let state_id = arg0_state_id
-  let year_frac = arg1_year_frac
-
-  //Declare local instance variables
-  let best_diff: number
-  let best_iv: any
-  let cache_k = `${state_id}_${year_frac.toFixed(4)}_${entity_name || ''}`
-  let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
-  let clean_e: string
-  let diff: number
-  let effective_state_id: number
-  let file_path: string
-  let fill_color: string | undefined
-  let info: { acapital: boolean; fill?: string; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
-  let is_name_plausible: boolean = true
-  let is_state_temporal_match: boolean = true
-  let matched_state_id: number | undefined
-  let res_info: { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number }
-  let state: any
-  let state_bbox: [number, number, number, number] | undefined
-  let states_path: string
-  let valid_timeline: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }>
-
-  file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
-  if (fs.existsSync(file_path)) {
-    try {
-      let stats = fs.statSync(file_path)
-      if (!state_capitals_data || stats.mtimeMs > state_capitals_mtime) {
-        state_capitals_mtime = stats.mtimeMs
-        state_capitals_data = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
-        capital_info_cache.clear()
-        city_name_coords_cache.clear()
-        in_memory_slice_lru.clear()
-      }
-    } catch {
-      state_capitals_data = {}
-    }
-  } else if (!state_capitals_data) {
-    state_capitals_data = {}
-  }
-
-  //Guard clauses
-  if (capital_info_cache.has(cache_k))
-    return capital_info_cache.get(cache_k)!
-
-  state = AtlasBordersService.getStateById(state_id)
-  if (state && (state.start_year !== undefined || state.stop_year !== undefined)) {
-    if (year_frac < (state.start_year ?? -99999) - 5 || year_frac > (state.stop_year ?? 99999) + 5)
-      is_state_temporal_match = false
-  }
-  if (state && entity_name) {
-    let s_name = (state.name || '').toLowerCase().trim()
-    let e_name = entity_name.toLowerCase().trim()
-    let s_base = s_name.replace(/\(.*?\)/g, '').trim()
-    let e_base = e_name.replace(/\(.*?\)/g, '').trim()
-    if (
-      !s_name.includes(e_name) &&
-      !e_name.includes(s_name) &&
-      (!s_base || !e_base || (!s_base.includes(e_base) && !e_base.includes(s_base)))
-    ) {
-      is_name_plausible = false
-    }
-  }
-
-  if (is_state_temporal_match && is_name_plausible) {
-    info = state_capitals_data ? state_capitals_data[state_id] : undefined
-  }
-
-  //Fallback to match by entity name if state_id has no direct capital record or belongs to another polity
-  if (!info && entity_name) {
-    if (!states_name_map) {
-      states_name_map = new Map()
-      states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
-      if (fs.existsSync(states_path)) {
-        try {
-          let raw_states = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
-          let all_keys = Object.keys(raw_states)
-          for (let i = 0; i < all_keys.length; i++) {
-            let s = raw_states[all_keys[i]]
-            if (s && s.state_id !== undefined) {
-              let s_name = (s.name || '').toLowerCase().trim()
-              if (!states_name_map.has(s_name))
-                states_name_map.set(s_name, [])
-              states_name_map.get(s_name)!.push({
-                start_year: s.start_year ?? -99999,
-                state_id: Number(s.state_id),
-                stop_year: s.stop_year ?? 99999,
-              })
-
-              let base_s = s_name.replace(/\(.*?\)/g, '').trim()
-              if (!states_by_clean_name.has(base_s))
-                states_by_clean_name.set(base_s, [])
-              states_by_clean_name.get(base_s)!.push({
-                start_year: s.start_year ?? -99999,
-                state_id: Number(s.state_id),
-                stop_year: s.stop_year ?? 99999,
-              })
-            }
-          }
-        } catch {
-          //Ignore parsing error
-        }
-      }
-    }
-
-    clean_e = entity_name.toLowerCase().trim()
-    candidates = []
-
-    let direct_matches = states_by_clean_name.get(clean_e)
-    if (direct_matches) {
-      for (let i = 0; i < direct_matches.length; i++) {
-        if (year_frac >= direct_matches[i].start_year && year_frac <= direct_matches[i].stop_year)
-          candidates.push(direct_matches[i])
-      }
-    }
-
-    let has_capital_candidate = candidates.some((c) => {
-      let info_c = state_capitals_data ? state_capitals_data[c.state_id] : undefined
-      return info_c && !info_c.acapital && info_c.timeline && info_c.timeline.length > 0
-    })
-
-    if (!has_capital_candidate && clean_e.length >= 4) {
-      for (let [s_name, list] of states_name_map.entries()) {
-        let base_s = s_name.replace(/\(.*?\)/g, '').trim()
-        let is_match = (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' '))
-        if (is_match) {
-          for (let x = 0; x < list.length; x++) {
-            if (year_frac >= list[x].start_year && year_frac <= list[x].stop_year)
-              candidates.push(list[x])
-          }
-        }
-      }
-    }
-
-    if (candidates.length > 0 && state_capitals_data) {
-      candidates.sort((arg0_a, arg0_b) => {
-        let a_info = state_capitals_data![arg0_a.state_id]
-        let a_has_tl = a_info && !a_info.acapital && a_info.timeline && a_info.timeline.length > 0 ? 1 : 0
-        let b_info = state_capitals_data![arg0_b.state_id]
-        let b_has_tl = b_info && !b_info.acapital && b_info.timeline && b_info.timeline.length > 0 ? 1 : 0
-        if (b_has_tl !== a_has_tl)
-          return b_has_tl - a_has_tl
-
-        let a_state = AtlasBordersService.getStateById(arg0_a.state_id)
-        let b_state = AtlasBordersService.getStateById(arg0_b.state_id)
-        let a_is_occ = (a_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
-        let b_is_occ = (b_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
-        return a_is_occ - b_is_occ
-      })
-
-      for (let k = 0; k < candidates.length; k++) {
-        let candidate_info = state_capitals_data[candidates[k].state_id]
-        if (candidate_info && (!candidate_info.acapital || !info)) {
-          info = candidate_info
-          matched_state_id = candidates[k].state_id
-          if (!candidate_info.acapital)
-            break
-        }
-      }
-    }
-  }
-
-  effective_state_id = matched_state_id || state_id
-  state = AtlasBordersService.getStateById(effective_state_id)
-  fill_color = state?.fill_color || (info as any)?.fill
-
-  if (!info) {
-    res_info = { fill_color: state?.fill_color, is_acapital: false, state_id: effective_state_id }
-    capital_info_cache.set(cache_k, res_info)
-    return res_info
-  }
-
-  if (info.acapital) {
-    res_info = { fill_color: fill_color, is_acapital: true, state_id: effective_state_id }
-    capital_info_cache.set(cache_k, res_info)
-    return res_info
-  }
-
-  if (info.timeline && info.timeline.length > 0) {
-    state_bbox = state?.bbox
-
-    //Filter out timeline items whose cities are geographically impossible for this state
-    valid_timeline = []
-    for (let i = 0; i < info.timeline.length; i++) {
-      let iv = info.timeline[i]
-      if (state_bbox) {
-        let c_coords = iv.key ? getCityCoordsByKey(iv.key) : undefined
-        if (!c_coords && iv.city) {
-          let by_name = findCityCoordsByName(iv.city, state?.country || state?.name)
-          if (by_name?.coords)
-            c_coords = by_name.coords
-        }
-        if (c_coords && !isCityCoordsInsideBbox(c_coords, state_bbox, 3.5))
-          continue
-      }
-      valid_timeline.push(iv)
-    }
-
-    if (valid_timeline.length === 0) {
-      res_info = { fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
-      capital_info_cache.set(cache_k, res_info)
-      return res_info
-    }
-
-    for (let i = 0; i < valid_timeline.length; i++) {
-      let iv = valid_timeline[i]
-      if (year_frac >= iv.start_frac && year_frac <= iv.stop_frac) {
-        let contemp: { coords?: [number, number]; key?: string } = iv.key ? getContemporaneousCityKey(iv.key, year_frac) : { coords: undefined, key: iv.key }
-        let c_coords = contemp.coords || (iv.key ? getCityCoordsByKey(iv.key) : undefined)
-        if (!c_coords && iv.city) {
-          let by_name = findCityCoordsByName(iv.city, state?.country || state?.name)
-          if (by_name?.coords) {
-            c_coords = by_name.coords
-            if (!contemp.key)
-              contemp.key = by_name.key
-          }
-        }
-        res_info = { cap_coords: c_coords ? [c_coords[0], c_coords[1]] : undefined, capkey: contemp.key, capname: iv.city, fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
-        capital_info_cache.set(cache_k, res_info)
-        return res_info
-      }
-    }
-
-    best_iv = valid_timeline[0]
-    best_diff = Math.abs(year_frac - (best_iv.start_frac + best_iv.stop_frac) / 2)
-    for (let i = 1; i < valid_timeline.length; i++) {
-      let iv = valid_timeline[i]
-      diff = Math.abs(year_frac - (iv.start_frac + iv.stop_frac) / 2)
-      if (diff < best_diff) {
-        best_diff = diff
-        best_iv = iv
-      }
-    }
-    if (year_frac < best_iv.start_frac - 2 || year_frac > best_iv.stop_frac + 2) {
-      res_info = { fill_color: fill_color, is_acapital: true, state_id: effective_state_id }
-      capital_info_cache.set(cache_k, res_info)
-      return res_info
-    }
-
-    let contemp_best: { coords?: [number, number]; key?: string } = best_iv.key ? getContemporaneousCityKey(best_iv.key, year_frac) : { coords: undefined, key: best_iv.key }
-    let best_coords = contemp_best.coords || (best_iv.key ? getCityCoordsByKey(best_iv.key) : undefined)
-    if (!best_coords && best_iv.city) {
-      let by_name = findCityCoordsByName(best_iv.city, state?.country || state?.name)
-      if (by_name?.coords) {
-        best_coords = by_name.coords
-        if (!contemp_best.key)
-          contemp_best.key = by_name.key
-      }
-    }
-    res_info = { cap_coords: best_coords ? [best_coords[0], best_coords[1]] : undefined, capkey: contemp_best.key, capname: best_iv.city, fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
-    capital_info_cache.set(cache_k, res_info)
-    return res_info
-  }
-
-  res_info = { fill_color: fill_color, is_acapital: false, state_id: effective_state_id }
-  capital_info_cache.set(cache_k, res_info)
-
-  //Return statement
-  return res_info
-}
-
-/**
  * AtlasBordersService provides high-performance temporal slicing and streaming of historical GIS boundaries.
  */
 export class AtlasBordersService {
+  static states_by_id: Map<string | number, any> | null = null
+
   /**
    * Culls redundant and duplicate vertices in GeoJSON polygon geometries using Ramer-Douglas-Peucker algorithm.
    *
@@ -1126,7 +62,7 @@ export class AtlasBordersService {
   }
 
   /**
-   * Retrieves the absolute filesystem paths for atlas datasets.
+   * Resolves absolute file paths for GIS and boundary datasets.
    *
    * @returns {{ cacheDir: string, cshapesPath: string, detailedDir: string, detailedNaissancePath: string, naissancePath: string }}
    */
@@ -1165,102 +101,9 @@ export class AtlasBordersService {
    * @returns {any[]}
    */
   static loadCShapes (): any[] {
-    //Guard clauses
-    if (cached_cshapes_features)
-      return cached_cshapes_features
-
-    //Declare local instance variables
-    let file_path = AtlasBordersService.getDatasetPaths().cshapesPath
-
-    //Guard clauses
-    if (!fs.existsSync(file_path)) {
-      console.warn(`[AtlasBordersService] CShapes file not found: ${file_path}`)
-      cached_cshapes_features = []
-      return cached_cshapes_features
-    }
-
-    //Function body
-    try {
-      console.log(`[AtlasBordersService] Loading and indexing CShapes-2.0.geojson...`)
-      let raw = fs.readFileSync(file_path, 'utf-8')
-      cached_cshapes_data = JSON.parse(raw)
-      cached_cshapes_features = cached_cshapes_data.features || []
-
-      //Deduplicate and cull redundant vertices from CShapes features for high-performance rendering
-      for (let i = 0; i < cached_cshapes_features.length; i++) {
-        let feat = cached_cshapes_features[i]
-        if (feat.geometry)
-          feat.geometry = cullAndSimplifyGeometry(feat.geometry, 0.012)
-      }
-
-      //Index keyframes by gwcode and precalculate start/end timestamps
-      cached_cshapes_keyframes_by_gwcode = new Map()
-      for (let i = 0; i < cached_cshapes_features.length; i++) {
-        let feat = cached_cshapes_features[i]
-        let p = feat.properties
-        let s_day = p.gwsday || 1
-        let s_month = p.gwsmonth || 1
-        let s_year = p.gwsyear
-        let e_day = p.gweday || 1
-        let e_month = p.gwemonth || 1
-        let e_year = p.gweyear
-
-        feat._start_ts = UfDate.getTimestamp({
-          day: s_day,
-          hour: 0,
-          minute: 0,
-          month: s_month,
-          year: s_year,
-        })
-        feat._end_ts = UfDate.getTimestamp({
-          day: e_day,
-          hour: 23,
-          minute: 59,
-          month: e_month,
-          year: e_year,
-        })
-
-        let gw = p.gwcode
-        if (gw !== undefined) {
-          if (!cached_cshapes_keyframes_by_gwcode.has(gw))
-            cached_cshapes_keyframes_by_gwcode.set(gw, [])
-          let list = cached_cshapes_keyframes_by_gwcode.get(gw)!
-          let formatted_date = UfDate.formatDate({
-            day: s_day,
-            month: s_month,
-            year: s_year,
-          })
-          list.push({
-            date: formatted_date,
-            day: s_day,
-            label: `Boundary keyframe (${s_year}-${e_year})`,
-            month: s_month,
-            timestamp: feat._start_ts,
-            year: s_year,
-          })
-        }
-      }
-
-      //Sort keyframes chronologically
-      for (let list of cached_cshapes_keyframes_by_gwcode.values()) {
-        list.sort((arg0_a, arg0_b) => (arg0_a.timestamp || 0) - (arg0_b.timestamp || 0))
-      }
-
-      console.log(`[AtlasBordersService] Successfully indexed ${cached_cshapes_features.length} CShapes features across ${cached_cshapes_keyframes_by_gwcode.size} nations.`)
-    } catch (arg0_err) {
-      console.error('[AtlasBordersService] Failed to load CShapes-2.0.geojson:', arg0_err)
-      cached_cshapes_features = []
-    }
-
-    //Return statement
-    return cached_cshapes_features
+    return loadCShapes(AtlasBordersService.getDatasetPaths().cshapesPath)
   }
 
-  /**
-   * Loads and indexes atlas.naissance in memory on first access using SVEA History keyframe specifications.
-   *
-   * @returns {Map<string, NaissanceEntityRecord>}
-   */
   /**
    * Parses keyframes from a Naissance entity object, supporting stringified JSON,
    * numeric timestamps, and UF/Date natural/ISO/delimited date strings.
@@ -1272,271 +115,18 @@ export class AtlasBordersService {
   static parseNaissanceKeyframes (
     arg0_ent: any
   ): { kf_map: Map<number, [any, any, any]>; sorted_ts: number[] } | null {
-    //Convert from parameters
-    let ent = arg0_ent
-
-    //Guard clauses
-    if (!ent || typeof ent !== 'object')
-      return null
-
-    //Declare local instance variables
-    let history_obj: any
-    let kf_items: { ts: number; val: [any, any, any] }[] = []
-    let kf_map = new Map<number, [any, any, any]>()
-    let raw_history = ent.history || ent.keyframes
-    let raw_keys: string[]
-    let sorted_ts: number[]
-
-    //Function body
-    if (typeof raw_history === 'string') {
-      try {
-        raw_history = JSON.parse(raw_history)
-      } catch {
-        return null
-      }
-    }
-
-    history_obj = (raw_history && raw_history.keyframes) ? raw_history.keyframes : raw_history
-    if (!history_obj || typeof history_obj !== 'object')
-      return null
-
-    raw_keys = Object.keys(history_obj)
-    if (raw_keys.length === 0)
-      return null
-
-    for (let i = 0; i < raw_keys.length; i++) {
-      let raw_key = raw_keys[i]
-      let raw_val = history_obj[raw_key]
-      let ts: number
-      let val = Array.isArray(raw_val) ? raw_val : raw_val?.value
-      let trimmed_key = String(raw_key).trim()
-      let num_val = Number(trimmed_key)
-
-      if (!Number.isNaN(num_val)) {
-        if (Math.abs(num_val) <= 10000) {
-          ts = UfDate.getTimestamp({ day: 1, hour: 0, minute: 0, month: 1, year: Math.round(num_val) })
-        } else {
-          ts = num_val
-        }
-      } else {
-        let parsed_date = UfDate.convertStringToDate(trimmed_key)
-        if (parsed_date) {
-          ts = UfDate.getTimestamp(parsed_date)
-        } else {
-          ts = UfDate.getTimestamp(trimmed_key)
-        }
-      }
-
-      if (Array.isArray(val)) {
-        let geom = val[0]
-        if (geom === 'undefined')
-          geom = undefined
-        let symbol = (val[1] === 'undefined') ? undefined : val[1]
-        let props = (val[2] === 'undefined') ? undefined : val[2]
-        kf_items.push({ ts, val: [geom, symbol, props] as [any, any, any] })
-      } else if (raw_val && typeof raw_val === 'object') {
-        let geom = raw_val.geometry || raw_val.feature || null
-        if (geom === 'undefined')
-          geom = undefined
-        let symbol = (typeof raw_val.symbol === 'object' && raw_val.symbol !== null) ? raw_val.symbol : (raw_val.symbol === 'undefined' ? undefined : {})
-        let props = (typeof raw_val.properties === 'object' && raw_val.properties !== null) ? raw_val.properties : (raw_val.properties === 'undefined' ? undefined : {})
-        kf_items.push({ ts, val: [geom, symbol, props] })
-      }
-    }
-
-    if (kf_items.length === 0)
-      return null
-
-    kf_items.sort((arg0_a, arg0_b) => arg0_a.ts - arg0_b.ts)
-    sorted_ts = kf_items.map((arg0_it) => arg0_it.ts)
-
-    for (let i = 0; i < kf_items.length; i++) {
-      kf_map.set(kf_items[i].ts, kf_items[i].val)
-    }
-
-    //Return statement
-    return { kf_map, sorted_ts }
+    return parseNaissanceKeyframes(arg0_ent)
   }
 
   /**
    * Loads and indexes a .naissance file in memory on first access using SVEA History keyframe specifications.
-   * Supports both small and very large (>500MB) files using chunked streaming buffers to prevent V8 string limits.
    *
    * @param {string} [arg0_file_path]
    *
    * @returns {Map<string, NaissanceEntityRecord>}
    */
   static loadNaissance (arg0_file_path?: string): Map<string, NaissanceEntityRecord> {
-    //Convert from parameters
-    let file_path = arg0_file_path || AtlasBordersService.getDatasetPaths().naissancePath
-
-    //Guard clauses
-    if (cached_naissance_entities_by_path.has(file_path))
-      return cached_naissance_entities_by_path.get(file_path)!
-
-    if (!fs.existsSync(file_path)) {
-      console.warn(`[AtlasBordersService] Naissance file not found: ${file_path}`)
-      let empty_map = new Map<string, NaissanceEntityRecord>()
-      cached_naissance_entities_by_path.set(file_path, empty_map)
-      return empty_map
-    }
-
-    //Declare local instance variables
-    let entity_records = new Map<string, NaissanceEntityRecord>()
-    let stat = fs.statSync(file_path)
-
-    //Maintain memory bounded cache: retain at most 3 parsed maps in memory
-    if (cached_naissance_entities_by_path.size >= 3) {
-      let oldest_key = cached_naissance_entities_by_path.keys().next().value
-      if (oldest_key !== undefined)
-        cached_naissance_entities_by_path.delete(oldest_key)
-    }
-
-    //Function body
-    try {
-      console.log(`[AtlasBordersService] Loading and indexing ${path.basename(file_path)} (${Math.round(stat.size / 1024 / 1024)}MB)...`)
-
-      if (stat.size >= 250 * 1024 * 1024) {
-        //Large file (>250MB): use chunked synchronous buffer reads to prevent V8 ERR_STRING_TOO_LONG
-        let buffer_size = 4 * 1024 * 1024
-        let buffer = Buffer.alloc(buffer_size)
-        let fd = fs.openSync(file_path, 'r')
-        let file_size = stat.size
-        let leftover = ''
-        let position = 0
-
-        while (position < file_size) {
-          let bytes_to_read = Math.min(buffer_size, file_size - position)
-          let bytes_read = fs.readSync(fd, buffer, 0, bytes_to_read, position)
-          position += bytes_read
-
-          let chunk_str = leftover + buffer.toString('utf-8', 0, bytes_read)
-          let last_nl = chunk_str.lastIndexOf('\n')
-          if (last_nl === -1) {
-            leftover = chunk_str
-            continue
-          }
-
-          let to_process = chunk_str.slice(0, last_nl)
-          leftover = chunk_str.slice(last_nl + 1)
-          let lines = to_process.split('\n')
-
-          for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim()
-            if (line === '{' || line === '}' || line === '')
-              continue
-            if (line.endsWith(','))
-              line = line.slice(0, -1)
-            if (line.startsWith('"map_settings":'))
-              continue
-
-            let colon_idx = line.indexOf('":')
-            if (colon_idx === -1)
-              continue
-
-            let ent_id = line.slice(1, colon_idx)
-            let json_str = line.slice(colon_idx + 2)
-
-            try {
-              let ent = JSON.parse(json_str)
-              if (!ent || ent.class_name !== 'GeometryPolygon')
-                continue
-
-              let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
-              if (!parsed_kfs)
-                continue
-
-              entity_records.set(ent_id, {
-                class_name: ent.class_name,
-                id: ent_id,
-                keyframes: parsed_kfs.kf_map,
-                max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
-                min_ts: parsed_kfs.sorted_ts[0],
-                name: ent.name,
-                sorted_timestamps: parsed_kfs.sorted_ts,
-              })
-            } catch {
-              //Skip malformed entry
-            }
-          }
-        }
-
-        if (leftover.trim().length > 0) {
-          let line = leftover.trim()
-          if (line.endsWith(','))
-            line = line.slice(0, -1)
-          if (line !== '}' && !line.startsWith('"map_settings":')) {
-            let colon_idx = line.indexOf('":')
-            if (colon_idx !== -1) {
-              let ent_id = line.slice(1, colon_idx)
-              let json_str = line.slice(colon_idx + 2)
-              try {
-                let ent = JSON.parse(json_str)
-                if (ent && ent.class_name === 'GeometryPolygon') {
-                  let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
-                  if (parsed_kfs) {
-                    entity_records.set(ent_id, {
-                      class_name: ent.class_name,
-                      id: ent_id,
-                      keyframes: parsed_kfs.kf_map,
-                      max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
-                      min_ts: parsed_kfs.sorted_ts[0],
-                      name: ent.name,
-                      sorted_timestamps: parsed_kfs.sorted_ts,
-                    })
-                  }
-                }
-              } catch {
-                //Skip malformed entry
-              }
-            }
-          }
-        }
-
-        fs.closeSync(fd)
-      } else {
-        //Small file (<250MB): read in one go
-        let raw = fs.readFileSync(file_path, 'utf-8')
-        let parsed_data = JSON.parse(raw)
-        raw = ''
-
-        let keys = Object.keys(parsed_data)
-        for (let i = 0; i < keys.length; i++) {
-          let ent_id = keys[i]
-          if (ent_id === 'map_settings')
-            continue
-
-          let ent = parsed_data[ent_id]
-          if (!ent || ent.class_name !== 'GeometryPolygon')
-            continue
-
-          let parsed_kfs = AtlasBordersService.parseNaissanceKeyframes(ent)
-          if (!parsed_kfs)
-            continue
-
-          entity_records.set(ent_id, {
-            class_name: ent.class_name,
-            id: ent_id,
-            keyframes: parsed_kfs.kf_map,
-            max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
-            min_ts: parsed_kfs.sorted_ts[0],
-            name: ent.name,
-            sorted_timestamps: parsed_kfs.sorted_ts,
-          })
-        }
-
-        parsed_data = null as any
-      }
-
-      console.log(`[AtlasBordersService] Successfully indexed ${entity_records.size} entities from ${path.basename(file_path)}.`)
-    } catch (arg0_err) {
-      console.error(`[AtlasBordersService] Failed to load ${file_path}:`, arg0_err)
-    }
-
-    cached_naissance_entities_by_path.set(file_path, entity_records)
-
-    //Return statement
-    return entity_records
+    return loadNaissance(arg0_file_path || AtlasBordersService.getDatasetPaths().naissancePath)
   }
 
   /**
@@ -1588,7 +178,6 @@ export class AtlasBordersService {
 
   /**
    * Retrieves a single historical border feature by state_id, gwcode, or name at a given year.
-   * Searches detailed_borders first, then statistical_borders, and finally falls back to states.json.
    *
    * @param {number} arg0_year
    * @param {number | string} [arg1_state_id]
@@ -1671,7 +260,6 @@ export class AtlasBordersService {
           month: options.month,
         })
         if (borders_res && Array.isArray(borders_res.features)) {
-          //1. Exact match pass
           for (let x = 0; x < borders_res.features.length; x++) {
             if (matchFeature(borders_res.features[x])) {
               target_feature = borders_res.features[x]
@@ -1681,7 +269,6 @@ export class AtlasBordersService {
           if (target_feature)
             break
 
-          //2. Substring/alias match pass if name was provided
           if (q_name_lower) {
             for (let y = 0; y < borders_res.features.length; y++) {
               let feat = borders_res.features[y]
@@ -1705,7 +292,6 @@ export class AtlasBordersService {
     if (target_feature)
       return target_feature
 
-    //3. Fallback to states.json if not found in sliced border geometries
     if (state_id !== undefined) {
       let state = AtlasBordersService.getStateById(state_id)
       if (state) {
@@ -1823,7 +409,6 @@ export class AtlasBordersService {
     lru_key = `${dataset}_${target_date_obj.year}_${target_date_obj.month}_${target_date_obj.day}_${bbox ? bbox.join(',') : 'all'}`
     is_whole_year_query = Boolean(!bbox && target_date_obj.day === 1 && target_date_obj.month === 1 && Number.isInteger(arg0_year))
 
-    //Check in-memory LRU cache
     if (in_memory_slice_lru.has(lru_key)) {
       let cached_list = in_memory_slice_lru.get(lru_key)!
       return {
@@ -1849,7 +434,6 @@ export class AtlasBordersService {
         disk_cache_path = alt_path
     }
 
-    //Check disk cache only for baseline whole-year queries without spatial bbox
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
@@ -1882,7 +466,6 @@ export class AtlasBordersService {
     }
 
     if (dataset === 'detailed_borders') {
-      //--- 1. DETAILED BORDERS SLICER (-3500 to 2026) ---
       let dataset_paths = AtlasBordersService.getDatasetPaths()
       let entities: Map<string, NaissanceEntityRecord>
 
@@ -1900,7 +483,6 @@ export class AtlasBordersService {
       }
 
       for (let [ent_id, ent] of entities.entries()) {
-        //Guard clause: check if entity exists at or before target timestamp
         if (ent.min_ts > target_ts)
           continue
 
@@ -1909,7 +491,6 @@ export class AtlasBordersService {
         let current_symbol: Record<string, any> = {}
         let resolved_ts = ent.min_ts
 
-        //Resolve state at target_ts using SVEA History algorithm
         for (let i = 0; i < ent.sorted_timestamps.length; i++) {
           let ts = ent.sorted_timestamps[i]
           if (ts > target_ts)
@@ -1928,7 +509,6 @@ export class AtlasBordersService {
             current_props = { ...current_props, ...kf[2] }
         }
 
-        //If territory ceased existing (.properties.hidden in SVEA) or geometry is missing, skip
         if (current_props.hidden === true)
           continue
         if (!current_geom)
@@ -1956,7 +536,7 @@ export class AtlasBordersService {
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
+        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name, AtlasBordersService.getStateById)
         let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
 
         features.push({
@@ -1992,19 +572,17 @@ export class AtlasBordersService {
         })
       }
     } else if (target_year >= 1886) {
-      //--- 2. CSHAPES-2.0 GEOJSON SLICER (1886 - Present) ---
       let cshapes = AtlasBordersService.loadCShapes()
+      let cached_keyframes = getCShapesKeyframesByGwcode()
 
       for (let i = 0; i < cshapes.length; i++) {
         let feat = cshapes[i]
         let p = feat.properties
 
-        //Check temporal domain validity using precalculated timestamps
         let is_active = feat._start_ts <= target_ts && (feat._end_ts >= target_ts || (p.gweyear >= 2019 && target_year >= 2019))
         if (!is_active)
           continue
 
-        //Compute or verify bounding box
         let geom_bbox = feat.bbox || computeGeometryBBox(feat.geometry)
         if (bbox) {
           let [b_min_x, b_min_y, b_max_x, b_max_y] = bbox
@@ -2014,8 +592,8 @@ export class AtlasBordersService {
         }
 
         let gw = p.gwcode
-        let keyframes = gw !== undefined ? cached_cshapes_keyframes_by_gwcode.get(gw) : undefined
-        let cap_info = getStateCapitalInfo(p.gwcode, target_year, p.cntry_name)
+        let keyframes = gw !== undefined ? cached_keyframes.get(gw) : undefined
+        let cap_info = getStateCapitalInfo(p.gwcode, target_year, p.cntry_name, AtlasBordersService.getStateById)
         let cs_cap_coords = cap_info.cap_coords || ((p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined)
         let cs_cap_name = cap_info.capname || p.capname
         let cs_cap_key = cap_info.capkey || (cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined)
@@ -2053,11 +631,9 @@ export class AtlasBordersService {
         })
       }
     } else {
-      //--- 3. ATLAS.NAISSANCE SLICER (-3500 to 1886) ---
       let entities = AtlasBordersService.loadNaissance()
 
       for (let [ent_id, ent] of entities.entries()) {
-        //Guard clause: check if entity exists at or before target timestamp
         if (ent.min_ts > target_ts)
           continue
 
@@ -2066,7 +642,6 @@ export class AtlasBordersService {
         let current_symbol: Record<string, any> = {}
         let resolved_ts = ent.min_ts
 
-        //Resolve state at target_ts using SVEA History algorithm
         for (let i = 0; i < ent.sorted_timestamps.length; i++) {
           let ts = ent.sorted_timestamps[i]
           if (ts > target_ts)
@@ -2085,7 +660,6 @@ export class AtlasBordersService {
             current_props = { ...current_props, ...kf[2] }
         }
 
-        //If territory ceased existing (.properties.hidden in SVEA) or geometry is missing, skip
         if (current_props.hidden === true)
           continue
         if (!current_geom)
@@ -2107,8 +681,8 @@ export class AtlasBordersService {
         let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
-        let num_sid = Number(ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name)
+        let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
+        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name, AtlasBordersService.getStateById)
         let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
 
         features.push({
@@ -2117,17 +691,23 @@ export class AtlasBordersService {
           id: `naissance_${ent_id}`,
           properties: {
             adm0_a3: entity_name,
+            area: current_props.area,
             cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
+            caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
+            caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
             capname: cap_info.capname,
             color: feat_fill,
             date: UfDate.formatDate(resolved_date_obj),
             fillColor: feat_fill,
             fill_color: feat_fill,
+            flags: current_props.flags,
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: getEntityKeyframesSummary(ent),
+            label: current_props.label,
+            link: current_props.link,
             name: entity_name,
             name_long: entity_name,
             state_id: num_sid,
@@ -2139,10 +719,6 @@ export class AtlasBordersService {
       }
     }
 
-    //Sort features deterministically by name
-    features.sort((arg0_a, arg0_b) => arg0_a.properties.name.localeCompare(arg0_b.properties.name))
-
-    //Update in-memory LRU with capacity cap
     if (in_memory_slice_lru.size >= max_lru_entries) {
       let oldest_key = in_memory_slice_lru.keys().next().value
       if (oldest_key !== undefined)
@@ -2150,17 +726,21 @@ export class AtlasBordersService {
     }
     in_memory_slice_lru.set(lru_key, features)
 
-    //Persist to disk cache asynchronously only for baseline whole-year queries
-    if (is_whole_year_query) {
+    if (is_whole_year_query && (features.length > 0 || target_year < -3000)) {
       try {
-        fs.writeFile(
-          disk_cache_path,
-          JSON.stringify({ date: UfDate.formatDate(target_date_obj), domain, features, source, timestamp: target_ts, v: 3, year: target_year }),
-          'utf-8',
-          () => {}
-        )
-      } catch {
-        //Ignore disk write errors
+        let payload_to_cache = {
+          count: features.length,
+          date: UfDate.formatDate(target_date_obj),
+          domain,
+          features,
+          source,
+          timestamp: target_ts,
+          v: 3,
+          year: target_year,
+        }
+        fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
+      } catch (arg0_err) {
+        //Ignore write errors
       }
     }
 
@@ -2177,15 +757,11 @@ export class AtlasBordersService {
   }
 
   /**
-   * Streams sliced historical borders as chunked JSON to the HTTP response.
+   * Streams sliced border feature collections in chunked JSON format.
    *
    * @param {ServerResponse} arg0_res
    * @param {number} arg1_year
    * @param {Object} [arg2_options]
-   * @param {[number, number, number, number]} [arg2_options.bbox]
-   * @param {string} [arg2_options.dataset]
-   * @param {number} [arg2_options.day]
-   * @param {number} [arg2_options.month]
    *
    * @returns {void}
    */
@@ -2233,6 +809,9 @@ export class AtlasBordersService {
     res.write('  ]\n')
     res.write('}\n')
     res.end()
+
+    //Return statement
+    return
   }
 
   /**
@@ -2250,7 +829,7 @@ export class AtlasBordersService {
     let cshapes = AtlasBordersService.loadCShapes()
     let dataset_paths = AtlasBordersService.getDatasetPaths()
     let default_entities = AtlasBordersService.loadNaissance()
-    let search_entity_maps = [default_entities, ...cached_naissance_entities_by_path.values()]
+    let search_entity_maps = [default_entities]
 
     //Function body
     if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
@@ -2259,7 +838,6 @@ export class AtlasBordersService {
         search_entity_maps.push(detailed_entities)
     }
 
-    //1. Check Naissance entities across any loaded maps or default atlas.naissance
     for (let i = 0; i < search_entity_maps.length; i++) {
       let entities = search_entity_maps[i]
       if (entities.has(target_id)) {
@@ -2293,7 +871,6 @@ export class AtlasBordersService {
       }
     }
 
-    //2. Check CShapes entities
     let numeric_gw = parseInt(target_id, 10)
     let matching_features = cshapes.filter(
       (arg0_f) => arg0_f.properties.gwcode === numeric_gw || arg0_f.properties.cntry_name.toLowerCase() === target_id.toLowerCase()
@@ -2327,8 +904,6 @@ export class AtlasBordersService {
     //Return statement
     return null
   }
-
-  static states_by_id: Map<string | number, any> | null = null
 
   /**
    * Retrieves state metadata by state ID from data/atlas/temp/states.json.
@@ -2376,14 +951,14 @@ export class AtlasBordersService {
    * @param {number} arg1_year_frac
    * @param {string} [arg2_entity_name]
    *
-   * @returns {{ cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number }}
+   * @returns {StateCapitalInfo}
    */
   static getStateCapitalInfo (
     arg0_state_id: number,
     arg1_year_frac: number,
     arg2_entity_name?: string
-  ): { cap_coords?: [number, number]; capkey?: string; capname?: string; fill_color?: string; is_acapital: boolean; state_id?: number } {
-    return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name)
+  ): StateCapitalInfo {
+    return getStateCapitalInfo(arg0_state_id, arg1_year_frac, arg2_entity_name, AtlasBordersService.getStateById)
   }
 
   /**
@@ -2409,10 +984,8 @@ export class AtlasBordersService {
   static clearCache (): void {
     //Function body
     cached_active_state_ids.clear()
-    cached_naissance_entities_by_path.clear()
-    capital_info_cache.clear()
-    city_name_coords_cache.clear()
-    contemp_city_cache.clear()
+    clearNaissanceCache()
+    clearCityResolverCache()
     in_memory_slice_lru.clear()
 
     let cache_dir = AtlasBordersService.getDatasetPaths().cacheDir

@@ -648,3 +648,5 @@ export function formatLocalisedString (
   //Return statement
   return result
 }
+
+export { formatLocalisedString as formatString }

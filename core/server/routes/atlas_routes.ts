@@ -1,9 +1,12 @@
 import fs from 'fs'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { ParsedUrlQuery } from 'querystring'
+import { gzipSync } from 'node:zlib'
 import type { ParsedDataLayer } from '../layer_parser.ts'
 import { AtlasBordersService } from '../AtlasBordersService.ts'
 import { UfDate } from '../../framework/utils/uf_date.ts'
+
+let compressed_borders_cache = new Map<string, Buffer>()
 
 export interface AtlasRouteContext {
   layers: Record<string, ParsedDataLayer>
@@ -85,9 +88,13 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
   //Route 16: GET /api/atlas/borders or /api/gis/borders (Streamed or batch historical country boundaries)
   if (
     pathname === '/atlas/borders' ||
+    pathname === '/atlas/borders.json' ||
     pathname === '/api/atlas/borders' ||
+    pathname === '/api/atlas/borders.json' ||
     pathname === '/gis/borders' ||
-    pathname === '/api/gis/borders'
+    pathname === '/gis/borders.json' ||
+    pathname === '/api/gis/borders' ||
+    pathname === '/api/gis/borders.json'
   ) {
     let bbox_param = query.bbox as string
     let bbox: [number, number, number, number] | undefined = undefined
@@ -120,15 +127,49 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
         return
       }
 
-      let borders_payload = AtlasBordersService.getBordersAtYear(year, { bbox, dataset, day, month })
+      let accept_encoding = (req.headers['accept-encoding'] as string) || ''
+      let cache_key = `${dataset}:${year}-${month || 1}-${day || 1}:${bbox ? bbox.join(',') : ''}`
+      let supports_gzip = accept_encoding.includes('gzip')
+
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
+
+      if (supports_gzip && compressed_borders_cache.has(cache_key)) {
+        let cached_buf = compressed_borders_cache.get(cache_key)!
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Content-Encoding', 'gzip')
+        res.setHeader('Content-Length', cached_buf.length)
+        res.end(cached_buf)
+        return
+      }
+
+      let borders_payload = AtlasBordersService.getBordersAtYear(year, { bbox, dataset, day, month })
+
       if (borders_payload.features.length === 0 && year >= -3000) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
       } else {
-        res.setHeader('Cache-Control', 'no-cache, must-revalidate')
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
       }
-      res.end(JSON.stringify(borders_payload))
+
+      let json_str = JSON.stringify(borders_payload)
+
+      if (supports_gzip) {
+        let compressed = gzipSync(Buffer.from(json_str, 'utf-8'), { level: 6 })
+
+        if (compressed_borders_cache.size >= 150) {
+          let oldest_key = compressed_borders_cache.keys().next().value
+          if (oldest_key)
+            compressed_borders_cache.delete(oldest_key)
+        }
+        compressed_borders_cache.set(cache_key, compressed)
+
+        res.setHeader('Content-Encoding', 'gzip')
+        res.setHeader('Content-Length', compressed.length)
+        res.end(compressed)
+      } else {
+        res.setHeader('Content-Length', Buffer.byteLength(json_str))
+        res.end(json_str)
+      }
       return
     } catch (arg0_err: any) {
       console.error('[ApiMiddleware] Error querying historical borders:', arg0_err)

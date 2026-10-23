@@ -86,7 +86,7 @@ export async function fetchStadesterCitiesAsync (
         year: String(year),
       })
 
-      let res = await fetch(`/api/stadester/cities?${url_params.toString()}`)
+      let res = await fetch(`/api/stadester/cities.json?${url_params.toString()}`)
       if (!res.ok)
         return []
 

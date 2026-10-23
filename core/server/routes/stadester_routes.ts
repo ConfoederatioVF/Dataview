@@ -1,8 +1,11 @@
 import fs from 'fs'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { ParsedUrlQuery } from 'querystring'
+import { gzipSync } from 'node:zlib'
 import { StadesterService } from '../stadester_service.ts'
 import { AtlasBordersService } from '../AtlasBordersService.ts'
+
+let compressed_cities_cache = new Map<string, Buffer>()
 
 export interface StadesterRouteContext {
   pathname: string
@@ -73,7 +76,12 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
   }
 
   //Route 13: GET /api/stadester/cities (Active cities at year, with streaming and compact support)
-  if (pathname === '/stadester/cities' || pathname === '/api/stadester/cities') {
+  if (
+    pathname === '/stadester/cities' ||
+    pathname === '/stadester/cities.json' ||
+    pathname === '/api/stadester/cities' ||
+    pathname === '/api/stadester/cities.json'
+  ) {
     let bbox_param = query.bbox as string
     let bbox: [number, number, number, number] | undefined = undefined
     if (bbox_param) {
@@ -93,7 +101,23 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
 
     try {
+      let accept_encoding = (req.headers['accept-encoding'] as string) || ''
+      let cache_key = `${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}`
+      let supports_gzip = accept_encoding.includes('gzip')
+
       if (format === 'compact') {
+        res.statusCode = 200
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Content-Type', 'application/json')
+
+        if (supports_gzip && compressed_cities_cache.has(cache_key)) {
+          let cached_buf = compressed_cities_cache.get(cache_key)!
+          res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', cached_buf.length)
+          res.end(cached_buf)
+          return
+        }
+
         let compact_payload = StadesterService.getCompactCitiesAtYear(dataset, year, {
           bbox,
           color_mode,
@@ -102,9 +126,25 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
           min_pop,
           month,
         })
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.end(JSON.stringify(compact_payload))
+        let json_str = JSON.stringify(compact_payload)
+
+        if (supports_gzip) {
+          let compressed = gzipSync(Buffer.from(json_str, 'utf-8'), { level: 6 })
+
+          if (compressed_cities_cache.size >= 150) {
+            let oldest_key = compressed_cities_cache.keys().next().value
+            if (oldest_key)
+              compressed_cities_cache.delete(oldest_key)
+          }
+          compressed_cities_cache.set(cache_key, compressed)
+
+          res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', compressed.length)
+          res.end(compressed)
+        } else {
+          res.setHeader('Content-Length', Buffer.byteLength(json_str))
+          res.end(json_str)
+        }
         return
       }
 
@@ -132,12 +172,24 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         return
       }
 
-      res.end(JSON.stringify({
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+
+      let json_str = JSON.stringify({
         cities,
         count: cities.length,
         dataset,
         year,
-      }))
+      })
+
+      if (supports_gzip) {
+        let compressed = gzipSync(Buffer.from(json_str, 'utf-8'), { level: 6 })
+        res.setHeader('Content-Encoding', 'gzip')
+        res.setHeader('Content-Length', compressed.length)
+        res.end(compressed)
+      } else {
+        res.setHeader('Content-Length', Buffer.byteLength(json_str))
+        res.end(json_str)
+      }
       return
     } catch (arg0_err: any) {
       console.error('[ApiMiddleware] Error querying stadester cities:', arg0_err)

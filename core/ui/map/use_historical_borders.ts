@@ -63,8 +63,8 @@ export let fetchHistoricalBordersAsync = async function (
   }
 
   //Function body
-  url = `/api/atlas/borders?year=${year}&dataset=${dataset}&day=${day}&month=${month}`
-  res = await fetch(url, { cache: 'no-cache', signal })
+  url = `/api/atlas/borders.json?year=${year}&dataset=${dataset}&day=${day}&month=${month}`
+  res = await fetch(url, { signal })
   if (!res.ok)
     throw new Error(`HTTP error ${res.status}`)
 
@@ -210,9 +210,9 @@ export let useHistoricalBorders = function (
   is_active = enabled || active_layer_id === 'statistical_borders' || active_layer_id === 'detailed_borders' || active_layer_id === 'simplified_borders' || Boolean(active_layer_id && active_layer_id.includes('border'))
 
   date_obj = UfDate.fromFractionalYear(timeline_year)
-  effective_day = date_obj.day
-  effective_month = date_obj.month
   effective_year = date_obj.year
+  effective_month = (effective_year < 1886) ? 1 : date_obj.month
+  effective_day = (effective_year < 1886) ? 1 : date_obj.day
 
   cache_key = `${dataset}:${effective_year}-${effective_month}-${effective_day}`
 

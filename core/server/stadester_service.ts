@@ -17,8 +17,6 @@ import {
   getStateCapitals,
   isStateAcapital,
   loadCityMetadata,
-  loadStateCapitals,
-  matchMetadataToCity,
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
 import {
@@ -72,7 +70,6 @@ export let StadesterService = {
   isStateAcapital,
   loadCityMetadata,
   loadDataset,
-  loadStateCapitals,
-  matchMetadataToCity,
+  loadStateCapitals: getStateCapitals,
   resolveCityNameAtYear,
 }

@@ -137,7 +137,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Circle Transparency / Opacity Slider */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
-          <span className="text-muted-foreground">Circle Opacity</span>
+          <span className="text-muted-foreground">{t.mapmodes.stadester.circleOpacity || 'Circle Opacity'}</span>
           <span className="font-mono text-[10px] text-foreground">
             {Math.round(((config.opacity !== undefined) ? config.opacity : 0.7) * 100)}%
           </span>
@@ -174,7 +174,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            Growth Rate
+            {t.mapmodes.stadester.growthRate || 'Growth Rate'}
           </button>
           <button
             type="button"
@@ -189,7 +189,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            Population
+            {t.mapmodes.stadester.population || 'Population'}
           </button>
           <button
             type="button"
@@ -204,7 +204,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 : 'bg-background hover:bg-muted text-muted-foreground border-border'
               }`}
           >
-            Region
+            {t.mapmodes.stadester.region || 'Region'}
           </button>
         </div>
       </div>
@@ -226,7 +226,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Population Threshold (minPop) Slider & Number Input */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
-          <span className="text-muted-foreground">Min Population Threshold</span>
+          <span className="text-muted-foreground">{t.mapmodes.stadester.minPopThreshold || t.mapmodes.stadester.minPop || 'Min Population Threshold'}</span>
           <div className="flex items-center gap-1 font-mono">
             <input
               type="number"
@@ -278,7 +278,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Max Cities Limit Slider & Number Input */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
-          <span className="text-muted-foreground">Max Settlements Displayed</span>
+          <span className="text-muted-foreground">{t.mapmodes.stadester.maxSettlements || t.mapmodes.stadester.maxCities || 'Max Settlements Displayed'}</span>
           <div className="flex items-center gap-1 font-mono">
             <input
               type="number"
@@ -329,7 +329,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Bubble Size Multiplier */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
-          <span className="text-muted-foreground">Circle Bubble Size</span>
+          <span className="text-muted-foreground">{t.mapmodes.stadester.bubbleSize || 'Circle Bubble Size'}</span>
           <span className="text-foreground font-mono font-bold">{bubble_size.toFixed(2)}x</span>
         </div>
         <Slider
@@ -346,7 +346,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
       {/* Large-City Contrast Slider */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
-          <span className="text-muted-foreground">Large-City Contrast</span>
+          <span className="text-muted-foreground">{t.mapmodes.stadester.largeCityContrast || t.mapmodes.stadester.capitalContrast || 'Large-City Contrast'}</span>
           <span className="text-foreground font-mono font-bold">{large_city_contrast.toFixed(2)}x</span>
         </div>
         <Slider
@@ -465,7 +465,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                     : 'bg-background hover:bg-muted text-muted-foreground border-border'
                   }`}
               >
-                Use Country Colour
+                {t.mapmodes.stadester.countryColour || 'Country Colour'}
               </button>
               <button
                 type="button"
@@ -480,14 +480,14 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                     : 'bg-background hover:bg-muted text-muted-foreground border-border'
                   }`}
               >
-                Constant Colour
+                {t.mapmodes.stadester.constantColour || 'Constant Colour'}
               </button>
             </div>
 
             {config.capitalColorMode === 'constant' && (
               <div className="space-y-1 pt-1">
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-muted-foreground">Custom Colour</span>
+                  <span className="text-muted-foreground">{t.mapmodes.stadester.customColour || 'Custom Colour'}</span>
                   <div className="flex items-center gap-1.5">
                     <input
                       type="color"
@@ -516,13 +516,14 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                 {/* Preset Chips */}
                 <div className="flex items-center gap-1 pt-0.5 flex-wrap">
                   {[
-                    { label: 'Yellow', value: '#FFDC00' },
-                    { label: 'Green', value: '#5b8a5a' },
-                    { label: 'Red', value: '#FF4136' },
-                    { label: 'Grey', value: '#969696' },
-                    { label: 'Cyan', value: '#7FDBFF' },
+                    { key: 'yellow', label: 'Yellow', value: '#FFDC00' },
+                    { key: 'green', label: 'Green', value: '#5b8a5a' },
+                    { key: 'red', label: 'Red', value: '#FF4136' },
+                    { key: 'grey', label: 'Grey', value: '#969696' },
+                    { key: 'cyan', label: 'Cyan', value: '#7FDBFF' },
                   ].map((arg0_preset) => {
                     let is_active = (config.capitalConstantColor || '#FFDC00').toLowerCase() === arg0_preset.value.toLowerCase()
+                    let chip_label = (t.mapmodes.borders.colours as any)?.[arg0_preset.key] || arg0_preset.label
                     return (
                       <button
                         key={arg0_preset.value}
@@ -539,7 +540,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
                           }`}
                       >
                         <span className="w-2 h-2 inline-block border border-black/30" style={{ backgroundColor: arg0_preset.value }} />
-                        {arg0_preset.label}
+                        {chip_label}
                       </button>
                     )
                   })}

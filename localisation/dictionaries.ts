@@ -226,6 +226,7 @@ export interface LocalisationConfig {
         black: string
         cyan: string
         green: string
+        grey: string
         mauve: string
         orange: string
         red: string
@@ -299,21 +300,31 @@ export interface LocalisationConfig {
       capitalContrast: string
       capitalMarkers: string
       capitalUnderlines: string
+      circleOpacity: string
       circleStyle: string
       cityLabels: string
       colorMode: string
       constant: string
+      constantColour: string
+      countryColour: string
+      customColour: string
       datasetVersion: string
       fill: string
       growth: string
       growthPalette: string
+      growthRate: string
       halo: string
       heuristicCulling: string
       heuristicCullingDesc?: string
       labelCollision: string
+      largeCityContrast: string
       maxCities: string
+      maxSettlements: string
       minPop: string
+      minPopThreshold: string
       outline: string
+      population: string
+      region: string
       renderedCount: string
       selectDataset: string
       stadester10: string

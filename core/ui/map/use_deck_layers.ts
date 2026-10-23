@@ -814,8 +814,8 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
             score += 50000
           if (c.isCapital || c.is_capital)
             score += 10000
-          if (c.key && !c.key.includes('agglomeration'))
-            score += 5000
+          if (cap.cap_coords)
+            score += Math.max(0, Math.round((0.30 - dist) * 1000000))
           score += Math.max(0, Math.round((0.25 - dist) * 5000))
           score += Math.min(1000, Math.round((c.population || 0) / 1000))
 

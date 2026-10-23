@@ -12,6 +12,7 @@ import {
 import {
   getShortCityLabel,
   reconcileCapitalWithAuthoritativeBorders,
+  reconcileCitiesWithAuthoritativeBorders,
 } from './deck_capital_reconciliation.ts'
 
 export function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
@@ -421,18 +422,16 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
 
       //Reconcile capital cities isomorphically with authoritative historical border features
       if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
-        visible_label_cities = visible_label_cities.map((arg0_c: any) =>
-          reconcileCapitalWithAuthoritativeBorders(
-            arg0_c,
-            active_capitals_by_key,
-            active_capitals_by_name,
-            acapital_state_ids,
-            active_state_capitals_by_sid,
-            active_state_ids,
-            active_polity_names,
-            authoritative_capitals_by_city,
-            active_capitals_list
-          )
+        visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
+          visible_label_cities,
+          active_capitals_by_key,
+          active_capitals_by_name,
+          acapital_state_ids,
+          active_state_capitals_by_sid,
+          active_state_ids,
+          active_polity_names,
+          authoritative_capitals_by_city,
+          active_capitals_list
         )
       }
     }

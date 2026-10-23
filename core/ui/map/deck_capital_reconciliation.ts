@@ -156,7 +156,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
   //3. If candidate match found, verify spatial plausibility against match.cap_coords, match.bbox and country compatibility
   if (match && match.cap_coords && c_lon !== undefined && c_lat !== undefined) {
     cap_dist = Math.hypot(c_lon - match.cap_coords[0], c_lat - match.cap_coords[1])
-    if (cap_dist > 1.5) {
+    if (cap_dist > 0.25) {
       match = null
     }
   }
@@ -254,7 +254,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
       if (active_cap && (active_cap.capkey || active_cap.capname || active_cap.cap_coords)) {
         let is_same_coord = false
         if (active_cap.cap_coords && (c_lon !== undefined && c_lat !== undefined)) {
-          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.20
+          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.03
         }
         let clean_active_key = normalizeCityKey(active_cap.capkey || '')
         let clean_city_key = normalizeCityKey(city.key || '')
@@ -288,33 +288,203 @@ export function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  //6. Spatial fallback: match unassigned authoritative capital within 0.15 degrees
-  if (!city.isCapital && !city.is_capital && active_capitals_list && active_capitals_list.length > 0 && c_lon !== undefined && c_lat !== undefined) {
-    for (let cap of active_capitals_list) {
-      if (!cap.cap_coords)
+  //Return statement
+  return city
+}
+
+
+/**
+ * Reconciles a collection of cities against authoritative active historical borders features.
+ * Guarantees that for each designated capital point, only the single city spatially closest
+ * to that capital point is designated as capital, and all secondary cities within proximity have
+ * their capital status explicitly cleared.
+ *
+ * @param {any[]} arg0_cities - City points/labels array
+ * @param {Map<string, any>} arg1_capitals_by_key - Authoritative active capitals indexed by key
+ * @param {Map<string, any>} arg2_capitals_by_name - Authoritative active capitals indexed by name
+ * @param {Set<string>} arg3_acapital_state_ids - State IDs explicitly marked as acapital
+ * @param {Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>} arg4_state_capitals_by_sid - Active state capitals by state ID
+ * @param {Set<string>} [arg5_active_state_ids] - State IDs active in current historical borders
+ * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
+ * @param {Map<string, any>} [arg7_authoritative_capitals_by_city] - Pre-matched authoritative capitals by city key/id
+ * @param {Array<any>} [arg8_active_capitals_list] - Authoritative active capitals list with coordinates
+ *
+ * @returns {any[]} Reconciled cities array
+ */
+export function reconcileCitiesWithAuthoritativeBorders (
+  arg0_cities: any[],
+  arg1_capitals_by_key: Map<string, any>,
+  arg2_capitals_by_name: Map<string, any>,
+  arg3_acapital_state_ids: Set<string>,
+  arg4_state_capitals_by_sid: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>,
+  arg5_active_state_ids?: Set<string>,
+  arg6_active_polity_names?: Set<string>,
+  arg7_authoritative_capitals_by_city?: Map<string, any>,
+  arg8_active_capitals_list?: Array<any>
+): any[] {
+  //Convert from parameters
+  let acapital_state_ids = arg3_acapital_state_ids
+  let active_capitals_list = arg8_active_capitals_list
+  let active_polity_names = arg6_active_polity_names
+  let active_state_ids = arg5_active_state_ids
+  let authoritative_capitals_by_city = arg7_authoritative_capitals_by_city
+  let capitals_by_key = arg1_capitals_by_key
+  let capitals_by_name = arg2_capitals_by_name
+  let cities = arg0_cities
+  let state_capitals_by_sid = arg4_state_capitals_by_sid
+
+  //Guard clauses
+  if (!cities || cities.length === 0)
+    return cities || []
+
+  //Declare local instance variables
+  let assigned_capital_indices = new Set<number>()
+  let proximity_radius: number = 0.35
+  let reconciled: any[] = []
+  let suppressed_capital_indices = new Set<number>()
+
+  //Function body
+  //1. First pass: run baseline authoritative reconciliation on each individual city
+  for (let i = 0; i < cities.length; i++) {
+    let c = cities[i]
+    let r = reconcileCapitalWithAuthoritativeBorders(
+      c,
+      capitals_by_key,
+      capitals_by_name,
+      acapital_state_ids,
+      state_capitals_by_sid,
+      active_state_ids,
+      active_polity_names,
+      authoritative_capitals_by_city,
+      active_capitals_list
+    )
+    reconciled.push(r)
+  }
+
+  //2. Spatial resolution: for each designated capital point, assign only the single closest city
+  if (active_capitals_list && active_capitals_list.length > 0) {
+    for (let i = 0; i < active_capitals_list.length; i++) {
+      let cap = active_capitals_list[i]
+      if (!cap || !cap.cap_coords)
         continue
-      let d = Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1])
-      if (d <= 0.15 && d < best_dist) {
-        best_dist = d
-        best_cap = cap
+
+      let cap_coords = cap.cap_coords
+      let cap_lat = cap_coords[1]
+      let cap_lon = cap_coords[0]
+      let closest_dist: number = Infinity
+      let closest_index: number = -1
+      let nearby_indices: number[] = []
+
+      for (let x = 0; x < reconciled.length; x++) {
+        let city = reconciled[x]
+        let c_lat = city.rawCoords ? city.rawCoords[1] : (city.lat !== undefined ? city.lat : (city.coords ? city.coords[0] : (city.position ? city.position[1] : undefined)))
+        let c_lon = city.rawCoords ? city.rawCoords[0] : (city.lon !== undefined ? city.lon : (city.coords ? city.coords[1] : (city.position ? city.position[0] : undefined)))
+        if (c_lat === undefined || c_lon === undefined)
+          continue
+
+        let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
+        if (dist <= proximity_radius) {
+          nearby_indices.push(x)
+          if (dist < closest_dist) {
+            closest_dist = dist
+            closest_index = x
+          }
+        }
+      }
+
+      if (closest_index !== -1) {
+        let resolved_color = (cap.color && cap.color !== '#FFDC00') ? cap.color : '#FFDC00'
+        let target_city = reconciled[closest_index]
+        reconciled[closest_index] = {
+          ...target_city,
+          capitalColor: resolved_color,
+          capitalOf: cap.polity_name || target_city.capitalOf,
+          capitalStateId: cap.state_id !== undefined ? cap.state_id : target_city.capitalStateId,
+          capital_color: resolved_color,
+          capital_state_id: cap.state_id !== undefined ? cap.state_id : target_city.capital_state_id,
+          capital_state_name: cap.polity_name || target_city.capital_state_name,
+          isCapital: true,
+          is_capital: true,
+        }
+        assigned_capital_indices.add(closest_index)
+
+        //Suppress all other nearby secondary cities within proximity of this designated capital
+        for (let y = 0; y < nearby_indices.length; y++) {
+          let idx = nearby_indices[y]
+          if (idx !== closest_index)
+            suppressed_capital_indices.add(idx)
+        }
       }
     }
-    if (best_cap) {
-      let cap_color_fallback = (best_cap.color && best_cap.color !== '#FFDC00') ? best_cap.color : '#FFDC00'
-      return {
+  }
+
+  //3. Clustering suppression: ensure no multiple capitals within proximity radius of each other
+  for (let i = 0; i < reconciled.length; i++) {
+    let c1 = reconciled[i]
+    if (!c1.isCapital && !c1.is_capital)
+      continue
+    if (suppressed_capital_indices.has(i))
+      continue
+
+    let c1_lat = c1.rawCoords ? c1.rawCoords[1] : (c1.lat !== undefined ? c1.lat : (c1.coords ? c1.coords[0] : (c1.position ? c1.position[1] : undefined)))
+    let c1_lon = c1.rawCoords ? c1.rawCoords[0] : (c1.lon !== undefined ? c1.lon : (c1.coords ? c1.coords[1] : (c1.position ? c1.position[0] : undefined)))
+    if (c1_lat === undefined || c1_lon === undefined)
+      continue
+
+    for (let j = i + 1; j < reconciled.length; j++) {
+      let c2 = reconciled[j]
+      if (!c2.isCapital && !c2.is_capital)
+        continue
+      if (suppressed_capital_indices.has(j))
+        continue
+
+      let c2_lat = c2.rawCoords ? c2.rawCoords[1] : (c2.lat !== undefined ? c2.lat : (c2.coords ? c2.coords[0] : (c2.position ? c2.position[1] : undefined)))
+      let c2_lon = c2.rawCoords ? c2.rawCoords[0] : (c2.lon !== undefined ? c2.lon : (c2.coords ? c2.coords[1] : (c2.position ? c2.position[0] : undefined)))
+      if (c2_lat === undefined || c2_lon === undefined)
+        continue
+
+      let d = Math.hypot(c1_lon - c2_lon, c1_lat - c2_lat)
+      if (d <= proximity_radius) {
+        //If one is assigned by explicit designated capital point, suppress the other
+        if (assigned_capital_indices.has(i) && !assigned_capital_indices.has(j)) {
+          suppressed_capital_indices.add(j)
+        } else if (!assigned_capital_indices.has(i) && assigned_capital_indices.has(j)) {
+          suppressed_capital_indices.add(i)
+        } else {
+          //Otherwise suppress the one with smaller population
+          let pop1 = typeof c1.population === 'number' ? c1.population : 0
+          let pop2 = typeof c2.population === 'number' ? c2.population : 0
+          if (pop1 >= pop2) {
+            suppressed_capital_indices.add(j)
+          } else {
+            suppressed_capital_indices.add(i)
+          }
+        }
+      }
+    }
+  }
+
+  //4. Strip capital status from all suppressed secondary cities
+  for (let idx of suppressed_capital_indices) {
+    if (assigned_capital_indices.has(idx))
+      continue
+
+    let city = reconciled[idx]
+    if (city && (city.isCapital || city.is_capital)) {
+      reconciled[idx] = {
         ...city,
-        capitalColor: cap_color_fallback,
-        capital_color: cap_color_fallback,
-        capitalOf: best_cap.polity_name,
-        capitalStateId: best_cap.state_id,
-        capital_state_id: best_cap.state_id,
-        capital_state_name: best_cap.polity_name,
-        isCapital: true,
-        is_capital: true,
+        capitalColor: undefined,
+        capitalOf: undefined,
+        capitalStateId: undefined,
+        capital_color: undefined,
+        capital_state_id: undefined,
+        capital_state_name: undefined,
+        isCapital: false,
+        is_capital: false,
       }
     }
   }
 
   //Return statement
-  return city
+  return reconciled
 }

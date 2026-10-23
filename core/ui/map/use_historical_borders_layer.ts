@@ -1,6 +1,7 @@
 import { COORDINATE_SYSTEM } from '@deck.gl/core'
 import { GeoJsonLayer } from '@deck.gl/layers'
 import { transformGeometryToEqualEarth } from '@framework/geopng/equal_earth.ts'
+import { sanitizePolygonGeometry } from '@framework/geopng/polygon_sanitizer.ts'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import type { HistoricalBordersConfig, ProjectionType } from '@framework/geopng/types.ts'
@@ -73,7 +74,7 @@ export function createHistoricalBordersDeckLayer (
   let on_select = options.onSelectHistoricalFeature
   let projection = options.projection
   let selected_id = options.selectedHistoricalId
-  let timeline_year = options.timelineYear
+  let _timeline_year = options.timelineYear
 
   //Declare local instance variables
   let base_layer: GeoJsonLayer
@@ -122,12 +123,13 @@ export function createHistoricalBordersDeckLayer (
     if (projection === 'EqualEarth') {
       layer_data = borders_data.features.map((arg0_f) => ({
         ...arg0_f,
-        geometry: transformGeometryToEqualEarth(arg0_f.geometry),
+        geometry: transformGeometryToEqualEarth(sanitizePolygonGeometry(arg0_f.geometry)),
         raw_feature: arg0_f,
       }))
     } else {
       layer_data = borders_data.features.map((arg0_f) => ({
         ...arg0_f,
+        geometry: sanitizePolygonGeometry(arg0_f.geometry),
         raw_feature: arg0_f,
       }))
     }

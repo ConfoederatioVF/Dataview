@@ -1,3 +1,5 @@
+import { sanitizePolygonGeometry } from '../framework/geopng/polygon_sanitizer.ts'
+
 /**
  * Computes a 2D bounding box [minLng, minLat, maxLng, maxLat] for a GeoJSON geometry.
  *
@@ -246,10 +248,10 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
       new_coords.push(simplifyRing(geometry.coordinates[i], tol))
 
     //Return statement
-    return {
+    return sanitizePolygonGeometry({
       ...geometry,
       coordinates: new_coords,
-    }
+    })
   }
 
   if (type === 'MultiPolygon') {
@@ -262,12 +264,12 @@ export let cullAndSimplifyGeometry = function (arg0_geometry: any, arg1_toleranc
     }
 
     //Return statement
-    return {
+    return sanitizePolygonGeometry({
       ...geometry,
       coordinates: new_coords,
-    }
+    })
   }
 
   //Return statement
-  return geometry
+  return sanitizePolygonGeometry(geometry)
 }

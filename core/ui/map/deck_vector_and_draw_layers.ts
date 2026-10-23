@@ -7,6 +7,7 @@ import {
 } from '@deck.gl/layers'
 import { CountryFeature } from '@framework/geopng/polygon_binning.ts'
 import { transformGeometryToEqualEarth } from '@framework/geopng/equal_earth.ts'
+import { sanitizePolygonGeometry } from '@framework/geopng/polygon_sanitizer.ts'
 import { projectLngLatToLayerCoords } from '@framework/geopng/polygon_draw_tool.ts'
 import type {
   CircleOverlayConfig,
@@ -168,9 +169,12 @@ export function buildCustomVectorLayer (arg0_options: BuildCustomVectorOptions):
   let custom_vector_data = (projection === 'EqualEarth')
     ? custom_vector_features.map((arg0_f) => ({
         ...arg0_f,
-        geometry: transformGeometryToEqualEarth(arg0_f.geometry),
+        geometry: transformGeometryToEqualEarth(sanitizePolygonGeometry(arg0_f.geometry)),
       }))
-    : custom_vector_features
+    : custom_vector_features.map((arg0_f) => ({
+        ...arg0_f,
+        geometry: sanitizePolygonGeometry(arg0_f.geometry),
+      }))
 
   //Return statement
   return new GeoJsonLayer({
@@ -369,14 +373,14 @@ export function buildCountryHighlightLayers (arg0_options: BuildCountryHighlight
           let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
           return {
             ...arg0_c,
-            geometry: transformGeometryToEqualEarth(geom),
+            geometry: transformGeometryToEqualEarth(sanitizePolygonGeometry(geom)),
           }
         })
       : effective_selected_array.map((arg0_c: any) => {
           let geom = (arg0_c.raw_feature && arg0_c.raw_feature.geometry) ? arg0_c.raw_feature.geometry : arg0_c.geometry
           return {
             ...arg0_c,
-            geometry: { ...geom },
+            geometry: sanitizePolygonGeometry(geom),
           }
         })
 
@@ -438,9 +442,10 @@ export function buildCountryHighlightLayers (arg0_options: BuildCountryHighlight
         : (hovered_country.properties?.adm0_a3 || (hovered_country.id !== undefined && hovered_country.id !== null ? String(hovered_country.id) : '') || hovered_country.properties?.name || 'hov')
 
     let hov_geom = (hovered_country as any).raw_feature?.geometry || hovered_country.geometry
+    let clean_hov_geom = sanitizePolygonGeometry(hov_geom)
     let hovered_data = (projection === 'EqualEarth')
-      ? [{ ...hovered_country, geometry: transformGeometryToEqualEarth(hov_geom) }]
-      : [{ ...hovered_country, geometry: { ...hov_geom } }]
+      ? [{ ...hovered_country, geometry: transformGeometryToEqualEarth(clean_hov_geom) }]
+      : [{ ...hovered_country, geometry: clean_hov_geom }]
 
     layers.push(
       new GeoJsonLayer({
@@ -515,7 +520,7 @@ export function buildDrawToolLayers (arg0_options: BuildDrawToolLayersOptions): 
     layers.push(
       new GeoJsonLayer({
         id: `draw-tool-preview-${projection}-${draw_points.length}`,
-        data: preview_geojson_data,
+        data: preview_geojson_data as any,
         filled: true,
         stroked: false,
         pickable: false,

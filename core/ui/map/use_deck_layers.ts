@@ -803,6 +803,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
             } else if (c.other_names && Array.isArray(c.other_names)) {
               is_name_match = c.other_names.some((arg0_on: string) => {
                 let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+                let on_lower = arg0_on.toLowerCase().trim()
                 let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
                 return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name

@@ -269,6 +269,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let deck_ref = useRef<any>(null)
   let default_desktop_pick_radius: number
   let default_touch_pick_radius: number
+  let drag_end_time_ref = useRef<number>(0)
   let drag_start_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let dragged_vertex_idx_ref = useRef<number | null>(null)
   let effective_pick_radius: number
@@ -564,13 +565,16 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     let handleWindowPointerUp = () => {
       if (dragged_vertex_idx_ref.current !== null) {
         if (has_dragged_ref.current) {
+          drag_end_time_ref.current = Date.now()
           suppress_click_ref.current = true
           setTimeout(() => {
             suppress_click_ref.current = false
-          }, 120)
+          }, 450)
+          last_vertex_tap_ref.current = null
         }
         dragged_vertex_idx_ref.current = null
         drag_start_pos_ref.current = null
+        has_dragged_ref.current = false
         set_dragged_vertex_idx(null)
       }
     }
@@ -949,7 +953,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     (info: any) => {
       // 1. Drawing mode intercept
       if (is_drawing) {
-        if (suppress_click_ref.current || has_dragged_ref.current)
+        if (suppress_click_ref.current || has_dragged_ref.current || Date.now() - drag_end_time_ref.current < 450)
           return
 
         let click_x = info.x
@@ -1836,7 +1840,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
         }
       }}
       onDoubleClickCapture={(e) => {
-        if (point_just_deleted_ref.current) {
+        let now = Date.now()
+        if (point_just_deleted_ref.current || now - drag_end_time_ref.current < 450) {
           e.preventDefault()
           e.stopPropagation()
           return
@@ -1985,14 +1990,22 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           let did_drag = has_dragged_ref.current
 
           if (did_drag) {
+            drag_end_time_ref.current = Date.now()
             suppress_click_ref.current = true
             setTimeout(() => {
               suppress_click_ref.current = false
-            }, 120)
+            }, 450)
             last_vertex_tap_ref.current = null
           } else {
             // Vertex tap without dragging - check for double tap/click
             let now = Date.now()
+            if (now - drag_end_time_ref.current < 450) {
+              dragged_vertex_idx_ref.current = null
+              drag_start_pos_ref.current = null
+              has_dragged_ref.current = false
+              set_dragged_vertex_idx(null)
+              return
+            }
             let last_tap = last_vertex_tap_ref.current
             if (
               last_tap &&
@@ -2137,10 +2150,11 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           let did_drag = has_dragged_ref.current
 
           if (did_drag) {
+            drag_end_time_ref.current = Date.now()
             suppress_click_ref.current = true
             setTimeout(() => {
               suppress_click_ref.current = false
-            }, 120)
+            }, 450)
             last_vertex_tap_ref.current = null
           } else {
             let touch = e.changedTouches ? e.changedTouches[0] : null
@@ -2148,6 +2162,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
             let x = touch ? touch.clientX - rect.left : (drag_start_pos_ref.current?.x ?? 0)
             let y = touch ? touch.clientY - rect.top : (drag_start_pos_ref.current?.y ?? 0)
             let now = Date.now()
+            if (now - drag_end_time_ref.current < 450) {
+              dragged_vertex_idx_ref.current = null
+              drag_start_pos_ref.current = null
+              has_dragged_ref.current = false
+              set_dragged_vertex_idx(null)
+              return
+            }
             let last_tap = last_vertex_tap_ref.current
             if (
               last_tap &&

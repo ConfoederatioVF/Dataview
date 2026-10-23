@@ -42,9 +42,10 @@ import { CirclePixelPoint } from './use_circle_overlay'
 import * as d3Chromatic from 'd3-scale-chromatic'
 
 import {
-  resolveRegionColorHex,
-  hexToRgb,
   ensureContrastAgainstDark,
+  getCapitalColorRgba,
+  hexToRgb,
+  resolveRegionColorHex,
 } from './deck_layer_palette_utils'
 
 function getShortCityLabel (arg0_name: string): string {
@@ -1859,47 +1860,13 @@ export let useDeckLayers = function (arg0_options: UseDeckLayersParams): any[] {
                 if (!d.isCapital || options.stadesterConfig?.showCapitals === false || options.stadesterConfig?.showCapitalUnderlines === false)
                   return [0, 0, 0, 0]
 
-                let cap_rgb: [number, number, number] = [255, 220, 0]
-                let color_mode = options.stadesterConfig?.capitalColorMode || 'state'
-                let constant_color = options.stadesterConfig?.capitalConstantColor || '#FFDC00'
-
-                if (color_mode === 'constant') {
-                  cap_rgb = hexToRgb(constant_color)
-                } else if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
-                  cap_rgb = [d.capitalColor[0], d.capitalColor[1], d.capitalColor[2]]
-                } else if (typeof d.capitalColor === 'string' && d.capitalColor.startsWith('#')) {
-                  cap_rgb = hexToRgb(d.capitalColor)
-                } else {
-                  cap_rgb = hexToRgb(constant_color)
-                }
-                if (color_mode === 'state')
-                  return [cap_rgb[0], cap_rgb[1], cap_rgb[2], 255]
-
-                let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
-                return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
+                return getCapitalColorRgba(d, options.stadesterConfig)
               },
               getColor: (d: any) => {
                 if (!d.isCapital || options.stadesterConfig?.showCapitals === false)
                   return [255, 255, 255, 255]
 
-                let cap_rgb: [number, number, number] = [255, 220, 0]
-                let color_mode = options.stadesterConfig?.capitalColorMode || 'state'
-                let constant_color = options.stadesterConfig?.capitalConstantColor || '#FFDC00'
-
-                if (color_mode === 'constant') {
-                  cap_rgb = hexToRgb(constant_color)
-                } else if (Array.isArray(d.capitalColor) && d.capitalColor.length >= 3) {
-                  cap_rgb = [d.capitalColor[0], d.capitalColor[1], d.capitalColor[2]]
-                } else if (typeof d.capitalColor === 'string' && d.capitalColor.startsWith('#')) {
-                  cap_rgb = hexToRgb(d.capitalColor)
-                } else {
-                  cap_rgb = hexToRgb(constant_color)
-                }
-                if (color_mode === 'state')
-                  return [cap_rgb[0], cap_rgb[1], cap_rgb[2], 255]
-
-                let contrast_rgb = ensureContrastAgainstDark(cap_rgb, 155)
-                return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
+                return getCapitalColorRgba(d, options.stadesterConfig)
               },
               getTextAnchor: 'start',
               getAlignmentBaseline: 'center',

@@ -46,7 +46,7 @@ export function ensureContrastAgainstDark (
   let t: number
 
   //Guard clauses
-  if (!rgb || rgb.length < 3)
+  if (!rgb || rgb.length < 3 || isNaN(r) || isNaN(g) || isNaN(b))
     return [255, 220, 0]
 
   //Function body
@@ -63,6 +63,88 @@ export function ensureContrastAgainstDark (
   //Return statement
   return [r, g, b]
 }
+
+
+/**
+ * Resolves a capital city's RGBA label colour, ensuring minimum luminance contrast against dark backgrounds.
+ *
+ * @param {any} arg0_city - City object containing capitalColor or capital_color metadata
+ * @param {any} [arg1_config] - Stadester configuration with capitalColorMode and capitalConstantColor
+ * @param {number} [arg2_min_luminance=155] - Minimum luminance threshold to enforce
+ *
+ * @returns {[number, number, number, number]}
+ */
+export function getCapitalColorRgba (
+  arg0_city: any,
+  arg1_config?: any,
+  arg2_min_luminance?: number
+): [number, number, number, number] {
+  //Convert from parameters
+  let city = arg0_city
+  let config = arg1_config
+  let min_luminance = (arg2_min_luminance !== undefined) ? arg2_min_luminance : 155
+
+  //Declare local instance variables
+  let cap_rgb: [number, number, number] = [255, 220, 0]
+  let color_mode = config?.capitalColorMode || 'state'
+  let constant_color = config?.capitalConstantColor || '#FFDC00'
+  let contrast_rgb: [number, number, number]
+  let raw_cap_color: any
+
+  //Guard clauses
+  if (!city)
+    return [255, 220, 0, 255]
+
+  //Function body
+  raw_cap_color = city.capitalColor || city.capital_color
+
+  if (color_mode === 'constant') {
+    cap_rgb = hexToRgb(constant_color)
+  } else if (Array.isArray(raw_cap_color) && raw_cap_color.length >= 3) {
+    cap_rgb = [raw_cap_color[0], raw_cap_color[1], raw_cap_color[2]]
+  } else if (typeof raw_cap_color === 'string' && raw_cap_color.trim().length > 0) {
+    cap_rgb = hexToRgb(raw_cap_color)
+  } else {
+    cap_rgb = hexToRgb(constant_color)
+  }
+
+  contrast_rgb = ensureContrastAgainstDark(cap_rgb, min_luminance)
+
+  //Return statement
+  return [contrast_rgb[0], contrast_rgb[1], contrast_rgb[2], 255]
+}
+
+
+/**
+ * Converts hexadecimal color string to [R, G, B] tuple.
+ *
+ * @param {string} arg0_hex
+ *
+ * @returns {[number, number, number]}
+ */
+export function hexToRgb (arg0_hex: string): [number, number, number] {
+  //Convert from parameters
+  let hex = (arg0_hex || '').replace('#', '').trim()
+
+  //Declare local instance variables
+  let num: number
+
+  //Guard clauses
+  if (!hex)
+    return [255, 220, 0]
+
+  //Function body
+  if (hex.length === 3)
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
+
+  num = parseInt(hex, 16)
+  if (isNaN(num))
+    return [255, 220, 0]
+
+  //Return statement
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]
+}
+
 
 /**
  * Resolves regional color hex for a given world region and coordinate pair.
@@ -111,20 +193,4 @@ export function resolveRegionColorHex (arg0_region?: string, arg1_coords?: [numb
 
   //Return statement
   return '#ef4444'
-}
-
-/**
- * Converts hexadecimal color string to [R, G, B] tuple.
- *
- * @param {string} arg0_hex
- *
- * @returns {[number, number, number]}
- */
-export function hexToRgb (arg0_hex: string): [number, number, number] {
-  //Convert from parameters
-  let hex = arg0_hex.replace('#', '')
-  if (hex.length === 3)
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-  let num = parseInt(hex, 16)
-  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]
 }

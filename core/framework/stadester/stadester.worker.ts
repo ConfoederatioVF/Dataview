@@ -270,7 +270,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
     bubbleSize: b_scale,
     colorMode: color_mode,
     displayOptions: display_options,
-    heuristicCulling: is_heuristic_culling,
+    heuristicCulling: is_heuristic_culling = true,
     isHalo: is_halo,
     isMobile: is_mobile,
     labelCollision: is_collision_active,

@@ -146,7 +146,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         displayOptions: config.display_options,
         heuristicCulling: (config.heuristicCulling !== undefined)
           ? Boolean(config.heuristicCulling)
-          : Boolean(window_w < 768),
+          : true,
         isHalo: config.halo !== false && !config.filled,
         isMobile: Boolean(window_w < 768),
         labelCollision: config.labelCollision !== false,

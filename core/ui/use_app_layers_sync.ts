@@ -321,8 +321,8 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
                 growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
                 halo: opts.halo ?? arg0_prev.halo,
                 heuristicCulling: is_mobile
-                  ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
-                  : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
+                  ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? opts.heuristic_culling ?? opts.heuristicCulling ?? true)
+                  : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? true),
                 labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
                 largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
                 maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,
@@ -374,8 +374,8 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
             growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,
             halo: opts.halo ?? arg0_prev.halo,
             heuristicCulling: is_mobile
-              ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? true)
-              : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? false),
+              ? (opts.mobile_heuristic_culling ?? opts.mobileHeuristicCulling ?? opts.heuristic_culling ?? opts.heuristicCulling ?? true)
+              : (opts.heuristic_culling ?? opts.heuristicCulling ?? arg0_prev.heuristicCulling ?? true),
             labelCollision: opts.label_collision ?? opts.labelCollision ?? arg0_prev.labelCollision,
             largeCityContrast: opts.large_city_contrast ?? opts.largeCityContrast ?? arg0_prev.largeCityContrast,
             maxCities: opts.max_cities ?? opts.maxCities ?? arg0_prev.maxCities,

@@ -49,7 +49,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   let bubble_size = config.bubbleSize
   let color_mode = config.colorMode
   let dataset = config.dataset || 'stadester_1.1'
-  let heuristic_culling = Boolean(config.heuristicCulling)
+  let heuristic_culling = (config.heuristicCulling !== undefined) ? Boolean(config.heuristicCulling) : true
   let large_city_contrast = (config.largeCityContrast !== undefined) ? config.largeCityContrast : 1.0
   let max_cities = config.maxCities
   let min_pop = config.minPop
@@ -395,7 +395,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           onClick={() =>
             on_change_config((arg0_prev) => ({
               ...arg0_prev,
-              heuristicCulling: !arg0_prev.heuristicCulling,
+              heuristicCulling: !(arg0_prev.heuristicCulling ?? true),
             }))
           }
           className={`px-2 py-0.5 text-[10px] rounded-none border transition-colors cursor-pointer font-bold ${heuristic_culling

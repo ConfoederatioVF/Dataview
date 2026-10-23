@@ -145,7 +145,7 @@ export let App: React.FC = function () {
     filled: true,
     growthPalette: 'Rainbow',
     halo: false,
-    heuristicCulling: is_mobile,
+    heuristicCulling: true,
     labelCollision: true,
     maxCities: 4000,
     minPop: 0.01,

@@ -22,7 +22,6 @@ import { useLocalisation } from '@localisation'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { MarkdownRenderer } from '@ui/components/markdown_renderer'
 import { InfoFlyoutPanel } from '@ui/topbar/info_flyout_panel'
-import { DataLayersTab } from './data_layers_tab'
 import { SidebarBinningSection } from './sidebar_binning_section'
 import { SidebarHeader } from './sidebar_header'
 import { SidebarManualUploadSection } from './sidebar_manual_upload_section'
@@ -170,6 +169,7 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
   let set_opacity = props.setOpacity
   let set_percentile_list = props.setPercentileList
   let set_scale_type = props.setScaleType
+  let stadester_config = props.stadesterConfig
   let top_clearance = props.topClearance
   let user_role = props.userRole
   let width = props.width
@@ -187,22 +187,95 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
   let { t } = useLocalisation()
 
   //Function body
+  let active_layer = useMemo(() => {
+    if (!active_layer_id)
+      return null
+    if (layers && layers[active_layer_id])
+      return layers[active_layer_id]
+    if (active_layer_id.includes('.')) {
+      let parent_id = active_layer_id.split('.')[0]
+      let parent = layers ? layers[parent_id] : null
+      if (parent && parent.sub_layers) {
+        let sub = parent.sub_layers.find((arg0_sub: any) => arg0_sub.id === active_layer_id)
+        if (sub)
+          return sub
+      }
+    }
+    return null
+  }, [active_layer_id, layers])
+
   let active_descriptions = useMemo(() => {
-    let descriptions: Array<{ id: string; markdown: string; title: string }> = []
-    if (map_modes) {
+    let active_entries: { id: string; markdown: string; title: string }[] = []
+    let added_ids = new Set<string>()
+
+    //1. Active primary raster/vector layer
+    if (active_layer && active_layer.id !== 'default_basemap' && active_layer.type !== 'vector.basemap' && active_layer.description) {
+      let raw_md = (Array.isArray(active_layer.description)) ? active_layer.description.join('\n') : String(active_layer.description)
+      active_entries.push({
+        id: active_layer.id,
+        markdown: raw_md,
+        title: active_layer.name || active_layer.id,
+      })
+      added_ids.add(active_layer.id)
+    }
+
+    //2. Stadestér settlements overlay
+    if (stadester_config?.enabled && layers?.['stadester']?.description) {
+      let raw_md = (Array.isArray(layers['stadester'].description)) ? layers['stadester'].description.join('\n') : String(layers['stadester'].description)
+      active_entries.push({
+        id: 'stadester',
+        markdown: raw_md,
+        title: layers['stadester'].name || 'Stadestér (Cities)',
+      })
+      added_ids.add('stadester')
+    }
+
+    //3. Historical Borders overlay
+    if (historical_borders_config?.enabled) {
+      let border_dataset = historical_borders_config.dataset || 'statistical_borders'
+      let border_layer = layers?.[border_dataset] || (border_dataset === 'statistical_borders' ? layers?.['simplified_borders'] : undefined)
+      if (border_layer?.description) {
+        let raw_md = (Array.isArray(border_layer.description)) ? border_layer.description.join('\n') : String(border_layer.description)
+        active_entries.push({
+          id: border_dataset,
+          markdown: raw_md,
+          title: border_layer.name || 'Historical Borders',
+        })
+        added_ids.add(border_dataset)
+      }
+    }
+
+    //4. Other active map modes
+    if (map_modes && map_modes.length > 0) {
       for (let i = 0; i < map_modes.length; i++) {
-        let m = map_modes[i]
-        if (m.enabled && m.description) {
-          descriptions.push({
-            id: m.id,
-            markdown: m.description,
-            title: m.label || m.name,
-          })
+        let mode = map_modes[i]
+        if (mode.active && mode.id !== 'default' && !added_ids.has(mode.id)) {
+          let desc = (mode as any).description || layers?.[mode.id]?.description
+          if (desc) {
+            let raw_md = (Array.isArray(desc)) ? desc.join('\n') : String(desc)
+            active_entries.push({
+              id: mode.id,
+              markdown: raw_md,
+              title: mode.label || layers?.[mode.id]?.name || mode.id,
+            })
+            added_ids.add(mode.id)
+          }
         }
       }
     }
-    return descriptions
-  }, [map_modes])
+
+    //5. Fallback to default basemap if no other overlays or modes have descriptions
+    if (active_entries.length === 0 && active_layer?.description) {
+      let raw_md = (Array.isArray(active_layer.description)) ? active_layer.description.join('\n') : String(active_layer.description)
+      active_entries.push({
+        id: active_layer.id || 'default_basemap',
+        markdown: raw_md,
+        title: active_layer.name || 'Description',
+      })
+    }
+
+    return active_entries
+  }, [active_layer, historical_borders_config?.dataset, historical_borders_config?.enabled, layers, map_modes, stadester_config?.enabled])
 
   let toggle_folder = function (arg0_folder: string) {
     set_open_folders((arg0_prev) => ({
@@ -420,20 +493,6 @@ export let SidebarControls: React.FC<SidebarControlsProps> = function (arg0_prop
                 setAppMode={set_app_mode}
                 setDataFormat={set_data_format}
                 t={t}
-              />
-
-              {/* SECTION 4: DATA LAYERS CATALOGUE TAB */}
-              <DataLayersTab
-                activeLayerId={active_layer_id}
-                activeVariableSelectors={active_variable_selectors}
-                isLoadingLayers={is_loading_layers}
-                layers={layers}
-                onChangeVariableSelector={on_change_variable_selector}
-                onSelectLayer={on_select_layer}
-                onToggleMapMode={on_toggle_map_mode}
-                mapModes={map_modes}
-                stadesterConfig={props.stadesterConfig}
-                historicalBordersConfig={historical_borders_config}
               />
             </div>
           )

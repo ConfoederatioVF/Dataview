@@ -150,9 +150,9 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         return false
       if (state_id !== undefined && (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id)))
         return true
-      if (c_norm) {
+      if (state_id === undefined && c_norm) {
         let cap_of = (arg0_c.capitalOf || arg0_c.capital_state_name || '').toLowerCase().trim()
-        if (cap_of && (cap_of === c_norm || cap_of.includes(c_norm) || c_norm.includes(cap_of)))
+        if (cap_of && cap_of === c_norm)
           return true
       }
       return false

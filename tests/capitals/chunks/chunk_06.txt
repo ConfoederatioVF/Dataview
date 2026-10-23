@@ -1661,7 +1661,7 @@ TIMELINE:
 STATE: [3545] Karkota Empire (626.1.1 -> 856.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  626.1.1 -> 856.1.1: Srinagar [ghsl-Srinagar-India]
+  626.1.1 -> 856.1.1: Srinagar [stadester-Srînagar-India]
 ---
 
 STATE: [3546] Nevada Territory (1861.3.2 -> 1864.10.31) [fill: #944481]

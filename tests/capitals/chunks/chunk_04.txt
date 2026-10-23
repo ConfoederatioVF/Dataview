@@ -757,8 +757,11 @@ TIMELINE:
 ---
 
 STATE: [2086] British East India Company (1612.1.1 -> 1858.8.2) [fill: #EBBCC5]
-STATUS: ACAPITAL
-REASON: Corporate chartered trading company with decentralized presidency factories across India
+STATUS: CAPITAL
+TIMELINE:
+  1612.1.1 -> 1687.1.1: Surat [ghsl-Surat-India]
+  1687.1.1 -> 1773.1.1: Bombay [stadester-Mumbaî-India]
+  1773.1.1 -> 1858.8.2: Calcutta [stadester-Calcutta-India]
 ---
 
 STATE: [2087] Crimean People's Republic (1917.12.13 -> 1918.1.25) [fill: #687FAD]
@@ -2601,7 +2604,7 @@ TIMELINE:
 STATE: [2398] Dutch Bengal (1628.1.1 -> 1824.3.17) [fill: #E0A348]
 STATUS: CAPITAL
 TIMELINE:
-  1628.1.1 -> 1824.3.17: Chinsurah [stadester-Calcutta-India]
+  1628.1.1 -> 1824.3.17: Chinsurah [stadester-Hugli-Chinsurah-India]
 ---
 
 STATE: [2399] Dutse (1422.1.1 -> 1808.1.1) [fill: #405F85]

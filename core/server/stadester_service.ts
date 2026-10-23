@@ -241,6 +241,7 @@ export let StadesterService = {
   city_metadata_mtime: 0,
   datasets: new Map<string, Record<string, CityIndexEntry>>(),
   lite_cache_paths: new Map<string, string>(),
+  state_capitals_cache: null as Record<string, any> | null,
   state_capitals_mtime: 0,
   states_by_id: null as Map<string | number, any> | null,
 
@@ -293,6 +294,59 @@ export let StadesterService = {
     return StadesterService.states_by_id.get(state_id) || StadesterService.states_by_id.get(String(state_id)) || null
   },
 
+
+  /**
+   * Retrieves the authoritative state_capitals.json mapping.
+   *
+   * @returns {Record<string, any>}
+   */
+  getStateCapitals: function (): Record<string, any> {
+    //Declare local instance variables
+    let file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+
+    //Guard clauses
+    if (StadesterService.state_capitals_cache)
+      return StadesterService.state_capitals_cache
+
+    //Function body
+    if (fs.existsSync(file_path)) {
+      try {
+        StadesterService.state_capitals_cache = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
+      } catch {
+        StadesterService.state_capitals_cache = {}
+      }
+    } else {
+      StadesterService.state_capitals_cache = {}
+    }
+
+    //Return statement
+    return StadesterService.state_capitals_cache || {}
+  },
+
+
+  /**
+   * Checks whether a state is marked as acapital in state_capitals.json.
+   *
+   * @param {string | number} arg0_state_id
+   *
+   * @returns {boolean}
+   */
+  isStateAcapital: function (arg0_state_id: string | number): boolean {
+    //Convert from parameters
+    let state_id = arg0_state_id
+
+    //Guard clauses
+    if (state_id === undefined || state_id === null)
+      return false
+
+    //Declare local instance variables
+    let sc = StadesterService.getStateCapitals()
+    let sid_str = String(state_id)
+
+    //Return statement
+    return Boolean(sc[sid_str]?.acapital)
+  },
+
   /**
    * Evaluates whether a city was a capital at target historical year, validating state existence.
    *
@@ -329,6 +383,8 @@ export let StadesterService = {
       let sid_num = Number(arg0_sid)
       let state = StadesterService.getStateById(arg0_sid)
       if (!state)
+        return false
+      if (StadesterService.isStateAcapital(arg0_sid))
         return false
       let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
       let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
@@ -632,6 +688,7 @@ export let StadesterService = {
       let stats = fs.statSync(file_path)
       StadesterService.state_capitals_mtime = stats.mtimeMs
       state_capitals = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
+      StadesterService.state_capitals_cache = state_capitals
     } catch (arg0_err) {
       console.warn('[StadesterService] Failed to load state_capitals.json:', arg0_err)
       return
@@ -669,6 +726,10 @@ export let StadesterService = {
         for (let y = 0; y < city.capital_records.length; y++) {
           let rec = city.capital_records[y]
           if (rec.state_id !== null && rec.state_id !== undefined) {
+            let s_id_str = String(rec.state_id)
+            if (state_capitals[s_id_str]?.acapital)
+              continue
+
             let next_rec = (y + 1 < city.capital_records.length) ? city.capital_records[y + 1] : null
             let stop_date = next_rec ? next_rec.date : '2026.1.1'
             let stop_frac = next_rec ? next_rec.year_frac : 2026
@@ -1801,6 +1862,8 @@ export let StadesterService = {
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
           return false
+        if (StadesterService.isStateAcapital(arg0_sid))
+          return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
         let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
@@ -2017,6 +2080,8 @@ export let StadesterService = {
         let sid_num = Number(arg0_sid)
         let state = StadesterService.getStateById(arg0_sid)
         if (!state)
+          return false
+        if (StadesterService.isStateAcapital(arg0_sid))
           return false
         let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
         let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)

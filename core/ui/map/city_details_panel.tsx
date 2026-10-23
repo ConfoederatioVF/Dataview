@@ -82,6 +82,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
   let city_key: string | null
   let density_at_year: number | undefined
   let display_city_name: string
+  let explicit_is_cap: boolean | undefined
   let format: ReturnType<typeof useLocalisation>['format']
   let formatted_current_year: string
   let full_record: CityFullRecord | null
@@ -124,12 +125,16 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       )
     : ''
 
-  is_capital = Boolean(
-    (city as any)?.is_capital ||
-    (city as any)?.isCapital ||
-    ((city as any)?.capital_records && isCityCapitalAtYear(city as any, current_year)) ||
-    ((city as any)?.capital && isCityCapitalAtYear(city as any, current_year))
-  )
+  explicit_is_cap = (city as any)?.isCapital !== undefined
+    ? Boolean((city as any).isCapital)
+    : ((city as any)?.is_capital !== undefined ? Boolean((city as any).is_capital) : undefined)
+
+  is_capital = explicit_is_cap !== undefined
+    ? explicit_is_cap
+    : Boolean(
+        ((city as any)?.capital_records && isCityCapitalAtYear(city as any, current_year)) ||
+        ((city as any)?.capital && isCityCapitalAtYear(city as any, current_year))
+      )
 
   polity_name =
     (city as any)?.capitalOf ||
@@ -138,12 +143,16 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   if (borders_data && borders_data.features && borders_data.features.length > 0) {
     let sid = (city as any)?.capital_state_id || (city as any)?.capitalStateId
-    if (sid !== undefined && !polity_name) {
-      let matched_feat = borders_data.features.find((f: any) => f.properties?.state_id === sid || f.properties?.state_id === Number(sid))
-      if (matched_feat?.properties?.name) {
-        polity_name = matched_feat.properties.name
-        is_capital = true
-      }
+    let matched_feat = sid !== undefined
+      ? borders_data.features.find((arg0_f: any) => arg0_f.properties?.state_id === sid || arg0_f.properties?.state_id === Number(sid))
+      : null
+
+    if (matched_feat?.properties?.is_acapital) {
+      is_capital = false
+      polity_name = undefined
+    } else if (sid !== undefined && !polity_name && matched_feat?.properties?.name) {
+      polity_name = matched_feat.properties.name
+      is_capital = true
     }
 
     if (!is_capital || !polity_name) {
@@ -155,6 +164,8 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
         let city_country = (city?.country || (city as any)?.country || '').toLowerCase().trim()
 
         for (let feat of borders_data.features) {
+          if (feat.properties?.is_acapital)
+            continue
           if (feat.properties?.cap_coords && Array.isArray(feat.properties.cap_coords) && feat.properties.cap_coords.length >= 2) {
             let dist = Math.hypot(c_lon - feat.properties.cap_coords[0], c_lat - feat.properties.cap_coords[1])
             if (dist <= 0.20) {
@@ -187,25 +198,10 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
         }
       }
     }
+  }
 
-    //Enforce larger country resolution: if city claims to be capital of a microstate that does not match city.country,
-    //and a matching larger state exists in borders_data:
-    let city_country = (city?.country || (city as any)?.country || '').toLowerCase().trim()
-    if (city_country) {
-      let pol_norm = (polity_name || '').toLowerCase().trim()
-      if (pol_norm && !pol_norm.includes(city_country) && !city_country.includes(pol_norm)) {
-        let country_feat = borders_data.features.find((arg0_f: any) => {
-          let fn = (arg0_f.properties?.name || '').toLowerCase().trim()
-          return fn === city_country || fn.includes(city_country) || city_country.includes(fn)
-        })
-        if (country_feat && country_feat.properties?.name) {
-          polity_name = country_feat.properties.name
-          if (country_feat.properties?.state_id !== undefined && (city as any)) {
-            (city as any).capital_state_id = country_feat.properties.state_id
-          }
-        }
-      }
-    }
+  if (!is_capital) {
+    polity_name = undefined
   }
 
   //Extract population for current year (safely handle primitive vs dictionary)

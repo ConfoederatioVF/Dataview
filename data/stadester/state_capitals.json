@@ -28372,8 +28372,34 @@
     ]
   },
   "2086": {
-    "acapital": true,
-    "fill": "#EBBCC5"
+    "acapital": false,
+    "fill": "#EBBCC5",
+    "timeline": [
+      {
+        "city": "Surat",
+        "key": "ghsl-Surat-India",
+        "start": "1612.1.1",
+        "start_frac": 1612.0027397260274,
+        "stop": "1687.1.1",
+        "stop_frac": 1687.0027397260274
+      },
+      {
+        "city": "Bombay",
+        "key": "stadester-Mumbaî-India",
+        "start": "1687.1.1",
+        "start_frac": 1687.0027397260274,
+        "stop": "1773.1.1",
+        "stop_frac": 1773.0027397260274
+      },
+      {
+        "city": "Calcutta",
+        "key": "stadester-Calcutta-India",
+        "start": "1773.1.1",
+        "start_frac": 1773.0027397260274,
+        "stop": "1858.8.2",
+        "stop_frac": 1858.5808219178082
+      }
+    ]
   },
   "2087": {
     "acapital": false,
@@ -32479,11 +32505,11 @@
     "timeline": [
       {
         "city": "Chinsurah",
-        "key": "stadester-Calcutta-India",
+        "key": "stadester-Hugli-Chinsurah-India",
         "start": "1628.1.1",
         "start_frac": 1628.0027397260274,
         "stop": "1824.3.17",
-        "stop_frac": 1824.2109589041097
+        "stop_frac": 1824.207650273224
       }
     ]
   },
@@ -37808,12 +37834,12 @@
     "fill": "#EBBCC5",
     "timeline": [
       {
-        "city": "Srinagar",
-        "key": "stadester-Srinagar--Garhwal--India",
+        "city": "Tehri",
+        "key": "stadester-Tehri-India",
         "start": "1815.4.21",
         "start_frac": 1815.304109589041,
-        "stop": "1950.1.1",
-        "stop_frac": 1950.0027397260274
+        "stop": "1949.8.1",
+        "stop_frac": 1949.5808219178082
       }
     ]
   },
@@ -47915,7 +47941,7 @@
     "timeline": [
       {
         "city": "Srinagar",
-        "key": "ghsl-Srinagar-India",
+        "key": "stadester-Srînagar-India",
         "start": "626.1.1",
         "start_frac": 626.0027397260274,
         "stop": "856.1.1",

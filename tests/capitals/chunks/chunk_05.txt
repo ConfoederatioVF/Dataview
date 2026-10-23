@@ -1042,10 +1042,10 @@ TIMELINE:
   1518.1.1 -> 1659.1.1: Colombo [stadester-Colombo-Sri Lanka]
 ---
 
-STATE: [2785] Garhwal Kingdom (Princely State) (1815.4.21 -> 1950.1.1) [fill: #EBBCC5]
+STATE: [2785] Garhwal Kingdom (Princely State) (1815.4.21 -> 1949.8.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1815.4.21 -> 1950.1.1: Srinagar [stadester-Srinagar--Garhwal--India]
+  1815.4.21 -> 1949.8.1: Tehri [stadester-Tehri-India]
 ---
 
 STATE: [2786] Portuguese Gold Coast (1482.1.21 -> 1683.1.1) [fill: #90A16A]

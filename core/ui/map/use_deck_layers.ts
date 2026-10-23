@@ -265,6 +265,10 @@ function reconcileCapitalWithAuthoritativeBorders (
           ...city,
           capitalColor: undefined,
           capital_color: undefined,
+          capitalOf: undefined,
+          capitalStateId: undefined,
+          capital_state_id: undefined,
+          capital_state_name: undefined,
           isCapital: false,
           is_capital: false,
         }
@@ -277,6 +281,10 @@ function reconcileCapitalWithAuthoritativeBorders (
           ...city,
           capitalColor: undefined,
           capital_color: undefined,
+          capitalOf: undefined,
+          capitalStateId: undefined,
+          capital_state_id: undefined,
+          capital_state_name: undefined,
           isCapital: false,
           is_capital: false,
         }
@@ -309,6 +317,10 @@ function reconcileCapitalWithAuthoritativeBorders (
             ...city,
             capitalColor: undefined,
             capital_color: undefined,
+            capitalOf: undefined,
+            capitalStateId: undefined,
+            capital_state_id: undefined,
+            capital_state_name: undefined,
             isCapital: false,
             is_capital: false,
           }

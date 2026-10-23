@@ -422,6 +422,7 @@ let city_coords_spatial_grid: Map<string, CityCoordRecord[]> = new Map()
 let city_name_coords_cache: Map<string, { coords?: [number, number]; key?: string } | null> = new Map()
 let contemp_city_cache: Map<string, { coords?: [number, number]; key: string }> = new Map()
 let state_capitals_data: Record<number, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }> | null = null
+let state_capitals_mtime = 0
 let states_by_clean_name: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> = new Map()
 let states_name_map: Map<string, Array<{ start_year: number; state_id: number; stop_year: number }>> | null = null
 
@@ -870,23 +871,27 @@ let getStateCapitalInfo = function (
   let states_path: string
   let valid_timeline: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }>
 
+  file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+  if (fs.existsSync(file_path)) {
+    try {
+      let stats = fs.statSync(file_path)
+      if (!state_capitals_data || stats.mtimeMs > state_capitals_mtime) {
+        state_capitals_mtime = stats.mtimeMs
+        state_capitals_data = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
+        capital_info_cache.clear()
+        city_name_coords_cache.clear()
+        in_memory_slice_lru.clear()
+      }
+    } catch {
+      state_capitals_data = {}
+    }
+  } else if (!state_capitals_data) {
+    state_capitals_data = {}
+  }
+
   //Guard clauses
   if (capital_info_cache.has(cache_k))
     return capital_info_cache.get(cache_k)!
-
-  //Function body
-  if (!state_capitals_data) {
-    file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
-    if (fs.existsSync(file_path)) {
-      try {
-        state_capitals_data = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
-      } catch {
-        state_capitals_data = {}
-      }
-    } else {
-      state_capitals_data = {}
-    }
-  }
 
   state = AtlasBordersService.getStateById(state_id)
   if (state && (state.start_year !== undefined || state.stop_year !== undefined)) {

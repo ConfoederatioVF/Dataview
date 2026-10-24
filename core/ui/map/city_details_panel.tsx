@@ -206,9 +206,7 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
 
   //Extract population for current year (safely handle primitive vs dictionary)
   pop_at_year = 0
-  if (typeof (city as any).population === 'number') {
-    pop_at_year = (city as any).population
-  } else if (full_record?.population && typeof full_record.population === 'object') {
+  if (full_record?.population && typeof full_record.population === 'object') {
     let yr_str = String(current_year)
     if (full_record.population[yr_str] !== undefined) {
       pop_at_year = full_record.population[yr_str]
@@ -224,13 +222,13 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
       if (best_yr !== null)
         pop_at_year = full_record.population[String(best_yr)] || 0
     }
+  } else if (typeof (city as any).population === 'number') {
+    pop_at_year = (city as any).population
   }
 
   //Extract area for current year (safely handle primitive vs dictionary)
   area_at_year = undefined
-  if (typeof (city as any).area === 'number' && !Number.isNaN((city as any).area)) {
-    area_at_year = (city as any).area
-  } else if (full_record?.area && typeof full_record.area === 'object') {
+  if (full_record?.area && typeof full_record.area === 'object') {
     let yr_str = String(current_year)
     if (full_record.area[yr_str] !== undefined && !Number.isNaN(full_record.area[yr_str])) {
       area_at_year = full_record.area[yr_str]
@@ -249,13 +247,13 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
           area_at_year = a_val
       }
     }
+  } else if (typeof (city as any).area === 'number' && !Number.isNaN((city as any).area)) {
+    area_at_year = (city as any).area
   }
 
   //Extract density for current year (safely handle primitive vs dictionary)
   density_at_year = undefined
-  if (typeof (city as any).density === 'number' && !Number.isNaN((city as any).density)) {
-    density_at_year = (city as any).density
-  } else if (full_record?.density && typeof full_record.density === 'object') {
+  if (full_record?.density && typeof full_record.density === 'object') {
     let yr_str = String(current_year)
     if (full_record.density[yr_str] !== undefined && !Number.isNaN(full_record.density[yr_str])) {
       density_at_year = full_record.density[yr_str]
@@ -274,6 +272,8 @@ export let CityDetailsPanel: React.FC<CityDetailsPanelProps> = function (arg0_pr
           density_at_year = d_val
       }
     }
+  } else if (typeof (city as any).density === 'number' && !Number.isNaN((city as any).density)) {
+    density_at_year = (city as any).density
   }
 
   //Fallback: Calculate density from population and area if density is missing

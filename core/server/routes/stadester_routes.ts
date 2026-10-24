@@ -215,8 +215,8 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let year = (query.year !== undefined && !isNaN(Number(query.year))) ? parseFloat(query.year as string) : (query.year ? (query.year as string) : 1950)
 
     let coords: [number, number] | undefined = (lat !== undefined && !isNaN(lat) && lon !== undefined && !isNaN(lon)) ? [lat, lon] : undefined
-    if (!coords && (city_name || city_key)) {
-      let resolved_coords = AtlasBordersService.findCityCoordsByName(city_name || city_key, country)
+    if (!coords && city_name && !city_key) {
+      let resolved_coords = AtlasBordersService.findCityCoordsByName(city_name, country)
       if (resolved_coords?.coords) {
         coords = [resolved_coords.coords[1], resolved_coords.coords[0]]
       }

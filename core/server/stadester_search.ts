@@ -15,8 +15,101 @@ import {
   isStateAcapital,
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
-import { loadDataset } from './stadester_loader.ts'
+import { getSpatialGrid, loadDataset } from './stadester_loader.ts'
 import { getAuthoritativeCapitalsAtYear } from './stadester_queries.ts'
+
+/**
+ * Finds the corresponding era counterpart city (stadester <-> ghsl) within 35km matching name or alias.
+ *
+ * @param {CityIndexEntry} arg0_entry
+ * @param {Record<string, CityIndexEntry>} arg1_indexed
+ * @param {string} [arg2_dataset_name='stadester_1.1']
+ *
+ * @returns {CityIndexEntry | null}
+ */
+export function findEraCounterpart (
+  arg0_entry: CityIndexEntry,
+  arg1_indexed: Record<string, CityIndexEntry>,
+  arg2_dataset_name?: string
+): CityIndexEntry | null {
+  //Convert from parameters
+  let entry = arg0_entry
+  let indexed = arg1_indexed
+  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_1.1'
+
+  //Guard clauses
+  if (!entry || !entry.coords)
+    return null
+
+  let is_stadester = entry.key.startsWith('stadester-')
+  let is_ghsl = entry.key.startsWith('ghsl-')
+  if (!is_stadester && !is_ghsl)
+    return null
+
+  //Declare local instance variables
+  let best_dist = 999999
+  let best_other: CityIndexEntry | null = null
+  let c_clean: string
+  let c_lat = entry.coords[0]
+  let c_lng = entry.coords[1]
+  let c_name: string
+  let center_lat = Math.floor(c_lat)
+  let center_lng = Math.floor(c_lng)
+  let grid = getSpatialGrid(dataset_name)
+  let target_prefix = is_stadester ? 'ghsl-' : 'stadester-'
+
+  //Function body
+  c_name = (entry.name || '').toLowerCase().trim()
+  c_clean = c_name.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim()
+
+  for (let d_lat = -1; d_lat <= 1; d_lat++) {
+    for (let d_lng = -1; d_lng <= 1; d_lng++) {
+      let cell_key = `${center_lng + d_lng}_${center_lat + d_lat}`
+      let cell = grid.get(cell_key)
+      if (!cell)
+        continue
+
+      for (let i = 0; i < cell.length; i++) {
+        let other_key = cell[i]
+        if (!other_key.startsWith(target_prefix))
+          continue
+
+        let other = indexed[other_key]
+        if (!other || !other.coords)
+          continue
+
+        let dist = computeHaversineDistanceKm(c_lat, c_lng, other.coords[0], other.coords[1])
+        if (dist > 35)
+          continue
+
+        let o_name = (other.name || '').toLowerCase().trim()
+        let o_clean = o_name.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim()
+
+        let matches = Boolean(c_clean && o_clean && (c_clean === o_clean || o_name.includes(c_clean) || c_name.includes(o_clean)))
+        if (!matches && entry.other_names && Array.isArray(entry.other_names)) {
+          matches = entry.other_names.some((arg0_on: string) => {
+            let on_c = arg0_on.toLowerCase().replace(/\(.*?\)/g, '').trim()
+            return Boolean(on_c && (on_c === o_clean || o_name.includes(on_c)))
+          })
+        }
+        if (!matches && other.other_names && Array.isArray(other.other_names)) {
+          matches = other.other_names.some((arg0_on: string) => {
+            let on_c = arg0_on.toLowerCase().replace(/\(.*?\)/g, '').trim()
+            return Boolean(on_c && (on_c === c_clean || c_name.includes(on_c)))
+          })
+        }
+
+        if (matches && dist < best_dist) {
+          best_dist = dist
+          best_other = other
+        }
+      }
+    }
+  }
+
+  //Return statement
+  return best_other
+}
 
 /**
  * Retrieves a single city by its key or name and returns full historical details.
@@ -61,31 +154,6 @@ export function getCityByKey (
   let scoreCandidate: (arg0_entry: CityIndexEntry) => number
   let stripped_key: string
   let stripped_key_nfd: string
-
-  //Decompose composite keys (e.g. stadester-Tripoli-Libya -> city "Tripoli", country "Libya")
-  if (city_key.includes('-')) {
-    let parts = city_key.split('-')
-    if (parts.length >= 3 && (parts[0] === 'stadester' || parts[0] === 'ghsl' || parts[0] === 'oxford')) {
-      key_city = parts[1]
-      key_country = parts.slice(2).join('-')
-    } else if (parts.length >= 2) {
-      key_city = parts[0]
-      key_country = parts.slice(1).join('-')
-    }
-  }
-
-  //If coords not provided, resolve coordinates from city name and country
-  if (!options.coords && (city_key || (options as any).name)) {
-    let search_city = (options as any).name || key_city || city_key
-    let search_country = options.country || key_country
-    let resolved = AtlasBordersService.findCityCoordsByName(search_city, search_country)
-    if (resolved && resolved.coords) {
-      options.coords = [resolved.coords[1], resolved.coords[0]]
-      if (resolved.key && indexed[resolved.key]) {
-        candidates.push(indexed[resolved.key])
-      }
-    }
-  }
 
   //Guard clauses
   if ((!city_key && !options.coords) || !indexed)
@@ -172,30 +240,51 @@ export function getCityByKey (
       }
     }
 
+    let cp = findEraCounterpart(entry, indexed, dataset_name)
+    let merged_pop = cp?.population
+      ? { ...cp.population, ...entry.population }
+      : entry.population
+    let merged_area = cp?.area
+      ? { ...cp.area, ...entry.area }
+      : entry.area
+    let merged_density = cp?.density
+      ? { ...cp.density, ...entry.density }
+      : entry.density
+
+    let merged_other_names = entry.other_names
+    if (entry.other_names && cp?.other_names && Array.isArray(entry.other_names) && Array.isArray(cp.other_names)) {
+      merged_other_names = Array.from(new Set([...entry.other_names, ...cp.other_names]))
+    } else if (!merged_other_names && cp?.other_names) {
+      merged_other_names = cp.other_names
+    }
+
     return {
       ...entry,
+      area: merged_area,
       capital_color: cap_color,
       capital_state_id: cap_sid,
       capital_state_name: polity_name,
       capitalColor: cap_color,
       capitalOf: polity_name,
       capitalStateId: cap_sid,
+      counterpart_key: cp?.key,
+      density: merged_density,
       is_capital: is_capital,
       isCapital: is_capital,
       name: resolveCityNameAtYear(entry, effective_year),
+      other_names: merged_other_names,
+      population: merged_pop,
     }
   }
 
-  //Check direct key match
+  //Direct key match
   found = indexed[city_key] || indexed['stadester-' + city_key] || indexed['ghsl-' + city_key] || indexed['oxford-' + city_key]
 
-  //Check key match with diacritic normalization (e.g. stadester-Riyadh-Saudi Arabia <-> stadester-Riyâdh-Saudi Arabia)
   all_keys = Object.keys(indexed)
   city_key_lower = city_key.toLowerCase().trim()
   city_key_nfd = city_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
   stripped_key = city_key_lower.replace(/^(stadester-|ghsl-|oxford-)/, '')
   stripped_key_nfd = stripped_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  clean_search_city = (key_city || stripped_key).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
 
   if (!found && city_key_nfd) {
     for (let i = 0; i < all_keys.length; i++) {
@@ -208,43 +297,50 @@ export function getCityByKey (
     }
   }
 
+  //If found directly by primary key, return immediately without candidate search
   if (found) {
     if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
       return null
 
-    candidates.push(found)
+    //Return statement
+    return enrichCity(found)
+  }
 
-    //Also find contemporaneous counterpart if found is temporally displaced for requested year
-    if (year !== undefined && year !== null && found.coords) {
-      let req_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
-      let is_displaced = (found.key.startsWith('ghsl-') && req_yr < 1975) || (found.key.startsWith('stadester-') && req_yr >= 1975)
-      if (is_displaced) {
-        let f_lat = found.coords[0]
-        let f_lng = found.coords[1]
-        for (let k in indexed) {
-          let other = indexed[k]
-          if (!other.coords || other.key === found.key)
-            continue
-          let is_target_era = (found.key.startsWith('ghsl-') && other.key.startsWith('stadester-')) ||
-            (found.key.startsWith('stadester-') && other.key.startsWith('ghsl-'))
-          if (!is_target_era)
-            continue
-          let d = computeHaversineDistanceKm(other.coords[0], other.coords[1], f_lat, f_lng)
-          if (d <= 35) {
-            candidates.push(other)
-          }
-        }
+  //If not found by direct key, search candidates
+  if (city_key.includes('-')) {
+    let parts = city_key.split('-')
+    if (parts.length >= 3 && (parts[0] === 'stadester' || parts[0] === 'ghsl' || parts[0] === 'oxford')) {
+      key_city = parts[1]
+      key_country = parts.slice(2).join('-')
+    } else if (parts.length >= 2) {
+      key_city = parts[0]
+      key_country = parts.slice(1).join('-')
+    }
+  }
+
+  clean_search_city = (key_city || stripped_key).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+
+  //If coords not provided, resolve coordinates from city name and country
+  if (!options.coords && (city_key || (options as any).name)) {
+    let search_city = (options as any).name || key_city || city_key
+    let search_country = options.country || key_country
+    let resolved = AtlasBordersService.findCityCoordsByName(search_city, search_country)
+    if (resolved && resolved.coords) {
+      options.coords = [resolved.coords[1], resolved.coords[0]]
+      if (resolved.key && indexed[resolved.key]) {
+        candidates.push(indexed[resolved.key])
       }
     }
   }
 
-  //Fallback linear search by key, id or name
+  //Search candidates by name, id or aliases
   for (let i = 0; i < all_keys.length; i++) {
     let entry = indexed[all_keys[i]]
-    if (found && entry.key === found.key)
+    if (isBuggedCityName(entry.name, bugged_set) || (entry.key && isBuggedCityName(entry.key, bugged_set)))
       continue
-    let e_name_lower = entry.name ? entry.name.toLowerCase().trim() : ''
+
     let e_meta_lower = entry.metadata_name ? entry.metadata_name.toLowerCase().trim() : ''
+    let e_name_lower = entry.name ? entry.name.toLowerCase().trim() : ''
     let is_match = false
 
     if (
@@ -285,33 +381,57 @@ export function getCityByKey (
         is_match = true
     }
 
-    if (is_match) {
-      if (!isBuggedCityName(entry.name, bugged_set) && !(entry.key && isBuggedCityName(entry.key, bugged_set)))
-        candidates.push(entry)
-    }
+    if (is_match)
+      candidates.push(entry)
   }
 
+  //If coords provided, find nearby candidates via spatial grid
   if (options.coords) {
     let opt_lat = options.coords[0]
     let opt_lng = options.coords[1]
-    for (let i = 0; i < all_keys.length; i++) {
-      let entry = indexed[all_keys[i]]
-      if (!entry.coords)
-        continue
-      let d = computeHaversineDistanceKm(entry.coords[0], entry.coords[1], opt_lat, opt_lng)
-      if (d <= 35) {
-        if (!candidates.includes(entry) && !isBuggedCityName(entry.name, bugged_set))
-          candidates.push(entry)
+    let center_lat = Math.floor(opt_lat)
+    let center_lng = Math.floor(opt_lng)
+    let grid = getSpatialGrid(dataset_name)
+
+    for (let d_lat = -1; d_lat <= 1; d_lat++) {
+      for (let d_lng = -1; d_lng <= 1; d_lng++) {
+        let cell_key = `${center_lng + d_lng}_${center_lat + d_lat}`
+        let cell = grid.get(cell_key)
+        if (!cell)
+          continue
+
+        for (let i = 0; i < cell.length; i++) {
+          let entry = indexed[cell[i]]
+          if (!entry || !entry.coords || isBuggedCityName(entry.name, bugged_set))
+            continue
+          let d = computeHaversineDistanceKm(entry.coords[0], entry.coords[1], opt_lat, opt_lng)
+          if (d <= 35) {
+            if (!candidates.includes(entry))
+              candidates.push(entry)
+          }
+        }
       }
     }
   }
 
   if (candidates.length > 0) {
+    let search_name = ((options as any).name || key_city || city_key || '').toLowerCase().trim()
+    let search_nfd = search_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
     scoreCandidate = function (arg0_entry: CityIndexEntry): number {
       let score = 0
       let req_yr = (year !== undefined && year !== null)
         ? (typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year)
         : undefined
+
+      let e_name = (arg0_entry.name || '').toLowerCase().trim()
+      let e_nfd = e_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+      if (e_name === search_name || e_nfd === search_nfd) {
+        score += 1000000000
+      } else if (search_nfd && (e_nfd.includes(search_nfd) || search_nfd.includes(e_nfd))) {
+        score += 500000000
+      }
 
       if (options.coords && arg0_entry.coords) {
         let d_km = computeHaversineDistanceKm(arg0_entry.coords[0], arg0_entry.coords[1], options.coords[0], options.coords[1])
@@ -343,7 +463,9 @@ export function getCityByKey (
         let req_country = options.country.toLowerCase().trim()
         let entry_country = arg0_entry.country.toLowerCase().trim()
         if (entry_country === req_country || req_country.includes(entry_country) || entry_country.includes(req_country))
-          score += 1000000
+          score += 10000000
+        else
+          score -= 10000000
       }
       if (arg0_entry.key.startsWith('stadester-'))
         score += 10000
@@ -360,3 +482,4 @@ export function getCityByKey (
   //Return statement
   return null
 }
+

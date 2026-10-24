@@ -335,22 +335,39 @@ export let App: React.FC = function () {
   let stadester_cities: CityPoint[] = stadester_result.cities
   let selected_city_record: CityFullRecord | null = stadester_result.selectedCity
   let effective_selected_city = useMemo<CityFullRecord | null>(() => {
-    if (selected_city_record && selected_city_point && (selected_city_record.key === selected_city_point.key || String(selected_city_record.id) === String(selected_city_point.id))) {
-      return {
-        ...selected_city_point,
-        ...selected_city_record,
-        capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
-        capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
-        capitalStateId: (selected_city_record as any).capitalStateId || (selected_city_record as any).capital_state_id || (selected_city_point as any).capitalStateId || (selected_city_point as any).capital_state_id,
-        capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
-        capital_state_id: (selected_city_record as any).capital_state_id || (selected_city_record as any).capital_state_id || (selected_city_point as any).capital_state_id || (selected_city_point as any).capitalStateId,
-        capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
-        coords: selected_city_record.coords || selected_city_point.coords,
-        isCapital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital),
-        is_capital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital),
-        rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
-      } as unknown as CityFullRecord
+    if (selected_city_record && selected_city_point) {
+      let is_match = selected_city_record.key === selected_city_point.key ||
+        String(selected_city_record.id) === String(selected_city_point.id) ||
+        (selected_city_record as any).counterpart_key === selected_city_point.key ||
+        selected_city_point.key === (selected_city_record as any).counterpart_key
+
+      if (!is_match && selected_city_point.coords && selected_city_record.coords) {
+        let dist = Math.hypot(selected_city_point.coords[0] - selected_city_record.coords[0], selected_city_point.coords[1] - selected_city_record.coords[1])
+        if (dist <= 0.35)
+          is_match = true
+      }
+
+      if (is_match) {
+        return {
+          ...selected_city_point,
+          ...selected_city_record,
+          capitalColor: selected_city_record.capitalColor || (selected_city_record as any).capital_color || selected_city_point.capitalColor || (selected_city_point as any).capital_color,
+          capitalOf: selected_city_record.capitalOf || (selected_city_record as any).capital_state_name || selected_city_point.capitalOf || (selected_city_point as any).capital_state_name,
+          capitalStateId: (selected_city_record as any).capitalStateId || (selected_city_record as any).capital_state_id || (selected_city_point as any).capitalStateId || (selected_city_point as any).capital_state_id,
+          capital_color: (selected_city_record as any).capital_color || selected_city_record.capitalColor || (selected_city_point as any).capital_color || selected_city_point.capitalColor,
+          capital_state_id: (selected_city_record as any).capital_state_id || (selected_city_record as any).capital_state_id || (selected_city_point as any).capital_state_id || (selected_city_point as any).capitalStateId,
+          capital_state_name: (selected_city_record as any).capital_state_name || selected_city_record.capitalOf || (selected_city_point as any).capital_state_name || selected_city_point.capitalOf,
+          coords: selected_city_record.coords || selected_city_point.coords,
+          isCapital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean(selected_city_record.isCapital || (selected_city_record as any).is_capital),
+          is_capital: (selected_city_point.isCapital !== undefined) ? selected_city_point.isCapital : Boolean((selected_city_record as any).is_capital || selected_city_record.isCapital),
+          name: selected_city_point.name || selected_city_record.name,
+          population: (typeof selected_city_record.population === 'object' && selected_city_record.population) ? selected_city_record.population : selected_city_point.population,
+          rawCoords: (selected_city_record as any).rawCoords || (selected_city_point as any).rawCoords,
+        } as unknown as CityFullRecord
+      }
     }
+    if (selected_city_record && typeof selected_city_record.population === 'object')
+      return selected_city_record
     if (selected_city_point)
       return selected_city_point as unknown as CityFullRecord
     if (selected_city_record)

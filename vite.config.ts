@@ -5,7 +5,54 @@ import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
 import { createApiMiddleware } from './core/server/api_middleware.ts'
+import { clearAtlasConfigCache } from './core/server/atlas_config_loader.ts'
 import { loadAndParseLayers } from './core/server/layer_parser.ts'
+import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.ts'
+
+/**
+ * Broadcasts an HMR custom payload across all available Vite server hot channels.
+ *
+ * @param {any} arg0_server
+ * @param {string} arg1_event
+ * @param {any} arg2_data
+ *
+ * @returns {void}
+ */
+function broadcastHotMessage (arg0_server: any, arg0_event: string, arg1_data: any): void {
+  //Convert from parameters
+  let data = arg1_data
+  let event = arg0_event
+  let server = arg0_server
+
+  //Declare local instance variables
+  let payload = {
+    data: data,
+    event: event,
+    type: 'custom',
+  }
+
+  //Function body
+  try {
+    if (server.environments && (server.environments as any).client?.hot)
+      (server.environments as any).client.hot.send(payload)
+  } catch {
+    //Ignore environment send error
+  }
+
+  try {
+    if (server.hot)
+      server.hot.send(payload)
+  } catch {
+    //Ignore hot send error
+  }
+
+  try {
+    if (server.ws)
+      server.ws.send(payload)
+  } catch {
+    //Ignore ws send error
+  }
+}
 
 /**
  * Processes hot update events for configuration, layer, and localisation files.
@@ -40,23 +87,19 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
 
   //Handle common/ and localisation/ hot updates
   if (normalized_file.includes('/common/') || normalized_file.includes('/localisation/')) {
-    let hot_channel = (server.environments && (server.environments as any).client?.hot) || server.hot || (server as any).ws
-
     //1. Layers update: common/layers/ (including filepath_defines.json5 and individual layer configs)
     if (normalized_file.includes('/common/layers/')) {
       try {
+        clearAtlasConfigCache()
+        clearCompressedBordersCache()
+
         let config_dir = path.resolve(import.meta.dirname, './common')
         let registry = loadAndParseLayers(config_dir)
 
-        if (hot_channel)
-          hot_channel.send({
-            type: 'custom',
-            event: 'dataview:layers-update',
-            data: {
-              layers: registry.layers,
-              total: Object.keys(registry.layers).length,
-            },
-          })
+        broadcastHotMessage(server, 'dataview:layers-update', {
+          layers: registry.layers,
+          total: Object.keys(registry.layers).length,
+        })
       } catch (arg0_err) {
         console.error('[HMR] Error reloading layers:', arg0_err)
       }
@@ -74,18 +117,13 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
         let raw_content = fs.readFileSync(file, 'utf-8')
         let parsed_dict = JSON5.parse(raw_content)
 
-        if (hot_channel)
-          hot_channel.send({
-            type: 'custom',
-            event: 'dataview:config-update',
-            data: {
-              category: 'localisation',
-              data: parsed_dict,
-              dictionary: parsed_dict,
-              file: normalized_file,
-              locale: locale_key,
-            },
-          })
+        broadcastHotMessage(server, 'dataview:config-update', {
+          category: 'localisation',
+          data: parsed_dict,
+          dictionary: parsed_dict,
+          file: normalized_file,
+          locale: locale_key,
+        })
       } catch (arg0_err) {
         console.error('[HMR] Error reloading localisation:', arg0_err)
       }
@@ -101,16 +139,11 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
         let raw_content = fs.readFileSync(file, 'utf-8')
         let parsed_data = JSON5.parse(raw_content)
 
-        if (hot_channel)
-          hot_channel.send({
-            type: 'custom',
-            event: 'dataview:config-update',
-            data: {
-              category: base_name,
-              data: parsed_data,
-              file: normalized_file,
-            },
-          })
+        broadcastHotMessage(server, 'dataview:config-update', {
+          category: base_name,
+          data: parsed_data,
+          file: normalized_file,
+        })
       } catch (arg0_err) {
         console.error(`[HMR] Error reloading config ${file}:`, arg0_err)
       }
@@ -125,16 +158,11 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
         let base_name = path.basename(file, '.md')
         let raw_content = fs.readFileSync(file, 'utf-8')
 
-        if (hot_channel)
-          hot_channel.send({
-            type: 'custom',
-            event: 'dataview:config-update',
-            data: {
-              category: base_name,
-              data: raw_content,
-              file: normalized_file,
-            },
-          })
+        broadcastHotMessage(server, 'dataview:config-update', {
+          category: base_name,
+          data: raw_content,
+          file: normalized_file,
+        })
       } catch (arg0_err) {
         console.error(`[HMR] Error reloading markdown ${file}:`, arg0_err)
       }
@@ -189,6 +217,15 @@ function dataviewBackendPlugin (): Plugin {
         clearInterval(heartbeat_interval)
       })
 
+      //Explicitly watch common/ and localisation/ directories to ensure non-module JSON5 edits trigger HMR
+      server.watcher.add(path.resolve(import.meta.dirname, './common'))
+      server.watcher.add(path.resolve(import.meta.dirname, './localisation'))
+
+      server.watcher.on('all', (arg0_event, arg1_file_path) => {
+        if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
+          handleDataviewHotUpdate(arg1_file_path, server)
+      })
+
       //Function body
       server.middlewares.use(
         createApiMiddleware({
@@ -219,15 +256,12 @@ function dataviewBackendPlugin (): Plugin {
         return handleDataviewHotUpdate(ctx.file, ctx.server) as any
       },
     },
-    handleHotUpdate: {
-      order: 'pre',
-      handler (arg0_ctx) {
-        //Convert from parameters
-        let ctx = arg0_ctx
+    handleHotUpdate (arg0_ctx) {
+      //Convert from parameters
+      let ctx = arg0_ctx
 
-        //Return statement
-        return handleDataviewHotUpdate(ctx.file, ctx.server) as any
-      },
+      //Return statement
+      return handleDataviewHotUpdate(ctx.file, ctx.server) as any
     },
   }
 }

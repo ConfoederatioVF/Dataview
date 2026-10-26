@@ -44,6 +44,22 @@ export interface HistoricalBordersResponse {
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let max_lru_entries = 60
+let all_cache_clearers: Array<() => void> = []
+
+/**
+ * Registers an external cache clearer to run when AtlasBordersService.clearCache() is called.
+ *
+ * @param {() => void} arg0_fn
+ *
+ * @returns {void}
+ */
+export function registerAtlasCacheClearer (arg0_fn: () => void): void {
+  //Convert from parameters
+  let fn = arg0_fn
+
+  //Function body
+  all_cache_clearers.push(fn)
+}
 
 /**
  * AtlasBordersService provides high-performance temporal slicing and streaming of historical GIS boundaries.
@@ -928,6 +944,12 @@ export class AtlasBordersService {
     clearCityResolverCache()
     clearNaissanceCache()
     in_memory_slice_lru.clear()
+
+    for (let i = 0; i < all_cache_clearers.length; i++) {
+      try {
+        all_cache_clearers[i]()
+      } catch {}
+    }
 
     let cache_dir = AtlasBordersService.getDatasetPaths().cacheDir
     if (fs.existsSync(cache_dir)) {

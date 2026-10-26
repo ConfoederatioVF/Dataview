@@ -3,10 +3,24 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import type { ParsedUrlQuery } from 'querystring'
 import { gzipSync } from 'node:zlib'
 import type { ParsedDataLayer } from '../layer_parser.ts'
-import { AtlasBordersService } from '../AtlasBordersService.ts'
+import { AtlasBordersService, registerAtlasCacheClearer } from '../AtlasBordersService.ts'
 import { UfDate } from '../../framework/utils/uf_date.ts'
 
 let compressed_borders_cache = new Map<string, Buffer>()
+
+/**
+ * Clears the in-memory compressed borders buffer cache.
+ *
+ * @returns {void}
+ */
+export function clearCompressedBordersCache (): void {
+  //Function body
+  compressed_borders_cache.clear()
+}
+
+registerAtlasCacheClearer(() => {
+  clearCompressedBordersCache()
+})
 
 export interface AtlasRouteContext {
   layers: Record<string, ParsedDataLayer>
@@ -134,9 +148,13 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
 
+      let cache_control_header = (process.env.NODE_ENV === 'production' && process.env.VITE_PUBLIC_BUILD)
+        ? 'public, max-age=86400, stale-while-revalidate=604800'
+        : 'no-cache, must-revalidate'
+
       if (supports_gzip && compressed_borders_cache.has(cache_key)) {
         let cached_buf = compressed_borders_cache.get(cache_key)!
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Cache-Control', cache_control_header)
         res.setHeader('Content-Encoding', 'gzip')
         res.setHeader('Content-Length', cached_buf.length)
         res.end(cached_buf)
@@ -148,7 +166,7 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
       if (borders_payload.features.length === 0 && year >= -3000) {
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
       } else {
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Cache-Control', cache_control_header)
       }
 
       let json_str = JSON.stringify(borders_payload)

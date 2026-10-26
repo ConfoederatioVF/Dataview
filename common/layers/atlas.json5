@@ -16,7 +16,9 @@
             "<details>",
             "<summary>Methodology</summary>",
             "",
-            "Atlas 0.7b (de jure) is isomorphic to Cliopatria (which Seshat uses for its historical borders), but differed in containing border adjustments to align better with historical reality. From 1815AD-1886AD, we take borders from Correlates of War, and use C-Shapes 2.0 afterwards.",
+            "Atlas 0.7b (de jure) is isomorphic to Cliopatria (which Seshat uses for its historical borders), but differed in containing border adjustments to align better with historical reality.",
+            "",
+            "From 1815AD-1886AD, we take borders from Correlates of War, and use C-Shapes 2.0 afterwards. For consistency purposes, their original names have been preserved.",
             "",
             "Whilst these are known to contain encoding and historical errors, they allow for the qualitative encoding of academic data on institutions or polity status.",
             "</details>"

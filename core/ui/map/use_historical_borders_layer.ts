@@ -158,8 +158,8 @@ export function createHistoricalBordersDeckLayer (
       return [0, 0, 0, 0]
     },
     updateTriggers: {
-      getFillColor: [stroke_color, fill_opacity],
-      getLineColor: [stroke_color],
+      getFillColor: [stroke_color, fill_opacity, clean_tag],
+      getLineColor: [stroke_color, clean_tag],
       getLineWidth: [stroke_width],
     },
     onClick: (arg0_info: any) => {

@@ -8,9 +8,10 @@
     cache_dir: "${l_atlas}/cache",
     detailed_dir: "${l_atlas}/detailed",
     "simplified_borders": {
-        name: "Simplified Borders",
+        dejure: true,
+        name: "Borders (de jure)",
         description: [
-            "### De Jure Borders",
+            "### Academic Borders",
             "Joint database between [Seshat](https://seshat-db.com/), [Correlates of War](https://correlatesofwar.org/data-sets/), and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf). Used for statistical purposes.",
             "<details>",
             "<summary>Methodology</summary>",
@@ -32,7 +33,7 @@
         ]
     },
     "detailed_borders": {
-        name: "Detailed Borders",
+        name: "Borders (de facto)",
         description: [
             "### De Facto Borders",
             "De facto territorial frontiers from 3500BC to 2026AD.",

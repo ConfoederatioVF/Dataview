@@ -12,6 +12,7 @@ export interface HistoricalBorderDetailsPanelProps {
   cities?: CityPoint[]
   countryStats?: CountryStats | null
   currentYear: number
+  dejure?: boolean
   embedded?: boolean
   feature: HistoricalBorderFeature | null
   isCalculatingStats?: boolean
@@ -42,6 +43,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let cities = props.cities
   let country_stats = props.countryStats
   let current_year = props.currentYear
+  let dejure = props.dejure
   let embedded = Boolean(props.embedded)
   let feature = props.feature
   let is_calculating_stats = props.isCalculatingStats
@@ -99,6 +101,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let country_name: string
   let current_date: { day: number; month: number; year: number }
   let current_ts: number
+  let dejure_id_items: { key: string; label: string; value: string | number }[] = []
   let display_year: string
   let end_year: number | undefined
   let feature_id: string | null
@@ -106,6 +109,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let handle_capital_click: (arg0_e: React.MouseEvent) => void
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
   let is_acapital = false
+  let is_dejure = dejure !== undefined ? dejure : Boolean(feature.properties?.dejure)
   let is_drawn_feature = Boolean(feature?.properties?.is_drawn)
   let keyframes_list: any[]
   let max_x: number
@@ -139,7 +143,41 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   start_year = feature.properties?.startYear
   state_id = (feature.properties?.state_id !== undefined && feature.properties?.state_id !== null)
     ? Number(feature.properties.state_id)
-    : (feature.properties?.id !== undefined && !feature.id?.toString().startsWith('cshapes') ? Number(feature.properties.id) : undefined)
+    : undefined
+
+  if (is_dejure) {
+    let checkValidId = (arg0_val: any): boolean => {
+      if (arg0_val === undefined || arg0_val === null)
+        return false
+      let s = String(arg0_val).trim()
+      return s !== '' && s !== '0' && s !== '-1' && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s.toLowerCase() !== 'none'
+    }
+
+    let seshat_val = feature.properties?.seshat_id ?? feature.properties?.seshatId ?? feature.properties?.seshat
+    let cow_val = feature.properties?.cow_id ?? feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
+    let cshapes_val = feature.properties?.cshapes_id ?? feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
+
+    if (checkValidId(seshat_val))
+      dejure_id_items.push({
+        key: 'seshat',
+        label: t.mapPanels.historicalBorders.seshatId || 'Seshat ID:',
+        value: seshat_val,
+      })
+
+    if (checkValidId(cow_val))
+      dejure_id_items.push({
+        key: 'cow',
+        label: t.mapPanels.historicalBorders.cowId || 'COW ID:',
+        value: cow_val,
+      })
+
+    if (checkValidId(cshapes_val))
+      dejure_id_items.push({
+        key: 'cshapes',
+        label: t.mapPanels.historicalBorders.cshapesId || 'C-Shapes ID:',
+        value: cshapes_val,
+      })
+  }
 
   if (cap_name) {
     cap_names = cap_name.split(/[,/]/).map((arg0_s) => arg0_s.trim()).filter(Boolean)
@@ -393,7 +431,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   if (active_kf_index === -1 && keyframes_list.length > 0)
     active_kf_index = 0
 
-  if (feature.id?.toString().startsWith('cshapes') || feature.properties?.gwcode) {
+  if (feature.id?.toString().startsWith('cshapes')) {
     source_label = 'CShapes-2.0'
   } else if (feature.id?.toString().startsWith('detailed')) {
     source_label = 'detailed.naissance'
@@ -699,6 +737,21 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           </div>
         </div>
       </div>
+
+      {/* De Jure IDs */}
+      {is_dejure && dejure_id_items.length > 0 && (
+        <div className="text-[11px] text-muted-foreground font-mono mb-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+          {dejure_id_items.map((arg0_item, arg1_idx) => (
+            <React.Fragment key={arg0_item.key}>
+              {arg1_idx > 0 && <span>•</span>}
+              <span>
+                <span className="text-foreground font-semibold">{arg0_item.label}</span>{' '}
+                <span>{arg0_item.value}</span>
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
 
       {/* Raster Statistics & Full Calculator Header */}
       {effective_stats ? (

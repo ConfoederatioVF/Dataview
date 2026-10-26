@@ -474,7 +474,7 @@ export let findCityCoordsByName = function (
  * @returns {StateCapitalInfo}
  */
 export let getStateCapitalInfo = function (
-  arg0_state_id: number,
+  arg0_state_id: number | undefined,
   arg1_year_frac: number,
   arg2_entity_name?: string,
   arg3_get_state_by_id?: (state_id: string | number) => any
@@ -488,11 +488,11 @@ export let getStateCapitalInfo = function (
   //Declare local instance variables
   let best_diff: number
   let best_iv: any
-  let cache_k = `${state_id}_${year_frac.toFixed(4)}_${entity_name || ''}`
+  let cache_k = `${state_id ?? 'none'}_${year_frac.toFixed(4)}_${entity_name || ''}`
   let candidates: Array<{ start_year: number; state_id: number; stop_year: number }>
   let clean_e: string
   let diff: number
-  let effective_state_id: number
+  let effective_state_id: number | undefined
   let file_path: string
   let fill_color: string | undefined
   let info: { acapital: boolean; fill?: string; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> } | undefined
@@ -526,7 +526,7 @@ export let getStateCapitalInfo = function (
   if (capital_info_cache.has(cache_k))
     return capital_info_cache.get(cache_k)!
 
-  state = get_state ? get_state(state_id) : null
+  state = (state_id !== undefined && get_state) ? get_state(state_id) : null
   if (state && (state.start_year !== undefined || state.stop_year !== undefined)) {
     if (year_frac < (state.start_year ?? -99999) - 5 || year_frac > (state.stop_year ?? 99999) + 5)
       is_state_temporal_match = false
@@ -545,7 +545,7 @@ export let getStateCapitalInfo = function (
     }
   }
 
-  if (is_state_temporal_match && is_name_plausible) {
+  if (state_id !== undefined && is_state_temporal_match && is_name_plausible) {
     info = state_capitals_data ? state_capitals_data[state_id] : undefined
   }
 
@@ -644,7 +644,7 @@ export let getStateCapitalInfo = function (
   }
 
   effective_state_id = matched_state_id || state_id
-  state = get_state ? get_state(effective_state_id) : null
+  state = (effective_state_id !== undefined && get_state) ? get_state(effective_state_id) : null
   fill_color = state?.fill_color || (info as any)?.fill
 
   if (!info) {

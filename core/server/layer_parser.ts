@@ -34,6 +34,7 @@ export interface ParsedDataLayer {
   category?: string
   category_open?: boolean
   category_type?: 'continuous' | 'discrete'
+  dejure?: boolean
   description?: string
   display_options?: Record<string, any>
   encoding: 'float32' | 'int32'
@@ -501,6 +502,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
     )
     let metadata_keys = [
       'category_type',
+      'dejure',
       'description',
       'encoding',
       'filepath',
@@ -722,6 +724,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             category: dataset_name,
             category_open: sub_item.open !== undefined ? Boolean(sub_item.open) : category_open,
             category_type: (sub_item.category_type || item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
+            dejure: sub_item.dejure !== undefined ? Boolean(sub_item.dejure) : (item.dejure !== undefined ? Boolean(item.dejure) : undefined),
             description: sub_desc_text,
             encoding: sub_item.encoding || 'float32',
             filepath_template: sub_template,
@@ -774,6 +777,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           category: dataset_name,
           category_open: item.open !== undefined ? Boolean(item.open) : category_open,
           category_type: (item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
+          dejure: item.dejure !== undefined ? Boolean(item.dejure) : undefined,
           description: desc_text,
           display_options: item.display_options || parsed_json.display_options,
           encoding: item.encoding || 'float32',

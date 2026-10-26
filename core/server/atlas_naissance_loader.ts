@@ -26,7 +26,11 @@ export interface HistoricalBorderFeature {
     caplat?: number
     caplong?: number
     capname?: string
+    cow?: number | string
+    cow_id?: number | string
+    cshapes_id?: number | string
     date?: string
+    dejure?: boolean
     endDate?: string
     endYear?: number
     gwcode?: number
@@ -34,6 +38,7 @@ export interface HistoricalBorderFeature {
     is_acapital?: boolean
     keyframes?: HistoricalBorderKeyframe[]
     name: string
+    seshat_id?: string
     startDate?: string
     startYear?: number
     state_id?: number

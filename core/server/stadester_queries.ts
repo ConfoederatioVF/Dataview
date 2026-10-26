@@ -173,7 +173,7 @@ export function getAuthoritativeCapitalsAtYear (
         }
 
         if (best_city) {
-          let cap_color_val = p.fill_color || p.fillColor || p.symbol?.polygonFill || p.symbol?.fillColor || p.color || (p.state_id ? getStateById(p.state_id)?.fill_color : null) || (p.gwcode ? getStateById(p.gwcode)?.fill_color : null) || '#FFDC00'
+          let cap_color_val = p.polygonFill || p.symbol?.polygonFill || p.fill_color || p.fillColor || p.color || (p.state_id ? getStateById(p.state_id)?.fill_color : null) || '#FFDC00'
           let feat_area = p.area !== undefined ? Number(p.area) : 0
           if (!feat_area && feat.bbox)
             feat_area = Math.max(0, (feat.bbox[2] - feat.bbox[0])*(feat.bbox[3] - feat.bbox[1]))

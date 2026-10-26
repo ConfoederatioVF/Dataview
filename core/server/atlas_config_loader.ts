@@ -5,6 +5,7 @@ import JSON5 from 'json5'
 export interface AtlasDatasetPaths {
   cacheDir: string
   cshapesPath: string
+  dejureDatasets: Record<string, boolean>
   dejureNaissancePath: string
   detailedDir: string
   detailedNaissancePath: string
@@ -40,6 +41,11 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let atlas_data_dir = path.resolve(process.cwd(), 'data/atlas')
   let cache_dir = path.join(atlas_data_dir, 'cache')
   let cshapes_path = path.join(atlas_data_dir, 'CShapes-2.0.geojson')
+  let dejure_datasets: Record<string, boolean> = {
+    detailed_borders: false,
+    simplified_borders: true,
+    statistical_borders: true,
+  }
   let dejure_naissance_path = path.join(atlas_data_dir, 'atlas_dejure.naissance')
   let detailed_dir = path.join(atlas_data_dir, 'detailed')
   let detailed_naissance_path = path.join(atlas_data_dir, 'detailed.naissance')
@@ -88,6 +94,13 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
       if (parsed_atlas.detailed_dir)
         detailed_dir = resolveToken(parsed_atlas.detailed_dir)
 
+      if (parsed_atlas.simplified_borders?.dejure !== undefined) {
+        dejure_datasets.simplified_borders = Boolean(parsed_atlas.simplified_borders.dejure)
+        dejure_datasets.statistical_borders = Boolean(parsed_atlas.simplified_borders.dejure)
+      }
+      if (parsed_atlas.detailed_borders?.dejure !== undefined)
+        dejure_datasets.detailed_borders = Boolean(parsed_atlas.detailed_borders.dejure)
+
       let simp_fps = parsed_atlas.simplified_borders?.filepaths
       if (Array.isArray(simp_fps)) {
         for (let i = 0; i < simp_fps.length; i++) {
@@ -127,6 +140,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   cached_dataset_paths = {
     cacheDir: cache_dir,
     cshapesPath: cshapes_path,
+    dejureDatasets: dejure_datasets,
     dejureNaissancePath: dejure_naissance_path,
     detailedDir: detailed_dir,
     detailedNaissancePath: detailed_naissance_path,

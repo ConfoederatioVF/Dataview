@@ -720,6 +720,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           cities={stadester_cities}
           countryStats={country_stats}
           currentYear={timeline_year || 1950}
+          dejure={Boolean(
+            selected_historical_feature?.properties?.dejure ??
+            (historical_borders_config?.dataset
+              ? (props.dataLayers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
+              : undefined)
+          )}
           feature={selected_historical_feature}
           isCalculatingStats={is_calculating_stats}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}

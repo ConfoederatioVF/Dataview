@@ -243,10 +243,11 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
           if (s_id)
             acapital_state_ids.add(s_id)
         } else if (p.capname || p.capkey || p.cap_coords || (p.caplong !== undefined && p.caplat !== undefined)) {
-          let polity_color = p.fill_color ||
+          let polity_color = p.polygonFill ||
+            p.symbol?.polygonFill ||
+            p.fill_color ||
             p.fillColor ||
             p.color ||
-            p.symbol?.polygonFill ||
             p.symbol?.fillColor ||
             p.symbol?.strokeColor ||
             p.strokeColor

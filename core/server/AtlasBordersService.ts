@@ -9,7 +9,6 @@ import {
 import {
   clearCityResolverCache,
   findCityCoordsByName,
-  getContemporaneousCityKey,
   getStateCapitalInfo,
   type StateCapitalInfo,
 } from './atlas_city_resolver.ts'
@@ -21,7 +20,6 @@ import {
 import {
   clearNaissanceCache,
   detailed_borders_slices,
-  getCShapesKeyframesByGwcode,
   getEntityKeyframesSummary,
   type HistoricalBorderFeature,
   type HistoricalBorderKeyframe,
@@ -105,7 +103,7 @@ export class AtlasBordersService {
    * @returns {Map<string, NaissanceEntityRecord>}
    */
   static loadNaissance (arg0_file_path?: string): Map<string, NaissanceEntityRecord> {
-    return loadNaissance(arg0_file_path || AtlasBordersService.getDatasetPaths().naissancePath)
+    return loadNaissance(arg0_file_path || AtlasBordersService.getDatasetPaths().dejureNaissancePath)
   }
 
   /**
@@ -341,6 +339,7 @@ export class AtlasBordersService {
     let disk_cache_path: string
     let domain: [number, number]
     let features: HistoricalBorderFeature[] = []
+    let is_dejure = Boolean(AtlasBordersService.getDatasetPaths().dejureDatasets[dataset])
     let is_whole_year_query: boolean
     let lru_key: string
     let source: 'cshapes' | 'naissance'
@@ -371,13 +370,8 @@ export class AtlasBordersService {
     target_ts = UfDate.getTimestamp(target_date_obj)
     target_year = target_date_obj.year
 
-    domain = dataset === 'detailed_borders'
-      ? [-3500, 2026]
-      : (target_year >= 1886 ? [1886, 2026] : [-3500, 1886])
-
-    source = dataset === 'detailed_borders'
-      ? 'naissance'
-      : (target_year >= 1886 ? 'cshapes' : 'naissance')
+    domain = [-3500, 2026]
+    source = 'naissance'
 
     lru_key = `${dataset}_${target_date_obj.year}_${target_date_obj.month}_${target_date_obj.day}_${bbox ? bbox.join(',') : 'all'}`
     is_whole_year_query = Boolean(!bbox && target_date_obj.day === 1 && target_date_obj.month === 1 && Number.isInteger(arg0_year))
@@ -412,13 +406,13 @@ export class AtlasBordersService {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
         let is_valid_cache = Array.isArray(cached_json.features) &&
           (cached_json.features.length > 0 || target_year < -3000) &&
-          (cached_json.features.length === 0 || cached_json.features[0].properties?.state_id !== undefined)
-        let is_missing_cap_coords = cached_json.v !== 4 &&
+          (cached_json.features.length === 0 || cached_json.features[0].id !== undefined)
+        let is_missing_cap_coords = cached_json.v !== 6 &&
           cached_json.features &&
           cached_json.features.length > 20 &&
           !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
           cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
-        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === 4) {
+        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === 6) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
@@ -507,7 +501,17 @@ export class AtlasBordersService {
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
         let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
         let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name, AtlasBordersService.getStateById)
-        let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
+        let feat_fill = current_symbol?.polygonFill ||
+          current_props.polygonFill ||
+          current_symbol?.fillColor ||
+          current_props.fillColor ||
+          current_props.fill_color ||
+          current_props.color ||
+          cap_info.fill_color ||
+          AtlasBordersService.getStateById(num_sid)?.fill_color
+
+        if (feat_fill && !current_symbol.polygonFill)
+          current_symbol = { ...current_symbol, polygonFill: feat_fill }
 
         features.push({
           bbox: geom_bbox,
@@ -522,10 +526,15 @@ export class AtlasBordersService {
             caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
             capname: cap_info.capname,
             color: feat_fill,
+            cow: current_props.cow || current_props.cow_code,
+            cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
+            cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
             date: UfDate.formatDate(resolved_date_obj),
+            dejure: is_dejure,
             fillColor: feat_fill,
             fill_color: feat_fill,
             flags: current_props.flags,
+            gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
@@ -534,6 +543,8 @@ export class AtlasBordersService {
             link: current_props.link,
             name: entity_name,
             name_long: entity_name,
+            polygonFill: feat_fill,
+            seshat_id: current_props.seshat_id || current_props.seshatId || current_props.seshat,
             state_id: num_sid,
             symbol: current_symbol,
             timestamp: resolved_ts,
@@ -541,70 +552,9 @@ export class AtlasBordersService {
           type: 'Feature',
         })
       }
-    } else if (target_year >= 1886) {
-      let cshapes = AtlasBordersService.loadCShapes()
-      let cached_keyframes = getCShapesKeyframesByGwcode()
-
-      for (let i = 0; i < cshapes.length; i++) {
-        let feat = cshapes[i]
-        let p = feat.properties
-
-        let is_active = feat._start_ts <= target_ts && (feat._end_ts >= target_ts || (p.gweyear >= 2019 && target_year >= 2019))
-        if (!is_active)
-          continue
-
-        let geom_bbox = feat.bbox || computeGeometryBBox(feat.geometry)
-        if (bbox) {
-          let [b_min_x, b_min_y, b_max_x, b_max_y] = bbox
-          let [g_min_x, g_min_y, g_max_x, g_max_y] = geom_bbox
-          if (g_max_x < b_min_x || g_min_x > b_max_x || g_max_y < b_min_y || g_min_y > b_max_y)
-            continue
-        }
-
-        let gw = p.gwcode
-        let keyframes = gw !== undefined ? cached_keyframes.get(gw) : undefined
-        let cap_info = getStateCapitalInfo(p.gwcode, target_year, p.cntry_name, AtlasBordersService.getStateById)
-        let cs_cap_coords = cap_info.cap_coords || ((p.caplong !== undefined && p.caplat !== undefined) ? [p.caplong, p.caplat] as [number, number] : undefined)
-        let cs_cap_name = cap_info.capname || p.capname
-        let cs_cap_key = cap_info.capkey || (cs_cap_coords ? getContemporaneousCityKey('', target_year, cs_cap_coords).key : undefined)
-        let cs_fill = p.polygonFill || p.symbol?.polygonFill || p.fillColor || p.fill_color || feat.polygonFill || cap_info.fill_color || (cap_info.state_id ? AtlasBordersService.getStateById(cap_info.state_id)?.fill_color : undefined) || (p.gwcode ? AtlasBordersService.getStateById(p.gwcode)?.fill_color : undefined)
-        let cs_symbol = { ...(p.symbol || {}), ...(cs_fill ? { polygonFill: cs_fill } : {}) }
-        features.push({
-          bbox: geom_bbox,
-          geometry: feat.geometry,
-          id: `cshapes_${p.gwcode}_${p.gwsyear}`,
-          properties: {
-            adm0_a3: p.cntry_name,
-            area: p.area,
-            cap_coords: cs_cap_coords,
-            capkey: cs_cap_key,
-            caplat: cs_cap_coords ? cs_cap_coords[1] : p.caplat,
-            caplong: cs_cap_coords ? cs_cap_coords[0] : p.caplong,
-            capname: cs_cap_name,
-            color: cs_fill,
-            date: UfDate.formatDate({ day: p.gwsday || 1, month: p.gwsmonth || 1, year: p.gwsyear }),
-            endDate: p.gwedate,
-            endYear: p.gweyear,
-            fillColor: cs_fill,
-            fill_color: cs_fill,
-            gwcode: p.gwcode,
-            id: p.gwcode,
-            is_acapital: cap_info.is_acapital,
-            iso_a3: p.cntry_name,
-            keyframes: keyframes || [],
-            name: p.cntry_name,
-            name_long: p.cntry_name,
-            polygonFill: cs_fill,
-            startDate: p.gwsdate,
-            startYear: p.gwsyear,
-            state_id: cap_info.state_id || p.gwcode,
-            symbol: cs_symbol,
-          },
-          type: 'Feature',
-        })
-      }
     } else {
-      let entities = AtlasBordersService.loadNaissance()
+      let dataset_paths = AtlasBordersService.getDatasetPaths()
+      let entities = AtlasBordersService.loadNaissance(dataset_paths.dejureNaissancePath)
 
       for (let [ent_id, ent] of entities.entries()) {
         if (ent.min_ts > target_ts)
@@ -654,9 +604,18 @@ export class AtlasBordersService {
         let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
         let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
         let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
-        let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name, AtlasBordersService.getStateById)
-        let feat_fill = current_symbol?.polygonFill || cap_info.fill_color || AtlasBordersService.getStateById(num_sid)?.fill_color
+        let explicit_sid = current_props.state_id !== undefined ? Number(current_props.state_id) : undefined
+        let cap_info = getStateCapitalInfo(explicit_sid, target_year, entity_name, AtlasBordersService.getStateById)
+        let feat_fill = current_symbol?.polygonFill ||
+          current_props.polygonFill ||
+          current_symbol?.fillColor ||
+          current_props.fillColor ||
+          current_props.fill_color ||
+          current_props.color ||
+          undefined
+
+        if (feat_fill && !current_symbol.polygonFill)
+          current_symbol = { ...current_symbol, polygonFill: feat_fill }
 
         features.push({
           bbox: geom_bbox,
@@ -671,10 +630,15 @@ export class AtlasBordersService {
             caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
             capname: cap_info.capname,
             color: feat_fill,
+            cow: current_props.cow || current_props.cow_code,
+            cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
+            cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
             date: UfDate.formatDate(resolved_date_obj),
+            dejure: is_dejure,
             fillColor: feat_fill,
             fill_color: feat_fill,
             flags: current_props.flags,
+            gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
@@ -683,7 +647,9 @@ export class AtlasBordersService {
             link: current_props.link,
             name: entity_name,
             name_long: entity_name,
-            state_id: num_sid,
+            polygonFill: feat_fill,
+            seshat_id: current_props.seshat_id || current_props.seshatId || current_props.seshat,
+            state_id: explicit_sid,
             symbol: current_symbol,
             timestamp: resolved_ts,
           },
@@ -708,7 +674,7 @@ export class AtlasBordersService {
           features,
           source,
           timestamp: target_ts,
-          v: 4,
+          v: 6,
           year: target_year,
         }
         fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
@@ -956,10 +922,11 @@ export class AtlasBordersService {
    */
   static clearCache (): void {
     //Function body
+    AtlasBordersService.states_by_id = null
     cached_active_state_ids.clear()
     clearAtlasConfigCache()
-    clearNaissanceCache()
     clearCityResolverCache()
+    clearNaissanceCache()
     in_memory_slice_lru.clear()
 
     let cache_dir = AtlasBordersService.getDatasetPaths().cacheDir

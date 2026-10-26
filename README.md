@@ -23,7 +23,10 @@ See [Onboarding/AI Policy](https://github.com/ConfoederatioVF/Onboarding) for mo
 
 ## Technical Notes.
 
-For the purposes of rapid iteration, Confoederatio Dataview utilises a Deck.gl + Echarts stack. The frontend is what you would expect: React, shadcn/ui, and Tailwind CSS. The backend is primarily Node.js/C, since it is determined by file I/O and raster calculation speeds.
+Frontend: Deck.gl + Echarts; React + shadcn/ui + Tailwind CSS
+Backend: Node.js/C
+
+Since the main limitation of Confoederatio Dataview are the massive amounts of files it needs to both transfer, read, and compute; both I/O speeds and the data volume you are sending down from the server to the client need to be carefully considered. UIs need to be adaptive in supporting both desktop and mobile environments. Because this is a data visualisation repository, you should move fast and patch faster.
 
 Documentation should be standardised via TypeDoc for human maintainers. Unfortunately, due to the dynamic nature of Dataview, such systems may be of limited utility. Feel free to contact maintainers if you have a particular question about given software components.
 

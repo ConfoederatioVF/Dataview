@@ -1,7 +1,7 @@
 # Confoederatio Dataview
 
 <img src = "https://i.postimg.cc/J4RnLc9Y/81-dataview-1820-ottoman.jpg" width = "100%">
-<div align = "center">Confoederatio Dataview witth GDP (PPP) and 3D Elevation enabled, 1820AD.</div>
+<div align = "center">Confoederatio Dataview with GDP (PPP) and 3D Elevation enabled, 1820AD.</div>
 <br>
 
 <img src = "https://i.postimg.cc/3ND2B1zL/crd-coat-of-arms-logo.png" height = "64"/> <img src = "https://i.postimg.cc/HxNQXRvc/ctd-coat-of-arms-logo.png" height = "64"/>
@@ -15,7 +15,7 @@
 
 Dataview is the main repository for online data portals and visualisers at Confoederatio. Although open-source, code here is directly deployed and so may change frequently with new updates, without explicit versioning. By default, ports are bound to https://localhost:15000. In addition to installing [Node.js](https://nodejs.org/en/download), you will also have to change individual filepaths to point at core rasters in `common/layers/filepath_defines.json5`. 
 
-Links to fetching the latest raster and vector datasets (as well as information on how to edit datasets) can be found over at [Collation](https://github.com/ConfoederatioVF/Collation).
+Links to fetching the latest raster and vector datasets (as well as information on how to edit datasets) can be found over at [Collation](https://github.com/ConfoederatioVF/Collation). 
 
 ## AI Policy/Contributing.
 

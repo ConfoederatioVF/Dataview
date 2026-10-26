@@ -2,33 +2,31 @@
     name: "Atlas (Historical Borders)",
     open: false,
     category_type: "discrete",
+    root_folders: {
+        l_atlas: "./data/atlas",
+    },
+    cache_dir: "${l_atlas}/cache",
+    detailed_dir: "${l_atlas}/detailed",
     "simplified_borders": {
         name: "Simplified Borders",
         description: [
-            "### Simplified Borders",
-            "Simplified de facto borders used for statistical purposes. Shapes after 1886AD are not coloured.",
+            "### De Jure Borders",
+            "Joint database between [Seshat](https://seshat-db.com/), [Correlates of War](https://correlatesofwar.org/data-sets/), and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf). Used for statistical purposes.",
             "<details>",
             "<summary>Methodology</summary>",
-            "Joint database between Atlas 0.6b and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf).",
             "",
-            "Atlas 0.6b is isomorphic to Cliopatria (which [Seshat](https://seshat-db.com/) uses for its historical borders), but differed in containing border adjustments to align better with historical reality. Both [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) and C-Shapes 2.0 are known to contain encoding and historical errors, but both allow for the qualitative encoding of academic databases on institutions or polity status, i.e. via Seshat or the [Correlates of War](https://correlatesofwar.org/data-sets/).",
+            "Atlas 0.7b (de jure) is isomorphic to Cliopatria (which Seshat uses for its historical borders), but differed in containing border adjustments to align better with historical reality. From 1815AD-1886AD, we take borders from Correlates of War, and use C-Shapes 2.0 afterwards.",
+            "",
+            "Whilst these are known to contain encoding and historical errors, they allow for the qualitative encoding of academic data on institutions or polity status.",
             "</details>"
         ],
         filepaths: [
             {
-                path: "${l_atlas}/CShapes-2.0.geojson",
-                type: "vector.geojson",
-                domain: [
-                    1886,
-                    2026
-                ]
-            },
-            {
-                path: "${l_atlas}/atlas.naissance",
+                path: "${l_atlas}/atlas_dejure.naissance",
                 type: "vector.naissance",
                 domain: [
                     -3500,
-                    1886
+                    2026
                 ]
             }
         ]
@@ -36,7 +34,7 @@
     "detailed_borders": {
         name: "Detailed Borders",
         description: [
-            "### Detailed Borders",
+            "### De Facto Borders",
             "De facto territorial frontiers from 3500BC to 2026AD.",
             "<details>",
             "<summary>Data Caveats</summary>",

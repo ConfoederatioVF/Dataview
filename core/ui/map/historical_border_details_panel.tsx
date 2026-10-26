@@ -395,8 +395,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
   if (feature.id?.toString().startsWith('cshapes') || feature.properties?.gwcode) {
     source_label = 'CShapes-2.0'
+  } else if (feature.id?.toString().startsWith('detailed')) {
+    source_label = 'detailed.naissance'
   } else {
-    source_label = 'atlas.naissance'
+    source_label = 'atlas_dejure.naissance'
   }
 
   if (start_year !== undefined && end_year !== undefined) {

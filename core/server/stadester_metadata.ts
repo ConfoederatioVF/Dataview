@@ -10,7 +10,6 @@ import {
   normalizeMetadataEntry,
   parseYearMonthDay,
   resolveHistoricalCityName,
-  type CapitalRecord,
   type CityMetadataEntry,
   type HistoricalNameRecord,
 } from '../framework/stadester/city_metadata_framework.ts'
@@ -23,7 +22,6 @@ import {
 let city_metadata_cache: CityMetadataEntry[] | null = null
 let city_metadata_mtime = 0
 let state_capitals_cache: Record<string, any> | null = null
-let state_capitals_mtime = 0
 let states_by_id: Map<string | number, any> | null = null
 
 /**
@@ -620,8 +618,6 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
 
   //Function body
   try {
-    let stats = fs.statSync(file_path)
-    state_capitals_mtime = stats.mtimeMs
     state_capitals = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
     state_capitals_cache = state_capitals
   } catch (arg0_err) {

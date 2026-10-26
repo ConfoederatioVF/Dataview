@@ -138,7 +138,10 @@ export let resolveRootFolders = function (
   //Normalise all paths
   for (let i = 0; i < all_keys.length; i++) {
     let k = all_keys[i]
-    resolved_roots[k] = normaliseLayerPath(resolved_roots[k])
+    let normalized = normaliseLayerPath(resolved_roots[k])
+    if (!path.isAbsolute(normalized))
+      normalized = path.resolve(process.cwd(), normalized)
+    resolved_roots[k] = normalized
   }
 
   //Return statement

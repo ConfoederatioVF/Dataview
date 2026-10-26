@@ -107,7 +107,7 @@ export let fetchHistoricalBordersAsync = async function (
 }
 
 /**
- * Hook to asynchronously fetch and cache historical borders from CShapes-2.0 and atlas.naissance.
+ * Hook to asynchronously fetch and cache historical borders from CShapes-2.0 and atlas_dejure.naissance.
  * Operates a single-in-flight background queue during timelapse playback to prevent network saturation,
  * whilst providing instant responsive updates on playback stop and timeline scrubbing.
  *

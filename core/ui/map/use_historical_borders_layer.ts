@@ -55,7 +55,7 @@ function parseHexToRgba (arg0_hex: string, arg1_alpha: number = 255): [number, n
 let cached_layer_data_map: WeakMap<object, Map<string, any[]>> = new WeakMap()
 
 /**
- * Builds deck.gl GeoJsonLayers rendering temporally sliced historical borders from CShapes-2.0 and atlas.naissance.
+ * Builds deck.gl GeoJsonLayers rendering temporally sliced historical borders from CShapes-2.0 and atlas_dejure.naissance.
  * Memoises transformed geometries and isolates hover and selection into lightweight overlay layers for optimal FPS.
  *
  * @param {HistoricalBordersLayerOptions} arg0_options
@@ -151,7 +151,7 @@ export function createHistoricalBordersDeckLayer (
     getLineWidth: stroke_width,
     getLineColor: base_rgba,
     getFillColor: (arg0_d: any) => {
-      let polity_color = arg0_d.properties?.fillColor || arg0_d.properties?.fill_color || arg0_d.properties?.symbol?.polygonFill || arg0_d.properties?.symbol?.fillColor || arg0_d.properties?.color
+      let polity_color = arg0_d.properties?.polygonFill || arg0_d.properties?.fillColor || arg0_d.properties?.fill_color || arg0_d.properties?.symbol?.polygonFill || arg0_d.properties?.symbol?.fillColor || arg0_d.properties?.color
       if (polity_color && fill_alpha > 0)
         return parseHexToRgba(polity_color, fill_alpha)
 

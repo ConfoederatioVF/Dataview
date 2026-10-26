@@ -107,7 +107,9 @@
             "What is **NWM2**?",
             "NWM2 is the second generation of the __Naissance World Model__, which integrated previously separate datasets (NWM1) into a cohesive model of Earth.",
             "---",
-            "During this phase, we expect integration and reproducibility to be our top priorities, in addition to ensuring as complete global coverage as possible."
+            "The NWM is what we call a human systems model. It attempts to continuously model every major system of human society at a global level, for the entire Holocene.",
+            "",
+            "As of 2026, we expect integration and reproducibility to be our top priorities, in addition to ensuring as complete global coverage as possible."
           ],
         },
         {
@@ -118,9 +120,9 @@
             "> Complex multi-raster calculations are downsampled to `1080x540` for performance reasons.",
             "",
             "There are some known issues with NWM2 data we are currently working on.",
-            "- Detailed borders are overly reliant on presence modelling/scraping, and as a result of the latter, we cannot make them more available than they currently are until they have been substantially improved.",
+            "- Detailed borders are overly reliant on presence modelling/scraping.",
             "- Modern borders are often used for consistency by historical statisticians, and the input of such academic sources biases training data.",
-            "- Net migration may not always be predicted accurately for years further back.",
+            "- Smaller island and micronations currently have incomplete data. Since this scope is so limited, it is highly likely you will be better off with manual sources anyway.",
             "",
             "In addition, full data methodologies or releases for Eoscala/Velkscala are a work-in-progress. We try our best to document their methodologies whereever possible.",
             "",
@@ -131,12 +133,12 @@
           title: "Downloads",
           open: false,
           content: [
-            "- Atlas 0.51: [Datavault](https://datavault.confoederatio.org/s/rPntqXwCxzXg4Bk)",
+            "- Atlas 0.7: [Datavault](https://datavault.confoederatio.org/s/rPntqXwCxzXg4Bk)",
             "  - We do not feel that Atlas 0.6 is in a strong position for release; we are working on this.",
             "- Eoscala 1.5: [Datavault](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr)",
             "- Velkscala 1.0: [Datavault](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b)",
             "- Stadestér is available as **part of Velkscala**. Whilst separate images are available below, they may be significantly out-of-date.",
-            "  - Stadestér 1.1: [Datavault](https://datavault.confoederatio.org/s/KqC3kAKgeKNfWYc)",
+            "  - Stadestér 1.1: [Datavault](https://datavault.confoederatio.org/s/QcXSrmcA7qYSmR6)",
             "  - Stadestér 1.0: [Datavault](https://datavault.confoederatio.org/s/CBT74PsEc6tCZFx) | [Zenodo](https://zenodo.org/records/17180328)",
           ]
         },

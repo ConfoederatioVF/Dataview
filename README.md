@@ -15,13 +15,17 @@
 
 Dataview is the main repository for online data portals and visualisers at Confoederatio. Although open-source, code here is directly deployed and so may change frequently with new updates, without explicit versioning. By default, ports are bound to https://localhost:15000. In addition to installing [Node.js](https://nodejs.org/en/download), you will also have to change individual filepaths to point at core rasters in `common/layers/filepath_defines.json5`. 
 
-Links to fetching the latest raster and vector datasets (as well as information on how to edit datasets) can be found over at [Collation](https://github.com/ConfoederatioVF/Collation). 
+Links to fetching the latest raster and vector datasets (as well as information on how to edit datasets) can be found over at [Collation](https://github.com/ConfoederatioVF/Collation).
 
 ## AI Policy/Contributing.
 
 As a form of auto-complete, we believe AI works best when the user can't see it. Anything facing the end client should be human written and configured.
 
 Agents are inherently misaligned, as vendors have a tendency to fuzz requests using magic numbers, incomplete execution, and heuristics to save on cost. Contributing programmers are responsible for both steering them and reading the code they propose to ensure they follow overarching architectural decisions and contract guidelines. Guidelines are to be placed in the `./agents/` folder.
+
+## Technical Notes.
+
+For the purposes of rapid iteration, Confoederatio Dataview utilises a Deck.gl + Echarts stack. The frontend is what you would expect: React, shadcn/ui, and Tailwind CSS. The backend is primarily Node.js/C, since it is determined by file I/O and raster calculation speeds.
 
 ## Roadmap.
 

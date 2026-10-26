@@ -27,6 +27,8 @@ Agents are inherently misaligned, as vendors have a tendency to fuzz requests us
 
 For the purposes of rapid iteration, Confoederatio Dataview utilises a Deck.gl + Echarts stack. The frontend is what you would expect: React, shadcn/ui, and Tailwind CSS. The backend is primarily Node.js/C, since it is determined by file I/O and raster calculation speeds.
 
+Documentation should be standardised via TypeDoc for human maintainers. Unfortunately, due to the dynamic nature of Dataview, such systems may be of limited utility. Feel free to contact maintainers if you have a particular question about given software components.
+
 ## Roadmap.
 
 We tend not to post roadmaps on Git repositories in order to centralise them and remain agile. More information can be found over the CRD channel: [CRD Element](https://matrix.to/#/!bpzKRyzInDZbyDhiKq:matrix.confoederatio.org?via=matrix.confoederatio.org) | [CRD Discord](https://discord.gg/ksD66WhjU9). CTD is in charge of developer operations and technical systems for Dataview.

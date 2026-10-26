@@ -19,9 +19,7 @@ Links to fetching the latest raster and vector datasets (as well as information 
 
 ## AI Policy/Contributing.
 
-As a form of auto-complete, we believe AI works best when the user can't see it. Anything facing the end client should be human written and configured.
-
-Agents are inherently misaligned, as vendors have a tendency to fuzz requests using magic numbers, incomplete execution, and heuristics to save on cost. Contributing programmers are responsible for both steering them and reading the code they propose to ensure they follow overarching architectural decisions and contract guidelines. Guidelines are to be placed in the `./agents/` folder.
+See [Onboarding/AI Policy](https://github.com/ConfoederatioVF/Onboarding) for more details on how to contribute, and where or when LLM use is appropriate.
 
 ## Technical Notes.
 

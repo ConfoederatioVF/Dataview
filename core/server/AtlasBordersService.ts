@@ -353,10 +353,11 @@ export class AtlasBordersService {
     let target_month = options.month
 
     //Declare local instance variables
+    let dataset_paths = AtlasBordersService.getDatasetPaths()
     let disk_cache_path: string
     let domain: [number, number]
     let features: HistoricalBorderFeature[] = []
-    let is_dejure = Boolean(AtlasBordersService.getDatasetPaths().dejureDatasets[dataset])
+    let is_dejure = Boolean(dataset_paths.dejureDatasets[dataset])
     let is_whole_year_query: boolean
     let lru_key: string
     let source: 'cshapes' | 'naissance'
@@ -400,6 +401,7 @@ export class AtlasBordersService {
         date: UfDate.formatDate(target_date_obj),
         domain,
         features: cached_list,
+        id_fields: dataset_paths.idFields,
         source,
         timestamp: target_ts,
         year: target_year,
@@ -407,13 +409,13 @@ export class AtlasBordersService {
     }
 
     disk_cache_path = path.join(
-      AtlasBordersService.getDatasetPaths().cacheDir,
+      dataset_paths.cacheDir,
       `borders_${dataset}_${target_year}.json`
     )
 
     if (!fs.existsSync(disk_cache_path) && (dataset === 'simplified_borders' || dataset === 'statistical_borders')) {
       let alt_dataset = (dataset === 'simplified_borders') ? 'statistical_borders' : 'simplified_borders'
-      let alt_path = path.join(AtlasBordersService.getDatasetPaths().cacheDir, `borders_${alt_dataset}_${target_year}.json`)
+      let alt_path = path.join(dataset_paths.cacheDir, `borders_${alt_dataset}_${target_year}.json`)
       if (fs.existsSync(alt_path))
         disk_cache_path = alt_path
     }
@@ -436,6 +438,7 @@ export class AtlasBordersService {
             date: cached_json.date || UfDate.formatDate(target_date_obj),
             domain,
             features: cached_json.features,
+            id_fields: cached_json.id_fields || dataset_paths.idFields,
             source,
             timestamp: cached_json.timestamp || target_ts,
             year: target_year,
@@ -447,7 +450,6 @@ export class AtlasBordersService {
     }
 
     if (dataset === 'detailed_borders') {
-      let dataset_paths = AtlasBordersService.getDatasetPaths()
       let entities: Map<string, NaissanceEntityRecord>
 
       if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
@@ -571,7 +573,6 @@ export class AtlasBordersService {
         })
       }
     } else {
-      let dataset_paths = AtlasBordersService.getDatasetPaths()
       let entities = AtlasBordersService.loadNaissance(dataset_paths.dejureNaissancePath)
 
       for (let [ent_id, ent] of entities.entries()) {

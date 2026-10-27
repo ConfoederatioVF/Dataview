@@ -17,13 +17,13 @@
         },
         description: [
             "### Academic Borders",
-            "Joint database between [Seshat](https://seshat-db.com/), [Correlates of War](https://correlatesofwar.org/data-sets/), and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf). Used for statistical purposes.",
+            "Joint database between [Seshat](https://seshat-db.com/), [Correlates of War](https://correlatesofwar.org/data-sets/), and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/). Used for statistical purposes.",
             "<details>",
             "<summary>Methodology</summary>",
             "",
-            "Atlas 0.7b (de jure) is isomorphic to Cliopatria (which Seshat uses for its historical borders), but differed in containing border adjustments to align better with historical reality.",
+            "Atlas 0.7b (de jure) is isomorphic to [Cliopatria](https://doi.org/10.1038/s41597-025-04516-9) (which Seshat uses for its historical borders) prior to 1815AD, but differs in containing border adjustments to align better with historical reality.",
             "",
-            "From 1815AD-1886AD, we take borders from Correlates of War, and use C-Shapes 2.0 afterwards. For consistency purposes, their original names have been preserved.",
+            "From 1815AD-1886AD, we take borders from [Correlates of War](https://correlatesofwar.org/data-sets/cow-country-codes-2/), and use [C-Shapes 2.0](https://doi.org/10.1177/00220027211013563) afterwards. For consistency purposes, their original names have been preserved.",
             "",
             "Whilst these are known to contain encoding and historical errors, they allow for the qualitative encoding of academic data on institutions or polity status.",
             "</details>"

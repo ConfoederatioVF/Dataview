@@ -15,6 +15,7 @@ export interface HistoricalBorderDetailsPanelProps {
   dejure?: boolean
   embedded?: boolean
   feature: HistoricalBorderFeature | null
+  idFields?: Record<string, string> | Array<{ key: string; name: string }>
   isCalculatingStats?: boolean
   onBack?: () => void
   onClearPolygon?: () => void
@@ -46,6 +47,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let dejure = props.dejure
   let embedded = Boolean(props.embedded)
   let feature = props.feature
+  let id_fields = props.idFields
   let is_calculating_stats = props.isCalculatingStats
   let on_back = props.onBack
   let on_clear_polygon = props.onClearPolygon
@@ -153,30 +155,80 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       return s !== '' && s !== '0' && s !== '-1' && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s.toLowerCase() !== 'none'
     }
 
-    let seshat_val = feature.properties?.seshat_id ?? feature.properties?.seshatId ?? feature.properties?.seshat
-    let cow_val = feature.properties?.cow_id ?? feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
-    let cshapes_val = feature.properties?.cshapes_id ?? feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
+    let configured_id_fields = id_fields || feature.properties?.id_fields || feature.properties?.idFields
 
-    if (checkValidId(seshat_val))
-      dejure_id_items.push({
-        key: 'seshat',
-        label: t.mapPanels.historicalBorders.seshatId || 'Seshat ID:',
-        value: seshat_val,
-      })
+    if (configured_id_fields && typeof configured_id_fields === 'object') {
+      if (Array.isArray(configured_id_fields)) {
+        for (let i = 0; i < configured_id_fields.length; i++) {
+          let field_def = configured_id_fields[i]
+          let key = field_def.key
+          let label = field_def.name || field_def.label || key
+          let val = feature.properties?.[key]
+          if (val === undefined) {
+            if (key === 'seshat_id')
+              val = feature.properties?.seshatId ?? feature.properties?.seshat
+            if (key === 'cow_id')
+              val = feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
+            if (key === 'cshapes_id')
+              val = feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
+          }
+          if (checkValidId(val)) {
+            dejure_id_items.push({
+              key: key,
+              label: label.endsWith(':') ? label : `${label}:`,
+              value: val,
+            })
+          }
+        }
+      } else {
+        let field_keys = Object.keys(configured_id_fields)
+        for (let i = 0; i < field_keys.length; i++) {
+          let key = field_keys[i]
+          let label = configured_id_fields[key] || key
+          let val = feature.properties?.[key]
+          if (val === undefined) {
+            if (key === 'seshat_id')
+              val = feature.properties?.seshatId ?? feature.properties?.seshat
+            if (key === 'cow_id')
+              val = feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
+            if (key === 'cshapes_id')
+              val = feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
+          }
+          if (checkValidId(val)) {
+            dejure_id_items.push({
+              key: key,
+              label: label.endsWith(':') ? label : `${label}:`,
+              value: val,
+            })
+          }
+        }
+      }
+    } else {
+      let seshat_val = feature.properties?.seshat_id ?? feature.properties?.seshatId ?? feature.properties?.seshat
+      let cow_val = feature.properties?.cow_id ?? feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
+      let cshapes_val = feature.properties?.cshapes_id ?? feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
 
-    if (checkValidId(cow_val))
-      dejure_id_items.push({
-        key: 'cow',
-        label: t.mapPanels.historicalBorders.cowId || 'COW ID:',
-        value: cow_val,
-      })
+      if (checkValidId(seshat_val))
+        dejure_id_items.push({
+          key: 'seshat',
+          label: t.mapPanels.historicalBorders.seshatId || 'Seshat ID:',
+          value: seshat_val,
+        })
 
-    if (checkValidId(cshapes_val))
-      dejure_id_items.push({
-        key: 'cshapes',
-        label: t.mapPanels.historicalBorders.cshapesId || 'C-Shapes ID:',
-        value: cshapes_val,
-      })
+      if (checkValidId(cow_val))
+        dejure_id_items.push({
+          key: 'cow',
+          label: t.mapPanels.historicalBorders.cowId || 'COW ID:',
+          value: cow_val,
+        })
+
+      if (checkValidId(cshapes_val))
+        dejure_id_items.push({
+          key: 'cshapes',
+          label: t.mapPanels.historicalBorders.cshapesId || 'C-Shapes ID:',
+          value: cshapes_val,
+        })
+    }
   }
 
   if (cap_name) {

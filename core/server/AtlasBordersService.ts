@@ -36,6 +36,7 @@ export interface HistoricalBordersResponse {
   date?: string
   domain: [number, number]
   features: HistoricalBorderFeature[]
+  id_fields?: Record<string, string>
   source: 'cshapes' | 'naissance'
   timestamp?: number
   year: number
@@ -552,6 +553,7 @@ export class AtlasBordersService {
             flags: current_props.flags,
             gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
+            id_fields: dataset_paths.idFields,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: getEntityKeyframesSummary(ent),
@@ -656,6 +658,7 @@ export class AtlasBordersService {
             flags: current_props.flags,
             gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
+            id_fields: dataset_paths.idFields,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: getEntityKeyframesSummary(ent),
@@ -688,6 +691,7 @@ export class AtlasBordersService {
           date: UfDate.formatDate(target_date_obj),
           domain,
           features,
+          id_fields: dataset_paths.idFields,
           source,
           timestamp: target_ts,
           v: 6,
@@ -705,6 +709,7 @@ export class AtlasBordersService {
       date: UfDate.formatDate(target_date_obj),
       domain,
       features,
+      id_fields: dataset_paths.idFields,
       source,
       timestamp: target_ts,
       year: target_year,

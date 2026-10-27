@@ -574,6 +574,12 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 )}
                 embedded={true}
                 feature={selected_historical_feature}
+                idFields={
+                  selected_historical_feature?.properties?.id_fields ??
+                  (historical_borders_config?.dataset
+                    ? (layers?.[historical_borders_config.dataset]?.id_fields ?? layers?.[historical_borders_config.dataset]?.identifiers)
+                    : undefined)
+                }
                 isCalculatingStats={is_calculating_stats}
                 onClearPolygon={on_clear_polygon}
                 onClose={on_close_historical_feature || (() => {})}

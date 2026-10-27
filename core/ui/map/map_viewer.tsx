@@ -727,6 +727,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
               : undefined)
           )}
           feature={selected_historical_feature}
+          idFields={
+            selected_historical_feature?.properties?.id_fields ??
+            (historical_borders_config?.dataset
+              ? (props.dataLayers?.[historical_borders_config.dataset]?.id_fields ?? props.dataLayers?.[historical_borders_config.dataset]?.identifiers)
+              : undefined)
+          }
           isCalculatingStats={is_calculating_stats}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}
           onClearPolygon={handle_clear_polygon}

@@ -9,6 +9,7 @@ export interface AtlasDatasetPaths {
   dejureNaissancePath: string
   detailedDir: string
   detailedNaissancePath: string
+  idFields?: Record<string, string>
   naissancePath: string
 }
 
@@ -50,6 +51,11 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let detailed_dir = path.join(atlas_data_dir, 'detailed')
   let detailed_naissance_path = path.join(atlas_data_dir, 'detailed.naissance')
   let filepath_defines_path = path.resolve(process.cwd(), 'common/layers/filepath_defines.json5')
+  let id_fields: Record<string, string> = {
+    cshapes_id: 'C-Shapes ID',
+    cow_id: 'COW ID',
+    seshat_id: 'Seshat ID',
+  }
   let legacy_naissance_path = path.join(atlas_data_dir, 'atlas.naissance')
   let naissance_path: string
   let root_folders: Record<string, string> = {
@@ -101,6 +107,14 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
       if (parsed_atlas.detailed_borders?.dejure !== undefined)
         dejure_datasets.detailed_borders = Boolean(parsed_atlas.detailed_borders.dejure)
 
+      let parsed_id_fields = parsed_atlas.simplified_borders?.id_fields ||
+        parsed_atlas.simplified_borders?.identifiers ||
+        parsed_atlas.id_fields ||
+        parsed_atlas.identifiers
+      if (parsed_id_fields && typeof parsed_id_fields === 'object') {
+        id_fields = parsed_id_fields
+      }
+
       let simp_fps = parsed_atlas.simplified_borders?.filepaths
       if (Array.isArray(simp_fps)) {
         for (let i = 0; i < simp_fps.length; i++) {
@@ -144,6 +158,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
     dejureNaissancePath: dejure_naissance_path,
     detailedDir: detailed_dir,
     detailedNaissancePath: detailed_naissance_path,
+    idFields: id_fields,
     naissancePath: naissance_path,
   }
 

@@ -10,6 +10,11 @@
     "simplified_borders": {
         dejure: true,
         name: "Borders (de jure)",
+        id_fields: {
+            seshat_id: "Seshat ID",
+            cow_id: "CoW ID",
+            cshapes_id: "C-Shapes ID",
+        },
         description: [
             "### Academic Borders",
             "Joint database between [Seshat](https://seshat-db.com/), [Correlates of War](https://correlatesofwar.org/data-sets/), and [C-Shapes 2.0](https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf). Used for statistical purposes.",

@@ -43,6 +43,8 @@ export interface ParsedDataLayer {
   hide_colourbar?: boolean
   icon?: string
   id: string
+  id_fields?: Record<string, string> | Array<{ key: string; name: string }>
+  identifiers?: Record<string, string> | Array<{ key: string; name: string }>
   is_nested?: boolean
   legend?: {
     colourscheme?: string
@@ -509,6 +511,8 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'filepaths',
       'hide_colourbar',
       'hide_colorbar',
+      'id_fields',
+      'identifiers',
       'legend',
       'midpoint',
       'name',
@@ -731,6 +735,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             hide_colourbar: Boolean(sub_item.hide_colourbar ?? sub_item.hide_colorbar ?? item.hide_colourbar ?? item.hide_colorbar ?? (sub_item.show_colourbar === false || sub_item.show_colorbar === false || item.show_colourbar === false || item.show_colorbar === false)),
             icon: getLayerIcon(sub_k),
             id: sub_full_id,
+            id_fields: sub_item.id_fields || item.id_fields || parsed_json.id_fields || sub_item.identifiers || item.identifiers || parsed_json.identifiers,
             is_nested: true,
             legend: sub_item.legend,
             midpoint: sub_item.midpoint !== undefined ? Number(sub_item.midpoint) : (sub_item.legend?.midpoint !== undefined ? Number(sub_item.legend.midpoint) : undefined),
@@ -786,6 +791,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           hide_colourbar: Boolean(item.hide_colourbar ?? item.hide_colorbar ?? (item.show_colourbar === false || item.show_colorbar === false)),
           icon: getLayerIcon(k),
           id: k,
+          id_fields: item.id_fields || parsed_json.id_fields || item.identifiers || parsed_json.identifiers,
           legend: item.legend,
           midpoint: item.midpoint !== undefined ? Number(item.midpoint) : (item.legend?.midpoint !== undefined ? Number(item.legend.midpoint) : undefined),
           name: item.name || k,

@@ -43,7 +43,7 @@
         name: "Borders (de facto)",
         description: [
             "### De Facto Borders",
-            "De facto territorial frontiers from 3500BC to 2026AD.",
+            "De facto territorial frontiers from 3500BC to 2026AD, as best we can.",
             "<details>",
             "<summary>Data Caveats</summary>",
             "Regions outside of Europe, India, and Africa tend to be overly simplified (i.e. Warlord Era, Native American polities). We intend on improving these weakpoints via manual curation and adding diplomatic relations prior to a full release. Note that vassals, colonies, military occupations, parents, and state structures are already encoded.",

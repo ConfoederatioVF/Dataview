@@ -358,6 +358,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
   useEffect(() => {
     let unsubscribe = onLayersUpdate((arg0_next_layers) => {
       if (arg0_next_layers && typeof arg0_next_layers === 'object') {
+        console.log(`[useAppLayersSync] Live layers update applied: ${Object.keys(arg0_next_layers).length} layers.`)
         set_layers(arg0_next_layers)
         let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
         if (stadester_layer && stadester_layer.display_options) {

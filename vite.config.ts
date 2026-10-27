@@ -33,24 +33,13 @@ function broadcastHotMessage (arg0_server: any, arg0_event: string, arg1_data: a
 
   //Function body
   try {
-    if (server.environments && (server.environments as any).client?.hot)
-      (server.environments as any).client.hot.send(payload)
-  } catch {
-    //Ignore environment send error
-  }
-
-  try {
-    if (server.hot)
-      server.hot.send(payload)
-  } catch {
-    //Ignore hot send error
-  }
-
-  try {
-    if (server.ws)
+    if (server.hot) {
+      server.hot.send(event, data)
+    } else if (server.ws) {
       server.ws.send(payload)
-  } catch {
-    //Ignore ws send error
+    }
+  } catch (arg0_err) {
+    console.error(`[HMR] Failed to broadcast event '${event}':`, arg0_err)
   }
 }
 
@@ -100,6 +89,7 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
           layers: registry.layers,
           total: Object.keys(registry.layers).length,
         })
+        console.log(`[HMR] Reloaded layers config and broadcasted dataview:layers-update (${Object.keys(registry.layers).length} layers) for: ${normalized_file}`)
       } catch (arg0_err) {
         console.error('[HMR] Error reloading layers:', arg0_err)
       }
@@ -183,6 +173,34 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
 }
 
 
+let dataview_hot_timeout: NodeJS.Timeout | null = null
+
+/**
+ * Debounced wrapper for processing hot update events for configuration, layer, and localisation files.
+ *
+ * @param {string} arg0_file
+ * @param {any} arg1_server
+ *
+ * @returns {Array<any> | undefined}
+ */
+function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | void {
+  //Convert from parameters
+  let file = arg0_file
+  let server = arg1_server
+
+  //Function body
+  if (dataview_hot_timeout)
+    clearTimeout(dataview_hot_timeout)
+
+  dataview_hot_timeout = setTimeout(() => {
+    handleDataviewHotUpdate(file, server)
+  }, 100)
+
+  //Return statement
+  return []
+}
+
+
 /**
  * Custom Vite plugin providing backend API middleware and hot update handling.
  *
@@ -197,33 +215,13 @@ function dataviewBackendPlugin (): Plugin {
       //Convert from parameters
       let server = arg0_server
 
-      //Keep WebSocket connections alive across tunnels/proxies with a 20-second heartbeat
-      let heartbeat_interval = setInterval(() => {
-        let hot_channel = (server.environments && (server.environments as any).client?.hot) || server.hot || (server as any).ws
-        if (hot_channel) {
-          try {
-            hot_channel.send({
-              type: 'custom',
-              event: 'dataview:heartbeat',
-              data: { timestamp: Date.now() },
-            })
-          } catch {
-            //Ignore errors during closing sockets
-          }
-        }
-      }, 20000)
-
-      server.httpServer?.on('close', () => {
-        clearInterval(heartbeat_interval)
-      })
-
       //Explicitly watch common/ and localisation/ directories to ensure non-module JSON5 edits trigger HMR
       server.watcher.add(path.resolve(import.meta.dirname, './common'))
       server.watcher.add(path.resolve(import.meta.dirname, './localisation'))
 
       server.watcher.on('all', (arg0_event, arg1_file_path) => {
         if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
-          handleDataviewHotUpdate(arg1_file_path, server)
+          debouncedHandleDataviewHotUpdate(arg1_file_path, server)
       })
 
       //Function body
@@ -253,7 +251,7 @@ function dataviewBackendPlugin (): Plugin {
         let ctx = arg0_ctx
 
         //Return statement
-        return handleDataviewHotUpdate(ctx.file, ctx.server) as any
+        return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
       },
     },
     handleHotUpdate (arg0_ctx) {
@@ -261,7 +259,7 @@ function dataviewBackendPlugin (): Plugin {
       let ctx = arg0_ctx
 
       //Return statement
-      return handleDataviewHotUpdate(ctx.file, ctx.server) as any
+      return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
     },
   }
 }

@@ -117,56 +117,29 @@ export function onLayersUpdate (arg0_callback: LayersUpdateListener): () => void
 
 //Initialise Vite HMR listener if running in development environment
 if (import.meta.hot) {
-  //Keep-alive heartbeat and acknowledgment across tunnels, proxies, and background tabs
-  import.meta.hot.on('dataview:heartbeat', () => {
-    try {
-      import.meta.hot?.send('dataview:heartbeat-ack', { timestamp: Date.now() })
-    } catch {
-      //Ignore send errors
-    }
-  })
-
-  //Periodic client-to-server keepalive pulse
-  setInterval(() => {
-    try {
-      if (typeof document === 'undefined' || document.visibilityState !== 'hidden')
-        import.meta.hot?.send('dataview:client-ping', { timestamp: Date.now() })
-    } catch {
-      //Ignore send errors
-    }
-  }, 25000)
-
-  //Prevent Vite client from triggering an involuntary full-page reload on transient socket drops
-  if (typeof window !== 'undefined') {
-    setTimeout(() => {
-      try {
-        window.dispatchEvent(new Event('beforeunload'))
-      } catch {
-        //Ignore
-      }
-    }, 100)
-  }
-
   import.meta.hot.on('dataview:layers-update', (arg0_payload: any) => {
     let payload = arg0_payload
-    if (payload && payload.layers) {
-      console.log(`[ConfigHotReload] Hot reloaded ${Object.keys(payload.layers).length} layers in real time.`)
-      notifyLayersUpdate(payload.layers)
+    let next_layers = payload?.layers || payload?.data?.layers || (payload && !payload.type ? payload : null)
+    if (next_layers && typeof next_layers === 'object') {
+      console.log(`[ConfigHotReload] Received dataview:layers-update for ${Object.keys(next_layers).length} layers.`)
+      notifyLayersUpdate(next_layers)
     }
   })
 
   import.meta.hot.on('dataview:config-update', (arg0_payload: any) => {
     let payload = arg0_payload
-    if (payload && payload.category) {
-      console.log(`[ConfigHotReload] Hot reloaded config category '${payload.category}' in real time.`)
-      if (payload.category === 'localisation') {
-        notifyConfigUpdate(payload.category, {
-          data: payload.data,
-          dictionary: payload.dictionary || payload.data,
+    let category = payload?.category || payload?.data?.category
+    let data = payload?.data !== undefined ? payload.data : payload
+    if (category) {
+      console.log(`[ConfigHotReload] Hot reloaded config category '${category}' in real time.`)
+      if (category === 'localisation') {
+        notifyConfigUpdate(category, {
+          data: data,
+          dictionary: payload.dictionary || payload.data || data,
           locale: payload.locale,
         })
       } else {
-        notifyConfigUpdate(payload.category, payload.data)
+        notifyConfigUpdate(category, data)
       }
     }
   })

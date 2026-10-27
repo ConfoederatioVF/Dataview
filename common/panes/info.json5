@@ -134,7 +134,7 @@
           open: false,
           content: [
             "- Atlas 0.7: [Datavault](https://datavault.confoederatio.org/s/rPntqXwCxzXg4Bk)",
-            "  - We do not feel that Atlas 0.6 is in a strong position for release; we are working on this.",
+            "  - We do not feel that Atlas 0.7 is in a strong position for release; we are working on this.",
             "- Eoscala 1.5: [Datavault](https://datavault.confoederatio.org/s/2Kytdej7ABpw4rr)",
             "- Velkscala 1.0: [Datavault](https://datavault.confoederatio.org/s/44Pfgt7ya8wE77b)",
             "- Stadestér is available as **part of Velkscala**. Whilst separate images are available below, they may be significantly out-of-date.",

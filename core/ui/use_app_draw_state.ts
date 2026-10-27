@@ -34,17 +34,23 @@ export function matchesCountryFeature (arg0_a: CountryFeature, arg1_b: CountryFe
   //Guard clauses
   if (a === b)
     return true
-  if (a.id !== undefined && b.id !== undefined && a.id === b.id)
+
+  let a_id = (a.id !== undefined && a.id !== null)
+    ? String(a.id).replace(/^naissance_/, '')
+    : (a.properties?.id !== undefined && a.properties?.id !== null ? String(a.properties.id).replace(/^naissance_/, '') : '')
+  let b_id = (b.id !== undefined && b.id !== null)
+    ? String(b.id).replace(/^naissance_/, '')
+    : (b.properties?.id !== undefined && b.properties?.id !== null ? String(b.properties.id).replace(/^naissance_/, '') : '')
+
+  if (a_id && b_id && a_id === b_id)
     return true
-  if (a.properties?.id !== undefined && b.properties?.id !== undefined && a.properties.id === b.properties.id)
-    return true
-  if (a.properties?.gwcode !== undefined && b.properties?.gwcode !== undefined && a.properties.gwcode === b.properties.gwcode)
+  if (a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
     return true
   if (a.properties?.iso_a3 && a.properties.iso_a3 !== '-99' && a.properties.iso_a3 === b.properties?.iso_a3)
     return true
 
   //Return statement
-  return Boolean(a.properties?.name && b.properties?.name && a.properties.name === b.properties.name)
+  return false
 }
 
 

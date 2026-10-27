@@ -220,28 +220,36 @@ export class AtlasBordersService {
 
     let matchFeature = function (arg0_feat: HistoricalBorderFeature): boolean {
       let f = arg0_feat
-      if (state_id !== undefined) {
+      let clean_state_id = (state_id !== undefined) ? String(state_id).replace(/^naissance_/, '') : undefined
+
+      if (q_name_lower) {
+        let fn = (f.properties?.name || '').toLowerCase().trim()
+        let fl = (f.properties?.name_long || '').toLowerCase().trim()
+        if (fn !== q_name_lower && fl !== q_name_lower)
+          return false
+      }
+
+      if (clean_state_id !== undefined) {
+        let clean_f_id = String(f.id || '').replace(/^naissance_/, '').replace('detailed_', '').replace('cshapes_', '')
+        let clean_p_id = String(f.properties?.id || '').replace(/^naissance_/, '')
+        let p_state_id = (f.properties?.state_id !== undefined) ? String(f.properties.state_id) : ''
+
         if (
-          String(f.id) === state_id ||
-          String(f.id).replace('detailed_', '') === state_id ||
-          String(f.id).replace('cshapes_', '') === state_id ||
-          String(f.properties?.id) === state_id ||
-          String(f.properties?.state_id) === state_id ||
-          String(f.properties?.gwcode) === state_id
+          clean_f_id === clean_state_id ||
+          clean_p_id === clean_state_id ||
+          p_state_id === clean_state_id ||
+          (!q_name_lower && String(f.properties?.gwcode) === clean_state_id)
         ) {
           return true
         }
-      }
-      if (q_name_lower && f.properties?.name) {
-        let fn = f.properties.name.toLowerCase().trim()
-        if (fn === q_name_lower)
+
+        if (q_name_lower)
           return true
+        return false
       }
-      if (q_name_lower && f.properties?.name_long) {
-        let fl = f.properties.name_long.toLowerCase().trim()
-        if (fl === q_name_lower)
-          return true
-      }
+
+      if (q_name_lower)
+        return true
       return false
     }
 

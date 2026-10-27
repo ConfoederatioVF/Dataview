@@ -192,14 +192,12 @@ export function createHistoricalBordersDeckLayer (
 
   //2. Selected historical feature overlay (single feature, zero impact on base layer)
   if (selected_id) {
-    selected_feat = layer_data.find((arg0_d: any) =>
-      arg0_d.id === selected_id ||
-      arg0_d.properties?.id === selected_id ||
-      arg0_d.properties?.gwcode === selected_id ||
-      arg0_d.raw_feature?.id === selected_id ||
-      arg0_d.raw_feature?.properties?.id === selected_id ||
-      arg0_d.raw_feature?.properties?.gwcode === selected_id
-    )
+    let clean_sel_id = String(selected_id).replace(/^naissance_/, '')
+    selected_feat = layer_data.find((arg0_d: any) => {
+      let d_id = String(arg0_d.id || arg0_d.properties?.id || '').replace(/^naissance_/, '')
+      let raw_id = String(arg0_d.raw_feature?.id || arg0_d.raw_feature?.properties?.id || '').replace(/^naissance_/, '')
+      return (d_id && d_id === clean_sel_id) || (raw_id && raw_id === clean_sel_id)
+    })
 
     if (selected_feat) {
       layers_array.push(
@@ -226,14 +224,12 @@ export function createHistoricalBordersDeckLayer (
 
   //3. Hovered historical feature outline overlay (single feature stroke outline)
   if (!is_drawing && hovered_id && hovered_id !== selected_id) {
-    hovered_feat = layer_data.find((arg0_d: any) =>
-      arg0_d.id === hovered_id ||
-      arg0_d.properties?.id === hovered_id ||
-      arg0_d.properties?.gwcode === hovered_id ||
-      arg0_d.raw_feature?.id === hovered_id ||
-      arg0_d.raw_feature?.properties?.id === hovered_id ||
-      arg0_d.raw_feature?.properties?.gwcode === hovered_id
-    )
+    let clean_hov_id = String(hovered_id).replace(/^naissance_/, '')
+    hovered_feat = layer_data.find((arg0_d: any) => {
+      let d_id = String(arg0_d.id || arg0_d.properties?.id || '').replace(/^naissance_/, '')
+      let raw_id = String(arg0_d.raw_feature?.id || arg0_d.raw_feature?.properties?.id || '').replace(/^naissance_/, '')
+      return (d_id && d_id === clean_hov_id) || (raw_id && raw_id === clean_hov_id)
+    })
 
     if (hovered_feat) {
       layers_array.push(

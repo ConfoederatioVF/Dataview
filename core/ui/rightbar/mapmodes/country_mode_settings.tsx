@@ -53,13 +53,15 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       return iso;
     if (country.properties?.adm0_a3)
       return country.properties.adm0_a3;
+    if (country.id !== undefined && country.id !== null)
+      return String(country.id).replace(/^naissance_/, '');
+    if (country.properties?.id !== undefined && country.properties?.id !== null)
+      return String(country.properties.id).replace(/^naissance_/, '');
+    if (country.properties?.name)
+      return country.properties.name;
     if (country.properties?.gwcode !== undefined && country.properties?.gwcode !== null)
       return String(country.properties.gwcode);
-    if (country.id !== undefined && country.id !== null)
-      return String(country.id);
-    if (country.properties?.id !== undefined && country.properties?.id !== null)
-      return String(country.properties.id);
-    return country.properties?.name || '';
+    return '';
   };
 
   filtered_countries = useMemo(() => {
@@ -81,12 +83,14 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
       let primary_code = get_country_code(c);
       if (primary_code)
         code_set.add(primary_code);
-      if (c.id !== undefined && c.id !== null)
+      if (c.id !== undefined && c.id !== null) {
         code_set.add(String(c.id));
-      if (c.properties?.id !== undefined && c.properties?.id !== null)
+        code_set.add(String(c.id).replace(/^naissance_/, ''));
+      }
+      if (c.properties?.id !== undefined && c.properties?.id !== null) {
         code_set.add(String(c.properties.id));
-      if (c.properties?.gwcode !== undefined && c.properties?.gwcode !== null)
-        code_set.add(`gw_${c.properties.gwcode}`);
+        code_set.add(String(c.properties.id).replace(/^naissance_/, ''));
+      }
       if (c.properties?.iso_a3 && c.properties.iso_a3 !== '-99')
         code_set.add(c.properties.iso_a3);
       if (c.properties?.name)
@@ -182,9 +186,8 @@ export function CountryModeSettings (arg0_props: CountryModeSettingsProps) {
             let c = arg0_c;
             let code = get_country_code(c);
             let is_checked = selected_country_code_set.has(code) ||
-              (c.id !== undefined && c.id !== null && selected_country_code_set.has(String(c.id))) ||
-              (c.properties?.id !== undefined && c.properties?.id !== null && selected_country_code_set.has(String(c.properties.id))) ||
-              (c.properties?.gwcode !== undefined && c.properties?.gwcode !== null && selected_country_code_set.has(`gw_${c.properties.gwcode}`)) ||
+              (c.id !== undefined && c.id !== null && (selected_country_code_set.has(String(c.id)) || selected_country_code_set.has(String(c.id).replace(/^naissance_/, '')))) ||
+              (c.properties?.id !== undefined && c.properties?.id !== null && (selected_country_code_set.has(String(c.properties.id)) || selected_country_code_set.has(String(c.properties.id).replace(/^naissance_/, '')))) ||
               Boolean(c.properties?.name && selected_country_code_set.has(`name_${c.properties.name.toLowerCase()}`));
             let item_key = (c.id !== undefined && c.id !== null) ? String(c.id) : (code || c.properties?.name || '');
 

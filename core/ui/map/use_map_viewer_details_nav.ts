@@ -290,24 +290,33 @@ export function useMapViewerDetailsNav (arg0_options: UseMapViewerDetailsNavOpti
       let found: HistoricalBorderFeature | undefined
       if (historical_borders_result.bordersData?.features) {
         let all_f = historical_borders_result.bordersData.features
-        if (state_id !== undefined && state_id !== null) {
-          let sid_str = String(state_id)
-          let sid_num = Number(state_id)
-          found = all_f.find(
-            (arg0_f: any) =>
-              (arg0_f.properties?.state_id !== undefined && String(arg0_f.properties.state_id) === sid_str) ||
-              (arg0_f.properties?.gwcode !== undefined && arg0_f.properties.gwcode === sid_num) ||
-              (arg0_f.id !== undefined && String(arg0_f.id) === sid_str) ||
-              (arg0_f.properties?.id !== undefined && String(arg0_f.properties.id) === sid_str)
-          )
+        if (country_name) {
+          let c_norm = country_name.toLowerCase().trim()
+          found = all_f.find((arg0_f: any) => {
+            let nm = (arg0_f.properties?.name || '').toLowerCase().trim()
+            let nml = (arg0_f.properties?.name_long || '').toLowerCase().trim()
+            return nm === c_norm || nml === c_norm
+          })
+        }
+        if (!found && state_id !== undefined && state_id !== null) {
+          let sid_str = String(state_id).replace(/^naissance_/, '')
+          found = all_f.find((arg0_f: any) => {
+            let fid = String(arg0_f.id || arg0_f.properties?.id || '').replace(/^naissance_/, '')
+            let f_state_id = arg0_f.properties?.state_id !== undefined ? String(arg0_f.properties.state_id) : ''
+            return (fid && fid === sid_str) || (f_state_id && f_state_id === sid_str)
+          })
         }
         if (!found && country_name) {
           let c_norm = country_name.toLowerCase().trim()
           found = all_f.find((arg0_f: any) => {
             let nm = (arg0_f.properties?.name || '').toLowerCase().trim()
             let nml = (arg0_f.properties?.name_long || '').toLowerCase().trim()
-            return nm === c_norm || nml === c_norm || c_norm.includes(nm) || nm.includes(c_norm)
+            return nm.includes(c_norm) || c_norm.includes(nm)
           })
+        }
+        if (!found && state_id !== undefined && state_id !== null) {
+          let sid_num = Number(state_id)
+          found = all_f.find((arg0_f: any) => arg0_f.properties?.gwcode === sid_num)
         }
       }
 
@@ -424,15 +433,24 @@ export function useMapViewerDetailsNav (arg0_options: UseMapViewerDetailsNavOpti
 
   useEffect(() => {
     if (selected_historical_feature && historical_borders_result.bordersData) {
-      let current_gw = selected_historical_feature.properties?.gwcode
       let current_id = selected_historical_feature.id || selected_historical_feature.properties?.id
       let current_name = selected_historical_feature.properties?.name
+      let clean_current_id = (current_id !== undefined && current_id !== null)
+        ? String(current_id).replace(/^naissance_/, '')
+        : ''
+
       let updated_feat = historical_borders_result.bordersData.features.find(
-        (arg0_f: any) =>
-          arg0_f.id === current_id ||
-          (current_gw !== undefined && arg0_f.properties?.gwcode === current_gw) ||
-          (current_id !== undefined && arg0_f.properties?.id === current_id) ||
-          (current_name && arg0_f.properties?.name === current_name)
+        (arg0_f: any) => {
+          let f_id = arg0_f.id || arg0_f.properties?.id
+          let clean_f_id = (f_id !== undefined && f_id !== null)
+            ? String(f_id).replace(/^naissance_/, '')
+            : ''
+          if (clean_current_id && clean_f_id && clean_current_id === clean_f_id)
+            return true
+          if (current_name && arg0_f.properties?.name && arg0_f.properties.name === current_name)
+            return true
+          return false
+        }
       )
       if (updated_feat && updated_feat !== selected_historical_feature) {
         let is_same_identity =

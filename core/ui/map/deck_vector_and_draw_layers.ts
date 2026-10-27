@@ -389,13 +389,14 @@ export function buildCountryHighlightLayers (arg0_options: BuildCountryHighlight
         let iso = arg0_c.properties?.iso_a3
         if (iso && iso !== '-99')
           return iso
+        let cid = arg0_c.id || arg0_c.properties?.id
+        if (cid !== undefined && cid !== null)
+          return String(cid).replace(/^naissance_/, '')
+        if (arg0_c.properties?.name)
+          return arg0_c.properties.name
         if (arg0_c.properties?.gwcode !== undefined && arg0_c.properties?.gwcode !== null)
           return `gw_${arg0_c.properties.gwcode}`
-        if (arg0_c.id !== undefined && arg0_c.id !== null)
-          return String(arg0_c.id)
-        if (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null)
-          return String(arg0_c.properties.id)
-        return arg0_c.properties?.name || 'sel'
+        return 'sel'
       })
       .join('_')
 
@@ -425,21 +426,30 @@ export function buildCountryHighlightLayers (arg0_options: BuildCountryHighlight
   let is_hovered_already_selected = effective_selected_array.some((arg0_c: any) => {
     if (!hovered_country)
       return false
-    return (
-      (arg0_c.properties?.iso_a3 && arg0_c.properties.iso_a3 !== '-99' && arg0_c.properties.iso_a3 === hovered_country.properties?.iso_a3) ||
-      (arg0_c.id !== undefined && hovered_country.id !== undefined && arg0_c.id === hovered_country.id) ||
-      (arg0_c.properties?.id !== undefined && hovered_country.properties?.id !== undefined && arg0_c.properties.id === hovered_country.properties.id) ||
-      (arg0_c.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hovered_country.properties.gwcode) ||
-      Boolean(arg0_c.properties?.name && hovered_country.properties?.name && arg0_c.properties.name === hovered_country.properties.name)
-    )
+    if (arg0_c === hovered_country)
+      return true
+    let c_id = (arg0_c.id !== undefined && arg0_c.id !== null)
+      ? String(arg0_c.id).replace(/^naissance_/, '')
+      : (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null ? String(arg0_c.properties.id).replace(/^naissance_/, '') : '')
+    let h_id = (hovered_country.id !== undefined && hovered_country.id !== null)
+      ? String(hovered_country.id).replace(/^naissance_/, '')
+      : (hovered_country.properties?.id !== undefined && hovered_country.properties?.id !== null ? String(hovered_country.properties.id).replace(/^naissance_/, '') : '')
+    if (c_id && h_id && c_id === h_id)
+      return true
+    if (arg0_c.properties?.name && hovered_country.properties?.name && arg0_c.properties.name === hovered_country.properties.name)
+      return true
+    if (arg0_c.properties?.iso_a3 && arg0_c.properties.iso_a3 !== '-99' && arg0_c.properties.iso_a3 === hovered_country.properties?.iso_a3)
+      return true
+    return false
   })
 
   if (!is_drawing && countries_mode && hovered_country && !is_hovered_already_selected) {
+    let h_id = (hovered_country.id !== undefined && hovered_country.id !== null)
+      ? String(hovered_country.id).replace(/^naissance_/, '')
+      : (hovered_country.properties?.id !== undefined && hovered_country.properties?.id !== null ? String(hovered_country.properties.id).replace(/^naissance_/, '') : '')
     let hov_key = (hovered_country.properties?.iso_a3 && hovered_country.properties.iso_a3 !== '-99')
       ? hovered_country.properties.iso_a3
-      : (hovered_country.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== null)
-        ? `gw_${hovered_country.properties.gwcode}`
-        : (hovered_country.properties?.adm0_a3 || (hovered_country.id !== undefined && hovered_country.id !== null ? String(hovered_country.id) : '') || hovered_country.properties?.name || 'hov')
+      : (h_id || hovered_country.properties?.adm0_a3 || hovered_country.properties?.name || (hovered_country.properties?.gwcode !== undefined && hovered_country.properties?.gwcode !== null ? `gw_${hovered_country.properties.gwcode}` : '') || 'hov')
 
     let hov_geom = (hovered_country as any).raw_feature?.geometry || hovered_country.geometry
     let clean_hov_geom = sanitizePolygonGeometry(hov_geom)

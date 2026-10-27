@@ -316,13 +316,23 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       effective_selected_array = [...selected_countries]
       if (options.selectedHistoricalFeature) {
         let hist_feat = options.selectedHistoricalFeature as unknown as CountryFeature
-        let already_in = effective_selected_array.some((arg0_c: any) =>
-          arg0_c === hist_feat ||
-          (arg0_c.id !== undefined && hist_feat.id !== undefined && arg0_c.id === hist_feat.id) ||
-          (arg0_c.properties?.id !== undefined && hist_feat.properties?.id !== undefined && arg0_c.properties.id === hist_feat.properties.id) ||
-          (arg0_c.properties?.gwcode !== undefined && hist_feat.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hist_feat.properties.gwcode) ||
-          (arg0_c.properties?.name && hist_feat.properties?.name && arg0_c.properties.name === hist_feat.properties.name)
-        )
+        let hist_id = (hist_feat.id !== undefined && hist_feat.id !== null)
+          ? String(hist_feat.id).replace(/^naissance_/, '')
+          : (hist_feat.properties?.id !== undefined && hist_feat.properties?.id !== null ? String(hist_feat.properties.id).replace(/^naissance_/, '') : '')
+        let hist_name = hist_feat.properties?.name
+
+        let already_in = effective_selected_array.some((arg0_c: any) => {
+          if (arg0_c === hist_feat)
+            return true
+          let c_id = (arg0_c.id !== undefined && arg0_c.id !== null)
+            ? String(arg0_c.id).replace(/^naissance_/, '')
+            : (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null ? String(arg0_c.properties.id).replace(/^naissance_/, '') : '')
+          if (c_id && hist_id && c_id === hist_id)
+            return true
+          if (hist_name && arg0_c.properties?.name && arg0_c.properties.name === hist_name)
+            return true
+          return false
+        })
         if (!already_in)
           effective_selected_array.push(hist_feat)
       }
@@ -539,13 +549,19 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     is_historical_hovered_selected = Boolean(
       options.hoveredHistoricalFeature && effective_selected_array.some((arg0_c: any) => {
         let hf = options.hoveredHistoricalFeature!
-        return (
-          arg0_c === hf ||
-          (arg0_c.id !== undefined && hf.id !== undefined && arg0_c.id === hf.id) ||
-          (arg0_c.properties?.id !== undefined && hf.properties?.id !== undefined && arg0_c.properties.id === hf.properties.id) ||
-          (arg0_c.properties?.gwcode !== undefined && hf.properties?.gwcode !== undefined && arg0_c.properties.gwcode === hf.properties.gwcode) ||
-          (arg0_c.properties?.name && hf.properties?.name && arg0_c.properties.name === hf.properties.name)
-        )
+        if (arg0_c === hf)
+          return true
+        let c_id = (arg0_c.id !== undefined && arg0_c.id !== null)
+          ? String(arg0_c.id).replace(/^naissance_/, '')
+          : (arg0_c.properties?.id !== undefined && arg0_c.properties?.id !== null ? String(arg0_c.properties.id).replace(/^naissance_/, '') : '')
+        let hf_id = (hf.id !== undefined && hf.id !== null)
+          ? String(hf.id).replace(/^naissance_/, '')
+          : (hf.properties?.id !== undefined && hf.properties?.id !== null ? String(hf.properties.id).replace(/^naissance_/, '') : '')
+        if (c_id && hf_id && c_id === hf_id)
+          return true
+        if (hf.properties?.name && arg0_c.properties?.name && arg0_c.properties.name === hf.properties.name)
+          return true
+        return false
       })
     )
 

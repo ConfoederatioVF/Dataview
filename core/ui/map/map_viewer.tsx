@@ -161,10 +161,12 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   let [hovered_city_pos, set_hovered_city_pos] = useState<{ x: number; y: number } | null>(null)
   let [hovered_historical_feature, set_hovered_historical_feature] = useState<HistoricalBorderFeature | null>(null)
 
-  let border_dataset = historical_borders_config?.dataset || (props.activeLayerId && props.activeLayerId.includes('border') ? props.activeLayerId : 'statistical_borders')
+  let border_dataset = historical_borders_config?.dataset || (props.activeLayerId && props.activeLayerId.includes('border') ? props.activeLayerId : 'dejure_borders')
   let is_historical_borders_active = Boolean(
     historical_borders_config?.enabled ||
     props.historicalBordersEnabled ||
+    props.activeLayerId === 'dejure_borders' ||
+    props.activeLayerId === 'defacto_borders' ||
     props.activeLayerId === 'statistical_borders' ||
     props.activeLayerId === 'simplified_borders' ||
     props.activeLayerId === 'detailed_borders' ||
@@ -723,7 +725,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           dejure={Boolean(
             selected_historical_feature?.properties?.dejure ??
             (historical_borders_config?.dataset
-              ? (props.dataLayers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
+              ? (props.dataLayers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'dejure_borders' || historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
               : undefined)
           )}
           feature={selected_historical_feature}

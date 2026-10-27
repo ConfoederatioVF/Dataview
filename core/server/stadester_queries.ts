@@ -30,7 +30,7 @@ export let _cache_compact_cities = new Map<string, CompactCitiesPayload>()
  * @param {number} [arg1_year=1950]
  * @param {number} [arg2_month=1]
  * @param {number} [arg3_day=1]
- * @param {string} [arg4_border_dataset='detailed_borders']
+ * @param {string} [arg4_border_dataset='defacto_borders']
  *
  * @returns {Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>}
  */
@@ -42,7 +42,7 @@ export function getAuthoritativeCapitalsAtYear (
   arg4_border_dataset?: string
 ): Map<string, { area?: number; color: string; name?: string; state_id?: number | string }> {
   //Convert from parameters
-  let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'detailed_borders'
+  let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'defacto_borders'
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
   let day = arg3_day !== undefined ? arg3_day : 1
   let month = arg2_month !== undefined ? arg2_month : 1
@@ -61,8 +61,8 @@ export function getAuthoritativeCapitalsAtYear (
   //Function body
   try {
     borders = AtlasBordersService.getBordersAtYear(year, { dataset: border_dataset, day, month })
-    if ((!borders || !borders.features || borders.features.length === 0) && border_dataset === 'detailed_borders')
-      borders = AtlasBordersService.getBordersAtYear(year, { dataset: 'statistical_borders', day, month })
+    if ((!borders || !borders.features || borders.features.length === 0) && (border_dataset === 'defacto_borders' || border_dataset === 'detailed_borders'))
+      borders = AtlasBordersService.getBordersAtYear(year, { dataset: 'dejure_borders', day, month })
 
     if (borders && borders.features) {
       for (let i = 0; i < borders.features.length; i++) {
@@ -276,7 +276,7 @@ export function getCitiesAtYear (
     target_year,
     options.month,
     options.day,
-    options.dataset || 'detailed_borders'
+    options.dataset || 'defacto_borders'
   )
 
   for (let i = 0; i < all_city_keys.length; i++) {

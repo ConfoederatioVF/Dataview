@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { ServerResponse } from 'http'
+import { normaliseBorderDatasetId } from '../framework/geopng/types.ts'
 import { UfDate, type UfDateObject } from '../framework/utils/uf_date.ts'
 import {
   computeGeometryBBox,
@@ -19,7 +20,7 @@ import {
 } from './atlas_config_loader.ts'
 import {
   clearNaissanceCache,
-  detailed_borders_slices,
+  defacto_borders_slices,
   getEntityKeyframesSummary,
   type HistoricalBorderFeature,
   type HistoricalBorderKeyframe,
@@ -124,7 +125,7 @@ export class AtlasBordersService {
   }
 
   /**
-   * Returns a set of all active state IDs present in the detailed border slice at a specific date.
+   * Returns a set of all active state IDs present in the de facto border slice at a specific date.
    *
    * @param {number} arg0_year
    * @param {number} [arg1_month]
@@ -152,7 +153,7 @@ export class AtlasBordersService {
 
     //Function body
     let borders_res = AtlasBordersService.getBordersAtYear(year, {
-      dataset: 'detailed_borders',
+      dataset: 'defacto_borders',
       day,
       month,
     })
@@ -207,16 +208,16 @@ export class AtlasBordersService {
 
     //Declare local instance variables
     let datasets_to_search: string[] = []
-    let primary_dataset = options.dataset || 'detailed_borders'
+    let primary_dataset = normaliseBorderDatasetId(options.dataset, 'defacto_borders')
     let q_name_lower = name ? name.toLowerCase() : ''
     let target_feature: HistoricalBorderFeature | null = null
 
     //Function body
     datasets_to_search.push(primary_dataset)
-    if (primary_dataset !== 'detailed_borders')
-      datasets_to_search.push('detailed_borders')
-    if (primary_dataset !== 'statistical_borders')
-      datasets_to_search.push('statistical_borders')
+    if (primary_dataset !== 'defacto_borders')
+      datasets_to_search.push('defacto_borders')
+    if (primary_dataset !== 'dejure_borders')
+      datasets_to_search.push('dejure_borders')
 
     let matchFeature = function (arg0_feat: HistoricalBorderFeature): boolean {
       let f = arg0_feat
@@ -230,7 +231,7 @@ export class AtlasBordersService {
       }
 
       if (clean_state_id !== undefined) {
-        let clean_f_id = String(f.id || '').replace(/^naissance_/, '').replace('detailed_', '').replace('cshapes_', '')
+        let clean_f_id = String(f.id || '').replace(/^naissance_/, '').replace('detailed_', '').replace('defacto_', '').replace('cshapes_', '')
         let clean_p_id = String(f.properties?.id || '').replace(/^naissance_/, '')
         let p_state_id = (f.properties?.state_id !== undefined) ? String(f.properties.state_id) : ''
 
@@ -356,7 +357,7 @@ export class AtlasBordersService {
     let options = typeof arg1_options === 'string' ? { dataset: arg1_options } : (arg1_options || {})
     let target_year = arg0_year
     let bbox = options.bbox
-    let dataset = options.dataset || 'statistical_borders'
+    let dataset = normaliseBorderDatasetId(options.dataset, 'dejure_borders')
     let target_day = options.day
     let target_month = options.month
 
@@ -421,13 +422,6 @@ export class AtlasBordersService {
       `borders_${dataset}_${target_year}.json`
     )
 
-    if (!fs.existsSync(disk_cache_path) && (dataset === 'simplified_borders' || dataset === 'statistical_borders')) {
-      let alt_dataset = (dataset === 'simplified_borders') ? 'statistical_borders' : 'simplified_borders'
-      let alt_path = path.join(dataset_paths.cacheDir, `borders_${alt_dataset}_${target_year}.json`)
-      if (fs.existsSync(alt_path))
-        disk_cache_path = alt_path
-    }
-
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
         let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
@@ -457,17 +451,17 @@ export class AtlasBordersService {
       }
     }
 
-    if (dataset === 'detailed_borders') {
+    if (dataset === 'defacto_borders') {
       let entities: Map<string, NaissanceEntityRecord>
 
       if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
         entities = AtlasBordersService.loadNaissance(dataset_paths.detailedNaissancePath)
       } else {
-        let slice = detailed_borders_slices.find((arg0_s) =>
+        let slice = defacto_borders_slices.find((arg0_s) =>
           target_year >= arg0_s.domain[0] && (target_year < arg0_s.domain[1] || arg0_s.domain[1] === 2026)
         )
         if (!slice)
-          slice = target_year < -3500 ? detailed_borders_slices[0] : detailed_borders_slices[detailed_borders_slices.length - 1]
+          slice = target_year < -3500 ? defacto_borders_slices[0] : defacto_borders_slices[defacto_borders_slices.length - 1]
 
         let detailed_path = path.join(dataset_paths.detailedDir, slice.file)
         entities = AtlasBordersService.loadNaissance(detailed_path)
@@ -792,7 +786,7 @@ export class AtlasBordersService {
    */
   static getEntityDetails (arg0_id: string): any {
     //Convert from parameters
-    let target_id = arg0_id.replace(/^(naissance_|cshapes_|detailed_)/, '')
+    let target_id = arg0_id.replace(/^(naissance_|cshapes_|detailed_|defacto_)/, '')
 
     //Declare local instance variables
     let cshapes = AtlasBordersService.loadCShapes()

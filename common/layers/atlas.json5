@@ -7,13 +7,26 @@
     },
     cache_dir: "${l_atlas}/cache",
     detailed_dir: "${l_atlas}/detailed",
-    "simplified_borders": {
+    "dejure_borders": {
         dejure: true,
         name: "Borders (de jure)",
         id_fields: {
             seshat_id: "Seshat ID",
             cow_id: "CoW ID",
             cshapes_id: "C-Shapes ID",
+        },
+        display_options: {
+            stroke_colour: "#ffffff",
+            stroke_width: 1,
+            stroke_width_range: [
+                0,
+                5.0
+            ],
+            fill_opacity: 0.25,
+            fill_opacity_range: [
+                0.0,
+                1.0
+            ],
         },
         description: [
             "### Academic Borders",
@@ -39,8 +52,21 @@
             }
         ]
     },
-    "detailed_borders": {
+    "defacto_borders": {
         name: "Borders (de facto)",
+        display_options: {
+            stroke_colour: "#ffffff",
+            stroke_width: 1,
+            stroke_width_range: [
+                0,
+                5.0
+            ],
+            fill_opacity: 0.25,
+            fill_opacity_range: [
+                0.0,
+                1.0
+            ],
+        },
         description: [
             "### De Facto Borders",
             "De facto territorial frontiers from 3500BC to 2026AD, as best we can.",

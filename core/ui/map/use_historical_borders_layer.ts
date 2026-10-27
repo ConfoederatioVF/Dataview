@@ -144,10 +144,10 @@ export function createHistoricalBordersDeckLayer (
     pickable: !is_drawing,
     autoHighlight: !is_drawing,
     highlightColor: [255, 255, 255, 50],
-    stroked: true,
+    stroked: stroke_width > 0,
     filled: fill_alpha > 0,
     lineWidthUnits: 'pixels',
-    lineWidthMinPixels: 1,
+    lineWidthMinPixels: Math.min(1, stroke_width),
     getLineWidth: stroke_width,
     getLineColor: base_rgba,
     getFillColor: (arg0_d: any) => {
@@ -256,4 +256,3 @@ export function createHistoricalBordersDeckLayer (
   //Return statement
   return layers_array
 }
-

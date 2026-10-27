@@ -503,14 +503,19 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       (arg0_k) => !['root_folders', 'name', 'expressions', 'open'].includes(arg0_k)
     )
     let metadata_keys = [
+      'appearance',
+      'border_appearance',
       'category_type',
       'dejure',
       'description',
+      'display_options',
       'encoding',
+      'fill_opacity',
+      'fill_opacity_range',
       'filepath',
       'filepaths',
-      'hide_colourbar',
       'hide_colorbar',
+      'hide_colourbar',
       'id_fields',
       'identifiers',
       'legend',
@@ -520,8 +525,13 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'permissions',
       'pixel_offset',
       'root_folders',
-      'show_colourbar',
       'show_colorbar',
+      'show_colourbar',
+      'slider_range',
+      'stroke_color',
+      'stroke_colour',
+      'stroke_width',
+      'stroke_width_range',
       'synthetic_by_default',
       'type',
       'unit',
@@ -776,6 +786,24 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           resolved_template = sub_layer_list[0].filepath_template
         }
 
+        let merged_display_options = (
+          parsed_json.appearance ||
+          parsed_json.border_appearance ||
+          parsed_json.display_options ||
+          item.appearance ||
+          item.border_appearance ||
+          item.display_options
+        )
+          ? {
+              ...(parsed_json.appearance || {}),
+              ...(parsed_json.border_appearance || {}),
+              ...(parsed_json.display_options || {}),
+              ...(item.appearance || {}),
+              ...(item.border_appearance || {}),
+              ...(item.display_options || {}),
+            }
+          : undefined
+
         parsed_layers[k] = {
           available_years: years,
           can_be_uninhabited: Boolean(item.can_be_uninhabited ?? parsed_json.can_be_uninhabited),
@@ -784,7 +812,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           category_type: (item.category_type || parsed_json.category_type) as 'continuous' | 'discrete' | undefined,
           dejure: item.dejure !== undefined ? Boolean(item.dejure) : undefined,
           description: desc_text,
-          display_options: item.display_options || parsed_json.display_options,
+          display_options: merged_display_options,
           encoding: item.encoding || 'float32',
           filepath_template: resolved_template,
           filepaths: has_filepaths ? resolved_filepaths : undefined,

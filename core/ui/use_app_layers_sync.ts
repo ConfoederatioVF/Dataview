@@ -3,6 +3,8 @@ import { ParsedDataLayer } from '@server/layer_parser.ts'
 import {
   isBorderDatasetMatch,
   HistoricalBordersConfig,
+  normaliseBorderDatasetId,
+  resolveHistoricalBordersAppearance,
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { applyLayerLegend } from '@framework/raster/legend_utils.ts'
@@ -158,18 +160,32 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
 
     if (layer_id === 'lfpr')
       layer_id = 'lfpr.lfpr_female'
-    if (layer_id === 'statistical_borders' || layer_id === 'simplified_borders' || layer_id === 'detailed_borders') {
+    if (
+      layer_id === 'dejure_borders' ||
+      layer_id === 'defacto_borders' ||
+      layer_id === 'statistical_borders' ||
+      layer_id === 'simplified_borders' ||
+      layer_id === 'detailed_borders'
+    ) {
+      let norm_id = normaliseBorderDatasetId(layer_id)
+      let border_layer = (norm_id === 'dejure_borders')
+        ? (layers.dejure_borders || layers.simplified_borders || layers.statistical_borders)
+        : (layers.defacto_borders || layers.detailed_borders)
+
       set_historical_borders_config((arg0_prev) => {
-        let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, layer_id)
+        let is_currently_active = arg0_prev.enabled && isBorderDatasetMatch(arg0_prev.dataset, norm_id)
         if (is_currently_active) {
           return {
             ...arg0_prev,
             enabled: false,
           }
         }
+        let resolved_appearance = border_layer ? resolveHistoricalBordersAppearance(border_layer, arg0_prev) : {}
         return {
           ...arg0_prev,
-          dataset: layer_id,
+          ...resolved_appearance,
+          dataset: norm_id,
+          display_options: border_layer?.display_options || arg0_prev.display_options,
           enabled: true,
         }
       })
@@ -305,6 +321,23 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
             set_layers(data.layers)
             ;(window as any).__layersLoaded = true
             let layer_keys = Object.keys(data.layers)
+
+            set_historical_borders_config((arg0_prev) => {
+              let norm_ds = normaliseBorderDatasetId(arg0_prev.dataset, 'defacto_borders')
+              let border_layer = (norm_ds === 'dejure_borders')
+                ? (data.layers.dejure_borders || data.layers.simplified_borders || data.layers.statistical_borders)
+                : (data.layers.defacto_borders || data.layers.detailed_borders)
+              if (!border_layer)
+                return { ...arg0_prev, dataset: norm_ds }
+              let resolved_appearance = resolveHistoricalBordersAppearance(border_layer, arg0_prev)
+              return {
+                ...arg0_prev,
+                ...resolved_appearance,
+                dataset: norm_ds,
+                display_options: border_layer.display_options || arg0_prev.display_options,
+              }
+            })
+
             let stadester_layer = data.layers.stadester || data.layers['stadester_1.1'] || data.layers['stadester_1.0']
             if (stadester_layer && stadester_layer.display_options) {
               let opts = stadester_layer.display_options
@@ -353,13 +386,30 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
     return () => {
       cancelled = true
     }
-  }, [default_data_layers, default_stadester_enabled, is_mobile, set_stadester_config])
+  }, [default_data_layers, default_stadester_enabled, is_mobile, set_historical_borders_config, set_stadester_config])
 
   useEffect(() => {
     let unsubscribe = onLayersUpdate((arg0_next_layers) => {
       if (arg0_next_layers && typeof arg0_next_layers === 'object') {
         console.log(`[useAppLayersSync] Live layers update applied: ${Object.keys(arg0_next_layers).length} layers.`)
         set_layers(arg0_next_layers)
+
+        set_historical_borders_config((arg0_prev) => {
+          let norm_ds = normaliseBorderDatasetId(arg0_prev.dataset, 'defacto_borders')
+          let border_layer = (norm_ds === 'dejure_borders')
+            ? (arg0_next_layers.dejure_borders || arg0_next_layers.simplified_borders || arg0_next_layers.statistical_borders)
+            : (arg0_next_layers.defacto_borders || arg0_next_layers.detailed_borders)
+          if (!border_layer)
+            return { ...arg0_prev, dataset: norm_ds }
+          let resolved_appearance = resolveHistoricalBordersAppearance(border_layer, arg0_prev)
+          return {
+            ...arg0_prev,
+            ...resolved_appearance,
+            dataset: norm_ds,
+            display_options: border_layer.display_options || arg0_prev.display_options,
+          }
+        })
+
         let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
         if (stadester_layer && stadester_layer.display_options) {
           let opts = stadester_layer.display_options
@@ -393,7 +443,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
     return () => {
       unsubscribe()
     }
-  }, [is_mobile, set_stadester_config])
+  }, [is_mobile, set_historical_borders_config, set_stadester_config])
 
   useEffect(() => {
     let unsubscribe = onConfigUpdate('mapmodes', (arg0_next_mapmodes) => {

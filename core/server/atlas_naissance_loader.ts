@@ -60,7 +60,7 @@ export interface NaissanceEntityRecord {
   sorted_timestamps: number[]
 }
 
-export let detailed_borders_slices = [
+export let defacto_borders_slices = [
   { domain: [-3500, 476], file: '0.476.1.1.naissance' },
   { domain: [476, 1356], file: '1.1356.1.1.naissance' },
   { domain: [1356, 1707], file: '2.1707.1.1.naissance' },

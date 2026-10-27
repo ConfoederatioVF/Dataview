@@ -14,12 +14,14 @@ import {
   HistoricalBordersConfig,
   MapModeId,
   MapModeItem,
+  normaliseBorderDatasetId,
   ProjectionType,
+  resolveHistoricalBordersAppearance,
   ScaleType,
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { useCountryStatsAsync } from '@framework/geopng/use_country_stats_async.ts'
-import { MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
+import { ATLAS_CONFIG, MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
 import { SidebarControls } from '@ui/leftbar/sidebar_controls'
 import { MapViewer } from '@ui/map/map_viewer'
 import { AnalyticsDrawer } from '@ui/rightbar/analytics_drawer'
@@ -87,9 +89,24 @@ export let App: React.FC = function () {
   let [color_palette, set_color_palette] = useState<ColorPalette>('Plasma')
   let [data_format, set_data_format] = useState<DataFormat>('float32')
 
-  let default_data_layers = useMemo(() => MAP_CONFIG.defaultDataLayers ?? ['detailed_borders', 'stadester'], [])
-  let default_borders_enabled = default_data_layers.includes('detailed_borders') || default_data_layers.includes('simplified_borders') || default_data_layers.includes('historical_borders') || default_data_layers.includes('statistical_borders')
-  let default_border_dataset = default_data_layers.includes('detailed_borders') ? 'detailed_borders' : (default_data_layers.includes('simplified_borders') ? 'simplified_borders' : 'detailed_borders')
+  let default_data_layers = useMemo(() => MAP_CONFIG.defaultDataLayers ?? ['defacto_borders', 'stadester'], [])
+  let default_borders_enabled =
+    default_data_layers.includes('defacto_borders') ||
+    default_data_layers.includes('dejure_borders') ||
+    default_data_layers.includes('detailed_borders') ||
+    default_data_layers.includes('simplified_borders') ||
+    default_data_layers.includes('historical_borders') ||
+    default_data_layers.includes('statistical_borders')
+  let default_border_dataset = normaliseBorderDatasetId(
+    default_data_layers.find((arg0_l) =>
+      arg0_l === 'defacto_borders' ||
+      arg0_l === 'dejure_borders' ||
+      arg0_l === 'detailed_borders' ||
+      arg0_l === 'simplified_borders' ||
+      arg0_l === 'statistical_borders'
+    ),
+    'defacto_borders'
+  )
   let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_1.1')
 
   let [heightmap_config, set_heightmap_config] = useState<HeightmapConfig>({
@@ -102,10 +119,18 @@ export let App: React.FC = function () {
     opacityByPercentileStrength: 1.0,
     resolutionArcmin: 60,
   })
-  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>({
-    ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
-    dataset: default_border_dataset,
-    enabled: default_borders_enabled,
+  let [historical_borders_config, set_historical_borders_config] = useState<HistoricalBordersConfig>(() => {
+    let atlas_layer = (default_border_dataset === 'dejure_borders')
+      ? (ATLAS_CONFIG?.dejure_borders || ATLAS_CONFIG?.simplified_borders)
+      : (ATLAS_CONFIG?.defacto_borders || ATLAS_CONFIG?.detailed_borders)
+    let resolved_appearance = resolveHistoricalBordersAppearance(atlas_layer, DEFAULT_HISTORICAL_BORDERS_CONFIG)
+    return {
+      ...DEFAULT_HISTORICAL_BORDERS_CONFIG,
+      ...resolved_appearance,
+      dataset: default_border_dataset,
+      display_options: atlas_layer?.display_options,
+      enabled: default_borders_enabled,
+    }
   })
   let [info_panel_open, set_info_panel_open] = useState<boolean>(false)
   let [inspect_data, set_inspect_data] = useState<any>(null)

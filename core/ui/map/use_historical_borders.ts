@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { HistoricalBorderFeature, HistoricalBordersResponse } from '@server/AtlasBordersService'
+import { normaliseBorderDatasetId } from '@framework/geopng/types'
 import { UfDate, type UfDateObject } from '@framework/utils/uf_date'
 
 export interface HistoricalBordersHookResult {
@@ -40,7 +41,7 @@ export let fetchHistoricalBordersAsync = async function (
   arg4_signal?: AbortSignal
 ): Promise<HistoricalBordersResponse> {
   //Convert from parameters
-  let dataset = arg0_dataset
+  let dataset = normaliseBorderDatasetId(arg0_dataset, 'dejure_borders')
   let day = arg3_day
   let month = arg2_month
   let signal = arg4_signal
@@ -146,7 +147,10 @@ export let useHistoricalBorders = function (
     [key: string]: any
   } | null
   let cache_key: string
-  let dataset = custom_dataset || (active_layer_id && active_layer_id.includes('border') ? active_layer_id : 'statistical_borders')
+  let dataset = normaliseBorderDatasetId(
+    custom_dataset || (active_layer_id && active_layer_id.includes('border') ? active_layer_id : undefined),
+    'dejure_borders'
+  )
   let date_obj: UfDateObject
   let debounce_timer_ref = useRef<NodeJS.Timeout | null>(null)
   let domain: [number, number] | null
@@ -207,7 +211,14 @@ export let useHistoricalBorders = function (
   ;[is_loading, set_is_loading] = useState<boolean>(false)
   ;[source, set_source] = useState<'cshapes' | 'naissance' | null>(null)
 
-  is_active = enabled || active_layer_id === 'statistical_borders' || active_layer_id === 'detailed_borders' || active_layer_id === 'simplified_borders' || Boolean(active_layer_id && active_layer_id.includes('border'))
+  is_active =
+    enabled ||
+    active_layer_id === 'dejure_borders' ||
+    active_layer_id === 'defacto_borders' ||
+    active_layer_id === 'statistical_borders' ||
+    active_layer_id === 'detailed_borders' ||
+    active_layer_id === 'simplified_borders' ||
+    Boolean(active_layer_id && active_layer_id.includes('border'))
 
   date_obj = UfDate.fromFractionalYear(timeline_year)
   effective_year = date_obj.year

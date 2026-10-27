@@ -1,6 +1,12 @@
 import React from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
-import { HistoricalBordersConfig, StadesterConfig, isBorderDatasetMatch } from '@framework/geopng/types.ts'
+import {
+  HistoricalBordersConfig,
+  StadesterConfig,
+  isBorderDatasetMatch,
+  normaliseBorderDatasetId,
+  resolveHistoricalBordersAppearance,
+} from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { formatLocalisedString, useLocalisation } from '@localisation'
 import { HistoricalBordersSettings } from './historical_borders_settings'
@@ -56,7 +62,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
   let is_accessible = is_layer_accessible(layer)
   let is_active = active_layer_id === layer.id
   let is_border_dataset_match: boolean
-  let is_borders = layer.id === 'statistical_borders' || layer.id === 'detailed_borders' || layer.id === 'simplified_borders' || layer.type === 'vector.polygon' || layer.id.includes('borders')
+  let is_borders = layer.id === 'dejure_borders' || layer.id === 'defacto_borders' || layer.id === 'statistical_borders' || layer.id === 'detailed_borders' || layer.id === 'simplified_borders' || layer.type === 'vector.polygon' || layer.id.includes('borders')
   let is_node_expanded = Boolean(search_query.trim()) || (expanded_nodes[layer.id] ?? true)
   let is_overlay_active: boolean
   let is_searching = Boolean(search_query.trim())
@@ -97,9 +103,12 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                           enabled: false,
                         }
                       }
+                      let resolved_appearance = resolveHistoricalBordersAppearance(layer, arg0_prev)
                       return {
                         ...arg0_prev,
-                        dataset: layer.id,
+                        ...resolved_appearance,
+                        dataset: normaliseBorderDatasetId(layer.id),
+                        display_options: layer.display_options || arg0_prev.display_options,
                         enabled: true,
                       }
                     })
@@ -163,6 +172,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
             <div className="p-2 border-t border-border/60 bg-card/60 space-y-1 text-xs">
               <HistoricalBordersSettings
                 config={historical_borders_config}
+                displayOptions={layer.display_options}
                 onChangeConfig={set_historical_borders_config}
               />
             </div>

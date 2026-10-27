@@ -267,7 +267,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
           let is_parent_of_active = Boolean(active_layer && active_layer.parent_id === arg0_layer.id)
           let is_highlighted = is_exact_active || is_parent_of_active
           let years_count = arg0_layer.available_years ? arg0_layer.available_years.length : 0
-          let is_borders = arg0_layer.id === 'statistical_borders' || arg0_layer.id === 'detailed_borders' || arg0_layer.id === 'simplified_borders' || arg0_layer.type === 'vector.polygon' || arg0_layer.id.includes('borders')
+          let is_borders = arg0_layer.id === 'dejure_borders' || arg0_layer.id === 'defacto_borders' || arg0_layer.id === 'statistical_borders' || arg0_layer.id === 'detailed_borders' || arg0_layer.id === 'simplified_borders' || arg0_layer.type === 'vector.polygon' || arg0_layer.id.includes('borders')
           let is_border_dataset_match = is_borders
             ? isBorderDatasetMatch(historical_borders_config?.dataset, arg0_layer.id)
             : false

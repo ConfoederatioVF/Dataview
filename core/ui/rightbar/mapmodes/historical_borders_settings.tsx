@@ -1,12 +1,17 @@
 import React from 'react'
-import { HistoricalBordersConfig } from '@framework/geopng/types.ts'
+import {
+  DEFAULT_HISTORICAL_BORDERS_CONFIG,
+  HistoricalBordersConfig,
+  HistoricalBordersDisplayOptions,
+  resolveHistoricalBordersAppearance,
+} from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { Slider } from '@ui/components/slider'
-
 import { useLocalisation } from '@localisation'
 
 export interface HistoricalBordersSettingsProps {
   config: HistoricalBordersConfig
+  displayOptions?: HistoricalBordersDisplayOptions
   onChangeConfig: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
 }
 
@@ -32,15 +37,33 @@ export let HistoricalBordersSettings: React.FC<HistoricalBordersSettingsProps> =
   //Convert from parameters
   let props = arg0_props
   let config = props.config
+  let display_options = props.displayOptions
   let on_change_config = props.onChangeConfig
 
   //Declare local instance variables
-  let fill_opacity = (config.fillOpacity !== undefined) ? config.fillOpacity : 0.0
-  let stroke_color = config.strokeColor || '#d4af37'
-  let stroke_width = (config.strokeWidth !== undefined) ? config.strokeWidth : 1.25
+  let fill_opacity: number
+  let fill_opacity_range: [number, number]
+  let fill_opacity_step: number
+  let resolved_appearance = resolveHistoricalBordersAppearance(display_options || config.display_options, config)
+  let stroke_color: string
+  let stroke_width: number
+  let stroke_width_range: [number, number]
+  let stroke_width_step: number
   let { t } = useLocalisation()
 
   //Function body
+  fill_opacity_range = config.fillOpacityRange || resolved_appearance.fillOpacityRange || DEFAULT_HISTORICAL_BORDERS_CONFIG.fillOpacityRange || [0.0, 0.5]
+  stroke_width_range = config.strokeWidthRange || resolved_appearance.strokeWidthRange || DEFAULT_HISTORICAL_BORDERS_CONFIG.strokeWidthRange || [0.5, 5.0]
+  fill_opacity = (config.fillOpacity !== undefined)
+    ? Math.min(fill_opacity_range[1], Math.max(fill_opacity_range[0], config.fillOpacity))
+    : resolved_appearance.fillOpacity
+  stroke_color = config.strokeColor || resolved_appearance.strokeColor || '#ffffff'
+  stroke_width = (config.strokeWidth !== undefined)
+    ? Math.min(stroke_width_range[1], Math.max(stroke_width_range[0], config.strokeWidth))
+    : resolved_appearance.strokeWidth
+  fill_opacity_step = config.fillOpacityStep ?? resolved_appearance.fillOpacityStep ?? 0.05
+  stroke_width_step = config.strokeWidthStep ?? resolved_appearance.strokeWidthStep ?? 0.25
+
   //Return statement
   return (
     <div className="space-y-2 pt-1 text-xs select-none font-sans">
@@ -117,9 +140,9 @@ export let HistoricalBordersSettings: React.FC<HistoricalBordersSettingsProps> =
         </div>
         <Slider
           value={[stroke_width]}
-          min={0.5}
-          max={5.0}
-          step={0.25}
+          min={stroke_width_range[0]}
+          max={stroke_width_range[1]}
+          step={stroke_width_step}
           onValueChange={([arg0_val]) =>
             on_change_config((arg0_prev) => ({
               ...arg0_prev,
@@ -137,9 +160,9 @@ export let HistoricalBordersSettings: React.FC<HistoricalBordersSettingsProps> =
         </div>
         <Slider
           value={[fill_opacity]}
-          min={0.0}
-          max={0.5}
-          step={0.05}
+          min={fill_opacity_range[0]}
+          max={fill_opacity_range[1]}
+          step={fill_opacity_step}
           onValueChange={([arg0_val]) =>
             on_change_config((arg0_prev) => ({
               ...arg0_prev,

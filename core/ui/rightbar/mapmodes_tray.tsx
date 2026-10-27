@@ -569,7 +569,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 dejure={Boolean(
                   selected_historical_feature?.properties?.dejure ??
                   (historical_borders_config?.dataset
-                    ? (layers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
+                    ? (layers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'dejure_borders' || historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
                     : undefined)
                 )}
                 embedded={true}

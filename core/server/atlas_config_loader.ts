@@ -9,6 +9,7 @@ export interface AtlasDatasetPaths {
   dejureNaissancePath: string
   detailedDir: string
   detailedNaissancePath: string
+  displayOptions?: Record<string, Record<string, any>>
   idFields?: Record<string, string>
   naissancePath: string
 }
@@ -43,6 +44,8 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let cache_dir = path.join(atlas_data_dir, 'cache')
   let cshapes_path = path.join(atlas_data_dir, 'CShapes-2.0.geojson')
   let dejure_datasets: Record<string, boolean> = {
+    defacto_borders: false,
+    dejure_borders: true,
     detailed_borders: false,
     simplified_borders: true,
     statistical_borders: true,
@@ -50,6 +53,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let dejure_naissance_path = path.join(atlas_data_dir, 'atlas_dejure.naissance')
   let detailed_dir = path.join(atlas_data_dir, 'detailed')
   let detailed_naissance_path = path.join(atlas_data_dir, 'detailed.naissance')
+  let display_options: Record<string, Record<string, any>> = {}
   let filepath_defines_path = path.resolve(process.cwd(), 'common/layers/filepath_defines.json5')
   let id_fields: Record<string, string> = {
     cshapes_id: 'C-Shapes ID',
@@ -78,6 +82,8 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
     try {
       let raw_text = fs.readFileSync(atlas_config_path, 'utf-8')
       let parsed_atlas = JSON5.parse(raw_text)
+      let defacto_entry = parsed_atlas.defacto_borders || parsed_atlas.detailed_borders
+      let dejure_entry = parsed_atlas.dejure_borders || parsed_atlas.simplified_borders
 
       if (parsed_atlas.root_folders)
         root_folders = { ...root_folders, ...parsed_atlas.root_folders }
@@ -100,22 +106,32 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
       if (parsed_atlas.detailed_dir)
         detailed_dir = resolveToken(parsed_atlas.detailed_dir)
 
-      if (parsed_atlas.simplified_borders?.dejure !== undefined) {
-        dejure_datasets.simplified_borders = Boolean(parsed_atlas.simplified_borders.dejure)
-        dejure_datasets.statistical_borders = Boolean(parsed_atlas.simplified_borders.dejure)
+      if (dejure_entry?.dejure !== undefined) {
+        let is_dj = Boolean(dejure_entry.dejure)
+        dejure_datasets.dejure_borders = is_dj
+        dejure_datasets.simplified_borders = is_dj
+        dejure_datasets.statistical_borders = is_dj
       }
-      if (parsed_atlas.detailed_borders?.dejure !== undefined)
-        dejure_datasets.detailed_borders = Boolean(parsed_atlas.detailed_borders.dejure)
+      if (defacto_entry?.dejure !== undefined) {
+        let is_df = Boolean(defacto_entry.dejure)
+        dejure_datasets.defacto_borders = is_df
+        dejure_datasets.detailed_borders = is_df
+      }
 
-      let parsed_id_fields = parsed_atlas.simplified_borders?.id_fields ||
-        parsed_atlas.simplified_borders?.identifiers ||
+      if (dejure_entry?.display_options)
+        display_options.dejure_borders = dejure_entry.display_options
+      if (defacto_entry?.display_options)
+        display_options.defacto_borders = defacto_entry.display_options
+
+      let parsed_id_fields = dejure_entry?.id_fields ||
+        dejure_entry?.identifiers ||
         parsed_atlas.id_fields ||
         parsed_atlas.identifiers
       if (parsed_id_fields && typeof parsed_id_fields === 'object') {
         id_fields = parsed_id_fields
       }
 
-      let simp_fps = parsed_atlas.simplified_borders?.filepaths
+      let simp_fps = dejure_entry?.filepaths
       if (Array.isArray(simp_fps)) {
         for (let i = 0; i < simp_fps.length; i++) {
           let fp = simp_fps[i]
@@ -130,7 +146,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
         }
       }
 
-      let det_fps = parsed_atlas.detailed_borders?.filepaths
+      let det_fps = defacto_entry?.filepaths
       if (Array.isArray(det_fps)) {
         for (let i = 0; i < det_fps.length; i++) {
           let fp = det_fps[i]
@@ -158,6 +174,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
     dejureNaissancePath: dejure_naissance_path,
     detailedDir: detailed_dir,
     detailedNaissancePath: detailed_naissance_path,
+    displayOptions: display_options,
     idFields: id_fields,
     naissancePath: naissance_path,
   }

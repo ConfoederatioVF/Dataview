@@ -206,7 +206,7 @@ export function getCityByKey (
           num_yr,
           num_mo,
           num_day,
-          options.dataset || 'detailed_borders'
+          options.dataset || 'defacto_borders'
         )
         let cap_info = cshapes_capitals.get(entry.key) || (entry.id ? cshapes_capitals.get(String(entry.id)) : undefined)
         if (cap_info) {

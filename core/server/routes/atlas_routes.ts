@@ -4,6 +4,7 @@ import type { ParsedUrlQuery } from 'querystring'
 import { gzipSync } from 'node:zlib'
 import type { ParsedDataLayer } from '../layer_parser.ts'
 import { AtlasBordersService, registerAtlasCacheClearer } from '../AtlasBordersService.ts'
+import { normaliseBorderDatasetId } from '../../framework/geopng/types.ts'
 import { UfDate } from '../../framework/utils/uf_date.ts'
 
 let compressed_borders_cache = new Map<string, Buffer>()
@@ -57,7 +58,7 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
     pathname === '/gis/border' ||
     pathname === '/api/gis/border'
   ) {
-    let dataset = (query.dataset as string) || 'detailed_borders'
+    let dataset = normaliseBorderDatasetId(query.dataset as string, 'defacto_borders')
     let day_param = query.day ? parseInt(query.day as string, 10) : undefined
     let month_param = query.month ? parseInt(query.month as string, 10) : undefined
     let day = Number.isInteger(day_param) ? day_param : undefined
@@ -117,7 +118,7 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
       if (parts.length === 4 && !parts.some(Number.isNaN))
         bbox = [parts[0], parts[1], parts[2], parts[3]]
     }
-    let dataset = (query.dataset as string) || 'statistical_borders'
+    let dataset = normaliseBorderDatasetId(query.dataset as string, 'dejure_borders')
     let day_param = query.day ? parseInt(query.day as string, 10) : undefined
     let month_param = query.month ? parseInt(query.month as string, 10) : undefined
     let day = Number.isInteger(day_param) ? day_param : undefined

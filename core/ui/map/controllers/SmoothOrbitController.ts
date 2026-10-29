@@ -1,10 +1,15 @@
 import { OrbitController } from '@deck.gl/core'
 import { SmoothOrbitState } from './SmoothOrbitState'
 import {
+  handleControllerEvent,
   handleSmoothPinch,
   handleSmoothPinchEnd,
   handleSmoothPinchStart,
   isFunctionKeyPressed,
+  isMultiTouchEvent,
+  isSingleFingerPanBlocked,
+  isSmoothPinchActive,
+  reconcileControllerPointers,
 } from './smooth_controller_utils'
 
 /**
@@ -15,6 +20,22 @@ export class SmoothOrbitController extends OrbitController {
   // @ts-ignore
   ControllerState = SmoothOrbitState
   dragMode = 'pan' as const
+
+  /**
+   * Routes controller events through pointer reconciliation, cancel handlers, and unified two-finger tilt/pinch.
+   *
+   * @param {any} arg0_event
+   *
+   * @returns {any}
+   */
+  handleEvent (arg0_event: any): any {
+    //Convert from parameters
+    let event = arg0_event
+
+    //Return statement
+    return handleControllerEvent(this, event, super.handleEvent)
+  }
+
 
   /**
    * Checks whether the function key (Ctrl or Meta) is pressed.
@@ -31,6 +52,55 @@ export class SmoothOrbitController extends OrbitController {
     return isFunctionKeyPressed(event)
   }
 
+
+  /**
+   * Handles two-finger multi-pan move via the unified smooth pinch/tilt handler.
+   *
+   * @param {any} arg0_event
+   *
+   * @returns {boolean}
+   */
+  protected _onMultiPan (arg0_event: any): boolean {
+    //Convert from parameters
+    let event = arg0_event
+
+    //Return statement
+    return handleSmoothPinch(this, event)
+  }
+
+
+  /**
+   * Handles two-finger multi-pan end via the unified smooth pinch/tilt handler.
+   *
+   * @param {any} arg0_event
+   *
+   * @returns {boolean}
+   */
+  protected _onMultiPanEnd (arg0_event: any): boolean {
+    //Convert from parameters
+    let event = arg0_event
+
+    //Return statement
+    return handleSmoothPinchEnd(this, event)
+  }
+
+
+  /**
+   * Handles two-finger multi-pan start via the unified smooth pinch/tilt handler.
+   *
+   * @param {any} arg0_event
+   *
+   * @returns {boolean}
+   */
+  protected _onMultiPanStart (arg0_event: any): boolean {
+    //Convert from parameters
+    let event = arg0_event
+
+    //Return statement
+    return handleSmoothPinchStart(this, event)
+  }
+
+
   /**
    * Handles pan move event, ignoring multi-touch to prevent pan contention with pinch gestures.
    *
@@ -42,15 +112,29 @@ export class SmoothOrbitController extends OrbitController {
     //Convert from parameters
     let event = arg0_event
 
-    //Guard clauses
-    if (event?.pointers && event.pointers.length > 1)
+    //Declare local instance variables
+    let new_controller_state: any
+
+    //Function body
+    reconcileControllerPointers(this, event)
+    if (isMultiTouchEvent(event)) {
+      new_controller_state = this.controllerState.panEnd().rotateEnd()
+      if (isSmoothPinchActive()) {
+        ;(this as any).controllerState = new_controller_state
+      } else {
+        this.updateViewport(new_controller_state, null, {
+          isDragging: false,
+          isPanning: false,
+          isRotating: false,
+        })
+      }
       return false
-    if (event?.srcEvent?.touches && event.srcEvent.touches.length > 1)
-      return false
+    }
 
     //Return statement
     return super._onPan(event)
   }
+
 
   /**
    * Handles pan end event.
@@ -63,18 +147,32 @@ export class SmoothOrbitController extends OrbitController {
     //Convert from parameters
     let event = arg0_event
 
-    //Guard clauses
-    if (event?.pointers && event.pointers.length > 1)
+    //Declare local instance variables
+    let new_controller_state: any
+
+    //Function body
+    reconcileControllerPointers(this, event)
+    if (isMultiTouchEvent(event)) {
+      new_controller_state = this.controllerState.panEnd().rotateEnd()
+      if (isSmoothPinchActive()) {
+        ;(this as any).controllerState = new_controller_state
+      } else {
+        this.updateViewport(new_controller_state, null, {
+          isDragging: false,
+          isPanning: false,
+          isRotating: false,
+        })
+      }
       return false
-    if (event?.srcEvent?.touches && event.srcEvent.touches.length > 1)
-      return false
+    }
 
     //Return statement
     return super._onPanEnd(event)
   }
 
+
   /**
-   * Handles pan start event, ignoring multi-touch gestures.
+   * Handles pan start event, ignoring multi-touch gestures and post-pinch trailing touches.
    *
    * @param {any} arg0_event
    *
@@ -84,15 +182,15 @@ export class SmoothOrbitController extends OrbitController {
     //Convert from parameters
     let event = arg0_event
 
-    //Guard clauses
-    if (event?.pointers && event.pointers.length > 1)
-      return false
-    if (event?.srcEvent?.touches && event.srcEvent.touches.length > 1)
+    //Function body
+    reconcileControllerPointers(this, event)
+    if (isSingleFingerPanBlocked() || isMultiTouchEvent(event))
       return false
 
     //Return statement
     return super._onPanStart(event)
   }
+
 
   /**
    * Handles pinch move event.
@@ -109,6 +207,7 @@ export class SmoothOrbitController extends OrbitController {
     return handleSmoothPinch(this, event)
   }
 
+
   /**
    * Handles pinch end event.
    *
@@ -123,6 +222,7 @@ export class SmoothOrbitController extends OrbitController {
     //Return statement
     return handleSmoothPinchEnd(this, event)
   }
+
 
   /**
    * Handles pinch start event.

@@ -6,4 +6,9 @@ export { SmoothGlobeViewport, zoomAdjust } from './controllers/SmoothGlobeViewpo
 export { SmoothGlobeView } from './controllers/SmoothGlobeView'
 export { SmoothGlobeState } from './controllers/SmoothGlobeState'
 export { SmoothGlobeController } from './controllers/SmoothGlobeController'
-export { isFunctionKeyPressed, resetSmoothPinchState } from './controllers/smooth_controller_utils'
+export {
+  forceResetControllerInteraction,
+  isFunctionKeyPressed,
+  resetSmoothPinchState,
+  syncDeckTouchState,
+} from './controllers/smooth_controller_utils'

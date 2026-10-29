@@ -9,6 +9,9 @@ import { clearAtlasConfigCache } from './core/server/atlas_config_loader.ts'
 import { loadAndParseLayers } from './core/server/layer_parser.ts'
 import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.ts'
 
+let dataview_hot_timeouts = new Map<string, NodeJS.Timeout>()
+
+
 /**
  * Broadcasts an HMR custom payload across all available Vite server hot channels.
  *
@@ -18,11 +21,11 @@ import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.t
  *
  * @returns {void}
  */
-function broadcastHotMessage (arg0_server: any, arg0_event: string, arg1_data: any): void {
+function broadcastHotMessage (arg0_server: any, arg1_event: string, arg2_data: any): void {
   //Convert from parameters
-  let data = arg1_data
-  let event = arg0_event
   let server = arg0_server
+  let event = arg1_event
+  let data = arg2_data
 
   //Declare local instance variables
   let payload = {
@@ -42,6 +45,174 @@ function broadcastHotMessage (arg0_server: any, arg0_event: string, arg1_data: a
     console.error(`[HMR] Failed to broadcast event '${event}':`, arg0_err)
   }
 }
+
+
+/**
+ * Custom Vite plugin providing backend API middleware, hot update handling,
+ * and prevention of forced client-side hard reloads.
+ *
+ * @returns {Plugin}
+ */
+function dataviewBackendPlugin (): Plugin {
+  //Return statement
+  return {
+    name: 'dataview-backend',
+    enforce: 'pre',
+    configurePreviewServer (arg0_server) {
+      //Convert from parameters
+      let server = arg0_server
+
+      //Function body
+      server.middlewares.use(
+        createApiMiddleware({
+          configDir: path.resolve(import.meta.dirname, './common'),
+          exportsDir: path.resolve(import.meta.dirname, './exports'),
+        })
+      )
+    },
+    configureServer (arg0_server) {
+      //Convert from parameters
+      let server = arg0_server
+
+      //Declare local instance variables
+      let env_values: any[]
+      let heartbeat_interval: NodeJS.Timeout
+
+      //Function body
+      patchHotChannelSend(server.ws)
+      patchHotChannelSend(server.hot)
+      if (server.environments) {
+        env_values = Object.values(server.environments)
+        for (let i = 0; i < env_values.length; i++)
+          patchHotChannelSend(env_values[i]?.hot)
+      }
+
+      //Keep HMR WebSocket connections alive across reverse proxies and mobile NATs
+      heartbeat_interval = setInterval(() => {
+        broadcastHotMessage(server, 'dataview:heartbeat', { t: Date.now() })
+      }, 25000)
+
+      if (server.httpServer) {
+        server.httpServer.once('close', () => {
+          clearInterval(heartbeat_interval)
+        })
+      }
+
+      //Explicitly watch common/ and localisation/ directories to ensure non-module JSON5 edits trigger HMR
+      server.watcher.add(path.resolve(import.meta.dirname, './common'))
+      server.watcher.add(path.resolve(import.meta.dirname, './localisation'))
+
+      server.watcher.on('all', (arg0_event, arg1_file_path) => {
+        if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
+          debouncedHandleDataviewHotUpdate(arg1_file_path, server)
+      })
+
+      server.middlewares.use(
+        createApiMiddleware({
+          configDir: path.resolve(import.meta.dirname, './common'),
+          exportsDir: path.resolve(import.meta.dirname, './exports'),
+        })
+      )
+    },
+    handleHotUpdate (arg0_ctx) {
+      //Convert from parameters
+      let ctx = arg0_ctx
+
+      //Return statement
+      return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
+    },
+    hotUpdate: {
+      order: 'pre',
+      handler (arg0_ctx) {
+        //Convert from parameters
+        let ctx = arg0_ctx
+
+        //Return statement
+        return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
+      },
+    },
+    transform (arg0_code, arg1_id) {
+      //Convert from parameters
+      let code = arg0_code
+      let id = arg1_id
+
+      //Declare local instance variables
+      let normalized_id = id.replace(/\\/g, '/')
+      let patched_code: string
+
+      //Guard clauses
+      if (!normalized_id.includes('/vite/dist/client/') || !normalized_id.endsWith('.mjs'))
+        return null
+
+      //Function body
+      //1. Reconnect WebSocket silently on disconnect instead of forcing location.reload()
+      patched_code = code.replace(
+        /await\s+waitForSuccessfulPing\(url\.href\);\s*location\.reload\(\);/g,
+        'await waitForSuccessfulPing(url.href); try { await transport.connect(createHMRHandler(handleMessage)); } catch {}'
+      )
+
+      //2. Neutralise all remaining forced page reloads in the Vite client runtime
+      patched_code = patched_code.replace(/location\.reload\(\)/g, 'void 0')
+
+      //Return statement
+      return {
+        code: patched_code,
+        map: null,
+      }
+    },
+  }
+}
+
+
+/**
+ * Debounced wrapper for processing hot update events for configuration, layer, and localisation files.
+ *
+ * @param {string} arg0_file
+ * @param {any} arg1_server
+ *
+ * @returns {Array<any> | undefined}
+ */
+function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | void {
+  //Convert from parameters
+  let file = arg0_file
+  let server = arg1_server
+
+  //Declare local instance variables
+  let existing_timeout: NodeJS.Timeout | undefined
+  let normalized_file = file.replace(/\\/g, '/')
+  let timeout_handle: NodeJS.Timeout
+
+  //Guard clauses
+  if (
+    normalized_file.includes('/data/') ||
+    normalized_file.includes('/dist/') ||
+    normalized_file.includes('/exports/') ||
+    normalized_file.includes('/.agents/') ||
+    normalized_file.includes('/docs/') ||
+    normalized_file.includes('/tests/') ||
+    normalized_file.endsWith('.log') ||
+    normalized_file.includes('/.git/')
+  )
+    return []
+
+  if (!normalized_file.includes('/common/') && !normalized_file.includes('/localisation/'))
+    return undefined
+
+  //Function body
+  existing_timeout = dataview_hot_timeouts.get(normalized_file)
+  if (existing_timeout)
+    clearTimeout(existing_timeout)
+
+  timeout_handle = setTimeout(() => {
+    dataview_hot_timeouts.delete(normalized_file)
+    handleDataviewHotUpdate(file, server)
+  }, 100)
+  dataview_hot_timeouts.set(normalized_file, timeout_handle)
+
+  //Return statement
+  return []
+}
+
 
 /**
  * Processes hot update events for configuration, layer, and localisation files.
@@ -173,94 +344,32 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
 }
 
 
-let dataview_hot_timeout: NodeJS.Timeout | null = null
-
 /**
- * Debounced wrapper for processing hot update events for configuration, layer, and localisation files.
+ * Patches a Vite hot/WebSocket channel's send method so `full-reload` payloads are suppressed.
  *
- * @param {string} arg0_file
- * @param {any} arg1_server
+ * @param {any} arg0_channel
  *
- * @returns {Array<any> | undefined}
+ * @returns {void}
  */
-function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | void {
+function patchHotChannelSend (arg0_channel: any): void {
   //Convert from parameters
-  let file = arg0_file
-  let server = arg1_server
+  let channel = arg0_channel
+
+  //Declare local instance variables
+  let original_send: any
+
+  //Guard clauses
+  if (!channel || typeof channel.send !== 'function' || channel.__dataview_patched)
+    return
 
   //Function body
-  if (dataview_hot_timeout)
-    clearTimeout(dataview_hot_timeout)
-
-  dataview_hot_timeout = setTimeout(() => {
-    handleDataviewHotUpdate(file, server)
-  }, 100)
-
-  //Return statement
-  return []
-}
-
-
-/**
- * Custom Vite plugin providing backend API middleware and hot update handling.
- *
- * @returns {Plugin}
- */
-function dataviewBackendPlugin (): Plugin {
-  //Return statement
-  return {
-    name: 'dataview-backend',
-    enforce: 'pre',
-    configureServer (arg0_server) {
-      //Convert from parameters
-      let server = arg0_server
-
-      //Explicitly watch common/ and localisation/ directories to ensure non-module JSON5 edits trigger HMR
-      server.watcher.add(path.resolve(import.meta.dirname, './common'))
-      server.watcher.add(path.resolve(import.meta.dirname, './localisation'))
-
-      server.watcher.on('all', (arg0_event, arg1_file_path) => {
-        if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
-          debouncedHandleDataviewHotUpdate(arg1_file_path, server)
-      })
-
-      //Function body
-      server.middlewares.use(
-        createApiMiddleware({
-          configDir: path.resolve(import.meta.dirname, './common'),
-          exportsDir: path.resolve(import.meta.dirname, './exports'),
-        })
-      )
-    },
-    configurePreviewServer (arg0_server) {
-      //Convert from parameters
-      let server = arg0_server
-
-      //Function body
-      server.middlewares.use(
-        createApiMiddleware({
-          configDir: path.resolve(import.meta.dirname, './common'),
-          exportsDir: path.resolve(import.meta.dirname, './exports'),
-        })
-      )
-    },
-    hotUpdate: {
-      order: 'pre',
-      handler (arg0_ctx) {
-        //Convert from parameters
-        let ctx = arg0_ctx
-
-        //Return statement
-        return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
-      },
-    },
-    handleHotUpdate (arg0_ctx) {
-      //Convert from parameters
-      let ctx = arg0_ctx
-
-      //Return statement
-      return debouncedHandleDataviewHotUpdate(ctx.file, ctx.server) as any
-    },
+  original_send = channel.send.bind(channel)
+  channel.__dataview_patched = true
+  channel.send = function (...arg0_args: any[]) {
+    let first_arg = arg0_args[0]
+    if (first_arg && typeof first_arg === 'object' && first_arg.type === 'full-reload')
+      return
+    return original_send(...arg0_args)
   }
 }
 
@@ -272,7 +381,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     hmr: {
-      timeout: 120000,
+      timeout: 30000,
     },
     watch: {
       ignored: [

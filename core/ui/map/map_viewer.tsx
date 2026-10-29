@@ -17,7 +17,7 @@ import { MapmodesTray } from '@ui/rightbar/mapmodes_tray'
 import { MapViewerHUD } from '@ui/topbar/map_viewer_hud'
 import { useMapClearance } from './use_map_clearance'
 import { useMapViewState } from './use_map_view_state'
-import { resetSmoothPinchState } from './smooth_controllers'
+import { resetSmoothPinchState, syncDeckTouchState } from './smooth_controllers'
 import { useElevationSpikes } from './use_elevation_spikes'
 import { useCircleOverlay } from './use_circle_overlay'
 import { useDeckLayers } from './use_deck_layers'
@@ -408,6 +408,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   let container_events = useMapViewerContainerEvents({
     countries_mode,
+    deck_ref,
     drawing_system,
     hover_raf_ref,
     hovered_city_pos,
@@ -430,6 +431,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     on_pointer_leave,
     on_pointer_move,
     on_pointer_up,
+    on_touch_cancel,
     on_touch_end,
     on_touch_move,
     on_touch_start,
@@ -437,6 +439,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
 
   handle_reset_view = useCallback(() => {
     resetSmoothPinchState()
+    syncDeckTouchState(deck_ref.current, 0)
     if (hover_raf_ref.current !== null) {
       cancelAnimationFrame(hover_raf_ref.current)
       hover_raf_ref.current = null
@@ -645,6 +648,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
       onTouchStart={on_touch_start}
       onTouchMove={on_touch_move}
       onTouchEnd={on_touch_end}
+      onTouchCancel={on_touch_cancel}
     >
       <DeckGL
         ref={deck_ref}

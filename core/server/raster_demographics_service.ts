@@ -4,9 +4,12 @@ import { getOptimisationConfig } from '../../common/optimisation/optimisation.ts
 import { AtlasBordersService } from './AtlasBordersService.ts'
 import {
   AGE_COHORTS,
-  SECTOR_KEYS,
+  BAKED_DEMOGRAPHICS_PATH,
+  BAKED_SECTORS_PATH,
   COHORTS_DIR,
+  NATURAL_EARTH_PATH,
   PROFESSIONS_DIR,
+  SECTOR_KEYS,
   ensureDemographicBmpCache,
   ensureSectorBmpCache,
   isFileCacheStale,
@@ -40,10 +43,6 @@ export interface SectorBreakdownResult {
   global: Record<string, number>
   lastModified?: number
 }
-
-let NATURAL_EARTH_PATH = path.join(process.cwd(), 'public/data/ne_50m_admin_0_countries.geojson')
-let BAKED_DEMOGRAPHICS_PATH = path.resolve(process.cwd(), 'data/baked_global_demographics.json')
-let BAKED_SECTORS_PATH = path.resolve(process.cwd(), 'data/baked_global_sectors.json')
 
 let baked_global_demographics: Record<string, DemographicCohortResult> = {}
 let baked_global_sectors: Record<string, Record<string, number>> = {}

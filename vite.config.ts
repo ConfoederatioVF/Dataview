@@ -6,7 +6,9 @@ import path from 'path'
 import JSON5 from 'json5'
 import { createApiMiddleware } from './core/server/api_middleware.ts'
 import { clearAtlasConfigCache } from './core/server/atlas_config_loader.ts'
+import { FilepathDefines } from './core/server/filepath_defines.ts'
 import { loadAndParseLayers } from './core/server/layer_parser.ts'
+import { refreshRasterBmpPaths } from './core/server/raster_bmp_cache.ts'
 import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.ts'
 
 let dataview_hot_timeouts = new Map<string, NodeJS.Timeout>()
@@ -250,10 +252,13 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
     //1. Layers update: common/layers/ (including filepath_defines.json5 and individual layer configs)
     if (normalized_file.includes('/common/layers/')) {
       try {
+        let config_dir = path.resolve(import.meta.dirname, './common')
+
+        FilepathDefines.clearCache()
         clearAtlasConfigCache()
         clearCompressedBordersCache()
+        refreshRasterBmpPaths(config_dir)
 
-        let config_dir = path.resolve(import.meta.dirname, './common')
         let registry = loadAndParseLayers(config_dir)
 
         broadcastHotMessage(server, 'dataview:layers-update', {

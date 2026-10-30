@@ -2,20 +2,16 @@ import fs from 'fs'
 import path from 'path'
 import { spawnSync } from 'child_process'
 import { decode as decodePng } from 'fast-png'
-
-let AGE_COHORTS = [
-  '00', '01', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55', '60', '65', '70', '75', '80'
-]
-let SECTOR_KEYS = [
-  'agriculture', 'informal_labour', 'manufacturing', 'services', 'not_in_work'
-]
-
-let COHORTS_DIR = 'D:/Project 1509 - SVEA/histmap/3.data_transform/age_sex/4.composite_cohorts'
-let PROFESSIONS_DIR = 'D:/Project 1509 - SVEA/histmap/3.data_transform/professions/4.aggregates'
-let BMP_CACHE_DIR = path.resolve(process.cwd(), 'data/raster_cache')
-let BAKED_DEMOGRAPHICS_PATH = path.resolve(process.cwd(), 'data/baked_global_demographics.json')
-let BAKED_SECTORS_PATH = path.resolve(process.cwd(), 'data/baked_global_sectors.json')
-let NATIVE_READER_BIN = path.resolve(process.cwd(), 'bin/raster_reader.exe')
+import {
+  AGE_COHORTS,
+  BAKED_DEMOGRAPHICS_PATH,
+  BAKED_SECTORS_PATH,
+  BMP_CACHE_DIR,
+  COHORTS_DIR,
+  NATIVE_READER_BIN,
+  PROFESSIONS_DIR,
+  SECTOR_KEYS,
+} from '../core/server/raster_bmp_cache.ts'
 
 let DEFAULT_KEY_YEARS = [
   -10000, -5000, -3000, -1000, 0, 500, 1000, 1500, 1600, 1700, 1750, 1800,

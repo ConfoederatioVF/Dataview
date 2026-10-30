@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
+import { FilepathDefines } from './filepath_defines.ts'
 
 export interface AtlasDatasetPaths {
   cacheDir: string
@@ -39,10 +40,11 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
     return cached_dataset_paths
 
   //Declare local instance variables
-  let atlas_config_path = path.resolve(process.cwd(), 'common/layers/atlas.json5')
-  let atlas_data_dir = path.resolve(process.cwd(), 'data/atlas')
+  let defines = FilepathDefines.get()
+  let atlas_config_path = path.join(FilepathDefines.getProjectRoot(), 'common/layers/atlas.json5')
+  let atlas_data_dir = defines.root_folders.l_atlas
   let cache_dir = path.join(atlas_data_dir, 'cache')
-  let cshapes_path = path.join(atlas_data_dir, 'CShapes-2.0.geojson')
+  let cshapes_path = defines.filepaths.atlas_cshapes
   let dejure_datasets: Record<string, boolean> = {
     defacto_borders: false,
     dejure_borders: true,
@@ -50,34 +52,20 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
     simplified_borders: true,
     statistical_borders: true,
   }
-  let dejure_naissance_path = path.join(atlas_data_dir, 'atlas_dejure.naissance')
+  let dejure_naissance_path = defines.filepaths.atlas_dejure
   let detailed_dir = path.join(atlas_data_dir, 'detailed')
-  let detailed_naissance_path = path.join(atlas_data_dir, 'detailed.naissance')
+  let detailed_naissance_path = defines.filepaths.atlas_detailed
   let display_options: Record<string, Record<string, any>> = {}
-  let filepath_defines_path = path.resolve(process.cwd(), 'common/layers/filepath_defines.json5')
   let id_fields: Record<string, string> = {
     cshapes_id: 'C-Shapes ID',
     cow_id: 'COW ID',
     seshat_id: 'Seshat ID',
   }
-  let legacy_naissance_path = path.join(atlas_data_dir, 'atlas.naissance')
+  let legacy_naissance_path = defines.filepaths.atlas_legacy
   let naissance_path: string
-  let root_folders: Record<string, string> = {
-    l_atlas: './data/atlas',
-  }
+  let root_folders: Record<string, string> = { ...defines.root_folders }
 
   //Function body
-  if (fs.existsSync(filepath_defines_path)) {
-    try {
-      let raw_text = fs.readFileSync(filepath_defines_path, 'utf-8')
-      let parsed_json = JSON5.parse(raw_text)
-      let parsed_roots = parsed_json.root_folders || parsed_json || {}
-      root_folders = { ...root_folders, ...parsed_roots }
-    } catch (arg0_err) {
-      console.error('[AtlasConfigLoader] Failed to parse filepath_defines.json5:', arg0_err)
-    }
-  }
-
   if (fs.existsSync(atlas_config_path)) {
     try {
       let raw_text = fs.readFileSync(atlas_config_path, 'utf-8')
@@ -85,20 +73,13 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
       let defacto_entry = parsed_atlas.defacto_borders || parsed_atlas.detailed_borders
       let dejure_entry = parsed_atlas.dejure_borders || parsed_atlas.simplified_borders
 
-      if (parsed_atlas.root_folders)
-        root_folders = { ...root_folders, ...parsed_atlas.root_folders }
+      if (parsed_atlas.root_folders) {
+        let local_roots = FilepathDefines.resolveTokens(parsed_atlas.root_folders, root_folders)
+        root_folders = { ...root_folders, ...local_roots }
+      }
 
       let resolveToken = (arg0_raw_path: string): string => {
-        let res = arg0_raw_path
-        let root_keys = Object.keys(root_folders)
-        for (let i = 0; i < root_keys.length; i++) {
-          let k = root_keys[i]
-          let v = root_folders[k]
-          res = res.replace(new RegExp(`(\\$\\{${k}\\}|\\{${k}\\})`, 'g'), v)
-        }
-        if (!path.isAbsolute(res))
-          res = path.resolve(process.cwd(), res)
-        return path.normalize(res)
+        return FilepathDefines.resolveTokens({ target: arg0_raw_path }, root_folders).target
       }
 
       if (parsed_atlas.cache_dir)

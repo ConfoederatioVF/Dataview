@@ -1,5 +1,5 @@
 import fs from 'fs'
-import path from 'path'
+import { FilepathDefines } from './filepath_defines.ts'
 import { AtlasBordersService } from './AtlasBordersService.ts'
 import {
   computeHaversineDistanceKm,
@@ -42,7 +42,7 @@ export function getStateById (arg0_state_id: string | number): any {
   //Function body
   if (!states_by_id) {
     states_by_id = new Map()
-    let states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+    let states_path = FilepathDefines.get().filepaths.atlas_states
     if (fs.existsSync(states_path)) {
       try {
         let list = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
@@ -81,7 +81,7 @@ export function getStateById (arg0_state_id: string | number): any {
  */
 export function getStateCapitals (): Record<string, any> {
   //Declare local instance variables
-  let file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+  let file_path = FilepathDefines.get().filepaths.stadester_capitals
 
   //Guard clauses
   if (state_capitals_cache)
@@ -356,7 +356,7 @@ export function resolveCityNameAtYear (
  */
 export function loadCityMetadata (): CityMetadataEntry[] {
   //Declare local instance variables
-  let file_path = path.resolve(process.cwd(), 'data/stadester/city_metadata.json')
+  let file_path = FilepathDefines.get().filepaths.stadester_metadata
   let normalized_list: CityMetadataEntry[] = []
 
   //Guard clauses
@@ -606,7 +606,7 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
   let all_keys: string[]
   let all_state_ids: string[]
   let city_intervals = new Map<CityIndexEntry, Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }>>()
-  let file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+  let file_path = FilepathDefines.get().filepaths.stadester_capitals
   let name_country_to_city = new Map<string, CityIndexEntry[]>()
   let norm_key_to_cities = new Map<string, CityIndexEntry[]>()
   let state_capitals: Record<string, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }>

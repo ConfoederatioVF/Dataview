@@ -2,9 +2,6 @@
     name: "Atlas (Historical Borders)",
     open: false,
     category_type: "discrete",
-    root_folders: {
-        l_atlas: "./data/atlas",
-    },
     cache_dir: "${l_atlas}/cache",
     detailed_dir: "${l_atlas}/detailed",
     "dejure_borders": {

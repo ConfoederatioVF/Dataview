@@ -1,5 +1,5 @@
 import fs from 'fs'
-import path from 'path'
+import { FilepathDefines } from './filepath_defines.ts'
 
 export interface CityCoordRecord {
   coords: [number, number]
@@ -43,7 +43,7 @@ export let ensureCityCoordsLoaded = function (): void {
   city_coords_loaded = true
 
   //Declare local instance variables
-  let coords_path = path.resolve(process.cwd(), 'data/stadester/all_cities_coords.json')
+  let coords_path = FilepathDefines.get().filepaths.stadester_coords
   let list: any[]
   let raw: any
 
@@ -505,7 +505,7 @@ export let getStateCapitalInfo = function (
   let states_path: string
   let valid_timeline: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }>
 
-  file_path = path.resolve(process.cwd(), 'data/stadester/state_capitals.json')
+  file_path = FilepathDefines.get().filepaths.stadester_capitals
   if (fs.existsSync(file_path)) {
     try {
       let stats = fs.statSync(file_path)
@@ -553,7 +553,7 @@ export let getStateCapitalInfo = function (
   if (!info && entity_name) {
     if (!states_name_map) {
       states_name_map = new Map()
-      states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+      states_path = FilepathDefines.get().filepaths.atlas_states
       if (fs.existsSync(states_path)) {
         try {
           let raw_states = JSON.parse(fs.readFileSync(states_path, 'utf-8'))

@@ -2,7 +2,7 @@
  * Confoederatio UF/Date standard utility library.
  *
  * Direct TypeScript port and adaptation of the SVEA /UF/Date API
- * (D:/Project 1509 - SVEA/UF/js/date/date_basic.js & date_conversion.js).
+ * (configured via uf_date_basic & uf_date_conversion in common/layers/filepath_defines.json5).
  * Implements historical calendar calculations, triennial leap years for BC,
  * continuous minute timestamp calculation, string date conversion, and non-Oxford British English date formatting.
  */

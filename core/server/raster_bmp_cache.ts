@@ -7,6 +7,7 @@ import path from 'path'
 import { spawnSync } from 'child_process'
 import { decode as decodePng } from 'fast-png'
 import { getOptimisationConfig } from '../../common/optimisation/optimisation.ts'
+import { FilepathDefines } from './filepath_defines.ts'
 import type { ScanlineSpan } from './raster_scanline.ts'
 
 export let AGE_COHORTS = [
@@ -17,10 +18,15 @@ export let SECTOR_KEYS = [
   'agriculture', 'informal_labour', 'manufacturing', 'services', 'not_in_work'
 ]
 
-export let COHORTS_DIR = 'D:/Project 1509 - SVEA/histmap/3.data_transform/age_sex/4.composite_cohorts'
-export let PROFESSIONS_DIR = 'D:/Project 1509 - SVEA/histmap/3.data_transform/professions/4.aggregates'
-export let BMP_CACHE_DIR = path.resolve(process.cwd(), 'data/raster_cache')
-export let NATIVE_READER_BIN = path.resolve(process.cwd(), 'bin/raster_reader.exe')
+let initial_defines = FilepathDefines.get()
+
+export let BAKED_DEMOGRAPHICS_PATH = initial_defines.filepaths.baked_demographics
+export let BAKED_SECTORS_PATH = initial_defines.filepaths.baked_sectors
+export let BMP_CACHE_DIR = initial_defines.root_folders.l_raster_cache
+export let COHORTS_DIR = initial_defines.root_folders.age_sex
+export let NATIVE_READER_BIN = initial_defines.filepaths.native_raster_reader
+export let NATURAL_EARTH_PATH = initial_defines.filepaths.natural_earth
+export let PROFESSIONS_DIR = initial_defines.root_folders.prof_tot
 
 if (!fs.existsSync(BMP_CACHE_DIR))
   fs.mkdirSync(BMP_CACHE_DIR, { recursive: true })
@@ -321,6 +327,31 @@ export function readFloat32FromBmp (
     console.error(`[RasterBmpCache] Error reading BMP cache ${filepath}:`, arg0_err)
     return null
   }
+}
+
+
+/**
+ * Refreshes raster cache, dataset, and binary paths from common/layers/filepath_defines.json5.
+ *
+ * @param {string} [arg0_config_dir]
+ *
+ * @returns {void}
+ */
+export function refreshRasterBmpPaths (arg0_config_dir?: string): void {
+  //Convert from parameters
+  let config_dir = arg0_config_dir
+
+  //Declare local instance variables
+  let defines = FilepathDefines.get(config_dir)
+
+  //Function body
+  BAKED_DEMOGRAPHICS_PATH = defines.filepaths.baked_demographics
+  BAKED_SECTORS_PATH = defines.filepaths.baked_sectors
+  BMP_CACHE_DIR = defines.root_folders.l_raster_cache
+  COHORTS_DIR = defines.root_folders.age_sex
+  NATIVE_READER_BIN = defines.filepaths.native_raster_reader
+  NATURAL_EARTH_PATH = defines.filepaths.natural_earth
+  PROFESSIONS_DIR = defines.root_folders.prof_tot
 }
 
 /**

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { cullAndSimplifyGeometry } from './atlas_geometry_utils.ts'
+import { FilepathDefines } from './filepath_defines.ts'
 import { UfDate } from '../framework/utils/uf_date.ts'
 
 export interface HistoricalBorderKeyframe {
@@ -150,7 +151,7 @@ export let loadCShapes = function (arg0_cshapes_path?: string): any[] {
     return cached_cshapes_features
 
   //Declare local instance variables
-  let file_path = arg0_cshapes_path || path.resolve(process.cwd(), 'data/gis/cshapes-2.0/CShapes-2.0.geojson')
+  let file_path = arg0_cshapes_path || FilepathDefines.get().filepaths.atlas_cshapes
 
   //Guard clauses
   if (!fs.existsSync(file_path)) {

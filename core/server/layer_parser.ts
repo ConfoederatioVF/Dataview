@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
+import { FilepathDefines } from './filepath_defines.ts'
 
 export interface LayerVariableOption {
   name: string
@@ -80,75 +81,25 @@ export interface LayerRegistryCache {
  * @returns {string}
  */
 export let normaliseLayerPath = function (arg0_path: string): string {
-  //Convert from parameters
-  let target_path = arg0_path
-
-  //Declare local instance variables
-  let cleaned = target_path.replace(/\\/g, '/')
-
-  //Function body
-  //Collapse duplicate histmap segments if present
-  while (cleaned.includes('/histmap/histmap/'))
-    cleaned = cleaned.replace('/histmap/histmap/', '/histmap/')
-  while (cleaned.includes('histmap//histmap'))
-    cleaned = cleaned.replace('histmap//histmap', 'histmap/')
-
-  //Clean redundant double slashes (except initial protocol or drive)
-  cleaned = cleaned.replace(/([^:])\/\/+/g, '$1/')
-
   //Return statement
-  return path.normalize(cleaned)
+  return FilepathDefines.normalisePath(arg0_path)
 }
+
 
 /**
  * Resolves templated root folder paths recursively.
  *
  * @param {Record<string, string>} arg0_root_folders
+ * @param {Record<string, string>} [arg1_base_tokens]
  *
  * @returns {Record<string, string>}
  */
 export let resolveRootFolders = function (
-  arg0_root_folders: Record<string, string>
+  arg0_root_folders: Record<string, string>,
+  arg1_base_tokens?: Record<string, string>
 ): Record<string, string> {
-  //Convert from parameters
-  let root_folders = arg0_root_folders
-
-  //Declare local instance variables
-  let all_keys = Object.keys(root_folders)
-  let changed = true
-  let max_iterations = 10
-  let resolved_roots: Record<string, string> = { ...root_folders }
-
-  //Function body
-  while (changed && max_iterations > 0) {
-    changed = false
-    max_iterations--
-
-    for (let i = 0; i < all_keys.length; i++) {
-      let k = all_keys[i]
-      let val = resolved_roots[k]
-      let new_val = val.replace(/\$\{([^}]+)\}/g, (arg0_match, arg1_var) => {
-        if (resolved_roots[arg1_var]) {
-          changed = true
-          return resolved_roots[arg1_var]
-        }
-        return arg0_match
-      })
-      resolved_roots[k] = new_val
-    }
-  }
-
-  //Normalise all paths
-  for (let i = 0; i < all_keys.length; i++) {
-    let k = all_keys[i]
-    let normalized = normaliseLayerPath(resolved_roots[k])
-    if (!path.isAbsolute(normalized))
-      normalized = path.resolve(process.cwd(), normalized)
-    resolved_roots[k] = normalized
-  }
-
   //Return statement
-  return resolved_roots
+  return FilepathDefines.resolveTokens(arg0_root_folders, arg1_base_tokens)
 }
 
 /**
@@ -452,7 +403,6 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
   //Declare local instance variables
   let all_layer_files: string[] = []
   let file_cache = new Map<string, string>()
-  let filepath_defines_path: string
   let layers_dir = path.join(config_dir, 'layers')
   let parsed_layers: Record<string, ParsedDataLayer> = {}
   let resolved_roots: Record<string, string> = {}
@@ -464,19 +414,8 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
   }
 
   //Function body
-  filepath_defines_path = path.join(layers_dir, 'filepath_defines.json5')
-
   //1. Parse single source of truth root folders from filepath_defines.json5 if present
-  if (fs.existsSync(filepath_defines_path)) {
-    try {
-      let raw_text = fs.readFileSync(filepath_defines_path, 'utf-8')
-      let parsed_json = JSON5.parse(raw_text)
-      let raw_roots = parsed_json.root_folders || parsed_json || {}
-      resolved_roots = resolveRootFolders(raw_roots)
-    } catch (arg0_err) {
-      console.error('[LayerParser] Failed to parse filepath_defines.json5:', arg0_err)
-    }
-  }
+  resolved_roots = loadResolvedRootFolders(config_dir)
 
   //2. Read all layer definition files, excluding filepath_defines.json5
   all_layer_files = fs.readdirSync(layers_dir).filter(
@@ -493,7 +432,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
     //Extract local root_folders override if present
     if (parsed_json.root_folders) {
       let raw_roots = parsed_json.root_folders || {}
-      let file_roots = resolveRootFolders(raw_roots)
+      let file_roots = resolveRootFolders(raw_roots, resolved_roots)
       resolved_roots = { ...resolved_roots, ...file_roots }
     }
 
@@ -852,4 +791,19 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
     layers: parsed_layers,
     resolved_roots,
   }
+}
+
+
+/**
+ * Loads and resolves root folder definitions from common/layers/filepath_defines.json5.
+ *
+ * @param {string} [arg0_config_dir]
+ *
+ * @returns {Record<string, string>}
+ */
+export let loadResolvedRootFolders = function (
+  arg0_config_dir?: string
+): Record<string, string> {
+  //Return statement
+  return FilepathDefines.get(arg0_config_dir).root_folders
 }

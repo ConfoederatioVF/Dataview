@@ -1,5 +1,5 @@
 import fs from 'fs'
-import path from 'path'
+import { FilepathDefines } from './filepath_defines.ts'
 import type { CapitalRecord, CityMetadataEntry, HistoricalNameRecord } from '../framework/stadester/city_metadata_framework.ts'
 
 export type { CapitalRecord, CityMetadataEntry, HistoricalNameRecord }
@@ -13,7 +13,7 @@ let bugged_cities_mtime = 0
  * @returns {Set<string>}
  */
 export function getBuggedCitiesSet (): Set<string> {
-  let file_path = path.resolve(process.cwd(), 'data/stadester/bugged_cities.txt')
+  let file_path = FilepathDefines.get().filepaths.stadester_bugged_cities
 
   if (fs.existsSync(file_path)) {
     try {

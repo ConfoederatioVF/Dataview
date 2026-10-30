@@ -6,6 +6,7 @@ import {
   isCorruptedCityName,
   isSubordinateDistrictName,
 } from '../framework/stadester/city_name_framework.ts'
+import { FilepathDefines } from './filepath_defines.ts'
 
 export interface CityCacheRecord {
   resolvedName: string
@@ -21,8 +22,8 @@ export interface ResolverQueueTask {
 }
 
 let city_cache: Record<string, CityCacheRecord> = {}
-let city_cache_path = path.resolve(process.cwd(), 'data/stadester/cache/stadester_city_cache.json')
-let legacy_city_cache_path = path.resolve(process.cwd(), 'common/stadester_city_cache.json')
+let city_cache_path = FilepathDefines.get().filepaths.stadester_city_cache
+let legacy_city_cache_path = FilepathDefines.get().filepaths.stadester_legacy_city_cache
 let ghsl_csv_map = new Map<string, string>()
 let historical_cities_index: Array<{ coords: [number, number]; maxPop: number; name: string }> = []
 let is_cache_loaded = false
@@ -86,7 +87,7 @@ export let loadGhslCsvNames = function (): Map<string, string> {
     return ghsl_csv_map
 
   //Function body
-  csv_path = path.resolve(process.cwd(), 'data/stadester/GHSL.csv')
+  csv_path = FilepathDefines.get().filepaths.stadester_ghsl_csv
 
   if (fs.existsSync(csv_path)) {
     try {
@@ -142,7 +143,7 @@ export let saveCityCache = function (): void {
  */
 export let clearStadesterDiskCache = function (): void {
   //Declare local instance variables
-  let cache_dir = path.resolve(process.cwd(), 'data/stadester/cache')
+  let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
 
   //Function body
   if (fs.existsSync(cache_dir)) {

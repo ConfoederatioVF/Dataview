@@ -18,6 +18,7 @@ import {
   getAtlasDatasetPaths,
   type AtlasDatasetPaths,
 } from './atlas_config_loader.ts'
+import { FilepathDefines } from './filepath_defines.ts'
 import {
   clearNaissanceCache,
   defacto_borders_slices,
@@ -886,7 +887,7 @@ export class AtlasBordersService {
     //Function body
     if (!AtlasBordersService.states_by_id) {
       AtlasBordersService.states_by_id = new Map()
-      let states_path = path.resolve(process.cwd(), 'data/atlas/temp/states.json')
+      let states_path = FilepathDefines.get().filepaths.atlas_states
       if (fs.existsSync(states_path)) {
         try {
           let list = JSON.parse(fs.readFileSync(states_path, 'utf-8'))

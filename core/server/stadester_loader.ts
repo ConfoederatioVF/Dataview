@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
+import { FilepathDefines } from './filepath_defines.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
 import { applyCityMetadata, applyStateCapitals } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
@@ -20,7 +21,7 @@ export function getDatasetFilePath (arg0_dataset_name?: string): string {
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
 
   //Declare local instance variables
-  let base_dir = path.resolve(process.cwd(), 'data/stadester')
+  let base_dir = FilepathDefines.get().root_folders.l_stad
   let file_name = dataset_name.endsWith('.json') ? dataset_name : `${dataset_name}.json`
 
   //Return statement
@@ -40,12 +41,12 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
 
   //Declare local instance variables
-  let cache_dir = path.resolve(process.cwd(), 'data/stadester/cache')
+  let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
   let lite_file_path = path.join(cache_dir, `${dataset_name}_lite.json`)
   let source_file_path = getDatasetFilePath(dataset_name)
 
   //Guard clauses
-  let meta_file_path = path.resolve(process.cwd(), 'data/stadester/city_metadata.json')
+  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
   if (fs.existsSync(lite_file_path) && fs.existsSync(source_file_path)) {
     let is_meta_newer = false
     let lite_stat = fs.statSync(lite_file_path)
@@ -126,7 +127,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   }
 
   //Check lite disk cache for pre-resolved names
-  let cache_dir = path.resolve(process.cwd(), 'data/stadester/cache')
+  let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
   let lite_file_path = path.join(cache_dir, `${dataset_name}_lite.json`)
   let lite_name_map = new Map<string, string>()
 

@@ -476,8 +476,9 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           if (!label_text)
             continue
 
-          let text_w = label_text.length * 7.2 + 12
-          let text_h = 16
+          let font_size = Math.max(10, Math.min(15, 9 + Math.log10(Math.max(1000, cand.population || 1000))*0.9))
+          let text_w = label_text.length*(font_size*0.58) + 12
+          let text_h = font_size + 4
           let r = cand.pixelRadius
 
           let box_x1 = sx + r + 4

@@ -296,8 +296,10 @@ export function computeViewportBoundingBox (
     }
   } else {
     let bearing = view_state.bearing ?? 0
+    let bearing_rad = (bearing*Math.PI)/180
     let center_lat = view_state.latitude ?? 20
     let center_lng = view_state.longitude ?? 0
+    let cos_b = Math.abs(Math.cos(bearing_rad))
     let delta_y_mercator: number
     let half_h: number
     let half_w: number
@@ -306,6 +308,9 @@ export function computeViewportBoundingBox (
     let margin = 1.35
     let north_rad: number
     let pitch = view_state.pitch ?? 0
+    let rot_h: number
+    let rot_w: number
+    let sin_b = Math.abs(Math.sin(bearing_rad))
     let south_rad: number
     let span_lng: number
     let world_size: number
@@ -319,14 +324,16 @@ export function computeViewportBoundingBox (
       let pitch_rad = (Math.min(80, pitch)*Math.PI)/180
       margin = margin/Math.cos(pitch_rad)
     }
-    if (Math.abs(bearing) > 0.5)
-      margin *= 1.25
+
+    //Bounding box of viewport rectangle rotated under camera bearing
+    rot_w = window_w*cos_b + window_h*sin_b
+    rot_h = window_w*sin_b + window_h*cos_b
 
     //World scale in pixels at zoom: world_size = 512 * 2^zoom
     world_size = 512*Math.pow(2, zoom)
 
     //Longitude span
-    half_w = (window_w/2)*margin
+    half_w = (rot_w/2)*margin
     span_lng = (360*half_w)/world_size
 
     if (span_lng >= 180) {
@@ -343,7 +350,7 @@ export function computeViewportBoundingBox (
     }
 
     //Latitude calculation via conformal Web Mercator Gudermannian inverse
-    half_h = (window_h/2)*margin
+    half_h = (rot_h/2)*margin
     lat_clamped = Math.max(-85.051129, Math.min(85.051129, center_lat))
     lat_rad = (lat_clamped*Math.PI)/180
     y_mercator_center = Math.log(Math.tan(Math.PI/4 + lat_rad/2))
@@ -651,8 +658,8 @@ export function projectMercatorCoordinates (
   //2. Camera rotation (bearing)
   cos_b = Math.cos(bearing_rad)
   sin_b = Math.sin(bearing_rad)
-  x_rot = dx*cos_b - dy*sin_b
-  y_rot = dx*sin_b + dy*cos_b
+  x_rot = dx*cos_b + dy*sin_b
+  y_rot = -dx*sin_b + dy*cos_b
 
   //3. Perspective projection with pitch
   altitude = 1.5

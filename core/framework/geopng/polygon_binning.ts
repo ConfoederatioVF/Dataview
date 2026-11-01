@@ -1,4 +1,4 @@
-import { DecodedRaster } from './types.ts'
+import type { DecodedRaster } from './types.ts'
 
 export interface CountryProperties {
   adm0_a3?: string
@@ -626,7 +626,7 @@ export async function loadCountriesGeoJson (): Promise<CountryFeature[]> {
       console.error(`HTTP ${res.status} loading countries GeoJSON`)
       return []
     }
-    let data = await res.json()
+    let data: any = await res.json()
 
     for (let i = 0; i < data.features.length; i++) {
       let feat = data.features[i]

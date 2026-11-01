@@ -87,6 +87,7 @@ export interface MapViewerProps {
   onToggleCountry?: (country: CountryFeature) => void
   onToggleDraw?: () => void
   onToggleHistoricalBorders?: (arg0_enabled: boolean) => void
+  onToggleInfoPanel?: () => void
   onToggleMapMode: (id: MapModeId) => void
   onTogglePerformantMode?: (enabled: boolean) => void
   onToggleSettingsDrawer?: (open: boolean) => void
@@ -111,6 +112,7 @@ export interface MapViewerProps {
   setHistoricalBordersConfig?: React.Dispatch<React.SetStateAction<HistoricalBordersConfig>>
   setProjection: (p: ProjectionType) => void
   setStadesterConfig?: React.Dispatch<React.SetStateAction<StadesterConfig>>
+  settingsDrawerOpen?: boolean
   sidebarWidth?: number
   snapToKeyframes?: boolean
   stadesterCities?: CityPoint[]

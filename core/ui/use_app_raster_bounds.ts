@@ -22,7 +22,7 @@ export interface UseAppRasterBoundsOptions {
 }
 
 export interface UseAppRasterBoundsResult {
-  active_midpoint: number
+  active_midpoint: number | undefined
   active_raster: DecodedRaster | null
   breaks: number[]
   display_raster: DecodedRaster | null

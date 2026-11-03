@@ -1,1026 +1,1026 @@
 {
   "0": {
-    "agriculture": 75.2,
-    "informal_labour": 5.4,
-    "manufacturing": 13.4,
-    "services": 6,
+    "agriculture": 75.8,
+    "informal_labour": 5.3,
+    "manufacturing": 13.1,
+    "services": 5.8,
     "not_in_work": 0,
-    "lastModified": 1792311346677.8904
+    "lastModified": 1793569382387.8633
   },
   "100": {
-    "agriculture": 74.2,
-    "informal_labour": 5.5,
-    "manufacturing": 14,
+    "agriculture": 74.5,
+    "informal_labour": 5.4,
+    "manufacturing": 13.8,
     "services": 6.3,
     "not_in_work": 0,
-    "lastModified": 1792311349992.137
+    "lastModified": 1793569384347.1394
   },
   "200": {
-    "agriculture": 75,
+    "agriculture": 75.3,
     "informal_labour": 5.4,
-    "manufacturing": 13.4,
+    "manufacturing": 13.1,
     "services": 6.2,
     "not_in_work": 0,
-    "lastModified": 1792311345826.371
+    "lastModified": 1793569385330.3833
   },
   "300": {
-    "agriculture": 74.5,
-    "informal_labour": 5.5,
-    "manufacturing": 13.6,
+    "agriculture": 74.7,
+    "informal_labour": 5.4,
+    "manufacturing": 13.4,
     "services": 6.5,
     "not_in_work": 0,
-    "lastModified": 1792311346868.1228
+    "lastModified": 1793569385335.8613
   },
   "400": {
-    "agriculture": 74.5,
-    "informal_labour": 5.5,
-    "manufacturing": 13.5,
-    "services": 6.5,
-    "not_in_work": 0,
-    "lastModified": 1792311344293.9302
-  },
-  "500": {
-    "agriculture": 75.2,
-    "informal_labour": 5.4,
-    "manufacturing": 13.2,
-    "services": 6.2,
-    "not_in_work": 0,
-    "lastModified": 1792311345631.7483
-  },
-  "600": {
-    "agriculture": 74.7,
-    "informal_labour": 5.5,
-    "manufacturing": 13.3,
-    "services": 6.5,
-    "not_in_work": 0,
-    "lastModified": 1792311436424.6367
-  },
-  "700": {
     "agriculture": 74.9,
     "informal_labour": 5.4,
     "manufacturing": 13.2,
     "services": 6.5,
     "not_in_work": 0,
-    "lastModified": 1792311454919.4658
+    "lastModified": 1793569385341.0278
+  },
+  "500": {
+    "agriculture": 75.6,
+    "informal_labour": 5.4,
+    "manufacturing": 13,
+    "services": 6.1,
+    "not_in_work": 0,
+    "lastModified": 1793569385433.305
+  },
+  "600": {
+    "agriculture": 75.2,
+    "informal_labour": 5.4,
+    "manufacturing": 13,
+    "services": 6.4,
+    "not_in_work": 0,
+    "lastModified": 1793569454704.9717
+  },
+  "700": {
+    "agriculture": 75,
+    "informal_labour": 5.4,
+    "manufacturing": 13,
+    "services": 6.6,
+    "not_in_work": 0,
+    "lastModified": 1793569454742.2607
   },
   "800": {
-    "agriculture": 74.5,
-    "informal_labour": 5.5,
-    "manufacturing": 13.3,
-    "services": 6.7,
+    "agriculture": 74.6,
+    "informal_labour": 5.4,
+    "manufacturing": 13,
+    "services": 7,
     "not_in_work": 0,
-    "lastModified": 1792311456273.1938
+    "lastModified": 1793569456474.7173
   },
   "900": {
-    "agriculture": 74.5,
-    "informal_labour": 5.5,
-    "manufacturing": 13.3,
-    "services": 6.7,
-    "not_in_work": 0,
-    "lastModified": 1792311447261.9077
-  },
-  "1000": {
     "agriculture": 74.4,
     "informal_labour": 5.5,
-    "manufacturing": 13.2,
+    "manufacturing": 13.1,
     "services": 7,
     "not_in_work": 0,
-    "lastModified": 1792311450888.2122
+    "lastModified": 1793569458356.6309
   },
-  "1100": {
-    "agriculture": 74.5,
+  "1000": {
+    "agriculture": 74.2,
     "informal_labour": 5.5,
-    "manufacturing": 13.5,
-    "services": 6.5,
-    "not_in_work": 0,
-    "lastModified": 1792311451754.5151
-  },
-  "1200": {
-    "agriculture": 74.5,
-    "informal_labour": 5.5,
-    "manufacturing": 13.5,
-    "services": 6.5,
-    "not_in_work": 0,
-    "lastModified": 1792311459091.5674
-  },
-  "1300": {
-    "agriculture": 74.1,
-    "informal_labour": 5.6,
-    "manufacturing": 13.4,
-    "services": 7,
-    "not_in_work": 0,
-    "lastModified": 1792311461089.19
-  },
-  "1400": {
-    "agriculture": 73.9,
-    "informal_labour": 5.6,
-    "manufacturing": 13.2,
+    "manufacturing": 12.9,
     "services": 7.3,
     "not_in_work": 0,
-    "lastModified": 1792311457725.428
+    "lastModified": 1793569460062.0132
+  },
+  "1100": {
+    "agriculture": 74.3,
+    "informal_labour": 5.6,
+    "manufacturing": 13.2,
+    "services": 7,
+    "not_in_work": 0,
+    "lastModified": 1793569459277.8147
+  },
+  "1200": {
+    "agriculture": 74.1,
+    "informal_labour": 5.6,
+    "manufacturing": 13.2,
+    "services": 7.1,
+    "not_in_work": 0,
+    "lastModified": 1793569459934.6326
+  },
+  "1300": {
+    "agriculture": 73.6,
+    "informal_labour": 5.7,
+    "manufacturing": 13.1,
+    "services": 7.6,
+    "not_in_work": 0,
+    "lastModified": 1793569459747.1538
+  },
+  "1400": {
+    "agriculture": 73.8,
+    "informal_labour": 5.7,
+    "manufacturing": 13,
+    "services": 7.5,
+    "not_in_work": 0,
+    "lastModified": 1793569531289.6897
   },
   "1500": {
-    "agriculture": 73.3,
-    "informal_labour": 5.7,
-    "manufacturing": 13.3,
-    "services": 7.7,
+    "agriculture": 73.2,
+    "informal_labour": 5.8,
+    "manufacturing": 13.1,
+    "services": 8,
     "not_in_work": 0,
-    "lastModified": 1792311471329.4043
+    "lastModified": 1793569530415.6133
   },
   "1600": {
-    "agriculture": 72.5,
-    "informal_labour": 5.7,
-    "manufacturing": 13.8,
-    "services": 7.9,
+    "agriculture": 72.1,
+    "informal_labour": 5.9,
+    "manufacturing": 13.6,
+    "services": 8.5,
     "not_in_work": 0,
-    "lastModified": 1792311460277.635
+    "lastModified": 1793569532082.9294
   },
   "1700": {
-    "agriculture": 73.1,
-    "informal_labour": 5.7,
-    "manufacturing": 13.7,
-    "services": 7.5,
+    "agriculture": 72.7,
+    "informal_labour": 5.8,
+    "manufacturing": 13.4,
+    "services": 8.1,
     "not_in_work": 0,
-    "lastModified": 1792311471329.4043
+    "lastModified": 1793569535348.7432
   },
   "1710": {
-    "agriculture": 73.1,
-    "informal_labour": 5.7,
-    "manufacturing": 13.7,
-    "services": 7.5,
+    "agriculture": 71.8,
+    "informal_labour": 5.9,
+    "manufacturing": 13.6,
+    "services": 8.8,
     "not_in_work": 0,
-    "lastModified": 1792311460067.549
+    "lastModified": 1793569536825.6135
   },
   "1720": {
-    "agriculture": 73,
-    "informal_labour": 5.7,
-    "manufacturing": 13.8,
-    "services": 7.5,
+    "agriculture": 71.6,
+    "informal_labour": 5.9,
+    "manufacturing": 13.7,
+    "services": 8.8,
     "not_in_work": 0,
-    "lastModified": 1792311464018.421
+    "lastModified": 1793569535885.9033
   },
   "1730": {
-    "agriculture": 73,
-    "informal_labour": 5.7,
-    "manufacturing": 13.9,
-    "services": 7.4,
+    "agriculture": 71.7,
+    "informal_labour": 5.9,
+    "manufacturing": 13.7,
+    "services": 8.6,
     "not_in_work": 0,
-    "lastModified": 1792311467333.2551
+    "lastModified": 1793569535455.0146
   },
   "1740": {
-    "agriculture": 73,
-    "informal_labour": 5.6,
-    "manufacturing": 14,
-    "services": 7.4,
+    "agriculture": 71.9,
+    "informal_labour": 5.9,
+    "manufacturing": 13.8,
+    "services": 8.4,
     "not_in_work": 0,
-    "lastModified": 1792311469277.38
+    "lastModified": 1793569535951.791
   },
   "1750": {
-    "agriculture": 57.9,
+    "agriculture": 57.7,
     "informal_labour": 3.1,
-    "manufacturing": 13,
-    "services": 26.1,
+    "manufacturing": 12.8,
+    "services": 26.4,
     "not_in_work": 0,
-    "lastModified": 1792311550681.0735
+    "lastModified": 1793569608745.657
   },
   "1760": {
-    "agriculture": 58.1,
-    "informal_labour": 3.1,
-    "manufacturing": 12.9,
-    "services": 25.9,
+    "agriculture": 57.6,
+    "informal_labour": 3.2,
+    "manufacturing": 12.6,
+    "services": 26.6,
     "not_in_work": 0,
-    "lastModified": 1792311569659.9436
+    "lastModified": 1793569607931.1638
   },
   "1770": {
-    "agriculture": 58.5,
-    "informal_labour": 3,
-    "manufacturing": 12.8,
-    "services": 25.7,
+    "agriculture": 58,
+    "informal_labour": 3.1,
+    "manufacturing": 12.5,
+    "services": 26.4,
     "not_in_work": 0,
-    "lastModified": 1792311575520.9424
+    "lastModified": 1793569608437.6812
   },
   "1780": {
-    "agriculture": 58.7,
-    "informal_labour": 2.9,
-    "manufacturing": 12.9,
-    "services": 25.5,
+    "agriculture": 58.1,
+    "informal_labour": 3,
+    "manufacturing": 12.6,
+    "services": 26.2,
     "not_in_work": 0,
-    "lastModified": 1792311555199.6753
+    "lastModified": 1793569611358.7583
   },
   "1790": {
-    "agriculture": 59.2,
-    "informal_labour": 2.8,
-    "manufacturing": 12.8,
-    "services": 25.2,
+    "agriculture": 58.7,
+    "informal_labour": 2.9,
+    "manufacturing": 12.4,
+    "services": 26,
     "not_in_work": 0,
-    "lastModified": 1792311569699.4358
+    "lastModified": 1793569612059.0884
   },
   "1800": {
-    "agriculture": 60.2,
+    "agriculture": 60.1,
     "informal_labour": 2.5,
-    "manufacturing": 12.7,
-    "services": 24.6,
+    "manufacturing": 12.4,
+    "services": 25,
     "not_in_work": 0,
-    "lastModified": 1792311564382.9778
+    "lastModified": 1793569612149.2544
   },
   "1810": {
-    "agriculture": 59.9,
+    "agriculture": 59.5,
     "informal_labour": 2.6,
-    "manufacturing": 12.7,
-    "services": 24.8,
+    "manufacturing": 12.4,
+    "services": 25.4,
     "not_in_work": 0,
-    "lastModified": 1792311571470.8525
+    "lastModified": 1793569612931.358
   },
   "1820": {
-    "agriculture": 59.5,
-    "informal_labour": 2.7,
-    "manufacturing": 12.8,
-    "services": 25.1,
+    "agriculture": 59.8,
+    "informal_labour": 2.6,
+    "manufacturing": 12.5,
+    "services": 25.2,
     "not_in_work": 0,
-    "lastModified": 1792311574184.0479
+    "lastModified": 1793569613763.329
   },
   "1830": {
-    "agriculture": 59.4,
-    "informal_labour": 2.8,
-    "manufacturing": 12.7,
-    "services": 25.1,
+    "agriculture": 59.6,
+    "informal_labour": 2.7,
+    "manufacturing": 12.4,
+    "services": 25.3,
     "not_in_work": 0,
-    "lastModified": 1792311572631.589
+    "lastModified": 1793569684722.1267
   },
   "1840": {
     "agriculture": 59.1,
-    "informal_labour": 2.9,
-    "manufacturing": 12.7,
-    "services": 25.3,
+    "informal_labour": 2.8,
+    "manufacturing": 12.5,
+    "services": 25.6,
     "not_in_work": 0,
-    "lastModified": 1792311586272.0505
+    "lastModified": 1793569684835.5103
   },
   "1850": {
-    "agriculture": 58.6,
+    "agriculture": 58.7,
     "informal_labour": 2.8,
-    "manufacturing": 12.9,
-    "services": 25.7,
+    "manufacturing": 12.7,
+    "services": 25.8,
     "not_in_work": 0,
-    "lastModified": 1792311575516.7473
+    "lastModified": 1793569684023.406
   },
   "1860": {
-    "agriculture": 57.6,
-    "informal_labour": 3,
-    "manufacturing": 13,
-    "services": 26.4,
+    "agriculture": 57.4,
+    "informal_labour": 2.9,
+    "manufacturing": 12.9,
+    "services": 26.8,
     "not_in_work": 0,
-    "lastModified": 1792311588267.367
+    "lastModified": 1793569685203.962
   },
   "1870": {
     "agriculture": 55.8,
-    "informal_labour": 3.1,
-    "manufacturing": 14.4,
-    "services": 26.7,
+    "informal_labour": 3,
+    "manufacturing": 14.1,
+    "services": 27,
     "not_in_work": 0,
-    "lastModified": 1792311580613.4973
+    "lastModified": 1793569685843.0674
   },
   "1880": {
-    "agriculture": 53.6,
+    "agriculture": 53.3,
     "informal_labour": 3.2,
-    "manufacturing": 16.6,
-    "services": 26.6,
+    "manufacturing": 16.4,
+    "services": 27.1,
     "not_in_work": 0,
-    "lastModified": 1792311588267.367
+    "lastModified": 1793569688483.9778
   },
   "1890": {
-    "agriculture": 52.1,
-    "informal_labour": 3.8,
-    "manufacturing": 17.5,
-    "services": 26.6,
+    "agriculture": 53.5,
+    "informal_labour": 3.6,
+    "manufacturing": 17,
+    "services": 25.9,
     "not_in_work": 0,
-    "lastModified": 1792311593815.0078
+    "lastModified": 1793569692921.3594
   },
   "1900": {
     "agriculture": 55.4,
     "informal_labour": 3.5,
-    "manufacturing": 15.6,
-    "services": 25.5,
+    "manufacturing": 15.5,
+    "services": 25.6,
     "not_in_work": 0,
-    "lastModified": 1792311597371.035
+    "lastModified": 1793569694405.4695
   },
   "1910": {
-    "agriculture": 55.1,
-    "informal_labour": 3.3,
-    "manufacturing": 16.5,
+    "agriculture": 55.4,
+    "informal_labour": 3.2,
+    "manufacturing": 16.4,
     "services": 25.1,
     "not_in_work": 0,
-    "lastModified": 1792311666246.7742
+    "lastModified": 1793569766352.4595
   },
   "1920": {
-    "agriculture": 50.5,
-    "informal_labour": 3.1,
+    "agriculture": 51,
+    "informal_labour": 2.9,
     "manufacturing": 17,
-    "services": 29.3,
+    "services": 29.2,
     "not_in_work": 0,
-    "lastModified": 1792311687066.232
+    "lastModified": 1793569766164.286
   },
   "1930": {
-    "agriculture": 49.8,
-    "informal_labour": 3.1,
-    "manufacturing": 16.9,
+    "agriculture": 49.9,
+    "informal_labour": 3,
+    "manufacturing": 16.8,
     "services": 30.2,
     "not_in_work": 0,
-    "lastModified": 1792311696746.74
+    "lastModified": 1793569766317.1736
   },
   "1940": {
-    "agriculture": 47,
-    "informal_labour": 3,
+    "agriculture": 47.2,
+    "informal_labour": 2.9,
     "manufacturing": 18,
-    "services": 32.1,
+    "services": 32,
     "not_in_work": 0,
-    "lastModified": 1792311689567.8225
+    "lastModified": 1793569765548.3794
   },
   "1950": {
-    "agriculture": 46,
-    "informal_labour": 1.6,
-    "manufacturing": 19.8,
-    "services": 32.6,
-    "not_in_work": 0,
-    "lastModified": 1792311681139.6345
-  },
-  "1951": {
-    "agriculture": 45.6,
-    "informal_labour": 1.6,
-    "manufacturing": 19.7,
-    "services": 33,
-    "not_in_work": 0,
-    "lastModified": 1792311679618.542
-  },
-  "1952": {
-    "agriculture": 45.1,
-    "informal_labour": 1.7,
-    "manufacturing": 19.9,
-    "services": 33.3,
-    "not_in_work": 0,
-    "lastModified": 1792311689587.4937
-  },
-  "1953": {
-    "agriculture": 44.9,
-    "informal_labour": 1.8,
-    "manufacturing": 19.7,
-    "services": 33.6,
-    "not_in_work": 0,
-    "lastModified": 1792311687150.7046
-  },
-  "1954": {
-    "agriculture": 45.1,
-    "informal_labour": 1.7,
-    "manufacturing": 19.9,
-    "services": 33.3,
-    "not_in_work": 0,
-    "lastModified": 1792311687956.3152
-  },
-  "1955": {
-    "agriculture": 45,
-    "informal_labour": 1.8,
-    "manufacturing": 20.2,
-    "services": 33.1,
-    "not_in_work": 0,
-    "lastModified": 1792311700858.3381
-  },
-  "1956": {
-    "agriculture": 44.3,
-    "informal_labour": 1.8,
-    "manufacturing": 20.5,
-    "services": 33.4,
-    "not_in_work": 0,
-    "lastModified": 1792311691117.4805
-  },
-  "1957": {
-    "agriculture": 43.7,
-    "informal_labour": 1.8,
-    "manufacturing": 21.1,
-    "services": 33.4,
-    "not_in_work": 0,
-    "lastModified": 1792311707153.8928
-  },
-  "1958": {
-    "agriculture": 43.7,
-    "informal_labour": 1.7,
-    "manufacturing": 21.4,
-    "services": 33.2,
-    "not_in_work": 0,
-    "lastModified": 1792311706081.0266
-  },
-  "1959": {
-    "agriculture": 43.5,
-    "informal_labour": 1.7,
-    "manufacturing": 21.5,
-    "services": 33.2,
-    "not_in_work": 0,
-    "lastModified": 1792311705020.9363
-  },
-  "1960": {
-    "agriculture": 47.2,
-    "informal_labour": 1.8,
-    "manufacturing": 21.2,
-    "services": 29.8,
-    "not_in_work": 0,
-    "lastModified": 1792311712075.2512
-  },
-  "1961": {
     "agriculture": 46.4,
-    "informal_labour": 1.8,
-    "manufacturing": 21.6,
-    "services": 30.2,
-    "not_in_work": 0,
-    "lastModified": 1792311716822.2283
-  },
-  "1962": {
-    "agriculture": 45.7,
-    "informal_labour": 1.7,
-    "manufacturing": 21.9,
-    "services": 30.6,
-    "not_in_work": 0,
-    "lastModified": 1792311777707.1396
-  },
-  "1963": {
-    "agriculture": 44.9,
-    "informal_labour": 1.7,
-    "manufacturing": 22.2,
-    "services": 31.1,
-    "not_in_work": 0,
-    "lastModified": 1792311793838.74
-  },
-  "1964": {
-    "agriculture": 43.8,
-    "informal_labour": 1.7,
-    "manufacturing": 22.8,
-    "services": 31.8,
-    "not_in_work": 0,
-    "lastModified": 1792311809181.3022
-  },
-  "1965": {
-    "agriculture": 42.5,
-    "informal_labour": 1.8,
-    "manufacturing": 23.6,
-    "services": 32.2,
-    "not_in_work": 0,
-    "lastModified": 1792311802059.6323
-  },
-  "1966": {
-    "agriculture": 41.6,
-    "informal_labour": 1.7,
-    "manufacturing": 24.2,
+    "informal_labour": 2.4,
+    "manufacturing": 18.7,
     "services": 32.5,
     "not_in_work": 0,
-    "lastModified": 1792311795186.2363
+    "lastModified": 1793569765032.1248
   },
-  "1967": {
-    "agriculture": 40.5,
-    "informal_labour": 1.8,
-    "manufacturing": 24.8,
+  "1951": {
+    "agriculture": 46.3,
+    "informal_labour": 2.6,
+    "manufacturing": 18.4,
+    "services": 32.8,
+    "not_in_work": 0,
+    "lastModified": 1793569770170.6592
+  },
+  "1952": {
+    "agriculture": 45.8,
+    "informal_labour": 2.7,
+    "manufacturing": 18.5,
     "services": 33,
     "not_in_work": 0,
-    "lastModified": 1792311796586.704
+    "lastModified": 1793569773829.277
   },
-  "1968": {
-    "agriculture": 39.8,
-    "informal_labour": 1.7,
-    "manufacturing": 25,
+  "1953": {
+    "agriculture": 45.2,
+    "informal_labour": 2.9,
+    "manufacturing": 18.4,
     "services": 33.5,
     "not_in_work": 0,
-    "lastModified": 1792311796572.6797
+    "lastModified": 1793569777693.5813
+  },
+  "1954": {
+    "agriculture": 45.5,
+    "informal_labour": 2.6,
+    "manufacturing": 18.7,
+    "services": 33.2,
+    "not_in_work": 0,
+    "lastModified": 1793569845183.0286
+  },
+  "1955": {
+    "agriculture": 45.4,
+    "informal_labour": 2.8,
+    "manufacturing": 18.8,
+    "services": 33,
+    "not_in_work": 0,
+    "lastModified": 1793569844730.0105
+  },
+  "1956": {
+    "agriculture": 44.8,
+    "informal_labour": 2.9,
+    "manufacturing": 19.2,
+    "services": 33.2,
+    "not_in_work": 0,
+    "lastModified": 1793569844782.2036
+  },
+  "1957": {
+    "agriculture": 44.1,
+    "informal_labour": 2.8,
+    "manufacturing": 19.8,
+    "services": 33.3,
+    "not_in_work": 0,
+    "lastModified": 1793569845310.006
+  },
+  "1958": {
+    "agriculture": 44.4,
+    "informal_labour": 2.6,
+    "manufacturing": 20.1,
+    "services": 32.9,
+    "not_in_work": 0,
+    "lastModified": 1793569844530.7507
+  },
+  "1959": {
+    "agriculture": 44.1,
+    "informal_labour": 2.5,
+    "manufacturing": 20.3,
+    "services": 33.1,
+    "not_in_work": 0,
+    "lastModified": 1793569849655.1626
+  },
+  "1960": {
+    "agriculture": 48.1,
+    "informal_labour": 2.4,
+    "manufacturing": 20.1,
+    "services": 29.4,
+    "not_in_work": 0,
+    "lastModified": 1793569853068.1082
+  },
+  "1961": {
+    "agriculture": 47.5,
+    "informal_labour": 2.4,
+    "manufacturing": 20.4,
+    "services": 29.6,
+    "not_in_work": 0,
+    "lastModified": 1793569858622.0518
+  },
+  "1962": {
+    "agriculture": 46.8,
+    "informal_labour": 2.4,
+    "manufacturing": 20.8,
+    "services": 30,
+    "not_in_work": 0,
+    "lastModified": 1793569925458.5574
+  },
+  "1963": {
+    "agriculture": 46,
+    "informal_labour": 2.3,
+    "manufacturing": 21.1,
+    "services": 30.6,
+    "not_in_work": 0,
+    "lastModified": 1793569925284.3015
+  },
+  "1964": {
+    "agriculture": 44.4,
+    "informal_labour": 2.5,
+    "manufacturing": 21.7,
+    "services": 31.4,
+    "not_in_work": 0,
+    "lastModified": 1793569925533.7827
+  },
+  "1965": {
+    "agriculture": 43.1,
+    "informal_labour": 2.6,
+    "manufacturing": 22.5,
+    "services": 31.8,
+    "not_in_work": 0,
+    "lastModified": 1793569926554.8298
+  },
+  "1966": {
+    "agriculture": 42.1,
+    "informal_labour": 2.5,
+    "manufacturing": 23.2,
+    "services": 32.2,
+    "not_in_work": 0,
+    "lastModified": 1793569926405.2915
+  },
+  "1967": {
+    "agriculture": 40.9,
+    "informal_labour": 2.6,
+    "manufacturing": 23.9,
+    "services": 32.6,
+    "not_in_work": 0,
+    "lastModified": 1793569930993.202
+  },
+  "1968": {
+    "agriculture": 40.2,
+    "informal_labour": 2.6,
+    "manufacturing": 24.1,
+    "services": 33.1,
+    "not_in_work": 0,
+    "lastModified": 1793569933672.2905
   },
   "1969": {
-    "agriculture": 39,
-    "informal_labour": 1.8,
-    "manufacturing": 25.2,
-    "services": 34,
+    "agriculture": 39.4,
+    "informal_labour": 2.7,
+    "manufacturing": 24.3,
+    "services": 33.6,
     "not_in_work": 0,
-    "lastModified": 1792311796486.942
+    "lastModified": 1793569941176.573
   },
   "1970": {
-    "agriculture": 37.5,
-    "informal_labour": 2.1,
-    "manufacturing": 25.2,
-    "services": 35.1,
+    "agriculture": 38.1,
+    "informal_labour": 2.9,
+    "manufacturing": 24.4,
+    "services": 34.6,
     "not_in_work": 0,
-    "lastModified": 1792311802078.0908
+    "lastModified": 1793570011865.8
   },
   "1971": {
-    "agriculture": 36.7,
-    "informal_labour": 2.2,
-    "manufacturing": 25.4,
-    "services": 35.7,
+    "agriculture": 37.2,
+    "informal_labour": 3,
+    "manufacturing": 24.6,
+    "services": 35.2,
     "not_in_work": 0,
-    "lastModified": 1792311812861.6274
+    "lastModified": 1793570011754.4263
   },
   "1972": {
-    "agriculture": 36,
-    "informal_labour": 2.3,
-    "manufacturing": 25.4,
-    "services": 36.3,
+    "agriculture": 36.5,
+    "informal_labour": 3,
+    "manufacturing": 24.7,
+    "services": 35.7,
     "not_in_work": 0,
-    "lastModified": 1792311812841.6016
+    "lastModified": 1793570011754.4263
   },
   "1973": {
-    "agriculture": 35,
-    "informal_labour": 2.4,
-    "manufacturing": 25.7,
-    "services": 36.9,
+    "agriculture": 35.7,
+    "informal_labour": 3.1,
+    "manufacturing": 25,
+    "services": 36.2,
     "not_in_work": 0,
-    "lastModified": 1792311826380.1438
+    "lastModified": 1793570011754.4263
   },
   "1974": {
-    "agriculture": 34.2,
-    "informal_labour": 2.4,
-    "manufacturing": 25.8,
-    "services": 37.6,
+    "agriculture": 34.9,
+    "informal_labour": 3.1,
+    "manufacturing": 25.2,
+    "services": 36.7,
     "not_in_work": 0,
-    "lastModified": 1792311820038.0806
+    "lastModified": 1793570011595.1045
   },
   "1975": {
-    "agriculture": 33.8,
-    "informal_labour": 3,
-    "manufacturing": 25.8,
+    "agriculture": 34.1,
+    "informal_labour": 3.2,
+    "manufacturing": 25.4,
     "services": 37.3,
     "not_in_work": 0,
-    "lastModified": 1792311817584.7087
+    "lastModified": 1793570016320.5164
   },
   "1976": {
-    "agriculture": 33.9,
-    "informal_labour": 3,
-    "manufacturing": 25.9,
-    "services": 37.2,
+    "agriculture": 34.1,
+    "informal_labour": 3.1,
+    "manufacturing": 25.4,
+    "services": 37.3,
     "not_in_work": 0,
-    "lastModified": 1792311825624.9014
+    "lastModified": 1793570017127.063
   },
   "1977": {
-    "agriculture": 33.5,
-    "informal_labour": 3.1,
-    "manufacturing": 26,
-    "services": 37.4,
+    "agriculture": 34,
+    "informal_labour": 3.3,
+    "manufacturing": 25.5,
+    "services": 37.3,
     "not_in_work": 0,
-    "lastModified": 1792311828338.0037
+    "lastModified": 1793570024928.299
   },
   "1978": {
-    "agriculture": 33.2,
-    "informal_labour": 3.3,
-    "manufacturing": 25.9,
-    "services": 37.6,
+    "agriculture": 33.8,
+    "informal_labour": 3.4,
+    "manufacturing": 25.4,
+    "services": 37.4,
     "not_in_work": 0,
-    "lastModified": 1792311894538.0457
+    "lastModified": 1793570095572.8936
   },
   "1979": {
-    "agriculture": 33,
-    "informal_labour": 3.5,
-    "manufacturing": 25.8,
-    "services": 37.8,
-    "not_in_work": 0,
-    "lastModified": 1792311908469.6023
-  },
-  "1980": {
-    "agriculture": 32.9,
-    "informal_labour": 3.5,
-    "manufacturing": 25.8,
-    "services": 37.8,
-    "not_in_work": 0,
-    "lastModified": 1792311924249.9124
-  },
-  "1981": {
-    "agriculture": 32.5,
-    "informal_labour": 3.5,
-    "manufacturing": 25.7,
-    "services": 38.4,
-    "not_in_work": 0,
-    "lastModified": 1792311924227.9182
-  },
-  "1982": {
-    "agriculture": 32,
-    "informal_labour": 3.6,
-    "manufacturing": 25.6,
-    "services": 38.9,
-    "not_in_work": 0,
-    "lastModified": 1792311907060.7642
-  },
-  "1983": {
-    "agriculture": 31.9,
+    "agriculture": 33.3,
     "informal_labour": 3.6,
     "manufacturing": 25.4,
-    "services": 39.1,
+    "services": 37.7,
     "not_in_work": 0,
-    "lastModified": 1792311912785.7627
+    "lastModified": 1793570096062.9084
   },
-  "1984": {
-    "agriculture": 31.5,
+  "1980": {
+    "agriculture": 33.3,
+    "informal_labour": 3.7,
+    "manufacturing": 25.4,
+    "services": 37.6,
+    "not_in_work": 0,
+    "lastModified": 1793570096298.5935
+  },
+  "1981": {
+    "agriculture": 32.9,
     "informal_labour": 3.6,
     "manufacturing": 25.3,
-    "services": 39.6,
+    "services": 38.2,
     "not_in_work": 0,
-    "lastModified": 1792311915593.9739
+    "lastModified": 1793570097240.6858
+  },
+  "1982": {
+    "agriculture": 32.4,
+    "informal_labour": 3.7,
+    "manufacturing": 25.1,
+    "services": 38.8,
+    "not_in_work": 0,
+    "lastModified": 1793570097321.8535
+  },
+  "1983": {
+    "agriculture": 32.1,
+    "informal_labour": 3.8,
+    "manufacturing": 25,
+    "services": 39,
+    "not_in_work": 0,
+    "lastModified": 1793570099147.5857
+  },
+  "1984": {
+    "agriculture": 31.8,
+    "informal_labour": 3.7,
+    "manufacturing": 24.8,
+    "services": 39.7,
+    "not_in_work": 0,
+    "lastModified": 1793570100989.8535
   },
   "1985": {
-    "agriculture": 31.1,
-    "informal_labour": 3.4,
-    "manufacturing": 25.1,
-    "services": 40.5,
+    "agriculture": 31.2,
+    "informal_labour": 3.5,
+    "manufacturing": 24.6,
+    "services": 40.8,
     "not_in_work": 0,
-    "lastModified": 1792311915540.9167
+    "lastModified": 1793570108847.032
   },
   "1986": {
-    "agriculture": 30.8,
+    "agriculture": 30.9,
     "informal_labour": 3.4,
-    "manufacturing": 25,
-    "services": 40.9,
+    "manufacturing": 24.4,
+    "services": 41.2,
     "not_in_work": 0,
-    "lastModified": 1792311925576.0044
+    "lastModified": 1793570175939.5442
   },
   "1987": {
-    "agriculture": 30.4,
-    "informal_labour": 3.4,
-    "manufacturing": 24.9,
-    "services": 41.4,
+    "agriculture": 30.5,
+    "informal_labour": 3.5,
+    "manufacturing": 24.4,
+    "services": 41.6,
     "not_in_work": 0,
-    "lastModified": 1792311924836.2961
+    "lastModified": 1793570176495.766
   },
   "1988": {
-    "agriculture": 30,
-    "informal_labour": 3.4,
-    "manufacturing": 24.6,
-    "services": 41.9,
+    "agriculture": 30.2,
+    "informal_labour": 3.6,
+    "manufacturing": 24.2,
+    "services": 42,
     "not_in_work": 0,
-    "lastModified": 1792311925592.1538
+    "lastModified": 1793570177418.495
   },
   "1989": {
-    "agriculture": 30.1,
-    "informal_labour": 3.5,
-    "manufacturing": 24.3,
-    "services": 42.2,
+    "agriculture": 29.8,
+    "informal_labour": 3.6,
+    "manufacturing": 24,
+    "services": 42.6,
     "not_in_work": 0,
-    "lastModified": 1792311944238.1245
+    "lastModified": 1793570178036.7173
   },
   "1990": {
     "agriculture": 29.6,
     "informal_labour": 3.6,
-    "manufacturing": 24.2,
-    "services": 42.6,
+    "manufacturing": 23.9,
+    "services": 42.9,
     "not_in_work": 0,
-    "lastModified": 1792311938354.8772
+    "lastModified": 1793570180199.8142
   },
   "1991": {
-    "agriculture": 26.1,
-    "informal_labour": 3.5,
-    "manufacturing": 26.1,
-    "services": 44.3,
-    "not_in_work": 0,
-    "lastModified": 1792311944794.472
-  },
-  "1992": {
-    "agriculture": 26.1,
+    "agriculture": 26,
     "informal_labour": 3.5,
     "manufacturing": 25.9,
-    "services": 44.5,
+    "services": 44.6,
     "not_in_work": 0,
-    "lastModified": 1792311947836.793
+    "lastModified": 1793570180748.4604
+  },
+  "1992": {
+    "agriculture": 25.8,
+    "informal_labour": 3.5,
+    "manufacturing": 25.8,
+    "services": 44.9,
+    "not_in_work": 0,
+    "lastModified": 1793570182310.453
   },
   "1993": {
-    "agriculture": 25.6,
+    "agriculture": 25.3,
     "informal_labour": 3.5,
-    "manufacturing": 25.5,
-    "services": 45.3,
+    "manufacturing": 25.3,
+    "services": 45.9,
     "not_in_work": 0,
-    "lastModified": 1792311949262.16
+    "lastModified": 1793570188753.1765
   },
   "1994": {
-    "agriculture": 21.2,
-    "informal_labour": 3.5,
-    "manufacturing": 24.1,
-    "services": 51.3,
+    "agriculture": 20.3,
+    "informal_labour": 3.3,
+    "manufacturing": 23.9,
+    "services": 52.4,
     "not_in_work": 0,
-    "lastModified": 1792312012367.6562
+    "lastModified": 1793570257893.3547
   },
   "1995": {
-    "agriculture": 20.9,
-    "informal_labour": 3.5,
-    "manufacturing": 23.9,
-    "services": 51.6,
+    "agriculture": 20,
+    "informal_labour": 3.4,
+    "manufacturing": 23.8,
+    "services": 52.8,
     "not_in_work": 0,
-    "lastModified": 1792312023024.0762
+    "lastModified": 1793570258031.14
   },
   "1996": {
-    "agriculture": 20,
-    "informal_labour": 3.5,
-    "manufacturing": 23.8,
-    "services": 52.7,
+    "agriculture": 19.2,
+    "informal_labour": 3.3,
+    "manufacturing": 23.7,
+    "services": 53.8,
     "not_in_work": 0,
-    "lastModified": 1792312041752.1724
+    "lastModified": 1793570260003.564
   },
   "1997": {
-    "agriculture": 19.7,
-    "informal_labour": 3.4,
-    "manufacturing": 23.9,
-    "services": 53.1,
-    "not_in_work": 0,
-    "lastModified": 1792312041688.1265
-  },
-  "1998": {
-    "agriculture": 19.6,
+    "agriculture": 18.9,
     "informal_labour": 3.1,
-    "manufacturing": 23.8,
-    "services": 53.5,
-    "not_in_work": 0,
-    "lastModified": 1792312024930.3408
-  },
-  "1999": {
-    "agriculture": 19.1,
-    "informal_labour": 3.3,
-    "manufacturing": 23.8,
-    "services": 53.9,
-    "not_in_work": 0,
-    "lastModified": 1792312027043.157
-  },
-  "2000": {
-    "agriculture": 18.1,
-    "informal_labour": 3.5,
-    "manufacturing": 23.4,
-    "services": 55,
-    "not_in_work": 0,
-    "lastModified": 1792312037089.8152
-  },
-  "2001": {
-    "agriculture": 16.2,
-    "informal_labour": 3.4,
-    "manufacturing": 25.7,
-    "services": 54.7,
-    "not_in_work": 0,
-    "lastModified": 1792312038122.817
-  },
-  "2002": {
-    "agriculture": 16.4,
-    "informal_labour": 3.5,
-    "manufacturing": 25.4,
-    "services": 54.6,
-    "not_in_work": 0,
-    "lastModified": 1792312039618.7173
-  },
-  "2003": {
-    "agriculture": 16.1,
-    "informal_labour": 3.6,
-    "manufacturing": 25.4,
-    "services": 54.9,
-    "not_in_work": 0,
-    "lastModified": 1792312039632.2285
-  },
-  "2004": {
-    "agriculture": 15.7,
-    "informal_labour": 3.6,
-    "manufacturing": 25.5,
-    "services": 55.2,
-    "not_in_work": 0,
-    "lastModified": 1792312037832.4402
-  },
-  "2005": {
-    "agriculture": 14.8,
-    "informal_labour": 3.6,
     "manufacturing": 23.7,
-    "services": 57.8,
-    "not_in_work": 0,
-    "lastModified": 1792312063727.6025
-  },
-  "2006": {
-    "agriculture": 15.3,
-    "informal_labour": 4.2,
-    "manufacturing": 23.4,
-    "services": 57.1,
-    "not_in_work": 0,
-    "lastModified": 1792312062774.6338
-  },
-  "2007": {
-    "agriculture": 14.5,
-    "informal_labour": 4.3,
-    "manufacturing": 23.6,
-    "services": 57.6,
-    "not_in_work": 0,
-    "lastModified": 1792312067025.6196
-  },
-  "2008": {
-    "agriculture": 14,
-    "informal_labour": 4.4,
-    "manufacturing": 23.7,
-    "services": 57.9,
-    "not_in_work": 0,
-    "lastModified": 1792312067050.5234
-  },
-  "2009": {
-    "agriculture": 13.7,
-    "informal_labour": 4.5,
-    "manufacturing": 23.5,
-    "services": 58.2,
-    "not_in_work": 0,
-    "lastModified": 1792312070767.3572
-  },
-  "2010": {
-    "agriculture": 12.7,
-    "informal_labour": 4.7,
-    "manufacturing": 23.1,
-    "services": 59.5,
-    "not_in_work": 0,
-    "lastModified": 1792312132860.2139
-  },
-  "2011": {
-    "agriculture": 12.3,
-    "informal_labour": 4.8,
-    "manufacturing": 23.2,
-    "services": 59.7,
-    "not_in_work": 0,
-    "lastModified": 1792312144099.4175
-  },
-  "2012": {
-    "agriculture": 11.9,
-    "informal_labour": 4.9,
-    "manufacturing": 23.3,
-    "services": 59.9,
-    "not_in_work": 0,
-    "lastModified": 1792312158883.766
-  },
-  "2013": {
-    "agriculture": 11.6,
-    "informal_labour": 5,
-    "manufacturing": 23.4,
-    "services": 60,
-    "not_in_work": 0,
-    "lastModified": 1792312157330.1665
-  },
-  "2014": {
-    "agriculture": 10.6,
-    "informal_labour": 5.1,
-    "manufacturing": 23.6,
-    "services": 60.7,
-    "not_in_work": 0,
-    "lastModified": 1792312151984.3875
-  },
-  "2015": {
-    "agriculture": 8.9,
-    "informal_labour": 5.9,
-    "manufacturing": 23.6,
-    "services": 61.6,
-    "not_in_work": 0,
-    "lastModified": 1792312158277.7212
-  },
-  "2016": {
-    "agriculture": 9.3,
-    "informal_labour": 5.7,
-    "manufacturing": 23.3,
-    "services": 61.7,
-    "not_in_work": 0,
-    "lastModified": 1792312150938.264
-  },
-  "2017": {
-    "agriculture": 9.1,
-    "informal_labour": 5.7,
-    "manufacturing": 23.1,
-    "services": 62,
-    "not_in_work": 0,
-    "lastModified": 1792312152857.3206
-  },
-  "2018": {
-    "agriculture": 9,
-    "informal_labour": 5.7,
-    "manufacturing": 22.9,
-    "services": 62.4,
-    "not_in_work": 0,
-    "lastModified": 1792312157158.6697
-  },
-  "2019": {
-    "agriculture": 8.9,
-    "informal_labour": 5.6,
-    "manufacturing": 22.8,
-    "services": 62.6,
-    "not_in_work": 0,
-    "lastModified": 1792312156116.6199
-  },
-  "2020": {
-    "agriculture": 16.8,
-    "informal_labour": 4.2,
-    "manufacturing": 23.1,
-    "services": 56,
-    "not_in_work": 0,
-    "lastModified": 1792312156349.153
-  },
-  "2021": {
-    "agriculture": 17.5,
-    "informal_labour": 4.2,
-    "manufacturing": 22.7,
-    "services": 55.6,
-    "not_in_work": 0,
-    "lastModified": 1792312166513.3223
-  },
-  "2022": {
-    "agriculture": 18.4,
-    "informal_labour": 4.5,
-    "manufacturing": 22.5,
-    "services": 54.6,
-    "not_in_work": 0,
-    "lastModified": 1792312165665.3262
-  },
-  "2023": {
-    "agriculture": 19.1,
-    "informal_labour": 4.6,
-    "manufacturing": 22.1,
     "services": 54.2,
     "not_in_work": 0,
-    "lastModified": 1792312168476.1338
+    "lastModified": 1793570259623.3152
+  },
+  "1998": {
+    "agriculture": 18.8,
+    "informal_labour": 3.3,
+    "manufacturing": 23.6,
+    "services": 54.3,
+    "not_in_work": 0,
+    "lastModified": 1793570264022.2114
+  },
+  "1999": {
+    "agriculture": 18.2,
+    "informal_labour": 3.1,
+    "manufacturing": 23.7,
+    "services": 55,
+    "not_in_work": 0,
+    "lastModified": 1793570262561.7727
+  },
+  "2000": {
+    "agriculture": 17.2,
+    "informal_labour": 3.4,
+    "manufacturing": 23.5,
+    "services": 56,
+    "not_in_work": 0,
+    "lastModified": 1793570266710.2856
+  },
+  "2001": {
+    "agriculture": 15.7,
+    "informal_labour": 3.2,
+    "manufacturing": 25.6,
+    "services": 55.5,
+    "not_in_work": 0,
+    "lastModified": 1793570270451.2817
+  },
+  "2002": {
+    "agriculture": 15.7,
+    "informal_labour": 3.3,
+    "manufacturing": 25.4,
+    "services": 55.7,
+    "not_in_work": 0,
+    "lastModified": 1793570338731.0806
+  },
+  "2003": {
+    "agriculture": 15.4,
+    "informal_labour": 3.4,
+    "manufacturing": 25.3,
+    "services": 55.9,
+    "not_in_work": 0,
+    "lastModified": 1793570339542.583
+  },
+  "2004": {
+    "agriculture": 14.9,
+    "informal_labour": 3.4,
+    "manufacturing": 25.4,
+    "services": 56.4,
+    "not_in_work": 0,
+    "lastModified": 1793570341928.065
+  },
+  "2005": {
+    "agriculture": 13.9,
+    "informal_labour": 3.5,
+    "manufacturing": 23.4,
+    "services": 59.1,
+    "not_in_work": 0,
+    "lastModified": 1793570341627.3135
+  },
+  "2006": {
+    "agriculture": 14.2,
+    "informal_labour": 4,
+    "manufacturing": 23.1,
+    "services": 58.6,
+    "not_in_work": 0,
+    "lastModified": 1793570346073.3638
+  },
+  "2007": {
+    "agriculture": 13.4,
+    "informal_labour": 4.2,
+    "manufacturing": 23.3,
+    "services": 59.1,
+    "not_in_work": 0,
+    "lastModified": 1793570344629.2583
+  },
+  "2008": {
+    "agriculture": 12.9,
+    "informal_labour": 4.3,
+    "manufacturing": 23.4,
+    "services": 59.4,
+    "not_in_work": 0,
+    "lastModified": 1793570349737.4224
+  },
+  "2009": {
+    "agriculture": 12.6,
+    "informal_labour": 4.5,
+    "manufacturing": 23.2,
+    "services": 59.8,
+    "not_in_work": 0,
+    "lastModified": 1793570350169.9148
+  },
+  "2010": {
+    "agriculture": 11.6,
+    "informal_labour": 4.5,
+    "manufacturing": 22.9,
+    "services": 61,
+    "not_in_work": 0,
+    "lastModified": 1793570420924.8398
+  },
+  "2011": {
+    "agriculture": 11.2,
+    "informal_labour": 4.7,
+    "manufacturing": 23,
+    "services": 61.1,
+    "not_in_work": 0,
+    "lastModified": 1793570421140.7444
+  },
+  "2012": {
+    "agriculture": 10.7,
+    "informal_labour": 4.8,
+    "manufacturing": 23.2,
+    "services": 61.3,
+    "not_in_work": 0,
+    "lastModified": 1793570424243.1638
+  },
+  "2013": {
+    "agriculture": 10.3,
+    "informal_labour": 4.9,
+    "manufacturing": 23.3,
+    "services": 61.4,
+    "not_in_work": 0,
+    "lastModified": 1793570423696.516
+  },
+  "2014": {
+    "agriculture": 9.5,
+    "informal_labour": 5.1,
+    "manufacturing": 23.4,
+    "services": 62.1,
+    "not_in_work": 0,
+    "lastModified": 1793570427209.5068
+  },
+  "2015": {
+    "agriculture": 6.6,
+    "informal_labour": 4.2,
+    "manufacturing": 23.7,
+    "services": 65.5,
+    "not_in_work": 0,
+    "lastModified": 1793570427785.6592
+  },
+  "2016": {
+    "agriculture": 7,
+    "informal_labour": 4.3,
+    "manufacturing": 23.4,
+    "services": 65.3,
+    "not_in_work": 0,
+    "lastModified": 1793570433320.875
+  },
+  "2017": {
+    "agriculture": 6.8,
+    "informal_labour": 4.4,
+    "manufacturing": 23.3,
+    "services": 65.4,
+    "not_in_work": 0,
+    "lastModified": 1793570431029.901
+  },
+  "2018": {
+    "agriculture": 6.8,
+    "informal_labour": 4.5,
+    "manufacturing": 23.1,
+    "services": 65.6,
+    "not_in_work": 0,
+    "lastModified": 1793570501454.9521
+  },
+  "2019": {
+    "agriculture": 6.7,
+    "informal_labour": 4.7,
+    "manufacturing": 23,
+    "services": 65.6,
+    "not_in_work": 0,
+    "lastModified": 1793570501384.5376
+  },
+  "2020": {
+    "agriculture": 8.1,
+    "informal_labour": 6.4,
+    "manufacturing": 23.4,
+    "services": 62.2,
+    "not_in_work": 0,
+    "lastModified": 1793570504472.3816
+  },
+  "2021": {
+    "agriculture": 8.7,
+    "informal_labour": 6,
+    "manufacturing": 23.1,
+    "services": 62.2,
+    "not_in_work": 0,
+    "lastModified": 1793570504426.063
+  },
+  "2022": {
+    "agriculture": 9.4,
+    "informal_labour": 5.6,
+    "manufacturing": 23,
+    "services": 62,
+    "not_in_work": 0,
+    "lastModified": 1793570506972.4033
+  },
+  "2023": {
+    "agriculture": 10.5,
+    "informal_labour": 5.7,
+    "manufacturing": 22.5,
+    "services": 61.2,
+    "not_in_work": 0,
+    "lastModified": 1793570506747.072
   },
   "2024": {
-    "agriculture": 20.9,
-    "informal_labour": 4.7,
-    "manufacturing": 21,
-    "services": 53.4,
+    "agriculture": 10.6,
+    "informal_labour": 5.9,
+    "manufacturing": 21.8,
+    "services": 61.8,
     "not_in_work": 0,
-    "lastModified": 1792312167443.8628
+    "lastModified": 1793570512654.5332
   },
   "2025": {
-    "agriculture": 25.4,
-    "informal_labour": 4.5,
-    "manufacturing": 19.7,
-    "services": 50.5,
+    "agriculture": 13.1,
+    "informal_labour": 5.9,
+    "manufacturing": 20.9,
+    "services": 60.1,
     "not_in_work": 0,
-    "lastModified": 1792312169741.4426
+    "lastModified": 1793570510612.8855
   },
   "-10000": {
-    "agriculture": 2.9,
-    "informal_labour": 87.9,
-    "manufacturing": 8.1,
+    "agriculture": 3,
+    "informal_labour": 88,
+    "manufacturing": 7.7,
     "services": 1.2,
     "not_in_work": 0,
-    "lastModified": 1792311339249.834
+    "lastModified": 1793569307084.4734
   },
   "-9000": {
-    "agriculture": 3.3,
-    "informal_labour": 87.5,
-    "manufacturing": 8,
+    "agriculture": 3.5,
+    "informal_labour": 87.6,
+    "manufacturing": 7.7,
     "services": 1.2,
     "not_in_work": 0,
-    "lastModified": 1792311343266.3574
-  },
-  "-7000": {
-    "agriculture": 6,
-    "informal_labour": 84.6,
-    "manufacturing": 8.1,
-    "services": 1.3,
-    "not_in_work": 0,
-    "lastModified": 1792311341137.5957
+    "lastModified": 1793569307009.1792
   },
   "-8000": {
-    "agriculture": 3.9,
-    "informal_labour": 87,
-    "manufacturing": 7.8,
-    "services": 1.2,
+    "agriculture": 4.1,
+    "informal_labour": 87.1,
+    "manufacturing": 7.5,
+    "services": 1.3,
     "not_in_work": 0,
-    "lastModified": 1792311345284.3486
+    "lastModified": 1793569306900.0845
   },
-  "-5000": {
-    "agriculture": 30.3,
-    "informal_labour": 56.2,
-    "manufacturing": 11.1,
-    "services": 2.3,
-    "not_in_work": 0,
-    "lastModified": 1792311337255.917
-  },
-  "-4000": {
-    "agriculture": 53.7,
-    "informal_labour": 30.9,
-    "manufacturing": 12.3,
-    "services": 3.1,
-    "not_in_work": 0,
-    "lastModified": 1792311342275.9087
-  },
-  "-3000": {
-    "agriculture": 78,
-    "informal_labour": 5.2,
-    "manufacturing": 12.8,
-    "services": 4,
-    "not_in_work": 0,
-    "lastModified": 1792311342444.3184
-  },
-  "-2000": {
-    "agriculture": 75.6,
-    "informal_labour": 5.3,
-    "manufacturing": 14,
-    "services": 5,
-    "not_in_work": 0,
-    "lastModified": 1792311344024.5693
-  },
-  "-1000": {
-    "agriculture": 76,
-    "informal_labour": 5.3,
-    "manufacturing": 13.7,
-    "services": 5,
-    "not_in_work": 0,
-    "lastModified": 1792311346424.733
-  },
-  "-6000": {
-    "agriculture": 7.9,
-    "informal_labour": 81.5,
-    "manufacturing": 9.2,
+  "-7000": {
+    "agriculture": 6.3,
+    "informal_labour": 84.7,
+    "manufacturing": 7.7,
     "services": 1.4,
     "not_in_work": 0,
-    "lastModified": 1792311341110.2688
+    "lastModified": 1793569308567.708
+  },
+  "-6000": {
+    "agriculture": 8.4,
+    "informal_labour": 81.5,
+    "manufacturing": 8.7,
+    "services": 1.4,
+    "not_in_work": 0,
+    "lastModified": 1793569309042.421
+  },
+  "-3000": {
+    "agriculture": 78.7,
+    "informal_labour": 5.1,
+    "manufacturing": 12.2,
+    "services": 4,
+    "not_in_work": 0,
+    "lastModified": 1793569307571.271
+  },
+  "-5000": {
+    "agriculture": 30.9,
+    "informal_labour": 56.1,
+    "manufacturing": 10.6,
+    "services": 2.4,
+    "not_in_work": 0,
+    "lastModified": 1793569309046.299
+  },
+  "-2000": {
+    "agriculture": 76.2,
+    "informal_labour": 5.2,
+    "manufacturing": 13.5,
+    "services": 5,
+    "not_in_work": 0,
+    "lastModified": 1793569381939.0146
+  },
+  "-1000": {
+    "agriculture": 76.8,
+    "informal_labour": 5.2,
+    "manufacturing": 13.1,
+    "services": 4.9,
+    "not_in_work": 0,
+    "lastModified": 1793569381046.3215
+  },
+  "-4000": {
+    "agriculture": 54.3,
+    "informal_labour": 30.8,
+    "manufacturing": 11.7,
+    "services": 3.1,
+    "not_in_work": 0,
+    "lastModified": 1793569308467.2415
   }
 }

@@ -1,0 +1,43 @@
+{
+  // Default TUI localisation ('en-GB', 'fr', 'de')
+  default_locale: 'en-GB',
+
+  // Open system browser automatically on the initial session start (always suppressed on crash restarts)
+  default_open_browser: true,
+
+  // Default crash recovery policy ('persistent', 'oom', 'once')
+  default_watchdog_policy: 'persistent',
+
+  // Reset consecutive crash backoff counter once server stays healthy for this duration (ms)
+  healthy_uptime_reset_ms: 30000,
+
+  // Bind Vite server to all network interfaces (--host)
+  host: true,
+
+  // Per-machine local state file (gitignored via *.local) storing locked-in mode and TUI preferences
+  local_state_file: 'autorun.local',
+
+  // Countdown duration before automatically booting a locked-in mode (seconds)
+  lock_in_countdown_seconds: 3,
+
+  // Confirmation window required when pressing Quit/Ctrl+C or Menu while locked in (ms)
+  lock_in_ctrl_c_confirm_ms: 3000,
+
+  // Maximum exponential restart backoff delay during rapid consecutive crashes (ms)
+  max_backoff_ms: 30000,
+
+  // V8 heap limit for child Node/Vite processes (MB)
+  max_old_space_size_mb: 16384,
+
+  // Directory for temporary Node diagnostic crash reports (cleaned up automatically after inspection)
+  oom_report_dir: 'tests',
+
+  // Locked TCP port for Cloudflare tunnel and local access
+  port: 15000,
+
+  // Maximum time to wait for TCP port release after a fatal crash before respawning (ms)
+  port_wait_timeout_ms: 10000,
+
+  // Base delay before first auto-restart on crash (ms)
+  restart_delay_ms: 2000,
+}

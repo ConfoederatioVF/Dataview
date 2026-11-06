@@ -6,6 +6,56 @@ import rawDe from './de.json5?raw'
 export type SupportedLocale = 'en-GB' | 'fr' | 'de'
 
 export interface LocalisationConfig {
+  autorun?: {
+    autoBootCountdown: string
+    autoBootPaused: string
+    browserOff: string
+    browserOn: string
+    browserOpenDesc: string
+    browserOpenLabel: string
+    buildingBundle: string
+    cleanExit: string
+    confirmMenuLocked: string
+    confirmQuitLocked: string
+    crashDetectedOom: string
+    crashDetectedUnexpected: string
+    distMissingRebuild: string
+    exitedWithError: string
+    heapPortInfo: string
+    heapPortLabel: string
+    lockedInBadge: string
+    lockInCleared: string
+    lockInEnabled: string
+    lockInLabel: string
+    lockInNoneDesc: string
+    lockInSetDesc: string
+    manualRestart: string
+    menuControlsLine1: string
+    menuControlsLine2: string
+    modeDevDesc: string
+    modeDevTitle: string
+    modeExitDesc: string
+    modeExitTitle: string
+    modePreviewDesc: string
+    modePreviewTitle: string
+    modeRebuildDesc: string
+    modeRebuildTitle: string
+    portWait: string
+    runningControls: string
+    runningStats: string
+    statusLine: string
+    statusNone: string
+    title: string
+    unlockedBadge: string
+    watchdogLabel: string
+    watchdogLockedNotice: string
+    watchdogOnce: string
+    watchdogOnceDesc: string
+    watchdogOom: string
+    watchdogOomDesc: string
+    watchdogPersistent: string
+    watchdogPersistentDesc: string
+  }
   app: {
     badge: string
     subtitle: string

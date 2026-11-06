@@ -156,7 +156,6 @@ export let useElevationSpikes = function (arg0_options: UseElevationSpikesParams
       let gc = arg1_gc
 
       //Declare local instance variables
-      let cb_range: number
       let cell_alpha = alpha
       let cell_idx = gr*grid_w + gc
       let center_lat: number
@@ -168,7 +167,6 @@ export let useElevationSpikes = function (arg0_options: UseElevationSpikesParams
       let height_norm: number = 0
       let lat_correction: number
       let lat_rad: number
-      let lin_norm: number
       let lut_idx: number
       let max_allowed_lat: number
       let max_block_val: number = -Infinity
@@ -258,19 +256,16 @@ export let useElevationSpikes = function (arg0_options: UseElevationSpikesParams
       t_val = transformValue(v, scale_type as any, log_sigma)
       norm = Math.max(0, Math.min(1, (t_val - t_min)/t_range))
 
-      cb_range = max_val - min_val || 1
-      lin_norm = Math.max(0, Math.min(1, (v - min_val)/cb_range))
-
       if (height_scale_mode === 'percentile') {
-        let local_rank = (get_percentile_rank) ? get_percentile_rank(v) : lin_norm
+        let local_rank = (get_percentile_rank) ? get_percentile_rank(v) : norm
         height_norm = Math.max(0, Math.min(1, local_rank))
       } else if (height_scale_mode === 'blend') {
-        let local_rank = (get_percentile_rank) ? get_percentile_rank(v) : lin_norm
+        let local_rank = (get_percentile_rank) ? get_percentile_rank(v) : norm
         let local_pct_norm = Math.max(0, Math.min(1, local_rank))
         let local_weight = Math.max(0, Math.min(1, heightmap_config.blendWeight ?? 0.5))
-        height_norm = (1 - local_weight)*lin_norm + local_weight*local_pct_norm
+        height_norm = (1 - local_weight)*norm + local_weight*local_pct_norm
       } else {
-        height_norm = lin_norm
+        height_norm = norm
       }
 
       spike_height = (is_cartesian)

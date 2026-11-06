@@ -250,6 +250,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let panel_style: React.CSSProperties
   let panel_w: number
   let polity_description: string | undefined
+  let raster_detail_str: string | undefined
   let raster_metric_str: string
   let raster_metric_tooltip: string
   let raw_description: any
@@ -260,6 +261,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let target_x: number
   let target_y: number
   let validity_str: string
+  let vertices_count: number
 
   //Function body
   cap_name = feature.properties?.capname
@@ -273,6 +275,9 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   state_id = (feature.properties?.state_id !== undefined && feature.properties?.state_id !== null)
     ? Number(feature.properties.state_id)
     : undefined
+  vertices_count = is_drawn_feature
+    ? (feature?.geometry?.type === 'Polygon' ? Math.max(0, (feature.geometry.coordinates?.[0]?.length || 1) - 1) : 0)
+    : 0
 
   if (cap_name) {
     cap_names = cap_name.split(/[,/]/).map((arg0_s) => arg0_s.trim()).filter(Boolean)
@@ -375,6 +380,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       : effective_stats.mean * effective_stats.validCount
 
     abs_val = Math.abs(sum_val)
+    raster_detail_str = `${effective_stats.validCount.toLocaleString('de-DE')} ${t.mapPanels.historicalBorders.cells}`
     raster_metric_tooltip = `${t.mapPanels.historicalBorders.sum} ${sum_val.toLocaleString('de-DE', { maximumFractionDigits: 2 })}\n${t.mapPanels.historicalBorders.mean} ${effective_stats.mean.toLocaleString('de-DE', { maximumFractionDigits: 2 })}\n${t.mapPanels.historicalBorders.validCells} ${effective_stats.validCount.toLocaleString('de-DE')}`
 
     if (abs_val >= 1e12) {
@@ -389,9 +395,11 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       raster_metric_str = sum_val.toLocaleString('de-DE', { maximumFractionDigits: 2 })
     }
   } else if (is_calculating_stats) {
+    raster_detail_str = undefined
     raster_metric_str = t.mapPanels.historicalBorders.computing
     raster_metric_tooltip = t.mapPanels.historicalBorders.computingStats
   } else {
+    raster_detail_str = display_year || undefined
     raster_metric_str = t.mapPanels.historicalBorders.noData
     raster_metric_tooltip = t.mapPanels.historicalBorders.noRasterData
   }
@@ -610,45 +618,23 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         </div>
       )}
 
-      {/* Primary Statistics Grid (3 Cards matching Image 1 layout) */}
-      <div className="px-2.5 grid grid-cols-3 gap-1.5">
-        {/* Metric 1: Area */}
-        <div className="border border-border/60 bg-muted/20 p-2 text-center">
-          <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
-            {t.mapPanels.historicalBorders.areaKm2}
-          </div>
-          <div className="text-sm font-bold text-foreground font-mono mt-0.5 truncate" title={area_val_str}>
+      {/* Primary Metrics (Area & Raster Sum) */}
+      <div className="px-2.5">
+        <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2 bg-muted/20 border border-border/50 text-[11px]">
+          <span className="text-muted-foreground">{t.mapPanels.historicalBorders.areaKm2}</span>
+          <span className="font-mono font-bold text-foreground truncate translate-y-[1px]" title={area_val_str}>
             {area_val_str}
-          </div>
-          <div className="text-[9px] text-muted-foreground/70 truncate mt-0.5">&nbsp;</div>
-        </div>
+          </span>
 
-        {/* Metric 2: Raster Sum */}
-        <div className="border border-border/60 bg-muted/20 p-2 text-center">
-          <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
-            {t.mapPanels.historicalBorders.rasterSum}
-          </div>
-          <div className="text-sm font-bold text-primary font-mono mt-0.5 truncate" title={raster_metric_tooltip}>
+          <span className="text-muted-foreground">{t.mapPanels.historicalBorders.rasterSum}</span>
+          <span className="font-mono font-bold text-primary truncate translate-y-[1px]" title={raster_metric_tooltip}>
             {raster_metric_str}
-          </div>
-          <div className="text-[9px] text-muted-foreground/70 truncate mt-0.5" title={display_year}>
-            {effective_stats ? `${effective_stats.validCount.toLocaleString('de-DE')} ${t.mapPanels.historicalBorders.cells}` : display_year}
-          </div>
-        </div>
-
-        {/* Metric 3: Keyframes or Span */}
-        <div className="border border-border/60 bg-muted/20 p-2 text-center">
-          <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
-            {is_drawn_feature ? (t.mapPanels.historicalBorders.vertices || 'Vertices') : t.mapPanels.historicalBorders.keyframes}
-          </div>
-          <div className="text-sm font-bold text-foreground font-mono mt-0.5">
-            {is_drawn_feature
-              ? (feature?.geometry?.type === 'Polygon' ? Math.max(0, (feature.geometry.coordinates?.[0]?.length || 1) - 1) : 0)
-              : (keyframes_list.length > 0 ? keyframes_list.length : 1)}
-          </div>
-          <div className="text-[9px] text-muted-foreground/70 truncate mt-0.5">
-            {is_drawn_feature ? (t.mapPanels.historicalBorders.measurementPolygon || 'Measurement') : t.mapPanels.historicalBorders.historicalRecords}
-          </div>
+            {raster_detail_str && (
+              <span className="font-normal text-muted-foreground text-[10px] ml-1.5">
+                ({raster_detail_str})
+              </span>
+            )}
+          </span>
         </div>
       </div>
 
@@ -662,14 +648,14 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         <div className="mx-2.5 p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
           <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
             <span className="flex items-center gap-1">
-              <Icon name="bar_chart" className="text-xs text-primary" />
+              <Icon name="bar_chart" className="text-xs text-primary translate-y-[1px]" />
               <span>{format(t.mapPanels.historicalBorders.statisticsAt, display_year)}</span>
             </span>
             {on_open_analytics && (
               <button
                 type="button"
                 onClick={on_open_analytics}
-                className="text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer"
+                className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
               >
                 {t.mapPanels.historicalBorders.fullCalculator}
               </button>
@@ -727,15 +713,15 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-xs text-white" />
           <span className="uppercase tracking-wider font-mono text-[10px]">
             {is_drawn_feature
-              ? (t.mapPanels.historicalBorders.polygonActions || 'Polygon Actions')
-              : t.mapPanels.historicalBorders.historicalTrajectory}
+              ? `${t.mapPanels.historicalBorders.polygonActions || 'Polygon Actions'} (${vertices_count})`
+              : `${t.mapPanels.historicalBorders.historicalTrajectory} (${keyframes_list.length})`}
           </span>
         </span>
         {on_open_analytics && !effective_stats && !is_drawn_feature && (
           <button
             type="button"
             onClick={on_open_analytics}
-            className="text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer"
+            className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
           >
             {t.mapPanels.historicalBorders.analyticsDrawer}
           </button>
@@ -827,7 +813,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
                         }
                       }
                     }}
-                    className="text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors"
+                    className="p-0 m-0 leading-normal text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors translate-y-[1px]"
                     title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
                   >
                     {t.mapPanels.historicalBorders.jump}

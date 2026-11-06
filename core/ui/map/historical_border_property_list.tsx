@@ -2,7 +2,7 @@ import React from 'react'
 import type { BorderPropertyFields } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { useLocalisation } from '@localisation'
-import { BorderPropertyUtils } from './historical_border_property_utils'
+import { BorderPropertyUtils, type BorderPropertyItem } from './historical_border_property_utils'
 
 export interface HistoricalBorderPropertyListProps {
   fields?: BorderPropertyFields
@@ -22,7 +22,11 @@ export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListPr
   let properties = arg0_props.properties
 
   //Declare local instance variables
-  let items_array = BorderPropertyUtils.resolveItems(fields, properties, useLocalisation().locale)
+  let items_array: BorderPropertyItem[]
+  let localisation = useLocalisation()
+
+  //Function body
+  items_array = BorderPropertyUtils.resolveItems(fields, properties, localisation.locale)
 
   //Guard clauses
   if (items_array.length === 0)
@@ -42,11 +46,11 @@ export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListPr
                 href={arg0_item.value}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate text-[rgb(200,40,40)] hover:underline"
+                className="inline-flex items-center gap-0.5 text-[rgb(200,40,40)] hover:underline truncate translate-y-[1px] min-w-0"
                 title={arg0_item.value}
               >
-                {BorderPropertyUtils.getLinkLabel(arg0_item.value)}
-                <Icon name="open_in_new" size={9} className="ml-0.5 text-[rgb(200,40,40)]" style={{ verticalAlign: 'super' }} />
+                <span className="truncate">{BorderPropertyUtils.getLinkLabel(arg0_item.value)}</span>
+                <Icon name="open_in_new" size={10} className="shrink-0 text-[rgb(200,40,40)]" />
               </a>
             ) : (
               <span className="text-foreground font-medium truncate" title={arg0_item.value}>{arg0_item.value}</span>

@@ -509,6 +509,9 @@ export interface LocalisationConfig {
       computingStats: string
       cowId?: string
       cshapesId?: string
+      collapseDescription?: string
+      description?: string
+      expandDescription?: string
       editPolygon?: string
       estimated: string
       fullCalculator: string

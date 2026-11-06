@@ -203,6 +203,8 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
   if (
     pathname === '/atlas/entity' ||
     pathname === '/api/atlas/entity' ||
+    pathname === '/borders/entity' ||
+    pathname === '/api/borders/entity' ||
     pathname === '/gis/entity' ||
     pathname === '/api/gis/entity'
   ) {

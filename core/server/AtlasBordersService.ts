@@ -429,12 +429,12 @@ export class AtlasBordersService {
         let is_valid_cache = Array.isArray(cached_json.features) &&
           (cached_json.features.length > 0 || target_year < -3000) &&
           (cached_json.features.length === 0 || cached_json.features[0].id !== undefined)
-        let is_missing_cap_coords = cached_json.v !== 6 &&
+        let is_missing_cap_coords = cached_json.v !== 7 &&
           cached_json.features &&
           cached_json.features.length > 20 &&
           !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
           cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
-        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === 6) {
+        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === 7) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
@@ -553,6 +553,7 @@ export class AtlasBordersService {
             cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
             date: UfDate.formatDate(resolved_date_obj),
             dejure: is_dejure,
+            description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
             fillColor: feat_fill,
             fill_color: feat_fill,
             flags: current_props.flags,
@@ -657,6 +658,7 @@ export class AtlasBordersService {
             cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
             date: UfDate.formatDate(resolved_date_obj),
             dejure: is_dejure,
+            description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
             fillColor: feat_fill,
             fill_color: feat_fill,
             flags: current_props.flags,
@@ -698,7 +700,7 @@ export class AtlasBordersService {
           id_fields: dataset_paths.idFields,
           source,
           timestamp: target_ts,
-          v: 6,
+          v: 7,
           year: target_year,
         }
         fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
@@ -826,8 +828,10 @@ export class AtlasBordersService {
         //Return statement
         return {
           class_name: ent.class_name,
+          description: ent.description || ent.metadata?.description || (ent as any).descriptions,
           id: ent.id,
           keyframes: keyframes_detail,
+          metadata: ent.metadata,
           name: ent.name,
           source: 'naissance',
           totalKeyframes: keyframes_detail.length,

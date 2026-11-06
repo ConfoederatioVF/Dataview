@@ -7,8 +7,10 @@ import { UfDate } from '../framework/utils/uf_date.ts'
 export interface HistoricalBorderKeyframe {
   date: string
   day?: number
+  description?: string
   label: string
   month?: number
+  properties?: Record<string, any>
   timestamp?: number
   year: number
 }
@@ -32,6 +34,7 @@ export interface HistoricalBorderFeature {
     cshapes_id?: number | string
     date?: string
     dejure?: boolean
+    description?: string | string[]
     endDate?: string
     endYear?: number
     gwcode?: number
@@ -52,10 +55,12 @@ export interface HistoricalBorderFeature {
 
 export interface NaissanceEntityRecord {
   class_name: string
+  description?: string | string[]
   id: string
   keyframes: Map<number, [any, any, any]>
   keyframes_summary?: HistoricalBorderKeyframe[]
   max_ts: number
+  metadata?: Record<string, any>
   min_ts: number
   name?: string
   sorted_timestamps: number[]
@@ -422,9 +427,11 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
 
             entity_records.set(ent_id, {
               class_name: ent.class_name,
+              description: ent.metadata?.description || ent.metadata?.descriptions || ent.description || ent.descriptions,
               id: ent_id,
               keyframes: parsed_kfs.kf_map,
               max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+              metadata: ent.metadata,
               min_ts: parsed_kfs.sorted_ts[0],
               name: ent.name,
               sorted_timestamps: parsed_kfs.sorted_ts,
@@ -451,9 +458,11 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
                 if (parsed_kfs) {
                   entity_records.set(ent_id, {
                     class_name: ent.class_name,
+                    description: ent.metadata?.description || ent.metadata?.descriptions || ent.description || ent.descriptions,
                     id: ent_id,
                     keyframes: parsed_kfs.kf_map,
                     max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+                    metadata: ent.metadata,
                     min_ts: parsed_kfs.sorted_ts[0],
                     name: ent.name,
                     sorted_timestamps: parsed_kfs.sorted_ts,
@@ -489,9 +498,11 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
 
         entity_records.set(ent_id, {
           class_name: ent.class_name,
+          description: ent.metadata?.description || ent.metadata?.descriptions || ent.description || ent.descriptions,
           id: ent_id,
           keyframes: parsed_kfs.kf_map,
           max_ts: parsed_kfs.sorted_ts[parsed_kfs.sorted_ts.length - 1],
+          metadata: ent.metadata,
           min_ts: parsed_kfs.sorted_ts[0],
           name: ent.name,
           sorted_timestamps: parsed_kfs.sorted_ts,

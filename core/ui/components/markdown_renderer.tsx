@@ -31,7 +31,7 @@ let parseInline = function (arg0_text: string): React.ReactNode[] {
     return []
 
   //Function body
-  token_regex = /(\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\]\(([^)]+)\)|!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\[([^\]]+)\]\(([^)]+)\)|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|___([^_]+)___|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|~~([^~]+)~~)/g
+  token_regex = /(\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\]\(([^)]+)\)|!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)|\[([^\]]+)\]\(([^)]+)\)|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|___([^_]+)___|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|~~([^~]+)~~|<a\b[^>]*>[\s\S]*?<\/a>|<(?:b|strong)\b[^>]*>[\s\S]*?<\/(?:b|strong)>|<(?:i|em)\b[^>]*>[\s\S]*?<\/(?:i|em)>|<u\b[^>]*>[\s\S]*?<\/u>|<(?:s|del|strike)\b[^>]*>[\s\S]*?<\/(?:s|del|strike)>|<code\b[^>]*>[\s\S]*?<\/code>|<span\b[^>]*>[\s\S]*?<\/span>|<mark\b[^>]*>[\s\S]*?<\/mark>|<(?:sub|sup)\b[^>]*>[\s\S]*?<\/(?:sub|sup)>|<br\s*\/?>|<img\b[^>]*\/?>)/gi
   all_matches_array = Array.from(text.matchAll(token_regex))
 
   for (let i = 0; i < all_matches_array.length; i++) {
@@ -41,108 +41,230 @@ let parseInline = function (arg0_text: string): React.ReactNode[] {
     if (local_match_index > last_index)
       parts_array.push(text.slice(last_index, local_match_index))
 
-    let local_full_match = local_match[1]
+    let local_full_match = local_match[0]
 
     if (local_full_match.startsWith('[![')) {
-      let local_alt = local_match[2] || ''
-      let local_img_title = local_match[4] || local_alt
-      let local_img_url = local_match[3]
-      let local_link_url = local_match[5]
+      let local_img_match = local_full_match.match(/^\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\]\(([^)]+)\)$/)
+      if (local_img_match) {
+        let local_alt = local_img_match[1] || ''
+        let local_img_title = local_img_match[3] || local_alt
+        let local_img_url = local_img_match[2]
+        let local_link_url = local_img_match[4]
 
-      parts_array.push(
-        <a
-          key={`clickimg-${local_match_index}`}
-          href={local_link_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block hover:opacity-85 transition-opacity align-middle my-0.5"
-        >
+        parts_array.push(
+          <a
+            key={`clickimg-${local_match_index}`}
+            href={local_link_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block hover:opacity-85 transition-opacity align-middle my-0.5"
+          >
+            <img
+              src={local_img_url}
+              alt={local_alt}
+              title={local_img_title}
+              className="inline-block max-h-8 align-middle border border-border bg-background/50 object-contain rounded-none"
+              loading="lazy"
+            />
+          </a>
+        )
+      }
+    } else if (local_full_match.startsWith('![')) {
+      let local_img_match = local_full_match.match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)$/)
+      if (local_img_match) {
+        let local_alt = local_img_match[1] || ''
+        let local_img_title = local_img_match[3] || local_alt
+        let local_img_url = local_img_match[2]
+
+        parts_array.push(
           <img
+            key={`img-${local_match_index}`}
             src={local_img_url}
             alt={local_alt}
             title={local_img_title}
-            className="inline-block max-h-8 align-middle border border-border bg-background/50 object-contain rounded-none"
+            className="inline-block max-h-8 align-middle mx-1 border border-border bg-background/50 object-contain rounded-none"
             loading="lazy"
           />
-        </a>
-      )
-    } else if (local_full_match.startsWith('![')) {
-      let local_alt = local_match[6] || ''
-      let local_img_title = local_match[8] || local_alt
-      let local_img_url = local_match[7]
-
-      parts_array.push(
-        <img
-          key={`img-${local_match_index}`}
-          src={local_img_url}
-          alt={local_alt}
-          title={local_img_title}
-          className="inline-block max-h-8 align-middle mx-1 border border-border bg-background/50 object-contain rounded-none"
-          loading="lazy"
-        />
-      )
-    } else if (local_match[9] && local_match[10]) {
-      parts_array.push(
-        <a
-          key={`link-${local_match_index}`}
-          href={local_match[10]}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline font-medium align-[-1px]"
-          style={{ verticalAlign: '-1px' }}
-        >
-          {parseInline(local_match[9])}
-        </a>
-      )
-    } else if (local_match[11]) {
+        )
+      }
+    } else if (local_full_match.startsWith('[')) {
+      let local_link_match = local_full_match.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+      if (local_link_match) {
+        parts_array.push(
+          <a
+            key={`link-${local_match_index}`}
+            href={local_link_match[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium align-[-1px]"
+            style={{ verticalAlign: '-1px' }}
+          >
+            {parseInline(local_link_match[1])}
+          </a>
+        )
+      }
+    } else if (local_full_match.startsWith('***') || local_full_match.startsWith('___')) {
       parts_array.push(
         <strong key={`bold-em-${local_match_index}`} className="font-semibold text-foreground">
           <em className="italic">
-            {parseInline(local_match[11])}
+            {parseInline(local_full_match.slice(3, -3))}
           </em>
         </strong>
       )
-    } else if (local_match[12]) {
+    } else if (local_full_match.startsWith('**') || local_full_match.startsWith('__')) {
       parts_array.push(
         <strong key={`bold-${local_match_index}`} className="font-semibold text-foreground">
-          {parseInline(local_match[12])}
+          {parseInline(local_full_match.slice(2, -2))}
         </strong>
       )
-    } else if (local_match[13]) {
-      parts_array.push(
-        <u key={`underline-em-${local_match_index}`} className="underline underline-offset-2">
-          <em className="italic">
-            {parseInline(local_match[13])}
-          </em>
-        </u>
-      )
-    } else if (local_match[14]) {
-      parts_array.push(
-        <u key={`underline-${local_match_index}`} className="underline underline-offset-2">
-          {parseInline(local_match[14])}
-        </u>
-      )
-    } else if (local_match[15]) {
+    } else if (local_full_match.startsWith('`')) {
       parts_array.push(
         <code
           key={`code-${local_match_index}`}
           className="px-1 py-0.5 bg-muted text-foreground border border-border text-[0.8em] font-mono leading-none inline-block align-baseline"
         >
-          {local_match[15]}
+          {local_full_match.slice(1, -1)}
         </code>
       )
-    } else if (local_match[16] || local_match[17]) {
+    } else if (local_full_match.startsWith('*') || local_full_match.startsWith('_')) {
       parts_array.push(
         <em key={`em-${local_match_index}`} className="italic">
-          {parseInline(local_match[16] || local_match[17])}
+          {parseInline(local_full_match.slice(1, -1))}
         </em>
       )
-    } else if (local_match[18]) {
+    } else if (local_full_match.startsWith('~~')) {
       parts_array.push(
         <del key={`del-${local_match_index}`} className="line-through text-muted-foreground">
-          {parseInline(local_match[18])}
+          {parseInline(local_full_match.slice(2, -2))}
         </del>
       )
+    } else if (/^<a\b/i.test(local_full_match)) {
+      let a_match = local_full_match.match(/^<a\b[^>]*href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>$/i)
+      if (a_match) {
+        parts_array.push(
+          <a
+            key={`html-a-${local_match_index}`}
+            href={a_match[1]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium align-[-1px]"
+            style={{ verticalAlign: '-1px' }}
+          >
+            {parseInline(a_match[2])}
+          </a>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<(?:b|strong)\b/i.test(local_full_match)) {
+      let b_match = local_full_match.match(/^<(?:b|strong)\b[^>]*>([\s\S]*?)<\/(?:b|strong)>$/i)
+      if (b_match) {
+        parts_array.push(
+          <strong key={`html-b-${local_match_index}`} className="font-semibold text-foreground">
+            {parseInline(b_match[1])}
+          </strong>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<(?:i|em)\b/i.test(local_full_match)) {
+      let i_match = local_full_match.match(/^<(?:i|em)\b[^>]*>([\s\S]*?)<\/(?:i|em)>$/i)
+      if (i_match) {
+        parts_array.push(
+          <em key={`html-i-${local_match_index}`} className="italic">
+            {parseInline(i_match[1])}
+          </em>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<u\b/i.test(local_full_match)) {
+      let u_match = local_full_match.match(/^<u\b[^>]*>([\s\S]*?)<\/u>$/i)
+      if (u_match) {
+        parts_array.push(
+          <u key={`html-u-${local_match_index}`} className="underline underline-offset-2">
+            {parseInline(u_match[1])}
+          </u>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<(?:s|del|strike)\b/i.test(local_full_match)) {
+      let s_match = local_full_match.match(/^<(?:s|del|strike)\b[^>]*>([\s\S]*?)<\/(?:s|del|strike)>$/i)
+      if (s_match) {
+        parts_array.push(
+          <del key={`html-s-${local_match_index}`} className="line-through text-muted-foreground">
+            {parseInline(s_match[1])}
+          </del>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<code\b/i.test(local_full_match)) {
+      let c_match = local_full_match.match(/^<code\b[^>]*>([\s\S]*?)<\/code>$/i)
+      if (c_match) {
+        parts_array.push(
+          <code
+            key={`html-code-${local_match_index}`}
+            className="px-1 py-0.5 bg-muted text-foreground border border-border text-[0.8em] font-mono leading-none inline-block align-baseline"
+          >
+            {c_match[1]}
+          </code>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<br\s*\/?>/i.test(local_full_match)) {
+      parts_array.push(<br key={`html-br-${local_match_index}`} />)
+    } else if (/^<span\b/i.test(local_full_match)) {
+      let span_match = local_full_match.match(/^<span\b[^>]*>([\s\S]*?)<\/span>$/i)
+      if (span_match) {
+        parts_array.push(
+          <span key={`html-span-${local_match_index}`}>
+            {parseInline(span_match[1])}
+          </span>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<mark\b/i.test(local_full_match)) {
+      let mark_match = local_full_match.match(/^<mark\b[^>]*>([\s\S]*?)<\/mark>$/i)
+      if (mark_match) {
+        parts_array.push(
+          <mark key={`html-mark-${local_match_index}`} className="bg-yellow-500/20 text-foreground px-0.5">
+            {parseInline(mark_match[1])}
+          </mark>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<(?:sub|sup)\b/i.test(local_full_match)) {
+      let sub_sup_match = local_full_match.match(/^<(sub|sup)\b[^>]*>([\s\S]*?)<\/\1>$/i)
+      if (sub_sup_match) {
+        let TagName = sub_sup_match[1].toLowerCase() as 'sub' | 'sup'
+        parts_array.push(
+          <TagName key={`html-${TagName}-${local_match_index}`} className="text-[0.75em]">
+            {parseInline(sub_sup_match[2])}
+          </TagName>
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
+    } else if (/^<img\b/i.test(local_full_match)) {
+      let img_match = local_full_match.match(/^<img\b[^>]*src=["']([^"']*)["'](?:\s+[^>]*alt=["']([^"']*)["'])?[^>]*\/?>$/i)
+      if (img_match) {
+        parts_array.push(
+          <img
+            key={`html-img-${local_match_index}`}
+            src={img_match[1]}
+            alt={img_match[2] || ''}
+            className="inline-block max-h-8 align-middle mx-1 border border-border bg-background/50 object-contain rounded-none"
+            loading="lazy"
+          />
+        )
+      } else {
+        parts_array.push(local_full_match)
+      }
     }
 
     last_index = local_match_index + local_match[0].length
@@ -304,6 +426,14 @@ export let MarkdownRenderer: React.FC<MarkdownRendererProps> = function (arg0_pr
 
   //Function body
   raw_text = (Array.isArray(content)) ? content.join('\n') : content
+  raw_text = raw_text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  raw_text = raw_text.replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_m, lvl, txt) => `\n${'#'.repeat(Number(lvl))} ${txt.trim()}\n\n`)
+  raw_text = raw_text.replace(/<hr\s*\/?>/gi, '\n---\n')
+  raw_text = raw_text.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_m, txt) => `\n- ${txt.trim()}\n`)
+  raw_text = raw_text.replace(/<\/?(?:ul|ol)\b[^>]*>/gi, '\n')
+  raw_text = raw_text.replace(/<p\b[^>]*>/gi, '\n\n').replace(/<\/p>/gi, '\n\n')
+  raw_text = raw_text.replace(/<div\b[^>]*>/gi, '\n').replace(/<\/div>/gi, '\n')
+  raw_text = raw_text.replace(/<blockquote\b[^>]*>([\s\S]*?)<\/blockquote>/gi, (_m, txt) => `\n> ${txt.trim().replace(/\n/g, '\n> ')}\n\n`)
   lines_array = raw_text.split('\n')
 
   flush_list = function () {

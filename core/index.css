@@ -263,29 +263,31 @@ icon,
   background: rgba(255, 255, 255, 0.35);
 }
 
-/* Explicit custom scrollbar for flyout panels */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(0, 0, 0, 0.25);
-}
-
+/* Explicit custom scrollbar for flyout panels: WebKit for Chromium/Safari, standard fallback for Firefox */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.25);
-  border-left: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.45);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 0px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--accent-secondary-colour);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .custom-scrollbar {
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.4);
+    scrollbar-width: thin;
+  }
 }
 
 /* -- Crisp pixel rendering without antialiasing / smoothing -- */

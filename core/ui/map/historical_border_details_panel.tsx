@@ -1,9 +1,11 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import type { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { calculateFeatureArea } from '@framework/geopng/polygon_area.ts'
 import type { DecodedRaster, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
+import { MarkdownRenderer } from '@ui/components/markdown_renderer'
+import { resolveCapitalCityClick } from './historical_border_capital_utils'
 import { UfDate } from '@framework/utils/uf_date'
 import { useLocalisation } from '@localisation'
 
@@ -27,6 +29,48 @@ export interface HistoricalBorderDetailsPanelProps {
   raster?: DecodedRaster | null
   sidebarWidth?: number
 }
+
+let global_is_description_collapsed = true
+
+/**
+ * Returns whether polity descriptions are collapsed globally across all polities.
+ *
+ * @returns {boolean}
+ */
+export let isPolityDescriptionCollapsed = function (): boolean {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    let stored = window.localStorage.getItem('dataview_polity_desc_collapsed')
+    if (stored !== null)
+      return stored !== 'false'
+  }
+
+  //Return statement
+  return global_is_description_collapsed
+}
+
+
+/**
+ * Sets whether polity descriptions are collapsed globally across all polities.
+ *
+ * @param {boolean} arg0_collapsed
+ *
+ * @returns {void}
+ */
+export let setPolityDescriptionCollapsed = function (arg0_collapsed: boolean): void {
+  //Convert from parameters
+  let collapsed = arg0_collapsed
+
+  //Function body
+  global_is_description_collapsed = collapsed
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem('dataview_polity_desc_collapsed', String(collapsed))
+    } catch {
+      //Ignore storage errors
+    }
+  }
+}
+
 
 /**
  * Historical country details panel displaying temporally sliced attributes,
@@ -60,9 +104,98 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let sidebar_width = props.sidebarWidth
 
   //Hooks
+  let active_keyframe_ref = useRef<HTMLDivElement | null>(null)
+  let [fetched_description, set_fetched_description] = useState<string | null>(null)
+  let [is_desc_collapsed, set_is_desc_collapsed] = useState<boolean>(isPolityDescriptionCollapsed)
+  let keyframes_container_ref = useRef<HTMLDivElement | null>(null)
   let last_country_id_ref = useRef<string | null>(null)
   let last_pos_ref = useRef<{ x: number; y: number } | null>(null)
   let localisation = useLocalisation()
+
+  //Determine effective keyframes and active keyframe index for current timeline timestamp
+  let current_date = useMemo(() => UfDate.fromFractionalYear(current_year), [current_year])
+  let current_ts = useMemo(() => UfDate.getTimestamp(current_date), [current_date])
+  let current_feature_id = useMemo(() => {
+    return feature ? String(feature.id || feature.properties?.id || feature.properties?.name || '') : null
+  }, [feature])
+  let keyframes_list = useMemo(() => feature?.properties?.keyframes || [], [feature])
+
+  let active_kf_index = useMemo(() => {
+    let active_idx = -1
+    for (let i = 0; i < keyframes_list.length; i++) {
+      let kf = keyframes_list[i]
+      let kf_ts = kf.timestamp !== undefined
+        ? kf.timestamp
+        : UfDate.getTimestamp({
+          day: kf.day || 1,
+          month: kf.month || 1,
+          year: kf.year,
+        })
+      if (kf_ts <= current_ts) {
+        active_idx = i
+      } else {
+        break
+      }
+    }
+    if (active_idx === -1 && keyframes_list.length > 0)
+      active_idx = 0
+    return active_idx
+  }, [keyframes_list, current_ts])
+
+  //Fetch entity details description if not already provided on feature
+  useEffect(() => {
+    let current_id = current_feature_id
+    let has_desc = Boolean(
+      feature?.properties?.description ||
+      feature?.properties?.metadata?.description ||
+      (feature as any)?.description ||
+      (feature as any)?.metadata?.description
+    )
+    if (!current_id || has_desc)
+      return
+
+    let is_cancelled = false
+    let clean_id = current_id.replace(/^(naissance_|detailed_|defacto_|cshapes_)/, '')
+    fetch(`/api/atlas/entity?id=${encodeURIComponent(clean_id)}`)
+      .then((arg0_res) => (arg0_res.ok ? arg0_res.json() : null))
+      .then((arg0_data) => {
+        let desc = arg0_data?.description || arg0_data?.metadata?.description
+        if (!is_cancelled && desc) {
+          set_fetched_description(typeof desc === 'string' ? desc : Array.isArray(desc) ? desc.join('\n') : JSON.stringify(desc))
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      is_cancelled = true
+      set_fetched_description(null)
+    }
+  }, [current_feature_id, feature?.properties?.description, feature?.properties?.metadata?.description, (feature as any)?.description, (feature as any)?.metadata?.description])
+
+  //Scroll keyframes list to current keyframe
+  useEffect(() => {
+    let scrollToActive = () => {
+      let container = keyframes_container_ref.current
+      let active_el = active_keyframe_ref.current
+      if (container && active_el) {
+        let relative_y = (active_el.offsetParent === container)
+          ? active_el.offsetTop
+          : (active_el.getBoundingClientRect().top - container.getBoundingClientRect().top) + container.scrollTop
+        let target_scroll = Math.max(0, Math.round(relative_y - (container.clientHeight - active_el.clientHeight) / 2))
+        container.scrollTop = target_scroll
+      }
+    }
+
+    let raf_id = requestAnimationFrame(scrollToActive)
+    let timer1 = setTimeout(scrollToActive, 40)
+    let timer2 = setTimeout(scrollToActive, 200)
+
+    return () => {
+      cancelAnimationFrame(raf_id)
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+    }
+  }, [current_feature_id, active_kf_index])
 
   //Determine effective raster statistics for feature (computed asynchronously via Web Worker)
   let effective_stats = useMemo(() => {
@@ -95,25 +228,21 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     return null
 
   //Declare local instance variables
-  let active_kf_index = -1
   let alt_names_str: string | undefined
   let area_val_str: string
   let cap_name: string | undefined
   let cap_names: string[] = []
   let country_name: string
-  let current_date: { day: number; month: number; year: number }
-  let current_ts: number
   let dejure_id_items: { key: string; label: string; value: string | number }[] = []
   let display_year: string
   let end_year: number | undefined
   let feature_id: string | null
   let format = localisation.format
-  let handle_capital_click: (arg0_e: React.MouseEvent) => void
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
+  let handle_toggle_description: () => void
   let is_acapital = false
   let is_dejure = dejure !== undefined ? dejure : Boolean(feature.properties?.dejure)
   let is_drawn_feature = Boolean(feature?.properties?.is_drawn)
-  let keyframes_list: any[]
   let max_x: number
   let max_y: number
   let min_x: number
@@ -121,8 +250,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let panel_h: number
   let panel_style: React.CSSProperties
   let panel_w: number
+  let polity_description: string | undefined
   let raster_metric_str: string
   let raster_metric_tooltip: string
+  let raw_description: any
   let source_label: string
   let start_year: number | undefined
   let state_id: number | undefined
@@ -134,14 +265,11 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   //Function body
   cap_name = feature.properties?.capname
   country_name = feature.properties?.name || t.mapPanels.historicalBorders.historicalEntity
-  current_date = UfDate.fromFractionalYear(current_year)
-  current_ts = UfDate.getTimestamp(current_date)
   display_year = (current_year !== Math.floor(current_year))
     ? UfDate.formatDate(current_date)
     : UfDate.formatYear(current_year)
   end_year = feature.properties?.endYear
   is_acapital = Boolean(feature.properties?.is_acapital)
-  keyframes_list = feature.properties?.keyframes || []
   start_year = feature.properties?.startYear
   state_id = (feature.properties?.state_id !== undefined && feature.properties?.state_id !== null)
     ? Number(feature.properties.state_id)
@@ -254,234 +382,41 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
   handle_single_capital_click = (arg0_cap_name: string, arg0_e: React.MouseEvent) => {
     arg0_e.stopPropagation()
-    let single_name = arg0_cap_name.trim()
-    if (!single_name)
-      return
-
-    let cap_coords: [number, number] | undefined
-    if (feature.properties?.cap_coords && Array.isArray(feature.properties.cap_coords) && feature.properties.cap_coords.length >= 2) {
-      cap_coords = feature.properties.cap_coords as [number, number]
-    } else if (feature.properties?.caplong !== undefined && feature.properties?.caplat !== undefined) {
-      cap_coords = [Number(feature.properties.caplong), Number(feature.properties.caplat)]
-    }
-
-    let target_city: CityPoint | null = null
-    if (cities && cities.length > 0) {
-      //0. Coordinate proximity match if cap_coords or caplat/caplong available on feature
-      if (cap_coords) {
-        let best_dist = 999
-        let best_score = -1
-        for (let arg0_c of cities) {
-          let c_lat = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[1] : ((arg0_c as any).lat !== undefined ? (arg0_c as any).lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
-          let c_lon = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[0] : ((arg0_c as any).lon !== undefined ? (arg0_c as any).lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
-          if (c_lat === undefined || c_lon === undefined)
-            continue
-          let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
-          if (dist <= 0.20) {
-            let score = 0
-            if (feature.properties?.capkey && (arg0_c.key === feature.properties.capkey || (arg0_c as any).id === feature.properties.capkey))
-              score += 200000
-            if (arg0_c.isCapital || (arg0_c as any).is_capital)
-              score += 100000
-            score += Math.max(0, Math.round((0.25 - dist) * 5000))
-            score += Math.min(1000, Math.round((arg0_c.population || 0) / 1000))
-            if (score > best_score) {
-              best_score = score
-              best_dist = dist
-              target_city = arg0_c
-            }
-          }
-        }
-      }
-
-      //1. Check for active capital matching state_id
-      if (!target_city && state_id !== undefined) {
-        target_city = cities.find((arg0_c) =>
-          Boolean(arg0_c.isCapital || (arg0_c as any).is_capital) &&
-          (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id) || (arg0_c as any).capital_state_id === state_id || (arg0_c as any).capital_state_id === Number(state_id))
-        ) || null
-      }
-
-      //2. Check any city matching state_id
-      if (!target_city && state_id !== undefined) {
-        target_city = cities.find((arg0_c) =>
-          (arg0_c.capitalStateId === state_id || arg0_c.capitalStateId === Number(state_id) || (arg0_c as any).capital_state_id === state_id || (arg0_c as any).capital_state_id === Number(state_id))
-        ) || null
-      }
-
-      let s_clean = single_name.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-      let s_norm = s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-
-      //3. Check matching country and name/alias
-      if (!target_city && country_name) {
-        let c_norm = country_name.toLowerCase().trim()
-        target_city = cities.find((arg0_c) => {
-          let city_country = (arg0_c.country || '').toLowerCase().trim()
-          let is_country_match = city_country && (city_country === c_norm || c_norm.includes(city_country) || city_country.includes(c_norm))
-          if (!is_country_match)
-            return false
-          let c_n_clean = (arg0_c.name || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-          let c_n_norm = c_n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-          let c_s_clean = (arg0_c.shortName || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-          let c_s_norm = c_s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-          let is_alias_match = Boolean((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => {
-            let o_clean = arg0_o.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-            let o_norm = o_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-            return o_clean === s_clean || o_norm === s_norm
-          }))
-          return c_n_clean === s_clean || c_n_norm === s_norm || c_s_clean === s_clean || c_s_norm === s_norm || is_alias_match
-        }) || null
-      }
-
-      //4. Fallback: match by name, shortName or aliases
-      if (!target_city) {
-        target_city = cities.find((arg0_c) => {
-          if (cap_coords) {
-            let c_lat = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[1] : ((arg0_c as any).lat !== undefined ? (arg0_c as any).lat : (arg0_c.coords ? arg0_c.coords[0] : undefined))
-            let c_lon = (arg0_c as any).rawCoords ? (arg0_c as any).rawCoords[0] : ((arg0_c as any).lon !== undefined ? (arg0_c as any).lon : (arg0_c.coords ? arg0_c.coords[1] : undefined))
-            if (c_lat !== undefined && c_lon !== undefined) {
-              let dist = Math.hypot(c_lon - cap_coords[0], c_lat - cap_coords[1])
-              if (dist > 1.5)
-                return false
-            }
-          }
-          let c_n_clean = (arg0_c.name || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-          let c_n_norm = c_n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-          let c_s_clean = (arg0_c.shortName || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-          let c_s_norm = c_s_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-          let is_alias_match = Boolean((arg0_c as any).other_names && Array.isArray((arg0_c as any).other_names) && (arg0_c as any).other_names.some((arg0_o: string) => {
-            let o_clean = arg0_o.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-            let o_norm = o_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-            return o_clean === s_clean || o_norm === s_norm
-          }))
-          return c_n_clean === s_clean || c_n_norm === s_norm || c_s_clean === s_clean || c_s_norm === s_norm || is_alias_match
-        }) || null
-      }
-    }
-
-    if (target_city) {
-      let enriched_target: CityPoint = {
-        ...target_city,
-        capitalColor: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
-        capitalOf: target_city.capitalOf || target_city.capital_state_name || country_name,
-        capitalStateId: target_city.capitalStateId || (target_city as any).capital_state_id || state_id,
-        capital_color: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
-        capital_state_id: (target_city as any).capital_state_id || target_city.capitalStateId || state_id,
-        capital_state_name: target_city.capital_state_name || target_city.capitalOf || country_name,
-        isCapital: true,
-        is_capital: true,
-      }
-      if (on_select_city)
-        on_select_city(enriched_target)
-      if ((window as any).setSelectedCityKey)
-        (window as any).setSelectedCityKey(enriched_target.key)
-      if ((window as any).selectedCityRecord !== undefined)
-        (window as any).selectedCityRecord = enriched_target
-    } else {
-      let cap_key = feature.properties?.capkey || ''
-      let query_params = new URLSearchParams()
-      if (cap_key)
-        query_params.set('key', cap_key)
-      query_params.set('name', single_name)
-      query_params.set('year', String(current_year))
-      if (country_name)
-        query_params.set('country', country_name)
-      if (state_id !== undefined)
-        query_params.set('state_id', String(state_id))
-      if (cap_coords) {
-        query_params.set('lat', String(cap_coords[1]))
-        query_params.set('lon', String(cap_coords[0]))
-      }
-
-      if (cap_coords) {
-        let initial_synth_city: CityPoint = {
-          capitalColor: feature.properties?.fill_color || '#FFDC00',
-          capitalOf: feature.properties?.name || country_name,
-          capitalStateId: state_id,
-          capital_color: feature.properties?.fill_color || '#FFDC00',
-          capital_state_id: state_id,
-          capital_state_name: feature.properties?.name || country_name,
-          coords: [cap_coords[1], cap_coords[0]],
-          country: feature.properties?.name || country_name,
-          id: cap_key || single_name,
-          isCapital: true,
-          is_capital: true,
-          key: cap_key || single_name,
-          name: single_name,
-          population: 0,
-        }
-        if (on_select_city)
-          on_select_city(initial_synth_city)
-        if ((window as any).setSelectedCityKey)
-          (window as any).setSelectedCityKey(cap_key || single_name)
-        if ((window as any).selectedCityRecord !== undefined)
-          (window as any).selectedCityRecord = initial_synth_city
-      }
-
-      fetch(`/api/stadester/city?${query_params.toString()}`)
-        .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))
-        .then((arg0_data) => {
-          if (arg0_data && arg0_data.key) {
-            let synth_city: CityPoint = {
-              area: arg0_data.area ? (typeof arg0_data.area === 'object' ? Object.values(arg0_data.area)[0] as number : arg0_data.area) : undefined,
-              capitalColor: arg0_data.capitalColor || arg0_data.capital_color || feature.properties?.fill_color || '#FFDC00',
-              capitalOf: arg0_data.capitalOf || arg0_data.capital_state_name || feature.properties?.name || country_name,
-              capitalStateId: arg0_data.capitalStateId || arg0_data.capital_state_id || state_id,
-              capital_color: arg0_data.capital_color || arg0_data.capitalColor || feature.properties?.fill_color || '#FFDC00',
-              capital_state_id: arg0_data.capital_state_id || arg0_data.capitalStateId || state_id,
-              capital_state_name: arg0_data.capital_state_name || arg0_data.capitalOf || feature.properties?.name || country_name,
-              coords: arg0_data.coords || [0, 0],
-              country: arg0_data.country || feature.properties?.name || country_name,
-              id: arg0_data.key,
-              isCapital: true,
-              is_capital: true,
-              key: arg0_data.key,
-              name: arg0_data.name || single_name,
-              population: typeof arg0_data.population === 'number'
-                ? arg0_data.population
-                : (arg0_data.population && typeof arg0_data.population === 'object'
-                  ? (arg0_data.population[String(current_year)] || Object.values(arg0_data.population)[0] || 0)
-                  : 0),
-            }
-            if (on_select_city)
-              on_select_city(synth_city)
-            if ((window as any).setSelectedCityKey)
-              (window as any).setSelectedCityKey(arg0_data.key)
-            if ((window as any).selectedCityRecord !== undefined)
-              (window as any).selectedCityRecord = synth_city
-          }
-        })
-        .catch((arg0_err) => {
-          console.error('[HistoricalBorderDetailsPanel] Failed to fetch city details:', arg0_err)
-        })
-    }
-  }
-
-  handle_capital_click = (arg0_e: React.MouseEvent) => {
-    if (cap_names.length > 0) {
-      handle_single_capital_click(cap_names[0], arg0_e)
-    }
-  }
-
-  //Determine the single active keyframe index for current timeline timestamp
-  active_kf_index = -1
-  for (let i = 0; i < keyframes_list.length; i++) {
-    let kf = keyframes_list[i]
-    let kf_ts = kf.timestamp !== undefined
-      ? kf.timestamp
-      : UfDate.getTimestamp({
-        day: kf.day || 1,
-        month: kf.month || 1,
-        year: kf.year,
+    if (feature) {
+      resolveCapitalCityClick({
+        capName: arg0_cap_name,
+        cities,
+        countryName: country_name,
+        currentYear: current_year,
+        feature,
+        onSelectCity: on_select_city,
+        stateId: state_id,
       })
-    if (kf_ts <= current_ts) {
-      active_kf_index = i
-    } else {
-      break
     }
   }
-  if (active_kf_index === -1 && keyframes_list.length > 0)
-    active_kf_index = 0
+
+  handle_toggle_description = () => {
+    let next_state = !is_desc_collapsed
+    setPolityDescriptionCollapsed(next_state)
+    set_is_desc_collapsed(next_state)
+  }
+
+  raw_description = feature.properties?.description ||
+    feature.properties?.metadata?.description ||
+    (feature as any)?.description ||
+    (feature as any)?.metadata?.description ||
+    feature.properties?.descriptions ||
+    (feature as any)?.descriptions ||
+    (keyframes_list[active_kf_index] && ((keyframes_list[active_kf_index] as any).description || (keyframes_list[active_kf_index] as any).properties?.description)) ||
+    fetched_description
+
+  if (Array.isArray(raw_description)) {
+    polity_description = raw_description.join('\n').trim()
+  } else if (typeof raw_description === 'string') {
+    polity_description = raw_description.trim()
+  } else if (raw_description && typeof raw_description === 'object') {
+    polity_description = JSON.stringify(raw_description)
+  }
 
   if (feature.id?.toString().startsWith('cshapes')) {
     source_label = 'CShapes-2.0'
@@ -612,11 +547,17 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
     panel_style = {
       left: `${Math.round(target_x)}px`,
+      maxHeight: (typeof window !== 'undefined')
+        ? `min(calc(100vh - ${Math.round(target_y) + 16}px), 480px)`
+        : '480px',
+      overflowY: 'auto',
       position: 'fixed',
       top: `${Math.round(target_y)}px`,
     }
   } else {
     panel_style = {
+      maxHeight: '480px',
+      overflowY: 'auto',
       position: 'relative',
       width: '100%',
     }
@@ -628,13 +569,13 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       id="dataview-historical-border-panel"
       style={panel_style}
       className={embedded
-        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 space-y-2'
-        : 'z-15 w-96 max-w-[calc(100vw-32px)] bg-card/95 backdrop-blur-md border border-border shadow-2xl p-3 text-foreground select-none font-sans animate-in fade-in-0 zoom-in-95 duration-150'
+        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 flex flex-col max-h-[480px] p-2.5'
+        : 'z-15 w-96 max-w-[calc(100vw-32px)] max-h-[480px] flex flex-col bg-card/95 backdrop-blur-md border border-border shadow-2xl p-2.5 text-foreground select-none font-sans animate-in fade-in-0 zoom-in-95 duration-150'
       }
     >
-      {/* Header */}
+      {/* Header (Pinned) */}
       {!embedded && (
-        <div className="flex items-start justify-between border-b border-border/70 pb-2 mb-2.5">
+        <div className="flex items-start justify-between border-b border-border/70 pb-2 mb-2 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             {on_back && (
               <button
@@ -696,7 +637,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {embedded && (
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 pb-1.5">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 pb-2 mb-2 shrink-0">
           {on_back && (
             <button
               type="button"
@@ -736,9 +677,12 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         </div>
       )}
 
+      {/* Scrollable Content Body */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-1 space-y-2.5">
+
       {/* Alternate names & Capital info */}
       {(alt_names_str || cap_names.length > 0) && (
-        <div className="text-[11px] text-muted-foreground mb-2.5 space-y-0.5">
+        <div className="text-[11px] text-muted-foreground space-y-0.5">
           {alt_names_str && (
             <div>
               <span className="text-muted-foreground/80">{t.mapPanels.historicalBorders.alsoRecordedAs} </span>
@@ -749,7 +693,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {/* Primary Statistics Grid (3 Cards matching Image 1 layout) */}
-      <div className="grid grid-cols-3 gap-1.5 mb-3">
+      <div className="grid grid-cols-3 gap-1.5">
         {/* Metric 1: Area */}
         <div className="border border-border/60 bg-muted/20 p-2 text-center">
           <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
@@ -792,7 +736,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {/* De Jure IDs */}
       {is_dejure && dejure_id_items.length > 0 && (
-        <div className="text-[11px] text-muted-foreground font-mono mb-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+        <div className="text-[11px] text-muted-foreground font-mono flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
           {dejure_id_items.map((arg0_item, arg1_idx) => (
             <React.Fragment key={arg0_item.key}>
               {arg1_idx > 0 && <span>•</span>}
@@ -807,7 +751,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {/* Raster Statistics & Full Calculator Header */}
       {effective_stats ? (
-        <div className="mb-2.5 p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
+        <div className="p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
           <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
             <span className="flex items-center gap-1">
               <Icon name="bar_chart" className="text-xs text-primary" />
@@ -863,14 +807,14 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           </div>
         </div>
       ) : is_calculating_stats ? (
-        <div className="mb-2.5 p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
+        <div className="p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
           <Icon name="sync" className="animate-spin text-xs text-primary" />
           <span className="text-[11px] font-mono">{t.mapPanels.historicalBorders.computingStats}</span>
         </div>
       ) : null}
 
       {/* Keyframe Timeline Trajectory Header OR Drawn Polygon Actions */}
-      <div className="flex items-center justify-between text-[11px] font-semibold text-foreground mb-1.5 border-t border-border/50 pt-2">
+      <div className="flex items-center justify-between text-[11px] font-semibold text-foreground border-t border-border/50 pt-2">
         <span className="flex items-center gap-1.5">
           <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-xs text-white" />
           <span className="uppercase tracking-wider font-mono text-[10px]">
@@ -919,7 +863,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           </button>
         </div>
       ) : keyframes_list.length > 0 ? (
-        <div className="max-h-44 overflow-y-auto custom-scrollbar space-y-1 pr-0.5">
+        <div ref={keyframes_container_ref} className="relative max-h-[168px] overflow-y-auto custom-scrollbar p-2 space-y-1 bg-muted/15 border border-border/40">
           {keyframes_list.map((arg0_kf: any, arg1_idx: number) => {
             let is_curr = arg1_idx === active_kf_index
             let is_unrecorded = Boolean(arg0_kf.label?.toLowerCase().includes('unrecorded') || arg0_kf.label?.toLowerCase().includes('hidden') || arg0_kf.label?.toLowerCase().includes('dissolved') || arg0_kf.label?.toLowerCase().includes('deleted'))
@@ -928,61 +872,101 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
             let kf_label = kf.label || t.mapPanels.historicalBorders.boundaryUpdated
 
             return (
-              <button
+              <div
                 key={`${kf.timestamp || kf.year}-${arg1_idx}`}
-                type="button"
-                onClick={() => {
-                  if (on_jump_to_year) {
-                    if (kf.timestamp !== undefined) {
-                      let kf_date_obj = UfDate.convertTimestampToDate(kf.timestamp)
-                      let kf_frac = UfDate.toFractionalYear(kf_date_obj)
-                      on_jump_to_year(kf_frac)
-                    } else if (kf.year !== undefined) {
-                      let kf_frac = UfDate.toFractionalYear({
-                        day: kf.day || 1,
-                        month: kf.month || 1,
-                        year: kf.year,
-                      })
-                      on_jump_to_year(kf_frac)
-                    }
-                  }
-                }}
-                className={`w-full text-left px-2 py-1.5 text-[11px] flex items-center justify-between transition-colors cursor-pointer border ${is_curr
+                ref={is_curr ? active_keyframe_ref : undefined}
+                className={`w-full text-left px-2 py-1.5 text-[var(--body-font-size)] flex items-center justify-between transition-colors border ${is_curr
                   ? 'bg-red-500/20 border-red-500/60 text-red-400 font-bold shadow-xs'
                   : is_unrecorded
-                    ? 'bg-muted/30 border-border/40 hover:bg-muted/50 text-muted-foreground'
-                    : 'bg-card hover:bg-muted/50 border-border/40 text-muted-foreground hover:text-foreground'
+                    ? 'bg-muted/30 border-border/40 text-muted-foreground'
+                    : 'bg-card border-border/40 text-muted-foreground'
                   }`}
-                title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
               >
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${is_curr ? 'bg-red-500' : (is_unrecorded ? 'bg-muted-foreground/40' : 'bg-muted-foreground/60')
                       }`}
                   />
-                  <span className="font-mono font-semibold shrink-0 text-foreground">{kf_date_str}</span>
-                  <span className="truncate text-[10px] text-muted-foreground ml-1">{kf_label}</span>
+                  <span className="font-mono font-semibold shrink-0 text-foreground text-[var(--body-font-size)]">{kf_date_str}</span>
+                  <span className="truncate text-muted-foreground ml-1 text-[var(--body-font-size)]">{kf_label}</span>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0 ml-2">
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
                   {is_unrecorded && (
-                    <span className="text-[9px] px-1 py-0.2 bg-muted text-muted-foreground border border-border/60 font-mono">
+                    <span className="text-[var(--body-font-size)] px-1.5 py-0.5 bg-muted text-muted-foreground border border-border/60 font-mono">
                       {t.mapPanels.historicalBorders.unrecorded}
                     </span>
                   )}
-                  <span className="text-[10px] text-red-500 hover:text-red-400 hover:underline font-mono">
+                  <button
+                    type="button"
+                    onClick={(arg0_e: React.MouseEvent) => {
+                      arg0_e.stopPropagation()
+                      if (on_jump_to_year) {
+                        if (kf.timestamp !== undefined) {
+                          let kf_date_obj = UfDate.convertTimestampToDate(kf.timestamp)
+                          let kf_frac = UfDate.toFractionalYear(kf_date_obj)
+                          on_jump_to_year(kf_frac)
+                        } else if (kf.year !== undefined) {
+                          let kf_frac = UfDate.toFractionalYear({
+                            day: kf.day || 1,
+                            month: kf.month || 1,
+                            year: kf.year,
+                          })
+                          on_jump_to_year(kf_frac)
+                        }
+                      }
+                    }}
+                    className="text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors"
+                    title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
+                  >
                     {t.mapPanels.historicalBorders.jump}
-                  </span>
+                  </button>
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>
       ) : (
-        <div className="text-[11px] text-muted-foreground italic py-1 text-center bg-muted/20 border border-border/40">
+        <div className="text-[var(--body-font-size)] text-muted-foreground italic py-1 text-center bg-muted/20 border border-border/40">
           {t.mapPanels.historicalBorders.noKeyframeEvents}
         </div>
       )}
+
+      {/* Polity Description */}
+      {polity_description && (
+        <div className="border-t border-border/50 pt-2">
+          <button
+            type="button"
+            onClick={handle_toggle_description}
+            className={`w-full flex items-center justify-between text-xs font-semibold text-foreground py-2 px-2.5 bg-muted/20 hover:bg-muted/40 border border-border/40 cursor-pointer select-none transition-colors group ${
+              !is_desc_collapsed ? 'border-b-0' : ''
+            }`}
+            title={is_desc_collapsed
+              ? (t.mapPanels.historicalBorders.expandDescription || 'Expand description')
+              : (t.mapPanels.historicalBorders.collapseDescription || 'Collapse description')
+            }
+          >
+            <div className="flex items-center gap-2">
+              <Icon name="description" className="text-sm text-white" />
+              <span className="uppercase tracking-wider font-mono text-[11px]">
+                {t.mapPanels.historicalBorders.description || 'Description'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white">
+              <Icon
+                name={is_desc_collapsed ? 'expand_more' : 'expand_less'}
+                className="text-base transition-transform"
+              />
+            </div>
+          </button>
+          {!is_desc_collapsed && (
+            <div className="text-[var(--body-font-size)] text-muted-foreground leading-relaxed select-text overflow-hidden p-3 bg-muted/10 border border-border/40 border-t-0 animate-in fade-in-0 duration-150">
+              <MarkdownRenderer content={polity_description} />
+            </div>
+          )}
+        </div>
+      )}
+      </div>
     </div>
   )
 }

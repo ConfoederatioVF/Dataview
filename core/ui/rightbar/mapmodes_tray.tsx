@@ -568,6 +568,7 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 currentYear={timeline_year}
                 embedded={true}
                 feature={selected_historical_feature}
+                hideDescription={historical_borders_config?.dataset ? layers?.[historical_borders_config.dataset]?.hide_description : undefined}
                 isCalculatingStats={is_calculating_stats}
                 onClearPolygon={on_clear_polygon}
                 onClose={on_close_historical_feature || (() => {})}

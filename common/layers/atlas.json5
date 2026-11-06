@@ -7,6 +7,8 @@
     "dejure_borders": {
         dejure: true,
         name: "Borders (de jure)",
+        //Hides the polity description section in country infoboxes.
+        hide_description: true,
         //Keyframe [2] property keys shown in country infoboxes, in display order. Labels accept a string or a localised object.
         property_fields: {
             seshat_id: { "en-GB": "Seshat ID", fr: "ID Seshat", de: "Seshat-ID" },

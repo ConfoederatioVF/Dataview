@@ -17,6 +17,7 @@ export interface HistoricalBorderDetailsPanelProps {
   currentYear: number
   embedded?: boolean
   feature: HistoricalBorderFeature | null
+  hideDescription?: boolean
   isCalculatingStats?: boolean
   onBack?: () => void
   onClearPolygon?: () => void
@@ -90,6 +91,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let current_year = props.currentYear
   let embedded = Boolean(props.embedded)
   let feature = props.feature
+  let hide_description = Boolean(props.hideDescription)
   let is_calculating_stats = props.isCalculatingStats
   let on_back = props.onBack
   let on_clear_polygon = props.onClearPolygon
@@ -150,7 +152,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       (feature as any)?.description ||
       (feature as any)?.metadata?.description
     )
-    if (!current_id || has_desc)
+    if (!current_id || has_desc || hide_description)
       return
 
     let is_cancelled = false
@@ -169,7 +171,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       is_cancelled = true
       set_fetched_description(null)
     }
-  }, [current_feature_id, feature?.properties?.description, feature?.properties?.metadata?.description, (feature as any)?.description, (feature as any)?.metadata?.description])
+  }, [current_feature_id, hide_description, feature?.properties?.description, feature?.properties?.metadata?.description, (feature as any)?.description, (feature as any)?.metadata?.description])
 
   //Scroll keyframes list to current keyframe
   useEffect(() => {
@@ -837,7 +839,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {/* Polity Description */}
-      {polity_description && (
+      {!hide_description && polity_description && (
         <div className="border-t border-border/50 pt-2">
           <button
             type="button"

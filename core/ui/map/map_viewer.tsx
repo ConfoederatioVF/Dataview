@@ -727,6 +727,7 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
           countryStats={country_stats}
           currentYear={timeline_year || 1950}
           feature={selected_historical_feature}
+          hideDescription={historical_borders_config?.dataset ? props.dataLayers?.[historical_borders_config.dataset]?.hide_description : undefined}
           isCalculatingStats={is_calculating_stats}
           onBack={nav_history.length > 0 ? handle_nav_back : undefined}
           onClearPolygon={handle_clear_polygon}

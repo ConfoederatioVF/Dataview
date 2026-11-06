@@ -43,6 +43,7 @@ export interface ParsedDataLayer {
   filepath_template: string
   filepaths?: LayerFilepathItem[]
   hide_colourbar?: boolean
+  hide_description?: boolean
   icon?: string
   id: string
   is_nested?: boolean
@@ -455,6 +456,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'filepaths',
       'hide_colorbar',
       'hide_colourbar',
+      'hide_description',
       'legend',
       'midpoint',
       'name',
@@ -681,6 +683,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             encoding: sub_item.encoding || 'float32',
             filepath_template: sub_template,
             hide_colourbar: Boolean(sub_item.hide_colourbar ?? sub_item.hide_colorbar ?? item.hide_colourbar ?? item.hide_colorbar ?? (sub_item.show_colourbar === false || sub_item.show_colorbar === false || item.show_colourbar === false || item.show_colorbar === false)),
+            hide_description: Boolean(sub_item.hide_description ?? item.hide_description),
             icon: getLayerIcon(sub_k),
             id: sub_full_id,
             is_nested: true,
@@ -755,6 +758,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           filepath_template: resolved_template,
           filepaths: has_filepaths ? resolved_filepaths : undefined,
           hide_colourbar: Boolean(item.hide_colourbar ?? item.hide_colorbar ?? (item.show_colourbar === false || item.show_colorbar === false)),
+          hide_description: Boolean(item.hide_description),
           icon: getLayerIcon(k),
           id: k,
           legend: item.legend,

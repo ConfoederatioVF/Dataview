@@ -78,6 +78,7 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
     }
 
     try {
+      AtlasBordersService.ensureDatasetFreshness(dataset, year)
       let border_feat = AtlasBordersService.getBorderFeature(year, state_id, name, { dataset, day, month })
       if (!border_feat) {
         res.statusCode = 404
@@ -137,6 +138,8 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
     }
 
     try {
+      AtlasBordersService.ensureDatasetFreshness(dataset, year)
+
       if (is_streaming) {
         AtlasBordersService.streamBorders(res, year, { bbox, dataset, day, month })
         return
@@ -217,6 +220,9 @@ export function handleAtlasRoute (arg0_context: AtlasRouteContext): void {
     }
 
     try {
+      AtlasBordersService.ensureDatasetFreshness('dejure_borders')
+      AtlasBordersService.ensureDatasetFreshness('defacto_borders')
+
       let details = AtlasBordersService.getEntityDetails(entity_id)
       if (!details) {
         res.statusCode = 404

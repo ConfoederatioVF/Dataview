@@ -176,8 +176,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   //Scroll keyframes list to current keyframe
   useEffect(() => {
     let scrollToActive = () => {
-      let container = keyframes_container_ref.current
       let active_el = active_keyframe_ref.current
+      let container = keyframes_container_ref.current
       if (container && active_el) {
         let relative_y = (active_el.offsetParent === container)
           ? active_el.offsetTop
@@ -484,13 +484,13 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       id="dataview-historical-border-panel"
       style={panel_style}
       className={embedded
-        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 flex flex-col p-2.5'
-        : 'z-15 w-96 max-w-[calc(100vw-32px)] max-h-[480px] flex flex-col bg-card/95 backdrop-blur-md border border-border shadow-2xl p-2.5 text-foreground select-none font-sans animate-in fade-in-0 zoom-in-95 duration-150'
+        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 flex flex-col p-0'
+        : 'z-15 w-96 max-w-[calc(100vw-32px)] max-h-[480px] flex flex-col bg-card/95 backdrop-blur-md border border-border shadow-2xl p-0 text-foreground select-none font-sans animate-in fade-in-0 zoom-in-95 duration-150'
       }
     >
       {/* Header (Pinned) */}
       {!embedded && (
-        <div className="flex items-start justify-between border-b border-border/70 pb-2 mb-2 shrink-0">
+        <div className="flex items-start justify-between border-b border-border/70 px-2.5 pt-2.5 pb-2 mb-0 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             {on_back && (
               <button
@@ -552,7 +552,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {embedded && (
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 pb-2 mb-2 shrink-0">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono border-b border-border/70 px-2.5 pt-2 pb-2 mb-0 shrink-0">
           {on_back && (
             <button
               type="button"
@@ -594,13 +594,13 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {/* Scrollable Content Body */}
       <div className={embedded
-        ? 'pb-1 space-y-2.5'
-        : 'flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-1 space-y-2.5'
+        ? 'py-2 space-y-2.5'
+        : 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar py-2.5 space-y-2.5'
       }>
 
       {/* Alternate names & Capital info */}
       {(alt_names_str || cap_names.length > 0) && (
-        <div className="text-[11px] text-muted-foreground space-y-0.5">
+        <div className="px-2.5 text-[11px] text-muted-foreground space-y-0.5">
           {alt_names_str && (
             <div>
               <span className="text-muted-foreground/80">{t.mapPanels.historicalBorders.alsoRecordedAs} </span>
@@ -611,7 +611,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {/* Primary Statistics Grid (3 Cards matching Image 1 layout) */}
-      <div className="grid grid-cols-3 gap-1.5">
+      <div className="px-2.5 grid grid-cols-3 gap-1.5">
         {/* Metric 1: Area */}
         <div className="border border-border/60 bg-muted/20 p-2 text-center">
           <div className="text-[9px] text-muted-foreground uppercase font-mono tracking-wider">
@@ -653,11 +653,13 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       </div>
 
       {/* Keyframe Properties (configured per layer in common/layers/atlas.json5) */}
-      <HistoricalBorderPropertyList fields={property_fields} properties={feature.properties} />
+      <div className="px-2.5">
+        <HistoricalBorderPropertyList fields={property_fields} properties={feature.properties} />
+      </div>
 
       {/* Raster Statistics & Full Calculator Header */}
       {effective_stats ? (
-        <div className="p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
+        <div className="mx-2.5 p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
           <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
             <span className="flex items-center gap-1">
               <Icon name="bar_chart" className="text-xs text-primary" />
@@ -713,14 +715,14 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           </div>
         </div>
       ) : is_calculating_stats ? (
-        <div className="p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
+        <div className="mx-2.5 p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
           <Icon name="sync" className="animate-spin text-xs text-primary" />
           <span className="text-[11px] font-mono">{t.mapPanels.historicalBorders.computingStats}</span>
         </div>
       ) : null}
 
       {/* Keyframe Timeline Trajectory Header OR Drawn Polygon Actions */}
-      <div className="flex items-center justify-between text-[11px] font-semibold text-foreground border-t border-border/50 pt-2">
+      <div className="px-2.5 flex items-center justify-between text-[11px] font-semibold text-foreground border-t border-border/50 pt-2">
         <span className="flex items-center gap-1.5">
           <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-xs text-white" />
           <span className="uppercase tracking-wider font-mono text-[10px]">
@@ -742,7 +744,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {/* Interactive Keyframes List OR Polygon Actions */}
       {is_drawn_feature ? (
-        <div className="grid grid-cols-2 gap-2 pt-0.5">
+        <div className="px-2.5 grid grid-cols-2 gap-2 pt-0.5">
           <button
             type="button"
             onClick={() => {
@@ -769,7 +771,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           </button>
         </div>
       ) : keyframes_list.length > 0 ? (
-        <div ref={keyframes_container_ref} className="relative max-h-[168px] overflow-y-auto custom-scrollbar p-2 space-y-1 bg-muted/15 border border-border/40">
+        <div
+          ref={keyframes_container_ref}
+          className="w-full max-h-[168px] overflow-y-auto overflow-x-hidden custom-scrollbar pl-2.5 pr-3 py-1.5 space-y-1 bg-muted/15 border-y border-border/40"
+        >
           {keyframes_list.map((arg0_kf: any, arg1_idx: number) => {
             let is_curr = arg1_idx === active_kf_index
             let is_unrecorded = Boolean(arg0_kf.label?.toLowerCase().includes('unrecorded') || arg0_kf.label?.toLowerCase().includes('hidden') || arg0_kf.label?.toLowerCase().includes('dissolved') || arg0_kf.label?.toLowerCase().includes('deleted'))
@@ -833,14 +838,14 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           })}
         </div>
       ) : (
-        <div className="text-[var(--body-font-size)] text-muted-foreground italic py-1 text-center bg-muted/20 border border-border/40">
+        <div className="mx-2.5 text-[var(--body-font-size)] text-muted-foreground italic py-1 text-center bg-muted/20 border border-border/40">
           {t.mapPanels.historicalBorders.noKeyframeEvents}
         </div>
       )}
 
       {/* Polity Description */}
       {!hide_description && polity_description && (
-        <div className="border-t border-border/50 pt-2">
+        <div className="px-2.5 border-t border-border/50 pt-2">
           <button
             type="button"
             onClick={handle_toggle_description}

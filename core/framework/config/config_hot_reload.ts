@@ -4,11 +4,36 @@
  * @module framework/config/config_hot_reload
  */
 
+export type BordersUpdateListener = (arg0_data: any) => void
 export type ConfigUpdateListener = (arg0_data: any) => void
 export type LayersUpdateListener = (arg0_layers: Record<string, any>) => void
 
+let all_borders_listeners: Set<BordersUpdateListener> = new Set()
 let all_config_listeners: Map<string, Set<ConfigUpdateListener>> = new Map()
 let all_layers_listeners: Set<LayersUpdateListener> = new Set()
+
+/**
+ * Notifies all registered listeners for Atlas historical border updates.
+ *
+ * @param {any} arg0_data
+ */
+export function notifyBordersUpdate (arg0_data: any): void {
+  //Convert from parameters
+  let data = arg0_data
+
+  //Guard clauses
+  if (!all_borders_listeners || all_borders_listeners.size === 0)
+    return
+
+  //Function body
+  all_borders_listeners.forEach((arg0_cb) => {
+    try {
+      arg0_cb(data)
+    } catch (arg0_err) {
+      console.error('[ConfigHotReload] Error executing borders listener:', arg0_err)
+    }
+  })
+}
 
 /**
  * Notifies all registered listeners for a specific config category.
@@ -95,6 +120,27 @@ export function onConfigUpdate (
 }
 
 /**
+ * Subscribes a callback to hot updates for Atlas historical borders.
+ * Returns an unsubscribe function.
+ *
+ * @param {BordersUpdateListener} arg0_callback
+ *
+ * @returns {() => void}
+ */
+export function onBordersUpdate (arg0_callback: BordersUpdateListener): () => void {
+  //Convert from parameters
+  let callback = arg0_callback
+
+  //Function body
+  all_borders_listeners.add(callback)
+
+  //Return statement
+  return function () {
+    all_borders_listeners.delete(callback)
+  }
+}
+
+/**
  * Subscribes a callback to hot updates for layers definitions.
  * Returns an unsubscribe function.
  *
@@ -124,6 +170,12 @@ if (import.meta.hot) {
       console.log(`[ConfigHotReload] Received dataview:layers-update for ${Object.keys(next_layers).length} layers.`)
       notifyLayersUpdate(next_layers)
     }
+  })
+
+  import.meta.hot.on('dataview:borders-update', (arg0_payload: any) => {
+    let payload = arg0_payload
+    console.log(`[ConfigHotReload] Received dataview:borders-update for: ${payload?.file || payload?.filename || 'atlas boundary data'}.`)
+    notifyBordersUpdate(payload)
   })
 
   import.meta.hot.on('dataview:config-update', (arg0_payload: any) => {

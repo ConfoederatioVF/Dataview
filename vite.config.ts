@@ -6,6 +6,7 @@ import path from 'path'
 import JSON5 from 'json5'
 import { createApiMiddleware } from './core/server/api_middleware.ts'
 import { clearAtlasConfigCache } from './core/server/atlas_config_loader.ts'
+import { AtlasBordersService } from './core/server/AtlasBordersService.ts'
 import { FilepathDefines } from './core/server/filepath_defines.ts'
 import { loadAndParseLayers } from './core/server/layer_parser.ts'
 import { refreshRasterBmpPaths } from './core/server/raster_bmp_cache.ts'
@@ -104,6 +105,13 @@ function dataviewBackendPlugin (): Plugin {
       server.watcher.add(path.resolve(import.meta.dirname, './common'))
       server.watcher.add(path.resolve(import.meta.dirname, './localisation'))
 
+      try {
+        let defines = FilepathDefines.get()
+        let atlas_root = path.resolve(import.meta.dirname, defines.root_folders.l_atlas || './data/atlas')
+        if (fs.existsSync(atlas_root))
+          server.watcher.add(atlas_root)
+      } catch {}
+
       server.watcher.on('all', (arg0_event, arg1_file_path) => {
         if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
           debouncedHandleDataviewHotUpdate(arg1_file_path, server)
@@ -181,23 +189,30 @@ function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any):
 
   //Declare local instance variables
   let existing_timeout: NodeJS.Timeout | undefined
+  let is_atlas_file = Boolean(
+    file.endsWith('.naissance') ||
+    (file.includes('atlas') && (file.endsWith('.json') || file.endsWith('.naissance')))
+  )
   let normalized_file = file.replace(/\\/g, '/')
   let timeout_handle: NodeJS.Timeout
 
   //Guard clauses
   if (
-    normalized_file.includes('/data/') ||
-    normalized_file.includes('/dist/') ||
-    normalized_file.includes('/exports/') ||
-    normalized_file.includes('/.agents/') ||
-    normalized_file.includes('/docs/') ||
-    normalized_file.includes('/tests/') ||
-    normalized_file.endsWith('.log') ||
-    normalized_file.includes('/.git/')
+    !is_atlas_file &&
+    (
+      normalized_file.includes('/data/') ||
+      normalized_file.includes('/dist/') ||
+      normalized_file.includes('/exports/') ||
+      normalized_file.includes('/.agents/') ||
+      normalized_file.includes('/docs/') ||
+      normalized_file.includes('/tests/') ||
+      normalized_file.endsWith('.log') ||
+      normalized_file.includes('/.git/')
+    )
   )
     return []
 
-  if (!normalized_file.includes('/common/') && !normalized_file.includes('/localisation/'))
+  if (!is_atlas_file && !normalized_file.includes('/common/') && !normalized_file.includes('/localisation/'))
     return undefined
 
   //Function body
@@ -205,10 +220,11 @@ function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any):
   if (existing_timeout)
     clearTimeout(existing_timeout)
 
+  let debounce_delay = normalized_file.endsWith('.naissance') ? 1000 : 100
   timeout_handle = setTimeout(() => {
     dataview_hot_timeouts.delete(normalized_file)
     handleDataviewHotUpdate(file, server)
-  }, 100)
+  }, debounce_delay)
   dataview_hot_timeouts.set(normalized_file, timeout_handle)
 
   //Return statement
@@ -230,22 +246,50 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
   let server = arg1_server
 
   //Declare local instance variables
+  let is_atlas_file = Boolean(
+    file.endsWith('.naissance') ||
+    (file.includes('atlas') && (file.endsWith('.json') || file.endsWith('.naissance')))
+  )
   let normalized_file = file.replace(/\\/g, '/')
 
   //Guard clauses
   if (
-    normalized_file.includes('/data/') ||
-    normalized_file.includes('/dist/') ||
-    normalized_file.includes('/exports/') ||
-    normalized_file.includes('/.agents/') ||
-    normalized_file.includes('/docs/') ||
-    normalized_file.includes('/tests/') ||
-    normalized_file.endsWith('.log') ||
-    normalized_file.includes('/.git/')
+    !is_atlas_file &&
+    (
+      normalized_file.includes('/data/') ||
+      normalized_file.includes('/dist/') ||
+      normalized_file.includes('/exports/') ||
+      normalized_file.includes('/.agents/') ||
+      normalized_file.includes('/docs/') ||
+      normalized_file.includes('/tests/') ||
+      normalized_file.endsWith('.log') ||
+      normalized_file.includes('/.git/')
+    )
   )
     return []
 
   //Function body
+
+  //0. Handle Atlas .naissance and border cache hot updates
+  if (is_atlas_file) {
+    try {
+      console.log(`[HMR] Detected Atlas boundary dataset change: ${normalized_file}`)
+      AtlasBordersService.clearCache()
+      clearCompressedBordersCache()
+
+      broadcastHotMessage(server, 'dataview:borders-update', {
+        file: normalized_file,
+        filename: path.basename(file),
+        timestamp: Date.now(),
+      })
+      console.log(`[HMR] Cleared Atlas caches and broadcasted dataview:borders-update for: ${normalized_file}`)
+    } catch (arg0_err) {
+      console.error('[HMR] Error updating Atlas caches:', arg0_err)
+    }
+
+    //Return statement
+    return []
+  }
 
   //Handle common/ and localisation/ hot updates
   if (normalized_file.includes('/common/') || normalized_file.includes('/localisation/')) {

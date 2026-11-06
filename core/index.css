@@ -95,6 +95,8 @@ body {
   font-family: var(--body-font-family), sans-serif;
   border-color: var(--border);
   box-sizing: border-box;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-width: thin;
 }
 
 body {
@@ -283,11 +285,9 @@ icon,
   background: var(--accent-secondary-colour);
 }
 
-@supports not selector(::-webkit-scrollbar) {
-  .custom-scrollbar {
-    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.4);
-    scrollbar-width: thin;
-  }
+.custom-scrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.45);
+  scrollbar-width: thin;
 }
 
 /* -- Crisp pixel rendering without antialiasing / smoothing -- */

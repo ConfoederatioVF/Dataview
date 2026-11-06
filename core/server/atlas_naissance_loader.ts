@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { cullAndSimplifyGeometry } from './atlas_geometry_utils.ts'
+import { getStateCapitalInfo } from './atlas_city_resolver.ts'
+import { computeGeometryBBox, cullAndSimplifyGeometry } from './atlas_geometry_utils.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import { UfDate } from '../framework/utils/uf_date.ts'
 
@@ -83,6 +84,48 @@ let cached_cshapes_data: any = null
 let cached_cshapes_features: any[] = null as unknown as any[]
 let cached_cshapes_keyframes_by_gwcode: Map<number, HistoricalBorderKeyframe[]> = new Map()
 let cached_naissance_entities_by_path: Map<string, Map<string, NaissanceEntityRecord>> = new Map()
+let cached_naissance_mtimes: Map<string, number> = new Map()
+
+/**
+ * Resolves the last-modified timestamp of a .naissance file on disk.
+ *
+ * @param {string} arg0_file_path
+ *
+ * @returns {number}
+ */
+export let getNaissanceFileMtime = function (arg0_file_path: string): number {
+  //Convert from parameters
+  let file_path = arg0_file_path
+
+  //Guard clauses
+  if (!fs.existsSync(file_path))
+    return 0
+
+  //Return statement
+  return fs.statSync(file_path).mtimeMs
+}
+
+
+/**
+ * Checks whether an in-memory parsed Naissance entity cache is stale relative to disk mtime.
+ *
+ * @param {string} arg0_file_path
+ *
+ * @returns {boolean}
+ */
+export let isNaissanceCacheStale = function (arg0_file_path: string): boolean {
+  //Convert from parameters
+  let file_path = arg0_file_path
+
+  //Guard clauses
+  if (!cached_naissance_entities_by_path.has(file_path))
+    return true
+  if (!fs.existsSync(file_path))
+    return false
+
+  //Return statement
+  return fs.statSync(file_path).mtimeMs !== cached_naissance_mtimes.get(file_path)
+}
 
 /**
  * Returns pre-indexed CShapes keyframes by GW code.
@@ -352,13 +395,11 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
   let file_path = arg0_file_path
 
   //Guard clauses
-  if (cached_naissance_entities_by_path.has(file_path))
-    return cached_naissance_entities_by_path.get(file_path)!
-
   if (!fs.existsSync(file_path)) {
     console.warn(`[AtlasBordersService] Naissance file not found: ${file_path}`)
     let empty_map = new Map<string, NaissanceEntityRecord>()
     cached_naissance_entities_by_path.set(file_path, empty_map)
+    cached_naissance_mtimes.set(file_path, 0)
     return empty_map
   }
 
@@ -366,11 +407,25 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
   let entity_records = new Map<string, NaissanceEntityRecord>()
   let stat = fs.statSync(file_path)
 
+  //Guard clauses
+  if (
+    cached_naissance_entities_by_path.has(file_path) &&
+    cached_naissance_mtimes.get(file_path) === stat.mtimeMs
+  ) {
+    return cached_naissance_entities_by_path.get(file_path)!
+  }
+
+  //If mtime changed or not cached, purge stale entry
+  cached_naissance_entities_by_path.delete(file_path)
+  cached_naissance_mtimes.delete(file_path)
+
   //Maintain memory bounded cache: retain at most 3 parsed maps in memory
   if (cached_naissance_entities_by_path.size >= 3) {
     let oldest_key = cached_naissance_entities_by_path.keys().next().value
-    if (oldest_key !== undefined)
+    if (oldest_key !== undefined) {
       cached_naissance_entities_by_path.delete(oldest_key)
+      cached_naissance_mtimes.delete(oldest_key)
+    }
   }
 
   //Function body
@@ -519,6 +574,7 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
   }
 
   cached_naissance_entities_by_path.set(file_path, entity_records)
+  cached_naissance_mtimes.set(file_path, stat.mtimeMs)
 
   //Return statement
   return entity_records
@@ -526,13 +582,181 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
 
 
 /**
- * Clears in-memory CShapes and Naissance caches.
+ * Clears in-memory CShapes and Naissance caches, optionally targeting a specific file.
+ *
+ * @param {string} [arg0_file_path]
  *
  * @returns {void}
  */
-export let clearNaissanceCache = function (): void {
+export let clearNaissanceCache = function (arg0_file_path?: string): void {
+  //Convert from parameters
+  let file_path = arg0_file_path
+
+  //Function body
+  if (file_path) {
+    cached_naissance_entities_by_path.delete(file_path)
+    cached_naissance_mtimes.delete(file_path)
+    return
+  }
+
   cached_cshapes_data = null
   cached_cshapes_features = null as unknown as any[]
   cached_cshapes_keyframes_by_gwcode.clear()
   cached_naissance_entities_by_path.clear()
+  cached_naissance_mtimes.clear()
+}
+
+
+/**
+ * Slices and formats historical border features from Naissance entities for a given target timestamp.
+ *
+ * @param {Map<string, NaissanceEntityRecord>} arg0_entities
+ * @param {number} arg1_target_ts
+ * @param {number} arg2_target_year
+ * @param {Object} [arg3_options]
+ * @param {[number, number, number, number]} [arg3_options.bbox]
+ * @param {(arg0_id: string | number) => any} [arg3_options.getStateById]
+ * @param {string} [arg3_options.id_prefix='naissance_']
+ * @param {boolean} [arg3_options.is_defacto=false]
+ * @param {boolean} [arg3_options.is_dejure=false]
+ *
+ * @returns {HistoricalBorderFeature[]}
+ */
+export let sliceNaissanceEntities = function (
+  arg0_entities: Map<string, NaissanceEntityRecord>,
+  arg1_target_ts: number,
+  arg2_target_year: number,
+  arg3_options?: {
+    bbox?: [number, number, number, number]
+    getStateById?: (arg0_id: string | number) => any
+    id_prefix?: string
+    is_defacto?: boolean
+    is_dejure?: boolean
+  }
+): HistoricalBorderFeature[] {
+  //Convert from parameters
+  let entities = arg0_entities
+  let options = arg3_options || {}
+  let target_ts = arg1_target_ts
+  let target_year = arg2_target_year
+
+  //Declare local instance variables
+  let bbox = options.bbox
+  let features: HistoricalBorderFeature[] = []
+  let getStateById = options.getStateById || (() => null)
+  let id_prefix = options.id_prefix || 'naissance_'
+  let is_defacto = Boolean(options.is_defacto)
+  let is_dejure = Boolean(options.is_dejure)
+
+  //Function body
+  for (let [ent_id, ent] of entities.entries()) {
+    if (ent.min_ts > target_ts)
+      continue
+
+    let current_geom: any = null
+    let current_props: Record<string, any> = {}
+    let current_symbol: Record<string, any> = {}
+    let resolved_ts = ent.min_ts
+
+    for (let i = 0; i < ent.sorted_timestamps.length; i++) {
+      let ts = ent.sorted_timestamps[i]
+      if (ts > target_ts)
+        break
+
+      resolved_ts = ts
+      let kf = ent.keyframes.get(ts)
+      if (!kf)
+        continue
+
+      if (kf[0] !== undefined && kf[0] !== 'undefined')
+        current_geom = kf[0]
+      if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
+        current_symbol = { ...current_symbol, ...kf[1] }
+      if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
+        current_props = { ...current_props, ...kf[2] }
+    }
+
+    if (current_props.hidden === true)
+      continue
+    if (!current_geom)
+      continue
+
+    let geom = current_geom.feature?.geometry || current_geom.geometry || (current_geom.type && current_geom.coordinates ? current_geom : null)
+    if (!geom || !geom.coordinates)
+      continue
+
+    if (!geom._simplified) {
+      geom = cullAndSimplifyGeometry(geom, 0.008)
+      geom._simplified = true
+    }
+
+    let geom_bbox = computeGeometryBBox(geom)
+
+    if (bbox) {
+      let [b_min_x, b_min_y, b_max_x, b_max_y] = bbox
+      let [g_min_x, g_min_y, g_max_x, g_max_y] = geom_bbox
+      if (g_max_x < b_min_x || g_min_x > b_max_x || g_max_y < b_min_y || g_min_y > b_max_y)
+        continue
+    }
+
+    let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
+    let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
+    let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
+    let explicit_sid = current_props.state_id !== undefined ? Number(current_props.state_id) : (is_defacto ? Number(ent_id) : undefined)
+    let cap_info = getStateCapitalInfo(explicit_sid, target_year, entity_name, getStateById)
+    let feat_fill = current_symbol?.polygonFill ||
+      current_props.polygonFill ||
+      current_symbol?.fillColor ||
+      current_props.fillColor ||
+      current_props.fill_color ||
+      current_props.color ||
+      (is_defacto ? (cap_info.fill_color || getStateById(explicit_sid!)?.fill_color) : undefined)
+
+    if (feat_fill && !current_symbol.polygonFill)
+      current_symbol = { ...current_symbol, polygonFill: feat_fill }
+
+    features.push({
+      bbox: geom_bbox,
+      geometry: geom,
+      id: `${id_prefix}${ent_id}`,
+      properties: {
+        adm0_a3: entity_name,
+        area: current_props.area,
+        attributes: current_props,
+        cap_coords: cap_info.cap_coords,
+        capkey: cap_info.capkey,
+        caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
+        caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
+        capname: cap_info.capname,
+        color: feat_fill,
+        cow: current_props.cow || current_props.cow_code,
+        cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
+        cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
+        date: UfDate.formatDate(resolved_date_obj),
+        dejure: is_dejure,
+        description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
+        fillColor: feat_fill,
+        fill_color: feat_fill,
+        flags: current_props.flags,
+        gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
+        id: ent_id,
+        is_acapital: cap_info.is_acapital,
+        iso_a3: entity_name,
+        keyframes: getEntityKeyframesSummary(ent),
+        label: current_props.label,
+        link: current_props.link,
+        name: entity_name,
+        name_long: entity_name,
+        polygonFill: feat_fill,
+        seshat_id: current_props.seshat_id || current_props.seshatId || current_props.seshat,
+        state_id: explicit_sid,
+        symbol: current_symbol,
+        timestamp: resolved_ts,
+      },
+      type: 'Feature',
+    })
+  }
+
+  //Return statement
+  return features
 }

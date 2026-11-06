@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { HistoricalBorderFeature, HistoricalBordersResponse } from '@server/AtlasBordersService'
+import { onBordersUpdate } from '@framework/config/config_hot_reload'
 import { normaliseBorderDatasetId } from '@framework/geopng/types'
 import { UfDate, type UfDateObject } from '@framework/utils/uf_date'
 
@@ -21,6 +22,16 @@ export interface HistoricalBordersHookResult {
 }
 
 let client_borders_cache = new Map<string, HistoricalBordersResponse>()
+
+/**
+ * Clears the client-side historical borders cache.
+ *
+ * @returns {void}
+ */
+export let clearClientBordersCache = function (): void {
+  //Function body
+  client_borders_cache.clear()
+}
 
 /**
  * Asynchronously fetches and caches historical borders for a given temporal key.
@@ -384,6 +395,20 @@ export let useHistoricalBorders = function (
         clearTimeout(debounce_timer_ref.current)
     }
   }, [cache_key, dataset, is_active, effective_year, effective_month, effective_day, is_playing, pump_queue])
+
+  useEffect(() => {
+    //Listen to Atlas borders hot updates
+    let unsubscribe = onBordersUpdate(() => {
+      clearClientBordersCache()
+      rendered_key_ref.current = ''
+      if (is_active)
+        pump_queue()
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [is_active, pump_queue])
 
   //Return statement
   return {

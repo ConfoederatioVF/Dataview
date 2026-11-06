@@ -4,7 +4,6 @@ import type { ServerResponse } from 'http'
 import { normaliseBorderDatasetId } from '../framework/geopng/types.ts'
 import { UfDate, type UfDateObject } from '../framework/utils/uf_date.ts'
 import {
-  computeGeometryBBox,
   cullAndSimplifyGeometry,
 } from './atlas_geometry_utils.ts'
 import {
@@ -22,13 +21,15 @@ import { FilepathDefines } from './filepath_defines.ts'
 import {
   clearNaissanceCache,
   defacto_borders_slices,
-  getEntityKeyframesSummary,
+  getNaissanceFileMtime,
   type HistoricalBorderFeature,
   type HistoricalBorderKeyframe,
+  isNaissanceCacheStale,
   loadCShapes,
   loadNaissance,
   type NaissanceEntityRecord,
   parseNaissanceKeyframes,
+  sliceNaissanceEntities,
 } from './atlas_naissance_loader.ts'
 
 export type { AtlasDatasetPaths, HistoricalBorderFeature, HistoricalBorderKeyframe }
@@ -44,11 +45,12 @@ export interface HistoricalBordersResponse {
 }
 
 //Bump whenever the cached border feature schema changes, to invalidate stale disk caches
+let all_cache_clearers: Array<() => void> = []
 let border_cache_version = 8
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
+let last_known_source_mtimes: Map<string, number> = new Map()
 let max_lru_entries = 60
-let all_cache_clearers: Array<() => void> = []
 
 /**
  * Registers an external cache clearer to run when AtlasBordersService.clearCache() is called.
@@ -237,33 +239,19 @@ export class AtlasBordersService {
         let clean_p_id = String(f.properties?.id || '').replace(/^naissance_/, '')
         let p_state_id = (f.properties?.state_id !== undefined) ? String(f.properties.state_id) : ''
 
-        if (
-          clean_f_id === clean_state_id ||
-          clean_p_id === clean_state_id ||
-          p_state_id === clean_state_id ||
-          (!q_name_lower && String(f.properties?.gwcode) === clean_state_id)
-        ) {
+        if (clean_f_id === clean_state_id || clean_p_id === clean_state_id || p_state_id === clean_state_id || (!q_name_lower && String(f.properties?.gwcode) === clean_state_id))
           return true
-        }
 
-        if (q_name_lower)
-          return true
-        return false
+        return Boolean(q_name_lower)
       }
 
-      if (q_name_lower)
-        return true
-      return false
+      return Boolean(q_name_lower)
     }
 
     for (let i = 0; i < datasets_to_search.length; i++) {
       let ds = datasets_to_search[i]
       try {
-        let borders_res = AtlasBordersService.getBordersAtYear(target_year, {
-          dataset: ds,
-          day: options.day,
-          month: options.month,
-        })
+        let borders_res = AtlasBordersService.getBordersAtYear(target_year, { dataset: ds, day: options.day, month: options.month })
         if (borders_res && Array.isArray(borders_res.features)) {
           for (let x = 0; x < borders_res.features.length; x++) {
             if (matchFeature(borders_res.features[x])) {
@@ -289,7 +277,7 @@ export class AtlasBordersService {
               break
           }
         }
-      } catch (arg0_err) {
+      } catch {
         //Continue search
       }
     }
@@ -301,13 +289,9 @@ export class AtlasBordersService {
       let state = AtlasBordersService.getStateById(state_id)
       if (state) {
         let synth_feat: HistoricalBorderFeature = {
-          geometry: state.bbox ? {
-            coordinates: [[[state.bbox[0], state.bbox[1]], [state.bbox[2], state.bbox[1]], [state.bbox[2], state.bbox[3]], [state.bbox[0], state.bbox[3]], [state.bbox[0], state.bbox[1]]]],
-            type: 'Polygon',
-          } : {
-            coordinates: [],
-            type: 'Polygon',
-          },
+          geometry: state.bbox
+            ? { coordinates: [[[state.bbox[0], state.bbox[1]], [state.bbox[2], state.bbox[1]], [state.bbox[2], state.bbox[3]], [state.bbox[0], state.bbox[3]], [state.bbox[0], state.bbox[1]]]], type: 'Polygon' }
+            : { coordinates: [], type: 'Polygon' },
           id: String(state.state_id),
           properties: {
             area: 0,
@@ -372,10 +356,14 @@ export class AtlasBordersService {
     let is_whole_year_query: boolean
     let lru_key: string
     let source: 'cshapes' | 'naissance'
+    let source_mtime: number
     let target_date_obj: UfDateObject
     let target_ts: number
 
     //Function body
+    AtlasBordersService.ensureDatasetFreshness(dataset, target_year)
+    source_mtime = AtlasBordersService.getSourceMtime(dataset, target_year)
+
     if (target_day !== undefined && target_month !== undefined) {
       target_date_obj = {
         day: target_day,
@@ -425,25 +413,42 @@ export class AtlasBordersService {
 
     if (is_whole_year_query && fs.existsSync(disk_cache_path)) {
       try {
-        let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
-        let is_valid_cache = Array.isArray(cached_json.features) &&
-          (cached_json.features.length > 0 || target_year < -3000) &&
-          (cached_json.features.length === 0 || cached_json.features[0].id !== undefined)
-        let is_missing_cap_coords = cached_json.v !== border_cache_version &&
-          cached_json.features &&
-          cached_json.features.length > 20 &&
-          !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
-          cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
-        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === border_cache_version) {
-          in_memory_slice_lru.set(lru_key, cached_json.features)
-          return {
-            count: cached_json.features.length,
-            date: cached_json.date || UfDate.formatDate(target_date_obj),
-            domain,
-            features: cached_json.features,
-            source,
-            timestamp: cached_json.timestamp || target_ts,
-            year: target_year,
+        let cache_stat = fs.statSync(disk_cache_path)
+        let is_mtime_stale = Boolean(source_mtime > 0 && cache_stat.mtimeMs < source_mtime)
+
+        if (is_mtime_stale) {
+          try {
+            fs.unlinkSync(disk_cache_path)
+          } catch {}
+        } else {
+          let cached_json = JSON.parse(fs.readFileSync(disk_cache_path, 'utf-8'))
+          let is_source_stale = Boolean(cached_json.source_mtime && source_mtime > 0 && cached_json.source_mtime < source_mtime)
+
+          if (is_source_stale) {
+            try {
+              fs.unlinkSync(disk_cache_path)
+            } catch {}
+          } else {
+            let is_valid_cache = Array.isArray(cached_json.features) &&
+              (cached_json.features.length > 0 || target_year < -3000) &&
+              (cached_json.features.length === 0 || cached_json.features[0].id !== undefined)
+            let is_missing_cap_coords = cached_json.v !== border_cache_version &&
+              cached_json.features &&
+              cached_json.features.length > 20 &&
+              !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
+              cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
+            if (is_valid_cache && !is_missing_cap_coords && cached_json.v === border_cache_version) {
+              in_memory_slice_lru.set(lru_key, cached_json.features)
+              return {
+                count: cached_json.features.length,
+                date: cached_json.date || UfDate.formatDate(target_date_obj),
+                domain,
+                features: cached_json.features,
+                source,
+                timestamp: cached_json.timestamp || target_ts,
+                year: target_year,
+              }
+            }
           }
         }
       } catch {
@@ -467,219 +472,23 @@ export class AtlasBordersService {
         entities = AtlasBordersService.loadNaissance(slice_path)
       }
 
-      for (let [ent_id, ent] of entities.entries()) {
-        if (ent.min_ts > target_ts)
-          continue
-
-        let current_geom: any = null
-        let current_props: Record<string, any> = {}
-        let current_symbol: Record<string, any> = {}
-        let resolved_ts = ent.min_ts
-
-        for (let i = 0; i < ent.sorted_timestamps.length; i++) {
-          let ts = ent.sorted_timestamps[i]
-          if (ts > target_ts)
-            break
-
-          resolved_ts = ts
-          let kf = ent.keyframes.get(ts)
-          if (!kf)
-            continue
-
-          if (kf[0] !== undefined && kf[0] !== 'undefined')
-            current_geom = kf[0]
-          if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
-            current_symbol = { ...current_symbol, ...kf[1] }
-          if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
-            current_props = { ...current_props, ...kf[2] }
-        }
-
-        if (current_props.hidden === true)
-          continue
-        if (!current_geom)
-          continue
-
-        let geom = current_geom.feature?.geometry || current_geom.geometry || (current_geom.type && current_geom.coordinates ? current_geom : null)
-        if (!geom || !geom.coordinates)
-          continue
-
-        if (!geom._simplified) {
-          geom = cullAndSimplifyGeometry(geom, 0.008)
-          geom._simplified = true
-        }
-
-        let geom_bbox = computeGeometryBBox(geom)
-
-        if (bbox) {
-          let [b_min_x, b_min_y, b_max_x, b_max_y] = bbox
-          let [g_min_x, g_min_y, g_max_x, g_max_y] = geom_bbox
-          if (g_max_x < b_min_x || g_min_x > b_max_x || g_max_y < b_min_y || g_min_y > b_max_y)
-            continue
-        }
-
-        let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
-        let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
-        let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
-        let num_sid = Number(current_props.state_id !== undefined ? current_props.state_id : ent_id)
-        let cap_info = getStateCapitalInfo(num_sid, target_year, entity_name, AtlasBordersService.getStateById)
-        let feat_fill = current_symbol?.polygonFill ||
-          current_props.polygonFill ||
-          current_symbol?.fillColor ||
-          current_props.fillColor ||
-          current_props.fill_color ||
-          current_props.color ||
-          cap_info.fill_color ||
-          AtlasBordersService.getStateById(num_sid)?.fill_color
-
-        if (feat_fill && !current_symbol.polygonFill)
-          current_symbol = { ...current_symbol, polygonFill: feat_fill }
-
-        features.push({
-          bbox: geom_bbox,
-          geometry: geom,
-          id: `defacto_${ent_id}`,
-          properties: {
-            adm0_a3: entity_name,
-            area: current_props.area,
-            attributes: current_props,
-            cap_coords: cap_info.cap_coords,
-            capkey: cap_info.capkey,
-            caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
-            caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
-            capname: cap_info.capname,
-            color: feat_fill,
-            cow: current_props.cow || current_props.cow_code,
-            cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
-            cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
-            date: UfDate.formatDate(resolved_date_obj),
-            dejure: is_dejure,
-            description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
-            fillColor: feat_fill,
-            fill_color: feat_fill,
-            flags: current_props.flags,
-            gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
-            id: ent_id,
-            is_acapital: cap_info.is_acapital,
-            iso_a3: entity_name,
-            keyframes: getEntityKeyframesSummary(ent),
-            label: current_props.label,
-            link: current_props.link,
-            name: entity_name,
-            name_long: entity_name,
-            polygonFill: feat_fill,
-            seshat_id: current_props.seshat_id || current_props.seshatId || current_props.seshat,
-            state_id: num_sid,
-            symbol: current_symbol,
-            timestamp: resolved_ts,
-          },
-          type: 'Feature',
-        })
-      }
+      features = sliceNaissanceEntities(entities, target_ts, target_year, {
+        bbox,
+        getStateById: AtlasBordersService.getStateById,
+        id_prefix: 'defacto_',
+        is_defacto: true,
+        is_dejure,
+      })
     } else {
       let entities = AtlasBordersService.loadNaissance(dataset_paths.dejureNaissancePath)
 
-      for (let [ent_id, ent] of entities.entries()) {
-        if (ent.min_ts > target_ts)
-          continue
-
-        let current_geom: any = null
-        let current_props: Record<string, any> = {}
-        let current_symbol: Record<string, any> = {}
-        let resolved_ts = ent.min_ts
-
-        for (let i = 0; i < ent.sorted_timestamps.length; i++) {
-          let ts = ent.sorted_timestamps[i]
-          if (ts > target_ts)
-            break
-
-          resolved_ts = ts
-          let kf = ent.keyframes.get(ts)
-          if (!kf)
-            continue
-
-          if (kf[0] !== undefined && kf[0] !== 'undefined')
-            current_geom = kf[0]
-          if (kf[1] !== undefined && kf[1] !== 'undefined' && typeof kf[1] === 'object' && kf[1] !== null)
-            current_symbol = { ...current_symbol, ...kf[1] }
-          if (kf[2] !== undefined && kf[2] !== 'undefined' && typeof kf[2] === 'object' && kf[2] !== null)
-            current_props = { ...current_props, ...kf[2] }
-        }
-
-        if (current_props.hidden === true)
-          continue
-        if (!current_geom)
-          continue
-
-        let geom = current_geom.feature?.geometry || current_geom.geometry || (current_geom.type && current_geom.coordinates ? current_geom : null)
-        if (!geom || !geom.coordinates)
-          continue
-
-        let geom_bbox = computeGeometryBBox(geom)
-
-        if (bbox) {
-          let [b_min_x, b_min_y, b_max_x, b_max_y] = bbox
-          let [g_min_x, g_min_y, g_max_x, g_max_y] = geom_bbox
-          if (g_max_x < b_min_x || g_min_x > b_max_x || g_max_y < b_min_y || g_min_y > b_max_y)
-            continue
-        }
-
-        let raw_name = current_props.name || ent.name || `Entity ${ent_id}`
-        let entity_name = typeof raw_name === 'string' ? raw_name.replace(/\n+/g, ' ') : `Entity ${ent_id}`
-        let resolved_date_obj = UfDate.convertTimestampToDate(resolved_ts)
-        let explicit_sid = current_props.state_id !== undefined ? Number(current_props.state_id) : undefined
-        let cap_info = getStateCapitalInfo(explicit_sid, target_year, entity_name, AtlasBordersService.getStateById)
-        let feat_fill = current_symbol?.polygonFill ||
-          current_props.polygonFill ||
-          current_symbol?.fillColor ||
-          current_props.fillColor ||
-          current_props.fill_color ||
-          current_props.color ||
-          undefined
-
-        if (feat_fill && !current_symbol.polygonFill)
-          current_symbol = { ...current_symbol, polygonFill: feat_fill }
-
-        features.push({
-          bbox: geom_bbox,
-          geometry: geom,
-          id: `naissance_${ent_id}`,
-          properties: {
-            adm0_a3: entity_name,
-            area: current_props.area,
-            attributes: current_props,
-            cap_coords: cap_info.cap_coords,
-            capkey: cap_info.capkey,
-            caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
-            caplong: cap_info.cap_coords ? cap_info.cap_coords[0] : undefined,
-            capname: cap_info.capname,
-            color: feat_fill,
-            cow: current_props.cow || current_props.cow_code,
-            cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
-            cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
-            date: UfDate.formatDate(resolved_date_obj),
-            dejure: is_dejure,
-            description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
-            fillColor: feat_fill,
-            fill_color: feat_fill,
-            flags: current_props.flags,
-            gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
-            id: ent_id,
-            is_acapital: cap_info.is_acapital,
-            iso_a3: entity_name,
-            keyframes: getEntityKeyframesSummary(ent),
-            label: current_props.label,
-            link: current_props.link,
-            name: entity_name,
-            name_long: entity_name,
-            polygonFill: feat_fill,
-            seshat_id: current_props.seshat_id || current_props.seshatId || current_props.seshat,
-            state_id: explicit_sid,
-            symbol: current_symbol,
-            timestamp: resolved_ts,
-          },
-          type: 'Feature',
-        })
-      }
+      features = sliceNaissanceEntities(entities, target_ts, target_year, {
+        bbox,
+        getStateById: AtlasBordersService.getStateById,
+        id_prefix: 'naissance_',
+        is_defacto: false,
+        is_dejure,
+      })
     }
 
     if (in_memory_slice_lru.size >= max_lru_entries) {
@@ -697,12 +506,13 @@ export class AtlasBordersService {
           domain,
           features,
           source,
+          source_mtime,
           timestamp: target_ts,
           v: border_cache_version,
           year: target_year,
         }
         fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
-      } catch (arg0_err) {
+      } catch {
         //Ignore write errors
       }
     }
@@ -954,6 +764,7 @@ export class AtlasBordersService {
     clearCityResolverCache()
     clearNaissanceCache()
     in_memory_slice_lru.clear()
+    last_known_source_mtimes.clear()
 
     for (let i = 0; i < all_cache_clearers.length; i++) {
       try {
@@ -972,5 +783,203 @@ export class AtlasBordersService {
         }
       }
     }
+  }
+
+  /**
+   * Clears in-memory and stale disk caches for a specific border dataset.
+   *
+   * @param {string} arg0_dataset
+   * @param {string} [arg1_source_path]
+   *
+   * @returns {void}
+   */
+  static clearCacheForDataset (arg0_dataset: string, arg1_source_path?: string): void {
+    //Convert from parameters
+    let dataset = normaliseBorderDatasetId(arg0_dataset, 'dejure_borders')
+    let source_path = arg1_source_path
+
+    //Function body
+    for (let key of in_memory_slice_lru.keys()) {
+      if (key.startsWith(`${dataset}_`))
+        in_memory_slice_lru.delete(key)
+    }
+
+    cached_active_state_ids.clear()
+    clearNaissanceCache(source_path)
+
+    for (let i = 0; i < all_cache_clearers.length; i++) {
+      try {
+        all_cache_clearers[i]()
+      } catch {}
+    }
+
+    AtlasBordersService.purgeStaleDiskCaches(dataset)
+
+    //Return statement
+    return
+  }
+
+  /**
+   * Validates whether the source .naissance file has been updated on disk, automatically invalidating stale caches.
+   *
+   * @param {string} arg0_dataset
+   * @param {number} [arg1_year]
+   *
+   * @returns {boolean} True if caches were stale and purged, false if already fresh.
+   */
+  static ensureDatasetFreshness (arg0_dataset: string, arg1_year?: number): boolean {
+    //Convert from parameters
+    let dataset = normaliseBorderDatasetId(arg0_dataset, 'dejure_borders')
+    let year = arg1_year
+
+    //Declare local instance variables
+    let current_mtime: number
+    let is_stale = false
+    let last_mtime: number | undefined
+    let source_path = AtlasBordersService.getSourceDatasetPath(dataset, year)
+
+    //Guard clauses
+    if (!source_path || !fs.existsSync(source_path))
+      return false
+
+    //Function body
+    current_mtime = getNaissanceFileMtime(source_path)
+    last_mtime = last_known_source_mtimes.get(source_path)
+
+    if (last_mtime !== undefined && current_mtime > last_mtime)
+      is_stale = true
+    if (isNaissanceCacheStale(source_path))
+      is_stale = true
+
+    last_known_source_mtimes.set(source_path, current_mtime)
+
+    if (is_stale) {
+      console.log(`[AtlasBordersService] Detected update to ${path.basename(source_path)} (mtime: ${current_mtime}). Automatically invalidating caches...`)
+      AtlasBordersService.clearCacheForDataset(dataset, source_path)
+    }
+
+    //Return statement
+    return is_stale
+  }
+
+  /**
+   * Resolves the primary source filesystem path for a historical border dataset.
+   *
+   * @param {string} arg0_dataset
+   * @param {number} [arg1_year]
+   *
+   * @returns {string | null}
+   */
+  static getSourceDatasetPath (arg0_dataset: string, arg1_year?: number): string | null {
+    //Convert from parameters
+    let dataset = normaliseBorderDatasetId(arg0_dataset, 'dejure_borders')
+    let year = arg1_year
+
+    //Declare local instance variables
+    let dataset_paths = AtlasBordersService.getDatasetPaths()
+
+    //Function body
+    if (dataset === 'defacto_borders') {
+      if (fs.existsSync(dataset_paths.defactoNaissancePath))
+        return dataset_paths.defactoNaissancePath
+
+      if (year !== undefined && fs.existsSync(dataset_paths.detailedDir)) {
+        let slice = defacto_borders_slices.find((arg0_s) =>
+          year >= arg0_s.domain[0] && (year < arg0_s.domain[1] || arg0_s.domain[1] === 2026)
+        )
+        if (!slice)
+          slice = year < -3500 ? defacto_borders_slices[0] : defacto_borders_slices[defacto_borders_slices.length - 1]
+
+        let slice_path = path.join(dataset_paths.detailedDir, slice.file)
+        if (fs.existsSync(slice_path))
+          return slice_path
+      }
+
+      return dataset_paths.defactoNaissancePath
+    }
+
+    //Return statement
+    return dataset_paths.dejureNaissancePath || dataset_paths.naissancePath || null
+  }
+
+  /**
+   * Resolves the last-modified timestamp of the source .naissance file for a dataset.
+   *
+   * @param {string} arg0_dataset
+   * @param {number} [arg1_year]
+   *
+   * @returns {number}
+   */
+  static getSourceMtime (arg0_dataset: string, arg1_year?: number): number {
+    //Convert from parameters
+    let dataset = arg0_dataset
+    let year = arg1_year
+
+    //Declare local instance variables
+    let source_path = AtlasBordersService.getSourceDatasetPath(dataset, year)
+
+    //Guard clauses
+    if (!source_path)
+      return 0
+
+    //Return statement
+    return getNaissanceFileMtime(source_path)
+  }
+
+  /**
+   * Purges disk cache files in cacheDir that are older than their corresponding .naissance source file.
+   *
+   * @param {string} [arg0_dataset]
+   *
+   * @returns {number} The count of deleted stale cache files.
+   */
+  static purgeStaleDiskCaches (arg0_dataset?: string): number {
+    //Convert from parameters
+    let target_dataset = arg0_dataset ? normaliseBorderDatasetId(arg0_dataset, 'dejure_borders') : undefined
+
+    //Declare local instance variables
+    let cache_dir = AtlasBordersService.getDatasetPaths().cacheDir
+    let purged_count = 0
+
+    //Guard clauses
+    if (!fs.existsSync(cache_dir))
+      return 0
+
+    //Function body
+    try {
+      let files = fs.readdirSync(cache_dir)
+      for (let i = 0; i < files.length; i++) {
+        let f = files[i]
+        if (!f.startsWith('borders_') || !f.endsWith('.json'))
+          continue
+
+        let file_path = path.join(cache_dir, f)
+        let parts = f.replace(/^borders_/, '').replace(/\.json$/, '').split('_')
+        let file_year = parts.length > 1 ? Number(parts[parts.length - 1]) : undefined
+        let ds = parts.slice(0, parts.length - 1).join('_')
+
+        if (target_dataset && ds !== target_dataset)
+          continue
+
+        let source_mtime = AtlasBordersService.getSourceMtime(ds, file_year)
+        if (source_mtime > 0) {
+          let stat = fs.statSync(file_path)
+          if (stat.mtimeMs < source_mtime) {
+            try {
+              fs.unlinkSync(file_path)
+              purged_count++
+            } catch {}
+          }
+        }
+      }
+    } catch (arg0_err) {
+      console.warn('[AtlasBordersService] Error purging stale disk caches:', arg0_err)
+    }
+
+    if (purged_count > 0)
+      console.log(`[AtlasBordersService] Purged ${purged_count} stale border disk cache file(s).`)
+
+    //Return statement
+    return purged_count
   }
 }

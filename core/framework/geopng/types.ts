@@ -205,6 +205,16 @@ export interface CityFullRecord {
   type?: string
 }
 
+/**
+ * Infobox property label: a plain string or an object keyed by locale (en-GB, fr, de).
+ */
+export type BorderPropertyFieldLabel = string | Record<string, string>
+
+/**
+ * Keyframe [2] property keys mapped to infobox labels, in display order. Configured per layer in common/layers/atlas.json5.
+ */
+export type BorderPropertyFields = Record<string, BorderPropertyFieldLabel>
+
 export interface HistoricalBordersDisplayOptions {
   fill_opacity?: number
   fill_opacity_range?: [number, number]

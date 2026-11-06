@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
+import type { BorderPropertyFields } from '../framework/geopng/types.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 
 export interface LayerVariableOption {
@@ -44,8 +45,6 @@ export interface ParsedDataLayer {
   hide_colourbar?: boolean
   icon?: string
   id: string
-  id_fields?: Record<string, string> | Array<{ key: string; name: string }>
-  identifiers?: Record<string, string> | Array<{ key: string; name: string }>
   is_nested?: boolean
   legend?: {
     colourscheme?: string
@@ -59,6 +58,7 @@ export interface ParsedDataLayer {
   parent_id?: string
   permissions: string[]
   pixel_offset?: number | { covariate?: string; x?: number; y?: number }
+  property_fields?: BorderPropertyFields
   sub_layers?: ParsedDataLayer[]
   synthetic_by_default?: boolean
   threshold?: number
@@ -455,14 +455,13 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'filepaths',
       'hide_colorbar',
       'hide_colourbar',
-      'id_fields',
-      'identifiers',
       'legend',
       'midpoint',
       'name',
       'open',
       'permissions',
       'pixel_offset',
+      'property_fields',
       'root_folders',
       'show_colorbar',
       'show_colourbar',
@@ -684,7 +683,6 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             hide_colourbar: Boolean(sub_item.hide_colourbar ?? sub_item.hide_colorbar ?? item.hide_colourbar ?? item.hide_colorbar ?? (sub_item.show_colourbar === false || sub_item.show_colorbar === false || item.show_colourbar === false || item.show_colorbar === false)),
             icon: getLayerIcon(sub_k),
             id: sub_full_id,
-            id_fields: sub_item.id_fields || item.id_fields || parsed_json.id_fields || sub_item.identifiers || item.identifiers || parsed_json.identifiers,
             is_nested: true,
             legend: sub_item.legend,
             midpoint: sub_item.midpoint !== undefined ? Number(sub_item.midpoint) : (sub_item.legend?.midpoint !== undefined ? Number(sub_item.legend.midpoint) : undefined),
@@ -692,6 +690,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
             parent_id: k,
             permissions: sub_item.permissions ? (Array.isArray(sub_item.permissions) ? sub_item.permissions : [sub_item.permissions]) : ['default'],
             pixel_offset: sub_item.pixel_offset ?? item.pixel_offset,
+            property_fields: sub_item.property_fields || item.property_fields || parsed_json.property_fields,
             synthetic_by_default: sub_item.synthetic_by_default !== undefined
               ? Boolean(sub_item.synthetic_by_default)
               : (item.synthetic_by_default !== undefined
@@ -758,12 +757,12 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           hide_colourbar: Boolean(item.hide_colourbar ?? item.hide_colorbar ?? (item.show_colourbar === false || item.show_colorbar === false)),
           icon: getLayerIcon(k),
           id: k,
-          id_fields: item.id_fields || parsed_json.id_fields || item.identifiers || parsed_json.identifiers,
           legend: item.legend,
           midpoint: item.midpoint !== undefined ? Number(item.midpoint) : (item.legend?.midpoint !== undefined ? Number(item.legend.midpoint) : undefined),
           name: item.name || k,
           permissions: item.permissions ? (Array.isArray(item.permissions) ? item.permissions : [item.permissions]) : ['default'],
           pixel_offset: item.pixel_offset,
+          property_fields: item.property_fields || parsed_json.property_fields,
           sub_layers: sub_layer_list.length > 0 ? sub_layer_list : undefined,
           synthetic_by_default: item.synthetic_by_default !== undefined
             ? Boolean(item.synthetic_by_default)

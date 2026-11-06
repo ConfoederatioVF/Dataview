@@ -38,12 +38,13 @@ export interface HistoricalBordersResponse {
   date?: string
   domain: [number, number]
   features: HistoricalBorderFeature[]
-  id_fields?: Record<string, string>
   source: 'cshapes' | 'naissance'
   timestamp?: number
   year: number
 }
 
+//Bump whenever the cached border feature schema changes, to invalidate stale disk caches
+let border_cache_version = 8
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let max_lru_entries = 60
@@ -411,7 +412,6 @@ export class AtlasBordersService {
         date: UfDate.formatDate(target_date_obj),
         domain,
         features: cached_list,
-        id_fields: dataset_paths.idFields,
         source,
         timestamp: target_ts,
         year: target_year,
@@ -429,19 +429,18 @@ export class AtlasBordersService {
         let is_valid_cache = Array.isArray(cached_json.features) &&
           (cached_json.features.length > 0 || target_year < -3000) &&
           (cached_json.features.length === 0 || cached_json.features[0].id !== undefined)
-        let is_missing_cap_coords = cached_json.v !== 7 &&
+        let is_missing_cap_coords = cached_json.v !== border_cache_version &&
           cached_json.features &&
           cached_json.features.length > 20 &&
           !cached_json.features.some((arg0_f: any) => arg0_f.properties?.cap_coords) &&
           cached_json.features.some((arg0_f: any) => arg0_f.properties?.capname)
-        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === 7) {
+        if (is_valid_cache && !is_missing_cap_coords && cached_json.v === border_cache_version) {
           in_memory_slice_lru.set(lru_key, cached_json.features)
           return {
             count: cached_json.features.length,
             date: cached_json.date || UfDate.formatDate(target_date_obj),
             domain,
             features: cached_json.features,
-            id_fields: cached_json.id_fields || dataset_paths.idFields,
             source,
             timestamp: cached_json.timestamp || target_ts,
             year: target_year,
@@ -455,8 +454,8 @@ export class AtlasBordersService {
     if (dataset === 'defacto_borders') {
       let entities: Map<string, NaissanceEntityRecord>
 
-      if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
-        entities = AtlasBordersService.loadNaissance(dataset_paths.detailedNaissancePath)
+      if (fs.existsSync(dataset_paths.defactoNaissancePath)) {
+        entities = AtlasBordersService.loadNaissance(dataset_paths.defactoNaissancePath)
       } else {
         let slice = defacto_borders_slices.find((arg0_s) =>
           target_year >= arg0_s.domain[0] && (target_year < arg0_s.domain[1] || arg0_s.domain[1] === 2026)
@@ -464,8 +463,8 @@ export class AtlasBordersService {
         if (!slice)
           slice = target_year < -3500 ? defacto_borders_slices[0] : defacto_borders_slices[defacto_borders_slices.length - 1]
 
-        let detailed_path = path.join(dataset_paths.detailedDir, slice.file)
-        entities = AtlasBordersService.loadNaissance(detailed_path)
+        let slice_path = path.join(dataset_paths.detailedDir, slice.file)
+        entities = AtlasBordersService.loadNaissance(slice_path)
       }
 
       for (let [ent_id, ent] of entities.entries()) {
@@ -538,10 +537,11 @@ export class AtlasBordersService {
         features.push({
           bbox: geom_bbox,
           geometry: geom,
-          id: `detailed_${ent_id}`,
+          id: `defacto_${ent_id}`,
           properties: {
             adm0_a3: entity_name,
             area: current_props.area,
+            attributes: current_props,
             cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
             caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
@@ -559,7 +559,6 @@ export class AtlasBordersService {
             flags: current_props.flags,
             gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
-            id_fields: dataset_paths.idFields,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: getEntityKeyframesSummary(ent),
@@ -647,6 +646,7 @@ export class AtlasBordersService {
           properties: {
             adm0_a3: entity_name,
             area: current_props.area,
+            attributes: current_props,
             cap_coords: cap_info.cap_coords,
             capkey: cap_info.capkey,
             caplat: cap_info.cap_coords ? cap_info.cap_coords[1] : undefined,
@@ -664,7 +664,6 @@ export class AtlasBordersService {
             flags: current_props.flags,
             gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
             id: ent_id,
-            id_fields: dataset_paths.idFields,
             is_acapital: cap_info.is_acapital,
             iso_a3: entity_name,
             keyframes: getEntityKeyframesSummary(ent),
@@ -697,10 +696,9 @@ export class AtlasBordersService {
           date: UfDate.formatDate(target_date_obj),
           domain,
           features,
-          id_fields: dataset_paths.idFields,
           source,
           timestamp: target_ts,
-          v: 7,
+          v: border_cache_version,
           year: target_year,
         }
         fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
@@ -715,7 +713,6 @@ export class AtlasBordersService {
       date: UfDate.formatDate(target_date_obj),
       domain,
       features,
-      id_fields: dataset_paths.idFields,
       source,
       timestamp: target_ts,
       year: target_year,
@@ -798,10 +795,10 @@ export class AtlasBordersService {
     let search_entity_maps = [default_entities]
 
     //Function body
-    if (fs.existsSync(dataset_paths.detailedNaissancePath)) {
-      let detailed_entities = AtlasBordersService.loadNaissance(dataset_paths.detailedNaissancePath)
-      if (!search_entity_maps.includes(detailed_entities))
-        search_entity_maps.push(detailed_entities)
+    if (fs.existsSync(dataset_paths.defactoNaissancePath)) {
+      let defacto_entities = AtlasBordersService.loadNaissance(dataset_paths.defactoNaissancePath)
+      if (!search_entity_maps.includes(defacto_entities))
+        search_entity_maps.push(defacto_entities)
     }
 
     for (let i = 0; i < search_entity_maps.length; i++) {

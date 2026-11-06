@@ -24,6 +24,7 @@ export interface HistoricalBorderFeature {
   id: string
   properties: {
     area?: number
+    attributes?: Record<string, any>
     cap_coords?: [number, number]
     capkey?: string
     caplat?: number

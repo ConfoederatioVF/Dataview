@@ -6,12 +6,11 @@ import { FilepathDefines } from './filepath_defines.ts'
 export interface AtlasDatasetPaths {
   cacheDir: string
   cshapesPath: string
+  defactoNaissancePath: string
   dejureDatasets: Record<string, boolean>
   dejureNaissancePath: string
   detailedDir: string
-  detailedNaissancePath: string
   displayOptions?: Record<string, Record<string, any>>
-  idFields?: Record<string, string>
   naissancePath: string
 }
 
@@ -45,6 +44,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let atlas_data_dir = defines.root_folders.l_atlas
   let cache_dir = path.join(atlas_data_dir, 'cache')
   let cshapes_path = defines.filepaths.atlas_cshapes
+  let defacto_naissance_path = defines.filepaths.atlas_defacto
   let dejure_datasets: Record<string, boolean> = {
     defacto_borders: false,
     dejure_borders: true,
@@ -54,13 +54,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   }
   let dejure_naissance_path = defines.filepaths.atlas_dejure
   let detailed_dir = path.join(atlas_data_dir, 'detailed')
-  let detailed_naissance_path = defines.filepaths.atlas_detailed
   let display_options: Record<string, Record<string, any>> = {}
-  let id_fields: Record<string, string> = {
-    cshapes_id: 'C-Shapes ID',
-    cow_id: 'COW ID',
-    seshat_id: 'Seshat ID',
-  }
   let legacy_naissance_path = defines.filepaths.atlas_legacy
   let naissance_path: string
   let root_folders: Record<string, string> = { ...defines.root_folders }
@@ -104,14 +98,6 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
       if (defacto_entry?.display_options)
         display_options.defacto_borders = defacto_entry.display_options
 
-      let parsed_id_fields = dejure_entry?.id_fields ||
-        dejure_entry?.identifiers ||
-        parsed_atlas.id_fields ||
-        parsed_atlas.identifiers
-      if (parsed_id_fields && typeof parsed_id_fields === 'object') {
-        id_fields = parsed_id_fields
-      }
-
       let simp_fps = dejure_entry?.filepaths
       if (Array.isArray(simp_fps)) {
         for (let i = 0; i < simp_fps.length; i++) {
@@ -133,7 +119,7 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
           let fp = det_fps[i]
           let p = fp.path || fp
           if (typeof p === 'string' && (p.endsWith('.naissance') || fp.type === 'vector.naissance'))
-            detailed_naissance_path = resolveToken(p)
+            defacto_naissance_path = resolveToken(p)
         }
       }
     } catch (arg0_err) {
@@ -151,12 +137,11 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   cached_dataset_paths = {
     cacheDir: cache_dir,
     cshapesPath: cshapes_path,
+    defactoNaissancePath: defacto_naissance_path,
     dejureDatasets: dejure_datasets,
     dejureNaissancePath: dejure_naissance_path,
     detailedDir: detailed_dir,
-    detailedNaissancePath: detailed_naissance_path,
     displayOptions: display_options,
-    idFields: id_fields,
     naissancePath: naissance_path,
   }
 

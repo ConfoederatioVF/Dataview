@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import type { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { calculateFeatureArea } from '@framework/geopng/polygon_area.ts'
-import type { DecodedRaster, CityPoint } from '@framework/geopng/types.ts'
+import type { BorderPropertyFields, DecodedRaster, CityPoint } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { MarkdownRenderer } from '@ui/components/markdown_renderer'
 import { resolveCapitalCityClick } from './historical_border_capital_utils'
+import { HistoricalBorderPropertyList } from './historical_border_property_list'
 import { UfDate } from '@framework/utils/uf_date'
 import { useLocalisation } from '@localisation'
 
@@ -14,10 +15,8 @@ export interface HistoricalBorderDetailsPanelProps {
   cities?: CityPoint[]
   countryStats?: CountryStats | null
   currentYear: number
-  dejure?: boolean
   embedded?: boolean
   feature: HistoricalBorderFeature | null
-  idFields?: Record<string, string> | Array<{ key: string; name: string }>
   isCalculatingStats?: boolean
   onBack?: () => void
   onClearPolygon?: () => void
@@ -26,6 +25,7 @@ export interface HistoricalBorderDetailsPanelProps {
   onJumpToYear?: (arg0_year: number) => void
   onOpenAnalytics?: () => void
   onSelectCity?: (city: CityPoint) => void
+  propertyFields?: BorderPropertyFields
   raster?: DecodedRaster | null
   sidebarWidth?: number
 }
@@ -88,10 +88,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let cities = props.cities
   let country_stats = props.countryStats
   let current_year = props.currentYear
-  let dejure = props.dejure
   let embedded = Boolean(props.embedded)
   let feature = props.feature
-  let id_fields = props.idFields
   let is_calculating_stats = props.isCalculatingStats
   let on_back = props.onBack
   let on_clear_polygon = props.onClearPolygon
@@ -100,6 +98,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let on_jump_to_year = props.onJumpToYear
   let on_open_analytics = props.onOpenAnalytics
   let on_select_city = props.onSelectCity
+  let property_fields = props.propertyFields
   let raster = props.raster
   let sidebar_width = props.sidebarWidth
 
@@ -233,7 +232,6 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let cap_name: string | undefined
   let cap_names: string[] = []
   let country_name: string
-  let dejure_id_items: { key: string; label: string; value: string | number }[] = []
   let display_year: string
   let end_year: number | undefined
   let feature_id: string | null
@@ -241,7 +239,6 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
   let handle_toggle_description: () => void
   let is_acapital = false
-  let is_dejure = dejure !== undefined ? dejure : Boolean(feature.properties?.dejure)
   let is_drawn_feature = Boolean(feature?.properties?.is_drawn)
   let max_x: number
   let max_y: number
@@ -274,90 +271,6 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   state_id = (feature.properties?.state_id !== undefined && feature.properties?.state_id !== null)
     ? Number(feature.properties.state_id)
     : undefined
-
-  if (is_dejure) {
-    let checkValidId = (arg0_val: any): boolean => {
-      if (arg0_val === undefined || arg0_val === null)
-        return false
-      let s = String(arg0_val).trim()
-      return s !== '' && s !== '0' && s !== '-1' && s.toLowerCase() !== 'null' && s.toLowerCase() !== 'undefined' && s.toLowerCase() !== 'none'
-    }
-
-    let configured_id_fields = id_fields || feature.properties?.id_fields || feature.properties?.idFields
-
-    if (configured_id_fields && typeof configured_id_fields === 'object') {
-      if (Array.isArray(configured_id_fields)) {
-        for (let i = 0; i < configured_id_fields.length; i++) {
-          let field_def = configured_id_fields[i]
-          let key = field_def.key
-          let label = field_def.name || field_def.label || key
-          let val = feature.properties?.[key]
-          if (val === undefined) {
-            if (key === 'seshat_id')
-              val = feature.properties?.seshatId ?? feature.properties?.seshat
-            if (key === 'cow_id')
-              val = feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
-            if (key === 'cshapes_id')
-              val = feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
-          }
-          if (checkValidId(val)) {
-            dejure_id_items.push({
-              key: key,
-              label: label.endsWith(':') ? label : `${label}:`,
-              value: val,
-            })
-          }
-        }
-      } else {
-        let field_keys = Object.keys(configured_id_fields)
-        for (let i = 0; i < field_keys.length; i++) {
-          let key = field_keys[i]
-          let label = configured_id_fields[key] || key
-          let val = feature.properties?.[key]
-          if (val === undefined) {
-            if (key === 'seshat_id')
-              val = feature.properties?.seshatId ?? feature.properties?.seshat
-            if (key === 'cow_id')
-              val = feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
-            if (key === 'cshapes_id')
-              val = feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
-          }
-          if (checkValidId(val)) {
-            dejure_id_items.push({
-              key: key,
-              label: label.endsWith(':') ? label : `${label}:`,
-              value: val,
-            })
-          }
-        }
-      }
-    } else {
-      let seshat_val = feature.properties?.seshat_id ?? feature.properties?.seshatId ?? feature.properties?.seshat
-      let cow_val = feature.properties?.cow_id ?? feature.properties?.cow ?? feature.properties?.cow_code ?? feature.properties?.cowId
-      let cshapes_val = feature.properties?.cshapes_id ?? feature.properties?.gwcode ?? feature.properties?.cshapes ?? feature.properties?.cshapesId
-
-      if (checkValidId(seshat_val))
-        dejure_id_items.push({
-          key: 'seshat',
-          label: t.mapPanels.historicalBorders.seshatId || 'Seshat ID:',
-          value: seshat_val,
-        })
-
-      if (checkValidId(cow_val))
-        dejure_id_items.push({
-          key: 'cow',
-          label: t.mapPanels.historicalBorders.cowId || 'COW ID:',
-          value: cow_val,
-        })
-
-      if (checkValidId(cshapes_val))
-        dejure_id_items.push({
-          key: 'cshapes',
-          label: t.mapPanels.historicalBorders.cshapesId || 'C-Shapes ID:',
-          value: cshapes_val,
-        })
-    }
-  }
 
   if (cap_name) {
     cap_names = cap_name.split(/[,/]/).map((arg0_s) => arg0_s.trim()).filter(Boolean)
@@ -420,8 +333,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
   if (feature.id?.toString().startsWith('cshapes')) {
     source_label = 'CShapes-2.0'
-  } else if (feature.id?.toString().startsWith('detailed')) {
-    source_label = 'detailed.naissance'
+  } else if (feature.id?.toString().startsWith('defacto')) {
+    source_label = 'atlas_defacto.naissance'
   } else {
     source_label = 'atlas_dejure.naissance'
   }
@@ -545,19 +458,19 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       last_pos_ref.current = { x: target_x, y: target_y }
     }
 
+    //Outer panel clips; only the content body scrolls, so the pinned header stays put and scrollbars never nest
     panel_style = {
       left: `${Math.round(target_x)}px`,
       maxHeight: (typeof window !== 'undefined')
         ? `min(calc(100vh - ${Math.round(target_y) + 16}px), 480px)`
         : '480px',
-      overflowY: 'auto',
+      overflow: 'hidden',
       position: 'fixed',
       top: `${Math.round(target_y)}px`,
     }
   } else {
+    //Embedded hosts (i.e. the mobile tray) provide the single scroll container, so the panel grows to its natural height
     panel_style = {
-      maxHeight: '480px',
-      overflowY: 'auto',
       position: 'relative',
       width: '100%',
     }
@@ -569,7 +482,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       id="dataview-historical-border-panel"
       style={panel_style}
       className={embedded
-        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 flex flex-col max-h-[480px] p-2.5'
+        ? 'w-full text-foreground select-none font-sans animate-in fade-in-0 duration-150 flex flex-col p-2.5'
         : 'z-15 w-96 max-w-[calc(100vw-32px)] max-h-[480px] flex flex-col bg-card/95 backdrop-blur-md border border-border shadow-2xl p-2.5 text-foreground select-none font-sans animate-in fade-in-0 zoom-in-95 duration-150'
       }
     >
@@ -678,7 +591,10 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       )}
 
       {/* Scrollable Content Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-1 space-y-2.5">
+      <div className={embedded
+        ? 'pb-1 space-y-2.5'
+        : 'flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1 pb-1 space-y-2.5'
+      }>
 
       {/* Alternate names & Capital info */}
       {(alt_names_str || cap_names.length > 0) && (
@@ -734,20 +650,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         </div>
       </div>
 
-      {/* De Jure IDs */}
-      {is_dejure && dejure_id_items.length > 0 && (
-        <div className="text-[11px] text-muted-foreground font-mono flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-          {dejure_id_items.map((arg0_item, arg1_idx) => (
-            <React.Fragment key={arg0_item.key}>
-              {arg1_idx > 0 && <span>•</span>}
-              <span>
-                <span className="text-foreground font-semibold">{arg0_item.label}</span>{' '}
-                <span>{arg0_item.value}</span>
-              </span>
-            </React.Fragment>
-          ))}
-        </div>
-      )}
+      {/* Keyframe Properties (configured per layer in common/layers/atlas.json5) */}
+      <HistoricalBorderPropertyList fields={property_fields} properties={feature.properties} />
 
       {/* Raster Statistics & Full Calculator Header */}
       {effective_stats ? (

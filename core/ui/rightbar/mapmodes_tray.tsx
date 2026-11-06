@@ -566,26 +566,15 @@ export let MapmodesTray: React.FC<MapmodesTrayProps> = React.memo(function (arg0
                 cities={stadester_cities}
                 countryStats={country_stats}
                 currentYear={timeline_year}
-                dejure={Boolean(
-                  selected_historical_feature?.properties?.dejure ??
-                  (historical_borders_config?.dataset
-                    ? (layers?.[historical_borders_config.dataset]?.dejure ?? (historical_borders_config.dataset === 'dejure_borders' || historical_borders_config.dataset === 'simplified_borders' || historical_borders_config.dataset === 'statistical_borders'))
-                    : undefined)
-                )}
                 embedded={true}
                 feature={selected_historical_feature}
-                idFields={
-                  selected_historical_feature?.properties?.id_fields ??
-                  (historical_borders_config?.dataset
-                    ? (layers?.[historical_borders_config.dataset]?.id_fields ?? layers?.[historical_borders_config.dataset]?.identifiers)
-                    : undefined)
-                }
                 isCalculatingStats={is_calculating_stats}
                 onClearPolygon={on_clear_polygon}
                 onClose={on_close_historical_feature || (() => {})}
                 onEditPolygon={on_edit_polygon}
                 onJumpToYear={on_jump_to_year}
                 onSelectCity={on_select_city}
+                propertyFields={historical_borders_config?.dataset ? layers?.[historical_borders_config.dataset]?.property_fields : undefined}
                 raster={raster}
               />
             )}

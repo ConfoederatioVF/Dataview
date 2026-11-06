@@ -507,8 +507,6 @@ export interface LocalisationConfig {
       closeHistoricalDetails: string
       computing: string
       computingStats: string
-      cowId?: string
-      cshapesId?: string
       collapseDescription?: string
       description?: string
       expandDescription?: string
@@ -530,7 +528,6 @@ export interface LocalisationConfig {
       noRasterData: string
       polygonActions?: string
       rasterSum: string
-      seshatId?: string
       statisticsAt: string
       stdDev: string
       sum: string

@@ -36,8 +36,8 @@
   },
   filepaths: {
     atlas_cshapes: "${l_atlas}/CShapes-2.0.geojson",
+    atlas_defacto: "${l_atlas}/atlas_defacto.naissance",
     atlas_dejure: "${l_atlas}/atlas_dejure.naissance",
-    atlas_detailed: "${l_atlas}/detailed.naissance",
     atlas_legacy: "${l_atlas}/atlas.naissance",
     atlas_states: "${l_atlas}/temp/states.json",
     baked_demographics: "${l_data}/baked_global_demographics.json",

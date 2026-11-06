@@ -32,6 +32,8 @@ export interface HistoricalBorderDetailsPanelProps {
 }
 
 let global_is_description_collapsed = false
+let global_is_info_collapsed = false
+let global_is_keyframes_collapsed = false
 
 /**
  * Returns whether polity descriptions are collapsed globally across all polities.
@@ -51,6 +53,40 @@ export let isPolityDescriptionCollapsed = function (): boolean {
 
 
 /**
+ * Returns whether polity information sections are collapsed globally across all polities.
+ *
+ * @returns {boolean}
+ */
+export let isPolityInfoCollapsed = function (): boolean {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    let stored = window.localStorage.getItem('dataview_polity_info_collapsed')
+    if (stored !== null)
+      return stored === 'true'
+  }
+
+  //Return statement
+  return global_is_info_collapsed
+}
+
+
+/**
+ * Returns whether polity keyframes sections are collapsed globally across all polities.
+ *
+ * @returns {boolean}
+ */
+export let isPolityKeyframesCollapsed = function (): boolean {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    let stored = window.localStorage.getItem('dataview_polity_keyframes_collapsed')
+    if (stored !== null)
+      return stored === 'true'
+  }
+
+  //Return statement
+  return global_is_keyframes_collapsed
+}
+
+
+/**
  * Sets whether polity descriptions are collapsed globally across all polities.
  *
  * @param {boolean} arg0_collapsed
@@ -66,6 +102,52 @@ export let setPolityDescriptionCollapsed = function (arg0_collapsed: boolean): v
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       window.localStorage.setItem('dataview_polity_desc_collapsed', String(collapsed))
+    } catch {
+      //Ignore storage errors
+    }
+  }
+}
+
+
+/**
+ * Sets whether polity information sections are collapsed globally across all polities.
+ *
+ * @param {boolean} arg0_collapsed
+ *
+ * @returns {void}
+ */
+export let setPolityInfoCollapsed = function (arg0_collapsed: boolean): void {
+  //Convert from parameters
+  let collapsed = arg0_collapsed
+
+  //Function body
+  global_is_info_collapsed = collapsed
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem('dataview_polity_info_collapsed', String(collapsed))
+    } catch {
+      //Ignore storage errors
+    }
+  }
+}
+
+
+/**
+ * Sets whether polity keyframes sections are collapsed globally across all polities.
+ *
+ * @param {boolean} arg0_collapsed
+ *
+ * @returns {void}
+ */
+export let setPolityKeyframesCollapsed = function (arg0_collapsed: boolean): void {
+  //Convert from parameters
+  let collapsed = arg0_collapsed
+
+  //Function body
+  global_is_keyframes_collapsed = collapsed
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem('dataview_polity_keyframes_collapsed', String(collapsed))
     } catch {
       //Ignore storage errors
     }
@@ -108,8 +190,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let active_keyframe_ref = useRef<HTMLDivElement | null>(null)
   let [fetched_description, set_fetched_description] = useState<string | null>(null)
   let [is_desc_collapsed, set_is_desc_collapsed] = useState<boolean>(isPolityDescriptionCollapsed)
-  let [is_info_collapsed, set_is_info_collapsed] = useState<boolean>(false)
-  let [is_keyframes_collapsed, set_is_keyframes_collapsed] = useState<boolean>(false)
+  let [is_info_collapsed, set_is_info_collapsed] = useState<boolean>(isPolityInfoCollapsed)
+  let [is_keyframes_collapsed, set_is_keyframes_collapsed] = useState<boolean>(isPolityKeyframesCollapsed)
   let keyframes_container_ref = useRef<HTMLDivElement | null>(null)
   let last_country_id_ref = useRef<string | null>(null)
   let last_pos_ref = useRef<{ x: number; y: number } | null>(null)
@@ -326,11 +408,15 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   }
 
   handle_toggle_info = () => {
-    set_is_info_collapsed(!is_info_collapsed)
+    let next_state = !is_info_collapsed
+    setPolityInfoCollapsed(next_state)
+    set_is_info_collapsed(next_state)
   }
 
   handle_toggle_keyframes = () => {
-    set_is_keyframes_collapsed(!is_keyframes_collapsed)
+    let next_state = !is_keyframes_collapsed
+    setPolityKeyframesCollapsed(next_state)
+    set_is_keyframes_collapsed(next_state)
   }
 
   raw_description = feature.properties?.description ||
@@ -655,18 +741,18 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
           )}
 
           {/* Primary Metrics (Area & Raster Sum) and Keyframe Properties */}
-          <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2.5 bg-muted/20 border border-border/50 text-[11px]">
+          <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2.5 bg-muted/20 border border-border/50 text-[11px] animate-in fade-in-0 duration-150">
             <span className="text-muted-foreground">{t.mapPanels.historicalBorders.areaKm2}</span>
-            <span className="font-mono font-bold text-foreground truncate translate-y-[1px]" title={area_val_str}>
+            <span className="font-mono font-bold text-foreground truncate" title={area_val_str}>
               {area_val_str}
             </span>
 
             <span className="text-muted-foreground">{t.mapPanels.historicalBorders.rasterSum}</span>
-            <span className="font-mono font-bold text-primary truncate translate-y-[1px]" title={raster_metric_tooltip}>
+            <span className="font-mono font-bold text-primary truncate" title={raster_metric_tooltip}>
               {raster_metric_str}
               {raster_detail_str && (
                 <span className="font-normal text-muted-foreground ml-1.5">
-                  ({raster_detail_str})
+                  <span className="inline-block -translate-y-[0.4px]">(</span>{raster_detail_str}<span className="inline-block -translate-y-[0.4px]">)</span>
                 </span>
               )}
             </span>
@@ -681,17 +767,17 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
           {/* Raster Statistics & Full Calculator Header */}
           {effective_stats ? (
-            <div className="p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
+            <div className="p-2 bg-muted/20 border border-border/50 text-xs space-y-1 animate-in fade-in-0 duration-150">
               <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
                 <span className="flex items-center gap-1">
-                  <Icon name="bar_chart" className="text-xs text-primary translate-y-[1px]" />
+                  <Icon name="bar_chart" className="text-xs text-primary" />
                   <span>{format(t.mapPanels.historicalBorders.statisticsAt, display_year)}</span>
                 </span>
                 {on_open_analytics && (
                   <button
                     type="button"
                     onClick={on_open_analytics}
-                    className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
+                    className="p-0 m-0 text-[11px] text-red-500 hover:text-red-400 hover:underline cursor-pointer"
                   >
                     {t.mapPanels.historicalBorders.fullCalculator}
                   </button>
@@ -737,7 +823,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
               </div>
             </div>
           ) : is_calculating_stats ? (
-            <div className="p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
+            <div className="p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground animate-in fade-in-0 duration-150">
               <Icon name="sync" className="animate-spin text-xs text-primary" />
               <span className="text-[11px] font-mono">{t.mapPanels.historicalBorders.computingStats}</span>
             </div>
@@ -765,16 +851,24 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {on_open_analytics && !effective_stats && !is_drawn_feature && (
-            <button
-              type="button"
+            <span
+              role="button"
+              tabIndex={0}
               onClick={(arg0_e) => {
                 arg0_e.stopPropagation()
                 on_open_analytics()
               }}
-              className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
+              onKeyDown={(arg0_e) => {
+                if (arg0_e.key === 'Enter' || arg0_e.key === ' ') {
+                  arg0_e.preventDefault()
+                  arg0_e.stopPropagation()
+                  on_open_analytics()
+                }
+              }}
+              className="p-0 m-0 text-[11px] text-red-500 hover:text-red-400 hover:underline cursor-pointer"
             >
               {t.mapPanels.historicalBorders.analyticsDrawer || 'Statistics'}
-            </button>
+            </span>
           )}
           <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white">
             <Icon
@@ -870,7 +964,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
                           }
                         }
                       }}
-                      className="p-0 m-0 leading-normal text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors translate-y-[1px]"
+                      className="p-0 m-0 leading-normal text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors"
                       title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
                     >
                       {t.mapPanels.historicalBorders.jump}

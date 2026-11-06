@@ -53,7 +53,7 @@ export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListPr
                 href={arg0_item.value}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-0.5 text-[rgb(200,40,40)] hover:underline truncate translate-y-[1px] min-w-0"
+                className="inline-flex items-center gap-0.5 text-[rgb(200,40,40)] hover:underline min-w-0"
                 title={arg0_item.value}
               >
                 <span className="truncate">{BorderPropertyUtils.getLinkLabel(arg0_item.value)}</span>

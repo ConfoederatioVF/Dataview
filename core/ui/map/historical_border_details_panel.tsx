@@ -31,7 +31,7 @@ export interface HistoricalBorderDetailsPanelProps {
   sidebarWidth?: number
 }
 
-let global_is_description_collapsed = true
+let global_is_description_collapsed = false
 
 /**
  * Returns whether polity descriptions are collapsed globally across all polities.
@@ -42,7 +42,7 @@ export let isPolityDescriptionCollapsed = function (): boolean {
   if (typeof window !== 'undefined' && window.localStorage) {
     let stored = window.localStorage.getItem('dataview_polity_desc_collapsed')
     if (stored !== null)
-      return stored !== 'false'
+      return stored === 'true'
   }
 
   //Return statement
@@ -108,6 +108,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let active_keyframe_ref = useRef<HTMLDivElement | null>(null)
   let [fetched_description, set_fetched_description] = useState<string | null>(null)
   let [is_desc_collapsed, set_is_desc_collapsed] = useState<boolean>(isPolityDescriptionCollapsed)
+  let [is_info_collapsed, set_is_info_collapsed] = useState<boolean>(false)
+  let [is_keyframes_collapsed, set_is_keyframes_collapsed] = useState<boolean>(false)
   let keyframes_container_ref = useRef<HTMLDivElement | null>(null)
   let last_country_id_ref = useRef<string | null>(null)
   let last_pos_ref = useRef<{ x: number; y: number } | null>(null)
@@ -240,6 +242,8 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
   let format = localisation.format
   let handle_single_capital_click: (arg0_cap_name: string, arg0_e: React.MouseEvent) => void
   let handle_toggle_description: () => void
+  let handle_toggle_info: () => void
+  let handle_toggle_keyframes: () => void
   let is_acapital = false
   let is_drawn_feature = Boolean(feature?.properties?.is_drawn)
   let max_x: number
@@ -319,6 +323,14 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     let next_state = !is_desc_collapsed
     setPolityDescriptionCollapsed(next_state)
     set_is_desc_collapsed(next_state)
+  }
+
+  handle_toggle_info = () => {
+    set_is_info_collapsed(!is_info_collapsed)
+  }
+
+  handle_toggle_keyframes = () => {
+    set_is_keyframes_collapsed(!is_keyframes_collapsed)
   }
 
   raw_description = feature.properties?.description ||
@@ -602,242 +614,286 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
 
       {/* Scrollable Content Body */}
       <div className={embedded
-        ? 'py-2 space-y-2.5'
-        : 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar py-2.5 space-y-2.5'
+        ? 'p-2.5 space-y-2.5'
+        : 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar p-2.5 space-y-2.5'
       }>
 
-      {/* Alternate names & Capital info */}
-      {(alt_names_str || cap_names.length > 0) && (
-        <div className="px-2.5 text-[11px] text-muted-foreground space-y-0.5">
+      {/* 1. Information Collapsible */}
+      <button
+        type="button"
+        onClick={handle_toggle_info}
+        className="w-full flex items-center justify-between text-xs font-semibold text-foreground py-2 px-2.5 bg-muted/20 hover:bg-muted/40 border border-border/40 cursor-pointer select-none transition-colors group"
+        title={is_info_collapsed
+          ? (t.mapPanels.historicalBorders.expandInformation || 'Expand information')
+          : (t.mapPanels.historicalBorders.collapseInformation || 'Collapse information')
+        }
+      >
+        <div className="flex items-center gap-2">
+          <Icon name="info" className="text-sm text-white" />
+          <span className="uppercase tracking-wider font-mono text-[11px]">
+            {t.mapPanels.historicalBorders.information || 'Information'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white">
+          <Icon
+            name={is_info_collapsed ? 'expand_more' : 'expand_less'}
+            className="text-base transition-transform"
+          />
+        </div>
+      </button>
+
+      {!is_info_collapsed && (
+        <>
+          {/* Alternate names */}
           {alt_names_str && (
-            <div>
-              <span className="text-muted-foreground/80">{t.mapPanels.historicalBorders.alsoRecordedAs} </span>
-              <span className="text-foreground font-medium">{alt_names_str}</span>
+            <div className="text-[11px] text-muted-foreground space-y-0.5">
+              <div>
+                <span className="text-muted-foreground/80">{t.mapPanels.historicalBorders.alsoRecordedAs} </span>
+                <span className="text-foreground font-medium">{alt_names_str}</span>
+              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Primary Metrics (Area & Raster Sum) */}
-      <div className="px-2.5">
-        <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2 bg-muted/20 border border-border/50 text-[11px]">
-          <span className="text-muted-foreground">{t.mapPanels.historicalBorders.areaKm2}</span>
-          <span className="font-mono font-bold text-foreground truncate translate-y-[1px]" title={area_val_str}>
-            {area_val_str}
-          </span>
-
-          <span className="text-muted-foreground">{t.mapPanels.historicalBorders.rasterSum}</span>
-          <span className="font-mono font-bold text-primary truncate translate-y-[1px]" title={raster_metric_tooltip}>
-            {raster_metric_str}
-            {raster_detail_str && (
-              <span className="font-normal text-muted-foreground text-[10px] ml-1.5">
-                ({raster_detail_str})
-              </span>
-            )}
-          </span>
-        </div>
-      </div>
-
-      {/* Keyframe Properties (configured per layer in common/layers/atlas.json5) */}
-      <div className="px-2.5">
-        <HistoricalBorderPropertyList fields={property_fields} properties={feature.properties} />
-      </div>
-
-      {/* Raster Statistics & Full Calculator Header */}
-      {effective_stats ? (
-        <div className="mx-2.5 p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
-            <span className="flex items-center gap-1">
-              <Icon name="bar_chart" className="text-xs text-primary translate-y-[1px]" />
-              <span>{format(t.mapPanels.historicalBorders.statisticsAt, display_year)}</span>
+          {/* Primary Metrics (Area & Raster Sum) and Keyframe Properties */}
+          <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2.5 bg-muted/20 border border-border/50 text-[11px]">
+            <span className="text-muted-foreground">{t.mapPanels.historicalBorders.areaKm2}</span>
+            <span className="font-mono font-bold text-foreground truncate translate-y-[1px]" title={area_val_str}>
+              {area_val_str}
             </span>
-            {on_open_analytics && (
-              <button
-                type="button"
-                onClick={on_open_analytics}
-                className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
-              >
-                {t.mapPanels.historicalBorders.fullCalculator}
-              </button>
-            )}
+
+            <span className="text-muted-foreground">{t.mapPanels.historicalBorders.rasterSum}</span>
+            <span className="font-mono font-bold text-primary truncate translate-y-[1px]" title={raster_metric_tooltip}>
+              {raster_metric_str}
+              {raster_detail_str && (
+                <span className="font-normal text-muted-foreground ml-1.5">
+                  ({raster_detail_str})
+                </span>
+              )}
+            </span>
+
+            <HistoricalBorderPropertyList
+              asFragment={true}
+              fields={property_fields}
+              properties={feature.properties}
+              showDivider={true}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-1 text-[10px] font-mono pt-1">
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.sum} </span>
-              <span className="font-bold text-foreground">
-                {(effective_stats.total !== undefined ? effective_stats.total : effective_stats.mean * effective_stats.validCount).toLocaleString('de-DE', { maximumFractionDigits: 1 })}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.mean} </span>
-              <span className="font-bold text-foreground">
-                {effective_stats.mean.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.median} </span>
-              <span className="font-bold text-foreground">
-                {effective_stats.median.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.stdDev} </span>
-              <span className="font-bold text-foreground">
-                {effective_stats.stdDev.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.minMax} </span>
-              <span className="font-bold text-foreground">
-                {effective_stats.min.toFixed(1)} / {effective_stats.max.toFixed(1)}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t.mapPanels.historicalBorders.validCells} </span>
-              <span className="font-bold text-foreground">
-                {effective_stats.validCount.toLocaleString('de-DE')}
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : is_calculating_stats ? (
-        <div className="mx-2.5 p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
-          <Icon name="sync" className="animate-spin text-xs text-primary" />
-          <span className="text-[11px] font-mono">{t.mapPanels.historicalBorders.computingStats}</span>
-        </div>
-      ) : null}
 
-      {/* Keyframe Timeline Trajectory Header OR Drawn Polygon Actions */}
-      <div className="px-2.5 flex items-center justify-between text-[11px] font-semibold text-foreground border-t border-border/50 pt-2">
-        <span className="flex items-center gap-1.5">
-          <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-xs text-white" />
-          <span className="uppercase tracking-wider font-mono text-[10px]">
-            {is_drawn_feature
-              ? `${t.mapPanels.historicalBorders.polygonActions || 'Polygon Actions'} (${vertices_count})`
-              : `${t.mapPanels.historicalBorders.historicalTrajectory} (${keyframes_list.length})`}
-          </span>
-        </span>
-        {on_open_analytics && !effective_stats && !is_drawn_feature && (
-          <button
-            type="button"
-            onClick={on_open_analytics}
-            className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
-          >
-            {t.mapPanels.historicalBorders.analyticsDrawer}
-          </button>
-        )}
-      </div>
-
-      {/* Interactive Keyframes List OR Polygon Actions */}
-      {is_drawn_feature ? (
-        <div className="px-2.5 grid grid-cols-2 gap-2 pt-0.5">
-          <button
-            type="button"
-            onClick={() => {
-              if (on_edit_polygon && feature)
-                on_edit_polygon(feature as unknown as CountryFeature)
-            }}
-            className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-muted/60 hover:bg-muted text-foreground border border-border transition-colors cursor-pointer rounded-none"
-            title={t.mapPanels.historicalBorders.editPolygon}
-          >
-            <Icon name="edit" className="text-xs text-[rgb(200,40,40)]" />
-            <span>{t.mapPanels.historicalBorders.editPolygon || 'Edit Polygon'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (on_clear_polygon)
-                on_clear_polygon()
-            }}
-            className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/40 transition-colors cursor-pointer rounded-none"
-            title={t.mapPanels.historicalBorders.clearPolygon}
-          >
-            <Icon name="delete_sweep" className="text-xs text-red-400" />
-            <span>{t.mapPanels.historicalBorders.clearPolygon || 'Clear Polygon'}</span>
-          </button>
-        </div>
-      ) : keyframes_list.length > 0 ? (
-        <div
-          ref={keyframes_container_ref}
-          className="w-full max-h-[168px] overflow-y-auto overflow-x-hidden custom-scrollbar pl-2.5 pr-3 py-1.5 space-y-1 bg-muted/15 border-y border-border/40"
-        >
-          {keyframes_list.map((arg0_kf: any, arg1_idx: number) => {
-            let is_curr = arg1_idx === active_kf_index
-            let is_unrecorded = Boolean(arg0_kf.label?.toLowerCase().includes('unrecorded') || arg0_kf.label?.toLowerCase().includes('hidden') || arg0_kf.label?.toLowerCase().includes('dissolved') || arg0_kf.label?.toLowerCase().includes('deleted'))
-            let kf = arg0_kf
-            let kf_date_str = kf.date || UfDate.formatYear(kf.year)
-            let kf_label = kf.label || t.mapPanels.historicalBorders.boundaryUpdated
-
-            return (
-              <div
-                key={`${kf.timestamp || kf.year}-${arg1_idx}`}
-                ref={is_curr ? active_keyframe_ref : undefined}
-                className={`w-full text-left px-2 py-1.5 text-[var(--body-font-size)] flex items-center justify-between transition-colors border ${is_curr
-                  ? 'bg-red-500/20 border-red-500/60 text-red-400 font-bold shadow-xs'
-                  : is_unrecorded
-                    ? 'bg-muted/30 border-border/40 text-muted-foreground'
-                    : 'bg-card border-border/40 text-muted-foreground'
-                  }`}
-              >
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${is_curr ? 'bg-red-500' : (is_unrecorded ? 'bg-muted-foreground/40' : 'bg-muted-foreground/60')
-                      }`}
-                  />
-                  <span className="font-mono font-semibold shrink-0 text-foreground text-[var(--body-font-size)]">{kf_date_str}</span>
-                  <span className="truncate text-muted-foreground ml-1 text-[var(--body-font-size)]">{kf_label}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  {is_unrecorded && (
-                    <span className="text-[var(--body-font-size)] px-1.5 py-0.5 bg-muted text-muted-foreground border border-border/60 font-mono">
-                      {t.mapPanels.historicalBorders.unrecorded}
-                    </span>
-                  )}
+          {/* Raster Statistics & Full Calculator Header */}
+          {effective_stats ? (
+            <div className="p-2 bg-muted/20 border border-border/50 text-xs space-y-1">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
+                <span className="flex items-center gap-1">
+                  <Icon name="bar_chart" className="text-xs text-primary translate-y-[1px]" />
+                  <span>{format(t.mapPanels.historicalBorders.statisticsAt, display_year)}</span>
+                </span>
+                {on_open_analytics && (
                   <button
                     type="button"
-                    onClick={(arg0_e: React.MouseEvent) => {
-                      arg0_e.stopPropagation()
-                      if (on_jump_to_year) {
-                        if (kf.timestamp !== undefined) {
-                          let kf_date_obj = UfDate.convertTimestampToDate(kf.timestamp)
-                          let kf_frac = UfDate.toFractionalYear(kf_date_obj)
-                          on_jump_to_year(kf_frac)
-                        } else if (kf.year !== undefined) {
-                          let kf_frac = UfDate.toFractionalYear({
-                            day: kf.day || 1,
-                            month: kf.month || 1,
-                            year: kf.year,
-                          })
-                          on_jump_to_year(kf_frac)
-                        }
-                      }
-                    }}
-                    className="p-0 m-0 leading-normal text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors translate-y-[1px]"
-                    title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
+                    onClick={on_open_analytics}
+                    className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
                   >
-                    {t.mapPanels.historicalBorders.jump}
+                    {t.mapPanels.historicalBorders.fullCalculator}
                   </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1 text-[10px] font-mono pt-1">
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.sum} </span>
+                  <span className="font-bold text-foreground">
+                    {(effective_stats.total !== undefined ? effective_stats.total : effective_stats.mean * effective_stats.validCount).toLocaleString('de-DE', { maximumFractionDigits: 1 })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.mean} </span>
+                  <span className="font-bold text-foreground">
+                    {effective_stats.mean.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.median} </span>
+                  <span className="font-bold text-foreground">
+                    {effective_stats.median.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.stdDev} </span>
+                  <span className="font-bold text-foreground">
+                    {effective_stats.stdDev.toLocaleString('de-DE', { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.minMax} </span>
+                  <span className="font-bold text-foreground">
+                    {effective_stats.min.toFixed(1)} / {effective_stats.max.toFixed(1)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t.mapPanels.historicalBorders.validCells} </span>
+                  <span className="font-bold text-foreground">
+                    {effective_stats.validCount.toLocaleString('de-DE')}
+                  </span>
                 </div>
               </div>
-            )
-          })}
-        </div>
-      ) : (
-        <div className="mx-2.5 text-[var(--body-font-size)] text-muted-foreground italic py-1 text-center bg-muted/20 border border-border/40">
-          {t.mapPanels.historicalBorders.noKeyframeEvents}
-        </div>
+            </div>
+          ) : is_calculating_stats ? (
+            <div className="p-2 bg-muted/20 border border-border/50 text-xs flex items-center justify-center gap-2 text-muted-foreground">
+              <Icon name="sync" className="animate-spin text-xs text-primary" />
+              <span className="text-[11px] font-mono">{t.mapPanels.historicalBorders.computingStats}</span>
+            </div>
+          ) : null}
+        </>
       )}
 
-      {/* Polity Description */}
+      {/* 2. Keyframes Collapsible */}
+      <button
+        type="button"
+        onClick={handle_toggle_keyframes}
+        className="w-full flex items-center justify-between text-xs font-semibold text-foreground py-2 px-2.5 bg-muted/20 hover:bg-muted/40 border border-border/40 cursor-pointer select-none transition-colors group"
+        title={is_keyframes_collapsed
+          ? (t.mapPanels.historicalBorders.expandKeyframes || 'Expand keyframes')
+          : (t.mapPanels.historicalBorders.collapseKeyframes || 'Collapse keyframes')
+        }
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon name={is_drawn_feature ? 'polyline' : 'timeline'} className="text-sm text-white shrink-0" />
+          <span className="uppercase tracking-wider font-mono text-[11px] truncate">
+            {is_drawn_feature
+              ? `${t.mapPanels.historicalBorders.polygonActions || 'Polygon Actions'} (${vertices_count})`
+              : `${t.mapPanels.historicalBorders.historicalTrajectory || 'Keyframes'} (${keyframes_list.length})`}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {on_open_analytics && !effective_stats && !is_drawn_feature && (
+            <button
+              type="button"
+              onClick={(arg0_e) => {
+                arg0_e.stopPropagation()
+                on_open_analytics()
+              }}
+              className="p-0 m-0 leading-normal text-[10px] text-red-500 hover:text-red-400 hover:underline cursor-pointer translate-y-[1px]"
+            >
+              {t.mapPanels.historicalBorders.analyticsDrawer || 'Statistics'}
+            </button>
+          )}
+          <div className="flex items-center gap-1 text-muted-foreground group-hover:text-white">
+            <Icon
+              name={is_keyframes_collapsed ? 'expand_more' : 'expand_less'}
+              className="text-base transition-transform"
+            />
+          </div>
+        </div>
+      </button>
+
+      {!is_keyframes_collapsed && (
+        is_drawn_feature ? (
+          <div className="p-2.5 grid grid-cols-2 gap-2 bg-muted/10 border border-border/40 animate-in fade-in-0 duration-150">
+            <button
+              type="button"
+              onClick={() => {
+                if (on_edit_polygon && feature)
+                  on_edit_polygon(feature as unknown as CountryFeature)
+              }}
+              className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-muted/60 hover:bg-muted text-foreground border border-border transition-colors cursor-pointer rounded-none"
+              title={t.mapPanels.historicalBorders.editPolygon}
+            >
+              <Icon name="edit" className="text-xs text-[rgb(200,40,40)]" />
+              <span>{t.mapPanels.historicalBorders.editPolygon || 'Edit Polygon'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (on_clear_polygon)
+                  on_clear_polygon()
+              }}
+              className="px-2 py-1.5 text-xs font-semibold flex items-center justify-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/40 transition-colors cursor-pointer rounded-none"
+              title={t.mapPanels.historicalBorders.clearPolygon}
+            >
+              <Icon name="delete_sweep" className="text-xs text-red-400" />
+              <span>{t.mapPanels.historicalBorders.clearPolygon || 'Clear Polygon'}</span>
+            </button>
+          </div>
+        ) : keyframes_list.length > 0 ? (
+          <div
+            ref={keyframes_container_ref}
+            className="max-h-[168px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1.5 space-y-1 bg-muted/10 border border-border/40 animate-in fade-in-0 duration-150"
+          >
+            {keyframes_list.map((arg0_kf: any, arg1_idx: number) => {
+              let is_curr = arg1_idx === active_kf_index
+              let is_unrecorded = Boolean(arg0_kf.label?.toLowerCase().includes('unrecorded') || arg0_kf.label?.toLowerCase().includes('hidden') || arg0_kf.label?.toLowerCase().includes('dissolved') || arg0_kf.label?.toLowerCase().includes('deleted'))
+              let kf = arg0_kf
+              let kf_date_str = kf.date || UfDate.formatYear(kf.year)
+              let kf_label = kf.label || t.mapPanels.historicalBorders.boundaryUpdated
+
+              return (
+                <div
+                  key={`${kf.timestamp || kf.year}-${arg1_idx}`}
+                  ref={is_curr ? active_keyframe_ref : undefined}
+                  className={`w-full text-left px-2 py-1.5 text-[var(--body-font-size)] flex items-center justify-between transition-colors border ${is_curr
+                    ? 'bg-red-500/20 border-red-500/60 text-red-400 font-bold shadow-xs'
+                    : is_unrecorded
+                      ? 'bg-muted/30 border-border/40 text-muted-foreground'
+                      : 'bg-card border-border/40 text-muted-foreground'
+                    }`}
+                >
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${is_curr ? 'bg-red-500' : (is_unrecorded ? 'bg-muted-foreground/40' : 'bg-muted-foreground/60')
+                        }`}
+                    />
+                    <span className="font-mono font-semibold shrink-0 text-foreground text-[var(--body-font-size)]">{kf_date_str}</span>
+                    <span className="truncate text-muted-foreground ml-1 text-[var(--body-font-size)]">{kf_label}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {is_unrecorded && (
+                      <span className="text-[var(--body-font-size)] px-1.5 py-0.5 bg-muted text-muted-foreground border border-border/60 font-mono">
+                        {t.mapPanels.historicalBorders.unrecorded}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(arg0_e: React.MouseEvent) => {
+                        arg0_e.stopPropagation()
+                        if (on_jump_to_year) {
+                          if (kf.timestamp !== undefined) {
+                            let kf_date_obj = UfDate.convertTimestampToDate(kf.timestamp)
+                            let kf_frac = UfDate.toFractionalYear(kf_date_obj)
+                            on_jump_to_year(kf_frac)
+                          } else if (kf.year !== undefined) {
+                            let kf_frac = UfDate.toFractionalYear({
+                              day: kf.day || 1,
+                              month: kf.month || 1,
+                              year: kf.year,
+                            })
+                            on_jump_to_year(kf_frac)
+                          }
+                        }
+                      }}
+                      className="p-0 m-0 leading-normal text-[var(--body-font-size)] text-red-500 hover:text-red-400 hover:underline font-mono cursor-pointer transition-colors translate-y-[1px]"
+                      title={format(t.mapPanels.historicalBorders.jumpTimelineTo, kf_date_str)}
+                    >
+                      {t.mapPanels.historicalBorders.jump}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="p-3 bg-muted/10 border border-border/40 text-[var(--body-font-size)] text-muted-foreground italic text-center animate-in fade-in-0 duration-150">
+            {t.mapPanels.historicalBorders.noKeyframeEvents}
+          </div>
+        )
+      )}
+
+      {/* 3. Description Collapsible */}
       {!hide_description && polity_description && (
-        <div className="px-2.5 border-t border-border/50 pt-2">
+        <>
           <button
             type="button"
             onClick={handle_toggle_description}
-            className={`w-full flex items-center justify-between text-xs font-semibold text-foreground py-2 px-2.5 bg-muted/20 hover:bg-muted/40 border border-border/40 cursor-pointer select-none transition-colors group ${
-              !is_desc_collapsed ? 'border-b-0' : ''
-            }`}
+            className="w-full flex items-center justify-between text-xs font-semibold text-foreground py-2 px-2.5 bg-muted/20 hover:bg-muted/40 border border-border/40 cursor-pointer select-none transition-colors group"
             title={is_desc_collapsed
               ? (t.mapPanels.historicalBorders.expandDescription || 'Expand description')
               : (t.mapPanels.historicalBorders.collapseDescription || 'Collapse description')
@@ -857,11 +913,11 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
             </div>
           </button>
           {!is_desc_collapsed && (
-            <div className="text-[var(--body-font-size)] text-muted-foreground leading-relaxed select-text overflow-hidden p-3 bg-muted/10 border border-border/40 border-t-0 animate-in fade-in-0 duration-150">
+            <div className="text-[var(--body-font-size)] text-muted-foreground leading-relaxed select-text overflow-hidden p-3 bg-muted/10 border border-border/40 animate-in fade-in-0 duration-150">
               <MarkdownRenderer content={polity_description} />
             </div>
           )}
-        </div>
+        </>
       )}
       </div>
     </div>

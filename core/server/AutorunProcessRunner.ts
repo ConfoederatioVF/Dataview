@@ -289,7 +289,6 @@ export class AutorunProcessRunner {
 
     //Declare local instance variables
     let oom_dir_abs = path.resolve(this.root_dir, this.config.oom_report_dir)
-    let oom_dir_posix = oom_dir_abs.replace(/\\/g, '/')
     let oom_report_name = `.oom_report_${process.pid}_${Date.now()}.json`
     let oom_report_path = path.join(oom_dir_abs, oom_report_name)
 
@@ -303,16 +302,18 @@ export class AutorunProcessRunner {
       let child_env: NodeJS.ProcessEnv = {
         ...process.env,
         FORCE_COLOR: process.env.NO_COLOR !== undefined ? '0' : '1',
-        NODE_OPTIONS: [
-          `--max-old-space-size=${this.config.max_old_space_size_mb}`,
-          '--report-on-fatalerror',
-          '--report-uncaught-exception',
-          '--report-exclude-env',
-          '--report-exclude-network',
-          `--report-dir=${oom_dir_posix}`,
-          `--report-filename=${oom_report_name}`,
-        ].join(' '),
+        NODE_OPTIONS: `--max-old-space-size=${this.config.max_old_space_size_mb}`,
       }
+      let full_node_args: string[] = [
+        `--max-old-space-size=${this.config.max_old_space_size_mb}`,
+        '--report-on-fatalerror',
+        '--report-uncaught-exception',
+        '--report-exclude-env',
+        '--report-exclude-network',
+        `--report-dir=${oom_dir_abs}`,
+        `--report-filename=${oom_report_name}`,
+        ...node_args,
+      ]
       let recent_output = ''
       let settled = false
       let start_ms = Date.now()
@@ -324,7 +325,7 @@ export class AutorunProcessRunner {
           recent_output = recent_output.slice(recent_output.length - 16384)
       }
 
-      let child = spawn(process.execPath, node_args, {
+      let child = spawn(process.execPath, full_node_args, {
         cwd: this.root_dir,
         env: child_env,
         stdio: ['ignore', 'pipe', 'pipe'],

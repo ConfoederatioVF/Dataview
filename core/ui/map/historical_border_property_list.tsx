@@ -5,8 +5,10 @@ import { useLocalisation } from '@localisation'
 import { BorderPropertyUtils, type BorderPropertyItem } from './historical_border_property_utils'
 
 export interface HistoricalBorderPropertyListProps {
+  asFragment?: boolean
   fields?: BorderPropertyFields
   properties?: Record<string, any>
+  showDivider?: boolean
 }
 
 /**
@@ -18,10 +20,13 @@ export interface HistoricalBorderPropertyListProps {
  */
 export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListProps> = function (arg0_props) {
   //Convert from parameters
+  let as_fragment = Boolean(arg0_props.asFragment)
   let fields = arg0_props.fields
   let properties = arg0_props.properties
+  let show_divider = Boolean(arg0_props.showDivider)
 
   //Declare local instance variables
+  let content: React.ReactElement
   let items_array: BorderPropertyItem[]
   let localisation = useLocalisation()
 
@@ -32,9 +37,11 @@ export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListPr
   if (items_array.length === 0)
     return null
 
-  //Return statement
-  return (
-    <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2 bg-muted/20 border border-border/50 text-[11px]">
+  content = (
+    <React.Fragment>
+      {show_divider && (
+        <hr className="col-span-2 border-0 border-t border-border/50 my-2 w-full" />
+      )}
       {items_array.map((arg0_item) => {
         let is_link = /^https?:\/\//i.test(arg0_item.value)
 
@@ -58,6 +65,18 @@ export let HistoricalBorderPropertyList: React.FC<HistoricalBorderPropertyListPr
           </React.Fragment>
         )
       })}
+    </React.Fragment>
+  )
+
+  if (as_fragment) {
+    //Return statement
+    return content
+  }
+
+  //Return statement
+  return (
+    <div className="grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-0.5 p-2 bg-muted/20 border border-border/50 text-[11px]">
+      {content}
     </div>
   )
 }

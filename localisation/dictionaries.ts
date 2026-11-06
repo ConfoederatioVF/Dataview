@@ -555,17 +555,25 @@ export interface LocalisationConfig {
       cells: string
       clearPolygon?: string
       closeHistoricalDetails: string
+      collapseDescription?: string
+      collapseInfo?: string
+      collapseInformation?: string
+      collapseKeyframes?: string
       computing: string
       computingStats: string
-      collapseDescription?: string
       description?: string
-      expandDescription?: string
       editPolygon?: string
       estimated: string
+      expandDescription?: string
+      expandInfo?: string
+      expandInformation?: string
+      expandKeyframes?: string
       fullCalculator: string
       historicalEntity: string
       historicalRecords: string
       historicalTrajectory: string
+      info?: string
+      information?: string
       jump: string
       jumpTimelineTo: string
       keyframes: string

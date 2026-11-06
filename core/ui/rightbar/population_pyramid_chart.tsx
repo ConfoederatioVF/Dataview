@@ -5,6 +5,7 @@ import { CountryFeature, CountryStats, getFeatureEntityName } from '@framework/g
 import { Icon } from '@ui/components/icon'
 import { formatLegendValue } from '@ui/topbar/color_bar_legend'
 import { computeSyntheticDemographicPyramid } from '@framework/raster/synthetic_demographics'
+import { UfDate } from '@framework/utils/uf_date'
 import { useLocalisation } from '@localisation'
 
 export interface PopulationPyramidChartProps {
@@ -77,11 +78,13 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let container_ref = useRef<HTMLDivElement>(null)
   let container_width: number
   let countries_key: string
+  let display_year: number
   let echart_ref = useRef<any>(null)
   let effective_countries: CountryFeature[]
   let effective_use_placeholder: boolean
   let female_values: number[]
   let format: ReturnType<typeof useLocalisation>['format']
+  let formatted_year: string
   let handle_toggle_placeholder: (arg0_val: boolean) => void
   let is_loading: boolean
   let is_narrow: boolean
@@ -116,6 +119,8 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   let total_male: number
 
   //Function body
+  display_year = UfDate.fromFractionalYear(current_year).year
+  formatted_year = UfDate.formatYear(display_year)
   localisation = useLocalisation()
   format = localisation.format
   t = localisation.t
@@ -174,7 +179,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
   //Fetch individual country or global pyramid breakdown with instantaneous synthetic responsiveness
   useEffect(() => {
     let cancelled = false
-    let current_yr = Math.round(current_year)
+    let current_yr = display_year
     let interval: NodeJS.Timeout | null = null
 
     //1. Instantaneous responsiveness: initialize immediately with synthetic demographic model
@@ -287,7 +292,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
       if (interval)
         clearInterval(interval)
     }
-  }, [active_country_name, countries_key, current_year, effective_use_placeholder])
+  }, [active_country_name, countries_key, display_year, effective_use_placeholder])
 
   //Resize observer for responsive panel updates
   useEffect(() => {
@@ -665,7 +670,7 @@ export let PopulationPyramidChart: React.FC<PopulationPyramidChartProps> = funct
             <span className="truncate">{format(t.analytics.pyramidTitle, active_country_name || t.analytics.global)}</span>
           </span>
           <span className="text-muted-foreground font-mono shrink-0">
-            ({current_year < 0 ? `${Math.abs(current_year)}BC` : `${current_year}AD`})
+            ({formatted_year})
           </span>
         </div>
 

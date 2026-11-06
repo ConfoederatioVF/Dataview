@@ -4,6 +4,7 @@ import { DecodedRaster } from '@framework/geopng/types.ts'
 import { CountryFeature, CountryStats, getFeatureEntityName } from '@framework/geopng/polygon_binning.ts'
 import { Icon } from '@ui/components/icon'
 import { computeSyntheticSectorBreakdown } from '@framework/raster/synthetic_demographics'
+import { UfDate } from '@framework/utils/uf_date'
 import { useLocalisation } from '@localisation'
 
 export interface CategoryBreakdownChartProps {
@@ -63,10 +64,12 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   let container_width: number
   let countries_key: string
   let current_page: number
+  let display_year: number
   let echart_ref = useRef<any>(null)
   let effective_countries: CountryFeature[]
   let effective_use_placeholder: boolean
   let format: ReturnType<typeof useLocalisation>['format']
+  let formatted_year: string
   let global_sector_data: Record<string, number>
   let handle_next_page: () => void
   let handle_prev_page: () => void
@@ -99,6 +102,8 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   let total_pages: number
 
   //Function body
+  display_year = UfDate.fromFractionalYear(current_year).year
+  formatted_year = UfDate.formatYear(display_year)
   localisation = useLocalisation()
   format = localisation.format
   t = localisation.t
@@ -158,7 +163,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   //Fetch breakdown from backend API with instantaneous synthetic responsiveness
   useEffect(() => {
     let cancelled = false
-    let current_yr = Math.round(current_year)
+    let current_yr = display_year
     let interval: NodeJS.Timeout | null = null
 
     let country_names = effective_countries.map((arg0_c) => getFeatureEntityName(arg0_c)).filter(Boolean)
@@ -262,7 +267,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
       if (interval)
         clearInterval(interval)
     }
-  }, [countries_key, current_year, effective_use_placeholder, layer_id])
+  }, [countries_key, display_year, effective_use_placeholder, layer_id])
 
   //Resize observer for responsive panel updates
   useEffect(() => {
@@ -423,7 +428,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
           return `
             <div style="font-family: sans-serif; font-size: 11px; line-height: 1.4;">
               <div style="font-weight: bold; border-bottom: 1px solid #3f3f46; padding-bottom: 3px; margin-bottom: 4px; color: #f4f4f5;">
-                ${c_name} <span style="font-weight: normal; color: #a1a1aa;">(${current_year < 0 ? `${Math.abs(current_year)}BC` : `${current_year}AD`})</span>
+                ${c_name} <span style="font-weight: normal; color: #a1a1aa;">(${formatted_year})</span>
               </div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; color: ${color};">
                 <span><b>${s_name}:</b></span>
@@ -468,7 +473,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
   }, [
     active_variable_selectors.profession,
     by_country_data,
-    current_year,
+    formatted_year,
     global_sector_data,
     has_countries,
     paged_country_names,
@@ -488,7 +493,7 @@ export let CategoryBreakdownChart: React.FC<CategoryBreakdownChartProps> = funct
             </span>
           </span>
           <span className="text-muted-foreground font-mono">
-            ({current_year < 0 ? `${Math.abs(current_year)}BC` : `${current_year}AD`})
+            ({formatted_year})
           </span>
         </div>
 

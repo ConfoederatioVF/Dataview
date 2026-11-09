@@ -212,7 +212,9 @@ export function isCityInsideStateBBox (
     return true
 
   let [minX, minY, maxX, maxY] = state.bbox
-  if (c_lng < minX - tol || c_lng > maxX + tol || c_lat < minY - tol || c_lat > maxY + tol)
+  let span = Math.max(Math.abs(maxX - minX), Math.abs(maxY - minY))
+  let effective_tol = span < 1.5 ? Math.min(tol, Math.max(0.5, span*1.5)) : tol
+  if (c_lng < minX - effective_tol || c_lng > maxX + effective_tol || c_lat < minY - effective_tol || c_lat > maxY + effective_tol)
     return false
 
   //Return statement

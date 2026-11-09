@@ -1,4 +1,4 @@
-import { normalizeCityKey } from '@framework/stadester/city_metadata_framework.ts'
+import { normalizeCityKey } from '../../framework/stadester/city_metadata_framework.ts'
 
 /**
  * Returns the short display label for a city by extracting the first word prior to semicolons or commas.
@@ -21,6 +21,78 @@ export function getShortCityLabel (arg0_name: string): string {
 
   //Return statement
   return first_word || before_semi
+}
+
+
+/**
+ * Checks whether a city object matches an authoritative capital name via its display name, key prefix, or aliases.
+ *
+ * @param {any} arg0_city
+ * @param {string} [arg1_cap_name]
+ *
+ * @returns {boolean}
+ */
+export function doesCityMatchCapitalName (arg0_city: any, arg1_cap_name?: string): boolean {
+  //Convert from parameters
+  let cap_name = arg1_cap_name
+  let city = arg0_city
+
+  //Guard clauses
+  if (!city || !cap_name)
+    return false
+
+  //Declare local instance variables
+  let cap_lower = cap_name.toLowerCase().trim()
+  let cap_nfd = cap_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  let clean_cap = cap_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+  let clean_cap_strip_h = clean_cap.replace(/h$/, '')
+  let candidate_names: string[] = []
+
+  //Function body
+  if (city.name)
+    candidate_names.push(String(city.name))
+  if (city.shortName)
+    candidate_names.push(String(city.shortName))
+  if (city.key) {
+    let key_base = String(city.key).replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim()
+    if (key_base)
+      candidate_names.push(key_base)
+  }
+  if (Array.isArray(city.other_names)) {
+    for (let i = 0; i < city.other_names.length; i++)
+      candidate_names.push(String(city.other_names[i]))
+  } else if (typeof city.other_names === 'string') {
+    candidate_names.push(city.other_names)
+  }
+  if (Array.isArray(city.historical_names)) {
+    for (let i = 0; i < city.historical_names.length; i++) {
+      if (city.historical_names[i]?.name)
+        candidate_names.push(String(city.historical_names[i].name))
+    }
+  }
+
+  for (let i = 0; i < candidate_names.length; i++) {
+    let raw_cand = candidate_names[i]
+    let parts = raw_cand.split(';')
+    for (let x = 0; x < parts.length; x++) {
+      let c_lower = parts[x].toLowerCase().trim()
+      if (!c_lower)
+        continue
+      let c_nfd = c_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      let clean_c = c_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+      let clean_c_strip_h = clean_c.replace(/h$/, '')
+      if (
+        c_lower === cap_lower ||
+        c_nfd === cap_nfd ||
+        clean_c === clean_cap ||
+        (clean_c_strip_h.length >= 3 && clean_c_strip_h === clean_cap_strip_h)
+      )
+        return true
+    }
+  }
+
+  //Return statement
+  return false
 }
 
 
@@ -162,11 +234,13 @@ export function reconcileCapitalWithAuthoritativeBorders (
   }
 
   if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
+    let span = Math.max(Math.abs(match.bbox[2] - match.bbox[0]), Math.abs(match.bbox[3] - match.bbox[1]))
+    let effective_pad = span < 1.5 ? Math.min(pad, Math.max(0.5, span*1.5)) : pad
     if (
-      c_lon < match.bbox[0] - pad ||
-      c_lon > match.bbox[2] + pad ||
-      c_lat < match.bbox[1] - pad ||
-      c_lat > match.bbox[3] + pad
+      c_lon < match.bbox[0] - effective_pad ||
+      c_lon > match.bbox[2] + effective_pad ||
+      c_lat < match.bbox[1] - effective_pad ||
+      c_lat > match.bbox[3] + effective_pad
     ) {
       match = null
     }
@@ -254,7 +328,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
       if (active_cap && (active_cap.capkey || active_cap.capname || active_cap.cap_coords)) {
         let is_same_coord = false
         if (active_cap.cap_coords && (c_lon !== undefined && c_lat !== undefined)) {
-          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.03
+          is_same_coord = Math.hypot(c_lon - active_cap.cap_coords[0], c_lat - active_cap.cap_coords[1]) <= 0.01
         }
         let clean_active_key = normalizeCityKey(active_cap.capkey || '')
         let clean_city_key = normalizeCityKey(city.key || '')
@@ -262,14 +336,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
           (active_cap.capkey && (city.key === active_cap.capkey || String(city.id) === active_cap.capkey)) ||
           (clean_active_key && clean_city_key && clean_active_key === clean_city_key)
         )
-        let clean_active_name = (active_cap.capname || '').toLowerCase().trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
-        let clean_c_name = c_name.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
-        is_same_name = Boolean(
-          clean_active_name &&
-          (clean_c_name === clean_active_name ||
-           clean_c_name.startsWith(clean_active_name) ||
-           clean_active_name.startsWith(clean_c_name))
-        )
+        is_same_name = doesCityMatchCapitalName(city, active_cap.capname)
 
         if (!is_same_key && !is_same_name && !is_same_coord) {
           return {
@@ -361,7 +428,7 @@ export function reconcileCitiesWithAuthoritativeBorders (
     reconciled.push(r)
   }
 
-  //2. Spatial resolution: for each designated capital point, assign only the single closest city
+  //2. Spatial resolution: for each designated capital point, assign only the single matching city and never transfer capital status to an unculled neighbour
   if (active_capitals_list && active_capitals_list.length > 0) {
     for (let i = 0; i < active_capitals_list.length; i++) {
       let cap = active_capitals_list[i]
@@ -371,6 +438,7 @@ export function reconcileCitiesWithAuthoritativeBorders (
       let cap_coords = cap.cap_coords
       let cap_lat = cap_coords[1]
       let cap_lon = cap_coords[0]
+      let clean_cap_key = normalizeCityKey(cap.capkey || '')
       let closest_dist: number = Infinity
       let closest_index: number = -1
       let nearby_indices: number[] = []
@@ -385,7 +453,16 @@ export function reconcileCitiesWithAuthoritativeBorders (
         let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
         if (dist <= proximity_radius) {
           nearby_indices.push(x)
-          if (dist < closest_dist) {
+
+          let clean_city_key = normalizeCityKey(city.key || '')
+          let is_key_match = Boolean(
+            (cap.capkey && (city.key === cap.capkey || String(city.id) === cap.capkey)) ||
+            (clean_cap_key && clean_city_key && clean_cap_key === clean_city_key)
+          )
+          let is_name_match = doesCityMatchCapitalName(city, cap.capname)
+          let is_exact_coord = dist <= 0.01
+
+          if ((is_key_match || is_name_match || is_exact_coord) && dist < closest_dist) {
             closest_dist = dist
             closest_index = x
           }
@@ -407,13 +484,13 @@ export function reconcileCitiesWithAuthoritativeBorders (
           is_capital: true,
         }
         assigned_capital_indices.add(closest_index)
+      }
 
-        //Suppress all other nearby secondary cities within proximity of this designated capital
-        for (let y = 0; y < nearby_indices.length; y++) {
-          let idx = nearby_indices[y]
-          if (idx !== closest_index)
-            suppressed_capital_indices.add(idx)
-        }
+      //Suppress all other nearby secondary cities within proximity of this designated capital
+      for (let y = 0; y < nearby_indices.length; y++) {
+        let idx = nearby_indices[y]
+        if (idx !== closest_index)
+          suppressed_capital_indices.add(idx)
       }
     }
   }

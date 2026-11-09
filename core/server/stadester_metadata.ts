@@ -433,10 +433,19 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
   for (let i = 0; i < meta_list.length; i++) {
     let best_city: CityIndexEntry | null = null
+    let best_exact_city: CityIndexEntry | null = null
+    let best_named_city: CityIndexEntry | null = null
     let meta = meta_list[i]
     let min_dist = 999999
+    let min_exact_dist = 999999
+    let min_named_dist = 999999
     let target_lat = meta.coords[1]
     let target_lng = meta.coords[0]
+    let local_meta_name = normalizeCityAlias(meta.name || '')
+    let meta_aliases = [
+      local_meta_name,
+      ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map(normalizeCityAlias) : (typeof (meta as any).other_names === 'string' ? [normalizeCityAlias((meta as any).other_names)] : [])),
+    ].filter(Boolean)
 
     if (meta.key && indexed[meta.key]) {
       best_city = indexed[meta.key]
@@ -454,29 +463,41 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
             for (let c = 0; c < cell.length; c++) {
               let candidate = cell[c]
               let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
-              if (dist < min_dist) {
-                min_dist = dist
-                best_city = candidate
+              if (dist <= 0.1 && dist < min_exact_dist) {
+                min_exact_dist = dist
+                best_exact_city = candidate
+              }
+              if (dist <= 50 && dist < min_named_dist) {
+                let cand_aliases = [
+                  normalizeCityAlias(candidate.name || ''),
+                  ...(Array.isArray(candidate.other_names) ? candidate.other_names.map(normalizeCityAlias) : (typeof candidate.other_names === 'string' ? [normalizeCityAlias(candidate.other_names)] : [])),
+                ].filter(Boolean)
+                if (meta_aliases.some((ma) => cand_aliases.includes(ma))) {
+                  min_named_dist = dist
+                  best_named_city = candidate
+                }
               }
             }
           }
         }
+      }
+
+      if (best_named_city) {
+        best_city = best_named_city
+        min_dist = min_named_dist
+      } else if (best_exact_city) {
+        best_city = best_exact_city
+        min_dist = min_exact_dist
       }
     }
 
     if (best_city && min_dist <= 50) {
       let is_exact_coord_match = min_dist <= 0.1
       let local_best_name = normalizeCityAlias(best_city.name || '')
-      let local_meta_name = normalizeCityAlias(meta.name || '')
 
       let best_aliases = [
         local_best_name,
         ...(Array.isArray(best_city.other_names) ? best_city.other_names.map(normalizeCityAlias) : (typeof best_city.other_names === 'string' ? [normalizeCityAlias(best_city.other_names)] : [])),
-      ].filter(Boolean)
-
-      let meta_aliases = [
-        local_meta_name,
-        ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map(normalizeCityAlias) : (typeof (meta as any).other_names === 'string' ? [normalizeCityAlias((meta as any).other_names)] : [])),
       ].filter(Boolean)
 
       let is_name_match = meta_aliases.some((ma) => best_aliases.includes(ma))
@@ -727,7 +748,6 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
               if (!target_cities.includes(city_list[m]))
                 target_cities.push(city_list[m])
             }
-            break
           }
         }
       }

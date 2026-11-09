@@ -46,7 +46,7 @@ export interface HistoricalBordersResponse {
 
 //Bump whenever the cached border feature schema changes, to invalidate stale disk caches
 let all_cache_clearers: Array<() => void> = []
-let border_cache_version = 8
+let border_cache_version = 9
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let last_known_source_mtimes: Map<string, number> = new Map()
@@ -846,8 +846,13 @@ export class AtlasBordersService {
     current_mtime = getNaissanceFileMtime(source_path)
     last_mtime = last_known_source_mtimes.get(source_path)
 
-    if (last_mtime !== undefined && current_mtime > last_mtime)
+    if (last_mtime === undefined) {
+      last_known_source_mtimes.set(source_path, current_mtime)
+      AtlasBordersService.purgeStaleDiskCaches(dataset)
+    } else if (current_mtime !== last_mtime) {
       is_stale = true
+    }
+
     if (isNaissanceCacheStale(source_path))
       is_stale = true
 

@@ -119,7 +119,7 @@ export let isNaissanceCacheStale = function (arg0_file_path: string): boolean {
 
   //Guard clauses
   if (!cached_naissance_entities_by_path.has(file_path))
-    return true
+    return false
   if (!fs.existsSync(file_path))
     return false
 

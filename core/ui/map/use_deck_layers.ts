@@ -788,18 +788,24 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
             continue
 
           if (cap.bbox) {
-            let pad = 1.0
+            let span = Math.max(Math.abs(cap.bbox[2] - cap.bbox[0]), Math.abs(cap.bbox[3] - cap.bbox[1]))
+            let pad = span < 1.5 ? Math.min(1.0, Math.max(0.5, span*1.5)) : 1.0
             if (c_lon < cap.bbox[0] - pad || c_lon > cap.bbox[2] + pad || c_lat < cap.bbox[1] - pad || c_lat > cap.bbox[3] + pad)
               continue
           }
 
           let score = 0
-          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey))
+          let is_key_match = false
+          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey)) {
             score += 200000
+            is_key_match = true
+          }
           let clean_c_key = normalizeCityKey(c.key || '')
           let clean_cap_key = normalizeCityKey(cap.capkey || '')
-          if (clean_cap_key && clean_c_key && clean_cap_key === clean_c_key)
+          if (clean_cap_key && clean_c_key && clean_cap_key === clean_c_key) {
             score += 100000
+            is_key_match = true
+          }
           let c_name_lower = (c.name || '').toLowerCase().trim()
           let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           let cap_name_lower = (cap.capname || '').toLowerCase().trim()
@@ -807,14 +813,14 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
 
           let is_name_match = false
           if (cap_name_lower) {
-            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
-            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
+            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+            let key_base_name = String(c.key || '').replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             if (
               c_name_lower === cap_name_lower ||
               c_name_nfd === cap_name_nfd ||
               clean_c_name === clean_cap_name ||
-              clean_c_name.startsWith(clean_cap_name) ||
-              clean_cap_name.startsWith(clean_c_name)
+              (key_base_name && key_base_name === clean_cap_name)
             ) {
               is_name_match = true
             } else if (c.other_names && Array.isArray(c.other_names)) {
@@ -822,18 +828,22 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
                 let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
                 let on_lower = arg0_on.toLowerCase().trim()
                 let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
+                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
                 return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
               })
             }
           }
 
+          let is_exact_coord_match = dist <= 0.01
+          if (!is_key_match && !is_name_match && !is_exact_coord_match)
+            continue
+
           if (is_name_match)
-            score += 50000
+            score += 150000
           if (c.isCapital || c.is_capital)
             score += 10000
           if (cap.cap_coords)
-            score += Math.max(0, Math.round((0.30 - dist) * 1000000))
+            score += Math.max(0, Math.round((0.20 - dist) * 50000))
           score += Math.max(0, Math.round((0.25 - dist) * 5000))
           score += Math.min(1000, Math.round((c.population || 0) / 1000))
 

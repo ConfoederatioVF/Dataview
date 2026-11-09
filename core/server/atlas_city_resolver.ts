@@ -158,6 +158,26 @@ export let ensureCityCoordsLoaded = function (): void {
       }
       v_bucket.push(vaduz_rec)
     }
+
+    if (!city_coords_by_key.has('stadester-Saint Helier-Jersey')) {
+      let helier_rec: CityCoordRecord = {
+        coords: [-2.11, 49.1858],
+        country: 'Jersey',
+        key: 'stadester-Saint Helier-Jersey',
+        name: 'Saint Helier',
+        other_names: ['Saint Helier', 'St. Helier', 'St Helier'],
+      }
+      city_coords_by_key.set('stadester-Saint Helier-Jersey', helier_rec)
+      city_coords_by_key.set('stadester-saint helier-jersey', helier_rec)
+      city_coords_by_key.set('sainthelierjersey', helier_rec)
+
+      let h_bucket = city_coords_spatial_grid.get('-3_49')
+      if (!h_bucket) {
+        h_bucket = []
+        city_coords_spatial_grid.set('-3_49', h_bucket)
+      }
+      h_bucket.push(helier_rec)
+    }
   } catch (arg0_err) {
     console.error('[AtlasBordersService] Error indexing all_cities_coords.json:', arg0_err)
   }
@@ -270,6 +290,14 @@ export let getContemporaneousCityKey = function (
   min_cell_y = Math.floor(lat - 0.25)
   max_cell_y = Math.floor(lat + 0.25)
 
+  let target_name_clean = (item?.name || key.replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0] || '')
+    .replace(/\(.*?\)/g, '')
+    .split(';')[0]
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
   for (let i = min_cell_x; i <= max_cell_x; i++) {
     for (let x = min_cell_y; x <= max_cell_y; x++) {
       let bucket = city_coords_spatial_grid.get(`${i}_${x}`)
@@ -282,7 +310,29 @@ export let getContemporaneousCityKey = function (
         if (year >= 1975 && !c.key.startsWith('ghsl-'))
           continue
         let d = Math.hypot(c.coords[0] - lon, c.coords[1] - lat)
-        if (d < 0.20 && d < min_d) {
+        if (d >= 0.20)
+          continue
+
+        let cand_name_clean = (c.name || '')
+          .replace(/\(.*?\)/g, '')
+          .split(';')[0]
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+        let is_cand_name_match = Boolean(
+          target_name_clean &&
+          cand_name_clean &&
+          (cand_name_clean === target_name_clean ||
+           (Array.isArray(c.other_names) && c.other_names.some((arg0_on) =>
+             arg0_on.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(';').map((s) => s.trim()).includes(target_name_clean)
+           )))
+        )
+
+        if (!is_cand_name_match && d > 0.025)
+          continue
+
+        if (d < min_d) {
           min_d = d
           best = c
         }
@@ -327,13 +377,15 @@ export let isCityCoordsInsideBbox = function (
   let max_lng = bbox[2]
   let min_lat = bbox[1]
   let min_lng = bbox[0]
+  let span = Math.max(Math.abs(max_lng - min_lng), Math.abs(max_lat - min_lat))
+  let effective_pad = span < 1.5 ? Math.min(pad, Math.max(0.5, span*1.5)) : pad
 
   //Return statement
   return (
-    c_lng >= min_lng - pad &&
-    c_lng <= max_lng + pad &&
-    c_lat >= min_lat - pad &&
-    c_lat <= max_lat + pad
+    c_lng >= min_lng - effective_pad &&
+    c_lng <= max_lng + effective_pad &&
+    c_lat >= min_lat - effective_pad &&
+    c_lat <= max_lat + effective_pad
   )
 }
 

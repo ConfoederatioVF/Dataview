@@ -130,18 +130,29 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
   let lite_file_path = path.join(cache_dir, `${dataset_name}_lite.json`)
   let lite_name_map = new Map<string, string>()
+  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
 
   if (fs.existsSync(lite_file_path)) {
     try {
-      let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
-      if (Array.isArray(lite_data)) {
-        for (let i = 0; i < lite_data.length; i++) {
-          if (lite_data[i].key && lite_data[i].name) {
-            if (!isCorruptedCityName(lite_data[i].name))
-              lite_name_map.set(lite_data[i].key, lite_data[i].name)
+      let lite_stat = fs.statSync(lite_file_path)
+      let src_stat = fs.statSync(file_path)
+      let is_lite_fresh = lite_stat.mtimeMs >= src_stat.mtimeMs
+      if (is_lite_fresh && fs.existsSync(meta_file_path)) {
+        if (fs.statSync(meta_file_path).mtimeMs > lite_stat.mtimeMs)
+          is_lite_fresh = false
+      }
+
+      if (is_lite_fresh) {
+        let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
+        if (Array.isArray(lite_data)) {
+          for (let i = 0; i < lite_data.length; i++) {
+            if (lite_data[i].key && lite_data[i].name && lite_data[i].name !== 'City of London') {
+              if (!isCorruptedCityName(lite_data[i].name))
+                lite_name_map.set(lite_data[i].key, lite_data[i].name)
+            }
           }
+          console.log(`[StadesterLoader] Loaded ${lite_name_map.size} pre-resolved city names from ${lite_file_path}`)
         }
-        console.log(`[StadesterLoader] Loaded ${lite_name_map.size} pre-resolved city names from ${lite_file_path}`)
       }
     } catch (arg0_err) {
       console.warn('[StadesterLoader] Failed to read lite cache for names:', arg0_err)
@@ -177,9 +188,11 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
       ? cached_name
       : resolveCityDisplayName(key, c.name || key, c.coords, max_p, c.id)
 
-    if (key === 'stadester-London (Greater London)-United Kingdom' ||
+    if (key === 'London (agglomeration)-unkingd' ||
+        key === 'stadester-London (Greater London)-United Kingdom' ||
+        clean_display_name === 'City of London' ||
         (c.coords && Math.abs(c.coords[0] - 51.5134) < 0.01 && Math.abs(c.coords[1] - (-0.08925)) < 0.01)) {
-      clean_display_name = 'City of London'
+      clean_display_name = 'London'
     }
 
     let city_coords = c.coords
@@ -294,6 +307,41 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   }
   if (!indexed_record['stadester-Macau-Macau']) {
     indexed_record['stadester-Macau-Macau'] = indexed_record['stadester-Macau-Macao']
+  }
+
+  if (!indexed_record['stadester-Saint Helier-Jersey']) {
+    indexed_record['stadester-Saint Helier-Jersey'] = {
+      coords: [49.1858, -2.11],
+      country: 'Jersey',
+      elevation: 15,
+      id: 'stadester-Saint Helier-Jersey',
+      key: 'stadester-Saint Helier-Jersey',
+      max_pop: 35800,
+      max_year: 2020,
+      min_year: 1291,
+      name: 'Saint Helier',
+      original_names: ['saint helier', 'st. helier'],
+      other_names: ['Saint Helier', 'St. Helier', 'St Helier'],
+      population: {
+        '1291': 500,
+        '1400': 600,
+        '1500': 800,
+        '1600': 1200,
+        '1700': 2000,
+        '1800': 4000,
+        '1850': 29000,
+        '1900': 29000,
+        '1950': 26000,
+        '1970': 28000,
+        '1980': 27000,
+        '1990': 28000,
+        '2000': 28300,
+        '2010': 33500,
+        '2020': 35800,
+      },
+      region: 'europe',
+      years: [1291, 1400, 1500, 1600, 1700, 1800, 1850, 1900, 1950, 1970, 1980, 1990, 2000, 2010, 2020],
+    }
   }
 
   applyCityMetadata(indexed_record)

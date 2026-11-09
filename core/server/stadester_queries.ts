@@ -111,13 +111,15 @@ export function getAuthoritativeCapitalsAtYear (
             continue
 
           if (feat.bbox) {
-            let pad = 1.0
+            let span = Math.max(Math.abs(feat.bbox[2] - feat.bbox[0]), Math.abs(feat.bbox[3] - feat.bbox[1]))
+            let pad = span < 1.5 ? Math.min(1.0, Math.max(0.5, span*1.5)) : 1.0
             if (c_lon < feat.bbox[0] - pad || c_lon > feat.bbox[2] + pad || c_lat < feat.bbox[1] - pad || c_lat > feat.bbox[3] + pad)
               continue
           }
 
           let score = 0
-          if (p.capkey && (c.key === p.capkey || c.id === p.capkey))
+          let is_key_match = Boolean(p.capkey && (c.key === p.capkey || c.id === p.capkey))
+          if (is_key_match)
             score += 200000
 
           let c_name_lower = (c.name || '').toLowerCase().trim()
@@ -127,17 +129,17 @@ export function getAuthoritativeCapitalsAtYear (
 
           let is_name_match = false
           if (cap_name_lower) {
-            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
-            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
+            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
             let clean_c_strip_h = clean_c_name.replace(/h$/, '')
             let clean_cap_strip_h = clean_cap_name.replace(/h$/, '')
+            let key_base_name = String(c.key || '').replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             if (
               c_name_lower === cap_name_lower ||
               c_name_nfd === cap_name_nfd ||
               clean_c_name === clean_cap_name ||
-              clean_c_strip_h === clean_cap_strip_h ||
-              clean_c_name.startsWith(clean_cap_name) ||
-              clean_cap_name.startsWith(clean_c_name)
+              (clean_c_strip_h.length >= 3 && clean_c_strip_h === clean_cap_strip_h) ||
+              (key_base_name && key_base_name === clean_cap_name)
             ) {
               is_name_match = true
             } else if (c.other_names && Array.isArray(c.other_names)) {
@@ -145,14 +147,18 @@ export function getAuthoritativeCapitalsAtYear (
                 let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
                 let on_lower = on_clean
                 let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '')
-                return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name || clean_on.replace(/h$/, '') === clean_cap_strip_h
+                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
+                return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name || (clean_on.replace(/h$/, '').length >= 3 && clean_on.replace(/h$/, '') === clean_cap_strip_h)
               })
             }
           }
 
+          let is_exact_coord_match = dist <= 0.01
+          if (!is_key_match && !is_name_match && !is_exact_coord_match)
+            continue
+
           if (is_name_match)
-            score += 50000
+            score += 100000
           if (year < 1975 && c.key.startsWith('stadester-'))
             score += 25000
           if (year >= 1975 && c.key.startsWith('ghsl-'))

@@ -40,6 +40,7 @@ export interface WorkerProcessedPoint {
   isCapital?: boolean
   key: string
   name: string
+  other_names?: string | string[]
   pixelRadius: number
   population: number
   position: [number, number, number]
@@ -53,9 +54,11 @@ export interface WorkerPlacedLabel {
   capitalColor?: [number, number, number, number]
   capitalOf?: string
   capitalStateId?: number | string
+  country?: string
   isCapital?: boolean
   key: string
   name: string
+  other_names?: string | string[]
   pixelRadius: number
   population: number
   position: [number, number, number]
@@ -416,6 +419,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           isCapital: is_cap,
           key: c.key,
           name: c.name,
+          other_names: c.other_names,
           pixelRadius: pixel_radius,
           population: c.population,
           position: [px, py, 0],
@@ -509,9 +513,11 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             capitalColor: cand.capitalColor,
             capitalOf: cand.capitalOf,
             capitalStateId: cand.capitalStateId,
+            country: cand.country,
             isCapital: cand.isCapital,
             key: cand.key,
             name: cand.name,
+            other_names: cand.other_names,
             pixelRadius: cand.pixelRadius,
             population: cand.population,
             position: cand.position,

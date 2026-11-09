@@ -38,3 +38,4 @@ tests/*
 *.njsproj
 *.sln
 *.sw?
+*.bak

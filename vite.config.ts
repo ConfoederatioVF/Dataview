@@ -12,6 +12,7 @@ import { loadAndParseLayers } from './core/server/layer_parser.ts'
 import { refreshRasterBmpPaths } from './core/server/raster_bmp_cache.ts'
 import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.ts'
 
+let atlas_file_mtimes = new Map<string, number>()
 let dataview_hot_timeouts = new Map<string, NodeJS.Timeout>()
 
 
@@ -108,12 +109,24 @@ function dataviewBackendPlugin (): Plugin {
       try {
         let defines = FilepathDefines.get()
         let atlas_root = path.resolve(import.meta.dirname, defines.root_folders.l_atlas || './data/atlas')
-        if (fs.existsSync(atlas_root))
-          server.watcher.add(atlas_root)
+        if (fs.existsSync(atlas_root)) {
+          let atlas_entries = fs.readdirSync(atlas_root)
+          for (let i = 0; i < atlas_entries.length; i++) {
+            let entry_name = atlas_entries[i]
+            if (entry_name.endsWith('.naissance') || entry_name.endsWith('.geojson')) {
+              let full_entry_path = path.join(atlas_root, entry_name)
+              let norm_entry = full_entry_path.replace(/\\/g, '/')
+              try {
+                atlas_file_mtimes.set(norm_entry, fs.statSync(full_entry_path).mtimeMs)
+                server.watcher.add(full_entry_path)
+              } catch {}
+            }
+          }
+        }
       } catch {}
 
       server.watcher.on('all', (arg0_event, arg1_file_path) => {
-        if (arg0_event === 'change' || arg0_event === 'add' || arg0_event === 'unlink')
+        if (arg0_event === 'change' || arg0_event === 'unlink')
           debouncedHandleDataviewHotUpdate(arg1_file_path, server)
       })
 
@@ -189,11 +202,15 @@ function debouncedHandleDataviewHotUpdate (arg0_file: string, arg1_server: any):
 
   //Declare local instance variables
   let existing_timeout: NodeJS.Timeout | undefined
-  let is_atlas_file = Boolean(
-    file.endsWith('.naissance') ||
-    (file.includes('atlas') && (file.endsWith('.json') || file.endsWith('.naissance')))
-  )
   let normalized_file = file.replace(/\\/g, '/')
+  let is_atlas_file = Boolean(
+    !normalized_file.includes('/data/atlas/cache/') &&
+    !normalized_file.includes('/data/atlas/temp/') &&
+    (
+      normalized_file.endsWith('.naissance') ||
+      (normalized_file.includes('/data/atlas/') && normalized_file.endsWith('.geojson'))
+    )
+  )
   let timeout_handle: NodeJS.Timeout
 
   //Guard clauses
@@ -246,11 +263,15 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
   let server = arg1_server
 
   //Declare local instance variables
-  let is_atlas_file = Boolean(
-    file.endsWith('.naissance') ||
-    (file.includes('atlas') && (file.endsWith('.json') || file.endsWith('.naissance')))
-  )
   let normalized_file = file.replace(/\\/g, '/')
+  let is_atlas_file = Boolean(
+    !normalized_file.includes('/data/atlas/cache/') &&
+    !normalized_file.includes('/data/atlas/temp/') &&
+    (
+      normalized_file.endsWith('.naissance') ||
+      (normalized_file.includes('/data/atlas/') && normalized_file.endsWith('.geojson'))
+    )
+  )
 
   //Guard clauses
   if (
@@ -273,6 +294,13 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
   //0. Handle Atlas .naissance and border cache hot updates
   if (is_atlas_file) {
     try {
+      let current_mtime = fs.existsSync(file) ? fs.statSync(file).mtimeMs : 0
+      let prev_mtime = atlas_file_mtimes.get(normalized_file)
+      if (prev_mtime !== undefined && current_mtime === prev_mtime)
+        return []
+      if (current_mtime > 0)
+        atlas_file_mtimes.set(normalized_file, current_mtime)
+
       console.log(`[HMR] Detected Atlas boundary dataset change: ${normalized_file}`)
       AtlasBordersService.clearCache()
       clearCompressedBordersCache()

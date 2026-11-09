@@ -45,7 +45,7 @@
             label_collision: true,
             large_city_contrast: 1.0,
             max_cities: 4000,
-            min_pop: 0.01,
+            min_pop: 1000,
             mobile_heuristic_culling: true,
             opacity: 0.7,
             prefer_least_diacritics: true,

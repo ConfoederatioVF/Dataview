@@ -50471,9 +50471,9 @@
     "timeline": [
       {
         "city": "Saint Helier",
-        "key": "stadester-Saint Helier-United Kingdom",
+        "key": "stadester-Saint Helier-Jersey",
         "start": "1291.1.1",
-        "start_frac": 1291.0027397260274,
+        "start_frac": 1291.0027397260276,
         "stop": "1603.3.24",
         "stop_frac": 1603.2301369863014
       }
@@ -65653,11 +65653,11 @@
     "timeline": [
       {
         "city": "Saint Helier",
-        "key": "stadester-Saint Helier-United Kingdom",
-        "start": "1945.5.9",
-        "start_frac": 1945.3534246575343,
+        "key": "stadester-Saint Helier-Jersey",
+        "start": "1603.3.24",
+        "start_frac": 1603.2301369863014,
         "stop": "2026.1.1",
-        "stop_frac": 2026.0027397260274
+        "stop_frac": 2026.0027397260276
       }
     ]
   },

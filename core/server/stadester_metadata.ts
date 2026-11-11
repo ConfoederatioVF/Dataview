@@ -505,7 +505,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
       if (!is_exact_coord_match && !is_name_match)
         continue
 
-      if (is_exact_coord_match && meta.name && !best_city.key.startsWith('ghsl-'))
+      if ((is_exact_coord_match || min_dist <= 15) && meta.name && !best_city.key.startsWith('ghsl-'))
         best_city.name = meta.name
 
       if (meta.historical_names && meta.historical_names.length > 0)
@@ -552,6 +552,11 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
               let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
               if (dist <= 25) {
+                let other_aliases = [
+                  normalizeCityAlias(other.name || ''),
+                  ...(Array.isArray(other.other_names) ? other.other_names.map(normalizeCityAlias) : (typeof other.other_names === 'string' ? [normalizeCityAlias(other.other_names)] : [])),
+                ].filter(Boolean)
+
                 let is_era_counterpart =
                   (best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
                   (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))
@@ -560,16 +565,17 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
                   (other.is_agglomeration && (other.is_agglomeration_of === local_best_name || other.is_agglomeration_of === local_meta_name))
                 )
 
-                if (!is_era_counterpart && !is_agg_counterpart)
+                let is_same_settlement_counterpart = Boolean(
+                  dist <= 15 && meta_aliases.some((ma) => other_aliases.includes(ma))
+                )
+
+                if (!is_era_counterpart && !is_agg_counterpart && !is_same_settlement_counterpart)
                   continue
 
-                let other_aliases = [
-                  normalizeCityAlias(other.name || ''),
-                  ...(Array.isArray(other.other_names) ? other.other_names.map(normalizeCityAlias) : (typeof other.other_names === 'string' ? [normalizeCityAlias(other.other_names)] : [])),
-                ].filter(Boolean)
-
-                let is_counterpart_name_match = is_agg_counterpart || meta_aliases.some((ma) => other_aliases.includes(ma))
+                let is_counterpart_name_match = is_agg_counterpart || is_same_settlement_counterpart || meta_aliases.some((ma) => other_aliases.includes(ma))
                 if (is_counterpart_name_match) {
+                  if (dist <= 15 && meta.name && !other.key.startsWith('ghsl-') && (is_same_settlement_counterpart || /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '')))
+                    other.name = meta.name
                   if (meta.historical_names && meta.historical_names.length > 0)
                     other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
                   if (meta.capital_records && meta.capital_records.length > 0) {

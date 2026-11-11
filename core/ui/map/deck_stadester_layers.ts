@@ -88,7 +88,7 @@ export function buildStadesterCityPoints (arg0_options: BuildStadesterPointsOpti
     return []
 
   //Function body
-  return stadester_cities.map((city) => {
+  let city_points: any[] = stadester_cities.map((city) => {
     let c_lat = (city.lat !== undefined) ? city.lat : city.coords[0]
     let c_lon = (city.lon !== undefined) ? city.lon : city.coords[1]
     let fill_color: [number, number, number, number] = [255, 255, 255, 220]
@@ -134,6 +134,21 @@ export function buildStadesterCityPoints (arg0_options: BuildStadesterPointsOpti
       shortName: short_name,
     }
   })
+
+  //Sort ascending by population and pixel radius so smaller cities are drawn first and larger cities render in front
+  city_points.sort((arg0_a, arg0_b) => {
+    let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+    let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+    if (a_pop !== b_pop)
+      return a_pop - b_pop
+
+    let a_rad = (arg0_a.pixelRadius !== undefined && !isNaN(arg0_a.pixelRadius)) ? arg0_a.pixelRadius : 0
+    let b_rad = (arg0_b.pixelRadius !== undefined && !isNaN(arg0_b.pixelRadius)) ? arg0_b.pixelRadius : 0
+    return a_rad - b_rad
+  })
+
+  //Return statement
+  return city_points
 }
 
 
@@ -185,6 +200,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
 
   //Declare local instance variables
   let layers_array: any[] = []
+  let sorted_city_points: any[] = []
 
   //Guard clauses
   if (!options.stadesterConfig?.enabled || !effective_points || effective_points.length === 0)
@@ -195,6 +211,18 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
   let is_halo = options.stadesterConfig.halo !== false && !options.stadesterConfig.filled
   let is_labels_visible = (options.stadesterConfig.showLabels !== undefined) ? options.stadesterConfig.showLabels : true
 
+  //Sort ascending by population and pixel radius so smaller cities are drawn first and larger cities render in front
+  sorted_city_points = [...effective_points].sort((arg0_a: any, arg0_b: any) => {
+    let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+    let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+    if (a_pop !== b_pop)
+      return a_pop - b_pop
+
+    let a_rad = (arg0_a.pixelRadius !== undefined && !isNaN(arg0_a.pixelRadius)) ? arg0_a.pixelRadius : 0
+    let b_rad = (arg0_b.pixelRadius !== undefined && !isNaN(arg0_b.pixelRadius)) ? arg0_b.pixelRadius : 0
+    return a_rad - b_rad
+  })
+
   let circle_opacity = (options.stadesterConfig.opacity !== undefined) ? options.stadesterConfig.opacity : 0.7
   let fill_alpha = Math.round(255 * circle_opacity)
   let stroke_alpha = Math.min(255, Math.round(255 * Math.min(1.0, circle_opacity * 1.25)))
@@ -204,7 +232,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
     layers_array.push(
       new TextLayer({
         id: `stadester-cities-${projection}`,
-        data: effective_points,
+        data: sorted_city_points,
         getText: () => (is_halo) ? '○' : '●',
         characterSet: ['●', '○'],
         fontFamily: 'Segoe UI Symbol, Arial, sans-serif',
@@ -268,7 +296,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
     layers_array.push(
       new ScatterplotLayer({
         id: `stadester-cities-${projection}`,
-        data: effective_points,
+        data: sorted_city_points,
         getPosition: (d: any) => d.position,
         getRadius: (d: any) => d.pixelRadius,
         getFillColor: (d: any) => {
@@ -434,6 +462,13 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
           active_capitals_list
         )
       }
+
+      //Sort labels ascending so smaller city labels render first and larger city labels render in front
+      visible_label_cities = [...visible_label_cities].sort((arg0_a: any, arg0_b: any) => {
+        let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+        let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+        return a_pop - b_pop
+      })
     }
 
     if (visible_label_cities && visible_label_cities.length > 0) {

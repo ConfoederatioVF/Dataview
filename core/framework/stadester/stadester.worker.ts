@@ -531,6 +531,25 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         }
       }
 
+      //Sort points ascending so smaller cities are drawn first and larger cities render in front
+      processed_points.sort((arg0_a, arg0_b) => {
+        let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+        let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+        if (a_pop !== b_pop)
+          return a_pop - b_pop
+
+        let a_rad = (arg0_a.pixelRadius !== undefined && !isNaN(arg0_a.pixelRadius)) ? arg0_a.pixelRadius : 0
+        let b_rad = (arg0_b.pixelRadius !== undefined && !isNaN(arg0_b.pixelRadius)) ? arg0_b.pixelRadius : 0
+        return a_rad - b_rad
+      })
+
+      //Sort placed labels ascending so smaller city labels render first and larger city labels render in front
+      placed_labels.sort((arg0_a, arg0_b) => {
+        let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+        let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+        return a_pop - b_pop
+      })
+
       self.postMessage({
         labels: placed_labels,
         points: processed_points,

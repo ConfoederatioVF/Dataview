@@ -24,6 +24,55 @@ export let _cache_cities_at_year = new Map<string, CityRenderPoint[]>()
 export let _cache_compact_cities = new Map<string, CompactCitiesPayload>()
 
 /**
+ * Returns the HYDE benchmark step interval (in years) at a given historical year.
+ *
+ * @param {number} arg0_year
+ *
+ * @returns {number}
+ */
+export function getHydeIntervalAtYear (arg0_year: number): number {
+  //Convert from parameters
+  let year = Number(arg0_year)
+
+  //Guard clauses
+  if (!Number.isFinite(year))
+    return 200
+
+  //Function body
+  if (year < 0)
+    return 1000
+  if (year < 1700)
+    return 100
+  if (year < 1950)
+    return 10
+
+  //Return statement
+  return 10
+}
+
+/**
+ * Returns the maximum allowed temporal proximity gap (`Math.max(200, hyde_interval)`) between two years.
+ *
+ * @param {number} arg0_y0
+ * @param {number} [arg1_y1]
+ *
+ * @returns {number}
+ */
+export function getMaxTemporalProximityGap (arg0_y0: number, arg1_y1?: number): number {
+  //Convert from parameters
+  let y0 = Number(arg0_y0)
+  let y1 = (arg1_y1 !== undefined) ? Number(arg1_y1) : y0
+
+  //Declare local instance variables
+  let interval_0 = getHydeIntervalAtYear(y0)
+  let interval_1 = getHydeIntervalAtYear(y1)
+  let mid_interval = getHydeIntervalAtYear((y0 + y1)/2)
+
+  //Return statement
+  return Math.max(200, interval_0, interval_1, mid_interval)
+}
+
+/**
  * Resolves and caches authoritative border capitals mapped to their best/closest contemporaneous cities.
  *
  * @param {string} [arg0_dataset_name='stadester_1.1']
@@ -342,8 +391,11 @@ export function getCitiesAtYear (
 
       let p0 = city.population ? (city.population[String(prev_yr)] || 0) : 0
       let p1 = city.population ? (city.population[String(next_yr)] || 0) : 0
+      let max_gap = getMaxTemporalProximityGap(prev_yr, next_yr)
 
-      if (p0 >= 0.01 && p1 >= 0.01 && next_yr > prev_yr) {
+      if ((next_yr - prev_yr) > max_gap && target_year > prev_yr && target_year < next_yr) {
+        pop = 0
+      } else if (p0 >= 0.01 && p1 >= 0.01 && next_yr > prev_yr) {
         let t = (target_year - prev_yr)/(next_yr - prev_yr)
         let log_val = Math.log10(p0) + t*(Math.log10(p1) - Math.log10(p0))
         let calc_pop = Math.pow(10, log_val)
@@ -380,8 +432,9 @@ export function getCitiesAtYear (
 
       let gp0 = city.population[String(g_prev_yr)] || 0
       let gp1 = city.population[String(g_next_yr)] || 0
+      let g_max_gap = getMaxTemporalProximityGap(g_prev_yr, g_next_yr)
 
-      if (gp0 >= 0.01 && gp1 >= 0.01 && g_next_yr > g_prev_yr) {
+      if (gp0 >= 0.01 && gp1 >= 0.01 && g_next_yr > g_prev_yr && (g_next_yr - g_prev_yr) <= g_max_gap) {
         growth_rate = Math.pow(gp1/gp0, 1/(g_next_yr - g_prev_yr)) - 1
       }
     }

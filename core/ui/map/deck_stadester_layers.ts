@@ -1,8 +1,8 @@
 import { COORDINATE_SYSTEM } from '@deck.gl/core'
 import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
-import * as d3Chromatic from 'd3-scale-chromatic'
 import { projectEqualEarth } from '@framework/geopng/equal_earth.ts'
-import type { CityPoint, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
+import { getPaletteLUT } from '@framework/geopng/palettes'
+import type { CityPoint, ColorPalette, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import {
   getCapitalColorRgba,
@@ -11,10 +11,29 @@ import {
 } from './deck_layer_palette_utils'
 import {
   getShortCityLabel,
-  reconcileCapitalWithAuthoritativeBorders,
   reconcileCitiesWithAuthoritativeBorders,
 } from './deck_capital_reconciliation.ts'
 
+let growth_lut_cache = new Map<string, Uint8Array>()
+let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
+  [0.08, [232, 121, 249]],
+  [0.06, [239, 68, 68]],
+  [0.03, [251, 146, 60]],
+  [0.01, [253, 224, 71]],
+  [0.00, [198, 219, 85]],
+  [-0.02, [69, 207, 119]],
+  [-0.04, [72, 156, 240]],
+  [-0.05, [93, 96, 226]],
+]
+
+/**
+ * Computes RGB colour for an annual city growth rate using cached numeric LUT/stops.
+ *
+ * @param {number} arg0_rate
+ * @param {string} [arg1_palette='Rainbow']
+ *
+ * @returns {[number, number, number]}
+ */
 export function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
   //Convert from parameters
   let palette = (arg1_palette) ? arg1_palette : 'Rainbow'
@@ -25,18 +44,69 @@ export function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number
     return [160, 160, 160]
 
   //Function body
-  //D3 continuous colour interpolation from -0.05 to +0.08
-  let interpolator = (d3Chromatic as any)[`interpolate${palette}`]
-  if (interpolator) {
-    let t = Math.max(0, Math.min(1, (r - (-0.05))/(0.08 - (-0.05))))
-    let color_str = interpolator(t)
-    let match = color_str.match(/\d+/g)
-    if (match && match.length >= 3)
-      return [parseInt(match[0], 10), parseInt(match[1], 10), parseInt(match[2], 10)]
+  if (palette !== 'Rainbow') {
+    try {
+      let lut = growth_lut_cache.get(palette)
+      if (!lut) {
+        lut = getPaletteLUT(palette as ColorPalette)
+        growth_lut_cache.set(palette, lut)
+      }
+      let norm_t = Math.max(0, Math.min(1, (r - (-0.05))/(0.08 - (-0.05))))
+      let lut_idx = Math.min(255, Math.max(0, Math.round(norm_t*255)))
+      return [lut[lut_idx*3], lut[lut_idx*3 + 1], lut[lut_idx*3 + 2]]
+    } catch {
+      //Fallback to Rainbow stops
+    }
+  }
+
+  if (r >= RAINBOW_GROWTH_STOPS[0][0])
+    return RAINBOW_GROWTH_STOPS[0][1]
+
+  let last_idx = RAINBOW_GROWTH_STOPS.length - 1
+  if (r <= RAINBOW_GROWTH_STOPS[last_idx][0])
+    return RAINBOW_GROWTH_STOPS[last_idx][1]
+
+  for (let i = 0; i < last_idx; i++) {
+    let hi = RAINBOW_GROWTH_STOPS[i][0]
+    let lo = RAINBOW_GROWTH_STOPS[i + 1][0]
+    if (r <= hi && r >= lo) {
+      let t = (hi === lo) ? 0 : (r - lo)/(hi - lo)
+      let c_hi = RAINBOW_GROWTH_STOPS[i][1]
+      let c_lo = RAINBOW_GROWTH_STOPS[i + 1][1]
+      return [
+        Math.round(c_lo[0] + t*(c_hi[0] - c_lo[0])),
+        Math.round(c_lo[1] + t*(c_hi[1] - c_lo[1])),
+        Math.round(c_lo[2] + t*(c_hi[2] - c_lo[2])),
+      ]
+    }
   }
 
   //Return statement
-  return [232, 121, 249]
+  return RAINBOW_GROWTH_STOPS[4][1]
+}
+
+/**
+ * Checks whether a city region matches the currently hovered region string.
+ *
+ * @param {string | undefined} arg0_city_region
+ * @param {string | null} arg1_hovered_region
+ *
+ * @returns {boolean}
+ */
+function isCityRegionHighlighted (arg0_city_region: string | undefined, arg1_hovered_region: string | null): boolean {
+  //Convert from parameters
+  let city_region = arg0_city_region
+  let hovered_region = arg1_hovered_region
+
+  //Guard clauses
+  if (!hovered_region || !city_region)
+    return false
+
+  //Declare local instance variables
+  let c_reg = city_region.toLowerCase()
+
+  //Return statement
+  return c_reg === hovered_region || c_reg.includes(hovered_region) || hovered_region.includes(c_reg)
 }
 
 
@@ -163,12 +233,14 @@ export interface BuildStadesterCityLayersOptions {
   authoritative_capitals_by_city: Map<string, any>
   effective_points: any[]
   hoveredCity?: CityPoint | null
+  hovered_region?: string | null
   is_cartesian: boolean
   is_drawing: boolean
   is_mobile: boolean
   onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
   projection: ProjectionType
+  reconciled_labels?: any[]
   selectedCityKey?: string | null
   stadesterConfig?: StadesterConfig
   stadesterLabels?: any[]
@@ -192,6 +264,9 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
   let active_state_ids = arg0_options.active_state_ids
   let authoritative_capitals_by_city = arg0_options.authoritative_capitals_by_city
   let effective_points = arg0_options.effective_points
+  let hovered_region = (arg0_options.hovered_region !== undefined)
+    ? arg0_options.hovered_region
+    : (arg0_options.hoveredCity?.region ? arg0_options.hoveredCity.region.toLowerCase().trim() : null)
   let is_cartesian = arg0_options.is_cartesian
   let is_drawing = arg0_options.is_drawing
   let is_mobile = arg0_options.is_mobile
@@ -200,7 +275,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
 
   //Declare local instance variables
   let layers_array: any[] = []
-  let sorted_city_points: any[] = []
+  let sorted_city_points: any[]
 
   //Guard clauses
   if (!options.stadesterConfig?.enabled || !effective_points || effective_points.length === 0)
@@ -211,17 +286,8 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
   let is_halo = options.stadesterConfig.halo !== false && !options.stadesterConfig.filled
   let is_labels_visible = (options.stadesterConfig.showLabels !== undefined) ? options.stadesterConfig.showLabels : true
 
-  //Sort ascending by population and pixel radius so smaller cities are drawn first and larger cities render in front
-  sorted_city_points = [...effective_points].sort((arg0_a: any, arg0_b: any) => {
-    let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
-    let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
-    if (a_pop !== b_pop)
-      return a_pop - b_pop
-
-    let a_rad = (arg0_a.pixelRadius !== undefined && !isNaN(arg0_a.pixelRadius)) ? arg0_a.pixelRadius : 0
-    let b_rad = (arg0_b.pixelRadius !== undefined && !isNaN(arg0_b.pixelRadius)) ? arg0_b.pixelRadius : 0
-    return a_rad - b_rad
-  })
+  //Preserve effective_points array reference (already pre-sorted ascending by population and pixelRadius) so Deck.gl avoids re-uploading GPU buffers
+  sorted_city_points = effective_points
 
   let circle_opacity = (options.stadesterConfig.opacity !== undefined) ? options.stadesterConfig.opacity : 0.7
   let fill_alpha = Math.round(255 * circle_opacity)
@@ -240,20 +306,17 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         getPosition: (d: any) => d.position,
         getSize: (d: any) => d.pixelRadius * 2,
         getColor: (d: any) => {
-          let is_region_highlighted = Boolean(
-            options.hoveredCity?.region &&
-            d.region &&
-            (d.region === options.hoveredCity.region ||
-             d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-             options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-          )
-          if (is_region_highlighted) {
+          if (isCityRegionHighlighted(d.region, hovered_region)) {
             let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
             let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
             let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
             return [r, g, b, Math.min(255, fill_alpha + 35)]
           }
           return [d.color[0], d.color[1], d.color[2], (is_halo) ? stroke_alpha : fill_alpha]
+        },
+        updateTriggers: {
+          getColor: [hovered_region, fill_alpha, stroke_alpha, is_halo],
+          getText: [is_halo],
         },
         getTextAnchor: 'middle',
         getAlignmentBaseline: 'center',
@@ -300,14 +363,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         getPosition: (d: any) => d.position,
         getRadius: (d: any) => d.pixelRadius,
         getFillColor: (d: any) => {
-          let is_region_highlighted = Boolean(
-            options.hoveredCity?.region &&
-            d.region &&
-            (d.region === options.hoveredCity.region ||
-             d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-             options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-          )
-          if (is_region_highlighted) {
+          if (isCityRegionHighlighted(d.region, hovered_region)) {
             let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
             let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
             let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
@@ -316,20 +372,17 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
           return [d.color[0], d.color[1], d.color[2], fill_alpha]
         },
         getLineColor: (d: any) => {
-          let is_region_highlighted = Boolean(
-            options.hoveredCity?.region &&
-            d.region &&
-            (d.region === options.hoveredCity.region ||
-             d.region.toLowerCase().includes(options.hoveredCity.region.toLowerCase()) ||
-             options.hoveredCity.region.toLowerCase().includes(d.region.toLowerCase()))
-          )
-          if (is_region_highlighted) {
+          if (isCityRegionHighlighted(d.region, hovered_region)) {
             let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
             let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
             let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
             return [r, g, b, 255]
           }
           return [d.color[0], d.color[1], d.color[2], stroke_alpha]
+        },
+        updateTriggers: {
+          getFillColor: [hovered_region, fill_alpha],
+          getLineColor: [hovered_region, stroke_alpha],
         },
         getLineWidth: 1.5,
         lineWidthUnits: 'pixels',
@@ -431,44 +484,48 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
 
   // City text labels
   if (is_labels_visible) {
-    let visible_label_cities = options.stadesterLabels
+    let visible_label_cities = options.reconciled_labels
 
-    if (visible_label_cities && visible_label_cities.length > 0) {
-      if (visible_label_cities[0]?.projection && visible_label_cities[0].projection !== projection)
-        visible_label_cities = undefined
-    }
+    if (visible_label_cities === undefined) {
+      visible_label_cities = options.stadesterLabels
 
-    if (visible_label_cities && visible_label_cities.length > 0) {
-      visible_label_cities = visible_label_cities.filter((arg0_c: any) =>
-        arg0_c &&
-        arg0_c.position &&
-        Number.isFinite(arg0_c.position[0]) &&
-        Number.isFinite(arg0_c.position[1]) &&
-        typeof arg0_c.shortName === 'string' &&
-        arg0_c.shortName.trim().length > 0
-      )
-
-      //Reconcile capital cities isomorphically with authoritative historical border features
-      if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
-        visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
-          visible_label_cities,
-          active_capitals_by_key,
-          active_capitals_by_name,
-          acapital_state_ids,
-          active_state_capitals_by_sid,
-          active_state_ids,
-          active_polity_names,
-          authoritative_capitals_by_city,
-          active_capitals_list
-        )
+      if (visible_label_cities && visible_label_cities.length > 0) {
+        if (visible_label_cities[0]?.projection && visible_label_cities[0].projection !== projection)
+          visible_label_cities = undefined
       }
 
-      //Sort labels ascending so smaller city labels render first and larger city labels render in front
-      visible_label_cities = [...visible_label_cities].sort((arg0_a: any, arg0_b: any) => {
-        let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
-        let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
-        return a_pop - b_pop
-      })
+      if (visible_label_cities && visible_label_cities.length > 0) {
+        visible_label_cities = visible_label_cities.filter((arg0_c: any) =>
+          arg0_c &&
+          arg0_c.position &&
+          Number.isFinite(arg0_c.position[0]) &&
+          Number.isFinite(arg0_c.position[1]) &&
+          typeof arg0_c.shortName === 'string' &&
+          arg0_c.shortName.trim().length > 0
+        )
+
+        //Reconcile capital cities isomorphically with authoritative historical border features
+        if (active_capitals_by_key.size > 0 || active_capitals_by_name.size > 0 || active_capitals_list.length > 0 || acapital_state_ids.size > 0 || active_state_ids.size > 0) {
+          visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
+            visible_label_cities,
+            active_capitals_by_key,
+            active_capitals_by_name,
+            acapital_state_ids,
+            active_state_capitals_by_sid,
+            active_state_ids,
+            active_polity_names,
+            authoritative_capitals_by_city,
+            active_capitals_list
+          )
+        }
+
+        //Sort labels ascending so smaller city labels render first and larger city labels render in front
+        visible_label_cities = [...visible_label_cities].sort((arg0_a: any, arg0_b: any) => {
+          let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+          let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+          return a_pop - b_pop
+        })
+      }
     }
 
     if (visible_label_cities && visible_label_cities.length > 0) {

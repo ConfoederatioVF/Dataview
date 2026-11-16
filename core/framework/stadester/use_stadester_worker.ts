@@ -41,6 +41,10 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
   let debounce_timer_ref = useRef<any>(null)
   let is_calculating: boolean
   let labels: WorkerPlacedLabel[]
+  let last_dispatch_ms_ref = useRef<number>(0)
+  let last_dispatched_cities_ref = useRef<CityPoint[] | null>(null)
+  let last_dispatched_opts_key_ref = useRef<string>('')
+  let last_dispatched_year_ref = useRef<number>(year)
   let last_projection_ref = useRef<ProjectionType>(projection)
   let points: WorkerProcessedPoint[]
   let req_id_ref = useRef<number>(0)
@@ -85,6 +89,8 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     }
 
     return () => {
+      if (debounce_timer_ref.current)
+        clearTimeout(debounce_timer_ref.current)
       if (worker)
         worker.terminate()
       worker_ref.current = null
@@ -112,7 +118,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     } as WorkerInMessage)
   }, [cities, year, config?.enabled])
 
-  //3. Dispatch layout computation on camera/viewport change
+  //3. Dispatch layout computation on camera/viewport change (immediate for data/config changes, 48ms throttle for drags)
   useEffect(() => {
     if (last_projection_ref.current !== projection) {
       last_projection_ref.current = projection
@@ -124,26 +130,48 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       set_points([])
       set_labels([])
       set_is_calculating(false)
+      last_dispatched_cities_ref.current = null
       return
     }
 
     if (!worker_ref.current)
       return
 
+    let growth_palette = config.growthPalette || 'Rainbow'
+    let opts_key = JSON.stringify([
+      config.bubbleSize ?? 1.0,
+      config.colorMode || 'growth',
+      config.display_options || null,
+      growth_palette,
+      config.halo !== false && !config.filled,
+      config.heuristicCulling !== undefined ? Boolean(config.heuristicCulling) : true,
+      config.labelCollision !== false,
+      config.largeCityContrast ?? 1.0,
+      config.showLabels !== false,
+      projection,
+    ])
+    let is_non_view_change = Boolean(
+      last_dispatched_cities_ref.current !== cities ||
+      last_dispatched_year_ref.current !== year ||
+      last_dispatched_opts_key_ref.current !== opts_key
+    )
     let current_req_id = ++req_id_ref.current
 
-    if (debounce_timer_ref.current)
-      clearTimeout(debounce_timer_ref.current)
-
-    debounce_timer_ref.current = setTimeout(() => {
-      set_is_calculating(true)
+    let dispatchLayout = function (): void {
       let window_h = (typeof window !== 'undefined') ? window.innerHeight : 1080
       let window_w = (typeof window !== 'undefined') ? window.innerWidth : 1920
+
+      last_dispatch_ms_ref.current = performance.now()
+      last_dispatched_cities_ref.current = cities
+      last_dispatched_year_ref.current = year
+      last_dispatched_opts_key_ref.current = opts_key
+      set_is_calculating(true)
 
       worker_ref.current?.postMessage({
         bubbleSize: config.bubbleSize ?? 1.0,
         colorMode: config.colorMode || 'growth',
         displayOptions: config.display_options,
+        growthPalette: growth_palette,
         heuristicCulling: (config.heuristicCulling !== undefined)
           ? Boolean(config.heuristicCulling)
           : true,
@@ -159,14 +187,36 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         windowH: window_h,
         windowW: window_w,
       } as WorkerInMessage)
-    }, 16) // Debounce by ~1 frame to prevent flooding during fast drags
+    }
+
+    if (debounce_timer_ref.current) {
+      clearTimeout(debounce_timer_ref.current)
+      debounce_timer_ref.current = null
+    }
+
+    if (is_non_view_change) {
+      dispatchLayout()
+    } else {
+      let elapsed_ms = performance.now() - last_dispatch_ms_ref.current
+      if (elapsed_ms >= 48) {
+        dispatchLayout()
+      } else {
+        debounce_timer_ref.current = setTimeout(() => {
+          debounce_timer_ref.current = null
+          dispatchLayout()
+        }, Math.max(4, Math.ceil(48 - elapsed_ms)))
+      }
+    }
 
     return () => {
-      if (debounce_timer_ref.current)
+      if (debounce_timer_ref.current) {
         clearTimeout(debounce_timer_ref.current)
+        debounce_timer_ref.current = null
+      }
     }
   }, [
     cities,
+    year,
     config?.enabled,
     config?.bubbleSize,
     config?.colorMode,

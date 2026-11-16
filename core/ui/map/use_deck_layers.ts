@@ -24,7 +24,10 @@ import {
   normalizeCapitalNameStem,
   normalizePrimaryCityKey,
 } from '@framework/stadester/city_metadata_framework.ts'
-import { buildAuthoritativeCapitalsByCity } from './deck_capital_reconciliation.ts'
+import {
+  buildAuthoritativeCapitalsByCity,
+  reconcileCitiesWithAuthoritativeBorders,
+} from './deck_capital_reconciliation.ts'
 import { MAP_CONFIG } from '@common'
 import {
   EquirectangularTileset2D,
@@ -136,12 +139,23 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   let b_scale = (options.stadesterConfig?.bubbleSize !== undefined) ? options.stadesterConfig.bubbleSize : 1
   let color_mode = options.stadesterConfig?.colorMode || 'growth'
   let growth_palette = options.stadesterConfig?.growthPalette || 'Rainbow'
+  let hovered_city_region = (color_mode === 'region' || color_mode === 'continent')
+    ? (options.hoveredCity?.region ? options.hoveredCity.region.toLowerCase().trim() : null)
+    : null
   let is_cities_enabled = Boolean(options.stadesterConfig?.enabled)
+  let is_labels_visible = (options.stadesterConfig?.showLabels !== undefined) ? options.stadesterConfig.showLabels : true
   let is_mobile = Boolean(options.isMobile)
   let projection = options.projection
   let stadester_cities = options.stadesterCities
+  let is_worker_points_matching_proj = Boolean(
+    options.stadesterPoints &&
+    options.stadesterPoints.length > 0 &&
+    (!options.stadesterPoints[0]?.projection || options.stadesterPoints[0]?.projection === projection)
+  )
 
   let stadester_points_data = useMemo(() => {
+    if (is_worker_points_matching_proj)
+      return []
     return buildStadesterCityPoints({
       b_scale,
       color_mode,
@@ -152,6 +166,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       stadester_cities,
     })
   }, [
+    is_worker_points_matching_proj,
     is_cities_enabled,
     stadester_cities,
     b_scale,
@@ -161,9 +176,11 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     projection,
   ])
 
-  //Return statement
-  return useMemo(() => {
-    //Declare local instance variables
+  let effective_points = is_worker_points_matching_proj
+    ? options.stadesterPoints!
+    : stadester_points_data
+
+  let border_lookup = useMemo(() => {
     let acapital_state_ids = new Set<string>()
     let active_capitals_by_key = new Map<string, any>()
     let active_capitals_by_name = new Map<string, any>()
@@ -171,48 +188,6 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     let active_polity_names = new Set<string>()
     let active_state_capitals_by_sid = new Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>()
     let active_state_ids = new Set<string>()
-    let authoritative_capitals_by_city = new Map<string, any>()
-    let basemap = options.basemap
-    let border_features_by_id = new Map<string, any>()
-    let border_features_by_name = new Map<string, any>()
-    let circle_overlay_config = options.circleOverlayConfig
-    let circle_pixel_data = options.circlePixelData
-    let countries_mode = options.countriesMode
-    let cursor_lng_lat = options.cursorLngLat
-    let custom_vector_features = options.customVectorFeatures
-    let custom_vector_visible = options.customVectorVisible !== false
-    let dragged_vertex_index = options.draggedVertexIndex ?? null
-    let draw_points = options.drawPoints || []
-    let drawn_polygon_feature = options.drawnPolygonFeature
-    let effective_selected_array: CountryFeature[] = []
-    let elevation_spikes_data = options.elevationSpikesData
-    let equal_earth_land_geo_json = options.equalEarthLandGeoJson
-    let graticule_paths = options.graticulePaths
-    let heightmap_config = options.heightmapConfig
-    let hovered_country = options.hoveredCountry
-    let hovered_vertex_index = options.hoveredVertexIndex ?? null
-    let invert_palette = options.invertPalette
-    let is_cartesian: boolean
-    let is_drawing = Boolean(options.isDrawing)
-    let is_editing_shape = Boolean(options.isEditingShape)
-    let is_historical_hovered_selected: boolean
-    let is_mobile = Boolean(options.isMobile)
-    let land_data: any
-    let land_geo_json = options.landGeoJson
-    let layers_array: any[] = []
-    let max_val = options.maxVal
-    let min_val = options.minVal
-    let opacity = options.opacity
-    let palette = options.palette
-    let projection = options.projection
-    let raster = options.raster
-    let raster_bounds = options.rasterBounds
-    let rendered_canvas = options.renderedCanvas
-    let selected_countries = options.selectedCountries
-    let selected_country = options.selectedCountry
-    let show_graticule = options.showGraticule
-
-    is_cartesian = (projection === 'Equirectangular' || projection === 'EqualEarth')
 
     if (options.historicalBordersData && options.historicalBordersData.features) {
       for (let i = 0; i < options.historicalBordersData.features.length; i++) {
@@ -222,15 +197,6 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
           continue
 
         let s_id = p.state_id !== undefined ? String(p.state_id) : (p.id !== undefined ? String(p.id) : undefined)
-
-        if (p.id !== undefined)
-          border_features_by_id.set(String(p.id), feat)
-        if (feat.id !== undefined)
-          border_features_by_id.set(String(feat.id), feat)
-        if (p.state_id !== undefined)
-          border_features_by_id.set(String(p.state_id), feat)
-        if (p.name)
-          border_features_by_name.set(p.name.toLowerCase().trim(), feat)
 
         if (s_id)
           active_state_ids.add(s_id)
@@ -321,6 +287,122 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
         }
       }
     }
+
+    return {
+      acapital_state_ids,
+      active_capitals_by_key,
+      active_capitals_by_name,
+      active_capitals_list,
+      active_polity_names,
+      active_state_capitals_by_sid,
+      active_state_ids,
+    }
+  }, [options.historicalBordersData])
+
+  let authoritative_capitals_by_city = useMemo(() => {
+    return buildAuthoritativeCapitalsByCity(
+      border_lookup.active_capitals_list,
+      effective_points,
+      options.timelineYear
+    )
+  }, [border_lookup.active_capitals_list, effective_points, options.timelineYear])
+
+  let reconciled_stadester_labels = useMemo(() => {
+    if (!is_cities_enabled || !is_labels_visible || !options.stadesterLabels || options.stadesterLabels.length === 0)
+      return []
+    if (options.stadesterLabels[0]?.projection && options.stadesterLabels[0].projection !== projection)
+      return []
+
+    let visible_label_cities = options.stadesterLabels.filter((arg0_c: any) =>
+      arg0_c &&
+      arg0_c.position &&
+      Number.isFinite(arg0_c.position[0]) &&
+      Number.isFinite(arg0_c.position[1]) &&
+      typeof arg0_c.shortName === 'string' &&
+      arg0_c.shortName.trim().length > 0
+    )
+
+    if (visible_label_cities.length === 0)
+      return []
+
+    if (
+      border_lookup.active_capitals_by_key.size > 0 ||
+      border_lookup.active_capitals_by_name.size > 0 ||
+      border_lookup.active_capitals_list.length > 0 ||
+      border_lookup.acapital_state_ids.size > 0 ||
+      border_lookup.active_state_ids.size > 0
+    ) {
+      visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
+        visible_label_cities,
+        border_lookup.active_capitals_by_key,
+        border_lookup.active_capitals_by_name,
+        border_lookup.acapital_state_ids,
+        border_lookup.active_state_capitals_by_sid,
+        border_lookup.active_state_ids,
+        border_lookup.active_polity_names,
+        authoritative_capitals_by_city,
+        border_lookup.active_capitals_list
+      )
+    }
+
+    visible_label_cities.sort((arg0_a: any, arg0_b: any) => {
+      let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
+      let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
+      return a_pop - b_pop
+    })
+
+    return visible_label_cities
+  }, [
+    is_cities_enabled,
+    is_labels_visible,
+    options.stadesterLabels,
+    projection,
+    border_lookup,
+    authoritative_capitals_by_city,
+  ])
+
+  //Return statement
+  return useMemo(() => {
+    //Declare local instance variables
+    let basemap = options.basemap
+    let circle_overlay_config = options.circleOverlayConfig
+    let circle_pixel_data = options.circlePixelData
+    let countries_mode = options.countriesMode
+    let cursor_lng_lat = options.cursorLngLat
+    let custom_vector_features = options.customVectorFeatures
+    let custom_vector_visible = options.customVectorVisible !== false
+    let dragged_vertex_index = options.draggedVertexIndex ?? null
+    let draw_points = options.drawPoints || []
+    let drawn_polygon_feature = options.drawnPolygonFeature
+    let effective_selected_array: CountryFeature[] = []
+    let elevation_spikes_data = options.elevationSpikesData
+    let equal_earth_land_geo_json = options.equalEarthLandGeoJson
+    let graticule_paths = options.graticulePaths
+    let heightmap_config = options.heightmapConfig
+    let hovered_country = options.hoveredCountry
+    let hovered_vertex_index = options.hoveredVertexIndex ?? null
+    let invert_palette = options.invertPalette
+    let is_cartesian: boolean
+    let is_drawing = Boolean(options.isDrawing)
+    let is_editing_shape = Boolean(options.isEditingShape)
+    let is_historical_hovered_selected: boolean
+    let is_mobile = Boolean(options.isMobile)
+    let land_data: any
+    let land_geo_json = options.landGeoJson
+    let layers_array: any[] = []
+    let max_val = options.maxVal
+    let min_val = options.minVal
+    let opacity = options.opacity
+    let palette = options.palette
+    let projection = options.projection
+    let raster = options.raster
+    let raster_bounds = options.rasterBounds
+    let rendered_canvas = options.renderedCanvas
+    let selected_countries = options.selectedCountries
+    let selected_country = options.selectedCountry
+    let show_graticule = options.showGraticule
+
+    is_cartesian = (projection === 'Equirectangular' || projection === 'EqualEarth')
 
     if (selected_countries && selected_countries.length > 0) {
       effective_selected_array = [...selected_countries]
@@ -648,39 +730,24 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       layers_array.push(draw_tool_layers[i])
 
     //9. Stadestér Historical Cities
-    let is_worker_points_matching_proj = Boolean(
-      options.stadesterPoints &&
-      options.stadesterPoints.length > 0 &&
-      (!options.stadesterPoints[0]?.projection || options.stadesterPoints[0]?.projection === projection)
-    )
-    let effective_points = is_worker_points_matching_proj
-      ? options.stadesterPoints!
-      : stadester_points_data
-
-    //Pre-match active capitals to cities by coordinate proximity and key
-    authoritative_capitals_by_city = buildAuthoritativeCapitalsByCity(
-      active_capitals_list,
-      effective_points,
-      options.timelineYear
-    )
-
     let city_layers = buildStadesterCityLayers({
-      acapital_state_ids,
-      active_capitals_by_key,
-      active_capitals_by_name,
-      active_capitals_list,
-      active_polity_names,
-      active_state_capitals_by_sid,
-      active_state_ids,
+      acapital_state_ids: border_lookup.acapital_state_ids,
+      active_capitals_by_key: border_lookup.active_capitals_by_key,
+      active_capitals_by_name: border_lookup.active_capitals_by_name,
+      active_capitals_list: border_lookup.active_capitals_list,
+      active_polity_names: border_lookup.active_polity_names,
+      active_state_capitals_by_sid: border_lookup.active_state_capitals_by_sid,
+      active_state_ids: border_lookup.active_state_ids,
       authoritative_capitals_by_city,
       effective_points,
-      hoveredCity: options.hoveredCity,
+      hovered_region: hovered_city_region,
       is_cartesian,
       is_drawing,
       is_mobile,
       onHoverCity: options.onHoverCity,
       onSelectCity: options.onSelectCity,
       projection,
+      reconciled_labels: reconciled_stadester_labels,
       selectedCityKey: options.selectedCityKey,
       stadesterConfig: options.stadesterConfig,
       stadesterLabels: options.stadesterLabels,
@@ -714,14 +781,15 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     options.selectedCountries,
     options.countriesMode,
     options.hoveredCountry,
-    stadester_points_data,
-    options.stadesterPoints,
-    options.stadesterLabels,
+    effective_points,
+    reconciled_stadester_labels,
+    border_lookup,
+    authoritative_capitals_by_city,
     options.stadesterConfig,
     options.selectedCityKey,
     options.onSelectCity,
     options.onHoverCity,
-    options.hoveredCity,
+    hovered_city_region,
     options.historicalBordersData,
     options.historicalBordersConfig,
     options.selectedHistoricalFeature,

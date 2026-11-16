@@ -414,6 +414,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
   //Declare local instance variables
   let all_keys = Object.keys(indexed)
   let binding_state = new Map<string, { has_modern_entry: boolean; has_name_match: boolean; max_hn_year: number }>()
+  let city_alias_cache = new Map<string, { aliases: string[]; stems: string[] }>()
   let meta_list = loadCityMetadata()
   let spatial_grid: Record<string, CityIndexEntry[]> = {}
 
@@ -456,6 +457,16 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     return { aliases, stems }
   }
 
+  let getCachedCityAliases = function (arg0_city: CityIndexEntry): { aliases: string[]; stems: string[] } {
+    let cache_k = arg0_city.key
+    let cached = city_alias_cache.get(cache_k)
+    if (cached)
+      return cached
+    let built = buildAliasSet(arg0_city.name, arg0_city.other_names)
+    city_alias_cache.set(cache_k, built)
+    return built
+  }
+
   for (let i = 0; i < meta_list.length; i++) {
     let best_city: CityIndexEntry | null = null
     let best_exact_city: CityIndexEntry | null = null
@@ -492,7 +503,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
                 best_exact_city = candidate
               }
               if (dist <= 50 && dist < min_named_dist) {
-                let cand_info = buildAliasSet(candidate.name, candidate.other_names)
+                let cand_info = getCachedCityAliases(candidate)
                 let alias_hit = meta_aliases.some((ma) => cand_info.aliases.includes(ma))
                 let stem_hit = meta_stems.some((ms) => ms.length >= 3 && cand_info.stems.includes(ms))
                 if (alias_hit || stem_hit) {
@@ -517,7 +528,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     if (best_city && min_dist <= 50) {
       let is_exact_coord_match = min_dist <= 0.1
       let local_best_name = normalizeCityAlias(best_city.name || '')
-      let best_info = buildAliasSet(best_city.name, best_city.other_names)
+      let best_info = getCachedCityAliases(best_city)
       let is_name_match =
         meta_aliases.some((ma) => best_info.aliases.includes(ma)) ||
         meta_stems.some((ms) => ms.length >= 3 && best_info.stems.includes(ms))
@@ -571,10 +582,13 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
           meta_extra_aliases.push(best_city.name)
         best_city.name = meta.name
         best_city.metadata_name = meta.name
+        city_alias_cache.delete(best_city.key)
       }
 
-      if (is_name_match || !prev_binding?.has_name_match)
+      if (is_name_match || !prev_binding?.has_name_match) {
         mergeCityOtherNames(best_city, meta_extra_aliases)
+        city_alias_cache.delete(best_city.key)
+      }
 
       if (meta.historical_names && meta.historical_names.length > 0 && (is_name_match || !prev_binding?.has_name_match || !meta_is_modern))
         best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
@@ -601,7 +615,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
               let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
               if (dist <= 25) {
-                let other_info = buildAliasSet(other.name, other.other_names)
+                let other_info = getCachedCityAliases(other)
 
                 let is_era_counterpart =
                   (best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
@@ -641,6 +655,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
                     other.metadata_name = meta.name
                   }
                   mergeCityOtherNames(other, meta_extra_aliases)
+                  city_alias_cache.delete(other.key)
                   if (meta.historical_names && meta.historical_names.length > 0)
                     other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
                   binding_state.set(other.key, {

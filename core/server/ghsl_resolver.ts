@@ -166,10 +166,16 @@ export let clearStadesterDiskCache = function (): void {
  *
  * @param {Record<string, any>} arg0_raw_data
  * @param {boolean} [arg1_append=false]
+ * @param {boolean} [arg2_silent=false]
  */
-export let indexHistoricalCities = function (arg0_raw_data: Record<string, any>, arg1_append?: boolean): void {
+export let indexHistoricalCities = function (
+  arg0_raw_data: Record<string, any>,
+  arg1_append?: boolean,
+  arg2_silent?: boolean
+): void {
   //Convert from parameters
   let append_mode = Boolean(arg1_append)
+  let is_silent = Boolean(arg2_silent)
   let raw_data = arg0_raw_data
 
   //Declare local instance variables
@@ -182,27 +188,44 @@ export let indexHistoricalCities = function (arg0_raw_data: Record<string, any>,
   for (let i = 0; i < all_keys.length; i++) {
     let key = all_keys[i]
     let item = raw_data[key]
+    if (!item || !item.coords || !Array.isArray(item.coords) || key.startsWith('ghsl-'))
+      continue
+
+    let is_historical = key.startsWith('stadester-') || (item.min_year !== undefined && item.min_year < 1975)
+    let max_p = (typeof item.max_pop === 'number') ? item.max_pop : 0
+    let pop_obj = item.population || {}
+
+    if (!is_historical || typeof item.max_pop !== 'number') {
+      let pop_keys = Object.keys(pop_obj)
+      for (let x = 0; x < pop_keys.length; x++) {
+        let pv = pop_obj[pop_keys[x]]
+        let yr = Number(pop_keys[x])
+        if (yr < 1975)
+          is_historical = true
+        if (typeof pv === 'number' && pv > max_p)
+          max_p = pv
+      }
+    }
+
+    if (!is_historical)
+      continue
+
     let name = item.name || key
+    if (!isCorruptedCityName(name)) {
+      let clean_name = cleanCandidateCityString(name)
 
-    if (key.startsWith('stadester-') && item.coords && Array.isArray(item.coords)) {
-      if (!isCorruptedCityName(name)) {
-        let pop_obj = item.population || {}
-        let pop_vals = Object.values(pop_obj) as number[]
-        let max_p = pop_vals.length > 0 ? Math.max(...pop_vals) : 0
-        let clean_name = cleanCandidateCityString(name)
-
-        if (clean_name && !isCorruptedCityName(clean_name)) {
-          historical_cities_index.push({
-            coords: [item.coords[0], item.coords[1]],
-            maxPop: max_p,
-            name: clean_name,
-          })
-        }
+      if (clean_name && !isCorruptedCityName(clean_name)) {
+        historical_cities_index.push({
+          coords: [item.coords[0], item.coords[1]],
+          maxPop: max_p,
+          name: clean_name,
+        })
       }
     }
   }
 
-  console.log(`[GhslResolver] Indexed ${historical_cities_index.length} clean historical reference cities.`)
+  if (!is_silent && !append_mode)
+    console.log(`[GhslResolver] Indexed ${historical_cities_index.length} clean historical reference cities.`)
 }
 
 /**

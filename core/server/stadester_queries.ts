@@ -28,6 +28,134 @@ export let _cache_cities_at_year = new Map<string, CityRenderPoint[]>()
 export let _cache_compact_cities = new Map<string, CompactCitiesPayload>()
 
 /**
+ * Binary-searches sorted ascending years for the first index whose value is >= target_year.
+ *
+ * @param {number[]} arg0_sorted_years
+ * @param {number} arg1_target_year
+ *
+ * @returns {number}
+ */
+export function findLowerBoundIndex (arg0_sorted_years: number[], arg1_target_year: number): number {
+  //Convert from parameters
+  let sorted_years = arg0_sorted_years
+  let target_year = arg1_target_year
+
+  //Declare local instance variables
+  let hi = sorted_years.length
+  let lo = 0
+
+  //Function body
+  for (let i = 0; i < 32 && lo < hi; i++) {
+    let mid = (lo + hi) >> 1
+    if (sorted_years[mid] < target_year) {
+      lo = mid + 1
+    } else {
+      hi = mid
+    }
+  }
+
+  //Return statement
+  return lo
+}
+
+
+/**
+ * Computes continuous compound annual growth rate around target_year,
+ * suppressing single-step annual source splice discontinuities (e.g. 2024->2025 projection scalars).
+ *
+ * @param {Record<string, number> | undefined} arg0_population
+ * @param {number[]} arg1_pop_years
+ * @param {number} arg2_target_year
+ *
+ * @returns {number}
+ */
+export function computeCityAnnualGrowthRate (
+  arg0_population: Record<string, number> | undefined,
+  arg1_pop_years: number[],
+  arg2_target_year: number
+): number {
+  //Convert from parameters
+  let pop_years = arg1_pop_years
+  let population = arg0_population
+  let target_year = arg2_target_year
+
+  //Declare local instance variables
+  let idx: number
+  let max_gap: number
+  let median_rate: number
+  let n = pop_years ? pop_years.length : 0
+  let p0: number
+  let p1: number
+  let prev_rate: number
+  let raw_rate: number
+  let window_rates: number[] = []
+  let y0: number
+  let y1: number
+
+  //Guard clauses
+  if (!population || n < 2)
+    return 0
+
+  //Function body
+  if (target_year <= pop_years[0]) {
+    idx = 1
+  } else if (target_year >= pop_years[n - 1]) {
+    idx = n - 1
+  } else {
+    idx = Math.max(1, findLowerBoundIndex(pop_years, target_year))
+    if (idx >= n)
+      idx = n - 1
+  }
+
+  y0 = pop_years[idx - 1]
+  y1 = pop_years[idx]
+  p0 = population[String(y0)] || 0
+  p1 = population[String(y1)] || 0
+  max_gap = getMaxTemporalProximityGap(y0, y1)
+
+  if (p0 < 0.01 || p1 < 0.01 || y1 <= y0 || (y1 - y0) > max_gap)
+    return 0
+
+  raw_rate = Math.pow(p1/p0, 1/(y1 - y0)) - 1
+
+  if ((y1 - y0) <= 2) {
+    let end_k = Math.min(n - 1, idx + 1)
+    let start_k = Math.max(1, idx - 2)
+
+    for (let i = start_k; i <= end_k; i++) {
+      let wy0 = pop_years[i - 1]
+      let wy1 = pop_years[i]
+      let wp0 = population[String(wy0)] || 0
+      let wp1 = population[String(wy1)] || 0
+
+      if ((wy1 - wy0) <= 2 && wp0 >= 0.01 && wp1 >= 0.01)
+        window_rates.push(Math.pow(wp1/wp0, 1/(wy1 - wy0)) - 1)
+    }
+
+    if (window_rates.length >= 3) {
+      window_rates.sort((arg0_a, arg0_b) => arg0_a - arg0_b)
+      let mid = window_rates.length >> 1
+      median_rate = (window_rates.length%2 === 1)
+        ? window_rates[mid]
+        : 0.5*(window_rates[mid - 1] + window_rates[mid])
+
+      if (Math.abs(raw_rate - median_rate) > 0.015)
+        return median_rate
+    } else if (idx === n - 1 && idx >= 2 && (y0 - pop_years[idx - 2]) <= 2) {
+      let p_prev2 = population[String(pop_years[idx - 2])] || 0
+      if (p_prev2 >= 0.01) {
+        prev_rate = Math.pow(p0/p_prev2, 1/(y0 - pop_years[idx - 2])) - 1
+        if (Math.abs(raw_rate - prev_rate) > 0.015)
+          return prev_rate
+      }
+    }
+  }
+
+  //Return statement
+  return raw_rate
+}
+
+/**
  * Returns the HYDE benchmark step interval (in years) at a given historical year.
  *
  * @param {number} arg0_year
@@ -421,13 +549,11 @@ export function getCitiesAtYear (
     } else if (target_year >= end_yr) {
       pop = city.population ? (city.population[String(end_yr)] || 0) : 0
     } else {
-      for (let x = 0; x < pop_years.length - 1; x++) {
-        if (target_year >= pop_years[x] && target_year <= pop_years[x + 1]) {
-          prev_yr = pop_years[x]
-          next_yr = pop_years[x + 1]
-          break
-        }
-      }
+      let pop_idx = Math.max(1, findLowerBoundIndex(pop_years, target_year))
+      if (pop_idx >= pop_years.length)
+        pop_idx = pop_years.length - 1
+      prev_yr = pop_years[pop_idx - 1]
+      next_yr = pop_years[pop_idx]
 
       let p0 = city.population ? (city.population[String(prev_yr)] || 0) : 0
       let p1 = city.population ? (city.population[String(next_yr)] || 0) : 0
@@ -449,35 +575,8 @@ export function getCitiesAtYear (
       }
     }
 
-    //Calculate continuous annual growth rate around target_year (logarithmic slope)
-    if (city.population && pop_years.length > 1) {
-      let g_next_yr = pop_years[pop_years.length - 1]
-      let g_prev_yr = pop_years[0]
-
-      if (target_year <= pop_years[0]) {
-        g_prev_yr = pop_years[0]
-        g_next_yr = pop_years[1]
-      } else if (target_year >= pop_years[pop_years.length - 1]) {
-        g_prev_yr = pop_years[pop_years.length - 2]
-        g_next_yr = pop_years[pop_years.length - 1]
-      } else {
-        for (let x = 0; x < pop_years.length - 1; x++) {
-          if (target_year >= pop_years[x] && target_year <= pop_years[x + 1]) {
-            g_prev_yr = pop_years[x]
-            g_next_yr = pop_years[x + 1]
-            break
-          }
-        }
-      }
-
-      let gp0 = city.population[String(g_prev_yr)] || 0
-      let gp1 = city.population[String(g_next_yr)] || 0
-      let g_max_gap = getMaxTemporalProximityGap(g_prev_yr, g_next_yr)
-
-      if (gp0 >= 0.01 && gp1 >= 0.01 && g_next_yr > g_prev_yr && (g_next_yr - g_prev_yr) <= g_max_gap) {
-        growth_rate = Math.pow(gp1/gp0, 1/(g_next_yr - g_prev_yr)) - 1
-      }
-    }
+    //Calculate continuous annual growth rate around target_year (despiking single-step annual splice jumps)
+    growth_rate = computeCityAnnualGrowthRate(city.population, pop_years, target_year)
 
     if (pop < 0.01) {
       if (cshapes_capitals_by_city_key.has(city.key)) {

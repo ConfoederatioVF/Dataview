@@ -490,12 +490,74 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
   })
 
   let worker_result = useStadesterWorker({
-    cities: stadester_cities || [],
+    cities: stadester_cities || EMPTY_ARRAY,
     config: stadester_config,
     projection,
     viewState: proj_view_states[projection],
     year: timeline_year || 1950,
   })
+
+  let handle_deck_hover_city = useCallback(
+    (arg0_city: CityPoint | null, arg1_x?: number, arg2_y?: number) => {
+      if (is_drawing)
+        return
+      set_hovered_city((arg0_prev) => ((arg0_prev?.key || null) === (arg0_city?.key || null) ? arg0_prev : arg0_city))
+      if (!arg0_city) {
+        set_hovered_city_pos((arg0_prev) => (arg0_prev === null ? arg0_prev : null))
+      } else if (arg1_x !== undefined && arg2_y !== undefined) {
+        set_hovered_city_pos((arg0_prev) => (
+          (arg0_prev && arg0_prev.x === arg1_x && arg0_prev.y === arg2_y)
+            ? arg0_prev
+            : { x: arg1_x, y: arg2_y }
+        ))
+      }
+      if (on_hover_city)
+        on_hover_city(arg0_city, arg1_x, arg2_y)
+    },
+    [is_drawing, on_hover_city]
+  )
+
+  let handle_hover_historical_feature = useCallback(
+    (arg0_feat: any) => {
+      if (is_drawing)
+        return
+      let feat = arg0_feat ? (arg0_feat as HistoricalBorderFeature) : null
+      set_hovered_historical_feature((arg0_prev) => (arg0_prev === feat ? arg0_prev : feat))
+    },
+    [is_drawing]
+  )
+
+  let handle_select_border_feature = useCallback(
+    (arg0_feat: any, arg1_coord?: [number, number], arg2_x?: number, arg3_y?: number) => {
+      if (is_drawing)
+        return
+      let hist_feat = arg0_feat as unknown as HistoricalBorderFeature
+      set_nav_history([])
+      set_active_panel_type('country')
+      if (on_close_city_details)
+        on_close_city_details()
+      set_selected_historical_feature(hist_feat)
+      if (arg1_coord)
+        set_selected_historical_anchor_coord([arg1_coord[0], arg1_coord[1]])
+      if (arg2_x !== undefined && arg3_y !== undefined)
+        set_selected_historical_anchor_screen({ x: arg2_x, y: arg3_y })
+      if (on_toggle_country)
+        on_toggle_country(arg0_feat as unknown as CountryFeature)
+      else if (on_select_country)
+        on_select_country(arg0_feat as unknown as CountryFeature)
+    },
+    [
+      is_drawing,
+      on_close_city_details,
+      on_select_country,
+      on_toggle_country,
+      set_active_panel_type,
+      set_nav_history,
+      set_selected_historical_anchor_coord,
+      set_selected_historical_anchor_screen,
+      set_selected_historical_feature,
+    ]
+  )
 
   layers = useDeckLayers({
     activeLayerId: props.activeLayerId,
@@ -527,79 +589,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     maxVal: max_val,
     minVal: min_val,
     onFinishDraw: on_finish_draw,
-    onHoverCity: (arg0_city, arg1_x, arg2_y) => {
-      if (is_drawing)
-        return
-      set_hovered_city(arg0_city)
-      if (arg1_x !== undefined && arg2_y !== undefined)
-        set_hovered_city_pos({ x: arg1_x, y: arg2_y })
-      if (on_hover_city)
-        on_hover_city(arg0_city, arg1_x, arg2_y)
-    },
-    onHoverCustomVectorFeature: (feat) => {
-      if (is_drawing)
-        return
-      set_hovered_historical_feature(feat as unknown as HistoricalBorderFeature | null)
-    },
-    onHoverHistoricalFeature: (feat) => {
-      if (is_drawing)
-        return
-      set_hovered_historical_feature(feat)
-    },
+    onHoverCity: handle_deck_hover_city,
+    onHoverCustomVectorFeature: handle_hover_historical_feature,
+    onHoverHistoricalFeature: handle_hover_historical_feature,
     onSelectCity: handle_map_select_city,
-    onSelectCustomVectorFeature: (feat, coord, x, y) => {
-      if (is_drawing)
-        return
-      let hist_feat = feat as unknown as HistoricalBorderFeature
-      set_nav_history([])
-      set_active_panel_type('country')
-      if (on_close_city_details)
-        on_close_city_details()
-      set_selected_historical_feature(hist_feat)
-      if (coord)
-        set_selected_historical_anchor_coord([coord[0], coord[1]])
-      if (x !== undefined && y !== undefined)
-        set_selected_historical_anchor_screen({ x, y })
-      if (on_toggle_country)
-        on_toggle_country(feat)
-      else if (on_select_country)
-        on_select_country(feat)
-    },
-    onSelectDrawnPolygon: (feat, coord, x, y) => {
-      if (is_drawing)
-        return
-      let hist_feat = feat as unknown as HistoricalBorderFeature
-      set_nav_history([])
-      set_active_panel_type('country')
-      if (on_close_city_details)
-        on_close_city_details()
-      set_selected_historical_feature(hist_feat)
-      if (coord)
-        set_selected_historical_anchor_coord([coord[0], coord[1]])
-      if (x !== undefined && y !== undefined)
-        set_selected_historical_anchor_screen({ x, y })
-      if (on_toggle_country)
-        on_toggle_country(feat)
-      else if (on_select_country)
-        on_select_country(feat)
-    },
-    onSelectHistoricalFeature: (feat, coord, x, y) => {
-      if (is_drawing)
-        return
-      set_nav_history([])
-      set_active_panel_type('country')
-      if (on_close_city_details)
-        on_close_city_details()
-      set_selected_historical_feature(feat)
-      if (coord)
-        set_selected_historical_anchor_coord([coord[0], coord[1]])
-      if (x !== undefined && y !== undefined)
-        set_selected_historical_anchor_screen({ x, y })
-      if (on_toggle_country)
-        on_toggle_country(feat as unknown as CountryFeature)
-      else if (on_select_country)
-        on_select_country(feat as unknown as CountryFeature)
-    },
+    onSelectCustomVectorFeature: handle_select_border_feature,
+    onSelectDrawnPolygon: handle_select_border_feature,
+    onSelectHistoricalFeature: handle_select_border_feature,
     opacity,
     palette,
     projection,

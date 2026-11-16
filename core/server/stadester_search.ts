@@ -278,7 +278,17 @@ export function getCityByKey (
   }
 
   //Direct key match
-  found = indexed[city_key] || indexed['stadester-' + city_key] || indexed['ghsl-' + city_key] || indexed['oxford-' + city_key]
+  let bare_key = city_key.replace(/^(stadester-|ghsl-|oxford-)/i, '')
+  found = indexed[city_key] || indexed[bare_key] || indexed['stadester-' + bare_key] || indexed['ghsl-' + bare_key] || indexed['oxford-' + bare_key]
+
+  //If found directly by primary key, return immediately without allocating keys array
+  if (found) {
+    if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
+      return null
+
+    //Return statement
+    return enrichCity(found)
+  }
 
   all_keys = Object.keys(indexed)
   city_key_lower = city_key.toLowerCase().trim()
@@ -286,7 +296,7 @@ export function getCityByKey (
   stripped_key = city_key_lower.replace(/^(stadester-|ghsl-|oxford-)/, '')
   stripped_key_nfd = stripped_key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
-  if (!found && city_key_nfd) {
+  if (city_key_nfd) {
     for (let i = 0; i < all_keys.length; i++) {
       let entry_k = all_keys[i]
       let norm_k = entry_k.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
@@ -297,7 +307,6 @@ export function getCityByKey (
     }
   }
 
-  //If found directly by primary key, return immediately without candidate search
   if (found) {
     if (isBuggedCityName(found.name, bugged_set) || (found.key && isBuggedCityName(found.key, bugged_set)))
       return null

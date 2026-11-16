@@ -7,6 +7,7 @@ import { applyCityMetadata, applyStateCapitals } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
 
 let datasets_cache = new Map<string, Record<string, CityIndexEntry>>()
+let INDEX_CACHE_VERSION = 2
 let spatial_grid_by_dataset = new Map<string, Map<string, string[]>>()
 
 export interface ResolvedDatasetSources {
@@ -110,6 +111,87 @@ export function getDatasetFilePath (arg0_dataset_name?: string): string {
 
 
 /**
+ * Checks whether a persisted Stadestér cache file is newer than dataset shards, metadata, and capitals.
+ *
+ * @param {string} arg0_cache_path
+ * @param {number} arg1_max_source_mtime
+ *
+ * @returns {boolean}
+ */
+function isDatasetDiskCacheFresh (arg0_cache_path: string, arg1_max_source_mtime: number): boolean {
+  //Convert from parameters
+  let cache_path = arg0_cache_path
+  let max_source_mtime = arg1_max_source_mtime
+
+  //Declare local instance variables
+  let cap_file_path = FilepathDefines.get().filepaths.stadester_capitals
+  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
+
+  //Guard clauses
+  if (!fs.existsSync(cache_path))
+    return false
+
+  //Function body
+  let cache_stat = fs.statSync(cache_path)
+  if (cache_stat.size <= 1000 || cache_stat.mtimeMs < max_source_mtime)
+    return false
+  if (fs.existsSync(meta_file_path) && fs.statSync(meta_file_path).mtimeMs > cache_stat.mtimeMs)
+    return false
+  if (fs.existsSync(cap_file_path) && fs.statSync(cap_file_path).mtimeMs > cache_stat.mtimeMs)
+    return false
+
+  //Return statement
+  return true
+}
+
+
+/**
+ * Stream-writes the indexed dataset record to disk in 8 MB chunks so global datasets never hit V8 string limits.
+ *
+ * @param {string} arg0_file_path
+ * @param {Record<string, CityIndexEntry>} arg1_indexed
+ *
+ * @returns {void}
+ */
+function writeServerIndexCache (arg0_file_path: string, arg1_indexed: Record<string, CityIndexEntry>): void {
+  //Convert from parameters
+  let file_path = arg0_file_path
+  let indexed = arg1_indexed
+
+  //Declare local instance variables
+  let all_keys = Object.keys(indexed)
+  let buffer: string[] = [`{"_v":${INDEX_CACHE_VERSION},"cities":{`]
+  let buffer_len = buffer[0].length
+  let cache_dir = path.dirname(file_path)
+  let fd: number
+  let flush_threshold = 8*1024*1024
+
+  //Function body
+  if (!fs.existsSync(cache_dir))
+    fs.mkdirSync(cache_dir, { recursive: true })
+
+  fd = fs.openSync(file_path, 'w')
+  try {
+    for (let i = 0; i < all_keys.length; i++) {
+      let key = all_keys[i]
+      let chunk = (i > 0 ? ',' : '') + JSON.stringify(key) + ':' + JSON.stringify(indexed[key])
+      buffer.push(chunk)
+      buffer_len += chunk.length
+      if (buffer_len >= flush_threshold) {
+        fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+        buffer = []
+        buffer_len = 0
+      }
+    }
+    buffer.push('}}')
+    fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+  } finally {
+    fs.closeSync(fd)
+  }
+}
+
+
+/**
  * Ensures the lightweight static index cache exists on disk for immediate rendering.
  * Stream-writes entries row-by-row so large global datasets never exceed V8 string limits.
  *
@@ -125,34 +207,22 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
   let lite_file_path = path.join(cache_dir, `${clean_stem}_lite.json`)
-  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
   let source_info = resolveDatasetSourceFiles(clean_stem)
 
   //Guard clauses
-  if (fs.existsSync(lite_file_path) && source_info.files.length > 0) {
-    let is_meta_newer = false
+  if (source_info.files.length > 0 && isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms)) {
     let is_v2 = false
-    let lite_stat = fs.statSync(lite_file_path)
-
-    if (fs.existsSync(meta_file_path)) {
-      let meta_stat = fs.statSync(meta_file_path)
-      if (meta_stat.mtimeMs > lite_stat.mtimeMs)
-        is_meta_newer = true
+    try {
+      let head_buf = Buffer.alloc(1024)
+      let fd = fs.openSync(lite_file_path, 'r')
+      let bytes_read = fs.readSync(fd, head_buf, 0, 1024, 0)
+      fs.closeSync(fd)
+      is_v2 = head_buf.toString('utf-8', 0, bytes_read).includes('"_v2":true')
+    } catch {
+      is_v2 = false
     }
-
-    if (!is_meta_newer && lite_stat.mtimeMs >= source_info.max_mtime_ms && lite_stat.size > 1000) {
-      try {
-        let head_buf = Buffer.alloc(1024)
-        let fd = fs.openSync(lite_file_path, 'r')
-        let bytes_read = fs.readSync(fd, head_buf, 0, 1024, 0)
-        fs.closeSync(fd)
-        is_v2 = head_buf.toString('utf-8', 0, bytes_read).includes('"_v2":true')
-      } catch {
-        is_v2 = false
-      }
-      if (is_v2)
-        return lite_file_path
-    }
+    if (is_v2)
+      return lite_file_path
   }
 
   //Function body
@@ -237,32 +307,49 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
     return {}
   }
 
-  //Check lite disk cache for pre-resolved names
+  //Check persisted server index cache and lite disk cache
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
+  let indexed_file_path = path.join(cache_dir, `${clean_stem}_indexed.json`)
   let lite_file_path = path.join(cache_dir, `${clean_stem}_lite.json`)
   let lite_name_map = new Map<string, string>()
-  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
 
-  if (fs.existsSync(lite_file_path)) {
+  if (isDatasetDiskCacheFresh(indexed_file_path, source_info.max_mtime_ms)) {
     try {
-      let lite_stat = fs.statSync(lite_file_path)
-      let is_lite_fresh = lite_stat.mtimeMs >= source_info.max_mtime_ms
-      if (is_lite_fresh && fs.existsSync(meta_file_path)) {
-        if (fs.statSync(meta_file_path).mtimeMs > lite_stat.mtimeMs)
-          is_lite_fresh = false
-      }
+      let cached_bundle = JSON.parse(fs.readFileSync(indexed_file_path, 'utf-8'))
+      if (cached_bundle && cached_bundle._v === INDEX_CACHE_VERSION && cached_bundle.cities && typeof cached_bundle.cities === 'object') {
+        indexed_record = cached_bundle.cities
+        indexHistoricalCities(indexed_record, false, true)
+        datasets_cache.set(clean_stem, indexed_record)
+        if (dataset_name !== clean_stem)
+          datasets_cache.set(dataset_name, indexed_record)
 
-      if (is_lite_fresh) {
-        let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
-        if (Array.isArray(lite_data) && lite_data[0]?._v2) {
-          for (let i = 0; i < lite_data.length; i++) {
-            if (lite_data[i].key && lite_data[i].name && lite_data[i].name !== 'City of London') {
-              if (!isCorruptedCityName(lite_data[i].name))
-                lite_name_map.set(lite_data[i].key, lite_data[i].name)
-            }
-          }
-          console.log(`[StadesterLoader] Loaded ${lite_name_map.size} pre-resolved city names from ${lite_file_path}`)
+        try {
+          ensureLiteCache(clean_stem)
+        } catch (arg0_cache_err) {
+          console.warn('[StadesterLoader] Failed to ensure lite cache:', arg0_cache_err)
         }
+
+        console.log(`[StadesterLoader] Loaded ${Object.keys(indexed_record).length} pre-indexed cities from cache for ${clean_stem}.`)
+
+        //Return statement
+        return indexed_record
+      }
+    } catch (arg0_err) {
+      console.warn('[StadesterLoader] Failed to load server index cache, rebuilding:', arg0_err)
+    }
+  }
+
+  if (isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms)) {
+    try {
+      let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
+      if (Array.isArray(lite_data) && lite_data[0]?._v2) {
+        for (let i = 0; i < lite_data.length; i++) {
+          if (lite_data[i].key && lite_data[i].name && lite_data[i].name !== 'City of London') {
+            if (!isCorruptedCityName(lite_data[i].name))
+              lite_name_map.set(lite_data[i].key, lite_data[i].name)
+          }
+        }
+        console.log(`[StadesterLoader] Loaded ${lite_name_map.size} pre-resolved city names from ${lite_file_path}`)
       }
     } catch (arg0_err) {
       console.warn('[StadesterLoader] Failed to read lite cache for names:', arg0_err)
@@ -276,13 +363,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
     : source_info.files[0]
   console.log(`[StadesterLoader] Indexing dataset ${clean_stem} from ${src_label}...`)
 
-  //Pass 1: Index all historical pre-1975 anchor cities across all shards so cross-border GHSL name repairs stay consistent
-  for (let i = 0; i < source_info.files.length; i++) {
-    let shard_raw = JSON.parse(fs.readFileSync(source_info.files[i], 'utf-8'))
-    indexHistoricalCities(shard_raw, i > 0)
-  }
-
-  //Pass 2: Process and index entries sequentially per shard, releasing each shard object immediately
+  //Parse and index entries sequentially per shard in a single pass
   for (let s = 0; s < source_info.files.length; s++) {
     let raw_data: Record<string, any> = JSON.parse(fs.readFileSync(source_info.files[s], 'utf-8'))
     let all_city_keys = Object.keys(raw_data)
@@ -343,7 +424,6 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
         region: c.region,
         years: pop_years,
       }
-      delete raw_data[key]
     }
   }
 
@@ -464,12 +544,19 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
     }
   }
 
+  indexHistoricalCities(indexed_record, false)
   applyCityMetadata(indexed_record)
   applyStateCapitals(indexed_record)
   datasets_cache.set(clean_stem, indexed_record)
   if (dataset_name !== clean_stem)
     datasets_cache.set(dataset_name, indexed_record)
   console.log(`[StadesterLoader] Successfully indexed ${Object.keys(indexed_record).length} cities for ${clean_stem}.`)
+
+  try {
+    writeServerIndexCache(indexed_file_path, indexed_record)
+  } catch (arg0_index_err) {
+    console.warn('[StadesterLoader] Failed to write server index cache:', arg0_index_err)
+  }
 
   try {
     ensureLiteCache(clean_stem)

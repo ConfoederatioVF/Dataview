@@ -105,8 +105,12 @@ export type WorkerOutMessage =
       type: 'LAYOUT_ERROR'
     }
 
+let cap_rgba_cache = new Map<string, [number, number, number, number] | undefined>()
+let cached_display_opts_key = ''
 let current_cities: WorkerCityInput[] = []
 let current_year = 1950
+let short_name_cache = new WeakMap<WorkerCityInput, string>()
+let worker_lut_cache = new Map<string, Uint8Array>()
 
 let parseHexColorToRgba = function (
   arg0_hex?: string | [number, number, number, number],
@@ -119,19 +123,25 @@ let parseHexColorToRgba = function (
   if (typeof arg0_hex !== 'string')
     return undefined
 
+  let cache_k = `${arg0_hex}|${arg1_alpha}`
+  if (cap_rgba_cache.has(cache_k))
+    return cap_rgba_cache.get(cache_k)
+
   let clean = arg0_hex.replace('#', '').trim()
   if (clean.length === 3)
     clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2]
 
+  let parsed: [number, number, number, number] | undefined = undefined
   if (clean.length >= 6) {
     let r = parseInt(clean.substring(0, 2), 16)
     let g = parseInt(clean.substring(2, 4), 16)
     let b = parseInt(clean.substring(4, 6), 16)
     if (!isNaN(r) && !isNaN(g) && !isNaN(b))
-      return [r, g, b, arg1_alpha]
+      parsed = [r, g, b, arg1_alpha]
   }
 
-  return undefined
+  cap_rgba_cache.set(cache_k, parsed)
+  return parsed
 }
 
 let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
@@ -214,7 +224,11 @@ function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, numbe
 
   if (palette !== 'Rainbow') {
     try {
-      let lut = getPaletteLUT(palette as ColorPalette)
+      let lut = worker_lut_cache.get(palette)
+      if (!lut) {
+        lut = getPaletteLUT(palette as ColorPalette)
+        worker_lut_cache.set(palette, lut)
+      }
       let norm_t = Math.max(0, Math.min(1, (r - (-0.05)) / (0.08 - (-0.05))))
       let lut_idx = Math.min(255, Math.max(0, Math.round(norm_t * 255)))
       return [lut[lut_idx * 3], lut[lut_idx * 3 + 1], lut[lut_idx * 3 + 2]]
@@ -264,7 +278,28 @@ function getShortCityLabel (arg0_name: string): string {
   return primary_name
 }
 
-let latest_viewport_msg: (WorkerInMessage & { type: 'LAYOUT_VIEWPORT' }) | null = null
+function getCachedShortCityName (
+  arg0_city: WorkerCityInput,
+  arg1_display_options?: StadesterDisplayOptions
+): string {
+  //Convert from parameters
+  let city = arg0_city
+  let display_options = arg1_display_options
+
+  //Declare local instance variables
+  let cached = short_name_cache.get(city)
+
+  //Guard clauses
+  if (cached !== undefined)
+    return cached
+
+  //Function body
+  cached = pickBestCityDisplayName(city.name, city.other_names, display_options)
+  short_name_cache.set(city, cached)
+
+  //Return statement
+  return cached
+}
 
 function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEWPORT' }) {
   //Convert from parameters
@@ -287,6 +322,12 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
   } = msg
 
     try {
+      let opts_key = display_options ? JSON.stringify(display_options) : ''
+      if (opts_key !== cached_display_opts_key) {
+        cached_display_opts_key = opts_key
+        short_name_cache = new WeakMap<WorkerCityInput, string>()
+      }
+
       let is_cartesian = (projection === 'EqualEarth' || projection === 'Equirectangular')
       let is_globe = (projection === 'Globe')
       let zoom = view_state?.zoom ?? ((is_globe) ? 3 : 1.2)
@@ -426,7 +467,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           projection: projection,
           rawCoords: [c_lon, c_lat],
           region: c.region,
-          shortName: pickBestCityDisplayName(c.name, c.other_names, display_options),
+          shortName: getCachedShortCityName(c, display_options),
         }
 
         processed_points.push(pt)
@@ -582,13 +623,12 @@ self.onmessage = function (arg0_e: MessageEvent<WorkerInMessage>) {
     cities_arr.sort((arg0_a, arg0_b) => (arg0_b.population || 0) - (arg0_a.population || 0))
     current_cities = cities_arr
     current_year = msg.year
-    if (latest_viewport_msg)
-      processViewportLayout(latest_viewport_msg)
+    short_name_cache = new WeakMap<WorkerCityInput, string>()
+    cap_rgba_cache.clear()
     return
   }
 
   if (msg.type === 'LAYOUT_VIEWPORT') {
-    latest_viewport_msg = msg
     processViewportLayout(msg)
   }
 }

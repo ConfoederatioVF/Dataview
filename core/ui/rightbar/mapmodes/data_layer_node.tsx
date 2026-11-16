@@ -8,6 +8,7 @@ import {
   normaliseBorderDatasetId,
   resolveHistoricalBordersAppearance,
 } from '@framework/geopng/types.ts'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
 import { Icon } from '@ui/components/icon'
 import { formatLocalisedString, useLocalisation } from '@localisation'
 import { HistoricalBordersSettings } from './historical_borders_settings'
@@ -74,11 +75,12 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
   let { t } = useLocalisation()
 
   //Function body
+  let default_stadester_dataset = resolveDefaultStadesterDataset(layer, stadester_config?.dataset)
   is_border_dataset_match = is_borders
     ? isBorderDatasetMatch(historical_borders_config?.dataset, layer.id)
     : false
   is_stadester_dataset_match = is_stadester
-    ? (layer.id === 'stadester' || stadester_config?.dataset === layer.id || (!stadester_config?.dataset && layer.id === 'stadester_2.0'))
+    ? (layer.id === 'stadester' || stadester_config?.dataset === layer.id || (!stadester_config?.dataset && layer.id === default_stadester_dataset))
     : false
   is_overlay_active = is_borders
     ? (Boolean(historical_borders_config?.enabled) && is_border_dataset_match)
@@ -118,7 +120,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                   }
                 } else if (is_stadester && set_stadester_config) {
                   set_stadester_config((arg0_prev) => {
-                    let is_currently_active = arg0_prev.enabled && (layer.id === 'stadester' || arg0_prev.dataset === layer.id || (!arg0_prev.dataset && layer.id === 'stadester_2.0'))
+                    let is_currently_active = arg0_prev.enabled && (layer.id === 'stadester' || arg0_prev.dataset === layer.id || (!arg0_prev.dataset && layer.id === default_stadester_dataset))
                     if (is_currently_active) {
                       return {
                         ...arg0_prev,
@@ -127,7 +129,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                     }
                     return {
                       ...arg0_prev,
-                      dataset: (layer.id === 'stadester') ? (arg0_prev.dataset || 'stadester_2.0') : (layer.id as StadesterDatasetId),
+                      dataset: (layer.id === 'stadester') ? resolveDefaultStadesterDataset(layer, arg0_prev.dataset) : (layer.id as StadesterDatasetId),
                       display_options: layer.display_options || arg0_prev.display_options,
                       enabled: true,
                     }
@@ -183,6 +185,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
             <div className="p-2 border-t border-border/60 bg-card/60 space-y-1 text-xs">
               <StadesterSettings
                 config={stadester_config}
+                layer={layer}
                 onChangeConfig={set_stadester_config}
                 cityCount={stadester_city_count}
               />

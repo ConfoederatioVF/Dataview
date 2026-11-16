@@ -22,6 +22,7 @@ import {
   getNearbyCityKeys,
   loadDataset,
 } from './stadester_loader.ts'
+import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 
 export let _cache_authoritative_capitals_by_year = new Map<string, Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>>()
 export let _cache_cities_at_year = new Map<string, CityRenderPoint[]>()
@@ -224,7 +225,7 @@ export function getAuthoritativeCapitalsAtYear (
 ): Map<string, { area?: number; color: string; name?: string; state_id?: number | string }> {
   //Convert from parameters
   let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'defacto_borders'
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let day = arg3_day !== undefined ? arg3_day : 1
   let month = arg2_month !== undefined ? arg2_month : 1
   let year = arg1_year !== undefined ? Math.floor(arg1_year) : 1950
@@ -462,7 +463,7 @@ export function getCitiesAtYear (
   arg2_options?: StadesterQueryOptions
 ): CityRenderPoint[] {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let options = (arg2_options) ? arg2_options : {}
   let target_year = arg1_year !== undefined ? arg1_year : 1950
 
@@ -772,7 +773,7 @@ export function getLargestCitiesAtYear (
   arg2_limit?: number
 ): CityRenderPoint[] {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let limit = arg2_limit !== undefined ? arg2_limit : 20
   let year = arg1_year !== undefined ? arg1_year : 1950
 
@@ -812,7 +813,7 @@ export function getCompactCitiesAtYear (
   arg2_options?: StadesterQueryOptions
 ): CompactCitiesPayload {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let options = (arg2_options) ? arg2_options : {}
   let year = arg1_year !== undefined ? arg1_year : 1950
 

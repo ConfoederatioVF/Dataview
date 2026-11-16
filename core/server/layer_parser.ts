@@ -1,8 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
-import type { BorderPropertyFields } from '../framework/geopng/types.ts'
+import type { BorderPropertyFields, StadesterVersionDefinition } from '../framework/geopng/types.ts'
 import { FilepathDefines } from './filepath_defines.ts'
+import { resolveStadesterVersionsList } from './stadester_config_loader.ts'
 
 export interface LayerVariableOption {
   name: string
@@ -66,6 +67,7 @@ export interface ParsedDataLayer {
   type: string
   unit?: string
   variable_selectors?: Record<string, LayerVariableSelector>
+  versions?: StadesterVersionDefinition[]
 }
 
 export interface LayerRegistryCache {
@@ -457,6 +459,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'hide_colorbar',
       'hide_colourbar',
       'hide_description',
+      'icon',
       'legend',
       'midpoint',
       'name',
@@ -476,6 +479,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
       'type',
       'unit',
       'variable_selectors',
+      'versions',
     ]
 
     for (let x = 0; x < layer_keys.length; x++) {
@@ -487,6 +491,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
 
       let has_filepath = Boolean(item.filepath)
       let has_filepaths = Array.isArray(item.filepaths) && item.filepaths.length > 0
+      let has_versions = Boolean(item.versions && typeof item.versions === 'object')
       let sub_keys = Object.keys(item).filter(
         (arg0_sk) =>
           typeof item[arg0_sk] === 'object' &&
@@ -499,8 +504,9 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
         (typeof item.type === 'string' && item.type.startsWith('vector.')) ||
         (has_filepaths && item.filepaths.some((arg0_fp: any) => typeof arg0_fp.type === 'string' && arg0_fp.type.startsWith('vector.')))
 
-      if (has_filepath || has_filepaths || has_sub_layers || is_vector_layer) {
+      if (has_filepath || has_filepaths || has_versions || has_sub_layers || is_vector_layer) {
         //Resolve filepath template with root folders
+        let parsed_versions = has_versions ? resolveStadesterVersionsList(item.versions, resolved_roots) : undefined
         let resolved_filepaths: LayerFilepathItem[] = []
         let resolved_template = item.filepath || ''
         let root_keys = Object.keys(resolved_roots)
@@ -530,6 +536,11 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           }
           if (!resolved_template && resolved_filepaths.length > 0)
             resolved_template = resolved_filepaths[0].path
+        }
+
+        if (!resolved_template && parsed_versions && parsed_versions.length > 0) {
+          let first_avail = parsed_versions.find((arg0_v) => arg0_v.available !== false) || parsed_versions[0]
+          resolved_template = first_avail.path
         }
 
         //Extract variable selectors (either from variable_selectors or top-level properties)
@@ -632,7 +643,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           file_cache.set(k, resolved_template)
         } else if (layer_type.startsWith('vector.')) {
           years = [-10000, 2025]
-          if (has_filepath)
+          if (resolved_template)
             file_cache.set(k, resolved_template)
         } else if (has_filepath) {
           years = scanLayerTemplate(resolved_template, k, file_cache, selectors)
@@ -781,6 +792,7 @@ export let loadAndParseLayers = function (arg0_config_dir: string): LayerRegistr
           type: layer_type,
           unit: item.unit,
           variable_selectors: selectors,
+          versions: parsed_versions,
         }
       }
     }

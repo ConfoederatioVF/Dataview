@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { StadesterConfig } from '@framework/geopng/types.ts'
+import { resolveDefaultStadesterDataset, resolveStadesterVersionLabel } from '@framework/stadester/stadester_versions.ts'
+import { STADESTER_CONFIG } from '@common'
 import { Icon } from '@ui/components/icon'
 import { useLocalisation } from '@localisation'
 
@@ -49,11 +51,8 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
   //Declare local instance variables
   let bubble_size = (config.bubbleSize !== undefined) ? config.bubbleSize : 1
   let colour_mode = config.colorMode || 'growth'
-  let dataset_version = 'Stadestér 2.0'
-  if (config.dataset === 'stadester_1.0')
-    dataset_version = 'Stadestér 1.0'
-  else if (config.dataset === 'stadester_1.1')
-    dataset_version = 'Stadestér 1.1'
+  let dataset_id = resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester, config.dataset)
+  let dataset_version: string
   let format: ReturnType<typeof useLocalisation>['format']
   let gradient_style: string
   let growth_palette = config.growthPalette || 'Rainbow'
@@ -69,6 +68,7 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
 
   //Function body
   localisation = useLocalisation()
+  dataset_version = resolveStadesterVersionLabel(dataset_id, STADESTER_CONFIG?.stadester?.versions, localisation.locale)
   format = localisation.format
   t = localisation.t
 

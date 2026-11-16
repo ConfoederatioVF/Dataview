@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CityPoint, CityFullRecord, StadesterConfig, StadesterDatasetId } from '@framework/geopng/types.ts'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
+import { STADESTER_CONFIG } from '@common'
 
 export interface UseStadesterCitiesParams {
   colorMode?: 'growth' | 'population' | 'continent'
@@ -54,7 +56,7 @@ export async function fetchStadesterCitiesAsync (
   arg7_performant_mode?: boolean
 ): Promise<CityPoint[]> {
   //Convert from parameters
-  let dataset = arg0_dataset || 'stadester_2.0'
+  let dataset = arg0_dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
   let year = arg1_year
   let min_pop = (arg2_min_pop !== undefined) ? Math.max(0.01, arg2_min_pop) : 0.01
   let max_cities = (arg3_max_cities !== undefined) ? arg3_max_cities : 4000
@@ -175,7 +177,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
   let options = (arg0_options) ? arg0_options : ({} as UseStadesterCitiesParams)
   let cfg = options.config
   let color_mode = cfg?.colorMode || options.colorMode || 'growth'
-  let dataset = cfg?.dataset || options.dataset || 'stadester_2.0'
+  let dataset = cfg?.dataset || options.dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
   let enabled = (cfg !== undefined) ? cfg.enabled : Boolean(options.enabled)
   let is_playing = Boolean(options.isPlaying)
   let max_cities = (cfg?.maxCities !== undefined) ? cfg.maxCities : ((options.maxCities !== undefined) ? options.maxCities : 4000)

@@ -8,7 +8,9 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { applyLayerLegend } from '@framework/raster/legend_utils.ts'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
 import { onConfigUpdate, onLayersUpdate } from '@framework/config/config_hot_reload'
+import { STADESTER_CONFIG } from '@common'
 import type { ColorPalette, DataFormat, MapModeItem, ScaleType } from '@framework/geopng/types.ts'
 
 /**
@@ -338,7 +340,9 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
               }
             })
 
-            let stadester_layer = data.layers.stadester || data.layers['stadester_2.0'] || data.layers['stadester_1.1'] || data.layers['stadester_1.0']
+            let stadester_layer = data.layers.stadester || (Object.values(data.layers) as ParsedDataLayer[]).find((arg0_l) => arg0_l.id.includes('stadester'))
+            if (stadester_layer)
+              STADESTER_CONFIG.stadester = stadester_layer
             if (stadester_layer && stadester_layer.display_options) {
               let opts = stadester_layer.display_options
               set_stadester_config((arg0_prev) => ({
@@ -347,7 +351,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
                 capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
                 capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
                 colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
-                dataset: opts.dataset ?? arg0_prev.dataset,
+                dataset: resolveDefaultStadesterDataset(stadester_layer, arg0_prev.dataset),
                 display_options: opts,
                 enabled: arg0_prev.enabled ?? default_stadester_enabled,
                 filled: opts.filled ?? arg0_prev.filled,
@@ -410,7 +414,9 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
           }
         })
 
-        let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_2.0'] || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
+        let stadester_layer = arg0_next_layers.stadester || (Object.values(arg0_next_layers) as ParsedDataLayer[]).find((arg0_l) => arg0_l.id.includes('stadester'))
+        if (stadester_layer)
+          STADESTER_CONFIG.stadester = stadester_layer
         if (stadester_layer && stadester_layer.display_options) {
           let opts = stadester_layer.display_options
           set_stadester_config((arg0_prev) => ({
@@ -419,7 +425,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
             capitalColorMode: opts.capital_color_mode ?? opts.capitalColorMode ?? arg0_prev.capitalColorMode,
             capitalConstantColor: opts.capital_constant_color ?? opts.capitalConstantColor ?? arg0_prev.capitalConstantColor,
             colorMode: opts.color_mode ?? opts.colorMode ?? arg0_prev.colorMode,
-            dataset: opts.dataset ?? arg0_prev.dataset,
+            dataset: resolveDefaultStadesterDataset(stadester_layer, opts.dataset ?? arg0_prev.dataset),
             display_options: opts,
             filled: opts.filled ?? arg0_prev.filled,
             growthPalette: opts.growth_palette ?? opts.growthPalette ?? arg0_prev.growthPalette,

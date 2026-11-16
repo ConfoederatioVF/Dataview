@@ -80,7 +80,16 @@ export interface MapModeItem {
 }
 
 export type StadesterColorMode = 'growth' | 'population' | 'region' | 'continent'
-export type StadesterDatasetId = 'stadester_2.0' | 'stadester_1.1' | 'stadester_1.0'
+export type StadesterDatasetId = string
+export type StadesterVersionLabel = string | Record<string, string>
+
+export interface StadesterVersionDefinition {
+  available?: boolean
+  id: string
+  metadata_path?: string
+  name: StadesterVersionLabel
+  path: string
+}
 
 export interface StadesterDisplayOptions {
   bubble_size?: number

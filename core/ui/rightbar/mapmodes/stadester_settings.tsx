@@ -1,5 +1,12 @@
 import React from 'react'
 import { StadesterConfig, StadesterColorMode, StadesterDatasetId } from '@framework/geopng/types.ts'
+import {
+  getAvailableStadesterVersions,
+  resolveDefaultStadesterDataset,
+  resolveStadesterVersionLabel,
+} from '@framework/stadester/stadester_versions.ts'
+import { ParsedDataLayer } from '@server/layer_parser'
+import { STADESTER_CONFIG } from '@common'
 import { Icon } from '@ui/components/icon'
 import { Slider } from '@ui/components/slider'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ui/components/select'
@@ -9,6 +16,7 @@ import { D3ColorPaletteSelector } from '@ui/leftbar/d3_color_palette_selector'
 export interface StadesterSettingsProps {
   cityCount?: number
   config: StadesterConfig
+  layer?: ParsedDataLayer
   onChangeConfig: React.Dispatch<React.SetStateAction<StadesterConfig>>
 }
 
@@ -43,18 +51,20 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   let props = arg0_props
   let city_count = props.cityCount
   let config = props.config
+  let layer = props.layer
   let on_change_config = props.onChangeConfig
 
   //Declare local instance variables
+  let available_versions = getAvailableStadesterVersions(layer || STADESTER_CONFIG?.stadester)
   let bubble_size = config.bubbleSize
   let color_mode = config.colorMode
-  let dataset = config.dataset || 'stadester_2.0'
+  let dataset = resolveDefaultStadesterDataset(layer || STADESTER_CONFIG?.stadester, config.dataset)
   let heuristic_culling = (config.heuristicCulling !== undefined) ? Boolean(config.heuristicCulling) : true
   let large_city_contrast = (config.largeCityContrast !== undefined) ? config.largeCityContrast : 1.0
   let max_cities = config.maxCities
   let min_pop = config.minPop
   let show_labels = config.showLabels
-  let { t } = useLocalisation()
+  let { locale, t } = useLocalisation()
 
   //Function body
   //Return statement
@@ -89,9 +99,11 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
             <SelectValue placeholder={t.mapmodes.stadester.selectDataset} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="stadester_2.0">{t.mapmodes.stadester.stadester20}</SelectItem>
-            <SelectItem value="stadester_1.1">{t.mapmodes.stadester.stadester11}</SelectItem>
-            <SelectItem value="stadester_1.0">{t.mapmodes.stadester.stadester10}</SelectItem>
+            {available_versions.map((arg0_ver) => (
+              <SelectItem key={arg0_ver.id} value={arg0_ver.id}>
+                {resolveStadesterVersionLabel(arg0_ver.id, available_versions, locale)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

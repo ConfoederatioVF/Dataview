@@ -3,6 +3,7 @@ import path from 'path'
 import { isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
+import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
 import { applyCityMetadata, applyStateCapitals, clearCityMetadataCache, resolveCityMetadataPath } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
 
@@ -19,20 +20,34 @@ export interface ResolvedDatasetSources {
 }
 
 /**
- * Resolves either a partitioned Viscount macro-region Stadestér directory (`stadester_manifest.json`),
- * a versioned subfolder JSON file (`<dataset>/<dataset>.json`), or a flat legacy JSON dataset file.
+ * Clears in-memory Stadestér dataset and spatial grid caches so config/path updates take effect immediately.
  *
- * @param {string} [arg0_dataset_name='stadester_2.0']
+ * @returns {void}
+ */
+export function clearStadesterLoaderCache (): void {
+  //Function body
+  datasets_cache.clear()
+  spatial_grid_by_dataset.clear()
+}
+
+
+/**
+ * Resolves either a partitioned Viscount macro-region Stadestér directory (`stadester_manifest.json`),
+ * a versioned subfolder JSON file (`<dataset>/<dataset>.json`), or a flat legacy JSON dataset file,
+ * consulting common/layers/stadester.json5 version paths first.
+ *
+ * @param {string} [arg0_dataset_name]
  *
  * @returns {ResolvedDatasetSources}
  */
 export function resolveDatasetSourceFiles (arg0_dataset_name?: string): ResolvedDatasetSources {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let base_dir = FilepathDefines.get().root_folders.l_stad
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let configured = resolveStadesterVersionPaths(dataset_name)
   let files: string[] = []
   let legacy_path = path.join(base_dir, `${clean_stem}.json`)
   let max_mtime_ms = 0
@@ -41,6 +56,36 @@ export function resolveDatasetSourceFiles (arg0_dataset_name?: string): Resolved
   let versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
 
   //Function body
+  if (configured.path) {
+    let resolved_path = configured.path
+    if (fs.existsSync(resolved_path)) {
+      let stat = fs.statSync(resolved_path)
+      if (stat.isFile()) {
+        //Return statement
+        return {
+          dir_path: path.dirname(resolved_path),
+          files: [resolved_path],
+          is_partitioned: false,
+          manifest_path: '',
+          max_mtime_ms: stat.mtimeMs,
+        }
+      }
+      if (stat.isDirectory()) {
+        part_dir = resolved_path
+        manifest_path = path.join(part_dir, 'stadester_manifest.json')
+        versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
+      }
+    } else if (resolved_path.endsWith('.json')) {
+      versioned_file_path = resolved_path
+      part_dir = path.dirname(resolved_path)
+      manifest_path = path.join(part_dir, 'stadester_manifest.json')
+    } else {
+      part_dir = resolved_path
+      manifest_path = path.join(part_dir, 'stadester_manifest.json')
+      versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
+    }
+  }
+
   if (fs.existsSync(manifest_path)) {
     max_mtime_ms = fs.statSync(manifest_path).mtimeMs
     try {
@@ -100,21 +145,27 @@ export function resolveDatasetSourceFiles (arg0_dataset_name?: string): Resolved
 /**
  * Resolves the absolute path to a Stadestér dataset directory (when partitioned) or versioned/legacy JSON file.
  *
- * @param {string} [arg0_dataset_name='stadester_2.0']
+ * @param {string} [arg0_dataset_name]
  *
  * @returns {string}
  */
 export function getDatasetFilePath (arg0_dataset_name?: string): string {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let base_dir = FilepathDefines.get().root_folders.l_stad
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let configured = resolveStadesterVersionPaths(dataset_name)
   let part_dir = path.join(base_dir, clean_stem)
   let versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
 
   //Function body
+  if (configured.path) {
+    if (fs.existsSync(configured.path))
+      return configured.path
+    return configured.path
+  }
   if (fs.existsSync(path.join(part_dir, 'stadester_manifest.json')))
     return part_dir
   if (fs.existsSync(versioned_file_path))
@@ -130,7 +181,7 @@ export function getDatasetFilePath (arg0_dataset_name?: string): string {
  *
  * @param {string} arg0_cache_path
  * @param {number} arg1_max_source_mtime
- * @param {string} [arg2_dataset_name='stadester_2.0']
+ * @param {string} [arg2_dataset_name]
  *
  * @returns {boolean}
  */
@@ -141,7 +192,7 @@ function isDatasetDiskCacheFresh (
 ): boolean {
   //Convert from parameters
   let cache_path = arg0_cache_path
-  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : getDefaultStadesterDatasetId()
   let max_source_mtime = arg1_max_source_mtime
 
   //Declare local instance variables
@@ -222,7 +273,7 @@ function writeServerIndexCache (arg0_file_path: string, arg1_indexed: Record<str
  */
 export function ensureLiteCache (arg0_dataset_name?: string): string {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
@@ -309,7 +360,7 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
  */
 export function loadDataset (arg0_dataset_name?: string): Record<string, CityIndexEntry> {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let city_seq_id = 0
@@ -599,7 +650,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
  */
 export function getSpatialGrid (arg0_dataset_name?: string): Map<string, string[]> {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let grid: Map<string, string[]>

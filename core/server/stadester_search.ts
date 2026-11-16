@@ -16,6 +16,7 @@ import {
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
 import { getSpatialGrid, loadDataset } from './stadester_loader.ts'
+import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 import { getAuthoritativeCapitalsAtYear } from './stadester_queries.ts'
 
 /**
@@ -35,7 +36,7 @@ export function findEraCounterpart (
   //Convert from parameters
   let entry = arg0_entry
   let indexed = arg1_indexed
-  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : getDefaultStadesterDatasetId()
 
   //Guard clauses
   if (!entry || !entry.coords)
@@ -132,7 +133,7 @@ export function getCityByKey (
   arg5_options?: { coords?: [number, number]; country?: string; dataset?: string; state_id?: number | string }
 ): any | null {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let city_key = arg1_city_key || ''
   let year = arg2_year
   let month = arg3_month

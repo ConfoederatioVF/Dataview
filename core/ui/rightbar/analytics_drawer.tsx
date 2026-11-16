@@ -11,7 +11,8 @@ import { ParsedDataLayer } from '@server/layer_parser'
 import { Button } from '@ui/components/button'
 import { Icon } from '@ui/components/icon'
 import { useLocalisation } from '@localisation'
-import { UserRole, isPublicBuild } from '@common'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
+import { STADESTER_CONFIG, UserRole, isPublicBuild } from '@common'
 
 export interface AnalyticsDrawerProps {
   activeLayer?: ParsedDataLayer | null
@@ -86,7 +87,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
     scaleType: scale_type,
     selectedCountries: selected_countries,
     selectedCountry: selected_country,
-    stadesterDataset: stadester_dataset = 'stadester_2.0',
+    stadesterDataset: stadester_dataset = resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester),
     userRole: user_role = 'default',
   } = props
 

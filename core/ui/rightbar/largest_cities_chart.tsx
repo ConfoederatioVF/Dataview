@@ -4,6 +4,8 @@ import { CityPoint, StadesterDatasetId } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { UfDate } from '@framework/utils/uf_date'
 import { getPrimaryCityName } from '@framework/stadester/city_name_framework'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
+import { STADESTER_CONFIG } from '@common'
 import { useLocalisation } from '@localisation'
 
 export interface LargestCitiesChartProps {
@@ -40,7 +42,7 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
   //Convert from parameters
   let props = arg0_props
   let current_year = props.currentYear
-  let dataset = props.dataset || 'stadester_2.0'
+  let dataset = props.dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
   let on_select_city = props.onSelectCity
 
   //Declare local instance variables

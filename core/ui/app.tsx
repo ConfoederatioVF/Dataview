@@ -21,7 +21,8 @@ import {
   StadesterConfig,
 } from '@framework/geopng/types.ts'
 import { useCountryStatsAsync } from '@framework/geopng/use_country_stats_async.ts'
-import { ATLAS_CONFIG, MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
+import { normaliseStadesterVersions, resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
+import { ATLAS_CONFIG, MAP_CONFIG, MAPMODES_CONFIG, PERMISSIONS_CONFIG, STADESTER_CONFIG, UserRole, isPublicBuild, isRoleAllowed } from '@common'
 import { SidebarControls } from '@ui/leftbar/sidebar_controls'
 import { MapViewer } from '@ui/map/map_viewer'
 import { AnalyticsDrawer } from '@ui/rightbar/analytics_drawer'
@@ -107,7 +108,12 @@ export let App: React.FC = function () {
     ),
     'defacto_borders'
   )
-  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_2.0') || default_data_layers.includes('stadester_1.1')
+  let configured_stadester_versions = normaliseStadesterVersions(STADESTER_CONFIG?.stadester?.versions)
+  let default_stadester_dataset = resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
+  let default_stadester_enabled =
+    default_data_layers.includes('stadester') ||
+    default_data_layers.includes('stadester_cities') ||
+    configured_stadester_versions.some((arg0_v) => default_data_layers.includes(arg0_v.id))
 
   let [heightmap_config, set_heightmap_config] = useState<HeightmapConfig>({
     blendWeight: 0.5,
@@ -165,7 +171,7 @@ export let App: React.FC = function () {
     capitalColorMode: 'state',
     capitalConstantColor: '#FFDC00',
     colorMode: 'growth',
-    dataset: 'stadester_2.0',
+    dataset: default_stadester_dataset,
     enabled: default_stadester_enabled,
     filled: true,
     growthPalette: 'Rainbow',

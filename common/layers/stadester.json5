@@ -33,6 +33,26 @@
             "</details>"
         ],
         filepath: "${l_stad}/stadester_2.0",
+        //Configurable dataset versions in display order.
+        //`name` accepts a plain string or a localised object ({ "en-GB", fr, de }).
+        //`path` may point to a partitioned directory (containing stadester_manifest.json) or a JSON file; optional `metadata_path` overrides city_metadata.json.
+        versions: {
+            "stadester_2.0": {
+                name: "Stadestér 2.0 (Latest)",
+                path: "${l_stad}/stadester_2.0",
+                metadata_path: "${l_stad}/stadester_2.0/city_metadata.json",
+            },
+            "stadester_1.1": {
+                name: "Stadestér 1.1",
+                path: "${l_stad}/stadester_1.1/stadester_1.1.json",
+                metadata_path: "${l_stad}/stadester_1.1/city_metadata.json",
+            },
+            "stadester_1.0": {
+                name: "Stadestér 1.0",
+                path: "${l_stad}/stadester_1.0/stadester_1.0.json",
+                metadata_path: "${l_stad}/stadester_1.0/city_metadata.json",
+            },
+        },
         permissions: [
             "default"
         ],

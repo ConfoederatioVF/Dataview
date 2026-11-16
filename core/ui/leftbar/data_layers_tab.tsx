@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import { ParsedDataLayer } from '@server/layer_parser'
 import { Icon } from '@ui/components/icon'
 import { HistoricalBordersConfig, StadesterConfig, isBorderDatasetMatch } from '@framework/geopng/types.ts'
+import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
 import { HistoricalBordersSettings } from '@ui/rightbar/mapmodes/historical_borders_settings'
 import { StadesterSettings } from '@ui/rightbar/mapmodes/stadester_settings'
 import { useLocalisation } from '@localisation'
@@ -272,8 +273,11 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
             ? isBorderDatasetMatch(historical_borders_config?.dataset, arg0_layer.id)
             : false
           let is_stadester = arg0_layer.id.includes('stadester')
+          let default_stadester_dataset = is_stadester
+            ? resolveDefaultStadesterDataset(arg0_layer, stadester_config?.dataset)
+            : ''
           let is_stadester_dataset_match = is_stadester
-            ? (arg0_layer.id === 'stadester' || stadester_config?.dataset === arg0_layer.id || (!stadester_config?.dataset && arg0_layer.id === 'stadester_2.0'))
+            ? (arg0_layer.id === 'stadester' || stadester_config?.dataset === arg0_layer.id || (!stadester_config?.dataset && arg0_layer.id === default_stadester_dataset))
             : false
           let is_vector_overlay = arg0_layer.type === 'vector.points' || is_stadester || is_borders
           let is_overlay_active = is_borders
@@ -425,6 +429,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
                 <div className="px-3 pb-3 pt-1 border-t border-border/40 bg-card/60">
                   <StadesterSettings
                     config={stadester_config}
+                    layer={arg0_layer}
                     onChangeConfig={on_change_stadester_config}
                     cityCount={stadester_city_count}
                   />

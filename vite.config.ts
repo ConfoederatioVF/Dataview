@@ -11,6 +11,10 @@ import { FilepathDefines } from './core/server/filepath_defines.ts'
 import { loadAndParseLayers } from './core/server/layer_parser.ts'
 import { refreshRasterBmpPaths } from './core/server/raster_bmp_cache.ts'
 import { clearCompressedBordersCache } from './core/server/routes/atlas_routes.ts'
+import { clearCompressedCitiesCache } from './core/server/routes/stadester_routes.ts'
+import { clearStadesterConfigCache } from './core/server/stadester_config_loader.ts'
+import { clearStadesterLoaderCache } from './core/server/stadester_loader.ts'
+import { clearCityMetadataCache } from './core/server/stadester_metadata.ts'
 
 let atlas_file_mtimes = new Map<string, number>()
 let dataview_hot_timeouts = new Map<string, NodeJS.Timeout>()
@@ -329,6 +333,10 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
         FilepathDefines.clearCache()
         clearAtlasConfigCache()
         clearCompressedBordersCache()
+        clearStadesterConfigCache()
+        clearStadesterLoaderCache()
+        clearCityMetadataCache()
+        clearCompressedCitiesCache()
         refreshRasterBmpPaths(config_dir)
 
         let registry = loadAndParseLayers(config_dir)

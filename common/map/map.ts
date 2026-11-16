@@ -1,6 +1,7 @@
 import JSON5 from 'json5'
 import rawAtlasConfig from '../layers/atlas.json5?raw'
 import rawMapConfig from './map.json5?raw'
+import rawStadesterConfig from '../layers/stadester.json5?raw'
 import { onConfigUpdate, onLayersUpdate } from '@framework/config/config_hot_reload'
 
 export interface BasemapDefinition {
@@ -67,6 +68,7 @@ export interface MapConfig {
 
 export let ATLAS_CONFIG: Record<string, any> = JSON5.parse(rawAtlasConfig)
 export let MAP_CONFIG: MapConfig = JSON5.parse(rawMapConfig)
+export let STADESTER_CONFIG: Record<string, any> = JSON5.parse(rawStadesterConfig)
 
 //Keep in-place object reference synchronised on hot reload
 onConfigUpdate('map', (arg0_next_config) => {
@@ -80,6 +82,8 @@ onLayersUpdate((arg0_next_layers) => {
       ATLAS_CONFIG.dejure_borders = arg0_next_layers.dejure_borders
     if (arg0_next_layers.defacto_borders)
       ATLAS_CONFIG.defacto_borders = arg0_next_layers.defacto_borders
+    if (arg0_next_layers.stadester)
+      STADESTER_CONFIG.stadester = arg0_next_layers.stadester
   }
 })
 

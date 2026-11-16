@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { FilepathDefines } from './filepath_defines.ts'
 import { AtlasBordersService } from './AtlasBordersService.ts'
+import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
 import {
   computeHaversineDistanceKm,
   getCityActiveCapitalRecord,
@@ -46,25 +47,31 @@ export function clearCityMetadataCache (): void {
  */
 export function resolveCityMetadataPath (arg0_dataset_name?: string): string {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let configured = resolveStadesterVersionPaths(dataset_name)
   let defines = FilepathDefines.get()
   let filepaths = defines.filepaths || {}
   let l_stad = (defines.root_folders && defines.root_folders.l_stad) ? defines.root_folders.l_stad : './data/stadester'
   let versioned_path = path.join(l_stad, clean_stem, 'city_metadata.json')
 
   //Function body
+  if (configured.metadata_path && fs.existsSync(configured.metadata_path))
+    return configured.metadata_path
+  if (configured.path) {
+    let version_dir = configured.path.endsWith('.json') ? path.dirname(configured.path) : configured.path
+    let derived_meta_path = path.join(version_dir, 'city_metadata.json')
+    if (fs.existsSync(derived_meta_path))
+      return derived_meta_path
+  }
   if (fs.existsSync(versioned_path))
     return versioned_path
 
-  if (clean_stem === 'stadester_2.0' && filepaths.stadester_2_0_metadata && fs.existsSync(filepaths.stadester_2_0_metadata))
-    return filepaths.stadester_2_0_metadata
-  if (clean_stem === 'stadester_1.1' && filepaths.stadester_1_1_metadata && fs.existsSync(filepaths.stadester_1_1_metadata))
-    return filepaths.stadester_1_1_metadata
-  if (clean_stem === 'stadester_1.0' && filepaths.stadester_1_0_metadata && fs.existsSync(filepaths.stadester_1_0_metadata))
-    return filepaths.stadester_1_0_metadata
+  let define_key = `${clean_stem.replace(/\./g, '_')}_metadata`
+  if (filepaths[define_key] && fs.existsSync(filepaths[define_key]))
+    return filepaths[define_key]
 
   if (filepaths.stadester_metadata && fs.existsSync(filepaths.stadester_metadata))
     return filepaths.stadester_metadata
@@ -409,7 +416,7 @@ export function resolveCityNameAtYear (
  */
 export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry[] {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let cached_entry: { entries: CityMetadataEntry[]; mtime_ms: number } | undefined
@@ -469,7 +476,7 @@ export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry
 export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndexEntry>, arg1_dataset_name?: string): void {
   //Convert from parameters
   let indexed = arg0_indexed_record
-  let dataset_name = (arg1_dataset_name) ? arg1_dataset_name : 'stadester_2.0'
+  let dataset_name = (arg1_dataset_name) ? arg1_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
   let all_keys = Object.keys(indexed)

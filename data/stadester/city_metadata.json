@@ -500,8 +500,8 @@
   {
     "name": "Babylon",
     "coords": [
-      43.67929,
-      33.22319
+      44.4208,
+      32.5364
     ],
     "historical_names": [
       {
@@ -630,8 +630,8 @@
   {
     "name": "Catalhoyuk",
     "coords": [
-      35.81527,
-      37.19737
+      32.8269,
+      37.6685
     ],
     "historical_names": [
       {
@@ -985,8 +985,8 @@
   {
     "name": "Mari",
     "coords": [
-      37.19899,
-      36.48262
+      40.8893,
+      34.5496
     ],
     "historical_names": [
       {
@@ -1066,8 +1066,8 @@
   {
     "name": "Qatna",
     "coords": [
-      36.08743,
-      33.43349
+      36.8658,
+      34.835
     ],
     "historical_names": [
       {
@@ -1174,8 +1174,8 @@
   {
     "name": "Tadmor",
     "coords": [
-      38.99681,
-      34.80207
+      38.2681,
+      34.5533
     ],
     "historical_names": [
       {
@@ -1789,8 +1789,8 @@
   {
     "name": "Jiangling",
     "coords": [
-      112.4247,
-      30.04184
+      112.239,
+      30.3247
     ],
     "historical_names": [
       {
@@ -2060,8 +2060,8 @@
   {
     "name": "Troy",
     "coords": [
-      27.432852947774055,
-      37.941905104503086
+      26.2389,
+      39.9575
     ],
     "historical_names": [
       {
@@ -2512,8 +2512,8 @@
   {
     "name": "Champa",
     "coords": [
-      82.6515,
-      22.03
+      86.9417,
+      25.2375
     ],
     "historical_names": [
       {
@@ -2820,23 +2820,59 @@
     ]
   },
   {
-    "name": "Ker`c",
+    "name": "Kerch",
     "coords": [
       36.469551138796405,
       45.35942016552072
     ],
     "historical_names": [
       {
+        "date": "-600.1.1",
+        "name": "Panticapaeum"
+      },
+      {
         "date": "-500.1.1",
         "name": "Karcha"
       },
       {
+        "date": "-500.1.1",
+        "name": "Pantikapaion"
+      },
+      {
+        "date": "-500.1.1",
+        "name": "Panticapaeum"
+      },
+      {
         "date": "500.1.1",
-        "name": "Ker`c"
+        "name": "Bosporus"
+      },
+      {
+        "date": "500.1.1",
+        "name": "Kerch"
+      },
+      {
+        "date": "900.1.1",
+        "name": "Korchev"
+      },
+      {
+        "date": "1318.1.1",
+        "name": "Cerco"
+      },
+      {
+        "date": "1774.7.21",
+        "name": "Kerch"
       }
     ],
     "other_names": [
-      "Karcha"
+      "Karcha",
+      "Kerch-Yenikale",
+      "Panticapaeum",
+      "Korchev",
+      "Cerco",
+      "Kertch",
+      "Bosporus",
+      "Pantikapaion",
+      "Kerc"
     ]
   },
   {
@@ -3034,8 +3070,8 @@
   {
     "name": "Napata",
     "coords": [
-      30.21764,
-      12.86281
+      31.7714,
+      18.41
     ],
     "historical_names": [
       {
@@ -3138,8 +3174,8 @@
   {
     "name": "Qufu",
     "coords": [
-      117.24542,
-      35.47469
+      116.9911,
+      35.5928
     ],
     "historical_names": [
       {
@@ -3667,8 +3703,8 @@
   {
     "name": "Vaishali",
     "coords": [
-      85.35496,
-      25.68382
+      85.13,
+      25.99
     ],
     "historical_names": [
       {
@@ -4902,8 +4938,8 @@
   {
     "name": "Qumarkaj",
     "coords": [
-      -90.23076,
-      15.78347
+      -89.9206,
+      17.755
     ],
     "historical_names": [
       {
@@ -6215,8 +6251,8 @@
   {
     "name": "Isanapura",
     "coords": [
-      104.99096,
-      12.56568
+      105.0431,
+      12.8708
     ],
     "historical_names": [
       {
@@ -6571,8 +6607,8 @@
   {
     "name": "Bâgar Hât",
     "coords": [
-      90.35633,
-      23.68499
+      89.7912,
+      22.656
     ],
     "historical_names": [
       {
@@ -10166,8 +10202,8 @@
   {
     "name": "Caltabellotta",
     "coords": [
-      14.52,
-      37.23
+      13.2163,
+      37.5754
     ],
     "historical_names": [
       {
@@ -10293,8 +10329,8 @@
   {
     "name": "Câmpulung",
     "coords": [
-      25.62,
-      47.5
+      25.053104,
+      45.270605
     ],
     "historical_names": [
       {
@@ -14058,8 +14094,8 @@
   {
     "name": "Larisa",
     "coords": [
-      22.42,
-      38.63
+      22.419125,
+      39.639022
     ],
     "historical_names": [
       {
@@ -16001,8 +16037,8 @@
   {
     "name": "Nahicevan",
     "coords": [
-      45.33333,
-      39.25
+      45.4,
+      39.2
     ],
     "historical_names": [
       {
@@ -19001,7 +19037,7 @@
   {
     "name": "Sezze",
     "coords": [
-      13.7,
+      13.0667,
       41.5
     ],
     "historical_names": [
@@ -20504,8 +20540,8 @@
   {
     "name": "Tournus",
     "coords": [
-      4.82,
-      45.08
+      4.911953,
+      46.561816
     ],
     "historical_names": [
       {
@@ -23336,8 +23372,8 @@
   {
     "name": "Fuentes de Andalucía",
     "coords": [
-      -5.33,
-      38.47
+      -5.344063,
+      37.463298
     ],
     "historical_names": [
       {
@@ -23488,8 +23524,8 @@
   {
     "name": "Great Zimbabwe",
     "coords": [
-      29.15486,
-      -19.01544
+      30.9338,
+      -20.2674
     ],
     "historical_names": [
       {
@@ -23855,8 +23891,8 @@
   {
     "name": "Leeuwarden",
     "coords": [
-      5.75,
-      53.25
+      5.77,
+      53.2
     ],
     "historical_names": [
       {
@@ -26644,8 +26680,8 @@
   {
     "name": "Gniezno",
     "coords": [
-      17.58333,
-      52.58333
+      17.6,
+      52.53
     ],
     "historical_names": [
       {
@@ -28673,8 +28709,8 @@
   {
     "name": "Andria",
     "coords": [
-      16.25,
-      41.25
+      16.3,
+      41.22
     ],
     "historical_names": [
       {
@@ -29020,8 +29056,8 @@
   {
     "name": "Bihâr",
     "coords": [
-      85.27225,
-      25.96444
+      85.5253,
+      25.1964
     ],
     "historical_names": [
       {
@@ -29130,8 +29166,8 @@
   {
     "name": "Brest",
     "coords": [
-      23.76367,
-      52.09965
+      23.6877,
+      52.0975
     ],
     "historical_names": [
       {
@@ -29283,8 +29319,8 @@
   {
     "name": "Burgio",
     "coords": [
-      13.28,
-      37.6
+      13.2163,
+      37.5754
     ],
     "historical_names": [
       {
@@ -29356,8 +29392,8 @@
   {
     "name": "Cerreto Sannita",
     "coords": [
-      14.62,
-      41.02
+      14.5606,
+      41.2848
     ],
     "historical_names": [
       {
@@ -29589,8 +29625,8 @@
   {
     "name": "Cuers",
     "coords": [
-      6.07,
-      43.23
+      6.0417,
+      43.1911
     ],
     "historical_names": [
       {
@@ -30763,8 +30799,8 @@
   {
     "name": "Luxembourg",
     "coords": [
-      6.12958,
-      49.81527
+      6.13,
+      49.6114
     ],
     "historical_names": [
       {
@@ -31455,8 +31491,8 @@
   {
     "name": "Paredes de Nava",
     "coords": [
-      -4.68,
-      42.15
+      -4.65,
+      42.1
     ],
     "historical_names": [
       {
@@ -34404,8 +34440,8 @@
   {
     "name": "Gillingham",
     "coords": [
-      -2.2748,
-      51.0375
+      0.5514,
+      51.3863
     ],
     "historical_names": [
       {
@@ -35336,8 +35372,8 @@
   {
     "name": "Kremenets",
     "coords": [
-      25.8,
-      50.08
+      25.73,
+      50.1
     ],
     "historical_names": [
       {
@@ -36078,8 +36114,8 @@
   {
     "name": "Newport",
     "coords": [
-      -2.37,
-      52.78
+      -2.9977,
+      51.5842
     ],
     "historical_names": [
       {
@@ -36879,8 +36915,8 @@
   {
     "name": "s Hertogenbosch",
     "coords": [
-      5.25,
-      51.75
+      5.3,
+      51.7
     ],
     "historical_names": [
       {
@@ -38125,9 +38161,28 @@
         "name": "Šiauliai"
       },
       {
-        "date": "1800.1.1",
-        "name": "`Siauliai"
+        "date": "1236.1.1",
+        "name": "Siauliai"
+      },
+      {
+        "date": "1236.1.1",
+        "name": "Saule"
+      },
+      {
+        "date": "1795.1.1",
+        "name": "Shavli"
+      },
+      {
+        "date": "1918.1.1",
+        "name": "Siauliai"
       }
+    ],
+    "other_names": [
+      "Shavli",
+      "Szawle",
+      "Schaulen",
+      "Šiauliai",
+      "Saule"
     ]
   },
   {
@@ -40968,8 +41023,8 @@
   {
     "name": "Ngazargamu",
     "coords": [
-      8.67528,
-      9.082
+      12.2278,
+      13.0472
     ],
     "historical_names": [
       {
@@ -43265,16 +43320,32 @@
     }
   },
   {
-    "name": "`Cerkasy",
+    "name": "Cherkasy",
     "coords": [
       32.06502,
       49.44115
     ],
     "historical_names": [
       {
-        "date": "1300.1.1",
-        "name": "`Cerkasy"
+        "date": "1286.1.1",
+        "name": "Cherkasy"
+      },
+      {
+        "date": "1569.1.1",
+        "name": "Czerkasy"
+      },
+      {
+        "date": "1793.1.1",
+        "name": "Cherkassy"
+      },
+      {
+        "date": "1991.8.24",
+        "name": "Cherkasy"
       }
+    ],
+    "other_names": [
+      "Cherkassy",
+      "Czerkasy"
     ]
   },
   {
@@ -44379,8 +44450,8 @@
   {
     "name": "L’Aquila",
     "coords": [
-      13.63627,
-      42.12563
+      13.3995,
+      42.3498
     ],
     "historical_names": [
       {
@@ -44650,8 +44721,8 @@
   {
     "name": "Maladsetschna",
     "coords": [
-      28.85,
-      54.32
+      26.854,
+      54.3106
     ],
     "historical_names": [
       {
@@ -45094,8 +45165,8 @@
   {
     "name": "Oyo",
     "coords": [
-      3.61465,
-      8.15738
+      3.9343,
+      7.8449
     ],
     "historical_names": [
       {
@@ -46428,20 +46499,30 @@
     ]
   },
   {
-    "name": "`'Cerepovec",
+    "name": "Cherepovets",
     "coords": [
       37.90918,
       59.13233
     ],
     "historical_names": [
       {
-        "date": "1400.1.1",
-        "name": "`'Cerepovec"
+        "date": "1362.1.1",
+        "name": "Cherepovets"
       }
+    ],
+    "other_names": [
+      "Cherepovets Mariinsk Canal",
+      "Cherepovets Novgorod",
+      "Cherepovec",
+      "Severstal Metallurgical Hub",
+      "Tscheropowez",
+      "Cherepovets Metallurgical",
+      "Cherepovetz",
+      "Cherepovets Sheksna"
     ]
   },
   {
-    "name": "`'Cernjachovsk",
+    "name": "Chernyakhovsk",
     "coords": [
       21.83114,
       54.63127
@@ -46455,6 +46536,11 @@
         "date": "1946.9.7",
         "name": "Chernyakhovsk"
       }
+    ],
+    "other_names": [
+      "Insterburg",
+      "Tschernjachowsk",
+      "Isrute"
     ]
   },
   {
@@ -46663,7 +46749,7 @@
     ]
   },
   {
-    "name": "Berdy`civv",
+    "name": "Berdychiv",
     "coords": [
       28.58973,
       49.91064
@@ -46671,8 +46757,29 @@
     "historical_names": [
       {
         "date": "1400.1.1",
-        "name": "Berdy`civv"
+        "name": "Berdychiv"
+      },
+      {
+        "date": "1430.1.1",
+        "name": "Berdyczow"
+      },
+      {
+        "date": "1430.1.1",
+        "name": "Berdychiv"
+      },
+      {
+        "date": "1793.1.1",
+        "name": "Berdichev"
+      },
+      {
+        "date": "1920.1.1",
+        "name": "Berdychiv"
       }
+    ],
+    "other_names": [
+      "Berdichev",
+      "Berdyczow",
+      "Berditschew"
     ]
   },
   {
@@ -47128,8 +47235,8 @@
   {
     "name": "Imperial",
     "coords": [
-      -75.01515,
-      -9.18997
+      -76.3529,
+      -13.061
     ],
     "historical_names": [
       {
@@ -47326,8 +47433,8 @@
   {
     "name": "Krenik",
     "coords": [
-      20.93944,
-      6.61111
+      22.8833,
+      13.3667
     ],
     "historical_names": [
       {
@@ -47709,8 +47816,8 @@
   {
     "name": "Piatra Neamt",
     "coords": [
-      26.37,
-      44.93
+      26.377979,
+      46.929962
     ],
     "historical_names": [
       {
@@ -48217,8 +48324,8 @@
   {
     "name": "Velizh",
     "coords": [
-      31.11,
-      55.6
+      31.1967,
+      55.6056
     ],
     "historical_names": [
       {
@@ -49763,8 +49870,8 @@
   {
     "name": "Katsina",
     "coords": [
-      7.63057,
-      12.37967
+      7.617,
+      12.9807
     ],
     "historical_names": [
       {
@@ -51560,8 +51667,8 @@
   {
     "name": "Asaro",
     "coords": [
-      12.56738,
-      41.87194
+      14.4,
+      37.63
     ],
     "historical_names": [
       {
@@ -51848,7 +51955,7 @@
     ]
   },
   {
-    "name": "Dzer`'zinsk",
+    "name": "Dzerzhinsk",
     "coords": [
       43.46039,
       56.2367
@@ -51856,8 +51963,16 @@
     "historical_names": [
       {
         "date": "1600.1.1",
-        "name": "Dzer`'zinsk"
+        "name": "Rastyapino"
+      },
+      {
+        "date": "1929.6.22",
+        "name": "Dzerzhinsk"
       }
+    ],
+    "other_names": [
+      "Rastyapino",
+      "Volga-Oka Chemical Capital"
     ]
   },
   {
@@ -51953,8 +52068,8 @@
   {
     "name": "Getxo",
     "coords": [
-      -3.74922,
-      40.46367
+      -3.0064,
+      43.3442
     ],
     "historical_names": [
       {
@@ -52208,16 +52323,31 @@
     ]
   },
   {
-    "name": "Kremen`cuk",
+    "name": "Kremenchuk",
     "coords": [
       33.41001,
       49.06635
     ],
     "historical_names": [
       {
-        "date": "1600.1.1",
-        "name": "Kremen`cuk"
+        "date": "1571.1.1",
+        "name": "Kremenchuk"
+      },
+      {
+        "date": "1667.1.1",
+        "name": "Kremenchug"
+      },
+      {
+        "date": "1991.8.24",
+        "name": "Kremenchuk"
       }
+    ],
+    "other_names": [
+      "Kremenchug",
+      "Kremenchug Kryukov",
+      "Krzemienczuk",
+      "Kremenchug Hydro-Industrial Hub",
+      "Kremenczuk"
     ]
   },
   {
@@ -52522,8 +52652,8 @@
   {
     "name": "Munster",
     "coords": [
-      -8.71667,
-      52.34333
+      7.6261,
+      51.9607
     ],
     "historical_names": [
       {
@@ -52688,8 +52818,8 @@
   {
     "name": "Douglas",
     "coords": [
-      -3.43597,
-      55.37805
+      -4.4833,
+      54.15
     ],
     "historical_names": [
       {
@@ -52721,8 +52851,8 @@
   {
     "name": "San Sebastian",
     "coords": [
-      -5.92551,
-      43.26154
+      -1.981705,
+      43.318237
     ],
     "historical_names": [
       {
@@ -52788,8 +52918,8 @@
   {
     "name": "Sennar",
     "coords": [
-      33.975,
-      13.03171
+      33.5672,
+      13.5675
     ],
     "historical_names": [
       {
@@ -52864,8 +52994,8 @@
   {
     "name": "Starokonstantinov",
     "coords": [
-      21.17,
-      49.8
+      27.242,
+      49.766
     ],
     "historical_names": [
       {
@@ -53067,8 +53197,8 @@
   {
     "name": "Vel'ký Krtí`s",
     "coords": [
-      19.69902,
-      48.66903
+      20.3658,
+      48.8206
     ],
     "historical_names": [
       {
@@ -56056,16 +56186,33 @@
     }
   },
   {
-    "name": "Ni`'znij Tagil",
+    "name": "Nizhny Tagil",
     "coords": [
       59.98162,
       57.92149
     ],
     "historical_names": [
       {
-        "date": "1750.1.1",
-        "name": "Ni`'znij Tagil"
+        "date": "1722.1.1",
+        "name": "Nizhnetagilsky Zavod"
+      },
+      {
+        "date": "1919.1.1",
+        "name": "Nizhny Tagil"
       }
+    ],
+    "other_names": [
+      "Nizhnetagilskiy Zavod",
+      "Demidov Foundry",
+      "Nizhnetagilsky Zavod",
+      "Demidov Ironworks",
+      "Tagil",
+      "Uralvagonzavod",
+      "Nizhniy Tagil",
+      "Uralvagonzavod Hub",
+      "Tagil Ural Steel",
+      "Nizhnij Tagil",
+      "Tagil Uralvagonzavod"
     ]
   },
   {
@@ -57592,8 +57739,8 @@
   {
     "name": "Chao'an",
     "coords": [
-      116.67809,
-      23.46244
+      116.622,
+      23.658
     ],
     "historical_names": [
       {
@@ -57748,16 +57895,47 @@
     ]
   },
   {
-    "name": "D`'zokar",
+    "name": "Grozny",
     "coords": [
       45.68592,
       43.31816
     ],
     "historical_names": [
       {
-        "date": "1800.1.1",
-        "name": "D`'zokar"
+        "date": "1200.1.1",
+        "name": "Grozny Medieval Gorodishche"
+      },
+      {
+        "date": "1818.1.1",
+        "name": "Groznaya"
+      },
+      {
+        "date": "1869.12.30",
+        "name": "Grozny"
+      },
+      {
+        "date": "1996.1.1",
+        "name": "Dzhokhar"
+      },
+      {
+        "date": "2000.1.1",
+        "name": "Grozny"
       }
+    ],
+    "other_names": [
+      "Grozny Gorodishche",
+      "Грозный",
+      "Крепость Грозная",
+      "Соьлжа-ГIала",
+      "Groznaya",
+      "Solzha-Gala",
+      "Dzhokhar",
+      "Krepost Groznaya",
+      "Grozny Oilfields",
+      "Grozny Oil",
+      "Restored Chechen-Ingush ASSR Capital",
+      "Chechnya Capital",
+      "Solkha-Gala"
     ]
   },
   {
@@ -58755,8 +58933,8 @@
   {
     "name": "Linares",
     "coords": [
-      -6.56326,
-      43.23252
+      -3.63612,
+      38.093378
     ],
     "historical_names": [
       {
@@ -59004,8 +59182,8 @@
   {
     "name": "Mirzapur",
     "coords": [
-      78.12449,
-      20.80001
+      82.564434,
+      25.133699
     ],
     "historical_names": [
       {
@@ -59877,8 +60055,8 @@
   {
     "name": "Sangha",
     "coords": [
-      0.82478,
-      8.61954
+      0.0667,
+      11.05
     ],
     "historical_names": [
       {
@@ -60068,8 +60246,8 @@
   {
     "name": "Shakhty",
     "coords": [
-      40.16667,
-      47.66667
+      40.2144,
+      47.7092
     ],
     "historical_names": [
       {
@@ -60632,8 +60810,8 @@
   {
     "name": "Vjatka",
     "coords": [
-      50.39881,
-      57.50644
+      49.64,
+      58.579
     ],
     "historical_names": [
       {
@@ -61880,8 +62058,8 @@
   {
     "name": "Caudéran",
     "coords": [
-      -3.33763,
-      47.81076
+      -0.6123,
+      44.8497
     ],
     "historical_names": [
       {
@@ -62703,8 +62881,8 @@
   {
     "name": "Mans, Le",
     "coords": [
-      0.18027,
-      45.87647
+      0.1984,
+      48.0077
     ],
     "historical_names": [
       {
@@ -62755,8 +62933,8 @@
   {
     "name": "Mézières",
     "coords": [
-      0.57142,
-      45.83664
+      4.724,
+      49.742
     ],
     "historical_names": [
       {
@@ -63418,8 +63596,8 @@
   {
     "name": "Teste, La",
     "coords": [
-      2.21375,
-      46.22764
+      3.071,
+      50.6558
     ],
     "historical_names": [
       {
@@ -65724,8 +65902,8 @@
   {
     "name": "Middleton",
     "coords": [
-      -3.41464,
-      56.24639
+      -2.1865,
+      53.5528
     ],
     "historical_names": [
       {
@@ -65737,8 +65915,8 @@
   {
     "name": "Saint Helier",
     "coords": [
-      -0.19054,
-      51.39571
+      -2.1049,
+      49.188
     ],
     "historical_names": [
       {
@@ -65815,8 +65993,8 @@
   {
     "name": "Valdés",
     "coords": [
-      -4.24167,
-      36.7584
+      -6.507,
+      43.539
     ],
     "historical_names": [
       {
@@ -66725,8 +66903,8 @@
   {
     "name": "Bilt, De",
     "coords": [
-      5.8541,
-      51.12837
+      5.181,
+      52.109
     ],
     "historical_names": [
       {
@@ -70881,8 +71059,8 @@
   {
     "name": "Zijpe",
     "coords": [
-      4.09653,
-      51.65132
+      4.7558,
+      52.8015
     ],
     "historical_names": [
       {
@@ -71154,8 +71332,8 @@
   {
     "name": "Pe'c",
     "coords": [
-      21.00586,
-      44.01652
+      20.2883,
+      42.6591
     ],
     "historical_names": [
       {
@@ -71977,8 +72155,8 @@
   {
     "name": "Durango",
     "coords": [
-      -104.65878,
-      24.55927
+      -104.6532,
+      24.0277
     ],
     "historical_names": [
       {
@@ -72264,8 +72442,8 @@
   {
     "name": "Hamdullahi",
     "coords": [
-      -3.99617,
-      17.57069
+      -4.0958,
+      14.3311
     ],
     "historical_names": [
       {
@@ -74079,8 +74257,8 @@
   {
     "name": "Southend on Sea",
     "coords": [
-      0.71,
-      51.912
+      0.7077,
+      51.5459
     ],
     "historical_names": [
       {
@@ -74828,8 +75006,8 @@
   {
     "name": "Monte San Giuliano",
     "coords": [
-      14.28702,
-      42.03317
+      12.5864,
+      38.0369
     ],
     "historical_names": [
       {
@@ -76656,8 +76834,8 @@
   {
     "name": "East Millcreek",
     "coords": [
-      -111.89395,
-      40.76066
+      -111.8206,
+      40.6875
     ],
     "historical_names": [
       {
@@ -77238,8 +77416,8 @@
   {
     "name": "Maryborough",
     "coords": [
-      152.70342,
-      -25.53849
+      143.735,
+      -37.05
     ],
     "historical_names": [
       {
@@ -77622,8 +77800,8 @@
   {
     "name": "To`skent",
     "coords": [
-      64.58526,
-      41.37749
+      69.238522,
+      41.298221
     ],
     "historical_names": [
       {
@@ -78265,8 +78443,8 @@
   {
     "name": "Josefov",
     "coords": [
-      14.41567,
-      50.08902
+      15.9304,
+      50.3389
     ],
     "historical_names": [
       {
@@ -78761,8 +78939,8 @@
   {
     "name": "Spi`sské Podhradie",
     "coords": [
-      19.05614,
-      49.08508
+      20.7596,
+      49.0049
     ],
     "historical_names": [
       {
@@ -78778,8 +78956,8 @@
   {
     "name": "Spi`sské Vlachy",
     "coords": [
-      19.47373,
-      49.09322
+      20.7941,
+      48.9485
     ],
     "historical_names": [
       {
@@ -80153,8 +80331,8 @@
   {
     "name": "Bitterfeld",
     "coords": [
-      12.26154,
-      51.68191
+      12.3278,
+      51.6264
     ],
     "historical_names": [
       {
@@ -80479,8 +80657,8 @@
   {
     "name": "Lehe",
     "coords": [
-      9.02539,
-      54.34394
+      8.6007,
+      53.5662
     ],
     "historical_names": [
       {
@@ -80544,8 +80722,8 @@
   {
     "name": "Linden",
     "coords": [
-      8.65429,
-      50.52688
+      9.698,
+      52.369
     ],
     "historical_names": [
       {
@@ -80907,8 +81085,8 @@
   {
     "name": "Rüstringen",
     "coords": [
-      10.45153,
-      51.16569
+      8.118,
+      53.553
     ],
     "historical_names": [
       {
@@ -81292,8 +81470,8 @@
   {
     "name": "Fujimi",
     "coords": [
-      138.24067,
-      35.91466
+      139.5492,
+      35.8567
     ],
     "historical_names": [
       {
@@ -81417,8 +81595,8 @@
   {
     "name": "Takada",
     "coords": [
-      139.25053,
-      37.88402
+      138.2558,
+      37.11
     ],
     "historical_names": [
       {
@@ -81811,8 +81989,8 @@
   {
     "name": "Tambolong",
     "coords": [
-      121.77402,
-      12.87972
+      120.9547,
+      14.6872
     ],
     "historical_names": [
       {
@@ -82874,8 +83052,8 @@
   {
     "name": "Pyrgos",
     "coords": [
-      25.44782,
-      36.38304
+      21.47,
+      37.68
     ],
     "historical_names": [
       {
@@ -82952,8 +83130,8 @@
   {
     "name": "Sankt Johann",
     "coords": [
-      9.34341,
-      48.45372
+      7.028,
+      49.233
     ],
     "historical_names": [
       {
@@ -82978,8 +83156,8 @@
   {
     "name": "Schöneberg",
     "coords": [
-      10.9272,
-      53.85115
+      13.356,
+      52.487
     ],
     "historical_names": [
       {
@@ -83017,8 +83195,8 @@
   {
     "name": "Stene",
     "coords": [
-      4.46994,
-      50.50389
+      2.923,
+      51.199
     ],
     "historical_names": [
       {
@@ -87115,8 +87293,8 @@
   {
     "name": "Homberg",
     "coords": [
-      9.41272,
-      51.03144
+      6.705,
+      51.45
     ],
     "historical_names": [
       {
@@ -87128,8 +87306,8 @@
   {
     "name": "Horst",
     "coords": [
-      9.61817,
-      53.81107
+      7.022,
+      51.535
     ],
     "historical_names": [
       {
@@ -87450,8 +87628,8 @@
   {
     "name": "Lichterfelde",
     "coords": [
-      11.87636,
-      52.85668
+      13.3167,
+      52.4333
     ],
     "historical_names": [
       {
@@ -87789,8 +87967,8 @@
   {
     "name": "Nik`si`c",
     "coords": [
-      21.00262,
-      44.10127
+      18.9445,
+      42.7731
     ],
     "historical_names": [
       {
@@ -88374,8 +88552,8 @@
   {
     "name": "Santo Amaro",
     "coords": [
-      -46.70114,
-      -23.64387
+      -38.7119,
+      -12.5469
     ],
     "historical_names": [
       {
@@ -88967,8 +89145,8 @@
   {
     "name": "Wald",
     "coords": [
-      10.55649,
-      47.7223
+      7.043,
+      51.181
     ],
     "historical_names": [
       {
@@ -89045,8 +89223,8 @@
   {
     "name": "Wilhelmsburg",
     "coords": [
-      13.8574,
-      53.64172
+      10.0111,
+      53.495
     ],
     "historical_names": [
       {
@@ -89167,16 +89345,20 @@
     ]
   },
   {
-    "name": "`'Suja",
+    "name": "Shuya",
     "coords": [
       41.35753,
       56.85113
     ],
     "historical_names": [
       {
-        "date": "1891.1.1",
-        "name": "`'Suja"
+        "date": "1539.1.1",
+        "name": "Shuya"
       }
+    ],
+    "other_names": [
+      "Shuia",
+      "Suja"
     ]
   },
   {
@@ -89547,8 +89729,8 @@
   {
     "name": "Ara",
     "coords": [
-      77.07312,
-      28.63673
+      84.6608,
+      25.555
     ],
     "historical_names": [
       {
@@ -89829,8 +90011,8 @@
   {
     "name": "Ballia",
     "coords": [
-      79.36519,
-      28.20069
+      84.1715,
+      25.7647
     ],
     "historical_names": [
       {
@@ -90000,8 +90182,8 @@
   {
     "name": "Bârsi",
     "coords": [
-      76.02341,
-      29.04772
+      75.6882,
+      18.2357
     ],
     "historical_names": [
       {
@@ -91124,8 +91306,8 @@
   {
     "name": "Dharmapuri",
     "coords": [
-      75.8563,
-      22.87778
+      78.153,
+      12.1222
     ],
     "historical_names": [
       {
@@ -94242,8 +94424,8 @@
   {
     "name": "Shadara",
     "coords": [
-      73.17383,
-      33.77656
+      74.2824,
+      31.6211
     ],
     "historical_names": [
       {
@@ -94255,8 +94437,8 @@
   {
     "name": "Shahabad",
     "coords": [
-      76.86972,
-      30.15571
+      79.9414,
+      27.6453
     ],
     "historical_names": [
       {
@@ -96023,8 +96205,8 @@
   {
     "name": "Mercedes",
     "coords": [
-      -59.4306,
-      -34.65102
+      -65.4636,
+      -33.6774
     ],
     "historical_names": [
       {
@@ -96549,8 +96731,8 @@
   {
     "name": "Camatero",
     "coords": [
-      21.82431,
-      39.07421
+      23.712,
+      38.0597
     ],
     "historical_names": [
       {
@@ -97355,8 +97537,8 @@
   {
     "name": "Neápolis",
     "coords": [
-      23.06004,
-      36.51218
+      22.9391,
+      40.6534
     ],
     "historical_names": [
       {
@@ -98395,8 +98577,8 @@
   {
     "name": "Baranavi`cy",
     "coords": [
-      27.95339,
-      53.70981
+      26.0177,
+      53.1304
     ],
     "historical_names": [
       {
@@ -98723,8 +98905,8 @@
   {
     "name": "Chaltubo",
     "coords": [
-      -82.90712,
-      32.15744
+      42.6006,
+      42.3264
     ],
     "historical_names": [
       {
@@ -99279,8 +99461,8 @@
   {
     "name": "Jamâlîyah, Al",
     "coords": [
-      30.8025,
-      26.82055
+      30.54,
+      25.449
     ],
     "historical_names": [
       {
@@ -99488,8 +99670,8 @@
   {
     "name": "Kamo",
     "coords": [
-      43.95161,
-      40.82581
+      45.1267,
+      40.3589
     ],
     "historical_names": [
       {
@@ -99501,8 +99683,8 @@
   {
     "name": "Kamy`'sin",
     "coords": [
-      85.75216,
-      51.50728
+      45.4083,
+      50.0932
     ],
     "historical_names": [
       {
@@ -99536,8 +99718,8 @@
   {
     "name": "Kara-Köl",
     "coords": [
-      72.68449,
-      41.63044
+      78.3917,
+      42.4903
     ],
     "historical_names": [
       {
@@ -100616,8 +100798,8 @@
   {
     "name": "Panevè`zys",
     "coords": [
-      23.88127,
-      55.16944
+      24.3575,
+      55.7348
     ],
     "historical_names": [
       {
@@ -101309,16 +101491,30 @@
     ]
   },
   {
-    "name": "Tel`siai",
+    "name": "Telsiai",
     "coords": [
       22.25031,
       55.98344
     ],
     "historical_names": [
       {
-        "date": "1897.1.1",
-        "name": "Tel`siai"
+        "date": "1450.1.1",
+        "name": "Telsiai"
+      },
+      {
+        "date": "1795.1.1",
+        "name": "Telshi"
+      },
+      {
+        "date": "1918.1.1",
+        "name": "Telsiai"
       }
+    ],
+    "other_names": [
+      "Telshi",
+      "Telsze",
+      "Telšiai",
+      "Telsze Samogitia"
     ]
   },
   {
@@ -101613,8 +101809,8 @@
   {
     "name": "Zapori`z`ja",
     "coords": [
-      31.16558,
-      48.37943
+      35.1561,
+      47.8373
     ],
     "historical_names": [
       {
@@ -101933,8 +102129,8 @@
   {
     "name": "Eksjö",
     "coords": [
-      15.22155,
-      57.6172
+      14.9703,
+      57.6669
     ],
     "historical_names": [
       {
@@ -103089,8 +103285,8 @@
   {
     "name": "Kusatsu",
     "coords": [
-      138.59609,
-      36.62072
+      135.967,
+      35.017
     ],
     "historical_names": [
       {
@@ -104629,8 +104825,8 @@
   {
     "name": "Tomioka",
     "coords": [
-      141.00882,
-      37.34532
+      138.8899,
+      36.2599
     ],
     "historical_names": [
       {
@@ -104733,8 +104929,8 @@
   {
     "name": "Tsushima",
     "coords": [
-      129.28752,
-      34.20278
+      136.7412,
+      35.177
     ],
     "historical_names": [
       {
@@ -104785,8 +104981,8 @@
   {
     "name": "Ueno",
     "coords": [
-      139.77415,
-      35.70873
+      136.1272,
+      34.77
     ],
     "historical_names": [
       {
@@ -106561,8 +106757,8 @@
   {
     "name": "Nucet",
     "coords": [
-      25.54902,
-      44.77374
+      22.5614,
+      46.4842
     ],
     "historical_names": [
       {
@@ -107520,16 +107716,25 @@
     ]
   },
   {
-    "name": "`'Zukovskij",
+    "name": "Zhukovsky",
     "coords": [
       38.11326,
       55.59749
     ],
     "historical_names": [
       {
-        "date": "1900.1.1",
-        "name": "`'Zukovskij"
+        "date": "1935.1.1",
+        "name": "Stakhanovo"
+      },
+      {
+        "date": "1947.4.23",
+        "name": "Zhukovsky"
       }
+    ],
+    "other_names": [
+      "TsAGI Aviation Naukograd",
+      "Stakhanovo",
+      "Zhukovskiy"
     ]
   },
   {
@@ -113533,8 +113738,8 @@
   {
     "name": "Castrillón",
     "coords": [
-      -6.7918,
-      43.39746
+      -5.9925,
+      43.5558
     ],
     "historical_names": [
       {
@@ -114041,8 +114246,8 @@
   {
     "name": "Chodov",
     "coords": [
-      14.50708,
-      50.03109
+      12.7439,
+      50.2414
     ],
     "historical_names": [
       {
@@ -116511,8 +116716,8 @@
   {
     "name": "El Oro de Hidalgo",
     "coords": [
-      -100.13392,
-      19.80075
+      -105.3647,
+      25.9535
     ],
     "historical_names": [
       {
@@ -116563,8 +116768,8 @@
   {
     "name": "Elektrostal",
     "coords": [
-      38.45,
-      56.8
+      38.455161,
+      55.783553
     ],
     "historical_names": [
       {
@@ -119718,8 +119923,8 @@
   {
     "name": "Hajdúhadháztéglás",
     "coords": [
-      19.5033,
-      47.16249
+      21.694,
+      47.694
     ],
     "historical_names": [
       {
@@ -120186,8 +120391,8 @@
   {
     "name": "Hefa",
     "coords": [
-      34.99475,
-      32.48141
+      34.989571,
+      32.794046
     ],
     "historical_names": [
       {
@@ -121143,8 +121348,8 @@
   {
     "name": "Hranice",
     "coords": [
-      12.17579,
-      50.3046
+      17.7683,
+      49.5525
     ],
     "historical_names": [
       {
@@ -122418,8 +122623,8 @@
   {
     "name": "Jílové",
     "coords": [
-      14.10385,
-      50.76083
+      14.4928,
+      49.8981
     ],
     "historical_names": [
       {
@@ -124300,8 +124505,8 @@
   {
     "name": "Kronenberg",
     "coords": [
-      8.51831,
-      50.18351
+      7.13,
+      51.2
     ],
     "historical_names": [
       {
@@ -125694,8 +125899,8 @@
   {
     "name": "Leppävrita *",
     "coords": [
-      25.74815,
-      61.92411
+      27.7833,
+      62.49
     ],
     "historical_names": [
       {
@@ -129499,8 +129704,8 @@
   {
     "name": "Naberezhnye Chelny",
     "coords": [
-      52.32,
-      55.68
+      52.3958,
+      55.7436
     ],
     "historical_names": [
       {
@@ -129997,8 +130202,8 @@
   {
     "name": "Neftekamsk",
     "coords": [
-      54.25,
-      58.08
+      54.2483,
+      56.0883
     ],
     "historical_names": [
       {
@@ -131352,8 +131557,8 @@
   {
     "name": "Ontario",
     "coords": [
-      -77.28649,
-      42.85098
+      -117.6278,
+      34.0528
     ],
     "historical_names": [
       {
@@ -131594,8 +131799,8 @@
   {
     "name": "Osterfeld",
     "coords": [
-      11.9298,
-      51.08015
+      6.89,
+      51.505
     ],
     "historical_names": [
       {
@@ -134536,8 +134741,8 @@
   {
     "name": "Rheinhausen",
     "coords": [
-      7.71116,
-      48.22752
+      6.7255,
+      51.4098
     ],
     "historical_names": [
       {
@@ -134709,8 +134914,8 @@
   {
     "name": "Ringerike",
     "coords": [
-      9.98085,
-      60.30039
+      10.215,
+      60.188
     ],
     "historical_names": [
       {
@@ -135992,8 +136197,8 @@
   {
     "name": "San José",
     "coords": [
-      -2.10943,
-      36.76198
+      1.2933,
+      38.9217
     ],
     "historical_names": [
       {
@@ -136639,8 +136844,8 @@
   {
     "name": "São Martinho",
     "coords": [
-      -9.12545,
-      39.51582
+      -16.9394,
+      32.6428
     ],
     "historical_names": [
       {
@@ -138238,8 +138443,8 @@
   {
     "name": "Staré Mesto",
     "coords": [
-      16.94624,
-      50.16221
+      17.4334,
+      49.0751
     ],
     "historical_names": [
       {
@@ -138542,8 +138747,8 @@
   {
     "name": "Su`'sak",
     "coords": [
-      14.30673,
-      44.50864
+      14.477,
+      45.321
     ],
     "historical_names": [
       {
@@ -139537,8 +139742,8 @@
   {
     "name": "Tecamachalco",
     "coords": [
-      -99.23699,
-      19.41932
+      -97.717,
+      18.867
     ],
     "historical_names": [
       {
@@ -144284,8 +144489,8 @@
   {
     "name": "Acton",
     "coords": [
-      -2.55018,
-      53.07236
+      -0.2762,
+      51.509
     ],
     "historical_names": [
       {
@@ -144898,8 +145103,8 @@
   {
     "name": "Bagneux-les-Billettes",
     "coords": [
-      2.35504,
-      48.85801
+      2.3136,
+      48.7983
     ],
     "historical_names": [
       {
@@ -145080,8 +145285,8 @@
   {
     "name": "Bangor",
     "coords": [
-      -4.12926,
-      53.22739
+      -5.669,
+      54.6534
     ],
     "historical_names": [
       {
@@ -148571,8 +148776,8 @@
   {
     "name": "Edmonton",
     "coords": [
-      -4.87296,
-      50.51948
+      -0.0595,
+      51.6265
     ],
     "historical_names": [
       {
@@ -148692,8 +148897,8 @@
   {
     "name": "El-Mohammadia",
     "coords": [
-      3.16247,
-      36.7313
+      0.0732,
+      35.5848
     ],
     "historical_names": [
       {
@@ -149912,8 +150117,8 @@
   {
     "name": "Grand Falls",
     "coords": [
-      -67.74485,
-      47.04551
+      -55.645,
+      48.9369
     ],
     "historical_names": [
       {
@@ -150784,8 +150989,8 @@
   {
     "name": "Hutt",
     "coords": [
-      174.88597,
-      -40.90056
+      174.956,
+      -41.187
     ],
     "historical_names": [
       {
@@ -151846,8 +152051,8 @@
   {
     "name": "Kr`sko",
     "coords": [
-      14.99546,
-      46.15124
+      15.495,
+      45.9592
     ],
     "historical_names": [
       {
@@ -154035,8 +154240,8 @@
   {
     "name": "Mustafa Kemal Pasa",
     "coords": [
-      27.27655,
-      38.24295
+      28.4117,
+      40.0353
     ],
     "historical_names": [
       {
@@ -154230,8 +154435,8 @@
   {
     "name": "Newcastle",
     "coords": [
-      -5.89204,
-      54.21614
+      -9.055,
+      52.451
     ],
     "historical_names": [
       {
@@ -154243,8 +154448,8 @@
   {
     "name": "Newcastle",
     "coords": [
-      -78.58748,
-      43.91777
+      -65.5687,
+      46.983
     ],
     "historical_names": [
       {
@@ -154489,8 +154694,8 @@
   {
     "name": "Octeville",
     "coords": [
-      0.11528,
-      49.55578
+      -1.646,
+      49.618
     ],
     "historical_names": [
       {
@@ -156007,8 +156212,8 @@
   {
     "name": "Roussillon",
     "coords": [
-      5.29377,
-      43.90228
+      4.8272,
+      45.3719
     ],
     "historical_names": [
       {
@@ -157690,8 +157895,8 @@
   {
     "name": "Southgate",
     "coords": [
-      -0.20114,
-      51.10765
+      -0.1265,
+      51.6316
     ],
     "historical_names": [
       {
@@ -160491,8 +160696,8 @@
   {
     "name": "Sabanalarga",
     "coords": [
-      -75.81333,
-      6.85431
+      -74.9231,
+      10.6314
     ],
     "historical_names": [
       {
@@ -162205,8 +162410,8 @@
   {
     "name": "Cabo Gracias a Dios",
     "coords": [
-      -85.20723,
-      12.86542
+      -83.1301,
+      15.0065
     ],
     "historical_names": [
       {
@@ -163295,8 +163500,8 @@
   {
     "name": "Jauf",
     "coords": [
-      39.32062,
-      29.88736
+      39.8664,
+      29.8117
     ],
     "historical_names": [
       {
@@ -163981,8 +164186,8 @@
   {
     "name": "Tonalá",
     "coords": [
-      -103.24137,
-      20.62374
+      -93.75,
+      16.1
     ],
     "historical_names": [
       {
@@ -164364,7 +164569,7 @@
     ]
   },
   {
-    "name": "Dniprodzer`zyns'k",
+    "name": "Kamianske",
     "coords": [
       34.61286,
       48.51603
@@ -164379,13 +164584,19 @@
         "name": "Dneprodzerzhinsk"
       },
       {
+        "date": "1936.2.1",
+        "name": "Dniprodzerzhynsk"
+      },
+      {
         "date": "2016.5.19",
         "name": "Kamianske"
       }
     ],
     "other_names": [
-      "Kamianske",
-      "Dneprodzerzhinsk"
+      "Dneprodzerzhinsk",
+      "Dniprodzerzhynsk",
+      "Kamenskoe",
+      "Kamenskoye"
     ]
   },
   {
@@ -164404,8 +164615,8 @@
   {
     "name": "Halq al Wad",
     "coords": [
-      9.5375,
-      33.88692
+      10.305,
+      36.8181
     ],
     "historical_names": [
       {
@@ -164490,8 +164701,8 @@
   {
     "name": "Kâthmândau",
     "coords": [
-      84.12401,
-      28.39486
+      85.3046,
+      27.7269
     ],
     "historical_names": [
       {
@@ -164821,8 +165032,8 @@
   {
     "name": "Saihut",
     "coords": [
-      48.51639,
-      15.55273
+      51.2514,
+      15.2099
     ],
     "historical_names": [
       {
@@ -164847,8 +165058,8 @@
   {
     "name": "Saint Boniface",
     "coords": [
-      -72.82233,
-      46.5001
+      -97.105,
+      49.883
     ],
     "historical_names": [
       {
@@ -165344,8 +165555,8 @@
   {
     "name": "San Martín",
     "coords": [
-      -58.5371,
-      -34.57575
+      -68.472,
+      -33.0808
     ],
     "historical_names": [
       {
@@ -165357,8 +165568,8 @@
   {
     "name": "Santa Cruz",
     "coords": [
-      -69.19172,
-      -48.77368
+      -68.5218,
+      -50.0193
     ],
     "historical_names": [
       {
@@ -165794,8 +166005,8 @@
   {
     "name": "Iligan",
     "coords": [
-      124.46418,
-      8.22707
+      124.2399,
+      8.2421
     ],
     "historical_names": [
       {
@@ -165846,8 +166057,8 @@
   {
     "name": "Naga",
     "coords": [
-      123.27003,
-      13.6475
+      123.7573,
+      10.2085
     ],
     "historical_names": [
       {
@@ -165941,8 +166152,8 @@
   {
     "name": "Vestmannæyjar",
     "coords": [
-      -20.39191,
-      63.39067
+      -20.2673,
+      63.4377
     ],
     "historical_names": [
       {
@@ -166384,8 +166595,8 @@
   {
     "name": "Chinvali",
     "coords": [
-      44.77101,
-      42.11027
+      43.9667,
+      42.2333
     ],
     "historical_names": [
       {
@@ -166931,8 +167142,8 @@
   {
     "name": "Naoussa",
     "coords": [
-      25.23872,
-      37.12357
+      22.0681,
+      40.6294
     ],
     "historical_names": [
       {
@@ -167120,8 +167331,8 @@
   {
     "name": "Rabat-Salé",
     "coords": [
-      -6.23759,
-      34.17277
+      -6.825,
+      34.027
     ],
     "historical_names": [
       {
@@ -167163,8 +167374,8 @@
   {
     "name": "Rio Claro",
     "coords": [
-      -44.13441,
-      -22.72589
+      -47.5674,
+      -22.4005
     ],
     "historical_names": [
       {
@@ -167546,8 +167757,8 @@
   {
     "name": "Agoue",
     "coords": [
-      2.31583,
-      9.30769
+      1.6817,
+      6.2502
     ],
     "historical_names": [
       {
@@ -167742,8 +167953,8 @@
   {
     "name": "Babantapki",
     "coords": [
-      8.08167,
-      17.60779
+      9.0381,
+      13.7047
     ],
     "historical_names": [
       {
@@ -169063,8 +169274,8 @@
   {
     "name": "Marigot",
     "coords": [
-      -61.57929,
-      15.87434
+      -63.0822,
+      18.0731
     ],
     "historical_names": [
       {
@@ -169521,8 +169732,8 @@
   {
     "name": "Nungwa",
     "coords": [
-      -1.02319,
-      7.94653
+      -0.0771,
+      5.6011
     ],
     "historical_names": [
       {
@@ -170295,8 +170506,8 @@
   {
     "name": "Sudi",
     "coords": [
-      34.88882,
-      -6.36903
+      39.95,
+      -10.0997
     ],
     "historical_names": [
       {
@@ -170554,8 +170765,8 @@
   {
     "name": "Tund`'za",
     "coords": [
-      25.48583,
-      42.73388
+      26.5334,
+      42.4471
     ],
     "historical_names": [
       {
@@ -171059,8 +171270,8 @@
   {
     "name": "Masan",
     "coords": [
-      127.76692,
-      35.90776
+      128.5814,
+      35.2135
     ],
     "historical_names": [
       {
@@ -171085,8 +171296,8 @@
   {
     "name": "Puerto de la Concordia",
     "coords": [
-      -88.89653,
-      13.79419
+      -88.9516,
+      13.3502
     ],
     "historical_names": [
       {
@@ -171262,8 +171473,8 @@
   {
     "name": "Griva",
     "coords": [
-      23.6323,
-      56.64774
+      26.498,
+      55.858
     ],
     "historical_names": [
       {
@@ -171911,16 +172122,37 @@
     ]
   },
   {
-    "name": "Al`cevs'k",
+    "name": "Alchevsk",
     "coords": [
       38.81473,
       48.47177
     ],
     "historical_names": [
       {
-        "date": "1926.1.1",
-        "name": "Al`cevs'k"
+        "date": "1895.1.1",
+        "name": "Yuryevka"
+      },
+      {
+        "date": "1903.1.1",
+        "name": "Alchevsk"
+      },
+      {
+        "date": "1931.1.1",
+        "name": "Voroshilovsk"
+      },
+      {
+        "date": "1961.1.1",
+        "name": "Kommunarsk"
+      },
+      {
+        "date": "1991.1.1",
+        "name": "Alchevsk"
       }
+    ],
+    "other_names": [
+      "Voroshilovsk",
+      "Kommunarsk",
+      "Yuryevka"
     ]
   },
   {
@@ -171993,16 +172225,27 @@
     ]
   },
   {
-    "name": "Birobid`'zan",
+    "name": "Birobidzhan",
     "coords": [
       132.93067,
       48.78797
     ],
     "historical_names": [
       {
-        "date": "1926.1.1",
-        "name": "Birobid`'zan"
+        "date": "1912.1.1",
+        "name": "Tikhonkaya"
+      },
+      {
+        "date": "1931.1.1",
+        "name": "Birobidzhan"
       }
+    ],
+    "other_names": [
+      "Tikhonkaya",
+      "Jewish Autonomous Oblast Capital",
+      "Birobidjan",
+      "Jewish AO Capital",
+      "Birobidzan"
     ]
   },
   {
@@ -172415,8 +172658,8 @@
   {
     "name": "Laâyoune",
     "coords": [
-      -5.26836,
-      35.1688
+      -13.1989,
+      27.15
     ],
     "historical_names": [
       {
@@ -172659,9 +172902,33 @@
     ],
     "historical_names": [
       {
+        "date": "1648.1.1",
+        "name": "Monastyrskoye"
+      },
+      {
+        "date": "1917.1.1",
+        "name": "Prokopyevskoye"
+      },
+      {
+        "date": "1917.10.12",
+        "name": "Prokopyevsky Rudnik"
+      },
+      {
         "date": "1926.1.1",
         "name": "Prokop'evsk"
+      },
+      {
+        "date": "1931.5.10",
+        "name": "Prokopyevsk"
       }
+    ],
+    "other_names": [
+      "Prokopyevskiy Rudnik",
+      "Monastyrskoye",
+      "Prokopyevsky Rudnik",
+      "Kuzbass Coking Coal Hub",
+      "Prokopyevsk Kuzbass Coal",
+      "Prokopyevskoye"
     ]
   },
   {
@@ -173949,8 +174216,8 @@
   {
     "name": "Falealili",
     "coords": [
-      -171.75935,
-      -13.84193
+      -171.6946,
+      -14.0015
     ],
     "historical_names": [
       {
@@ -174613,8 +174880,8 @@
   {
     "name": "Hollywood",
     "coords": [
-      -118.32661,
-      34.09073
+      -80.1564,
+      26.0303
     ],
     "historical_names": [
       {
@@ -174842,8 +175109,8 @@
   {
     "name": "Klangenang",
     "coords": [
-      113.92133,
-      -0.78927
+      108.4543,
+      -6.6878
     ],
     "historical_names": [
       {
@@ -174872,8 +175139,8 @@
   {
     "name": "Kota Baru",
     "coords": [
-      115.9468,
-      -3.00298
+      116.2232,
+      -3.245
     ],
     "historical_names": [
       {
@@ -175468,8 +175735,8 @@
   {
     "name": "Roxas",
     "coords": [
-      122.62775,
-      11.38888
+      122.7508,
+      11.5862
     ],
     "historical_names": [
       {
@@ -175651,8 +175918,8 @@
   {
     "name": "Sukaraja",
     "coords": [
-      106.83935,
-      -6.58855
+      109.2881,
+      -7.4581
     ],
     "historical_names": [
       {
@@ -176396,8 +176663,8 @@
   {
     "name": "Cubei",
     "coords": [
-      28.36989,
-      47.41163
+      28.744,
+      45.7908
     ],
     "historical_names": [
       {
@@ -176656,8 +176923,8 @@
   {
     "name": "Hillsborough",
     "coords": [
-      -61.679,
-      12.1165
+      -61.456,
+      12.4829
     ],
     "historical_names": [
       {
@@ -177421,8 +177688,8 @@
   {
     "name": "Nchanga",
     "coords": [
-      27.84933,
-      -13.1339
+      27.8667,
+      -12.5167
     ],
     "historical_names": [
       {
@@ -177777,8 +178044,8 @@
   {
     "name": "Santo António",
     "coords": [
-      -25.70278,
-      37.85807
+      -16.9453,
+      32.6914
     ],
     "historical_names": [
       {
@@ -178323,16 +178590,24 @@
     ]
   },
   {
-    "name": "An`'zero-Sud`'zensk",
+    "name": "Anzhero-Sudzhensk",
     "coords": [
       85.99519,
       56.09546
     ],
     "historical_names": [
       {
-        "date": "1933.1.1",
-        "name": "An`'zero-Sud`'zensk"
+        "date": "1897.1.1",
+        "name": "Anzherka"
+      },
+      {
+        "date": "1928.1.1",
+        "name": "Anzhero-Sudzhensk"
       }
+    ],
+    "other_names": [
+      "Anzherka",
+      "Sudzhenka"
     ]
   },
   {
@@ -179381,8 +179656,8 @@
   {
     "name": "D`'zebel",
     "coords": [
-      22.58482,
-      42.83208
+      25.3,
+      41.5
     ],
     "historical_names": [
       {
@@ -179814,8 +180089,8 @@
   {
     "name": "Kopriv`'stica",
     "coords": [
-      22.41869,
-      42.286
+      24.35,
+      42.6333
     ],
     "historical_names": [
       {
@@ -180046,8 +180321,8 @@
   {
     "name": "Marica",
     "coords": [
-      23.70631,
-      42.30548
+      24.7297,
+      42.2317
     ],
     "historical_names": [
       {
@@ -182034,8 +182309,8 @@
   {
     "name": "Yungho",
     "coords": [
-      120.96052,
-      23.69781
+      121.5164,
+      25.0075
     ],
     "historical_names": [
       {
@@ -182095,8 +182370,8 @@
   {
     "name": "Altan Bulag",
     "coords": [
-      106.7936,
-      50.08116
+      106.498,
+      50.31
     ],
     "historical_names": [
       {
@@ -182674,8 +182949,8 @@
   {
     "name": "Dund-Us",
     "coords": [
-      91.37121,
-      48.12432
+      91.6419,
+      48.0056
     ],
     "historical_names": [
       {
@@ -182700,8 +182975,8 @@
   {
     "name": "Râ's-al-Wâd",
     "coords": [
-      6.85133,
-      33.3675
+      5.0317,
+      35.9437
     ],
     "historical_names": [
       {
@@ -182743,8 +183018,8 @@
   {
     "name": "Fuglafjarð",
     "coords": [
-      -6.91181,
-      61.89264
+      -6.8144,
+      62.2444
     ],
     "historical_names": [
       {
@@ -182937,8 +183212,8 @@
   {
     "name": "Ilagan",
     "coords": [
-      122.12918,
-      17.12845
+      121.8894,
+      17.1489
     ],
     "historical_names": [
       {
@@ -183577,8 +183852,8 @@
   {
     "name": "Perovo",
     "coords": [
-      42.40238,
-      56.2057
+      37.775,
+      55.741
     ],
     "historical_names": [
       {
@@ -183741,8 +184016,8 @@
   {
     "name": "San Antonio",
     "coords": [
-      120.08963,
-      14.92751
+      120.8533,
+      15.3078
     ],
     "historical_names": [
       {
@@ -184886,8 +185161,8 @@
   {
     "name": "SC",
     "coords": [
-      -81.16372,
-      33.83608
+      -71.2083,
+      21.325
     ],
     "historical_names": [
       {
@@ -185086,8 +185361,8 @@
   {
     "name": "Bolívar",
     "coords": [
-      -74.03001,
-      8.67044
+      -76.0203,
+      5.8494
     ],
     "historical_names": [
       {
@@ -185572,8 +185847,8 @@
   {
     "name": "Santander",
     "coords": [
-      -73.65362,
-      6.64371
+      -76.4845,
+      3.0076
     ],
     "historical_names": [
       {
@@ -186060,16 +186335,19 @@
     ]
   },
   {
-    "name": "Dru`zkivka",
+    "name": "Druzhkivka",
     "coords": [
       37.528,
       48.61604
     ],
     "historical_names": [
       {
-        "date": "1939.1.1",
-        "name": "Dru`zkivka"
+        "date": "1781.1.1",
+        "name": "Druzhkivka"
       }
+    ],
+    "other_names": [
+      "Druzhkovka"
     ]
   },
   {
@@ -186536,16 +186814,25 @@
     ]
   },
   {
-    "name": "Lysy`cans'k",
+    "name": "Lysychansk",
     "coords": [
       38.42742,
       48.91126
     ],
     "historical_names": [
       {
-        "date": "1939.1.1",
-        "name": "Lysy`cans'k"
+        "date": "1795.1.1",
+        "name": "Lysycha Balka"
+      },
+      {
+        "date": "1938.1.1",
+        "name": "Lysychansk"
       }
+    ],
+    "other_names": [
+      "Lisichansk",
+      "Lysytsia Balka",
+      "Lysycha Balka"
     ]
   },
   {
@@ -186590,8 +186877,8 @@
   {
     "name": "Nabere`'znyje `'Celny",
     "coords": [
-      136.02207,
-      48.87987
+      52.3958,
+      55.7436
     ],
     "historical_names": [
       {
@@ -186616,8 +186903,8 @@
   {
     "name": "Narjan-Mar",
     "coords": [
-      53.10783,
-      67.67101
+      53,
+      67.64
     ],
     "historical_names": [
       {
@@ -186822,16 +187109,19 @@
     ]
   },
   {
-    "name": "Rubi`zne",
+    "name": "Rubizhne",
     "coords": [
       38.37503,
       49.01585
     ],
     "historical_names": [
       {
-        "date": "1939.1.1",
-        "name": "Rubi`zne"
+        "date": "1904.1.1",
+        "name": "Rubizhne"
       }
+    ],
+    "other_names": [
+      "Rubezhnoye"
     ]
   },
   {
@@ -187018,8 +187308,8 @@
   {
     "name": "Tu`'sino",
     "coords": [
-      22.18449,
-      54.99502
+      37.427,
+      55.818
     ],
     "historical_names": [
       {
@@ -188482,8 +188772,8 @@
   {
     "name": "Caxias",
     "coords": [
-      -43.31309,
-      -22.78686
+      -43.3551,
+      -4.8656
     ],
     "historical_names": [
       {
@@ -189990,8 +190280,8 @@
   {
     "name": "Flores",
     "coords": [
-      -89.89261,
-      16.91813
+      -91.8245,
+      14.6546
     ],
     "historical_names": [
       {
@@ -190137,8 +190427,8 @@
   {
     "name": "Fuchû",
     "coords": [
-      139.47772,
-      35.66899
+      132.5044,
+      34.3925
     ],
     "historical_names": [
       {
@@ -190280,8 +190570,8 @@
   {
     "name": "Ghent",
     "coords": [
-      3.75,
-      51
+      3.730385,
+      51.049992
     ],
     "historical_names": [
       {
@@ -194756,8 +195046,8 @@
   {
     "name": "Santa Barbara",
     "coords": [
-      -91.6178,
-      15.33071
+      -91.227,
+      14.4345
     ],
     "historical_names": [
       {
@@ -195449,8 +195739,8 @@
   {
     "name": "Springfield",
     "coords": [
-      -76.74579,
-      41.84924
+      -75.3331,
+      39.9333
     ],
     "historical_names": [
       {
@@ -196779,8 +197069,8 @@
   {
     "name": "Yuzawa",
     "coords": [
-      138.81832,
-      36.93493
+      140.4947,
+      39.1642
     ],
     "historical_names": [
       {
@@ -197732,8 +198022,8 @@
   {
     "name": "Eastview",
     "coords": [
-      -106.61399,
-      52.09714
+      -75.633,
+      45.445
     ],
     "historical_names": [
       {
@@ -197797,8 +198087,8 @@
   {
     "name": "Farîdkot",
     "coords": [
-      74.82732,
-      30.5932
+      74.7545,
+      30.6731
     ],
     "historical_names": [
       {
@@ -197904,8 +198194,8 @@
   {
     "name": "Græsted-Gilleleje",
     "coords": [
-      9.50178,
-      56.26392
+      12.2851,
+      56.0656
     ],
     "historical_names": [
       {
@@ -198249,8 +198539,8 @@
   {
     "name": "Kénogami",
     "coords": [
-      -80.19675,
-      48.10086
+      -71.244,
+      48.436
     ],
     "historical_names": [
       {
@@ -198611,8 +198901,8 @@
   {
     "name": "Malkâpur",
     "coords": [
-      77.8929,
-      17.16094
+      76.2019,
+      20.8833
     ],
     "historical_names": [
       {
@@ -199199,8 +199489,8 @@
   {
     "name": "Ratangarh",
     "coords": [
-      74.27368,
-      26.29825
+      74.6199,
+      28.0757
     ],
     "historical_names": [
       {
@@ -199341,8 +199631,8 @@
   {
     "name": "Saint James-Assiniboia",
     "coords": [
-      -106.34677,
-      56.13037
+      -97.288,
+      49.8848
     ],
     "historical_names": [
       {
@@ -199822,8 +200112,8 @@
   {
     "name": "Vandra",
     "coords": [
-      84.11652,
-      18.60776
+      72.8297,
+      19.0576
     ],
     "historical_names": [
       {
@@ -201416,8 +201706,8 @@
   {
     "name": "Blue Mountains",
     "coords": [
-      150.48653,
-      -33.38563
+      150.567,
+      -33.698
     ],
     "historical_names": [
       {
@@ -202024,8 +202314,8 @@
   {
     "name": "San José",
     "coords": [
-      -58.44383,
-      -23.4425
+      -56.7356,
+      -25.5311
     ],
     "historical_names": [
       {
@@ -202076,8 +202366,8 @@
   {
     "name": "San Pedro",
     "coords": [
-      -59.66287,
-      -33.67578
+      -64.867,
+      -24.2334
     ],
     "historical_names": [
       {
@@ -202817,8 +203107,8 @@
   {
     "name": "Khong",
     "coords": [
-      103.34357,
-      22.54702
+      105.8552,
+      14.1188
     ],
     "historical_names": [
       {
@@ -203090,8 +203380,8 @@
   {
     "name": "New Tafo",
     "coords": [
-      -1.60441,
-      6.74471
+      -0.3704,
+      6.2157
     ],
     "historical_names": [
       {
@@ -203142,8 +203432,8 @@
   {
     "name": "Old Tafo",
     "coords": [
-      -0.39721,
-      6.23346
+      -1.6081,
+      6.7358
     ],
     "historical_names": [
       {
@@ -204064,8 +204354,8 @@
   {
     "name": "Amagi",
     "coords": [
-      128.89794,
-      27.81179
+      130.6542,
+      33.4181
     ],
     "historical_names": [
       {
@@ -205314,8 +205604,8 @@
   {
     "name": "Cárdenas",
     "coords": [
-      -93.37323,
-      18.00121
+      -99.6425,
+      22.0014
     ],
     "historical_names": [
       {
@@ -205405,8 +205695,8 @@
   {
     "name": "Cava",
     "coords": [
-      -51.92528,
-      -14.235
+      -43.4452,
+      -22.6804
     ],
     "historical_names": [
       {
@@ -205725,8 +206015,8 @@
   {
     "name": "Consolación del Norte",
     "coords": [
-      -77.78117,
-      21.52176
+      -83.575,
+      22.748
     ],
     "historical_names": [
       {
@@ -205829,8 +206119,8 @@
   {
     "name": "Criciúma",
     "coords": [
-      -41.61827,
-      -20.21787
+      -49.3882,
+      -28.6846
     ],
     "historical_names": [
       {
@@ -205868,8 +206158,8 @@
   {
     "name": "Cuauhthémoc",
     "coords": [
-      -99.16914,
-      19.43013
+      -106.8667,
+      28.405
     ],
     "historical_names": [
       {
@@ -206491,8 +206781,8 @@
   {
     "name": "Fuji",
     "coords": [
-      -80.99268,
-      34.97033
+      138.67622,
+      35.161484
     ],
     "historical_names": [
       {
@@ -206712,8 +207002,8 @@
   {
     "name": "Gravatá",
     "coords": [
-      -35.47659,
-      -6.99433
+      -35.5668,
+      -8.206
     ],
     "historical_names": [
       {
@@ -206894,8 +207184,8 @@
   {
     "name": "Hashima",
     "coords": [
-      129.73853,
-      32.62763
+      136.7033,
+      35.3199
     ],
     "historical_names": [
       {
@@ -207938,8 +208228,8 @@
   {
     "name": "Kashima",
     "coords": [
-      140.64479,
-      35.96568
+      130.0986,
+      33.1039
     ],
     "historical_names": [
       {
@@ -208336,8 +208626,8 @@
   {
     "name": "Lapa",
     "coords": [
-      -43.17809,
-      -22.91438
+      -49.7169,
+      -25.7677
     ],
     "historical_names": [
       {
@@ -208942,8 +209232,8 @@
   {
     "name": "Miyoshi",
     "coords": [
-      133.80725,
-      34.02602
+      132.85,
+      34.8
     ],
     "historical_names": [
       {
@@ -208968,8 +209258,8 @@
   {
     "name": "Mizusawa",
     "coords": [
-      141.63962,
-      40.24224
+      141.139,
+      39.1438
     ],
     "historical_names": [
       {
@@ -209241,8 +209531,8 @@
   {
     "name": "Nazaré",
     "coords": [
-      -64.36327,
-      -9.36092
+      -39.0139,
+      -13.035
     ],
     "historical_names": [
       {
@@ -209496,8 +209786,8 @@
   {
     "name": "Odda",
     "coords": [
-      6.91767,
-      59.93731
+      6.5456,
+      60.0691
     ],
     "historical_names": [
       {
@@ -210553,8 +210843,8 @@
   {
     "name": "Rio Negro",
     "coords": [
-      -64.70743,
-      -0.18717
+      -49.7878,
+      -26.0908
     ],
     "historical_names": [
       {
@@ -210921,8 +211211,8 @@
   {
     "name": "San Luis",
     "coords": [
-      -75.84759,
-      20.18719
+      -83.7681,
+      22.2828
     ],
     "historical_names": [
       {
@@ -211181,8 +211471,8 @@
   {
     "name": "Santa Rosalia",
     "coords": [
-      -65.65694,
-      7.48659
+      -66.923,
+      10.479
     ],
     "historical_names": [
       {
@@ -211704,8 +211994,8 @@
   {
     "name": "Shimminato",
     "coords": [
-      141.52566,
-      40.52841
+      137.081,
+      36.775
     ],
     "historical_names": [
       {
@@ -211730,8 +212020,8 @@
   {
     "name": "Shirakawa",
     "coords": [
-      136.89857,
-      36.27103
+      140.2109,
+      37.1263
     ],
     "historical_names": [
       {
@@ -211838,8 +212128,8 @@
   {
     "name": "Souk Arba l'Rharb",
     "coords": [
-      -7.09262,
-      31.7917
+      -5.9897,
+      34.6809
     ],
     "historical_names": [
       {
@@ -212176,8 +212466,8 @@
   {
     "name": "Tateyama",
     "coords": [
-      137.31373,
-      36.66347
+      139.87,
+      34.9966
     ],
     "historical_names": [
       {
@@ -212280,8 +212570,8 @@
   {
     "name": "Terîn Kôt",
     "coords": [
-      67.70995,
-      33.93911
+      65.877,
+      32.622
     ],
     "historical_names": [
       {
@@ -212358,8 +212648,8 @@
   {
     "name": "Tire",
     "coords": [
-      34.85161,
-      31.04605
+      34.9483,
+      32.2322
     ],
     "historical_names": [
       {
@@ -212605,8 +212895,8 @@
   {
     "name": "Uchigo",
     "coords": [
-      132.65981,
-      33.53257
+      140.855,
+      37.0358
     ],
     "historical_names": [
       {
@@ -212769,8 +213059,8 @@
   {
     "name": "Vargas",
     "coords": [
-      -66.73673,
-      10.589
+      -66.8506,
+      10.6131
     ],
     "historical_names": [
       {
@@ -212782,8 +213072,8 @@
   {
     "name": "Venustiano Carranza",
     "coords": [
-      -99.09499,
-      19.43061
+      -92.5625,
+      16.3294
     ],
     "historical_names": [
       {
@@ -212899,8 +213189,8 @@
   {
     "name": "Volzhsky",
     "coords": [
-      48.35682,
-      55.87229
+      44.7797,
+      48.7858
     ],
     "historical_names": [
       {
@@ -213932,8 +214222,8 @@
   {
     "name": "Deolâli",
     "coords": [
-      74.62101,
-      19.4728
+      73.8344,
+      19.944
     ],
     "historical_names": [
       {
@@ -214057,8 +214347,8 @@
   {
     "name": "Edendale",
     "coords": [
-      28.91667,
-      -30.38333
+      30.262,
+      -29.671
     ],
     "historical_names": [
       {
@@ -214282,8 +214572,8 @@
   {
     "name": "Goodwood",
     "coords": [
-      24.26146,
-      -26.45344
+      18.5492,
+      -33.9067
     ],
     "historical_names": [
       {
@@ -215109,8 +215399,8 @@
   {
     "name": "Lancaster",
     "coords": [
-      -74.50271,
-      45.14373
+      -66.1,
+      45.25
     ],
     "historical_names": [
       {
@@ -216746,8 +217036,8 @@
   {
     "name": "Tracy",
     "coords": [
-      -66.68292,
-      45.67684
+      -73.148,
+      46.017
     ],
     "historical_names": [
       {
@@ -217128,8 +217418,8 @@
   {
     "name": "Barrancas",
     "coords": [
-      -71.98182,
-      -34.49636
+      -70.746,
+      -33.463
     ],
     "historical_names": [
       {
@@ -217972,8 +218262,8 @@
   {
     "name": "Ondo",
     "coords": [
-      5.14781,
-      6.91487
+      4.8368,
+      7.0899
     ],
     "historical_names": [
       {
@@ -218695,8 +218985,8 @@
   {
     "name": "Boxian",
     "coords": [
-      107.91569,
-      23.64554
+      115.7746,
+      33.8654
     ],
     "historical_names": [
       {
@@ -219020,8 +219310,8 @@
   {
     "name": "Horqin Youyi Qianqi",
     "coords": [
-      121.98994,
-      46.37064
+      122.0546,
+      46.0737
     ],
     "historical_names": [
       {
@@ -219410,8 +219700,8 @@
   {
     "name": "Shuangcheng",
     "coords": [
-      126.18618,
-      45.18454
+      126.2896,
+      45.3642
     ],
     "historical_names": [
       {
@@ -219475,8 +219765,8 @@
   {
     "name": "Tao'an",
     "coords": [
-      111.12786,
-      28.4983
+      122.7795,
+      45.3324
     ],
     "historical_names": [
       {
@@ -220824,8 +221114,8 @@
   {
     "name": "La Trobe Valley",
     "coords": [
-      146.8,
-      -38.15
+      146.47,
+      -38.212
     ],
     "historical_names": [
       {
@@ -222641,8 +222931,8 @@
   {
     "name": "Esashi",
     "coords": [
-      140.12753,
-      41.86923
+      141.175,
+      39.1911
     ],
     "historical_names": [
       {
@@ -222822,8 +223112,8 @@
   {
     "name": "Hirata",
     "coords": [
-      140.57574,
-      37.22178
+      132.8236,
+      35.4323
     ],
     "historical_names": [
       {
@@ -223060,8 +223350,8 @@
   {
     "name": "Kawachi",
     "coords": [
-      140.24452,
-      35.88476
+      135.6183,
+      34.6627
     ],
     "historical_names": [
       {
@@ -224222,8 +224512,8 @@
   {
     "name": "Biak",
     "coords": [
-      135.98008,
-      -1.0381
+      136.0813,
+      -1.1699
     ],
     "historical_names": [
       {
@@ -224666,8 +224956,8 @@
   {
     "name": "Maïné-Soroa",
     "coords": [
-      11.79796,
-      13.72263
+      12.0275,
+      13.2156
     ],
     "historical_names": [
       {
@@ -225071,8 +225361,8 @@
   {
     "name": "Ayer Hitam",
     "coords": [
-      103.17996,
-      1.91834
+      100.2782,
+      5.4016
     ],
     "historical_names": [
       {
@@ -225964,8 +226254,8 @@
   {
     "name": "Huaide",
     "coords": [
-      104.1954,
-      35.86166
+      124.8083,
+      43.5052
     ],
     "historical_names": [
       {
@@ -226444,8 +226734,8 @@
   {
     "name": "Buyant-Uhaa",
     "coords": [
-      106.76269,
-      47.85266
+      110.1367,
+      44.8917
     ],
     "historical_names": [
       {
@@ -226779,8 +227069,8 @@
   {
     "name": "Katwe",
     "coords": [
-      32.57828,
-      0.30297
+      29.883,
+      -0.1376
     ],
     "historical_names": [
       {
@@ -227219,8 +227509,8 @@
   {
     "name": "Qara`zal",
     "coords": [
-      66.92368,
-      48.01957
+      70.7931,
+      48.0044
     ],
     "historical_names": [
       {
@@ -227342,8 +227632,8 @@
   {
     "name": "Sosumav",
     "coords": [
-      46.86911,
-      -18.76695
+      48.9167,
+      -13.0833
     ],
     "historical_names": [
       {
@@ -227355,8 +227645,8 @@
   {
     "name": "Sühbaatar",
     "coords": [
-      113.53808,
-      46.56532
+      106.2064,
+      50.2364
     ],
     "historical_names": [
       {
@@ -227974,8 +228264,8 @@
   {
     "name": "Anjalankoski",
     "coords": [
-      28.1371,
-      66.40933
+      26.824,
+      60.75
     ],
     "historical_names": [
       {
@@ -229790,8 +230080,8 @@
   {
     "name": "Chachoengsao",
     "coords": [
-      101.61578,
-      13.5491
+      101.0675,
+      13.6828
     ],
     "historical_names": [
       {
@@ -229829,8 +230119,8 @@
   {
     "name": "Chaiyaphum",
     "coords": [
-      101.88917,
-      16.01387
+      102.0315,
+      15.8068
     ],
     "historical_names": [
       {
@@ -230097,8 +230387,8 @@
   {
     "name": "Chon Buri",
     "coords": [
-      101.25238,
-      13.20175
+      100.9899,
+      13.3631
     ],
     "historical_names": [
       {
@@ -231772,8 +232062,8 @@
   {
     "name": "Hôjô",
     "coords": [
-      140.09343,
-      36.17769
+      132.7756,
+      33.9729
     ],
     "historical_names": [
       {
@@ -232026,8 +232316,8 @@
   {
     "name": "Ishikawa",
     "coords": [
-      136.52897,
-      36.32603
+      127.8214,
+      26.4233
     ],
     "historical_names": [
       {
@@ -232267,8 +232557,8 @@
   {
     "name": "Kaela",
     "coords": [
-      12.35472,
-      7.36972
+      14.45,
+      10.1
     ],
     "historical_names": [
       {
@@ -232872,8 +233162,8 @@
   {
     "name": "Krabi",
     "coords": [
-      99.10135,
-      8.11918
+      98.9175,
+      8.059
     ],
     "historical_names": [
       {
@@ -232917,8 +233207,8 @@
   {
     "name": "Kukurantumi",
     "coords": [
-      0.58239,
-      7.28274
+      -0.3655,
+      6.1883
     ],
     "historical_names": [
       {
@@ -233435,8 +233725,8 @@
   {
     "name": "Loei",
     "coords": [
-      101.61578,
-      17.42204
+      101.7237,
+      17.49
     ],
     "historical_names": [
       {
@@ -233474,8 +233764,8 @@
   {
     "name": "Lop Buri",
     "coords": [
-      100.89031,
-      15.04996
+      100.6448,
+      14.8116
     ],
     "historical_names": [
       {
@@ -234625,8 +234915,8 @@
   {
     "name": "Nakhon Phanom",
     "coords": [
-      104.56553,
-      17.41158
+      104.7795,
+      17.4035
     ],
     "historical_names": [
       {
@@ -234733,8 +235023,8 @@
   {
     "name": "Narathiwat",
     "coords": [
-      101.79796,
-      6.19009
+      101.8231,
+      6.4264
     ],
     "historical_names": [
       {
@@ -234871,8 +235161,8 @@
   {
     "name": "Neves",
     "coords": [
-      -44.08719,
-      -19.76644
+      -43.0975,
+      -22.8567
     ],
     "historical_names": [
       {
@@ -235851,8 +236141,8 @@
   {
     "name": "Phangnga",
     "coords": [
-      98.39649,
-      8.65578
+      98.5299,
+      8.4509
     ],
     "historical_names": [
       {
@@ -235894,8 +236184,8 @@
   {
     "name": "Phet Buri",
     "coords": [
-      99.63414,
-      12.90351
+      99.945,
+      13.103
     ],
     "historical_names": [
       {
@@ -236121,8 +236411,8 @@
   {
     "name": "Pocrí",
     "coords": [
-      -80.56051,
-      8.25734
+      -80.1202,
+      7.6569
     ],
     "historical_names": [
       {
@@ -236199,8 +236489,8 @@
   {
     "name": "Prachin Buri",
     "coords": [
-      101.61578,
-      14.09656
+      101.375,
+      14.0613
     ],
     "historical_names": [
       {
@@ -236386,8 +236676,8 @@
   {
     "name": "Rat Buri",
     "coords": [
-      99.63414,
-      13.45099
+      99.8142,
+      13.5354
     ],
     "historical_names": [
       {
@@ -236561,8 +236851,8 @@
   {
     "name": "Roi Et",
     "coords": [
-      103.72892,
-      15.90329
+      103.6523,
+      16.0527
     ],
     "historical_names": [
       {
@@ -236613,8 +236903,8 @@
   {
     "name": "Roxas",
     "coords": [
-      121.6169,
-      17.08213
+      122.7508,
+      11.5862
     ],
     "historical_names": [
       {
@@ -236786,8 +237076,8 @@
   {
     "name": "San Blas",
     "coords": [
-      -78.22483,
-      9.23886
+      -78.9484,
+      9.5586
     ],
     "historical_names": [
       {
@@ -236812,8 +237102,8 @@
   {
     "name": "San Felipe",
     "coords": [
-      -114.84078,
-      31.02507
+      -101.2167,
+      21.4833
     ],
     "historical_names": [
       {
@@ -236838,8 +237128,8 @@
   {
     "name": "San Francisco",
     "coords": [
-      -79.50666,
-      8.99257
+      -80.9667,
+      8.25
     ],
     "historical_names": [
       {
@@ -236851,8 +237141,8 @@
   {
     "name": "San Jose",
     "coords": [
-      121.10229,
-      12.40119
+      120.9869,
+      15.796
     ],
     "historical_names": [
       {
@@ -237217,8 +237507,8 @@
   {
     "name": "Ségouéla",
     "coords": [
-      -5.54708,
-      7.53999
+      -6.6773,
+      7.9622
     ],
     "historical_names": [
       {
@@ -237555,8 +237845,8 @@
   {
     "name": "Sisaket",
     "coords": [
-      104.47233,
-      14.75794
+      104.3289,
+      15.1144
     ],
     "historical_names": [
       {
@@ -237803,8 +238093,8 @@
   {
     "name": "Speljavik",
     "coords": [
-      8.46895,
-      60.47202
+      6.336,
+      62.448
     ],
     "historical_names": [
       {
@@ -237920,8 +238210,8 @@
   {
     "name": "Suphan Buri",
     "coords": [
-      99.99123,
-      14.53792
+      100.1184,
+      14.4749
     ],
     "historical_names": [
       {
@@ -237946,8 +238236,8 @@
   {
     "name": "Surin",
     "coords": [
-      103.72892,
-      15.16961
+      103.4936,
+      14.8818
     ],
     "historical_names": [
       {
@@ -238024,8 +238314,8 @@
   {
     "name": "Taga Dzong",
     "coords": [
-      90.4336,
-      27.51416
+      89.8769,
+      27.0753
     ],
     "historical_names": [
       {
@@ -238288,8 +238578,8 @@
   {
     "name": "Tenryû",
     "coords": [
-      137.85434,
-      35.27623
+      137.8137,
+      34.8606
     ],
     "historical_names": [
       {
@@ -238803,8 +239093,8 @@
   {
     "name": "Uthai Thani",
     "coords": [
-      99.45615,
-      15.29985
+      100.0281,
+      15.3823
     ],
     "historical_names": [
       {
@@ -239188,8 +239478,8 @@
   {
     "name": "Yamato",
     "coords": [
-      -71.77894,
-      42.55365
+      139.4581,
+      35.4875
     ],
     "historical_names": [
       {
@@ -239357,8 +239647,8 @@
   {
     "name": "Abelokipi",
     "coords": [
-      23.76375,
-      37.98867
+      22.92,
+      40.64
     ],
     "historical_names": [
       {
@@ -239594,8 +239884,8 @@
   {
     "name": "Argyroupolis",
     "coords": [
-      24.04317,
-      41.12163
+      23.758,
+      37.903
     ],
     "historical_names": [
       {
@@ -239711,8 +240001,8 @@
   {
     "name": "San José de Bellavista",
     "coords": [
-      -76.58928,
-      -7.05346
+      -77.109,
+      -12.063
     ],
     "historical_names": [
       {
@@ -240476,8 +240766,8 @@
   {
     "name": "Guadalupe",
     "coords": [
-      -79.47601,
-      -7.24525
+      -75.7728,
+      -13.986
     ],
     "historical_names": [
       {
@@ -241066,8 +241356,8 @@
   {
     "name": "Llama",
     "coords": [
-      -73.11169,
-      7.12201
+      -79.1189,
+      -6.5142
     ],
     "historical_names": [
       {
@@ -241329,8 +241619,8 @@
   {
     "name": "Metamorfossi",
     "coords": [
-      23.60368,
-      40.23019
+      23.7636,
+      38.0658
     ],
     "historical_names": [
       {
@@ -241524,8 +241814,8 @@
   {
     "name": "Newham",
     "coords": [
-      -1.72759,
-      55.548
+      0.035,
+      51.51
     ],
     "historical_names": [
       {
@@ -241675,8 +241965,8 @@
   {
     "name": "Pameungpeuk",
     "coords": [
-      107.73097,
-      -7.64425
+      107.598,
+      -7.018
     ],
     "historical_names": [
       {
@@ -241688,8 +241978,8 @@
   {
     "name": "Pânchur",
     "coords": [
-      78.8549,
-      30.0111
+      88.2641,
+      22.5312
     ],
     "historical_names": [
       {
@@ -241740,8 +242030,8 @@
   {
     "name": "Papaichtou",
     "coords": [
-      -53.12578,
-      3.93389
+      -54.1495,
+      3.807
     ],
     "historical_names": [
       {
@@ -241995,8 +242285,8 @@
   {
     "name": "Râjpur",
     "coords": [
-      75.13557,
-      21.94015
+      88.4321,
+      22.4382
     ],
     "historical_names": [
       {
@@ -242442,8 +242732,8 @@
   {
     "name": "Sumbawa",
     "coords": [
-      118.11711,
-      -8.73807
+      117.4164,
+      -8.4913
     ],
     "historical_names": [
       {
@@ -242784,8 +243074,8 @@
   {
     "name": "Xianggangzai",
     "coords": [
-      110.36194,
-      19.99024
+      114.1564,
+      22.2489
     ],
     "historical_names": [
       {
@@ -242870,8 +243160,8 @@
   {
     "name": "Al-Fuiayrah",
     "coords": [
-      56.24823,
-      25.41108
+      56.341,
+      25.131
     ],
     "historical_names": [
       {
@@ -243533,8 +243823,8 @@
   {
     "name": "Preah Seihânu",
     "coords": [
-      103.82163,
-      10.75819
+      103.5279,
+      10.6252
     ],
     "historical_names": [
       {
@@ -243702,8 +243992,8 @@
   {
     "name": "Siemréab",
     "coords": [
-      104.10013,
-      13.33027
+      103.862,
+      13.3574
     ],
     "historical_names": [
       {
@@ -246333,8 +246623,8 @@
   {
     "name": "Sango Otta",
     "coords": [
-      4.78884,
-      7.94521
+      3.2397,
+      6.7053
     ],
     "historical_names": [
       {
@@ -246788,8 +247078,8 @@
   {
     "name": "Al Abiar",
     "coords": [
-      17.22833,
-      26.3351
+      20.5967,
+      32.1889
     ],
     "historical_names": [
       {
@@ -247475,8 +247765,8 @@
   {
     "name": "Surt",
     "coords": [
-      16.91225,
-      30.15058
+      16.5807,
+      31.2025
     ],
     "historical_names": [
       {
@@ -247739,8 +248029,8 @@
   {
     "name": "Aleg",
     "coords": [
-      -13.72892,
-      17.3793
+      -13.9115,
+      17.0516
     ],
     "historical_names": [
       {
@@ -247933,8 +248223,8 @@
   {
     "name": "Bessataðahreppur",
     "coords": [
-      -19.02084,
-      64.96305
+      -22.062,
+      64.102
     ],
     "historical_names": [
       {
@@ -248089,8 +248379,8 @@
   {
     "name": "Ceylanpinar",
     "coords": [
-      39.73434,
-      36.90919
+      40.048,
+      36.857
     ],
     "historical_names": [
       {
@@ -248357,8 +248647,8 @@
   {
     "name": "Gölbasi",
     "coords": [
-      32.80575,
-      39.79829
+      37.6444,
+      37.7839
     ],
     "historical_names": [
       {
@@ -248448,8 +248738,8 @@
   {
     "name": "Hamakita",
     "coords": [
-      136.69763,
-      36.73294
+      137.79,
+      34.7931
     ],
     "historical_names": [
       {
@@ -248773,8 +249063,8 @@
   {
     "name": "Kücükköy",
     "coords": [
-      26.6891,
-      39.28783
+      28.8895,
+      41.0823
     ],
     "historical_names": [
       {
@@ -249357,8 +249647,8 @@
   {
     "name": "Ortaköy",
     "coords": [
-      29.02708,
-      41.05397
+      34.0403,
+      38.7361
     ],
     "historical_names": [
       {
@@ -250126,8 +250416,8 @@
   {
     "name": "Al Mayadeen",
     "coords": [
-      40.39049,
-      34.88601
+      40.4491,
+      35.0177
     ],
     "historical_names": [
       {
@@ -250615,8 +250905,8 @@
   {
     "name": "Campbelltown",
     "coords": [
-      150.81956,
-      -34.06661
+      138.663,
+      -34.878
     ],
     "historical_names": [
       {
@@ -251052,8 +251342,8 @@
   {
     "name": "Goedgegun",
     "coords": [
-      31.46587,
-      -26.5225
+      31.196,
+      -27.1335
     ],
     "historical_names": [
       {
@@ -251528,8 +251818,8 @@
   {
     "name": "Lillydale",
     "coords": [
-      152.13369,
-      -27.60512
+      145.35,
+      -37.758
     ],
     "historical_names": [
       {
@@ -251779,8 +252069,8 @@
   {
     "name": "Mitcham",
     "coords": [
-      145.19367,
-      -37.81636
+      138.625,
+      -34.987
     ],
     "historical_names": [
       {
@@ -252861,8 +253151,8 @@
   {
     "name": "Vohimarina",
     "coords": [
-      46.89704,
-      -21.6398
+      50.0114,
+      -13.3597
     ],
     "historical_names": [
       {
@@ -253415,8 +253705,8 @@
   {
     "name": "Faranah",
     "coords": [
-      -10.80001,
-      10.2587
+      -10.7369,
+      10.0416
     ],
     "historical_names": [
       {
@@ -254313,8 +254603,8 @@
   {
     "name": "Verchn'aja Salda",
     "coords": [
-      60.6047,
-      58.5047
+      60.5533,
+      58.0456
     ],
     "historical_names": [
       {
@@ -255411,8 +255701,8 @@
   {
     "name": "Fundación",
     "coords": [
-      -73.86543,
-      10.44928
+      -74.191,
+      10.5173
     ],
     "historical_names": [
       {
@@ -255657,8 +255947,8 @@
   {
     "name": "Khanh Hung",
     "coords": [
-      105.69991,
-      10.96317
+      105.981,
+      9.5825
     ],
     "historical_names": [
       {
@@ -256483,8 +256773,8 @@
   {
     "name": "Saltrou",
     "coords": [
-      -72.28521,
-      18.97119
+      -72.0689,
+      18.2381
     ],
     "historical_names": [
       {
@@ -256777,8 +257067,8 @@
   {
     "name": "Túquerros",
     "coords": [
-      -74.29733,
-      4.57087
+      -77.6186,
+      1.0857
     ],
     "historical_names": [
       {
@@ -256989,8 +257279,8 @@
   {
     "name": "Ascención",
     "coords": [
-      -59.45,
-      -16.31667
+      -63.1881,
+      -15.8922
     ],
     "historical_names": [
       {
@@ -257145,8 +257435,8 @@
   {
     "name": "Chilanga",
     "coords": [
-      32.54335,
-      -9.38806
+      28.2554,
+      -15.5487
     ],
     "historical_names": [
       {
@@ -257275,8 +257565,8 @@
   {
     "name": "Entre Ríos",
     "coords": [
-      -64.17444,
-      -21.52791
+      -64.5353,
+      -17.1972
     ],
     "historical_names": [
       {
@@ -257327,8 +257617,8 @@
   {
     "name": "Guadelupe",
     "coords": [
-      -66.52132,
-      -21.84901
+      -64.0889,
+      -18.5558
     ],
     "historical_names": [
       {
@@ -258011,8 +258301,8 @@
   {
     "name": "Puerto Quijarro",
     "coords": [
-      -57.77616,
-      -17.80257
+      -57.7138,
+      -19.0039
     ],
     "historical_names": [
       {
@@ -258258,8 +258548,8 @@
   {
     "name": "Santa Ana",
     "coords": [
-      -60.69239,
-      -16.57776
+      -65.4269,
+      -13.7444
     ],
     "historical_names": [
       {
@@ -258472,16 +258762,26 @@
     ]
   },
   {
-    "name": "`Zodzina",
+    "name": "Zhodino",
     "coords": [
       28.31101,
       54.09186
     ],
     "historical_names": [
       {
-        "date": "1970.1.1",
-        "name": "`Zodzina"
+        "date": "1643.1.1",
+        "name": "Boguslaw Pole"
+      },
+      {
+        "date": "1700.1.1",
+        "name": "Zhodino"
       }
+    ],
+    "other_names": [
+      "Zhodzina BelAZ Hub",
+      "Zhodzina",
+      "Zodzina",
+      "Boguslaw Pole"
     ]
   },
   {
@@ -258863,8 +259163,8 @@
   {
     "name": "as-Subaihiyah",
     "coords": [
-      47.91667,
-      28.88333
+      48.093,
+      29.106
     ],
     "historical_names": [
       {
@@ -260772,8 +261072,8 @@
   {
     "name": "Issineru",
     "coords": [
-      -58.93018,
-      4.86042
+      -60.3667,
+      6.3667
     ],
     "historical_names": [
       {
@@ -261075,8 +261375,8 @@
   {
     "name": "Kenge",
     "coords": [
-      13.66667,
-      -5.76667
+      17.0394,
+      -4.8172
     ],
     "historical_names": [
       {
@@ -261467,8 +261767,8 @@
   {
     "name": "Mae Hong Son",
     "coords": [
-      97.87216,
-      18.73703
+      97.9685,
+      19.3003
     ],
     "historical_names": [
       {
@@ -261788,16 +262088,25 @@
     ]
   },
   {
-    "name": "Mon`'cegorsk",
+    "name": "Monchegorsk",
     "coords": [
       32.89111,
       67.94315
     ],
     "historical_names": [
       {
-        "date": "1970.1.1",
-        "name": "Mon`'cegorsk"
+        "date": "1935.1.1",
+        "name": "Monche-Guba"
+      },
+      {
+        "date": "1937.9.20",
+        "name": "Monchegorsk"
       }
+    ],
+    "other_names": [
+      "Severonikel Kola Gulag Combine",
+      "Monche-Guba",
+      "Montschegorsk"
     ]
   },
   {
@@ -262154,8 +262463,8 @@
   {
     "name": "Nikolo-Berjozovka",
     "coords": [
-      54.16785,
-      56.12621
+      54.2483,
+      56.0883
     ],
     "historical_names": [
       {
@@ -262427,8 +262736,8 @@
   {
     "name": "Palmares",
     "coords": [
-      -83.6641,
-      9.31937
+      -84.4378,
+      10.0609
     ],
     "historical_names": [
       {
@@ -262453,8 +262762,8 @@
   {
     "name": "Paranavaí",
     "coords": [
-      -51.19164,
-      -19.67534
+      -52.4599,
+      -23.0879
     ],
     "historical_names": [
       {
@@ -262527,8 +262836,8 @@
   {
     "name": "Pe`'cora",
     "coords": [
-      55.80266,
-      64.0288
+      57.224,
+      65.147
     ],
     "historical_names": [
       {
@@ -263491,8 +263800,8 @@
   {
     "name": "Tapeta",
     "coords": [
-      -9.4295,
-      6.42805
+      -8.8631,
+      6.4944
     ],
     "historical_names": [
       {
@@ -263504,8 +263813,8 @@
   {
     "name": "Tasiusaq",
     "coords": [
-      -44.81741,
-      60.19405
+      -56.0556,
+      73.3689
     ],
     "historical_names": [
       {
@@ -263759,8 +264068,8 @@
   {
     "name": "Vicente de Carvalho",
     "coords": [
-      -43.31574,
-      -22.85578
+      -46.3008,
+      -23.9403
     ],
     "historical_names": [
       {
@@ -263798,8 +264107,8 @@
   {
     "name": "Virunga",
     "coords": [
-      29.51429,
-      -0.05022
+      29.225,
+      -1.638
     ],
     "historical_names": [
       {
@@ -264405,8 +264714,8 @@
   {
     "name": "Bélair",
     "coords": [
-      -114.08928,
-      50.99905
+      -71.4333,
+      46.8639
     ],
     "historical_names": [
       {
@@ -265002,8 +265311,8 @@
   {
     "name": "Haltemprice",
     "coords": [
-      -0.689,
-      53.796
+      -0.4154,
+      53.7806
     ],
     "historical_names": [
       {
@@ -265616,8 +265925,8 @@
   {
     "name": "Mulleriyawa",
     "coords": [
-      80.7718,
-      7.87305
+      79.9297,
+      6.933
     ],
     "historical_names": [
       {
@@ -265776,8 +266085,8 @@
   {
     "name": "Pallavaram",
     "coords": [
-      79.6995,
-      12.77483
+      80.1491,
+      12.9675
     ],
     "historical_names": [
       {
@@ -266083,8 +266392,8 @@
   {
     "name": "Santa Elena",
     "coords": [
-      -89.64363,
-      20.32754
+      -88.4137,
+      13.3798
     ],
     "historical_names": [
       {
@@ -266342,8 +266651,8 @@
   {
     "name": "Taputapuatea",
     "coords": [
-      -149.40684,
-      -17.67974
+      -151.397,
+      -16.8065
     ],
     "historical_names": [
       {
@@ -266528,8 +266837,8 @@
   {
     "name": "Warley",
     "coords": [
-      0.29768,
-      51.60761
+      -1.97,
+      52.473
     ],
     "historical_names": [
       {
@@ -267457,8 +267766,8 @@
   {
     "name": "Caldas",
     "coords": [
-      -75.24791,
-      5.29826
+      -75.6353,
+      6.0896
     ],
     "historical_names": [
       {
@@ -268456,8 +268765,8 @@
   {
     "name": "ad-Damer",
     "coords": [
-      33.91667,
-      17.58333
+      33.969428,
+      17.580326
     ],
     "historical_names": [
       {
@@ -268469,8 +268778,8 @@
   {
     "name": "Adama",
     "coords": [
-      39.25,
-      8.58333
+      39.258329,
+      8.526349
     ],
     "historical_names": [
       {
@@ -268577,8 +268886,8 @@
   {
     "name": "Ahwaz",
     "coords": [
-      48.75,
-      31.41667
+      48.670619,
+      31.318327
     ],
     "historical_names": [
       {
@@ -268790,8 +269099,8 @@
   {
     "name": "Al-Kut",
     "coords": [
-      45.75,
-      32.5
+      45.816029,
+      32.516491
     ],
     "historical_names": [
       {
@@ -268898,8 +269207,8 @@
   {
     "name": "Alchevsk",
     "coords": [
-      38.75,
-      48.5
+      38.814732,
+      48.471769
     ],
     "historical_names": [
       {
@@ -269102,8 +269411,8 @@
   {
     "name": "Anda",
     "coords": [
-      125.33333,
-      46.41667
+      125.10307,
+      46.58758
     ],
     "historical_names": [
       {
@@ -269457,8 +269766,8 @@
   {
     "name": "Arkhangelsk",
     "coords": [
-      40.58333,
-      64.58333
+      40.5433,
+      64.5401
     ],
     "historical_names": [
       {
@@ -269640,8 +269949,8 @@
   {
     "name": "Atbara",
     "coords": [
-      33.91667,
-      17.75
+      34.00844,
+      17.701452
     ],
     "historical_names": [
       {
@@ -269709,8 +270018,8 @@
   {
     "name": "Aurangabad",
     "coords": [
-      84.33333,
-      24.75
+      88.0336,
+      24.6012
     ],
     "historical_names": [
       {
@@ -269899,8 +270208,8 @@
   {
     "name": "Baidoa",
     "coords": [
-      43.58333,
-      3.16667
+      43.651925,
+      3.11405
     ],
     "historical_names": [
       {
@@ -270131,8 +270440,8 @@
   {
     "name": "Ballia",
     "coords": [
-      84.08333,
-      25.75
+      84.1715,
+      25.7647
     ],
     "historical_names": [
       {
@@ -270273,8 +270582,8 @@
   {
     "name": "Banjar",
     "coords": [
-      108.5,
-      -7.33333
+      108.5401,
+      -7.3713
     ],
     "historical_names": [
       {
@@ -270429,8 +270738,8 @@
   {
     "name": "Baoshan",
     "coords": [
-      131.41667,
-      46.58333
+      99.16181,
+      25.11205
     ],
     "historical_names": [
       {
@@ -271079,8 +271388,8 @@
   {
     "name": "Beloretsk",
     "coords": [
-      58.33333,
-      54
+      58.410072,
+      53.967553
     ],
     "historical_names": [
       {
@@ -271352,8 +271661,8 @@
   {
     "name": "Bhola",
     "coords": [
-      90.58333,
-      22.75
+      90.6536,
+      22.647
     ],
     "historical_names": [
       {
@@ -271365,8 +271674,8 @@
   {
     "name": "Bhubaneshwar",
     "coords": [
-      85.83333,
-      20.25
+      85.82461,
+      20.295985
     ],
     "historical_names": [
       {
@@ -271485,8 +271794,8 @@
   {
     "name": "Bilbeis",
     "coords": [
-      31.5,
-      30.41667
+      31.561869,
+      30.419788
     ],
     "historical_names": [
       {
@@ -271715,8 +272024,8 @@
   {
     "name": "Biskra",
     "coords": [
-      5.66667,
-      34.83333
+      5.727726,
+      34.853665
     ],
     "historical_names": [
       {
@@ -272022,8 +272331,8 @@
   {
     "name": "Borama",
     "coords": [
-      43.16667,
-      10
+      43.184402,
+      9.936009
     ],
     "historical_names": [
       {
@@ -272126,8 +272435,8 @@
   {
     "name": "Bruges",
     "coords": [
-      3.16667,
-      51.25
+      3.225059,
+      51.208451
     ],
     "historical_names": [
       {
@@ -272403,8 +272712,8 @@
   {
     "name": "Caxias",
     "coords": [
-      -43.41667,
-      -4.83333
+      -43.3551,
+      -4.8656
     ],
     "historical_names": [
       {
@@ -272624,8 +272933,8 @@
   {
     "name": "Changshu",
     "coords": [
-      120.66667,
-      31.66667
+      120.7522,
+      31.6538
     ],
     "historical_names": [
       {
@@ -272739,8 +273048,8 @@
   {
     "name": "Charikar",
     "coords": [
-      69.08333,
-      35
+      69.163956,
+      35.010618
     ],
     "historical_names": [
       {
@@ -272996,8 +273305,8 @@
   {
     "name": "Cherepovets",
     "coords": [
-      37.75,
-      59.16667
+      37.909181,
+      59.132333
     ],
     "historical_names": [
       {
@@ -273022,8 +273331,8 @@
   {
     "name": "Cherkessk",
     "coords": [
-      42,
-      44.25
+      42.0578,
+      44.2233
     ],
     "historical_names": [
       {
@@ -273093,8 +273402,8 @@
   {
     "name": "Chervonohrad",
     "coords": [
-      24.16667,
-      50.41667
+      24.219945,
+      50.387177
     ],
     "historical_names": [
       {
@@ -273119,8 +273428,8 @@
   {
     "name": "Chhapra",
     "coords": [
-      84.66667,
-      25.83333
+      84.754341,
+      25.78114
     ],
     "historical_names": [
       {
@@ -273301,8 +273610,8 @@
   {
     "name": "Chita",
     "coords": [
-      113.41667,
-      52
+      113.471191,
+      52.051503
     ],
     "historical_names": [
       {
@@ -273496,8 +273805,8 @@
   {
     "name": "Chuncheon",
     "coords": [
-      127.66667,
-      37.91667
+      127.727761,
+      37.880506
     ],
     "historical_names": [
       {
@@ -273894,8 +274203,8 @@
   {
     "name": "Dabu",
     "coords": [
-      116.66667,
-      24.41667
+      114.166781,
+      22.442125
     ],
     "historical_names": [
       {
@@ -273951,8 +274260,8 @@
   {
     "name": "Dairut",
     "coords": [
-      30.75,
-      27.58333
+      30.808439,
+      27.554079
     ],
     "historical_names": [
       {
@@ -273977,8 +274286,8 @@
   {
     "name": "Dali",
     "coords": [
-      109.91667,
-      34.83333
+      100.22558,
+      25.58244
     ],
     "historical_names": [
       {
@@ -274055,8 +274364,8 @@
   {
     "name": "Dangla",
     "coords": [
-      36.83333,
-      11.33333
+      36.841175,
+      11.257149
     ],
     "historical_names": [
       {
@@ -274137,8 +274446,8 @@
   {
     "name": "Darjeeling",
     "coords": [
-      88.16667,
-      27.08333
+      88.266412,
+      27.041621
     ],
     "historical_names": [
       {
@@ -274479,8 +274788,8 @@
   {
     "name": "Deqing",
     "coords": [
-      119.97728,
-      30.5427
+      111.7772,
+      23.1482
     ],
     "historical_names": [
       {
@@ -274513,8 +274822,8 @@
   {
     "name": "Dessie",
     "coords": [
-      39.58333,
-      11.16667
+      39.63496,
+      11.127905
     ],
     "historical_names": [
       {
@@ -274621,8 +274930,8 @@
   {
     "name": "Dharmapuri",
     "coords": [
-      78.08333,
-      12.16667
+      78.153,
+      12.1222
     ],
     "historical_names": [
       {
@@ -274678,8 +274987,8 @@
   {
     "name": "Dhubri",
     "coords": [
-      89.91667,
-      26.08333
+      89.974346,
+      26.020698
     ],
     "historical_names": [
       {
@@ -274769,8 +275078,8 @@
   {
     "name": "Diaobingshan",
     "coords": [
-      123.5,
-      42.5
+      123.547907,
+      42.449876
     ],
     "historical_names": [
       {
@@ -274821,8 +275130,8 @@
   {
     "name": "Dilla",
     "coords": [
-      38.25,
-      6.41667
+      38.303926,
+      6.413416
     ],
     "historical_names": [
       {
@@ -275197,8 +275506,8 @@
   {
     "name": "Drohobych",
     "coords": [
-      23.41667,
-      49.33333
+      23.51,
+      49.35
     ],
     "historical_names": [
       {
@@ -275228,8 +275537,8 @@
   {
     "name": "Druzhkivka",
     "coords": [
-      37.5,
-      48.66667
+      37.527997,
+      48.61604
     ],
     "historical_names": [
       {
@@ -275293,8 +275602,8 @@
   {
     "name": "Dunkirk",
     "coords": [
-      2.33333,
-      51.08333
+      2.376776,
+      51.034368
     ],
     "historical_names": [
       {
@@ -275423,8 +275732,8 @@
   {
     "name": "Ed Dueim",
     "coords": [
-      32.33333,
-      14
+      31.852909,
+      18.51038
     ],
     "historical_names": [
       {
@@ -275462,8 +275771,8 @@
   {
     "name": "El Geneina",
     "coords": [
-      22.41667,
-      13.5
+      22.435242,
+      13.433852
     ],
     "historical_names": [
       {
@@ -275514,8 +275823,8 @@
   {
     "name": "El Mansura",
     "coords": [
-      31.41667,
-      31.08333
+      31.37847,
+      31.040948
     ],
     "historical_names": [
       {
@@ -275579,8 +275888,8 @@
   {
     "name": "En Nahud",
     "coords": [
-      28.41667,
-      12.75
+      28.427993,
+      12.694829
     ],
     "historical_names": [
       {
@@ -275618,8 +275927,8 @@
   {
     "name": "Erigavo",
     "coords": [
-      47.33333,
-      10.66667
+      47.36576,
+      10.614965
     ],
     "historical_names": [
       {
@@ -275631,8 +275940,8 @@
   {
     "name": "Esna",
     "coords": [
-      32.5,
-      25.25
+      32.547685,
+      25.294082
     ],
     "historical_names": [
       {
@@ -275852,8 +276161,8 @@
   {
     "name": "Feixian",
     "coords": [
-      117.97711,
-      35.26659
+      114.8144,
+      36.5508
     ],
     "historical_names": [
       {
@@ -276064,8 +276373,8 @@
   {
     "name": "Feodosia",
     "coords": [
-      35.33333,
-      45.08333
+      35.380118,
+      45.049985
     ],
     "historical_names": [
       {
@@ -276223,8 +276532,8 @@
   {
     "name": "Funan",
     "coords": [
-      115.58333,
-      32.66667
+      123.95722,
+      41.87971
     ],
     "historical_names": [
       {
@@ -276275,8 +276584,8 @@
   {
     "name": "Fushun",
     "coords": [
-      104.91667,
-      29.25
+      123.95722,
+      41.87971
     ],
     "historical_names": [
       {
@@ -276288,8 +276597,8 @@
   {
     "name": "Fuyang",
     "coords": [
-      119.91667,
-      30.08333
+      115.81495,
+      32.88963
     ],
     "historical_names": [
       {
@@ -276301,8 +276610,8 @@
   {
     "name": "Fuyu",
     "coords": [
-      126.04972,
-      44.99014
+      124.831,
+      45.1748
     ],
     "historical_names": [
       {
@@ -276504,8 +276813,8 @@
   {
     "name": "Gangneung",
     "coords": [
-      128.83333,
-      37.75
+      128.899084,
+      37.756302
     ],
     "historical_names": [
       {
@@ -276696,8 +277005,8 @@
   {
     "name": "Genoa",
     "coords": [
-      8.83333,
-      44.41667
+      8.934738,
+      44.407145
     ],
     "historical_names": [
       {
@@ -276820,8 +277129,8 @@
   {
     "name": "Girga",
     "coords": [
-      31.83333,
-      26.33333
+      31.887568,
+      26.341876
     ],
     "historical_names": [
       {
@@ -276833,8 +277142,8 @@
   {
     "name": "Gjakova",
     "coords": [
-      20.41667,
-      42.41667
+      20.43,
+      42.37
     ],
     "historical_names": [
       {
@@ -276859,8 +277168,8 @@
   {
     "name": "Gobichettipalayam",
     "coords": [
-      77.41667,
-      11.5
+      77.435338,
+      11.454986
     ],
     "historical_names": [
       {
@@ -277290,8 +277599,8 @@
   {
     "name": "Guanxian",
     "coords": [
-      115.41667,
-      36.5
+      103.64662,
+      30.98837
     ],
     "historical_names": [
       {
@@ -277366,8 +277675,8 @@
   {
     "name": "Gudiyatham",
     "coords": [
-      78.83333,
-      13
+      78.868161,
+      12.942799
     ],
     "historical_names": [
       {
@@ -277405,8 +277714,8 @@
   {
     "name": "Guiyang",
     "coords": [
-      112.66667,
-      25.75
+      106.63019,
+      26.64759
     ],
     "historical_names": [
       {
@@ -277703,8 +278012,8 @@
   {
     "name": "Haicheng",
     "coords": [
-      122.75,
-      40.83333
+      115.32341,
+      22.96657
     ],
     "historical_names": [
       {
@@ -277768,8 +278077,8 @@
   {
     "name": "Haining",
     "coords": [
-      120.66667,
-      30.58333
+      117.06354,
+      30.54294
     ],
     "historical_names": [
       {
@@ -277976,8 +278285,8 @@
   {
     "name": "Hargeisa",
     "coords": [
-      44,
-      9.58333
+      44.066925,
+      9.561217
     ],
     "historical_names": [
       {
@@ -278033,8 +278342,8 @@
   {
     "name": "Havana",
     "coords": [
-      -82.41667,
-      23.08333
+      -82.358565,
+      23.133865
     ],
     "historical_names": [
       {
@@ -278077,8 +278386,8 @@
   {
     "name": "Hechi",
     "coords": [
-      108.58333,
-      24.5
+      108.0854,
+      24.69291
     ],
     "historical_names": [
       {
@@ -278181,8 +278490,8 @@
   {
     "name": "Hengzhou",
     "coords": [
-      109.25,
-      22.66667
+      112.57197,
+      26.893159
     ],
     "historical_names": [
       {
@@ -278330,8 +278639,8 @@
   {
     "name": "Hòa Bình",
     "coords": [
-      105.31312,
-      20.68613
+      105.3424,
+      20.8289
     ],
     "historical_names": [
       {
@@ -278637,8 +278946,8 @@
   {
     "name": "Huai'an",
     "coords": [
-      114.41667,
-      40.66667
+      119.113185,
+      33.551052
     ],
     "historical_names": [
       {
@@ -278715,8 +279024,8 @@
   {
     "name": "Huaining",
     "coords": [
-      116.75,
-      30.75
+      117.06354,
+      30.54294
     ],
     "historical_names": [
       {
@@ -278914,8 +279223,8 @@
   {
     "name": "Huaraz",
     "coords": [
-      -77.58333,
-      -9.5
+      -77.529158,
+      -9.529454
     ],
     "historical_names": [
       {
@@ -278927,8 +279236,8 @@
   {
     "name": "Huarong",
     "coords": [
-      112.5,
-      29.58333
+      112.5567,
+      29.5294
     ],
     "historical_names": [
       {
@@ -279018,8 +279327,8 @@
   {
     "name": "Hubli",
     "coords": [
-      75.08333,
-      15.33333
+      75.123955,
+      15.364708
     ],
     "historical_names": [
       {
@@ -279126,8 +279435,8 @@
   {
     "name": "Huinan",
     "coords": [
-      126.04687,
-      42.68499
+      120.459,
+      41.57
     ],
     "historical_names": [
       {
@@ -279152,8 +279461,8 @@
   {
     "name": "Huiyang",
     "coords": [
-      114.41667,
-      22.75
+      114.41552,
+      23.11251
     ],
     "historical_names": [
       {
@@ -279347,8 +279656,8 @@
   {
     "name": "Ikere-Ekiti",
     "coords": [
-      5.16667,
-      7.5
+      5.231888,
+      7.499126
     ],
     "historical_names": [
       {
@@ -279749,8 +280058,8 @@
   {
     "name": "Jehanabad",
     "coords": [
-      84.91667,
-      25.25
+      84.9896,
+      25.2134
     ],
     "historical_names": [
       {
@@ -279833,8 +280142,8 @@
   {
     "name": "Jhang",
     "coords": [
-      72.25,
-      31.33333
+      72.331676,
+      31.278068
     ],
     "historical_names": [
       {
@@ -279915,8 +280224,8 @@
   {
     "name": "Ji'an",
     "coords": [
-      126.16667,
-      41.16667
+      114.99376,
+      27.11382
     ],
     "historical_names": [
       {
@@ -280183,8 +280492,8 @@
   {
     "name": "Jiaozhou",
     "coords": [
-      120,
-      36.33333
+      120.028,
+      36.2931
     ],
     "historical_names": [
       {
@@ -280339,8 +280648,8 @@
   {
     "name": "Jincheng",
     "coords": [
-      106.33333,
-      31.58333
+      112.85113,
+      35.49039
     ],
     "historical_names": [
       {
@@ -280504,8 +280813,8 @@
   {
     "name": "Jingzhou",
     "coords": [
-      109.66667,
-      26.58333
+      112.239,
+      30.3247
     ],
     "historical_names": [
       {
@@ -280683,8 +280992,8 @@
   {
     "name": "Jinzhou",
     "coords": [
-      115,
-      38.08333
+      121.12703,
+      41.09515
     ],
     "historical_names": [
       {
@@ -280928,8 +281237,8 @@
   {
     "name": "Joypurhat",
     "coords": [
-      89,
-      25.16667
+      89.026945,
+      25.102406
     ],
     "historical_names": [
       {
@@ -281019,8 +281328,8 @@
   {
     "name": "Kadapa",
     "coords": [
-      78.75,
-      14.5
+      78.824209,
+      14.467315
     ],
     "historical_names": [
       {
@@ -281270,8 +281579,8 @@
   {
     "name": "Kaiyuan",
     "coords": [
-      124.0382,
-      42.54645
+      103.2475,
+      23.7184
     ],
     "historical_names": [
       {
@@ -281335,8 +281644,8 @@
   {
     "name": "Kaliganj",
     "coords": [
-      89.08333,
-      23.41667
+      89.1351,
+      23.4076
     ],
     "historical_names": [
       {
@@ -281548,8 +281857,8 @@
   {
     "name": "Kandahar",
     "coords": [
-      65.66667,
-      31.66667
+      65.715819,
+      31.620508
     ],
     "historical_names": [
       {
@@ -281647,8 +281956,8 @@
   {
     "name": "Karaganda",
     "coords": [
-      73,
-      49.75
+      73.109383,
+      49.804684
     ],
     "historical_names": [
       {
@@ -281738,8 +282047,8 @@
   {
     "name": "Kashgar",
     "coords": [
-      75.91667,
-      39.5
+      75.98976,
+      39.47042
     ],
     "historical_names": [
       {
@@ -281784,8 +282093,8 @@
   {
     "name": "Kaspiysk",
     "coords": [
-      47.58333,
-      42.91667
+      47.6386,
+      42.8817
     ],
     "historical_names": [
       {
@@ -281822,8 +282131,8 @@
   {
     "name": "Katni",
     "coords": [
-      80.33333,
-      23.83333
+      80.389381,
+      23.834344
     ],
     "historical_names": [
       {
@@ -282025,8 +282334,8 @@
   {
     "name": "Kerch",
     "coords": [
-      36.41667,
-      45.33333
+      36.469551,
+      45.35942
     ],
     "historical_names": [
       {
@@ -282094,8 +282403,8 @@
   {
     "name": "Khabarovsk",
     "coords": [
-      135.08333,
-      48.41667
+      135.0667,
+      48.4833
     ],
     "historical_names": [
       {
@@ -282183,8 +282492,8 @@
   {
     "name": "Khan Yunis",
     "coords": [
-      34.25,
-      31.33333
+      34.303999,
+      31.3462
     ],
     "historical_names": [
       {
@@ -282222,8 +282531,8 @@
   {
     "name": "Khartsyzk",
     "coords": [
-      38.08333,
-      48.08333
+      38.139396,
+      48.043204
     ],
     "historical_names": [
       {
@@ -282330,8 +282639,8 @@
   {
     "name": "Khoy",
     "coords": [
-      44.91667,
-      38.58333
+      44.959028,
+      38.545452
     ],
     "historical_names": [
       {
@@ -282451,8 +282760,8 @@
   {
     "name": "Kishoreganj",
     "coords": [
-      90.75,
-      24.5
+      90.785177,
+      24.433674
     ],
     "historical_names": [
       {
@@ -282464,8 +282773,8 @@
   {
     "name": "Kismayo",
     "coords": [
-      42.5,
-      -0.33333
+      42.546057,
+      -0.356046
     ],
     "historical_names": [
       {
@@ -282481,8 +282790,8 @@
   {
     "name": "Kluang",
     "coords": [
-      103.25,
-      2
+      103.319859,
+      2.033873
     ],
     "historical_names": [
       {
@@ -282680,8 +282989,8 @@
   {
     "name": "Kosti",
     "coords": [
-      32.58333,
-      13.16667
+      32.650351,
+      13.123468
     ],
     "historical_names": [
       {
@@ -282712,8 +283021,8 @@
   {
     "name": "Kotabaru",
     "coords": [
-      116.16667,
-      -3.25
+      116.2232,
+      -3.245
     ],
     "historical_names": [
       {
@@ -282725,8 +283034,8 @@
   {
     "name": "Kotabumi",
     "coords": [
-      104.83333,
-      -4.83333
+      104.8931,
+      -4.8362
     ],
     "historical_names": [
       {
@@ -282878,8 +283187,8 @@
   {
     "name": "Kremenchuk",
     "coords": [
-      33.33333,
-      49.08333
+      33.410006,
+      49.066348
     ],
     "historical_names": [
       {
@@ -282995,8 +283304,8 @@
   {
     "name": "Kundla",
     "coords": [
-      71.25,
-      21.33333
+      71.305238,
+      21.337698
     ],
     "historical_names": [
       {
@@ -283060,8 +283369,8 @@
   {
     "name": "Kuznetsk",
     "coords": [
-      46.58333,
-      53.16667
+      46.593922,
+      53.11601
     ],
     "historical_names": [
       {
@@ -283166,8 +283475,8 @@
   {
     "name": "La Vega",
     "coords": [
-      -70.58333,
-      19.25
+      -70.528877,
+      19.221142
     ],
     "historical_names": [
       {
@@ -283776,8 +284085,8 @@
   {
     "name": "Lianzhou",
     "coords": [
-      112.33333,
-      24.83333
+      109.20725,
+      21.66089
     ],
     "historical_names": [
       {
@@ -284204,8 +284513,8 @@
   {
     "name": "Linyi",
     "coords": [
-      116.83333,
-      37.16667
+      118.35646,
+      35.10465
     ],
     "historical_names": [
       {
@@ -284243,8 +284552,8 @@
   {
     "name": "Lipetsk",
     "coords": [
-      39.5,
-      52.58333
+      39.6,
+      52.62
     ],
     "historical_names": [
       {
@@ -284493,8 +284802,8 @@
   {
     "name": "Longjiang",
     "coords": [
-      123.20483,
-      47.33737
+      116.178,
+      22.992
     ],
     "historical_names": [
       {
@@ -284558,8 +284867,8 @@
   {
     "name": "Longxi",
     "coords": [
-      104.66667,
-      35
+      117.64725,
+      24.51347
     ],
     "historical_names": [
       {
@@ -284766,8 +285075,8 @@
   {
     "name": "Lucheng",
     "coords": [
-      113.25,
-      36.33333
+      120.69939,
+      27.99492
     ],
     "historical_names": [
       {
@@ -285366,8 +285675,8 @@
   {
     "name": "Makiivka",
     "coords": [
-      37.91667,
-      48.08333
+      37.96669,
+      48.045956
     ],
     "historical_names": [
       {
@@ -285416,8 +285725,8 @@
   {
     "name": "Malkapur",
     "coords": [
-      76.16667,
-      20.91667
+      76.2019,
+      20.8833
     ],
     "historical_names": [
       {
@@ -285630,8 +285939,8 @@
   {
     "name": "Margao",
     "coords": [
-      73.91667,
-      15.33333
+      73.978691,
+      15.285924
     ],
     "historical_names": [
       {
@@ -285799,8 +286108,8 @@
   {
     "name": "Mau",
     "coords": [
-      83.5,
-      25.91667
+      83.561012,
+      25.946284
     ],
     "historical_names": [
       {
@@ -285877,8 +286186,8 @@
   {
     "name": "Maykop",
     "coords": [
-      40.08333,
-      44.66667
+      40.104693,
+      44.607618
     ],
     "historical_names": [
       {
@@ -285961,8 +286270,8 @@
   {
     "name": "Meihekou",
     "coords": [
-      125.66667,
-      42.58333
+      125.6809,
+      42.5323
     ],
     "historical_names": [
       {
@@ -286156,8 +286465,8 @@
   {
     "name": "Mezhdurechensk",
     "coords": [
-      88,
-      53.75
+      88.0645,
+      53.689
     ],
     "historical_names": [
       {
@@ -286208,8 +286517,8 @@
   {
     "name": "Michurinsk",
     "coords": [
-      40.41667,
-      52.91667
+      40.498858,
+      52.892784
     ],
     "historical_names": [
       {
@@ -286399,8 +286708,8 @@
   {
     "name": "Mirzapur",
     "coords": [
-      82.5,
-      25.16667
+      82.564434,
+      25.133699
     ],
     "historical_names": [
       {
@@ -286771,8 +287080,8 @@
   {
     "name": "Mukachevo",
     "coords": [
-      22.66667,
-      48.5
+      22.7178,
+      48.4419
     ],
     "historical_names": [
       {
@@ -286885,8 +287194,8 @@
   {
     "name": "Munich",
     "coords": [
-      11.5,
-      48.08333
+      11.581981,
+      48.135125
     ],
     "historical_names": [
       {
@@ -287164,8 +287473,8 @@
   {
     "name": "Nancheng",
     "coords": [
-      116.58333,
-      27.58333
+      107.02377,
+      33.06761
     ],
     "historical_names": [
       {
@@ -287242,8 +287551,8 @@
   {
     "name": "Nanjing",
     "coords": [
-      117.33333,
-      24.58333
+      115.85794,
+      28.68202
     ],
     "historical_names": [
       {
@@ -287532,8 +287841,8 @@
   {
     "name": "Nawabganj",
     "coords": [
-      79.58333,
-      28.58333
+      81.183381,
+      26.926804
     ],
     "historical_names": [
       {
@@ -287558,8 +287867,8 @@
   {
     "name": "Nazareth",
     "coords": [
-      35.33333,
-      32.75
+      35.303546,
+      32.699635
     ],
     "historical_names": [
       {
@@ -287692,8 +288001,8 @@
   {
     "name": "Netrokona",
     "coords": [
-      90.66667,
-      24.91667
+      90.723087,
+      24.882086
     ],
     "historical_names": [
       {
@@ -287968,8 +288277,8 @@
   {
     "name": "Ningyuan",
     "coords": [
-      111.91667,
-      25.58333
+      81.52732,
+      43.97715
     ],
     "historical_names": [
       {
@@ -288011,8 +288320,8 @@
   {
     "name": "Nizhnekamsk",
     "coords": [
-      51.75,
-      55.66667
+      51.8245,
+      55.6366
     ],
     "historical_names": [
       {
@@ -288064,8 +288373,8 @@
   {
     "name": "Noapara",
     "coords": [
-      89.6287,
-      23.15117
+      89.4024,
+      23.0264
     ],
     "historical_names": [
       {
@@ -288142,8 +288451,8 @@
   {
     "name": "Novotroitsk",
     "coords": [
-      58.25,
-      51.25
+      58.299151,
+      51.205727
     ],
     "historical_names": [
       {
@@ -288406,8 +288715,8 @@
   {
     "name": "Oryol",
     "coords": [
-      36,
-      52.91667
+      36.06249,
+      52.966847
     ],
     "historical_names": [
       {
@@ -288927,8 +289236,8 @@
   {
     "name": "Paradise",
     "coords": [
-      -58.08333,
-      6.83333
+      -58.0446,
+      6.7928
     ],
     "historical_names": [
       {
@@ -289122,8 +289431,8 @@
   {
     "name": "Periyakulam",
     "coords": [
-      77.5,
-      10.16667
+      77.5452,
+      10.1186
     ],
     "historical_names": [
       {
@@ -289135,8 +289444,8 @@
   {
     "name": "Pervomaisk",
     "coords": [
-      30.83333,
-      48.08333
+      30.888431,
+      48.045125
     ],
     "historical_names": [
       {
@@ -289148,8 +289457,8 @@
   {
     "name": "Petropavl",
     "coords": [
-      69.08333,
-      54.91667
+      69.150834,
+      54.872087
     ],
     "historical_names": [
       {
@@ -289559,8 +289868,8 @@
   {
     "name": "Pirojpur",
     "coords": [
-      89.91667,
-      22.58333
+      89.972013,
+      22.584105
     ],
     "historical_names": [
       {
@@ -289628,8 +289937,8 @@
   {
     "name": "Pokrovsk",
     "coords": [
-      37.16667,
-      48.33333
+      37.1828,
+      48.2828
     ],
     "historical_names": [
       {
@@ -289716,8 +290025,8 @@
   {
     "name": "Ponnur",
     "coords": [
-      80.5,
-      16.08333
+      80.564525,
+      16.061284
     ],
     "historical_names": [
       {
@@ -289947,8 +290256,8 @@
   {
     "name": "Puno",
     "coords": [
-      -70.08333,
-      -15.83333
+      -70.02188,
+      -15.840222
     ],
     "historical_names": [
       {
@@ -290051,8 +290360,8 @@
   {
     "name": "Pyeongtaek",
     "coords": [
-      127.08333,
-      37
+      126.852453,
+      36.994024
     ],
     "historical_names": [
       {
@@ -290445,8 +290754,8 @@
   {
     "name": "Qingyuan",
     "coords": [
-      124.91667,
-      42.16667
+      115.46459,
+      38.87396
     ],
     "historical_names": [
       {
@@ -290510,8 +290819,8 @@
   {
     "name": "Qixia",
     "coords": [
-      120.75,
-      37.33333
+      120.8262,
+      37.3039
     ],
     "historical_names": [
       {
@@ -290618,8 +290927,8 @@
   {
     "name": "Quanzhou",
     "coords": [
-      111,
-      26
+      118.67583,
+      24.87405
     ],
     "historical_names": [
       {
@@ -290704,8 +291013,8 @@
   {
     "name": "Qujiang",
     "coords": [
-      113.58333,
-      24.75
+      106.97299,
+      30.83664
     ],
     "historical_names": [
       {
@@ -291172,8 +291481,8 @@
   {
     "name": "Reggio Calabria",
     "coords": [
-      15.58333,
-      38.08333
+      15.65,
+      38.12
     ],
     "historical_names": [
       {
@@ -291375,8 +291684,8 @@
   {
     "name": "Rosario",
     "coords": [
-      -60.66667,
-      -33
+      -60.693042,
+      -32.958702
     ],
     "historical_names": [
       {
@@ -291401,8 +291710,8 @@
   {
     "name": "Rossosh",
     "coords": [
-      39.5,
-      50.25
+      39.579972,
+      50.196452
     ],
     "historical_names": [
       {
@@ -291997,8 +292306,8 @@
   {
     "name": "Sangareddy",
     "coords": [
-      78.08333,
-      17.66667
+      78.079819,
+      17.607523
     ],
     "historical_names": [
       {
@@ -292075,8 +292384,8 @@
   {
     "name": "Santa Cruz de Barahona",
     "coords": [
-      -71.16667,
-      18.25
+      -71.102408,
+      18.212081
     ],
     "historical_names": [
       {
@@ -292088,8 +292397,8 @@
   {
     "name": "Santa Cruz de la Sierra",
     "coords": [
-      -63.16667,
-      -17.75
+      -63.192508,
+      -17.798072
     ],
     "historical_names": [
       {
@@ -292560,8 +292869,8 @@
   {
     "name": "Shanxian",
     "coords": [
-      116,
-      34.83333
+      111.200053,
+      34.772707
     ],
     "historical_names": [
       {
@@ -292919,8 +293228,8 @@
   {
     "name": "Shimla",
     "coords": [
-      77.08333,
-      31.16667
+      77.163987,
+      31.104963
     ],
     "historical_names": [
       {
@@ -293312,8 +293621,8 @@
   {
     "name": "Sidi Bel Abbes",
     "coords": [
-      -0.66667,
-      35.25
+      -0.629846,
+      35.210166
     ],
     "historical_names": [
       {
@@ -293859,8 +294168,8 @@
   {
     "name": "Southend-on-Sea",
     "coords": [
-      0.58333,
-      51.58333
+      0.7077,
+      51.5459
     ],
     "historical_names": [
       {
@@ -293872,8 +294181,8 @@
   {
     "name": "Sreemangal",
     "coords": [
-      91.66667,
-      24.33333
+      91.731442,
+      24.309455
     ],
     "historical_names": [
       {
@@ -294064,8 +294373,8 @@
   {
     "name": "Suining",
     "coords": [
-      117.91667,
-      33.91667
+      105.59273,
+      30.53286
     ],
     "historical_names": [
       {
@@ -294361,8 +294670,8 @@
   {
     "name": "Suryapet",
     "coords": [
-      79.58333,
-      17.16667
+      79.628791,
+      17.135009
     ],
     "historical_names": [
       {
@@ -294517,8 +294826,8 @@
   {
     "name": "Taian",
     "coords": [
-      122.41667,
-      41.41667
+      117.0884,
+      36.19994
     ],
     "historical_names": [
       {
@@ -295283,8 +295592,8 @@
   {
     "name": "Tiaret",
     "coords": [
-      1.25,
-      35.41667
+      1.321904,
+      35.370944
     ],
     "historical_names": [
       {
@@ -295814,8 +296123,8 @@
   {
     "name": "Turin",
     "coords": [
-      7.58333,
-      45.08333
+      7.686855,
+      45.070315
     ],
     "historical_names": [
       {
@@ -295884,8 +296193,8 @@
   {
     "name": "Udaipur",
     "coords": [
-      91.41667,
-      23.58333
+      73.712479,
+      24.585445
     ],
     "historical_names": [
       {
@@ -296122,8 +296431,8 @@
   {
     "name": "Urgench",
     "coords": [
-      60.58333,
-      41.58333
+      60.624275,
+      41.534001
     ],
     "historical_names": [
       {
@@ -296325,8 +296634,8 @@
   {
     "name": "Veliky Novgorod",
     "coords": [
-      31.16667,
-      58.5
+      31.2981,
+      58.4944
     ],
     "historical_names": [
       {
@@ -296360,8 +296669,8 @@
   {
     "name": "Venice",
     "coords": [
-      12.33333,
-      45.5
+      12.315955,
+      45.440379
     ],
     "historical_names": [
       {
@@ -296440,8 +296749,8 @@
   {
     "name": "Virudhunagar",
     "coords": [
-      77.91667,
-      9.58333
+      77.962443,
+      9.568012
     ],
     "historical_names": [
       {
@@ -296466,8 +296775,8 @@
   {
     "name": "Volzhskiy",
     "coords": [
-      44.75,
-      48.83333
+      44.7797,
+      48.7858
     ],
     "historical_names": [
       {
@@ -296525,8 +296834,8 @@
   {
     "name": "Wafangdian",
     "coords": [
-      121.91667,
-      39.66667
+      121.9967,
+      39.6176
     ],
     "historical_names": [
       {
@@ -296746,8 +297055,8 @@
   {
     "name": "Wanzhou",
     "coords": [
-      108.33333,
-      30.75
+      108.40873,
+      30.8079
     ],
     "historical_names": [
       {
@@ -296815,8 +297124,8 @@
   {
     "name": "Wei",
     "coords": [
-      114.91667,
-      36.41667
+      119.16176,
+      36.70686
     ],
     "historical_names": [
       {
@@ -296880,8 +297189,8 @@
   {
     "name": "Weishan",
     "coords": [
-      117.08333,
-      34.83333
+      100.30711,
+      25.22714
     ],
     "historical_names": [
       {
@@ -297144,8 +297453,8 @@
   {
     "name": "Wuchang",
     "coords": [
-      127.16667,
-      44.91667
+      114.30525,
+      30.59276
     ],
     "historical_names": [
       {
@@ -297401,8 +297710,8 @@
   {
     "name": "Wuwei",
     "coords": [
-      117.91667,
-      31.33333
+      102.63797,
+      37.9282
     ],
     "historical_names": [
       {
@@ -297418,8 +297727,8 @@
   {
     "name": "Wuxi",
     "coords": [
-      110.08333,
-      28.33333
+      120.31237,
+      31.49099
     ],
     "historical_names": [
       {
@@ -298158,8 +298467,8 @@
   {
     "name": "Xintai",
     "coords": [
-      117.59307,
-      35.67921
+      117.7378,
+      35.8992
     ],
     "historical_names": [
       {
@@ -298184,8 +298493,8 @@
   {
     "name": "Xinxian",
     "coords": [
-      114.83333,
-      31.66667
+      112.73418,
+      38.4167
     ],
     "historical_names": [
       {
@@ -298567,8 +298876,8 @@
   {
     "name": "Yakutsk",
     "coords": [
-      129.66667,
-      62.08333
+      129.732,
+      62.0272
     ],
     "historical_names": [
       {
@@ -298655,8 +298964,8 @@
   {
     "name": "Yanggu",
     "coords": [
-      115.66667,
-      36.08333
+      112.55067,
+      37.87059
     ],
     "historical_names": [
       {
@@ -298772,8 +299081,8 @@
   {
     "name": "Yanling",
     "coords": [
-      114.16667,
-      34.16667
+      114.179,
+      34.0958
     ],
     "historical_names": [
       {
@@ -298854,8 +299163,8 @@
   {
     "name": "Yaroslavl",
     "coords": [
-      39.83333,
-      57.58333
+      39.884471,
+      57.626074
     ],
     "historical_names": [
       {
@@ -298875,8 +299184,8 @@
   {
     "name": "Ye",
     "coords": [
-      113.33333,
-      33.66667
+      114.406566,
+      36.274552
     ],
     "historical_names": [
       {
@@ -299112,8 +299421,8 @@
   {
     "name": "Yidu",
     "coords": [
-      111.4501,
-      30.37846
+      118.4837,
+      36.6935
     ],
     "historical_names": [
       {
@@ -299177,8 +299486,8 @@
   {
     "name": "Yingkou",
     "coords": [
-      109.91667,
-      27.58333
+      122.50917,
+      40.64448
     ],
     "historical_names": [
       {
@@ -299320,8 +299629,8 @@
   {
     "name": "Yiyang",
     "coords": [
-      117.41667,
-      28.41667
+      112.355161,
+      28.55391
     ],
     "historical_names": [
       {
@@ -299346,8 +299655,8 @@
   {
     "name": "Yiyuan",
     "coords": [
-      118.43241,
-      36.07437
+      120.2151,
+      29.1123
     ],
     "historical_names": [
       {
@@ -299567,8 +299876,8 @@
   {
     "name": "Yu",
     "coords": [
-      113.41667,
-      38.08333
+      106.551184,
+      29.565684
     ],
     "historical_names": [
       {
@@ -299749,8 +300058,8 @@
   {
     "name": "Yulin",
     "coords": [
-      110.18098,
-      22.65451
+      109.7539,
+      38.2288
     ],
     "historical_names": [
       {
@@ -299801,8 +300110,8 @@
   {
     "name": "Yuncheng",
     "coords": [
-      115.91667,
-      35.66667
+      111.00699,
+      35.02628
     ],
     "historical_names": [
       {
@@ -299866,8 +300175,8 @@
   {
     "name": "Yunyang",
     "coords": [
-      110.75,
-      32.83333
+      108.69698,
+      30.93063
     ],
     "historical_names": [
       {
@@ -299970,8 +300279,8 @@
   {
     "name": "Yuzhno-Sakhalinsk",
     "coords": [
-      142.66667,
-      47
+      142.7333,
+      46.95
     ],
     "historical_names": [
       {
@@ -300553,8 +300862,8 @@
   {
     "name": "Zhongshan",
     "coords": [
-      111.25,
-      24.58333
+      104.95764,
+      26.54658
     ],
     "historical_names": [
       {
@@ -300756,8 +301065,8 @@
   {
     "name": "Zoucheng",
     "coords": [
-      116.91667,
-      35.41667
+      116.985686,
+      35.40563
     ],
     "historical_names": [
       {
@@ -301305,8 +301614,8 @@
   {
     "name": "Al Qusiya",
     "coords": [
-      30.75,
-      27.5
+      30.817216,
+      27.439342
     ],
     "historical_names": [
       {
@@ -301907,8 +302216,8 @@
   {
     "name": "Chlef",
     "coords": [
-      1.33333,
-      36.16667
+      1.324707,
+      36.217444
     ],
     "historical_names": [
       {
@@ -302063,8 +302372,8 @@
   {
     "name": "Dongcun",
     "coords": [
-      121.16667,
-      36.83333
+      121.15846,
+      36.77645
     ],
     "historical_names": [
       {
@@ -302173,8 +302482,8 @@
   {
     "name": "El Kelaa des Sraghna",
     "coords": [
-      -7.41667,
-      32.08333
+      -7.351656,
+      32.052277
     ],
     "historical_names": [
       {
@@ -302616,8 +302925,8 @@
   {
     "name": "Jamame",
     "coords": [
-      42.66667,
-      0.08333
+      42.744257,
+      0.066853
     ],
     "historical_names": [
       {
@@ -302746,8 +303055,8 @@
   {
     "name": "Jinchengjiang",
     "coords": [
-      108,
-      24.75
+      108.0854,
+      24.69291
     ],
     "historical_names": [
       {
@@ -303115,8 +303424,8 @@
   {
     "name": "Longjing",
     "coords": [
-      129.41667,
-      42.83333
+      129.5091,
+      42.89107
     ],
     "historical_names": [
       {
@@ -303331,8 +303640,8 @@
   {
     "name": "Mian Channu",
     "coords": [
-      72.33333,
-      30.5
+      72.355211,
+      30.439018
     ],
     "historical_names": [
       {
@@ -303565,8 +303874,8 @@
   {
     "name": "Ouargla",
     "coords": [
-      5.25,
-      32
+      5.333535,
+      31.952741
     ],
     "historical_names": [
       {
@@ -303812,8 +304121,8 @@
   {
     "name": "Qingzhou",
     "coords": [
-      118.41667,
-      36.75
+      118.4837,
+      36.6935
     ],
     "historical_names": [
       {
@@ -303864,8 +304173,8 @@
   {
     "name": "Relizane",
     "coords": [
-      0.5,
-      35.75
+      0.557884,
+      35.745026
     ],
     "historical_names": [
       {
@@ -304194,8 +304503,8 @@
   {
     "name": "Souk Ahras",
     "coords": [
-      7.91667,
-      36.33333
+      7.938279,
+      36.279952
     ],
     "historical_names": [
       {
@@ -304428,8 +304737,8 @@
   {
     "name": "Turkestan",
     "coords": [
-      68.16667,
-      43.33333
+      68.248608,
+      43.305017
     ],
     "historical_names": [
       {
@@ -304756,8 +305065,8 @@
   {
     "name": "`Adan",
     "coords": [
-      44.91667,
-      12.83333
+      45.017592,
+      12.790638
     ],
     "historical_names": [
       {
@@ -304825,8 +305134,8 @@
   {
     "name": "Adigrat",
     "coords": [
-      39.41667,
-      14.33333
+      39.46112,
+      14.277644
     ],
     "historical_names": [
       {
@@ -304851,8 +305160,8 @@
   {
     "name": "Ain Beida",
     "coords": [
-      7.33333,
-      35.83333
+      7.390353,
+      35.796101
     ],
     "historical_names": [
       {
@@ -305142,8 +305451,8 @@
   {
     "name": "Az Zubayr",
     "coords": [
-      47.66667,
-      30.41667
+      47.700796,
+      30.376967
     ],
     "historical_names": [
       {
@@ -305245,8 +305554,8 @@
   {
     "name": "Balyana",
     "coords": [
-      32,
-      26.25
+      31.922639,
+      26.183444
     ],
     "historical_names": [
       {
@@ -305609,8 +305918,8 @@
   {
     "name": "Chengalpattu",
     "coords": [
-      79.91667,
-      12.75
+      79.988841,
+      12.681937
     ],
     "historical_names": [
       {
@@ -306043,8 +306352,8 @@
   {
     "name": "Dongsheng",
     "coords": [
-      105.33333,
-      28.83333
+      109.96144,
+      39.82127
     ],
     "historical_names": [
       {
@@ -306164,8 +306473,8 @@
   {
     "name": "El Tocuyo",
     "coords": [
-      -69.83333,
-      9.83333
+      -69.794002,
+      9.785174
     ],
     "historical_names": [
       {
@@ -306667,8 +306976,8 @@
   {
     "name": "Hpa-An",
     "coords": [
-      97.58333,
-      16.91667
+      97.643961,
+      16.875913
     ],
     "historical_names": [
       {
@@ -307201,8 +307510,8 @@
   {
     "name": "Khenchela",
     "coords": [
-      7.08333,
-      35.5
+      7.146015,
+      35.42694
     ],
     "historical_names": [
       {
@@ -307559,8 +307868,8 @@
   {
     "name": "Massawa",
     "coords": [
-      39.41667,
-      15.66667
+      39.453107,
+      15.608039
     ],
     "historical_names": [
       {
@@ -308301,8 +308610,8 @@
   {
     "name": "San Fernando del Valle de Catamarca",
     "coords": [
-      -65.83333,
-      -28.5
+      -65.779544,
+      -28.469581
     ],
     "historical_names": [
       {
@@ -308777,8 +309086,8 @@
   {
     "name": "Taroudant",
     "coords": [
-      -8.91667,
-      30.5
+      -8.874876,
+      30.472713
     ],
     "historical_names": [
       {
@@ -308816,8 +309125,8 @@
   {
     "name": "Tempeh",
     "coords": [
-      113.08333,
-      -8.16667
+      113.1766,
+      -8.1768
     ],
     "historical_names": [
       {
@@ -309045,8 +309354,8 @@
   {
     "name": "Virudhachalam",
     "coords": [
-      79.25,
-      11.58333
+      79.326619,
+      11.516094
     ],
     "historical_names": [
       {
@@ -309188,8 +309497,8 @@
   {
     "name": "Xilinhot",
     "coords": [
-      116,
-      43.91667
+      116.085244,
+      43.932936
     ],
     "historical_names": [
       {
@@ -309720,8 +310029,8 @@
   {
     "name": "Al-Manshah",
     "coords": [
-      31.75,
-      26.41667
+      31.802127,
+      26.47903
     ],
     "historical_names": [
       {
@@ -310162,8 +310471,8 @@
   {
     "name": "Binzhou",
     "coords": [
-      118,
-      37.41667
+      127.48586,
+      45.75864
     ],
     "historical_names": [
       {
@@ -310240,8 +310549,8 @@
   {
     "name": "Chachoengsao",
     "coords": [
-      101,
-      13.66667
+      101.0675,
+      13.6828
     ],
     "historical_names": [
       {
@@ -310527,8 +310836,8 @@
   {
     "name": "Denov",
     "coords": [
-      67.83333,
-      38.33333
+      67.892747,
+      38.276433
     ],
     "historical_names": [
       {
@@ -310622,8 +310931,8 @@
   {
     "name": "Dujiangyan",
     "coords": [
-      103.58333,
-      31
+      103.64662,
+      30.98837
     ],
     "historical_names": [
       {
@@ -310666,8 +310975,8 @@
   {
     "name": "Fashn",
     "coords": [
-      30.83333,
-      28.83333
+      30.898815,
+      28.823449
     ],
     "historical_names": [
       {
@@ -310692,8 +311001,8 @@
   {
     "name": "Fier",
     "coords": [
-      19.5,
-      40.75
+      19.559631,
+      40.72787
     ],
     "historical_names": [
       {
@@ -310926,8 +311235,8 @@
   {
     "name": "Haroonabad",
     "coords": [
-      73.08333,
-      29.66667
+      73.146762,
+      29.608115
     ],
     "historical_names": [
       {
@@ -311017,8 +311326,8 @@
   {
     "name": "Heshan",
     "coords": [
-      112.96436,
-      22.7653
+      108.8847,
+      23.8164
     ],
     "historical_names": [
       {
@@ -311108,8 +311417,8 @@
   {
     "name": "Jablah",
     "coords": [
-      35.91667,
-      35.41667
+      35.926739,
+      35.361471
     ],
     "historical_names": [
       {
@@ -311801,8 +312110,8 @@
   {
     "name": "Manbij",
     "coords": [
-      37.91667,
-      36.58333
+      37.960373,
+      36.526583
     ],
     "historical_names": [
       {
@@ -311879,8 +312188,8 @@
   {
     "name": "Mascara",
     "coords": [
-      0.08333,
-      35.41667
+      0.140026,
+      35.402099
     ],
     "historical_names": [
       {
@@ -312026,8 +312335,8 @@
   {
     "name": "Minhe",
     "coords": [
-      102.75,
-      36.33333
+      116.24145,
+      28.37737
     ],
     "historical_names": [
       {
@@ -312260,8 +312569,8 @@
   {
     "name": "Nyaungdon",
     "coords": [
-      95.58333,
-      17.08333
+      95.687874,
+      16.974818
     ],
     "historical_names": [
       {
@@ -312382,8 +312691,8 @@
   {
     "name": "Phra Nakhon Si Ayutthaya",
     "coords": [
-      100.58333,
-      14.41667
+      100.587663,
+      14.369233
     ],
     "historical_names": [
       {
@@ -312577,8 +312886,8 @@
   {
     "name": "Rajgarh",
     "coords": [
-      76.58333,
-      27.25
+      83.394963,
+      21.8974
     ],
     "historical_names": [
       {
@@ -313204,8 +313513,8 @@
   {
     "name": "Srinagar",
     "coords": [
-      78.75,
-      30.25
+      74.797282,
+      34.083671
     ],
     "historical_names": [
       {
@@ -313364,8 +313673,8 @@
   {
     "name": "Tongxiang",
     "coords": [
-      120.5,
-      30.66667
+      120.56432,
+      30.63074
     ],
     "historical_names": [
       {
@@ -313580,8 +313889,8 @@
   {
     "name": "Xinghua",
     "coords": [
-      119.83333,
-      32.91667
+      119.00771,
+      25.454
     ],
     "historical_names": [
       {
@@ -313962,8 +314271,8 @@
   {
     "name": "Abu Tig",
     "coords": [
-      31.25,
-      27
+      31.320754,
+      27.042223
     ],
     "historical_names": [
       {
@@ -314215,8 +314524,8 @@
   {
     "name": "Almere",
     "coords": [
-      5.16667,
-      52.41667
+      5.22,
+      52.37
     ],
     "historical_names": [
       {
@@ -314423,8 +314732,8 @@
   {
     "name": "Arish",
     "coords": [
-      33.75,
-      31.16667
+      33.803276,
+      31.132093
     ],
     "historical_names": [
       {
@@ -314640,8 +314949,8 @@
   {
     "name": "Balia",
     "coords": [
-      86.25,
-      25.41667
+      84.1715,
+      25.7647
     ],
     "historical_names": [
       {
@@ -314895,8 +315204,8 @@
   {
     "name": "Bhadravati",
     "coords": [
-      79.08333,
-      20.16667
+      75.706378,
+      13.827572
     ],
     "historical_names": [
       {
@@ -315950,8 +316259,8 @@
   {
     "name": "Eregli",
     "coords": [
-      34,
-      37.5
+      31.42026,
+      41.279909
     ],
     "historical_names": [
       {
@@ -316123,8 +316432,8 @@
   {
     "name": "G'ijduvon",
     "coords": [
-      64.58333,
-      40.08333
+      64.645129,
+      40.082085
     ],
     "historical_names": [
       {
@@ -316551,8 +316860,8 @@
   {
     "name": "Haimen",
     "coords": [
-      121.16667,
-      31.91667
+      121.44297,
+      28.67307
     ],
     "historical_names": [
       {
@@ -316763,8 +317072,8 @@
   {
     "name": "Ishim",
     "coords": [
-      69.41667,
-      56.16667
+      69.461486,
+      56.108748
     ],
     "historical_names": [
       {
@@ -317504,8 +317813,8 @@
   {
     "name": "Koson",
     "coords": [
-      65.5,
-      39.08333
+      65.582668,
+      39.042739
     ],
     "historical_names": [
       {
@@ -318367,8 +318676,8 @@
   {
     "name": "Mohammadia",
     "coords": [
-      0,
-      35.58333
+      0.0732,
+      35.5848
     ],
     "historical_names": [
       {
@@ -318720,8 +319029,8 @@
   {
     "name": "Nippani",
     "coords": [
-      74.33333,
-      16.41667
+      74.378639,
+      16.404167
     ],
     "historical_names": [
       {
@@ -318789,8 +319098,8 @@
   {
     "name": "Oka-Akoko",
     "coords": [
-      5.75,
-      7.5
+      5.805062,
+      7.466371
     ],
     "historical_names": [
       {
@@ -319426,7 +319735,7 @@
     "name": "Rîbnița",
     "coords": [
       29,
-      47.83333
+      47.7681
     ],
     "historical_names": [
       {
@@ -319457,8 +319766,8 @@
   {
     "name": "Sabanalarga",
     "coords": [
-      -75,
-      10.66667
+      -74.9231,
+      10.6314
     ],
     "historical_names": [
       {
@@ -319912,8 +320221,8 @@
   {
     "name": "Sig",
     "coords": [
-      -0.25,
-      35.58333
+      -0.190718,
+      35.532729
     ],
     "historical_names": [
       {
@@ -320402,8 +320711,8 @@
   {
     "name": "Tiruvallur",
     "coords": [
-      79.83333,
-      13.08333
+      79.634369,
+      10.766131
     ],
     "historical_names": [
       {
@@ -321078,8 +321387,8 @@
   {
     "name": "Zhaoyuan",
     "coords": [
-      120.43421,
-      37.35531
+      125.0782,
+      45.5193
     ],
     "historical_names": [
       {
@@ -321104,8 +321413,8 @@
   {
     "name": "Zliten",
     "coords": [
-      14.5,
-      32.5
+      14.518921,
+      32.278524
     ],
     "historical_names": [
       {
@@ -321264,8 +321573,8 @@
   {
     "name": "Ain Mlila",
     "coords": [
-      6.5,
-      36.08333
+      6.570833,
+      36.036111
     ],
     "historical_names": [
       {
@@ -321411,8 +321720,8 @@
   {
     "name": "Al Qurna",
     "coords": [
-      47.33333,
-      31
+      47.424532,
+      31.01745
     ],
     "historical_names": [
       {
@@ -322101,8 +322410,8 @@
   {
     "name": "Biala",
     "coords": [
-      31.16667,
-      31.16667
+      31.221516,
+      31.172358
     ],
     "historical_names": [
       {
@@ -322428,8 +322737,8 @@
   {
     "name": "Cheria",
     "coords": [
-      7.75,
-      35.33333
+      7.7552,
+      35.2695
     ],
     "historical_names": [
       {
@@ -322948,8 +323257,8 @@
   {
     "name": "Fatehpur",
     "coords": [
-      85.16667,
-      24.66667
+      80.799604,
+      25.92095
     ],
     "historical_names": [
       {
@@ -322987,8 +323296,8 @@
   {
     "name": "Fengcheng",
     "coords": [
-      115.77121,
-      28.1592
+      124.0403,
+      40.44
     ],
     "historical_names": [
       {
@@ -323017,8 +323326,8 @@
   {
     "name": "Fryazino",
     "coords": [
-      38,
-      56
+      38.044487,
+      55.9601
     ],
     "historical_names": [
       {
@@ -323818,8 +324127,8 @@
   {
     "name": "Imishli",
     "coords": [
-      48,
-      39.91667
+      48.066522,
+      39.869469
     ],
     "historical_names": [
       {
@@ -323978,8 +324287,8 @@
   {
     "name": "Jerash",
     "coords": [
-      35.83333,
-      32.33333
+      35.896076,
+      32.274651
     ],
     "historical_names": [
       {
@@ -324095,8 +324404,8 @@
   {
     "name": "Kalol",
     "coords": [
-      73.41667,
-      22.66667
+      72.492972,
+      23.241819
     ],
     "historical_names": [
       {
@@ -324599,8 +324908,8 @@
   {
     "name": "Ladnu",
     "coords": [
-      74.33333,
-      27.66667
+      74.39317,
+      27.641028
     ],
     "historical_names": [
       {
@@ -324781,8 +325090,8 @@
   {
     "name": "Luling",
     "coords": [
-      117.16667,
-      33.58333
+      114.99376,
+      27.11382
     ],
     "historical_names": [
       {
@@ -325179,8 +325488,8 @@
   {
     "name": "Mila",
     "coords": [
-      6.25,
-      36.5
+      6.258434,
+      36.451905
     ],
     "historical_names": [
       {
@@ -325612,8 +325921,8 @@
   {
     "name": "Nawada",
     "coords": [
-      88.41667,
-      23.91667
+      85.543457,
+      24.886686
     ],
     "historical_names": [
       {
@@ -325755,8 +326064,8 @@
   {
     "name": "Noyabrsk",
     "coords": [
-      75.41667,
-      63.25
+      75.45,
+      63.1994
     ],
     "historical_names": [
       {
@@ -326632,8 +326941,8 @@
   {
     "name": "Rudrapur",
     "coords": [
-      83.58333,
-      26.5
+      79.414121,
+      28.987508
     ],
     "historical_names": [
       {
@@ -326827,8 +327136,8 @@
   {
     "name": "San Pedro de Jujuy",
     "coords": [
-      -64.91667,
-      -24.25
+      -64.867,
+      -24.2334
     ],
     "historical_names": [
       {
@@ -327152,8 +327461,8 @@
   {
     "name": "Siem Reap",
     "coords": [
-      103.83333,
-      13.41667
+      103.862,
+      13.3574
     ],
     "historical_names": [
       {
@@ -327308,8 +327617,8 @@
   {
     "name": "Sougueur",
     "coords": [
-      1.41667,
-      35.25
+      1.494523,
+      35.183601
     ],
     "historical_names": [
       {
@@ -327720,8 +328029,8 @@
   {
     "name": "Tissemsilt",
     "coords": [
-      1.75,
-      35.66667
+      1.813098,
+      35.605378
     ],
     "historical_names": [
       {
@@ -328032,8 +328341,8 @@
   {
     "name": "Waliso",
     "coords": [
-      37.91667,
-      8.58333
+      37.972073,
+      8.539817
     ],
     "historical_names": [
       {
@@ -328123,8 +328432,8 @@
   {
     "name": "Whydah",
     "coords": [
-      2,
-      6.41667
+      2.076325,
+      6.371647
     ],
     "historical_names": [
       {
@@ -328549,8 +328858,8 @@
   {
     "name": "Afak",
     "coords": [
-      45.16667,
-      32.08333
+      45.374536,
+      31.92576
     ],
     "historical_names": [
       {
@@ -329344,8 +329653,8 @@
   {
     "name": "Beit Shemesh",
     "coords": [
-      34.91667,
-      31.75
+      34.986686,
+      31.749663
     ],
     "historical_names": [
       {
@@ -329504,8 +329813,8 @@
   {
     "name": "Bilwi",
     "coords": [
-      -83.41667,
-      14.08333
+      -83.394963,
+      14.039116
     ],
     "historical_names": [
       {
@@ -329530,8 +329839,8 @@
   {
     "name": "Bir El Ater",
     "coords": [
-      8,
-      34.75
+      8.056982,
+      34.750317
     ],
     "historical_names": [
       {
@@ -330387,8 +330696,8 @@
   {
     "name": "Genet",
     "coords": [
-      36.91667,
-      8.08333
+      38.493498,
+      9.068373
     ],
     "historical_names": [
       {
@@ -332071,8 +332380,8 @@
   {
     "name": "Mango",
     "coords": [
-      0.41667,
-      10.33333
+      0.475528,
+      10.358608
     ],
     "historical_names": [
       {
@@ -332534,8 +332843,8 @@
   {
     "name": "Nawanagar",
     "coords": [
-      84.16667,
-      25.41667
+      70.05773,
+      22.470702
     ],
     "historical_names": [
       {
@@ -332547,8 +332856,8 @@
   {
     "name": "Negele",
     "coords": [
-      39.58333,
-      5.33333
+      38.6746,
+      7.355
     ],
     "historical_names": [
       {
@@ -332824,8 +333133,8 @@
   {
     "name": "Pakse",
     "coords": [
-      105.75,
-      15.16667
+      105.815905,
+      15.117182
     ],
     "historical_names": [
       {
@@ -333257,8 +333566,8 @@
   {
     "name": "Quva",
     "coords": [
-      72,
-      40.5
+      72.070518,
+      40.525782
     ],
     "historical_names": [
       {
@@ -333445,8 +333754,8 @@
   {
     "name": "Rishtan",
     "coords": [
-      71.25,
-      40.41667
+      71.278781,
+      40.359097
     ],
     "historical_names": [
       {
@@ -333549,8 +333858,8 @@
   {
     "name": "Sahebganj",
     "coords": [
-      84.83333,
-      26.33333
+      87.645359,
+      25.238122
     ],
     "historical_names": [
       {
@@ -333861,8 +334170,8 @@
   {
     "name": "Shahabad",
     "coords": [
-      76.91667,
-      17.16667
+      79.9414,
+      27.6453
     ],
     "historical_names": [
       {
@@ -334030,8 +334339,8 @@
   {
     "name": "Sihanoukville",
     "coords": [
-      103.5,
-      10.66667
+      103.5279,
+      10.6252
     ],
     "historical_names": [
       {
@@ -334056,8 +334365,8 @@
   {
     "name": "Sirte",
     "coords": [
-      16.5,
-      31.25
+      16.5807,
+      31.2025
     ],
     "historical_names": [
       {
@@ -334411,8 +334720,8 @@
   {
     "name": "Tianzhen",
     "coords": [
-      114.08333,
-      40.41667
+      117.82675,
+      37.17105
     ],
     "historical_names": [
       {
@@ -335377,8 +335686,8 @@
   {
     "name": "Amdabad",
     "coords": [
-      87.75,
-      25.33333
+      72.571362,
+      23.022505
     ],
     "historical_names": [
       {
@@ -335710,8 +336019,8 @@
   {
     "name": "Bamian",
     "coords": [
-      67.75,
-      34.83333
+      67.82121,
+      34.810007
     ],
     "historical_names": [
       {
@@ -336784,8 +337093,8 @@
   {
     "name": "Faya-Largeau",
     "coords": [
-      19.08333,
-      18
+      19.104452,
+      17.930711
     ],
     "historical_names": [
       {
@@ -337191,8 +337500,8 @@
   {
     "name": "Haditha",
     "coords": [
-      42.33333,
-      34.08333
+      42.374164,
+      34.125183
     ],
     "historical_names": [
       {
@@ -337600,8 +337909,8 @@
   {
     "name": "Jinxi",
     "coords": [
-      116.75,
-      27.91667
+      120.8334,
+      40.7725
     ],
     "historical_names": [
       {
@@ -338037,8 +338346,8 @@
   {
     "name": "Ksar Chellala",
     "coords": [
-      2.25,
-      35.25
+      2.314499,
+      35.219468
     ],
     "historical_names": [
       {
@@ -339193,8 +339502,8 @@
   {
     "name": "Ouled Djellal",
     "coords": [
-      5,
-      34.41667
+      5.060593,
+      34.429119
     ],
     "historical_names": [
       {
@@ -339297,8 +339606,8 @@
   {
     "name": "Pandharkawada",
     "coords": [
-      78.5,
-      20.08333
+      78.549049,
+      20.02297
     ],
     "historical_names": [
       {
@@ -341016,8 +341325,8 @@
   {
     "name": "Wucheng",
     "coords": [
-      116.08333,
-      37.25
+      119.5715,
+      29.08624
     ],
     "historical_names": [
       {
@@ -341562,8 +341871,8 @@
   {
     "name": "Ain Turk",
     "coords": [
-      -0.83333,
-      35.75
+      -0.7637,
+      35.7416
     ],
     "historical_names": [
       {
@@ -342597,8 +342906,8 @@
   {
     "name": "Chapadinha",
     "coords": [
-      -43.32947,
-      -3.56375
+      -43.3589,
+      -3.7384
     ],
     "historical_names": [
       {
@@ -342952,8 +343261,8 @@
   {
     "name": "Datong",
     "coords": [
-      101.66667,
-      37
+      113.30001,
+      40.07637
     ],
     "historical_names": [
       {
@@ -343220,8 +343529,8 @@
   {
     "name": "El Hamma",
     "coords": [
-      9.75,
-      33.91667
+      9.795095,
+      33.885924
     ],
     "historical_names": [
       {
@@ -343233,8 +343542,8 @@
   {
     "name": "El M'Ghair",
     "coords": [
-      5.91667,
-      34
+      5.924424,
+      33.950285
     ],
     "historical_names": [
       {
@@ -343597,8 +343906,8 @@
   {
     "name": "Halabja",
     "coords": [
-      45.91667,
-      35.16667
+      45.985722,
+      35.177064
     ],
     "historical_names": [
       {
@@ -343813,8 +344122,8 @@
   {
     "name": "Ifon",
     "coords": [
-      5.75,
-      7
+      4.469676,
+      7.859371
     ],
     "historical_names": [
       {
@@ -343852,8 +344161,8 @@
   {
     "name": "Ila Orangun",
     "coords": [
-      4.83333,
-      8.08333
+      4.898752,
+      8.012073
     ],
     "historical_names": [
       {
@@ -344051,8 +344360,8 @@
   {
     "name": "Jiangyin",
     "coords": [
-      119.25,
-      25.5
+      120.28432,
+      31.91919
     ],
     "historical_names": [
       {
@@ -344540,8 +344849,8 @@
   {
     "name": "La Calera",
     "coords": [
-      -71.25,
-      -32.75
+      -71.20732,
+      -32.787343
     ],
     "historical_names": [
       {
@@ -345355,8 +345664,8 @@
   {
     "name": "Nanma",
     "coords": [
-      120.16667,
-      29.08333
+      120.2151,
+      29.1123
     ],
     "historical_names": [
       {
@@ -345546,8 +345855,8 @@
   {
     "name": "Nuevitas",
     "coords": [
-      -77.33333,
-      21.58333
+      -77.26925,
+      21.550023
     ],
     "historical_names": [
       {
@@ -346001,8 +346310,8 @@
   {
     "name": "Ras El Oued",
     "coords": [
-      5,
-      36
+      5.0317,
+      35.9437
     ],
     "historical_names": [
       {
@@ -346352,8 +346661,8 @@
   {
     "name": "Sidi Bouzid",
     "coords": [
-      9.41667,
-      35.08333
+      9.483939,
+      35.035439
     ],
     "historical_names": [
       {
@@ -346813,8 +347122,8 @@
   {
     "name": "Tolga",
     "coords": [
-      5.33333,
-      34.75
+      5.380369,
+      34.726849
     ],
     "historical_names": [
       {
@@ -348151,8 +348460,8 @@
   {
     "name": "Bala Murghab",
     "coords": [
-      63.25,
-      35.58333
+      63.309294,
+      35.640348
     ],
     "historical_names": [
       {
@@ -348690,8 +348999,8 @@
   {
     "name": "Capanema",
     "coords": [
-      -47.25,
-      -1.16667
+      -47.1801,
+      -1.193
     ],
     "historical_names": [
       {
@@ -349729,8 +350038,8 @@
   {
     "name": "Hell-Ville",
     "coords": [
-      48.25,
-      -13.33333
+      48.266728,
+      -13.397099
     ],
     "historical_names": [
       {
@@ -350790,8 +351099,8 @@
   {
     "name": "Miliana",
     "coords": [
-      2.16667,
-      36.33333
+      2.228407,
+      36.308027
     ],
     "historical_names": [
       {
@@ -351184,8 +351493,8 @@
   {
     "name": "Nkwanta",
     "coords": [
-      0.5,
-      8.25
+      -2.100849,
+      7.179635
     ],
     "historical_names": [
       {
@@ -351331,8 +351640,8 @@
   {
     "name": "Ouenza",
     "coords": [
-      8.08333,
-      36
+      8.13292,
+      35.951064
     ],
     "historical_names": [
       {
@@ -351855,8 +352164,8 @@
   {
     "name": "Raniganj",
     "coords": [
-      87.16667,
-      26.08333
+      87.114265,
+      23.623389
     ],
     "historical_names": [
       {
@@ -351898,8 +352207,8 @@
   {
     "name": "Ratnapura",
     "coords": [
-      80.33333,
-      6.75
+      80.384734,
+      6.705574
     ],
     "historical_names": [
       {
@@ -352074,8 +352383,8 @@
   {
     "name": "San Jose",
     "coords": [
-      121.91667,
-      10.75
+      120.9869,
+      15.796
     ],
     "historical_names": [
       {
@@ -353193,8 +353502,8 @@
   {
     "name": "Yatta",
     "coords": [
-      35.08333,
-      31.5
+      35.0957,
+      31.4482
     ],
     "historical_names": [
       {
@@ -353730,8 +354039,8 @@
   {
     "name": "Al Qusair",
     "coords": [
-      36.5,
-      34.5
+      36.582049,
+      34.507175
     ],
     "historical_names": [
       {
@@ -353756,8 +354065,8 @@
   {
     "name": "Al-Rastan",
     "coords": [
-      36.66667,
-      34.91667
+      36.726362,
+      34.927365
     ],
     "historical_names": [
       {
@@ -354497,8 +354806,8 @@
   {
     "name": "Chapra",
     "coords": [
-      88.5,
-      23.58333
+      84.754341,
+      25.78114
     ],
     "historical_names": [
       {
@@ -354562,8 +354871,8 @@
   {
     "name": "Chilanga",
     "coords": [
-      28.25,
-      -15.5
+      28.2554,
+      -15.5487
     ],
     "historical_names": [
       {
@@ -354601,8 +354910,8 @@
   {
     "name": "Colina",
     "coords": [
-      -70.75,
-      -33.16667
+      -70.675965,
+      -33.204545
     ],
     "historical_names": [
       {
@@ -354887,8 +355196,8 @@
   {
     "name": "El Affroun",
     "coords": [
-      2.58333,
-      36.5
+      2.625741,
+      36.470159
     ],
     "historical_names": [
       {
@@ -355697,8 +356006,8 @@
   {
     "name": "Junagarh",
     "coords": [
-      82.91667,
-      19.91667
+      70.457944,
+      21.52222
     ],
     "historical_names": [
       {
@@ -357125,8 +357434,8 @@
   {
     "name": "Pinheiro",
     "coords": [
-      -45.16667,
-      -2.5
+      -45.0876,
+      -2.5266
     ],
     "historical_names": [
       {
@@ -357333,8 +357642,8 @@
   {
     "name": "Remchi",
     "coords": [
-      -1.5,
-      35.08333
+      -1.42611,
+      35.065493
     ],
     "historical_names": [
       {
@@ -357732,8 +358041,8 @@
   {
     "name": "Sidi Khaled",
     "coords": [
-      4.91667,
-      34.41667
+      4.992247,
+      34.401396
     ],
     "historical_names": [
       {
@@ -357745,8 +358054,8 @@
   {
     "name": "Sidi Moussa",
     "coords": [
-      3.08333,
-      36.66667
+      3.08873,
+      36.604789
     ],
     "historical_names": [
       {
@@ -357888,8 +358197,8 @@
   {
     "name": "Tangub [Tubod]",
     "coords": [
-      123.83333,
-      8.08333
+      123.684699,
+      8.09592
     ],
     "historical_names": [
       {
@@ -357966,8 +358275,8 @@
   {
     "name": "Tiberias",
     "coords": [
-      35.5,
-      32.83333
+      35.530973,
+      32.795859
     ],
     "historical_names": [
       {
@@ -358035,8 +358344,8 @@
   {
     "name": "Tolanaro",
     "coords": [
-      46.91667,
-      -25
+      46.982541,
+      -25.028664
     ],
     "historical_names": [
       {
@@ -358518,16 +358827,20 @@
     ]
   },
   {
-    "name": "`'Sebekino",
+    "name": "Shebekino",
     "coords": [
       36.89476,
       50.41187
     ],
     "historical_names": [
       {
-        "date": "1950.1.1",
-        "name": "`'Sebekino"
+        "date": "1713.1.1",
+        "name": "Shebekino"
       }
+    ],
+    "other_names": [
+      "Shebekino Belgorod",
+      "Shebekino Sloboda"
     ]
   },
   {
@@ -358546,8 +358859,8 @@
   {
     "name": "`'Zeleznogorsk",
     "coords": [
-      93.53563,
-      56.26026
+      35.3572,
+      52.3447
     ],
     "historical_names": [
       {
@@ -358678,16 +358991,20 @@
     ]
   },
   {
-    "name": "`Sepetivka",
+    "name": "Shepetivka",
     "coords": [
       27.05599,
       50.17575
     ],
     "historical_names": [
       {
-        "date": "1950.1.1",
-        "name": "`Sepetivka"
+        "date": "1594.1.1",
+        "name": "Shepetivka"
       }
+    ],
+    "other_names": [
+      "Shepetovka",
+      "Szepietowka"
     ]
   },
   {
@@ -358745,8 +359062,8 @@
   {
     "name": "`Sovot",
     "coords": [
-      68.66482,
-      39.9732
+      60.3,
+      41.65
     ],
     "historical_names": [
       {
@@ -358979,8 +359296,8 @@
   {
     "name": "Abov'an",
     "coords": [
-      45.03819,
-      40.0691
+      44.6256,
+      40.2739
     ],
     "historical_names": [
       {
@@ -359564,8 +359881,8 @@
   {
     "name": "Ain Turk",
     "coords": [
-      3.82448,
-      36.40005
+      -0.7637,
+      35.7416
     ],
     "historical_names": [
       {
@@ -359655,8 +359972,8 @@
   {
     "name": "Akbarâbâd",
     "coords": [
-      47.02488,
-      34.4674
+      52.7808,
+      29.2458
     ],
     "historical_names": [
       {
@@ -359798,8 +360115,8 @@
   {
     "name": "Al Baq'ah",
     "coords": [
-      36.23841,
-      30.58516
+      35.8431,
+      32.0736
     ],
     "historical_names": [
       {
@@ -359889,8 +360206,8 @@
   {
     "name": "Al-Buraymî",
     "coords": [
-      56.11423,
-      24.16714
+      55.785,
+      24.2595
     ],
     "historical_names": [
       {
@@ -360175,8 +360492,8 @@
   {
     "name": "Aliabad",
     "coords": [
-      52.3201,
-      29.99923
+      54.8667,
+      36.9075
     ],
     "historical_names": [
       {
@@ -361024,8 +361341,8 @@
   {
     "name": "Ar Rayyân",
     "coords": [
-      51.05407,
-      24.91695
+      51.4297,
+      25.3013
     ],
     "historical_names": [
       {
@@ -361180,8 +361497,8 @@
   {
     "name": "Arcos",
     "coords": [
-      -111.92663,
-      33.40295
+      -45.5394,
+      -20.2822
     ],
     "historical_names": [
       {
@@ -361310,8 +361627,8 @@
   {
     "name": "Arroyo Concepción",
     "coords": [
-      -63.58865,
-      -16.29015
+      -57.707,
+      -19.024
     ],
     "historical_names": [
       {
@@ -361947,8 +362264,8 @@
   {
     "name": "Ba",
     "coords": [
-      177.65811,
-      -17.70238
+      177.6741,
+      -17.5343
     ],
     "historical_names": [
       {
@@ -362090,8 +362407,8 @@
   {
     "name": "Bae",
     "coords": [
-      106.822,
-      -6.19927
+      110.8634,
+      -6.7784
     ],
     "historical_names": [
       {
@@ -362116,8 +362433,8 @@
   {
     "name": "Bagan Jaya",
     "coords": [
-      101.97577,
-      4.21048
+      100.3913,
+      5.4279
     ],
     "historical_names": [
       {
@@ -362194,8 +362511,8 @@
   {
     "name": "Bâhah",
     "coords": [
-      41.44125,
-      20.27227
+      41.4653,
+      20.0125
     ],
     "historical_names": [
       {
@@ -362629,8 +362946,8 @@
   {
     "name": "Bandeirantes",
     "coords": [
-      -50.80991,
-      -20.61018
+      -50.3714,
+      -23.1075
     ],
     "historical_names": [
       {
@@ -362746,8 +363063,8 @@
   {
     "name": "Banjar",
     "coords": [
-      114.99915,
-      -3.32002
+      108.5401,
+      -7.3713
     ],
     "historical_names": [
       {
@@ -362980,8 +363297,8 @@
   {
     "name": "Barreiros",
     "coords": [
-      -35.19954,
-      -8.81205
+      -48.618,
+      -27.575
     ],
     "historical_names": [
       {
@@ -363383,8 +363700,8 @@
   {
     "name": "Beaconsfield",
     "coords": [
-      145.36992,
-      -38.0478
+      146.8168,
+      -41.2012
     ],
     "historical_names": [
       {
@@ -363526,8 +363843,8 @@
   {
     "name": "Bela",
     "coords": [
-      79.61371,
-      21.1518
+      81.987,
+      25.9146
     ],
     "historical_names": [
       {
@@ -363768,8 +364085,8 @@
   {
     "name": "Benito Juárez",
     "coords": [
-      -99.15914,
-      19.37941
+      -86.851528,
+      21.161908
     ],
     "historical_names": [
       {
@@ -364015,8 +364332,8 @@
   {
     "name": "Bhola",
     "coords": [
-      90.7101,
-      22.17853
+      90.6536,
+      22.647
     ],
     "historical_names": [
       {
@@ -364093,8 +364410,8 @@
   {
     "name": "Bidhan Nagar",
     "coords": [
-      87.34597,
-      23.51775
+      88.42,
+      22.58
     ],
     "historical_names": [
       {
@@ -364223,8 +364540,8 @@
   {
     "name": "Bina",
     "coords": [
-      46.90455,
-      39.58683
+      50.0764,
+      40.4539
     ],
     "historical_names": [
       {
@@ -364474,8 +364791,8 @@
   {
     "name": "Bjuzmejin",
     "coords": [
-      59.55628,
-      38.96972
+      58.1972,
+      38.0542
     ],
     "historical_names": [
       {
@@ -364591,8 +364908,8 @@
   {
     "name": "Boa Viagem",
     "coords": [
-      -34.90241,
-      -8.13173
+      -39.7319,
+      -5.1278
     ],
     "historical_names": [
       {
@@ -364864,8 +365181,8 @@
   {
     "name": "Bonito",
     "coords": [
-      -56.48788,
-      -21.12822
+      -35.7289,
+      -8.47
     ],
     "historical_names": [
       {
@@ -365254,8 +365571,8 @@
   {
     "name": "Breves",
     "coords": [
-      -66.0172,
-      -2.63652
+      -50.4806,
+      -1.6831
     ],
     "historical_names": [
       {
@@ -365475,8 +365792,8 @@
   {
     "name": "Buenos Aires",
     "coords": [
-      -79.94585,
-      8.63073
+      -81.5,
+      8.4499
     ],
     "historical_names": [
       {
@@ -366458,8 +366775,8 @@
   {
     "name": "Cangshan",
     "coords": [
-      119.27345,
-      26.04769
+      118.514,
+      28.9037
     ],
     "historical_names": [
       {
@@ -366570,8 +366887,8 @@
   {
     "name": "Capanema",
     "coords": [
-      -53.80777,
-      -25.67187
+      -47.1801,
+      -1.193
     ],
     "historical_names": [
       {
@@ -366887,8 +367204,8 @@
   {
     "name": "Cascatinha",
     "coords": [
-      -43.36337,
-      -21.78417
+      -43.1484,
+      -22.472
     ],
     "historical_names": [
       {
@@ -367511,8 +367828,8 @@
   {
     "name": "Chaoxian",
     "coords": [
-      126.4631,
-      47.43597
+      117.8553,
+      31.6128
     ],
     "historical_names": [
       {
@@ -367667,8 +367984,8 @@
   {
     "name": "Chenxian",
     "coords": [
-      116.0751,
-      30.0515
+      113.0288,
+      25.8035
     ],
     "historical_names": [
       {
@@ -367745,8 +368062,8 @@
   {
     "name": "Chikhali Kalan Paraisa",
     "coords": [
-      78.4354,
-      21.82389
+      78.759,
+      22.1913
     ],
     "historical_names": [
       {
@@ -367810,8 +368127,8 @@
   {
     "name": "China Gadila",
     "coords": [
-      78.96288,
-      20.59368
+      83.3096,
+      17.7628
     ],
     "historical_names": [
       {
@@ -367918,8 +368235,8 @@
   {
     "name": "Chui",
     "coords": [
-      74.40566,
-      42.5655
+      75.28,
+      42.81
     ],
     "historical_names": [
       {
@@ -367983,8 +368300,8 @@
   {
     "name": "Chuxian",
     "coords": [
-      103.58168,
-      38.95586
+      118.3161,
+      32.3003
     ],
     "historical_names": [
       {
@@ -368138,8 +368455,8 @@
   {
     "name": "Ciénaga de Zapata",
     "coords": [
-      -81.4279,
-      22.29765
+      -81.2051,
+      22.2887
     ],
     "historical_names": [
       {
@@ -368372,8 +368689,8 @@
   {
     "name": "Clinton",
     "coords": [
-      -83.97161,
-      42.07199
+      -82.92,
+      42.5869
     ],
     "historical_names": [
       {
@@ -368684,8 +369001,8 @@
   {
     "name": "Comondú",
     "coords": [
-      -111.8442,
-      26.07079
+      -111.6703,
+      25.0322
     ],
     "historical_names": [
       {
@@ -369334,8 +369651,8 @@
   {
     "name": "Dachangzhen",
     "coords": [
-      113.99145,
-      40.84719
+      118.7598,
+      32.2329
     ],
     "historical_names": [
       {
@@ -369854,8 +370171,8 @@
   {
     "name": "Depok",
     "coords": [
-      106.79424,
-      -6.40248
+      110.4317,
+      -7.7625
     ],
     "historical_names": [
       {
@@ -370371,8 +370688,8 @@
   {
     "name": "Dolni `'Ciflik",
     "coords": [
-      24.58603,
-      42.8351
+      27.7171,
+      42.9937
     ],
     "historical_names": [
       {
@@ -370852,8 +371169,8 @@
   {
     "name": "East Riding of Yorkshire",
     "coords": [
-      -0.719,
-      53.82159
+      -0.437,
+      53.7435
     ],
     "historical_names": [
       {
@@ -372043,8 +372360,8 @@
   {
     "name": "Ezeh",
     "coords": [
-      53.68805,
-      32.42791
+      49.8678,
+      31.8296
     ],
     "historical_names": [
       {
@@ -372160,8 +372477,8 @@
   {
     "name": "Falale",
     "coords": [
-      -178.1165,
-      -14.2938
+      -176.202,
+      -13.29
     ],
     "historical_names": [
       {
@@ -372792,8 +373109,8 @@
   {
     "name": "Francisco I. Madero",
     "coords": [
-      -104.31914,
-      24.40088
+      -103.2731,
+      25.7753
     ],
     "historical_names": [
       {
@@ -373039,8 +373356,8 @@
   {
     "name": "Fuxin",
     "coords": [
-      112.98351,
-      34.73885
+      121.6701,
+      42.0217
     ],
     "historical_names": [
       {
@@ -373325,8 +373642,8 @@
   {
     "name": "Ganhe",
     "coords": [
-      106.50368,
-      26.34362
+      123.0433,
+      50.63
     ],
     "historical_names": [
       {
@@ -373351,8 +373668,8 @@
   {
     "name": "Garakcuchur",
     "coords": [
-      47.57693,
-      40.1431
+      49.9765,
+      40.3795
     ],
     "historical_names": [
       {
@@ -373650,8 +373967,8 @@
   {
     "name": "Gedangan",
     "coords": [
-      110.68333,
-      -7.18333
+      112.7267,
+      -7.3908
     ],
     "historical_names": [
       {
@@ -373992,8 +374309,8 @@
   {
     "name": "Goiabeiras",
     "coords": [
-      -56.108,
-      -15.59908
+      -40.3029,
+      -20.2706
     ],
     "historical_names": [
       {
@@ -374243,8 +374560,8 @@
   {
     "name": "Grajaú",
     "coords": [
-      -46.66829,
-      -23.77219
+      -46.1389,
+      -5.8189
     ],
     "historical_names": [
       {
@@ -374529,8 +374846,8 @@
   {
     "name": "Guanghua",
     "coords": [
-      121.22967,
-      30.90262
+      111.6721,
+      32.3803
     ],
     "historical_names": [
       {
@@ -374713,8 +375030,8 @@
   {
     "name": "Guerrero",
     "coords": [
-      -99.5451,
-      17.43919
+      -107.4856,
+      28.5478
     ],
     "historical_names": [
       {
@@ -375063,8 +375380,8 @@
   {
     "name": "Hadeja",
     "coords": [
-      38.06201,
-      36.15137
+      10.062,
+      12.453
     ],
     "historical_names": [
       {
@@ -375128,8 +375445,8 @@
   {
     "name": "Hailin",
     "coords": [
-      128.45262,
-      44.62874
+      129.38,
+      44.594
     ],
     "historical_names": [
       {
@@ -375141,8 +375458,8 @@
   {
     "name": "Hailong",
     "coords": [
-      120.42328,
-      41.56736
+      125.6809,
+      42.5323
     ],
     "historical_names": [
       {
@@ -375327,8 +375644,8 @@
   {
     "name": "Hammad",
     "coords": [
-      50.5577,
-      26.0667
+      50.5069,
+      26.1153
     ],
     "historical_names": [
       {
@@ -375444,8 +375761,8 @@
   {
     "name": "Harrison",
     "coords": [
-      -84.79947,
-      44.01919
+      -82.8292,
+      42.5836
     ],
     "historical_names": [
       {
@@ -375496,8 +375813,8 @@
   {
     "name": "Hastings",
     "coords": [
-      145.18375,
-      -38.30772
+      152.732,
+      -31.456
     ],
     "historical_names": [
       {
@@ -375717,8 +376034,8 @@
   {
     "name": "Hidaka",
     "coords": [
-      142.07435,
-      42.479
+      139.3391,
+      35.9078
     ],
     "historical_names": [
       {
@@ -375834,8 +376151,8 @@
   {
     "name": "Hindustan Aeronautics Limited Township",
     "coords": [
-      73.9301,
-      20.11258
+      77.6683,
+      12.95
     ],
     "historical_names": [
       {
@@ -376156,8 +376473,8 @@
   {
     "name": "Huayun",
     "coords": [
-      119.44685,
-      26.77884
+      112.5567,
+      29.5294
     ],
     "historical_names": [
       {
@@ -377151,8 +377468,8 @@
   {
     "name": "Iraklia",
     "coords": [
-      25.45559,
-      36.84409
+      23.2824,
+      41.1822
     ],
     "historical_names": [
       {
@@ -377434,8 +377751,8 @@
   {
     "name": "Itambé",
     "coords": [
-      -40.61983,
-      -15.24391
+      -35.1092,
+      -7.4092
     ],
     "historical_names": [
       {
@@ -377746,8 +378063,8 @@
   {
     "name": "Jadabpur",
     "coords": [
-      87.9537,
-      24.19938
+      88.3676,
+      22.5025
     ],
     "historical_names": [
       {
@@ -377759,8 +378076,8 @@
   {
     "name": "Jagannathnagar",
     "coords": [
-      85.86653,
-      20.28528
+      85.2817,
+      23.3169
     ],
     "historical_names": [
       {
@@ -377837,8 +378154,8 @@
   {
     "name": "Jahânâbâd",
     "coords": [
-      79.71475,
-      28.63354
+      84.9896,
+      25.2134
     ],
     "historical_names": [
       {
@@ -378218,8 +378535,8 @@
   {
     "name": "Jiaoxian",
     "coords": [
-      107.39527,
-      23.30352
+      120.028,
+      36.2931
     ],
     "historical_names": [
       {
@@ -378283,8 +378600,8 @@
   {
     "name": "Jinxi",
     "coords": [
-      120.90138,
-      31.18099
+      120.8334,
+      40.7725
     ],
     "historical_names": [
       {
@@ -378352,8 +378669,8 @@
   {
     "name": "Jiulong",
     "coords": [
-      101.50729,
-      29.00019
+      114.1715,
+      22.2995
     ],
     "historical_names": [
       {
@@ -378482,8 +378799,8 @@
   {
     "name": "José Azueta",
     "coords": [
-      -95.7094,
-      18.0751
+      -101.6,
+      17.655
     ],
     "historical_names": [
       {
@@ -378638,8 +378955,8 @@
   {
     "name": "Junan",
     "coords": [
-      102.70973,
-      25.0453
+      118.827,
+      35.1818
     ],
     "historical_names": [
       {
@@ -378664,8 +378981,8 @@
   {
     "name": "Junxian",
     "coords": [
-      112.31726,
-      23.17232
+      111.5067,
+      32.5521
     ],
     "historical_names": [
       {
@@ -378911,8 +379228,8 @@
   {
     "name": "Kadamrasul",
     "coords": [
-      92.05549,
-      24.83824
+      90.5179,
+      23.6238
     ],
     "historical_names": [
       {
@@ -379145,8 +379462,8 @@
   {
     "name": "Kaliganj",
     "coords": [
-      90.57307,
-      23.96448
+      89.1351,
+      23.4076
     ],
     "historical_names": [
       {
@@ -379855,8 +380172,8 @@
   {
     "name": "Al Kázimíyah",
     "coords": [
-      43.74658,
-      35.38631
+      44.3378,
+      33.38
     ],
     "historical_names": [
       {
@@ -380197,8 +380514,8 @@
   {
     "name": "Khamaria",
     "coords": [
-      82.19176,
-      25.41832
+      80.0283,
+      23.2103
     ],
     "historical_names": [
       {
@@ -380535,8 +380852,8 @@
   {
     "name": "Kingston",
     "coords": [
-      149.1442,
-      -35.31379
+      147.3083,
+      -42.9769
     ],
     "historical_names": [
       {
@@ -380769,8 +381086,8 @@
   {
     "name": "Kochang",
     "coords": [
-      126.70196,
-      35.43496
+      127.9139,
+      35.6873
     ],
     "historical_names": [
       {
@@ -381111,8 +381428,8 @@
   {
     "name": "Korja`'zma",
     "coords": [
-      40.24833,
-      59.41889
+      47.1333,
+      61.3167
     ],
     "historical_names": [
       {
@@ -381200,16 +381517,20 @@
     ]
   },
   {
-    "name": "Kostomuk`'sa",
+    "name": "Kostomuksha",
     "coords": [
       30.61098,
       64.59513
     ],
     "historical_names": [
       {
-        "date": "1950.1.1",
-        "name": "Kostomuk`'sa"
+        "date": "1977.1.1",
+        "name": "Kostomuksha"
       }
+    ],
+    "other_names": [
+      "Finnish-Soviet Karelian Iron-Ore Boomtown",
+      "Kostamus"
     ]
   },
   {
@@ -381241,8 +381562,8 @@
   {
     "name": "Kota Bumi",
     "coords": [
-      102.96946,
-      -4.36363
+      104.8931,
+      -4.8362
     ],
     "historical_names": [
       {
@@ -381306,8 +381627,8 @@
   {
     "name": "Kotwali",
     "coords": [
-      91.82696,
-      22.34141
+      91.882,
+      24.892
     ],
     "historical_names": [
       {
@@ -381457,8 +381778,8 @@
   {
     "name": "Kramat",
     "coords": [
-      106.8466,
-      -6.184
+      109.2066,
+      -6.8681
     ],
     "historical_names": [
       {
@@ -381548,8 +381869,8 @@
   {
     "name": "Krya Vryssi",
     "coords": [
-      22.26664,
-      37.00881
+      22.3052,
+      40.6874
     ],
     "historical_names": [
       {
@@ -381717,8 +382038,8 @@
   {
     "name": "Kueishan",
     "coords": [
-      121.95016,
-      24.84237
+      121.3529,
+      25.0215
     ],
     "historical_names": [
       {
@@ -382133,8 +382454,8 @@
   {
     "name": "Kwangju",
     "coords": [
-      126.85591,
-      35.15008
+      127.2552,
+      37.4291
     ],
     "historical_names": [
       {
@@ -382146,8 +382467,8 @@
   {
     "name": "Kyõngsan",
     "coords": [
-      127.44065,
-      36.62519
+      128.7378,
+      35.8233
     ],
     "historical_names": [
       {
@@ -382263,8 +382584,8 @@
   {
     "name": "La Democracia",
     "coords": [
-      -90.94623,
-      14.22901
+      -91.8879,
+      15.6244
     ],
     "historical_names": [
       {
@@ -382588,8 +382909,8 @@
   {
     "name": "Lago de Pedra",
     "coords": [
-      -65.13806,
-      -7.84235
+      -45.1316,
+      -4.5603
     ],
     "historical_names": [
       {
@@ -382722,8 +383043,8 @@
   {
     "name": "Laiagan",
     "coords": [
-      143.95555,
-      -6.31499
+      143.767,
+      -5.283
     ],
     "historical_names": [
       {
@@ -382839,8 +383160,8 @@
   {
     "name": "Lalbahadur Nagar",
     "coords": [
-      82.23828,
-      16.98471
+      78.5576,
+      17.3477
     ],
     "historical_names": [
       {
@@ -382982,8 +383303,8 @@
   {
     "name": "Laranjeiras",
     "coords": [
-      -38.86598,
-      -5.29072
+      -37.17,
+      -10.8058
     ],
     "historical_names": [
       {
@@ -383247,8 +383568,8 @@
   {
     "name": "Lekoa",
     "coords": [
-      28.72099,
-      -26.95284
+      27.8406,
+      -26.5769
     ],
     "historical_names": [
       {
@@ -383507,8 +383828,8 @@
   {
     "name": "Likisia",
     "coords": [
-      125.72754,
-      -8.87422
+      125.3419,
+      -8.5875
     ],
     "historical_names": [
       {
@@ -383707,8 +384028,8 @@
   {
     "name": "Liyujiang",
     "coords": [
-      100.2271,
-      26.85648
+      113.231,
+      25.948
     ],
     "historical_names": [
       {
@@ -383967,8 +384288,8 @@
   {
     "name": "Los Lagos",
     "coords": [
-      -72.14161,
-      -41.91978
+      -72.8186,
+      -39.8625
     ],
     "historical_names": [
       {
@@ -384560,8 +384881,8 @@
   {
     "name": "Madinat ash-Sha'ab",
     "coords": [
-      44.61469,
-      12.83208
+      44.929,
+      12.837
     ],
     "historical_names": [
       {
@@ -385097,8 +385418,8 @@
   {
     "name": "Manciana",
     "coords": [
-      -9.69665,
-      9.94559
+      -8.6977,
+      10.6329
     ],
     "historical_names": [
       {
@@ -385376,8 +385697,8 @@
   {
     "name": "Maramya",
     "coords": [
-      -11.77989,
-      8.46055
+      -12.5147,
+      8.6787
     ],
     "historical_names": [
       {
@@ -385504,16 +385825,19 @@
     ]
   },
   {
-    "name": "Marhane`c'",
+    "name": "Marhanets",
     "coords": [
       34.60936,
       47.64832
     ],
     "historical_names": [
       {
-        "date": "1950.1.1",
-        "name": "Marhane`c'"
+        "date": "1938.1.1",
+        "name": "Marhanets"
       }
+    ],
+    "other_names": [
+      "Marganets"
     ]
   },
   {
@@ -385975,8 +386299,8 @@
   {
     "name": "Maulvibazar",
     "coords": [
-      91.73149,
-      24.30953
+      91.7701,
+      24.4854
     ],
     "historical_names": [
       {
@@ -386313,8 +386637,8 @@
   {
     "name": "Mercedes",
     "coords": [
-      -84.13184,
-      10.00712
+      -84.0503,
+      9.9437
     ],
     "historical_names": [
       {
@@ -386950,8 +387274,8 @@
   {
     "name": "Mixian",
     "coords": [
-      -115.56512,
-      32.63129
+      113.3636,
+      34.5299
     ],
     "historical_names": [
       {
@@ -387184,8 +387508,8 @@
   {
     "name": "Mombaça",
     "coords": [
-      -47.5645,
-      -22.92772
+      -39.6278,
+      -5.7428
     ],
     "historical_names": [
       {
@@ -387301,8 +387625,8 @@
   {
     "name": "Monjolo",
     "coords": [
-      -44.11826,
-      -18.32411
+      -42.9683,
+      -22.7994
     ],
     "historical_names": [
       {
@@ -387652,8 +387976,8 @@
   {
     "name": "Mpumalanga",
     "coords": [
-      30.52791,
-      -25.56534
+      30.6262,
+      -29.81
     ],
     "historical_names": [
       {
@@ -388107,8 +388431,8 @@
   {
     "name": "Nahe",
     "coords": [
-      10.13567,
-      53.79364
+      124.8653,
+      48.4775
     ],
     "historical_names": [
       {
@@ -388341,8 +388665,8 @@
   {
     "name": "Narganá",
     "coords": [
-      -79.32798,
-      9.1048
+      -78.58,
+      9.44
     ],
     "historical_names": [
       {
@@ -388406,8 +388730,8 @@
   {
     "name": "Nasirpur",
     "coords": [
-      82.97301,
-      25.26033
+      77.0687,
+      28.5989
     ],
     "historical_names": [
       {
@@ -388947,8 +389271,8 @@
   {
     "name": "Newtown",
     "coords": [
-      29.12704,
-      -26.50773
+      30.9682,
+      -29.7701
     ],
     "historical_names": [
       {
@@ -388986,8 +389310,8 @@
   {
     "name": "Ngamaba-Mfilou",
     "coords": [
-      15.82766,
-      -0.22802
+      15.222,
+      -4.248
     ],
     "historical_names": [
       {
@@ -389103,8 +389427,8 @@
   {
     "name": "Ning'an",
     "coords": [
-      128.64279,
-      43.97109
+      129.4706,
+      44.34
     ],
     "historical_names": [
       {
@@ -389298,8 +389622,8 @@
   {
     "name": "Nongso",
     "coords": [
-      128.18407,
-      36.07865
+      129.35,
+      35.617
     ],
     "historical_names": [
       {
@@ -389441,8 +389765,8 @@
   {
     "name": "Nova Brasilia",
     "coords": [
-      -38.41391,
-      -12.91866
+      -49.2639,
+      -16.7417
     ],
     "historical_names": [
       {
@@ -390307,8 +390631,8 @@
   {
     "name": "Olonkinbyen",
     "coords": [
-      20.97518,
-      77.87497
+      -8.715,
+      70.9219
     ],
     "historical_names": [
       {
@@ -390727,8 +391051,8 @@
   {
     "name": "Othón P. Blanco",
     "coords": [
-      -88.01185,
-      18.60713
+      -88.33,
+      18.515
     ],
     "historical_names": [
       {
@@ -391050,8 +391374,8 @@
   {
     "name": "Pacet",
     "coords": [
-      112.5404,
-      -7.66754
+      107.0319,
+      -6.7201
     ],
     "historical_names": [
       {
@@ -391388,8 +391712,8 @@
   {
     "name": "Palmar",
     "coords": [
-      -83.75343,
-      9.74892
+      -83.4564,
+      8.9634
     ],
     "historical_names": [
       {
@@ -391687,8 +392011,8 @@
   {
     "name": "Paradise",
     "coords": [
-      -57.97249,
-      5.58857
+      -58.0446,
+      6.7928
     ],
     "historical_names": [
       {
@@ -392354,8 +392678,8 @@
   {
     "name": "Penkalang Kundang",
     "coords": [
-      102.55223,
-      2.16358
+      101.5167,
+      3.2833
     ],
     "historical_names": [
       {
@@ -392731,8 +393055,8 @@
   {
     "name": "Pinheiro",
     "coords": [
-      -43.63577,
-      -18.08275
+      -45.0876,
+      -2.5266
     ],
     "historical_names": [
       {
@@ -392913,8 +393237,8 @@
   {
     "name": "Play Cu",
     "coords": [
-      108.2772,
-      14.05832
+      108.0063,
+      13.9811
     ],
     "historical_names": [
       {
@@ -393502,8 +393826,8 @@
   {
     "name": "Portão",
     "coords": [
-      -43.28348,
-      -22.83583
+      -51.235,
+      -29.6928
     ],
     "historical_names": [
       {
@@ -393593,8 +393917,8 @@
   {
     "name": "Potou",
     "coords": [
-      110.4555,
-      21.24475
+      116.57,
+      38.0739
     ],
     "historical_names": [
       {
@@ -393955,8 +394279,8 @@
   {
     "name": "Pueblo Nuevo",
     "coords": [
-      -105.43164,
-      35.331
+      -105.3585,
+      23.7823
     ],
     "historical_names": [
       {
@@ -394046,8 +394370,8 @@
   {
     "name": "Puerto Viejo",
     "coords": [
-      -82.75494,
-      9.65401
+      -84.0083,
+      10.4541
     ],
     "historical_names": [
       {
@@ -394124,8 +394448,8 @@
   {
     "name": "Puqi",
     "coords": [
-      113.63515,
-      29.71932
+      113.8977,
+      29.7298
     ],
     "historical_names": [
       {
@@ -394215,8 +394539,8 @@
   {
     "name": "Putuo",
     "coords": [
-      121.397,
-      31.2494
+      122.2888,
+      29.9537
     ],
     "historical_names": [
       {
@@ -394241,8 +394565,8 @@
   {
     "name": "Pyramid Point",
     "coords": [
-      172.98298,
-      1.44213
+      -171.678,
+      -2.81
     ],
     "historical_names": [
       {
@@ -394397,8 +394721,8 @@
   {
     "name": "Qixia",
     "coords": [
-      118.90907,
-      32.09636
+      120.8262,
+      37.3039
     ],
     "historical_names": [
       {
@@ -394410,8 +394734,8 @@
   {
     "name": "Qixian",
     "coords": [
-      112.33507,
-      37.35775
+      114.7636,
+      34.5543
     ],
     "historical_names": [
       {
@@ -394852,8 +395176,8 @@
   {
     "name": "Rajapur",
     "coords": [
-      73.52113,
-      16.65713
+      77.468,
+      28.651
     ],
     "historical_names": [
       {
@@ -395207,8 +395531,8 @@
   {
     "name": "Réo",
     "coords": [
-      -1.56159,
-      12.23833
+      -2.4667,
+      12.3167
     ],
     "historical_names": [
       {
@@ -396420,8 +396744,8 @@
   {
     "name": "Saint Andrews",
     "coords": [
-      -67.05307,
-      45.07378
+      -96.9782,
+      50.0661
     ],
     "historical_names": [
       {
@@ -396511,8 +396835,8 @@
   {
     "name": "Sakiet-Eddeïr",
     "coords": [
-      8.3554,
-      36.22293
+      10.8062,
+      34.7944
     ],
     "historical_names": [
       {
@@ -396875,8 +397199,8 @@
   {
     "name": "San Antonio",
     "coords": [
-      -84.18562,
-      9.97931
+      -84.047,
+      9.877
     ],
     "historical_names": [
       {
@@ -397005,8 +397329,8 @@
   {
     "name": "San Francisco",
     "coords": [
-      -86.02778,
-      13.27484
+      -86.7699,
+      13.1992
     ],
     "historical_names": [
       {
@@ -397070,8 +397394,8 @@
   {
     "name": "San Isidro",
     "coords": [
-      -83.70405,
-      9.37773
+      -84.0527,
+      10.0135
     ],
     "historical_names": [
       {
@@ -397161,8 +397485,8 @@
   {
     "name": "San Juan",
     "coords": [
-      -67.76607,
-      -20.90075
+      -63.8517,
+      -17.2918
     ],
     "historical_names": [
       {
@@ -397239,8 +397563,8 @@
   {
     "name": "San Marcos",
     "coords": [
-      -88.95216,
-      14.41035
+      -88.4167,
+      15.3
     ],
     "historical_names": [
       {
@@ -397291,8 +397615,8 @@
   {
     "name": "San Miguel",
     "coords": [
-      -85.31152,
-      9.81211
+      -84.048,
+      9.8476
     ],
     "historical_names": [
       {
@@ -397343,8 +397667,8 @@
   {
     "name": "San Pablo",
     "coords": [
-      -84.09337,
-      9.99768
+      -84.4552,
+      9.9047
     ],
     "historical_names": [
       {
@@ -397421,8 +397745,8 @@
   {
     "name": "San Rafael",
     "coords": [
-      -84.09865,
-      10.01447
+      -84.1532,
+      9.9448
     ],
     "historical_names": [
       {
@@ -397737,8 +398061,8 @@
   {
     "name": "Santa Bárbara",
     "coords": [
-      -49.69458,
-      -16.57447
+      -43.41,
+      -19.96
     ],
     "historical_names": [
       {
@@ -397789,8 +398113,8 @@
   {
     "name": "Santa Cruz",
     "coords": [
-      -43.6809,
-      -22.92082
+      -36.0233,
+      -6.2294
     ],
     "historical_names": [
       {
@@ -397867,8 +398191,8 @@
   {
     "name": "Santa Felicidade",
     "coords": [
-      -53.20027,
-      -23.41211
+      -49.3283,
+      -25.4083
     ],
     "historical_names": [
       {
@@ -398062,8 +398386,8 @@
   {
     "name": "Santa Rosa",
     "coords": [
-      -84.38377,
-      10.40253
+      -84.1134,
+      9.9766
     ],
     "historical_names": [
       {
@@ -398075,8 +398399,8 @@
   {
     "name": "Santa Rosa de Chena",
     "coords": [
-      -71.54297,
-      -35.67515
+      -70.779,
+      -33.553
     ],
     "historical_names": [
       {
@@ -398361,8 +398685,8 @@
   {
     "name": "São Benedito",
     "coords": [
-      -40.86514,
-      -4.04491
+      -43.9172,
+      -19.7835
     ],
     "historical_names": [
       {
@@ -398374,8 +398698,8 @@
   {
     "name": "São Bento",
     "coords": [
-      -65.30199,
-      -7.54587
+      -37.4504,
+      -6.4858
     ],
     "historical_names": [
       {
@@ -398465,8 +398789,8 @@
   {
     "name": "São Francisco",
     "coords": [
-      -41.4523,
-      -14.4459
+      -44.8644,
+      -15.9486
     ],
     "historical_names": [
       {
@@ -398790,8 +399114,8 @@
   {
     "name": "Sardarnagar",
     "coords": [
-      78.16571,
-      17.0929
+      72.627,
+      23.0819
     ],
     "historical_names": [
       {
@@ -399544,8 +399868,8 @@
   {
     "name": "Shelby",
     "coords": [
-      -86.36396,
-      43.60862
+      -83.0331,
+      42.6708
     ],
     "historical_names": [
       {
@@ -399648,8 +399972,8 @@
   {
     "name": "Shiguaigou",
     "coords": [
-      107.91124,
-      36.71354
+      110.272,
+      40.672
     ],
     "historical_names": [
       {
@@ -399752,8 +400076,8 @@
   {
     "name": "Shoalhaven",
     "coords": [
-      150.48923,
-      -35.08107
+      150.605,
+      -34.847
     ],
     "historical_names": [
       {
@@ -400111,8 +400435,8 @@
   {
     "name": "Simpang Empat",
     "coords": [
-      100.38329,
-      6.02434
+      100.6934,
+      4.2174
     ],
     "historical_names": [
       {
@@ -400462,8 +400786,8 @@
   {
     "name": "Skovbo",
     "coords": [
-      9.83663,
-      55.84835
+      11.9779,
+      55.4959
     ],
     "historical_names": [
       {
@@ -400718,8 +401042,8 @@
   {
     "name": "Solidaridad",
     "coords": [
-      -87.42075,
-      20.55012
+      -87.0799,
+      20.6274
     ],
     "historical_names": [
       {
@@ -400939,8 +401263,8 @@
   {
     "name": "South Barwon",
     "coords": [
-      133.77514,
-      -25.2744
+      144.345,
+      -38.18
     ],
     "historical_names": [
       {
@@ -401095,8 +401419,8 @@
   {
     "name": "Springfield",
     "coords": [
-      -64.86667,
-      44.63333
+      -96.8434,
+      49.9436
     ],
     "historical_names": [
       {
@@ -401487,8 +401811,8 @@
   {
     "name": "Suixian",
     "coords": [
-      113.29995,
-      31.8538
+      113.3907,
+      31.7125
     ],
     "historical_names": [
       {
@@ -401838,8 +402162,8 @@
   {
     "name": "Suxian",
     "coords": [
-      113.04236,
-      25.8004
+      116.9763,
+      33.6345
     ],
     "historical_names": [
       {
@@ -402020,8 +402344,8 @@
   {
     "name": "Tabo`sar",
     "coords": [
-      71.27609,
-      38.86103
+      69.6415,
+      40.5662
     ],
     "historical_names": [
       {
@@ -402124,8 +402448,8 @@
   {
     "name": "Taech'õn",
     "coords": [
-      129.5522,
-      36.07363
+      126.5864,
+      36.3416
     ],
     "historical_names": [
       {
@@ -402467,8 +402791,8 @@
   {
     "name": "Taman",
     "coords": [
-      6.18669,
-      52.80425
+      109.4325,
+      -6.8933
     ],
     "historical_names": [
       {
@@ -403179,8 +403503,8 @@
   {
     "name": "Tengxian",
     "coords": [
-      110.91497,
-      23.37497
+      117.1675,
+      35.0861
     ],
     "historical_names": [
       {
@@ -404236,8 +404560,8 @@
   {
     "name": "Tôyo",
     "coords": [
-      -84.93062,
-      34.76212
+      133.0856,
+      33.9295
     ],
     "historical_names": [
       {
@@ -404496,8 +404820,8 @@
   {
     "name": "Tsongi",
     "coords": [
-      11.60944,
-      -0.80369
+      10.11,
+      -2.79
     ],
     "historical_names": [
       {
@@ -405107,8 +405431,8 @@
   {
     "name": "Uro`sevac",
     "coords": [
-      19.38102,
-      45.70628
+      21.1553,
+      42.3706
     ],
     "historical_names": [
       {
@@ -405276,8 +405600,8 @@
   {
     "name": "Vah`s",
     "coords": [
-      71.3572,
-      39.25738
+      68.8335,
+      37.7062
     ],
     "historical_names": [
       {
@@ -405419,8 +405743,8 @@
   {
     "name": "Vale Royal",
     "coords": [
-      -0.12427,
-      51.5419
+      -2.5203,
+      53.2588
     ],
     "historical_names": [
       {
@@ -405783,8 +406107,8 @@
   {
     "name": "Vathy",
     "coords": [
-      20.71985,
-      38.36362
+      26.993,
+      37.741
     ],
     "historical_names": [
       {
@@ -405826,8 +406150,8 @@
   {
     "name": "Vejalpur",
     "coords": [
-      73.56268,
-      22.68983
+      72.5165,
+      23.0061
     ],
     "historical_names": [
       {
@@ -406060,8 +406384,8 @@
   {
     "name": "Viana",
     "coords": [
-      -40.42158,
-      -20.36687
+      -45.0014,
+      -3.2133
     ],
     "historical_names": [
       {
@@ -406840,8 +407164,8 @@
   {
     "name": "W.C.R Layout OG",
     "coords": [
-      81.72021,
-      24.09467
+      77.5475,
+      12.9988
     ],
     "historical_names": [
       {
@@ -407048,8 +407372,8 @@
   {
     "name": "Waru",
     "coords": [
-      130.65926,
-      -3.39069
+      112.7254,
+      -7.3633
     ],
     "historical_names": [
       {
@@ -407061,8 +407385,8 @@
   {
     "name": "Washington",
     "coords": [
-      -120.74014,
-      47.75107
+      -160.3778,
+      4.6883
     ],
     "historical_names": [
       {
@@ -407178,8 +407502,8 @@
   {
     "name": "Weixian",
     "coords": [
-      115.26669,
-      36.97542
+      119.2092,
+      36.7697
     ],
     "historical_names": [
       {
@@ -407601,8 +407925,8 @@
   {
     "name": "Xinglongzhen",
     "coords": [
-      113.39397,
-      35.45752
+      127.1143,
+      46.4414
     ],
     "historical_names": [
       {
@@ -407640,8 +407964,8 @@
   {
     "name": "Xinliulong",
     "coords": [
-      87.6271,
-      43.79343
+      114.196,
+      22.338
     ],
     "historical_names": [
       {
@@ -407653,8 +407977,8 @@
   {
     "name": "Xinwen",
     "coords": [
-      116.79393,
-      30.81356
+      117.67,
+      35.86
     ],
     "historical_names": [
       {
@@ -407835,8 +408159,8 @@
   {
     "name": "Yanling",
     "coords": [
-      113.77258,
-      26.48979
+      114.179,
+      34.0958
     ],
     "historical_names": [
       {
@@ -407913,8 +408237,8 @@
   {
     "name": "Yaxian",
     "coords": [
-      117.95238,
-      29.90878
+      109.5016,
+      18.2761
     ],
     "historical_names": [
       {
@@ -408034,8 +408358,8 @@
   {
     "name": "Yi'an",
     "coords": [
-      -46.50768,
-      -23.55092
+      125.2996,
+      47.8917
     ],
     "historical_names": [
       {
@@ -408047,8 +408371,8 @@
   {
     "name": "Yichuan",
     "coords": [
-      110.16899,
-      36.05026
+      112.4153,
+      34.4161
     ],
     "historical_names": [
       {
@@ -408060,8 +408384,8 @@
   {
     "name": "Yingchengzi",
     "coords": [
-      115.95672,
-      40.35963
+      113.568,
+      30.9443
     ],
     "historical_names": [
       {
@@ -408242,8 +408566,8 @@
   {
     "name": "Yushu",
     "coords": [
-      97.0065,
-      33.00528
+      126.5414,
+      44.825
     ],
     "historical_names": [
       {
@@ -408372,8 +408696,8 @@
   {
     "name": "Zarewo Selo",
     "coords": [
-      21.74527,
-      41.60863
+      22.7694,
+      41.9672
     ],
     "historical_names": [
       {
@@ -408411,8 +408735,8 @@
   {
     "name": "Zavet",
     "coords": [
-      27.06532,
-      42.83487
+      26.6667,
+      43.7667
     ],
     "historical_names": [
       {
@@ -408476,8 +408800,8 @@
   {
     "name": "Zelenogorsk",
     "coords": [
-      29.70069,
-      60.19671
+      94.5833,
+      56.1
     ],
     "historical_names": [
       {
@@ -408502,8 +408826,8 @@
   {
     "name": "Zhoukouzhen",
     "coords": [
-      115.93907,
-      39.6862
+      114.6441,
+      33.6167
     ],
     "historical_names": [
       {
@@ -443277,8 +443601,8 @@
   {
     "name": "Al-Ittihad",
     "coords": [
-      44.61469,
-      12.83208
+      44.929,
+      12.837
     ],
     "historical_names": [
       {
@@ -444057,8 +444381,8 @@
       "1289.5.1": null
     },
     "coords": [
-      35.75,
-      34.5
+      35.835968,
+      34.43483
     ],
     "historical_names": [
       {
@@ -501122,8 +501446,8 @@
   {
     "name": "Kostrzyn",
     "coords": [
-      17.22809,
-      52.3979
+      14.65,
+      52.62
     ],
     "historical_names": [
       {
@@ -511183,6 +511507,25 @@
       "Знам'янське городище",
       "Знаменское городище",
       "Велика Знам'янка"
+    ]
+  },
+  {
+    "coords": [
+      64.92,
+      56.31
+    ],
+    "historical_names": [
+      {
+        "date": "100.1.1",
+        "name": "Pavlinovo"
+      }
+    ],
+    "name": "Pavlinovo",
+    "other_names": [
+      "Павлиново",
+      "Павлиновское городище",
+      "Pavlinovskoye gorodishche",
+      "Pavlinovo gorodishche"
     ]
   }
 ]

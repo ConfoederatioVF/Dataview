@@ -3,33 +3,14 @@ import path from 'path'
 import type { ServerResponse } from 'http'
 import { normaliseBorderDatasetId } from '../framework/geopng/types.ts'
 import { UfDate, type UfDateObject } from '../framework/utils/uf_date.ts'
-import {
-  cullAndSimplifyGeometry,
-} from './atlas_geometry_utils.ts'
-import {
-  clearCityResolverCache,
-  findCityCoordsByName,
-  getStateCapitalInfo,
-  type StateCapitalInfo,
-} from './atlas_city_resolver.ts'
-import {
-  clearAtlasConfigCache,
-  getAtlasDatasetPaths,
-  type AtlasDatasetPaths,
-} from './atlas_config_loader.ts'
+import { cullAndSimplifyGeometry } from './atlas_geometry_utils.ts'
+import { clearCityResolverCache, findCityCoordsByName, getStateCapitalInfo, type StateCapitalInfo } from './atlas_city_resolver.ts'
+import { clearAtlasConfigCache, getAtlasDatasetPaths, type AtlasDatasetPaths } from './atlas_config_loader.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import {
-  clearNaissanceCache,
-  defacto_borders_slices,
-  getNaissanceFileMtime,
-  type HistoricalBorderFeature,
-  type HistoricalBorderKeyframe,
-  isNaissanceCacheStale,
-  loadCShapes,
-  loadNaissance,
-  type NaissanceEntityRecord,
-  parseNaissanceKeyframes,
-  sliceNaissanceEntities,
+  clearNaissanceCache, defacto_borders_slices, getNaissanceFileMtime,
+  type HistoricalBorderFeature, type HistoricalBorderKeyframe, isNaissanceCacheStale,
+  loadCShapes, loadNaissance, type NaissanceEntityRecord, parseNaissanceKeyframes, sliceNaissanceEntities,
 } from './atlas_naissance_loader.ts'
 
 export type { AtlasDatasetPaths, HistoricalBorderFeature, HistoricalBorderKeyframe }
@@ -46,7 +27,7 @@ export interface HistoricalBordersResponse {
 
 //Bump whenever the cached border feature schema changes, to invalidate stale disk caches
 let all_cache_clearers: Array<() => void> = []
-let border_cache_version = 12
+let border_cache_version = 13
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let last_known_source_mtimes: Map<string, number> = new Map()
@@ -805,6 +786,7 @@ export class AtlasBordersService {
     }
 
     cached_active_state_ids.clear()
+    clearCityResolverCache()
     clearNaissanceCache(source_path)
 
     for (let i = 0; i < all_cache_clearers.length; i++) {
@@ -833,6 +815,7 @@ export class AtlasBordersService {
     let year = arg1_year
 
     //Declare local instance variables
+    let cache_key: string
     let current_mtime: number
     let is_stale = false
     let last_mtime: number | undefined
@@ -843,11 +826,12 @@ export class AtlasBordersService {
       return false
 
     //Function body
-    current_mtime = getNaissanceFileMtime(source_path)
-    last_mtime = last_known_source_mtimes.get(source_path)
+    cache_key = `${dataset}::${source_path}`
+    current_mtime = AtlasBordersService.getSourceMtime(dataset, year)
+    last_mtime = last_known_source_mtimes.get(cache_key)
 
     if (last_mtime === undefined) {
-      last_known_source_mtimes.set(source_path, current_mtime)
+      last_known_source_mtimes.set(cache_key, current_mtime)
       AtlasBordersService.purgeStaleDiskCaches(dataset)
     } else if (current_mtime !== last_mtime) {
       is_stale = true
@@ -856,7 +840,7 @@ export class AtlasBordersService {
     if (isNaissanceCacheStale(source_path))
       is_stale = true
 
-    last_known_source_mtimes.set(source_path, current_mtime)
+    last_known_source_mtimes.set(cache_key, current_mtime)
 
     if (is_stale) {
       console.log(`[AtlasBordersService] Detected update to ${path.basename(source_path)} (mtime: ${current_mtime}). Automatically invalidating caches...`)
@@ -921,14 +905,22 @@ export class AtlasBordersService {
     let year = arg1_year
 
     //Declare local instance variables
+    let defines = FilepathDefines.get()
+    let max_mtime = 0
+    let sidecar_paths = [defines.filepaths.stadester_coords, defines.filepaths.stadester_capitals, defines.filepaths.stadester_metadata]
     let source_path = AtlasBordersService.getSourceDatasetPath(dataset, year)
 
-    //Guard clauses
-    if (!source_path)
-      return 0
+    //Function body
+    if (source_path)
+      max_mtime = Math.max(max_mtime, getNaissanceFileMtime(source_path))
+    for (let i = 0; i < sidecar_paths.length; i++) {
+      let fp = sidecar_paths[i]
+      if (fp && fs.existsSync(fp))
+        max_mtime = Math.max(max_mtime, fs.statSync(fp).mtimeMs)
+    }
 
     //Return statement
-    return getNaissanceFileMtime(source_path)
+    return max_mtime
   }
 
   /**

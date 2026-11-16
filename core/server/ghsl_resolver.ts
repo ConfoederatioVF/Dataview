@@ -165,16 +165,19 @@ export let clearStadesterDiskCache = function (): void {
  * Normalizes ASCII diacritical artifacts to ensure clean English/Latin display names.
  *
  * @param {Record<string, any>} arg0_raw_data
+ * @param {boolean} [arg1_append=false]
  */
-export let indexHistoricalCities = function (arg0_raw_data: Record<string, any>): void {
+export let indexHistoricalCities = function (arg0_raw_data: Record<string, any>, arg1_append?: boolean): void {
   //Convert from parameters
+  let append_mode = Boolean(arg1_append)
   let raw_data = arg0_raw_data
 
   //Declare local instance variables
   let all_keys = Object.keys(raw_data)
 
   //Function body
-  historical_cities_index = []
+  if (!append_mode)
+    historical_cities_index = []
 
   for (let i = 0; i < all_keys.length; i++) {
     let key = all_keys[i]

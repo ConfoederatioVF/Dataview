@@ -28,7 +28,7 @@
             "- Methodology report: [10.5281/zenodo.17180328](https://doi.org/10.5281/zenodo.17180328)",
             "</details>"
         ],
-        filepath: "${l_stad}/stadester_1.1.json",
+        filepath: "${l_stad}/stadester_1.1",
         permissions: [
             "default"
         ],

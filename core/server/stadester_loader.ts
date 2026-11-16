@@ -9,8 +9,83 @@ import type { CityIndexEntry } from './stadester_types.ts'
 let datasets_cache = new Map<string, Record<string, CityIndexEntry>>()
 let spatial_grid_by_dataset = new Map<string, Map<string, string[]>>()
 
+export interface ResolvedDatasetSources {
+  dir_path: string
+  files: string[]
+  is_partitioned: boolean
+  manifest_path: string
+  max_mtime_ms: number
+}
+
 /**
- * Resolves the absolute path to a Stadestér JSON dataset file.
+ * Resolves either a partitioned Viscount macro-region Stadestér directory (`stadester_manifest.json`)
+ * or a legacy monolithic JSON dataset file into its ordered shard file list and max mtime.
+ *
+ * @param {string} [arg0_dataset_name='stadester_1.1']
+ *
+ * @returns {ResolvedDatasetSources}
+ */
+export function resolveDatasetSourceFiles (arg0_dataset_name?: string): ResolvedDatasetSources {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+
+  //Declare local instance variables
+  let base_dir = FilepathDefines.get().root_folders.l_stad
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let files: string[] = []
+  let legacy_path = path.join(base_dir, `${clean_stem}.json`)
+  let max_mtime_ms = 0
+  let part_dir = path.join(base_dir, clean_stem)
+  let manifest_path = path.join(part_dir, 'stadester_manifest.json')
+
+  //Function body
+  if (fs.existsSync(manifest_path)) {
+    max_mtime_ms = fs.statSync(manifest_path).mtimeMs
+    try {
+      let manifest = JSON.parse(fs.readFileSync(manifest_path, 'utf-8'))
+      let regions = Array.isArray(manifest.regions) ? manifest.regions : []
+      for (let i = 0; i < regions.length; i++) {
+        let reg_files = Array.isArray(regions[i].files) ? regions[i].files : []
+        for (let x = 0; x < reg_files.length; x++) {
+          let shard_path = path.join(part_dir, reg_files[x])
+          if (fs.existsSync(shard_path)) {
+            let shard_mtime = fs.statSync(shard_path).mtimeMs
+            if (shard_mtime > max_mtime_ms)
+              max_mtime_ms = shard_mtime
+            files.push(shard_path)
+          }
+        }
+      }
+    } catch (arg0_err) {
+      console.error(`[StadesterLoader] Failed parsing Stadestér manifest at ${manifest_path}:`, arg0_err)
+    }
+
+    //Return statement
+    return {
+      dir_path: part_dir,
+      files: files,
+      is_partitioned: true,
+      manifest_path: manifest_path,
+      max_mtime_ms: max_mtime_ms,
+    }
+  }
+
+  if (fs.existsSync(legacy_path))
+    max_mtime_ms = fs.statSync(legacy_path).mtimeMs
+
+  //Return statement
+  return {
+    dir_path: base_dir,
+    files: fs.existsSync(legacy_path) ? [legacy_path] : [],
+    is_partitioned: false,
+    manifest_path: '',
+    max_mtime_ms: max_mtime_ms,
+  }
+}
+
+
+/**
+ * Resolves the absolute path to a Stadestér dataset directory (when partitioned) or legacy JSON file.
  *
  * @param {string} [arg0_dataset_name='stadester_1.1']
  *
@@ -22,15 +97,21 @@ export function getDatasetFilePath (arg0_dataset_name?: string): string {
 
   //Declare local instance variables
   let base_dir = FilepathDefines.get().root_folders.l_stad
-  let file_name = dataset_name.endsWith('.json') ? dataset_name : `${dataset_name}.json`
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let part_dir = path.join(base_dir, clean_stem)
+
+  //Function body
+  if (fs.existsSync(path.join(part_dir, 'stadester_manifest.json')))
+    return part_dir
 
   //Return statement
-  return path.join(base_dir, file_name)
+  return path.join(base_dir, `${clean_stem}.json`)
 }
 
 
 /**
  * Ensures the lightweight static index cache exists on disk for immediate rendering.
+ * Stream-writes entries row-by-row so large global datasets never exceed V8 string limits.
  *
  * @param {string} [arg0_dataset_name='stadester_1.1']
  *
@@ -42,16 +123,16 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
 
   //Declare local instance variables
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
-  let lite_file_path = path.join(cache_dir, `${dataset_name}_lite.json`)
-  let source_file_path = getDatasetFilePath(dataset_name)
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let lite_file_path = path.join(cache_dir, `${clean_stem}_lite.json`)
+  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
+  let source_info = resolveDatasetSourceFiles(clean_stem)
 
   //Guard clauses
-  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
-  if (fs.existsSync(lite_file_path) && fs.existsSync(source_file_path)) {
+  if (fs.existsSync(lite_file_path) && source_info.files.length > 0) {
     let is_meta_newer = false
     let is_v2 = false
     let lite_stat = fs.statSync(lite_file_path)
-    let src_stat = fs.statSync(source_file_path)
 
     if (fs.existsSync(meta_file_path)) {
       let meta_stat = fs.statSync(meta_file_path)
@@ -59,7 +140,7 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
         is_meta_newer = true
     }
 
-    if (!is_meta_newer && lite_stat.mtimeMs >= src_stat.mtimeMs && lite_stat.size > 1000) {
+    if (!is_meta_newer && lite_stat.mtimeMs >= source_info.max_mtime_ms && lite_stat.size > 1000) {
       try {
         let head_buf = Buffer.alloc(1024)
         let fd = fs.openSync(lite_file_path, 'r')
@@ -78,34 +159,50 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   if (!fs.existsSync(cache_dir))
     fs.mkdirSync(cache_dir, { recursive: true })
 
-  let indexed = loadDataset(dataset_name)
+  let indexed = loadDataset(clean_stem)
   let all_keys = Object.keys(indexed)
-  let lite_array: any[] = []
+  let buffer: string[] = ['[']
+  let buffer_len = 1
+  let fd = fs.openSync(lite_file_path, 'w')
+  let flush_threshold = 8*1024*1024
 
-  for (let i = 0; i < all_keys.length; i++) {
-    let c = indexed[all_keys[i]]
-    lite_array.push({
-      _v2: i === 0 ? true : undefined,
-      colour: c.colour,
-      coords: c.coords,
-      country: c.country,
-      ghsl_name: c.metadata_name || c.name || c.ghsl_name || c.reconciled_name,
-      historical_names: c.historical_names,
-      id: c.id,
-      key: c.key,
-      max_pop: c.max_pop,
-      max_year: c.max_year,
-      metadata_name: c.metadata_name || c.name,
-      min_year: c.min_year,
-      name: c.name,
-      other_names: c.other_names,
-      reconciled_name: c.metadata_name || c.name || c.reconciled_name || c.ghsl_name,
-      region: c.region,
-    })
+  try {
+    for (let i = 0; i < all_keys.length; i++) {
+      let c = indexed[all_keys[i]]
+      let row_obj = {
+        _v2: i === 0 ? true : undefined,
+        colour: c.colour,
+        coords: c.coords,
+        country: c.country,
+        ghsl_name: c.metadata_name || c.name || c.ghsl_name || c.reconciled_name,
+        historical_names: c.historical_names,
+        id: c.id,
+        key: c.key,
+        max_pop: c.max_pop,
+        max_year: c.max_year,
+        metadata_name: c.metadata_name || c.name,
+        min_year: c.min_year,
+        name: c.name,
+        other_names: c.other_names,
+        reconciled_name: c.metadata_name || c.name || c.reconciled_name || c.ghsl_name,
+        region: c.region,
+      }
+      let chunk = (i > 0 ? ',' : '') + JSON.stringify(row_obj)
+      buffer.push(chunk)
+      buffer_len += chunk.length
+      if (buffer_len >= flush_threshold) {
+        fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+        buffer = []
+        buffer_len = 0
+      }
+    }
+    buffer.push(']')
+    fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+  } finally {
+    fs.closeSync(fd)
   }
 
-  fs.writeFileSync(lite_file_path, JSON.stringify(lite_array), 'utf-8')
-  console.log(`[StadesterLoader] Pre-cached lightweight index for ${dataset_name}: ${lite_file_path} (${(fs.statSync(lite_file_path).size / (1024*1024)).toFixed(2)} MB)`)
+  console.log(`[StadesterLoader] Pre-cached lightweight index for ${clean_stem}: ${lite_file_path} (${(fs.statSync(lite_file_path).size / (1024*1024)).toFixed(2)} MB)`)
 
   //Return statement
   return lite_file_path
@@ -113,7 +210,7 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
 
 
 /**
- * Loads and indexes a Stadestér dataset into server memory.
+ * Loads and indexes a Stadestér dataset (partitioned macro-region shards or legacy JSON) into server memory.
  *
  * @param {string} [arg0_dataset_name='stadester_1.1']
  *
@@ -124,32 +221,32 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
 
   //Declare local instance variables
-  let all_city_keys: string[]
-  let file_path = getDatasetFilePath(dataset_name)
+  let city_seq_id = 0
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
   let indexed_record: Record<string, CityIndexEntry> = {}
-  let raw_data: Record<string, any>
-  let raw_text: string
+  let source_info = resolveDatasetSourceFiles(clean_stem)
 
   //Guard clauses
+  if (datasets_cache.has(clean_stem))
+    return datasets_cache.get(clean_stem)!
   if (datasets_cache.has(dataset_name))
     return datasets_cache.get(dataset_name)!
 
-  if (!fs.existsSync(file_path)) {
-    console.warn(`[StadesterLoader] Dataset file not found: ${file_path}`)
+  if (source_info.files.length === 0) {
+    console.warn(`[StadesterLoader] Dataset not found: ${getDatasetFilePath(clean_stem)}`)
     return {}
   }
 
   //Check lite disk cache for pre-resolved names
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
-  let lite_file_path = path.join(cache_dir, `${dataset_name}_lite.json`)
+  let lite_file_path = path.join(cache_dir, `${clean_stem}_lite.json`)
   let lite_name_map = new Map<string, string>()
   let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
 
   if (fs.existsSync(lite_file_path)) {
     try {
       let lite_stat = fs.statSync(lite_file_path)
-      let src_stat = fs.statSync(file_path)
-      let is_lite_fresh = lite_stat.mtimeMs >= src_stat.mtimeMs
+      let is_lite_fresh = lite_stat.mtimeMs >= source_info.max_mtime_ms
       if (is_lite_fresh && fs.existsSync(meta_file_path)) {
         if (fs.statSync(meta_file_path).mtimeMs > lite_stat.mtimeMs)
           is_lite_fresh = false
@@ -174,73 +271,83 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
 
   //Function body
   loadGhslCsvNames()
-  console.log(`[StadesterLoader] Indexing dataset ${dataset_name} from ${file_path}...`)
-  raw_text = fs.readFileSync(file_path, 'utf-8')
-  raw_data = JSON.parse(raw_text)
-  raw_text = ''
-  indexHistoricalCities(raw_data)
-  all_city_keys = Object.keys(raw_data)
+  let src_label = source_info.is_partitioned
+    ? `${source_info.dir_path} (${source_info.files.length} macro-region shards)`
+    : source_info.files[0]
+  console.log(`[StadesterLoader] Indexing dataset ${clean_stem} from ${src_label}...`)
 
-  for (let i = 0; i < all_city_keys.length; i++) {
-    let key = all_city_keys[i]
-    let c = raw_data[key]
-    let pop_obj = c.population || {}
-    let pop_years = Object.keys(pop_obj).map(Number).sort((arg0_a, arg0_b) => arg0_a - arg0_b)
-    let min_yr = pop_years.length > 0 ? pop_years[0] : 0
-    let max_yr = pop_years.length > 0 ? pop_years[pop_years.length - 1] : 0
-    let max_p = 0
-
-    for (let x = 0; x < pop_years.length; x++) {
-      let p_val = pop_obj[pop_years[x]] || 0
-      if (p_val > max_p)
-        max_p = p_val
-    }
-
-    let cached_name = lite_name_map.get(key)
-    let clean_display_name = (cached_name && !isCorruptedCityName(cached_name))
-      ? cached_name
-      : resolveCityDisplayName(key, c.name || key, c.coords, max_p, c.id)
-
-    if (key === 'London (agglomeration)-unkingd' ||
-        key === 'stadester-London (Greater London)-United Kingdom' ||
-        clean_display_name === 'City of London' ||
-        (c.coords && Math.abs(c.coords[0] - 51.5134) < 0.01 && Math.abs(c.coords[1] - (-0.08925)) < 0.01)) {
-      clean_display_name = 'London'
-    }
-
-    let city_coords = c.coords
-    if (key === 'stadester-Lamphun-Thailand' || (c.name === 'Lamphun' && c.country === 'Thailand')) {
-      if (city_coords && city_coords[0] < 10)
-        city_coords = [18.5744357, 99.00369719999999]
-    }
-
-    indexed_record[key] = {
-      area: c.area,
-      colour: c.colour,
-      coords: city_coords,
-      country: c.country,
-      density: c.density,
-      elevation: c.elevation,
-      ghsl_name: clean_display_name,
-      id: c.id !== undefined ? c.id : i + 1,
-      key: c.key || key,
-      max_pop: max_p,
-      max_year: max_yr,
-      min_year: min_yr,
-      name: clean_display_name,
-      original_names: c.original_names,
-      other_names: c.other_names,
-      population: pop_obj,
-      reconciled_name: clean_display_name,
-      region: c.region,
-      years: pop_years,
-    }
-    delete raw_data[key]
+  //Pass 1: Index all historical pre-1975 anchor cities across all shards so cross-border GHSL name repairs stay consistent
+  for (let i = 0; i < source_info.files.length; i++) {
+    let shard_raw = JSON.parse(fs.readFileSync(source_info.files[i], 'utf-8'))
+    indexHistoricalCities(shard_raw, i > 0)
   }
 
-  raw_data = {} as any
+  //Pass 2: Process and index entries sequentially per shard, releasing each shard object immediately
+  for (let s = 0; s < source_info.files.length; s++) {
+    let raw_data: Record<string, any> = JSON.parse(fs.readFileSync(source_info.files[s], 'utf-8'))
+    let all_city_keys = Object.keys(raw_data)
 
-  if (!indexed_record['stadester-Vaduz-Liechtenstein']) {
+    for (let i = 0; i < all_city_keys.length; i++) {
+      let key = all_city_keys[i]
+      let c = raw_data[key]
+      let pop_obj = c.population || {}
+      let pop_years = Object.keys(pop_obj).map(Number).sort((arg0_a, arg1_b) => arg0_a - arg1_b)
+      let min_yr = pop_years.length > 0 ? pop_years[0] : 0
+      let max_yr = pop_years.length > 0 ? pop_years[pop_years.length - 1] : 0
+      let max_p = 0
+
+      for (let x = 0; x < pop_years.length; x++) {
+        let p_val = pop_obj[pop_years[x]] || 0
+        if (p_val > max_p)
+          max_p = p_val
+      }
+
+      let cached_name = lite_name_map.get(key)
+      let clean_display_name = (cached_name && !isCorruptedCityName(cached_name))
+        ? cached_name
+        : resolveCityDisplayName(key, c.name || key, c.coords, max_p, c.id)
+
+      if (key === 'London (agglomeration)-unkingd' ||
+          key === 'London (agglomeration)-United Kingdom' ||
+          key === 'stadester-London (Greater London)-United Kingdom' ||
+          clean_display_name === 'City of London' ||
+          (c.coords && Math.abs(c.coords[0] - 51.5134) < 0.01 && Math.abs(c.coords[1] - (-0.08925)) < 0.01)) {
+        clean_display_name = 'London'
+      }
+
+      let city_coords = c.coords
+      if (key === 'stadester-Lamphun-Thailand' || (c.name === 'Lamphun' && c.country === 'Thailand')) {
+        if (city_coords && city_coords[0] < 10)
+          city_coords = [18.5744357, 99.00369719999999]
+      }
+
+      city_seq_id++
+      indexed_record[key] = {
+        area: c.area,
+        colour: c.colour,
+        coords: city_coords,
+        country: c.country,
+        density: c.density,
+        elevation: c.elevation,
+        ghsl_name: clean_display_name,
+        id: c.id !== undefined ? c.id : city_seq_id,
+        key: c.key || key,
+        max_pop: max_p,
+        max_year: max_yr,
+        min_year: min_yr,
+        name: clean_display_name,
+        original_names: c.original_names,
+        other_names: c.other_names,
+        population: pop_obj,
+        reconciled_name: clean_display_name,
+        region: c.region,
+        years: pop_years,
+      }
+      delete raw_data[key]
+    }
+  }
+
+  if (!indexed_record['stadester-Vaduz-Liechtenstein'] && !indexed_record['Vaduz-Liechtenstein']) {
     indexed_record['stadester-Vaduz-Liechtenstein'] = {
       coords: [47.141, 9.521],
       country: 'Liechtenstein',
@@ -277,7 +384,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
     }
   }
 
-  if (!indexed_record['stadester-Macau-Macao']) {
+  if (!indexed_record['stadester-Macau-Macao'] && !indexed_record['Macau-Macao']) {
     indexed_record['stadester-Macau-Macao'] = {
       colour: [173, 62, 62],
       coords: [22.1987, 113.5439],
@@ -318,11 +425,11 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
       years: [1557, 1560, 1600, 1635, 1700, 1750, 1800, 1850, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020],
     }
   }
-  if (!indexed_record['stadester-Macau-Macau']) {
+  if (!indexed_record['stadester-Macau-Macau'] && !indexed_record['Macau-Macau'] && indexed_record['stadester-Macau-Macao']) {
     indexed_record['stadester-Macau-Macau'] = indexed_record['stadester-Macau-Macao']
   }
 
-  if (!indexed_record['stadester-Saint Helier-Jersey']) {
+  if (!indexed_record['stadester-Saint Helier-Jersey'] && !indexed_record['Saint Helier-Jersey']) {
     indexed_record['stadester-Saint Helier-Jersey'] = {
       coords: [49.1858, -2.11],
       country: 'Jersey',
@@ -359,11 +466,13 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
 
   applyCityMetadata(indexed_record)
   applyStateCapitals(indexed_record)
-  datasets_cache.set(dataset_name, indexed_record)
-  console.log(`[StadesterLoader] Successfully indexed ${all_city_keys.length} cities for ${dataset_name}.`)
+  datasets_cache.set(clean_stem, indexed_record)
+  if (dataset_name !== clean_stem)
+    datasets_cache.set(dataset_name, indexed_record)
+  console.log(`[StadesterLoader] Successfully indexed ${Object.keys(indexed_record).length} cities for ${clean_stem}.`)
 
   try {
-    ensureLiteCache(dataset_name)
+    ensureLiteCache(clean_stem)
   } catch (arg0_cache_err) {
     console.warn('[StadesterLoader] Failed to ensure lite cache:', arg0_cache_err)
   }

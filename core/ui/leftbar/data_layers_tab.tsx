@@ -273,7 +273,7 @@ export let DataLayersTab: React.FC<DataLayersTabProps> = function (arg0_props) {
             : false
           let is_stadester = arg0_layer.id.includes('stadester')
           let is_stadester_dataset_match = is_stadester
-            ? (arg0_layer.id === 'stadester' || stadester_config?.dataset === arg0_layer.id || (!stadester_config?.dataset && arg0_layer.id === 'stadester_1.1'))
+            ? (arg0_layer.id === 'stadester' || stadester_config?.dataset === arg0_layer.id || (!stadester_config?.dataset && arg0_layer.id === 'stadester_2.0'))
             : false
           let is_vector_overlay = arg0_layer.type === 'vector.points' || is_stadester || is_borders
           let is_overlay_active = is_borders

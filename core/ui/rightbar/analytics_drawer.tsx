@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
-import { DecodedRaster, ScaleType } from '@framework/geopng/types.ts'
+import { DecodedRaster, ScaleType, StadesterDatasetId } from '@framework/geopng/types.ts'
 import { CountryFeature, CountryStats } from '@framework/geopng/polygon_binning.ts'
 import { getAnalyticsPanelRightOffset, UI_LAYOUT } from '@framework/utils/ui_layout'
 import { HistogramChart } from './histogram_chart'
@@ -45,7 +45,7 @@ export interface AnalyticsDrawerProps {
   scaleType: ScaleType
   selectedCountries?: CountryFeature[]
   selectedCountry?: CountryFeature | null
-  stadesterDataset?: 'stadester_1.1' | 'stadester_1.0'
+  stadesterDataset?: StadesterDatasetId
   userRole?: UserRole
 }
 
@@ -86,7 +86,7 @@ export let AnalyticsDrawer: React.FC<AnalyticsDrawerProps> = function (arg0_prop
     scaleType: scale_type,
     selectedCountries: selected_countries,
     selectedCountry: selected_country,
-    stadesterDataset: stadester_dataset = 'stadester_1.1',
+    stadesterDataset: stadester_dataset = 'stadester_2.0',
     userRole: user_role = 'default',
   } = props
 

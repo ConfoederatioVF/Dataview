@@ -13,10 +13,12 @@ import {
 import {
   applyCityMetadata,
   applyStateCapitals,
+  clearCityMetadataCache,
   getStateById,
   getStateCapitals,
   isStateAcapital,
   loadCityMetadata,
+  resolveCityMetadataPath,
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
 import {
@@ -56,6 +58,7 @@ export let StadesterService = {
   _cache_compact_cities,
   applyCityMetadata,
   applyStateCapitals,
+  clearCityMetadataCache,
   ensureLiteCache,
   getAuthoritativeCapitalsAtYear,
   getCitiesAtYear,
@@ -71,5 +74,6 @@ export let StadesterService = {
   loadCityMetadata,
   loadDataset,
   loadStateCapitals: getStateCapitals,
+  resolveCityMetadataPath,
   resolveCityNameAtYear,
 }

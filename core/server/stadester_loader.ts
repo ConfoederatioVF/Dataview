@@ -3,11 +3,11 @@ import path from 'path'
 import { isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
-import { applyCityMetadata, applyStateCapitals } from './stadester_metadata.ts'
+import { applyCityMetadata, applyStateCapitals, clearCityMetadataCache, resolveCityMetadataPath } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
 
 let datasets_cache = new Map<string, Record<string, CityIndexEntry>>()
-let INDEX_CACHE_VERSION = 2
+let INDEX_CACHE_VERSION = 3
 let spatial_grid_by_dataset = new Map<string, Map<string, string[]>>()
 
 export interface ResolvedDatasetSources {
@@ -19,16 +19,16 @@ export interface ResolvedDatasetSources {
 }
 
 /**
- * Resolves either a partitioned Viscount macro-region Stadestér directory (`stadester_manifest.json`)
- * or a legacy monolithic JSON dataset file into its ordered shard file list and max mtime.
+ * Resolves either a partitioned Viscount macro-region Stadestér directory (`stadester_manifest.json`),
+ * a versioned subfolder JSON file (`<dataset>/<dataset>.json`), or a flat legacy JSON dataset file.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  *
  * @returns {ResolvedDatasetSources}
  */
 export function resolveDatasetSourceFiles (arg0_dataset_name?: string): ResolvedDatasetSources {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
 
   //Declare local instance variables
   let base_dir = FilepathDefines.get().root_folders.l_stad
@@ -38,6 +38,7 @@ export function resolveDatasetSourceFiles (arg0_dataset_name?: string): Resolved
   let max_mtime_ms = 0
   let part_dir = path.join(base_dir, clean_stem)
   let manifest_path = path.join(part_dir, 'stadester_manifest.json')
+  let versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
 
   //Function body
   if (fs.existsSync(manifest_path)) {
@@ -71,6 +72,17 @@ export function resolveDatasetSourceFiles (arg0_dataset_name?: string): Resolved
     }
   }
 
+  if (fs.existsSync(versioned_file_path)) {
+    max_mtime_ms = fs.statSync(versioned_file_path).mtimeMs
+    return {
+      dir_path: part_dir,
+      files: [versioned_file_path],
+      is_partitioned: false,
+      manifest_path: '',
+      max_mtime_ms: max_mtime_ms,
+    }
+  }
+
   if (fs.existsSync(legacy_path))
     max_mtime_ms = fs.statSync(legacy_path).mtimeMs
 
@@ -86,24 +98,27 @@ export function resolveDatasetSourceFiles (arg0_dataset_name?: string): Resolved
 
 
 /**
- * Resolves the absolute path to a Stadestér dataset directory (when partitioned) or legacy JSON file.
+ * Resolves the absolute path to a Stadestér dataset directory (when partitioned) or versioned/legacy JSON file.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  *
  * @returns {string}
  */
 export function getDatasetFilePath (arg0_dataset_name?: string): string {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
 
   //Declare local instance variables
   let base_dir = FilepathDefines.get().root_folders.l_stad
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
   let part_dir = path.join(base_dir, clean_stem)
+  let versioned_file_path = path.join(part_dir, `${clean_stem}.json`)
 
   //Function body
   if (fs.existsSync(path.join(part_dir, 'stadester_manifest.json')))
     return part_dir
+  if (fs.existsSync(versioned_file_path))
+    return versioned_file_path
 
   //Return statement
   return path.join(base_dir, `${clean_stem}.json`)
@@ -115,17 +130,23 @@ export function getDatasetFilePath (arg0_dataset_name?: string): string {
  *
  * @param {string} arg0_cache_path
  * @param {number} arg1_max_source_mtime
+ * @param {string} [arg2_dataset_name='stadester_2.0']
  *
  * @returns {boolean}
  */
-function isDatasetDiskCacheFresh (arg0_cache_path: string, arg1_max_source_mtime: number): boolean {
+function isDatasetDiskCacheFresh (
+  arg0_cache_path: string,
+  arg1_max_source_mtime: number,
+  arg2_dataset_name?: string
+): boolean {
   //Convert from parameters
   let cache_path = arg0_cache_path
+  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_2.0'
   let max_source_mtime = arg1_max_source_mtime
 
   //Declare local instance variables
   let cap_file_path = FilepathDefines.get().filepaths.stadester_capitals
-  let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
+  let meta_file_path = resolveCityMetadataPath(dataset_name)
 
   //Guard clauses
   if (!fs.existsSync(cache_path))
@@ -195,13 +216,13 @@ function writeServerIndexCache (arg0_file_path: string, arg1_indexed: Record<str
  * Ensures the lightweight static index cache exists on disk for immediate rendering.
  * Stream-writes entries row-by-row so large global datasets never exceed V8 string limits.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  *
  * @returns {string} - Absolute path to cached lite JSON file
  */
 export function ensureLiteCache (arg0_dataset_name?: string): string {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
 
   //Declare local instance variables
   let cache_dir = FilepathDefines.get().root_folders.l_stad_cache
@@ -210,7 +231,7 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   let source_info = resolveDatasetSourceFiles(clean_stem)
 
   //Guard clauses
-  if (source_info.files.length > 0 && isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms)) {
+  if (source_info.files.length > 0 && isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms, clean_stem)) {
     let is_v2 = false
     try {
       let head_buf = Buffer.alloc(1024)
@@ -280,15 +301,15 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
 
 
 /**
- * Loads and indexes a Stadestér dataset (partitioned macro-region shards or legacy JSON) into server memory.
+ * Loads and indexes a Stadestér dataset (partitioned macro-region shards or versioned/legacy JSON) into server memory.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  *
  * @returns {Record<string, CityIndexEntry>}
  */
 export function loadDataset (arg0_dataset_name?: string): Record<string, CityIndexEntry> {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
 
   //Declare local instance variables
   let city_seq_id = 0
@@ -313,7 +334,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   let lite_file_path = path.join(cache_dir, `${clean_stem}_lite.json`)
   let lite_name_map = new Map<string, string>()
 
-  if (isDatasetDiskCacheFresh(indexed_file_path, source_info.max_mtime_ms)) {
+  if (isDatasetDiskCacheFresh(indexed_file_path, source_info.max_mtime_ms, clean_stem)) {
     try {
       let cached_bundle = JSON.parse(fs.readFileSync(indexed_file_path, 'utf-8'))
       if (cached_bundle && cached_bundle._v === INDEX_CACHE_VERSION && cached_bundle.cities && typeof cached_bundle.cities === 'object') {
@@ -339,7 +360,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
     }
   }
 
-  if (isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms)) {
+  if (isDatasetDiskCacheFresh(lite_file_path, source_info.max_mtime_ms, clean_stem)) {
     try {
       let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
       if (Array.isArray(lite_data) && lite_data[0]?._v2) {
@@ -545,7 +566,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
   }
 
   indexHistoricalCities(indexed_record, false)
-  applyCityMetadata(indexed_record)
+  applyCityMetadata(indexed_record, clean_stem)
   applyStateCapitals(indexed_record)
   datasets_cache.set(clean_stem, indexed_record)
   if (dataset_name !== clean_stem)
@@ -572,13 +593,13 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
 /**
  * Retrieves or builds a 1x1 degree spatial hash grid for fast proximity candidate queries.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  *
  * @returns {Map<string, string[]>}
  */
 export function getSpatialGrid (arg0_dataset_name?: string): Map<string, string[]> {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
 
   //Declare local instance variables
   let grid: Map<string, string[]>
@@ -670,4 +691,5 @@ export function getNearbyCityKeys (
 export function clearDatasetCache (): void {
   datasets_cache.clear()
   spatial_grid_by_dataset.clear()
+  clearCityMetadataCache()
 }

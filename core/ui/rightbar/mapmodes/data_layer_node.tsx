@@ -3,6 +3,7 @@ import { ParsedDataLayer } from '@server/layer_parser'
 import {
   HistoricalBordersConfig,
   StadesterConfig,
+  StadesterDatasetId,
   isBorderDatasetMatch,
   normaliseBorderDatasetId,
   resolveHistoricalBordersAppearance,
@@ -77,7 +78,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
     ? isBorderDatasetMatch(historical_borders_config?.dataset, layer.id)
     : false
   is_stadester_dataset_match = is_stadester
-    ? (layer.id === 'stadester' || stadester_config?.dataset === layer.id || (!stadester_config?.dataset && layer.id === 'stadester_1.1'))
+    ? (layer.id === 'stadester' || stadester_config?.dataset === layer.id || (!stadester_config?.dataset && layer.id === 'stadester_2.0'))
     : false
   is_overlay_active = is_borders
     ? (Boolean(historical_borders_config?.enabled) && is_border_dataset_match)
@@ -117,7 +118,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                   }
                 } else if (is_stadester && set_stadester_config) {
                   set_stadester_config((arg0_prev) => {
-                    let is_currently_active = arg0_prev.enabled && (layer.id === 'stadester' || arg0_prev.dataset === layer.id || (!arg0_prev.dataset && layer.id === 'stadester_1.1'))
+                    let is_currently_active = arg0_prev.enabled && (layer.id === 'stadester' || arg0_prev.dataset === layer.id || (!arg0_prev.dataset && layer.id === 'stadester_2.0'))
                     if (is_currently_active) {
                       return {
                         ...arg0_prev,
@@ -126,7 +127,7 @@ export let DataLayerNode: React.FC<DataLayerNodeProps> = function (arg0_props) {
                     }
                     return {
                       ...arg0_prev,
-                      dataset: (layer.id === 'stadester') ? (arg0_prev.dataset || 'stadester_1.1') : (layer.id as 'stadester_1.1' | 'stadester_1.0'),
+                      dataset: (layer.id === 'stadester') ? (arg0_prev.dataset || 'stadester_2.0') : (layer.id as StadesterDatasetId),
                       display_options: layer.display_options || arg0_prev.display_options,
                       enabled: true,
                     }

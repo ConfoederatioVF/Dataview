@@ -49,7 +49,11 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
   //Declare local instance variables
   let bubble_size = (config.bubbleSize !== undefined) ? config.bubbleSize : 1
   let colour_mode = config.colorMode || 'growth'
-  let dataset_version = (config.dataset === 'stadester_1.0') ? 'Stadestér 1.0' : 'Stadestér 1.1'
+  let dataset_version = 'Stadestér 2.0'
+  if (config.dataset === 'stadester_1.0')
+    dataset_version = 'Stadestér 1.0'
+  else if (config.dataset === 'stadester_1.1')
+    dataset_version = 'Stadestér 1.1'
   let format: ReturnType<typeof useLocalisation>['format']
   let gradient_style: string
   let growth_palette = config.growthPalette || 'Rainbow'

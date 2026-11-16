@@ -107,7 +107,7 @@ export let App: React.FC = function () {
     ),
     'defacto_borders'
   )
-  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_1.1')
+  let default_stadester_enabled = default_data_layers.includes('stadester') || default_data_layers.includes('stadester_cities') || default_data_layers.includes('stadester_2.0') || default_data_layers.includes('stadester_1.1')
 
   let [heightmap_config, set_heightmap_config] = useState<HeightmapConfig>({
     blendWeight: 0.5,
@@ -165,7 +165,7 @@ export let App: React.FC = function () {
     capitalColorMode: 'state',
     capitalConstantColor: '#FFDC00',
     colorMode: 'growth',
-    dataset: 'stadester_1.1',
+    dataset: 'stadester_2.0',
     enabled: default_stadester_enabled,
     filled: true,
     growthPalette: 'Rainbow',

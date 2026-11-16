@@ -1,5 +1,5 @@
 import React from 'react'
-import { StadesterConfig, StadesterColorMode } from '@framework/geopng/types.ts'
+import { StadesterConfig, StadesterColorMode, StadesterDatasetId } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { Slider } from '@ui/components/slider'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ui/components/select'
@@ -48,7 +48,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   //Declare local instance variables
   let bubble_size = config.bubbleSize
   let color_mode = config.colorMode
-  let dataset = config.dataset || 'stadester_1.1'
+  let dataset = config.dataset || 'stadester_2.0'
   let heuristic_culling = (config.heuristicCulling !== undefined) ? Boolean(config.heuristicCulling) : true
   let large_city_contrast = (config.largeCityContrast !== undefined) ? config.largeCityContrast : 1.0
   let max_cities = config.maxCities
@@ -81,7 +81,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           onValueChange={(arg0_val: any) =>
             on_change_config((arg0_prev) => ({
               ...arg0_prev,
-              dataset: arg0_val as 'stadester_1.1' | 'stadester_1.0',
+              dataset: arg0_val as StadesterDatasetId,
             }))
           }
         >
@@ -89,6 +89,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
             <SelectValue placeholder={t.mapmodes.stadester.selectDataset} />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="stadester_2.0">{t.mapmodes.stadester.stadester20}</SelectItem>
             <SelectItem value="stadester_1.1">{t.mapmodes.stadester.stadester11}</SelectItem>
             <SelectItem value="stadester_1.0">{t.mapmodes.stadester.stadester10}</SelectItem>
           </SelectContent>

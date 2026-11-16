@@ -11,9 +11,13 @@
             "> [!NOTE]",
             "> Larger cities may have two entries: one for incorporated urban areas, and for metro pop. not already counted.",
             "",
-            "A global historical database of 34.400+ cities and urban settlements from 3300BC to the present. Split by version (1.0, 1.1).",
+            "A global historical database of cities and urban settlements from 10000BC to the present. Split by version (2.0, 1.1, 1.0).",
             "",
             "Historical names, capital cities, and other visuals can be toggled in the **Mapmodes** menu.",
+            "<details>",
+            "<summary>Methodology (2.0)</summary>",
+            "Built on the Operation Viscount framework integrating bottom-up regional settlement gazetteers, inverse `z-index` cross-frontier deduplication, macro-regional sharding across 14 Viscount partitions, and chronological historical toponymy updates (`city_metadata.json`).",
+            "</details>",
             "<details>",
             "<summary>Methodology (1.1)</summary>",
             "Recalculation of [Reba et al.](https://doi.org/10.1038/sdata.2016.34) using [Worldcitypop](https://www.worldcitypop.com/) as ground truth anchors. Relative rates of change were then assessed using Reba, and flagging systems for manual geolocation were put in place. Most cities were located using [Geohack](https://www.mediawiki.org/wiki/GeoHack), [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview), and [Photon (OSM)](https://github.com/komoot/photon).",
@@ -28,7 +32,7 @@
             "- Methodology report: [10.5281/zenodo.17180328](https://doi.org/10.5281/zenodo.17180328)",
             "</details>"
         ],
-        filepath: "${l_stad}/stadester_1.1",
+        filepath: "${l_stad}/stadester_2.0",
         permissions: [
             "default"
         ],
@@ -37,7 +41,7 @@
             capital_color_mode: "state",
             capital_constant_color: "#FFDC00",
             color_mode: "growth",
-            dataset: "stadester_1.1",
+            dataset: "stadester_2.0",
             filled: true,
             growth_palette: "Rainbow",
             halo: false,

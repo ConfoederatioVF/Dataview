@@ -338,7 +338,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
               }
             })
 
-            let stadester_layer = data.layers.stadester || data.layers['stadester_1.1'] || data.layers['stadester_1.0']
+            let stadester_layer = data.layers.stadester || data.layers['stadester_2.0'] || data.layers['stadester_1.1'] || data.layers['stadester_1.0']
             if (stadester_layer && stadester_layer.display_options) {
               let opts = stadester_layer.display_options
               set_stadester_config((arg0_prev) => ({
@@ -410,7 +410,7 @@ export function useAppLayersSync (arg0_options: UseAppLayersSyncOptions) {
           }
         })
 
-        let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
+        let stadester_layer = arg0_next_layers.stadester || arg0_next_layers['stadester_2.0'] || arg0_next_layers['stadester_1.1'] || arg0_next_layers['stadester_1.0']
         if (stadester_layer && stadester_layer.display_options) {
           let opts = stadester_layer.display_options
           set_stadester_config((arg0_prev) => ({

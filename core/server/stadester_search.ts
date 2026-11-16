@@ -23,7 +23,7 @@ import { getAuthoritativeCapitalsAtYear } from './stadester_queries.ts'
  *
  * @param {CityIndexEntry} arg0_entry
  * @param {Record<string, CityIndexEntry>} arg1_indexed
- * @param {string} [arg2_dataset_name='stadester_1.1']
+ * @param {string} [arg2_dataset_name='stadester_2.0']
  *
  * @returns {CityIndexEntry | null}
  */
@@ -35,7 +35,7 @@ export function findEraCounterpart (
   //Convert from parameters
   let entry = arg0_entry
   let indexed = arg1_indexed
-  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg2_dataset_name) ? arg2_dataset_name : 'stadester_2.0'
 
   //Guard clauses
   if (!entry || !entry.coords)
@@ -114,7 +114,7 @@ export function findEraCounterpart (
 /**
  * Retrieves a single city by its key or name and returns full historical details.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  * @param {string} [arg1_city_key]
  * @param {number | string} [arg2_year]
  * @param {number} [arg3_month]
@@ -132,7 +132,7 @@ export function getCityByKey (
   arg5_options?: { coords?: [number, number]; country?: string; dataset?: string; state_id?: number | string }
 ): any | null {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
   let city_key = arg1_city_key || ''
   let year = arg2_year
   let month = arg3_month

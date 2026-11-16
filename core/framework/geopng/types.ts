@@ -80,6 +80,7 @@ export interface MapModeItem {
 }
 
 export type StadesterColorMode = 'growth' | 'population' | 'region' | 'continent'
+export type StadesterDatasetId = 'stadester_2.0' | 'stadester_1.1' | 'stadester_1.0'
 
 export interface StadesterDisplayOptions {
   bubble_size?: number
@@ -90,7 +91,7 @@ export interface StadesterDisplayOptions {
   capitalConstantColor?: string
   color_mode?: StadesterColorMode
   colorMode?: StadesterColorMode
-  dataset?: 'stadester_1.1' | 'stadester_1.0'
+  dataset?: StadesterDatasetId
   filled?: boolean
   growth_palette?: string
   growthPalette?: string
@@ -125,7 +126,7 @@ export interface StadesterConfig {
   capitalColorMode?: 'state' | 'constant'
   capitalConstantColor?: string
   colorMode: StadesterColorMode
-  dataset: 'stadester_1.1' | 'stadester_1.0'
+  dataset: StadesterDatasetId
   display_options?: StadesterDisplayOptions
   enabled: boolean
   filled?: boolean

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
 import ReactECharts from 'echarts-for-react'
-import { CityPoint } from '@framework/geopng/types.ts'
+import { CityPoint, StadesterDatasetId } from '@framework/geopng/types.ts'
 import { Icon } from '@ui/components/icon'
 import { UfDate } from '@framework/utils/uf_date'
 import { getPrimaryCityName } from '@framework/stadester/city_name_framework'
@@ -8,7 +8,7 @@ import { useLocalisation } from '@localisation'
 
 export interface LargestCitiesChartProps {
   currentYear: number
-  dataset?: 'stadester_1.1' | 'stadester_1.0'
+  dataset?: StadesterDatasetId
   onSelectCity?: (arg0_key: string) => void
 }
 
@@ -40,7 +40,7 @@ export let LargestCitiesChart: React.FC<LargestCitiesChartProps> = function (arg
   //Convert from parameters
   let props = arg0_props
   let current_year = props.currentYear
-  let dataset = props.dataset || 'stadester_1.1'
+  let dataset = props.dataset || 'stadester_2.0'
   let on_select_city = props.onSelectCity
 
   //Declare local instance variables

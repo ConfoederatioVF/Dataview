@@ -379,6 +379,7 @@ export interface LocalisationConfig {
       selectDataset: string
       stadester10: string
       stadester11: string
+      stadester20: string
       stateCapital: string
       title: string
     }

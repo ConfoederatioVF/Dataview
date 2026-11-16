@@ -207,7 +207,7 @@ export function getMaxTemporalProximityGap (arg0_y0: number, arg1_y1?: number): 
 /**
  * Resolves and caches authoritative border capitals mapped to their best/closest contemporaneous cities.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  * @param {number} [arg1_year=1950]
  * @param {number} [arg2_month=1]
  * @param {number} [arg3_day=1]
@@ -224,7 +224,7 @@ export function getAuthoritativeCapitalsAtYear (
 ): Map<string, { area?: number; color: string; name?: string; state_id?: number | string }> {
   //Convert from parameters
   let border_dataset = (arg4_border_dataset) ? arg4_border_dataset : 'defacto_borders'
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
   let day = arg3_day !== undefined ? arg3_day : 1
   let month = arg2_month !== undefined ? arg2_month : 1
   let year = arg1_year !== undefined ? Math.floor(arg1_year) : 1950
@@ -450,7 +450,7 @@ export function getAuthoritativeCapitalsAtYear (
 /**
  * Retrieves active cities interpolated at a specific historical year.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  * @param {number} [arg1_year=1950]
  * @param {StadesterQueryOptions} [arg2_options]
  *
@@ -462,7 +462,7 @@ export function getCitiesAtYear (
   arg2_options?: StadesterQueryOptions
 ): CityRenderPoint[] {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
   let options = (arg2_options) ? arg2_options : {}
   let target_year = arg1_year !== undefined ? arg1_year : 1950
 
@@ -760,7 +760,7 @@ export function getCitiesAtYear (
 /**
  * Returns top N largest cities at a specific year for chart visualisations.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  * @param {number} [arg1_year=1950]
  * @param {number} [arg2_limit=20]
  *
@@ -772,7 +772,7 @@ export function getLargestCitiesAtYear (
   arg2_limit?: number
 ): CityRenderPoint[] {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
   let limit = arg2_limit !== undefined ? arg2_limit : 20
   let year = arg1_year !== undefined ? arg1_year : 1950
 
@@ -800,7 +800,7 @@ export function getLargestCitiesAtYear (
 /**
  * Returns compact columnar arrays for fast transfer and minimal JSON serialization overhead.
  *
- * @param {string} [arg0_dataset_name='stadester_1.1']
+ * @param {string} [arg0_dataset_name='stadester_2.0']
  * @param {number} [arg1_year=1950]
  * @param {StadesterQueryOptions} [arg2_options]
  *
@@ -812,7 +812,7 @@ export function getCompactCitiesAtYear (
   arg2_options?: StadesterQueryOptions
 ): CompactCitiesPayload {
   //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_1.1'
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : 'stadester_2.0'
   let options = (arg2_options) ? arg2_options : {}
   let year = arg1_year !== undefined ? arg1_year : 1950
 

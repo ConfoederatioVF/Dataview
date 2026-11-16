@@ -35,7 +35,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
   //Route 12: GET /api/stadester/lite (Static lightweight cache)
   if (pathname === '/stadester/lite' || pathname === '/api/stadester/lite') {
-    let dataset = (query.dataset as string) || 'stadester_1.1'
+    let dataset = (query.dataset as string) || 'stadester_2.0'
     let lite_path: string
 
     try {
@@ -90,7 +90,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         bbox = [parts[0], parts[1], parts[2], parts[3]]
     }
     let color_mode = (query.colorMode as 'growth' | 'population' | 'region' | 'continent') || 'growth'
-    let dataset = (query.dataset as string) || 'stadester_1.1'
+    let dataset = (query.dataset as string) || 'stadester_2.0'
     let format = (query.format as string) || 'standard'
     let is_streaming = query.stream === '1' || query.stream === 'true'
     let max_cities = query.maxCities !== undefined ? parseInt(query.maxCities as string, 10) : 4000
@@ -205,7 +205,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let city_key = (query.key as string) || ''
     let city_name = (query.name as string) || ''
     let country = (query.country as string) || ''
-    let dataset = (query.dataset as string) || 'stadester_1.1'
+    let dataset = (query.dataset as string) || 'stadester_2.0'
 
     let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
     let lat = query.lat !== undefined ? parseFloat(query.lat as string) : undefined
@@ -263,7 +263,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
   //Route 15: GET /api/stadester/largest (Ranked largest cities at year)
   if (pathname === '/stadester/largest' || pathname === '/api/stadester/largest') {
-    let dataset = (query.dataset as string) || 'stadester_1.1'
+    let dataset = (query.dataset as string) || 'stadester_2.0'
     let limit = query.limit !== undefined ? parseInt(query.limit as string, 10) : 20
     let raw_year = parseFloat(query.year as string)
     let year = Number.isNaN(raw_year) ? 1950 : raw_year

@@ -486,7 +486,6 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
           new TileLayer({
             id: `esri-basemap-mercator-${basemap}`,
             data: esri_basemap_urls_obj[basemap],
-            maxCacheByteSize: 32*1024*1024,
             maxCacheSize: 60,
             maxZoom: 18,
             minZoom: 0,
@@ -512,7 +511,6 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
           new TileLayer({
             id: `esri-basemap-globe-${basemap}`,
             data: esri_basemap_urls_obj[basemap],
-            maxCacheByteSize: 32*1024*1024,
             maxCacheSize: 60,
             maxZoom: 18,
             minZoom: 0,
@@ -540,7 +538,6 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
             id: `esri-basemap-equirectangular-${basemap}`,
             data: esri_basemap_urls_obj[basemap],
             TilesetClass: EquirectangularTileset2D,
-            maxCacheByteSize: 32*1024*1024,
             maxCacheSize: 60,
             maxZoom: 18,
             minZoom: 0,

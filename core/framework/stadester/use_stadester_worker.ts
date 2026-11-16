@@ -158,6 +158,21 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     let current_req_id = ++req_id_ref.current
 
     let dispatchLayout = function (): void {
+      let serialisable_display_options = config.display_options
+        ? Object.fromEntries(
+            Object.entries(config.display_options).filter(([, arg0_val]) => typeof arg0_val !== 'function')
+          )
+        : undefined
+      let serialisable_view_state = view_state
+        ? {
+            bearing: view_state.bearing,
+            latitude: view_state.latitude,
+            longitude: view_state.longitude,
+            pitch: view_state.pitch,
+            target: Array.isArray(view_state.target) ? [...view_state.target] : undefined,
+            zoom: view_state.zoom,
+          }
+        : null
       let window_h = (typeof window !== 'undefined') ? window.innerHeight : 1080
       let window_w = (typeof window !== 'undefined') ? window.innerWidth : 1920
 
@@ -170,7 +185,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       worker_ref.current?.postMessage({
         bubbleSize: config.bubbleSize ?? 1.0,
         colorMode: config.colorMode || 'growth',
-        displayOptions: config.display_options,
+        displayOptions: serialisable_display_options,
         growthPalette: growth_palette,
         heuristicCulling: (config.heuristicCulling !== undefined)
           ? Boolean(config.heuristicCulling)
@@ -183,7 +198,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         reqId: current_req_id,
         showLabels: config.showLabels !== false,
         type: 'LAYOUT_VIEWPORT',
-        viewState: view_state,
+        viewState: serialisable_view_state,
         windowH: window_h,
         windowW: window_w,
       } as WorkerInMessage)

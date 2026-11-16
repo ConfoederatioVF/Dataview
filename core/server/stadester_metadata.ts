@@ -5,6 +5,7 @@ import {
   computeHaversineDistanceKm,
   getCityActiveCapitalRecord,
   isCityCapitalAtYear as isCityCapitalAtYearFramework,
+  normalizeCapitalNameStem,
   normalizeCityAlias,
   normalizeCityKey,
   normalizeMetadataEntry,
@@ -16,6 +17,8 @@ import {
 import {
   getPrimaryCityNormKey,
   isCityInsideStateBBox,
+  mergeCityCapitalRecords,
+  mergeCityOtherNames,
   type CityIndexEntry,
 } from './stadester_types.ts'
 
@@ -402,7 +405,6 @@ export function loadCityMetadata (): CityMetadataEntry[] {
  * Applies metadata from data/stadester/city_metadata.json to indexed cities.
  *
  * @param {Record<string, CityIndexEntry>} arg0_indexed_record
- *
  * @returns {void}
  */
 export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndexEntry>): void {
@@ -411,6 +413,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
   //Declare local instance variables
   let all_keys = Object.keys(indexed)
+  let binding_state = new Map<string, { has_modern_entry: boolean; has_name_match: boolean; max_hn_year: number }>()
   let meta_list = loadCityMetadata()
   let spatial_grid: Record<string, CityIndexEntry[]> = {}
 
@@ -431,6 +434,28 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     }
   }
 
+  let buildAliasSet = function (arg0_name?: string, arg1_other?: string | string[]): { aliases: string[]; stems: string[] } {
+    let raw_list: string[] = []
+    if (arg0_name)
+      raw_list.push(arg0_name)
+    if (Array.isArray(arg1_other)) {
+      raw_list.push(...arg1_other)
+    } else if (typeof arg1_other === 'string') {
+      raw_list.push(arg1_other)
+    }
+    let aliases: string[] = []
+    let stems: string[] = []
+    for (let i = 0; i < raw_list.length; i++) {
+      let a = normalizeCityAlias(raw_list[i] || '')
+      let s = normalizeCapitalNameStem(raw_list[i] || '')
+      if (a)
+        aliases.push(a)
+      if (s)
+        stems.push(s)
+    }
+    return { aliases, stems }
+  }
+
   for (let i = 0; i < meta_list.length; i++) {
     let best_city: CityIndexEntry | null = null
     let best_exact_city: CityIndexEntry | null = null
@@ -442,10 +467,9 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     let target_lat = meta.coords[1]
     let target_lng = meta.coords[0]
     let local_meta_name = normalizeCityAlias(meta.name || '')
-    let meta_aliases = [
-      local_meta_name,
-      ...(Array.isArray((meta as any).other_names) ? (meta as any).other_names.map(normalizeCityAlias) : (typeof (meta as any).other_names === 'string' ? [normalizeCityAlias((meta as any).other_names)] : [])),
-    ].filter(Boolean)
+    let meta_alias_info = buildAliasSet(meta.name, (meta as any).other_names)
+    let meta_aliases = meta_alias_info.aliases
+    let meta_stems = meta_alias_info.stems
 
     if (meta.key && indexed[meta.key]) {
       best_city = indexed[meta.key]
@@ -468,11 +492,10 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
                 best_exact_city = candidate
               }
               if (dist <= 50 && dist < min_named_dist) {
-                let cand_aliases = [
-                  normalizeCityAlias(candidate.name || ''),
-                  ...(Array.isArray(candidate.other_names) ? candidate.other_names.map(normalizeCityAlias) : (typeof candidate.other_names === 'string' ? [normalizeCityAlias(candidate.other_names)] : [])),
-                ].filter(Boolean)
-                if (meta_aliases.some((ma) => cand_aliases.includes(ma))) {
+                let cand_info = buildAliasSet(candidate.name, candidate.other_names)
+                let alias_hit = meta_aliases.some((ma) => cand_info.aliases.includes(ma))
+                let stem_hit = meta_stems.some((ms) => ms.length >= 3 && cand_info.stems.includes(ms))
+                if (alias_hit || stem_hit) {
                   min_named_dist = dist
                   best_named_city = candidate
                 }
@@ -494,49 +517,75 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     if (best_city && min_dist <= 50) {
       let is_exact_coord_match = min_dist <= 0.1
       let local_best_name = normalizeCityAlias(best_city.name || '')
-
-      let best_aliases = [
-        local_best_name,
-        ...(Array.isArray(best_city.other_names) ? best_city.other_names.map(normalizeCityAlias) : (typeof best_city.other_names === 'string' ? [normalizeCityAlias(best_city.other_names)] : [])),
-      ].filter(Boolean)
-
-      let is_name_match = meta_aliases.some((ma) => best_aliases.includes(ma))
+      let best_info = buildAliasSet(best_city.name, best_city.other_names)
+      let is_name_match =
+        meta_aliases.some((ma) => best_info.aliases.includes(ma)) ||
+        meta_stems.some((ms) => ms.length >= 3 && best_info.stems.includes(ms))
 
       if (!is_exact_coord_match && !is_name_match)
         continue
 
-      if ((is_exact_coord_match || min_dist <= 15) && meta.name && !best_city.key.startsWith('ghsl-'))
-        best_city.name = meta.name
+      let meta_max_year = -9999
+      for (let h = 0; h < (meta.historical_names || []).length; h++) {
+        let yf = meta.historical_names[h].year_frac
+        if (yf > meta_max_year)
+          meta_max_year = yf
+      }
+      for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
+        let yf = meta.capital_records![c_i].year_frac
+        if (yf > meta_max_year)
+          meta_max_year = yf
+      }
+      let meta_is_modern = meta_max_year >= 1700
+      let prev_binding = binding_state.get(best_city.key)
 
-      if (meta.historical_names && meta.historical_names.length > 0)
-        best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
+      //Guard against secondary unrelated metadata (e.g. Vatican City at Roma coords, Barawa at Mogadishu coords, Lawdar at Aden coords)
+      if (!is_name_match && prev_binding?.has_name_match) {
+        if (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern))
+          continue
+      }
 
-      if (meta.capital_records && meta.capital_records.length > 0) {
-        if (!best_city.capital) {
-          best_city.capital = meta.capital as any
-          best_city.capital_records = meta.capital_records
-        } else {
-          let existing_cap: Record<string, string | number | null> = { ...(best_city.capital || {}) }
-          let raw_meta_cap = meta.capital || {}
-          let all_meta_keys = Object.keys(raw_meta_cap)
-          for (let m = 0; m < all_meta_keys.length; m++) {
-            let d_key = all_meta_keys[m]
-            let incoming_val = raw_meta_cap[d_key]
-            if (existing_cap[d_key] === undefined || (incoming_val !== null && incoming_val !== undefined)) {
-              existing_cap[d_key] = incoming_val
-            }
-          }
-          best_city.capital = existing_cap
-          best_city.capital_records = Object.keys(existing_cap).map((arg0_d) => {
-            let p = parseYearMonthDay(arg0_d)
-            return {
-              date: arg0_d,
-              state_id: (existing_cap[arg0_d] !== undefined && existing_cap[arg0_d] !== null) ? Number(existing_cap[arg0_d]) : null,
-              year_frac: p.year_frac,
-            }
-          }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+      let meta_extra_aliases: string[] = []
+      if (meta.name)
+        meta_extra_aliases.push(meta.name)
+      if (Array.isArray((meta as any).other_names))
+        meta_extra_aliases.push(...(meta as any).other_names)
+      if (meta.historical_names) {
+        for (let h = 0; h < meta.historical_names.length; h++)
+          meta_extra_aliases.push(meta.historical_names[h].name)
+      }
+
+      let should_set_name = false
+      if ((is_exact_coord_match || min_dist <= 15) && meta.name && !best_city.key.startsWith('ghsl-')) {
+        if (!prev_binding) {
+          should_set_name = true
+        } else if (is_name_match && !prev_binding.has_name_match) {
+          should_set_name = true
+        } else if (is_name_match && meta_max_year >= prev_binding.max_hn_year && !(prev_binding.has_modern_entry && meta_max_year < 1700)) {
+          should_set_name = true
         }
       }
+
+      if (should_set_name && meta.name) {
+        if (best_city.name && best_city.name !== meta.name)
+          meta_extra_aliases.push(best_city.name)
+        best_city.name = meta.name
+        best_city.metadata_name = meta.name
+      }
+
+      if (is_name_match || !prev_binding?.has_name_match)
+        mergeCityOtherNames(best_city, meta_extra_aliases)
+
+      if (meta.historical_names && meta.historical_names.length > 0 && (is_name_match || !prev_binding?.has_name_match || !meta_is_modern))
+        best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
+
+      binding_state.set(best_city.key, {
+        has_modern_entry: Boolean(prev_binding?.has_modern_entry || (is_name_match && meta_is_modern)),
+        has_name_match: Boolean(prev_binding?.has_name_match || is_name_match),
+        max_hn_year: Math.max(prev_binding?.max_hn_year ?? -9999, meta_max_year),
+      })
+
+      mergeCityCapitalRecords(best_city, meta)
 
       let center_lat = Math.floor(target_lat)
       let center_lng = Math.floor(target_lng)
@@ -552,10 +601,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
               let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
               if (dist <= 25) {
-                let other_aliases = [
-                  normalizeCityAlias(other.name || ''),
-                  ...(Array.isArray(other.other_names) ? other.other_names.map(normalizeCityAlias) : (typeof other.other_names === 'string' ? [normalizeCityAlias(other.other_names)] : [])),
-                ].filter(Boolean)
+                let other_info = buildAliasSet(other.name, other.other_names)
 
                 let is_era_counterpart =
                   (best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
@@ -566,50 +612,72 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
                 )
 
                 let is_same_settlement_counterpart = Boolean(
-                  dist <= 15 && meta_aliases.some((ma) => other_aliases.includes(ma))
+                  dist <= 15 &&
+                  (meta_aliases.some((ma) => other_info.aliases.includes(ma)) ||
+                   meta_stems.some((ms) => ms.length >= 3 && other_info.stems.includes(ms)))
                 )
 
                 if (!is_era_counterpart && !is_agg_counterpart && !is_same_settlement_counterpart)
                   continue
 
-                let is_counterpart_name_match = is_agg_counterpart || is_same_settlement_counterpart || meta_aliases.some((ma) => other_aliases.includes(ma))
+                let is_counterpart_name_match =
+                  is_agg_counterpart ||
+                  is_same_settlement_counterpart ||
+                  meta_aliases.some((ma) => other_info.aliases.includes(ma)) ||
+                  meta_stems.some((ms) => ms.length >= 3 && other_info.stems.includes(ms))
                 if (is_counterpart_name_match) {
-                  if (dist <= 15 && meta.name && !other.key.startsWith('ghsl-') && (is_same_settlement_counterpart || /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '')))
+                  let prev_other = binding_state.get(other.key)
+                  let can_rename_other = Boolean(
+                    dist <= 15 &&
+                    meta.name &&
+                    !other.key.startsWith('ghsl-') &&
+                    (is_same_settlement_counterpart || /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '')) &&
+                    (!prev_other || (meta_max_year >= prev_other.max_hn_year && !(prev_other.has_modern_entry && meta_max_year < 1700)))
+                  )
+                  if (can_rename_other && meta.name) {
+                    if (other.name && other.name !== meta.name)
+                      meta_extra_aliases.push(other.name)
                     other.name = meta.name
+                    other.metadata_name = meta.name
+                  }
+                  mergeCityOtherNames(other, meta_extra_aliases)
                   if (meta.historical_names && meta.historical_names.length > 0)
                     other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
-                  if (meta.capital_records && meta.capital_records.length > 0) {
-                    if (!other.capital) {
-                      other.capital = meta.capital as any
-                      other.capital_records = meta.capital_records
-                    } else {
-                      let existing_other_cap: Record<string, string | number | null> = { ...(other.capital || {}) }
-                      let raw_meta_cap = meta.capital || {}
-                      let all_m_keys = Object.keys(raw_meta_cap)
-                      for (let m = 0; m < all_m_keys.length; m++) {
-                        let d_key = all_m_keys[m]
-                        let incoming_val = raw_meta_cap[d_key]
-                        if (existing_other_cap[d_key] === undefined || (incoming_val !== null && incoming_val !== undefined)) {
-                          existing_other_cap[d_key] = incoming_val
-                        }
-                      }
-                      other.capital = existing_other_cap
-                      other.capital_records = Object.keys(existing_other_cap).map((arg0_d) => {
-                        let p = parseYearMonthDay(arg0_d)
-                        return {
-                          date: arg0_d,
-                          state_id: (existing_other_cap[arg0_d] !== undefined && existing_other_cap[arg0_d] !== null) ? Number(existing_other_cap[arg0_d]) : null,
-                          year_frac: p.year_frac,
-                        }
-                      }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
-                    }
-                  }
+                  binding_state.set(other.key, {
+                    has_modern_entry: Boolean(prev_other?.has_modern_entry || meta_is_modern),
+                    has_name_match: true,
+                    max_hn_year: Math.max(prev_other?.max_hn_year ?? -9999, meta_max_year),
+                  })
+                  mergeCityCapitalRecords(other, meta)
                 }
               }
             }
           }
         }
       }
+    }
+  }
+
+  //Post-pass: ensure modern cities with post-1950 populations resolve to their latest modern metadata name rather than ancient/raw Populstat labels
+  for (let i = 0; i < all_keys.length; i++) {
+    let city = indexed[all_keys[i]]
+    if (!city || city.key.startsWith('ghsl-'))
+      continue
+    if ((city.max_year ?? 0) >= 1950 && city.historical_names && city.historical_names.length > 0) {
+      let last_hn = city.historical_names[city.historical_names.length - 1]
+      let name_stem = normalizeCapitalNameStem(city.name || '')
+      let has_ancient_match = city.historical_names.some((arg0_h) =>
+        arg0_h.year_frac < 1500 && normalizeCapitalNameStem(arg0_h.name) === name_stem
+      )
+      if (has_ancient_match && last_hn.year_frac >= 600 && normalizeCapitalNameStem(last_hn.name) !== name_stem) {
+        mergeCityOtherNames(city, [city.name])
+        city.name = last_hn.name
+      }
+    }
+    if (city.metadata_name || binding_state.has(city.key)) {
+      city.metadata_name = city.name
+      city.reconciled_name = city.name
+      city.ghsl_name = city.name
     }
   }
 

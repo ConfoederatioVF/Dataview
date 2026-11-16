@@ -313,7 +313,7 @@ export let resolveHistoricalCityName = function (
 
   //Declare local instance variables
   let active_1975_legacy: HistoricalNameRecord | null = null
-  let default_name = (city as any)?.reconciled_name || (city as any)?.ghsl_name || city?.name || ''
+  let default_name = ''
   let first_post_1975: HistoricalNameRecord | null = null
   let hist: HistoricalNameRecord[]
   let latest_post_1975: HistoricalNameRecord | null = null
@@ -324,6 +324,12 @@ export let resolveHistoricalCityName = function (
   //Guard clauses
   if (!city)
     return ''
+
+  if ((city as any)?.key && String((city as any).key).startsWith('ghsl-')) {
+    default_name = (city as any)?.reconciled_name || (city as any)?.ghsl_name || city?.name || ''
+  } else {
+    default_name = (city as any)?.metadata_name || city?.name || (city as any)?.reconciled_name || (city as any)?.ghsl_name || ''
+  }
 
   if (!city.historical_names || city.historical_names.length === 0)
     return default_name
@@ -368,7 +374,7 @@ export let resolveHistoricalCityName = function (
 
     if (rec_frac < 1975) {
       active_1975_legacy = hist[i]
-    } else if (rec_frac > 1975.0) {
+    } else if (rec_frac >= 1975.0) {
       if (!first_post_1975)
         first_post_1975 = hist[i]
 
@@ -495,6 +501,56 @@ export let isCityCapitalAtYear = function (
 }
 
 /**
+ * Normalises a city name or capital label to a canonical stem for cross-script/transliteration matching.
+ *
+ * @param {string} arg0_name - City or capital name string
+ *
+ * @returns {string} Normalised alphanumeric stem
+ */
+export let normalizeCapitalNameStem = function (arg0_name: string): string {
+  //Convert from parameters
+  let name = arg0_name
+
+  //Guard clauses
+  if (!name)
+    return ''
+
+  //Declare local instance variables
+  let base: string
+  let inv_match: RegExpMatchArray | null
+  let stem: string
+
+  //Function body
+  base = String(name).split(';')[0].replace(/\s*\([^)]*\)/g, '').replace(/\(s\)/gi, '').trim()
+  inv_match = base.match(/^([^,]+),\s*(al|el|ad|ar|as|at|az|an|ash)-?$/i)
+  if (inv_match)
+    base = `${inv_match[2]} ${inv_match[1]}`
+
+  stem = base
+    .toLowerCase()
+    .replace(/ł/g, 'l')
+    .replace(/đ/g, 'd')
+    .replace(/ø/g, 'o')
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/['’‘`´^ʻʼʾʿ]/g, '')
+    .replace(/[-_.,/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^(al|ar|ash|az|an|at|ad|as|el|er|esh|ez)\s+/i, '')
+    .replace(/\bsaint\b/g, 'st')
+    .replace(/^dj/, 'j')
+    .replace(/(iyah|iyyah)$/, 'iya')
+
+  if (stem.length >= 4 && stem.endsWith('h'))
+    stem = stem.slice(0, -1)
+
+  //Return statement
+  return stem.replace(/[^a-z0-9]/g, '')
+}
+
+/**
  * Normalises a city key or name by stripping dataset prefixes, diacritics, and punctuation for fuzzy matching.
  *
  * @param {string} arg0_key - City key or name string
@@ -512,9 +568,59 @@ export let normalizeCityKey = function (arg0_key: string): string {
   //Return statement
   return key
     .replace(/^(stadester|ghsl|oxford)-/i, '')
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/['’‘`´^ʻʼʾʿ]/g, '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+}
+
+/**
+ * Normalises a composite city key to its primary city + country stem, stripping dataset prefixes,
+ * parenthetical agglomeration tags, and semicolon-delimited secondary conurbations.
+ *
+ * @param {string} arg0_key - Composite city key
+ *
+ * @returns {string} Normalised primary key
+ */
+export let normalizePrimaryCityKey = function (arg0_key: string): string {
+  //Convert from parameters
+  let key = arg0_key
+
+  //Guard clauses
+  if (!key)
+    return ''
+
+  //Declare local instance variables
+  let city_part: string
+  let country: string
+  let inv_match: RegExpMatchArray | null
+  let parts: string[]
+  let primary_city: string
+  let stripped: string
+
+  //Function body
+  stripped = key.replace(/^(stadester|ghsl|oxford)-/i, '')
+  parts = stripped.split('-')
+  country = parts.length > 1 ? parts[parts.length - 1] : ''
+  city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
+  primary_city = city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim()
+
+  inv_match = primary_city.match(/^([^,]+),\s*(al|el|ad|ar|as|at|az|an|ash)-?$/i)
+  if (inv_match)
+    primary_city = `${inv_match[2]} ${inv_match[1]}`
+
+  //Return statement
+  return (primary_city + (country ? '-' + country : ''))
+    .toLowerCase()
+    .replace(/ł/g, 'l')
+    .replace(/đ/g, 'd')
+    .replace(/ø/g, 'o')
+    .replace(/ß/g, 'ss')
+    .replace(/['’‘`´^ʻʼʾʿ]/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]/g, '')
 }
 

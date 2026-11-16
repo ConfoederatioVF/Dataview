@@ -1,6 +1,12 @@
 import fs from 'fs'
 import { FilepathDefines } from './filepath_defines.ts'
-import type { CapitalRecord, CityMetadataEntry, HistoricalNameRecord } from '../framework/stadester/city_metadata_framework.ts'
+import {
+  normalizePrimaryCityKey,
+  parseYearMonthDay,
+  type CapitalRecord,
+  type CityMetadataEntry,
+  type HistoricalNameRecord,
+} from '../framework/stadester/city_metadata_framework.ts'
 
 export type { CapitalRecord, CityMetadataEntry, HistoricalNameRecord }
 
@@ -60,26 +66,8 @@ export function getPrimaryCityNormKey (arg0_key: string): string {
   //Convert from parameters
   let key = arg0_key
 
-  //Guard clauses
-  if (!key)
-    return ''
-
-  //Declare local instance variables
-  let city_part: string
-  let country: string
-  let full: string
-  let parts: string[]
-  let primary_city: string
-
-  //Function body
-  parts = key.replace(/^(stadester|ghsl|oxford)-/i, '').split('-')
-  country = parts.length > 1 ? parts[parts.length - 1] : ''
-  city_part = parts.slice(0, parts.length - 1).join('-')
-  primary_city = city_part.split(';')[0].replace(/\(.*?\)/g, '').trim()
-  full = (primary_city + (country ? '-' + country : '')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '')
-
   //Return statement
-  return full
+  return normalizePrimaryCityKey(key)
 }
 
 
@@ -134,6 +122,7 @@ export interface CompactCitiesPayload {
   growth: number[]
   keys: string[]
   names: string[]
+  other_names?: (string[] | null)[]
   pops: number[]
   regions: (string | undefined)[]
 }
@@ -219,4 +208,98 @@ export function isCityInsideStateBBox (
 
   //Return statement
   return true
+}
+
+
+/**
+ * Merges capital timelines from a CityMetadataEntry into an indexed CityIndexEntry.
+ *
+ * @param {CityIndexEntry} arg0_city
+ * @param {CityMetadataEntry} arg1_meta
+ *
+ * @returns {void}
+ */
+export function mergeCityCapitalRecords (arg0_city: CityIndexEntry, arg1_meta: CityMetadataEntry): void {
+  //Convert from parameters
+  let city = arg0_city
+  let meta = arg1_meta
+
+  //Guard clauses
+  if (!meta.capital_records || meta.capital_records.length === 0)
+    return
+
+  //Function body
+  if (!city.capital) {
+    city.capital = meta.capital as any
+    city.capital_records = meta.capital_records
+    return
+  }
+
+  let all_meta_keys: string[]
+  let existing_cap: Record<string, string | number | null> = { ...(city.capital || {}) }
+  let raw_meta_cap = meta.capital || {}
+
+  all_meta_keys = Object.keys(raw_meta_cap)
+  for (let i = 0; i < all_meta_keys.length; i++) {
+    let d_key = all_meta_keys[i]
+    let incoming_val = raw_meta_cap[d_key]
+    if (existing_cap[d_key] === undefined || (incoming_val !== null && incoming_val !== undefined))
+      existing_cap[d_key] = incoming_val
+  }
+  city.capital = existing_cap
+  city.capital_records = Object.keys(existing_cap).map((arg0_d) => {
+    let p = parseYearMonthDay(arg0_d)
+    return {
+      date: arg0_d,
+      state_id: (existing_cap[arg0_d] !== undefined && existing_cap[arg0_d] !== null) ? Number(existing_cap[arg0_d]) : null,
+      year_frac: p.year_frac,
+    }
+  }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+}
+
+
+/**
+ * Merges incoming city aliases and metadata names into an indexed city's deduplicated `other_names` array.
+ *
+ * @param {CityIndexEntry} arg0_city
+ * @param {string[]} arg1_extra_names
+ *
+ * @returns {void}
+ */
+export function mergeCityOtherNames (arg0_city: CityIndexEntry, arg1_extra_names: string[]): void {
+  //Convert from parameters
+  let city = arg0_city
+  let extra_names = arg1_extra_names
+
+  //Declare local instance variables
+  let existing_arr: string[] = []
+  let merged: string[] = []
+  let seen_lower = new Set<string>()
+
+  //Function body
+  if (Array.isArray(city.other_names)) {
+    existing_arr = city.other_names
+  } else if (typeof city.other_names === 'string' && city.other_names.trim()) {
+    existing_arr = [city.other_names]
+  }
+
+  for (let i = 0; i < existing_arr.length; i++) {
+    let clean = String(existing_arr[i] || '').trim()
+    let low = clean.toLowerCase()
+    if (clean && !seen_lower.has(low)) {
+      seen_lower.add(low)
+      merged.push(clean)
+    }
+  }
+  for (let i = 0; i < extra_names.length; i++) {
+    let clean = String(extra_names[i] || '').trim()
+    let low = clean.toLowerCase()
+    if (clean && !seen_lower.has(low)) {
+      seen_lower.add(low)
+      merged.push(clean)
+    }
+  }
+
+  if (merged.length > 0)
+    city.other_names = merged
 }

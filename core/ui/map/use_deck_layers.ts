@@ -20,7 +20,11 @@ import {
 import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
-import { normalizeCityKey } from '@framework/stadester/city_metadata_framework.ts'
+import {
+  normalizeCapitalNameStem,
+  normalizePrimaryCityKey,
+} from '@framework/stadester/city_metadata_framework.ts'
+import { buildAuthoritativeCapitalsByCity } from './deck_capital_reconciliation.ts'
 import { MAP_CONFIG } from '@common'
 import {
   EquirectangularTileset2D,
@@ -290,9 +294,12 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
 
           if (p.capkey) {
             let existing_k = active_capitals_by_key.get(p.capkey)
+            let prim_k = normalizePrimaryCityKey(p.capkey)
             if (!existing_k || (cap_entry.area > (existing_k.area || 0))) {
               active_capitals_by_key.set(p.capkey, cap_entry)
               active_capitals_by_key.set(p.capkey.toLowerCase().trim(), cap_entry)
+              if (prim_k)
+                active_capitals_by_key.set(prim_k, cap_entry)
             }
           }
           if (p.capname) {
@@ -303,8 +310,11 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
                 active_capitals_by_name.set(n, cap_entry)
                 let n_nfd = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 let n_clean = n_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
+                let n_stem = normalizeCapitalNameStem(n)
                 if (n_clean)
                   active_capitals_by_name.set(n_clean, cap_entry)
+                if (n_stem)
+                  active_capitals_by_name.set(n_stem, cap_entry)
               }
             }
           }
@@ -648,242 +658,11 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       : stadester_points_data
 
     //Pre-match active capitals to cities by coordinate proximity and key
-    if (active_capitals_list.length > 0 && effective_points && effective_points.length > 0) {
-      let timeline_yr = options.timelineYear
-      let pts_by_key = new Map<string, number>()
-      let pts_by_name = new Map<string, number[]>()
-      let pts_grid = new Map<string, number[]>()
-
-      for (let i = 0; i < effective_points.length; i++) {
-        let c = effective_points[i]
-        let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
-        let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : undefined))
-        if (c_lat === undefined || c_lon === undefined)
-          continue
-
-        let cell = `${Math.floor(c_lon)}_${Math.floor(c_lat)}`
-        let b = pts_grid.get(cell)
-        if (!b) {
-          b = []
-          pts_grid.set(cell, b)
-        }
-        b.push(i)
-
-        if (c.key) {
-          pts_by_key.set(c.key, i)
-          let clean_k = normalizeCityKey(c.key)
-          if (clean_k)
-            pts_by_key.set(clean_k, i)
-        }
-        if (c.id) {
-          pts_by_key.set(String(c.id), i)
-          let clean_id = normalizeCityKey(String(c.id))
-          if (clean_id)
-            pts_by_key.set(clean_id, i)
-        }
-
-        if (c.name) {
-          let c_name_lower = c.name.toLowerCase().trim()
-          let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          let clean_c = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-
-          let add_point_name = function (arg0_nm: string) {
-            if (!arg0_nm)
-              return
-            let arr = pts_by_name.get(arg0_nm)
-            if (!arr) {
-              arr = []
-              pts_by_name.set(arg0_nm, arr)
-            }
-            arr.push(i)
-          }
-
-          add_point_name(c_name_lower)
-          add_point_name(c_name_nfd)
-          add_point_name(clean_c)
-        }
-
-        if (c.other_names && Array.isArray(c.other_names)) {
-          for (let x = 0; x < c.other_names.length; x++) {
-            let on = c.other_names[x]
-            let on_clean = on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-            let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-            let arr = pts_by_name.get(on_clean) || pts_by_name.get(on_nfd) || pts_by_name.get(clean_on)
-            if (!arr) {
-              arr = []
-              pts_by_name.set(on_clean, arr)
-              pts_by_name.set(on_nfd, arr)
-              pts_by_name.set(clean_on, arr)
-            }
-            arr.push(i)
-          }
-        }
-      }
-
-      for (let i = 0; i < active_capitals_list.length; i++) {
-        let cap = active_capitals_list[i]
-        let best_city: any = null
-        let best_score = -1
-        let candidate_indices = new Set<number>()
-
-        if (cap.cap_coords) {
-          let min_cx = Math.floor(cap.cap_coords[0] - 0.25)
-          let max_cx = Math.floor(cap.cap_coords[0] + 0.25)
-          let min_cy = Math.floor(cap.cap_coords[1] - 0.25)
-          let max_cy = Math.floor(cap.cap_coords[1] + 0.25)
-
-          for (let x = min_cx; x <= max_cx; x++)
-            for (let y = min_cy; y <= max_cy; y++) {
-              let bucket = pts_grid.get(`${x}_${y}`)
-              if (bucket)
-                for (let z = 0; z < bucket.length; z++)
-                  candidate_indices.add(bucket[z])
-            }
-        }
-
-        if (cap.capkey) {
-          let idx = pts_by_key.get(cap.capkey) ?? pts_by_key.get(normalizeCityKey(cap.capkey))
-          if (idx !== undefined)
-            candidate_indices.add(idx)
-        }
-
-        if (cap.capname) {
-          let cap_name_lower = cap.capname.toLowerCase().trim()
-          let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          let clean_cap = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-          let list = pts_by_name.get(cap_name_lower) || pts_by_name.get(cap_name_nfd) || pts_by_name.get(clean_cap)
-          if (list)
-            for (let x = 0; x < list.length; x++)
-              candidate_indices.add(list[x])
-        }
-
-        let all_candidates = Array.from(candidate_indices)
-        for (let x = 0; x < all_candidates.length; x++) {
-          let j = all_candidates[x]
-          let c = effective_points[j]
-          let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
-          let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : undefined))
-          if (c_lat === undefined || c_lon === undefined)
-            continue
-
-          if (timeline_yr !== undefined) {
-            if (c.min_year !== undefined && timeline_yr < c.min_year)
-              continue
-            if (c.max_year !== undefined && c.max_year < 1975 && timeline_yr > c.max_year + 25)
-              continue
-            if (typeof c.population === 'number' && c.population <= 0)
-              continue
-            if (timeline_yr < 1975 && c.key && c.key.startsWith('ghsl-'))
-              continue
-          }
-
-          if (cap.cap_coords) {
-            if (Math.abs(c_lon - cap.cap_coords[0]) > 0.20 || Math.abs(c_lat - cap.cap_coords[1]) > 0.20)
-              continue
-          }
-
-          let dist = cap.cap_coords ? Math.hypot(c_lon - cap.cap_coords[0], c_lat - cap.cap_coords[1]) : 999
-          if (dist > 0.20)
-            continue
-
-          if (cap.bbox) {
-            let span = Math.max(Math.abs(cap.bbox[2] - cap.bbox[0]), Math.abs(cap.bbox[3] - cap.bbox[1]))
-            let pad = span < 1.5 ? Math.min(1.0, Math.max(0.5, span*1.5)) : 1.0
-            if (c_lon < cap.bbox[0] - pad || c_lon > cap.bbox[2] + pad || c_lat < cap.bbox[1] - pad || c_lat > cap.bbox[3] + pad)
-              continue
-          }
-
-          let score = 0
-          let is_key_match = false
-          if (cap.capkey && (c.key === cap.capkey || c.id === cap.capkey)) {
-            score += 200000
-            is_key_match = true
-          }
-          let clean_c_key = normalizeCityKey(c.key || '')
-          let clean_cap_key = normalizeCityKey(cap.capkey || '')
-          if (clean_cap_key && clean_c_key && clean_cap_key === clean_c_key) {
-            score += 100000
-            is_key_match = true
-          }
-          let c_name_lower = (c.name || '').toLowerCase().trim()
-          let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          let cap_name_lower = (cap.capname || '').toLowerCase().trim()
-          let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-
-          let is_name_match = false
-          if (cap_name_lower) {
-            let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
-            let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
-            let key_base_name = String(c.key || '').replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            if (
-              c_name_lower === cap_name_lower ||
-              c_name_nfd === cap_name_nfd ||
-              clean_c_name === clean_cap_name ||
-              (key_base_name && key_base_name === clean_cap_name)
-            ) {
-              is_name_match = true
-            } else if (c.other_names && Array.isArray(c.other_names)) {
-              is_name_match = c.other_names.some((arg0_on: string) => {
-                let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-                let on_lower = arg0_on.toLowerCase().trim()
-                let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
-                return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name
-              })
-            }
-          }
-
-          let is_exact_coord_match = dist <= 0.01
-          if (!is_key_match && !is_name_match && !is_exact_coord_match)
-            continue
-
-          if (is_name_match)
-            score += 150000
-          if (c.isCapital || c.is_capital)
-            score += 10000
-          if (cap.cap_coords)
-            score += Math.max(0, Math.round((0.20 - dist) * 50000))
-          score += Math.max(0, Math.round((0.25 - dist) * 5000))
-          score += Math.min(1000, Math.round((c.population || 0) / 1000))
-
-          if (score > best_score) {
-            best_score = score
-            best_city = c
-          }
-        }
-
-        if (best_city) {
-          let existing = authoritative_capitals_by_city.get(best_city.key)
-          let should_set = true
-
-          if (existing) {
-            let city_country = (best_city.country || '').toLowerCase().trim()
-            let exist_area = (existing as any).area || 0
-            let exist_polity = (existing.polity_name || '').toLowerCase().trim()
-            let new_polity = (cap.polity_name || '').toLowerCase().trim()
-            let exist_matches_country = Boolean(city_country && (exist_polity.includes(city_country) || city_country.includes(exist_polity)))
-            let new_area = cap.area || 0
-            let new_matches_country = Boolean(city_country && (new_polity.includes(city_country) || city_country.includes(new_polity)))
-
-            if (exist_matches_country && !new_matches_country) {
-              should_set = false
-            } else if (!exist_matches_country && new_matches_country) {
-              should_set = true
-            } else if (exist_area > new_area) {
-              should_set = false
-            }
-          }
-
-          if (should_set) {
-            if (best_city.key)
-              authoritative_capitals_by_city.set(best_city.key, cap)
-            if (best_city.id)
-              authoritative_capitals_by_city.set(String(best_city.id), cap)
-          }
-        }
-      }
-    }
+    authoritative_capitals_by_city = buildAuthoritativeCapitalsByCity(
+      active_capitals_list,
+      effective_points,
+      options.timelineYear
+    )
 
     let city_layers = buildStadesterCityLayers({
       acapital_state_ids,

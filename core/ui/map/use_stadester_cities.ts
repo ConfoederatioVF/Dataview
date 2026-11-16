@@ -115,6 +115,7 @@ export async function fetchStadesterCitiesAsync (
             is_capital: is_cap,
             key: data.keys[i],
             name: data.names[i],
+            other_names: (data.other_names && data.other_names[i]) ? data.other_names[i] : undefined,
             population: data.pops[i],
             region: data.regions ? data.regions[i] : undefined,
           })

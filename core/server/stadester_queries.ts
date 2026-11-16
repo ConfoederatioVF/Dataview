@@ -1,6 +1,10 @@
 import { AtlasBordersService } from './AtlasBordersService.ts'
 import { getPrimaryCityName, isBuggedCityName } from '../framework/stadester/city_name_framework.ts'
-import { getCityActiveCapitalRecord } from '../framework/stadester/city_metadata_framework.ts'
+import {
+  getCityActiveCapitalRecord,
+  normalizeCapitalNameStem,
+  normalizePrimaryCityKey,
+} from '../framework/stadester/city_metadata_framework.ts'
 import {
   getBuggedCitiesSet,
   isCityInsideStateBBox,
@@ -167,7 +171,16 @@ export function getAuthoritativeCapitalsAtYear (
           }
 
           let score = 0
-          let is_key_match = Boolean(p.capkey && (c.key === p.capkey || c.id === p.capkey))
+          let c_prim_key = normalizePrimaryCityKey(c.key || '')
+          let p_prim_key = p.capkey ? normalizePrimaryCityKey(p.capkey) : ''
+          let is_key_match = Boolean(
+            p.capkey &&
+            (c.key === p.capkey || c.id === p.capkey || (c_prim_key && p_prim_key && c_prim_key === p_prim_key))
+          )
+          let is_state_match = Boolean(
+            p.state_id !== undefined &&
+            c.capital_records?.some((arg0_rec) => String(arg0_rec.state_id) === String(p.state_id))
+          )
           if (is_key_match)
             score += 200000
 
@@ -175,39 +188,66 @@ export function getAuthoritativeCapitalsAtYear (
           let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
           let cap_name_lower = (p.capname || '').toLowerCase().trim()
           let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          let cap_stem = normalizeCapitalNameStem(p.capname || '')
 
           let is_name_match = false
           if (cap_name_lower) {
             let clean_c_name = c_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
             let clean_cap_name = cap_name_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').split(';')[0].trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
-            let clean_c_strip_h = clean_c_name.replace(/h$/, '')
-            let clean_cap_strip_h = clean_cap_name.replace(/h$/, '')
-            let key_base_name = String(c.key || '').replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            let c_stem = normalizeCapitalNameStem(c.name || '')
+            let key_base_raw = String(c.key || '').replace(/^(stadester|ghsl|oxford)-/i, '').split('-')[0].replace(/\(.*?\)/g, '').trim()
+            let key_base_name = key_base_raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            let key_base_stem = normalizeCapitalNameStem(key_base_raw)
             if (
               c_name_lower === cap_name_lower ||
               c_name_nfd === cap_name_nfd ||
               clean_c_name === clean_cap_name ||
-              (clean_c_strip_h.length >= 3 && clean_c_strip_h === clean_cap_strip_h) ||
-              (key_base_name && key_base_name === clean_cap_name)
+              (c_stem.length >= 3 && c_stem === cap_stem) ||
+              (key_base_name && key_base_name === clean_cap_name) ||
+              (key_base_stem.length >= 3 && key_base_stem === cap_stem)
             ) {
               is_name_match = true
-            } else if (c.other_names && Array.isArray(c.other_names)) {
-              is_name_match = c.other_names.some((arg0_on: string) => {
-                let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-                let on_lower = on_clean
+            } else {
+              let alias_pool: string[] = []
+              if (Array.isArray(c.other_names)) {
+                alias_pool.push(...c.other_names)
+              } else if (typeof c.other_names === 'string') {
+                alias_pool.push(c.other_names)
+              }
+              if (Array.isArray(c.historical_names)) {
+                for (let h = 0; h < c.historical_names.length; h++)
+                  alias_pool.push(c.historical_names[h].name)
+              }
+              is_name_match = alias_pool.some((arg0_on: string) => {
+                let on_clean = String(arg0_on || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
                 let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let clean_on = on_nfd.replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/\bsaint\b/g, 'st').replace(/\./g, '')
-                return on_lower === cap_name_lower || on_nfd === cap_name_nfd || clean_on === clean_cap_name || (clean_on.replace(/h$/, '').length >= 3 && clean_on.replace(/h$/, '') === clean_cap_strip_h)
+                let on_stem = normalizeCapitalNameStem(arg0_on || '')
+                return (
+                  on_clean === cap_name_lower ||
+                  on_nfd === cap_name_nfd ||
+                  (cap_stem.length >= 3 && on_stem === cap_stem)
+                )
               })
             }
           }
 
-          let is_exact_coord_match = dist <= 0.01
+          let c_country_l = (c.country || '').toLowerCase().trim()
+          let p_name_l = (p.name || '').toLowerCase().trim()
+          let is_ghsl_country_coord = Boolean(
+            p.capkey?.startsWith('ghsl-') &&
+            dist <= 0.12 &&
+            c_country_l &&
+            p_name_l &&
+            (p_name_l.includes(c_country_l) || c_country_l.includes(p_name_l))
+          )
+          let is_exact_coord_match = dist <= 0.01 || is_ghsl_country_coord || (is_state_match && dist <= 0.20)
           if (!is_key_match && !is_name_match && !is_exact_coord_match)
             continue
 
           if (is_name_match)
             score += 100000
+          if (is_state_match)
+            score += 50000
           if (year < 1975 && c.key.startsWith('stadester-'))
             score += 25000
           if (year >= 1975 && c.key.startsWith('ghsl-'))
@@ -690,6 +730,7 @@ export function getCompactCitiesAtYear (
   let keys: string[]
   let len: number
   let names: string[]
+  let other_names: (string[] | null)[]
   let payload: CompactCitiesPayload
   let pops: number[]
   let regions: (string | undefined)[]
@@ -710,16 +751,37 @@ export function getCompactCitiesAtYear (
   growth = new Array(len)
   keys = new Array(len)
   names = new Array(len)
+  other_names = new Array(len)
   pops = new Array(len)
   regions = new Array(len)
 
   for (let i = 0; i < len; i++) {
     let c = cities[i]
+    let compact_aliases: string[] = []
+    let seen_alias = new Set<string>()
     keys[i] = c.key
     names[i] = getPrimaryCityName(c.name, c.population)
+    seen_alias.add(names[i].toLowerCase().trim())
+
+    if (Array.isArray(c.other_names)) {
+      for (let x = 0; x < c.other_names.length && compact_aliases.length < 8; x++) {
+        let on = String(c.other_names[x] || '').trim()
+        let on_l = on.toLowerCase()
+        if (on && !seen_alias.has(on_l)) {
+          seen_alias.add(on_l)
+          compact_aliases.push(on)
+        }
+      }
+    } else if (typeof c.other_names === 'string' && c.other_names.trim()) {
+      let on = c.other_names.trim()
+      if (!seen_alias.has(on.toLowerCase()))
+        compact_aliases.push(on)
+    }
+
     countries[i] = c.country
     coords[i * 2] = c.coords[0]
     coords[i * 2 + 1] = c.coords[1]
+    other_names[i] = compact_aliases.length > 0 ? compact_aliases : null
     pops[i] = c.population
     growth[i] = c.growthRate !== undefined ? Math.round(c.growthRate * 10000) / 10000 : 0
     regions[i] = c.region
@@ -740,6 +802,7 @@ export function getCompactCitiesAtYear (
     growth,
     keys,
     names,
+    other_names,
     pops,
     regions,
   }

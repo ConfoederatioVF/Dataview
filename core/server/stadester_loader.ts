@@ -49,6 +49,7 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   let meta_file_path = FilepathDefines.get().filepaths.stadester_metadata
   if (fs.existsSync(lite_file_path) && fs.existsSync(source_file_path)) {
     let is_meta_newer = false
+    let is_v2 = false
     let lite_stat = fs.statSync(lite_file_path)
     let src_stat = fs.statSync(source_file_path)
 
@@ -58,8 +59,19 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
         is_meta_newer = true
     }
 
-    if (!is_meta_newer && lite_stat.mtimeMs >= src_stat.mtimeMs && lite_stat.size > 1000)
-      return lite_file_path
+    if (!is_meta_newer && lite_stat.mtimeMs >= src_stat.mtimeMs && lite_stat.size > 1000) {
+      try {
+        let head_buf = Buffer.alloc(1024)
+        let fd = fs.openSync(lite_file_path, 'r')
+        let bytes_read = fs.readSync(fd, head_buf, 0, 1024, 0)
+        fs.closeSync(fd)
+        is_v2 = head_buf.toString('utf-8', 0, bytes_read).includes('"_v2":true')
+      } catch {
+        is_v2 = false
+      }
+      if (is_v2)
+        return lite_file_path
+    }
   }
 
   //Function body
@@ -73,20 +85,21 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   for (let i = 0; i < all_keys.length; i++) {
     let c = indexed[all_keys[i]]
     lite_array.push({
+      _v2: i === 0 ? true : undefined,
       colour: c.colour,
       coords: c.coords,
       country: c.country,
-      ghsl_name: c.ghsl_name || c.reconciled_name,
+      ghsl_name: c.metadata_name || c.name || c.ghsl_name || c.reconciled_name,
       historical_names: c.historical_names,
       id: c.id,
       key: c.key,
       max_pop: c.max_pop,
       max_year: c.max_year,
-      metadata_name: c.metadata_name,
+      metadata_name: c.metadata_name || c.name,
       min_year: c.min_year,
       name: c.name,
       other_names: c.other_names,
-      reconciled_name: c.reconciled_name || c.ghsl_name,
+      reconciled_name: c.metadata_name || c.name || c.reconciled_name || c.ghsl_name,
       region: c.region,
     })
   }
@@ -144,7 +157,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
 
       if (is_lite_fresh) {
         let lite_data = JSON.parse(fs.readFileSync(lite_file_path, 'utf-8'))
-        if (Array.isArray(lite_data)) {
+        if (Array.isArray(lite_data) && lite_data[0]?._v2) {
           for (let i = 0; i < lite_data.length; i++) {
             if (lite_data[i].key && lite_data[i].name && lite_data[i].name !== 'City of London') {
               if (!isCorruptedCityName(lite_data[i].name))

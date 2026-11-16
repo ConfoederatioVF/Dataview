@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { FilepathDefines } from './filepath_defines.ts'
+import { normalizeCapitalNameStem } from '../framework/stadester/city_metadata_framework.ts'
 
 export interface CityCoordRecord {
   coords: [number, number]
@@ -177,6 +178,40 @@ export let ensureCityCoordsLoaded = function (): void {
         city_coords_spatial_grid.set('-3_49', h_bucket)
       }
       h_bucket.push(helier_rec)
+    }
+
+    let meta_path = FilepathDefines.get().filepaths.stadester_metadata
+    if (fs.existsSync(meta_path)) {
+      let raw_meta = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
+      let meta_arr = Array.isArray(raw_meta) ? raw_meta : Object.values(raw_meta)
+      for (let i = 0; i < meta_arr.length; i++) {
+        let m = meta_arr[i]
+        if (!m || !m.name || !Array.isArray(m.coords) || m.coords.length < 2)
+          continue
+        let m_rec: CityCoordRecord = {
+          coords: [Number(m.coords[0]), Number(m.coords[1])],
+          key: `meta-${i}`,
+          name: String(m.name),
+          other_names: Array.isArray(m.other_names) ? m.other_names : undefined,
+        }
+        let m_names: string[] = [m_rec.name, ...(m_rec.other_names || [])]
+        for (let x = 0; x < m_names.length; x++) {
+          let n_clean = String(m_names[x] || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
+          let n_norm = n_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
+          let n_stem = normalizeCapitalNameStem(m_names[x] || '')
+          for (let k_cand of [n_clean, n_norm, n_stem]) {
+            if (!k_cand)
+              continue
+            let arr = city_coords_by_norm_name.get(k_cand)
+            if (!arr) {
+              arr = []
+              city_coords_by_norm_name.set(k_cand, arr)
+            }
+            if (!arr.includes(m_rec))
+              arr.push(m_rec)
+          }
+        }
+      }
     }
   } catch (arg0_err) {
     console.error('[AtlasBordersService] Error indexing all_cities_coords.json:', arg0_err)
@@ -432,9 +467,9 @@ export let findCityCoordsByName = function (
   //Function body
   ensureCityCoordsLoaded()
 
-  c_lower = city_name.toLowerCase().trim()
+  c_lower = city_name.replace(/\s*\([^)]*\)/g, '').replace(/\(s\)/gi, '').toLowerCase().trim()
   c_norm = c_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-  c_clean = c_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+  c_clean = normalizeCapitalNameStem(city_name)
   country_lower = country ? country.toLowerCase().trim() : ''
 
   if (!c_norm) {
@@ -442,7 +477,7 @@ export let findCityCoordsByName = function (
     return null
   }
 
-  key_match = city_coords_by_key.get(city_name) || city_coords_by_key.get(c_lower)
+  key_match = city_coords_by_key.get(city_name) || city_coords_by_key.get(city_name.toLowerCase().trim()) || city_coords_by_key.get(c_lower)
   if (key_match)
     candidate_set.add(key_match)
 
@@ -468,9 +503,9 @@ export let findCityCoordsByName = function (
   for (let i = 0; i < all_candidates.length; i++) {
     let item = all_candidates[i]
     let score = 0
-    let i_name = (item.name || '').toLowerCase().trim()
+    let i_name = (item.name || '').replace(/\s*\([^)]*\)/g, '').toLowerCase().trim()
     let i_norm = i_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-    let clean_i = i_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+    let clean_i = normalizeCapitalNameStem(item.name || '')
     let has_exact = (i_norm === c_norm || i_name === c_lower || (c_clean && c_clean === clean_i))
 
     if (has_exact) {
@@ -479,7 +514,7 @@ export let findCityCoordsByName = function (
       if (item.other_names.some((arg0_on: string) => {
         let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
         let on_norm = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')
-        let clean_on = on_norm.replace(/^(al|ar|ash|az|an|at|ad|el|er)/, '').replace(/h$/, '')
+        let clean_on = normalizeCapitalNameStem(arg0_on)
         return on_clean === c_lower || on_norm === c_norm || (c_clean && c_clean === clean_on)
       })) {
         score += 850
@@ -602,6 +637,7 @@ export let getStateCapitalInfo = function (
   }
 
   //Fallback to match by entity name if state_id has no direct capital record or belongs to another polity
+  let used_window_fallback = false
   if (!info && entity_name) {
     if (!states_name_map) {
       states_name_map = new Map()
@@ -613,7 +649,7 @@ export let getStateCapitalInfo = function (
           for (let i = 0; i < all_keys.length; i++) {
             let s = raw_states[all_keys[i]]
             if (s && s.state_id !== undefined) {
-              let s_name = (s.name || '').toLowerCase().trim()
+              let s_name = (s.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
               if (!states_name_map.has(s_name))
                 states_name_map.set(s_name, [])
               states_name_map.get(s_name)!.push({
@@ -638,14 +674,110 @@ export let getStateCapitalInfo = function (
       }
     }
 
-    clean_e = entity_name.toLowerCase().trim()
+    let cshapes_alias_map: Record<string, string[]> = {
+      argentina: ['argentine republic'],
+      austria: ['republic of austria', 'first austrian republic'],
+      benin: ['republic of benin', 'people\'s republic of benin', 'republic of dahomey', 'french dahomey'],
+      'bosnia-herzegovina': ['bosnia and herzegovina'],
+      burma: ['republic of the union of myanmar', 'union of myanmar', 'socialist republic of the union of burma'],
+      'burkina faso': ['republic of upper volta', 'burkina faso'],
+      'cape verde': ['republic of cabo verde'],
+      ceylon: ['ceylon', 'colony of ceylon', 'republic of sri lanka', 'democratic socialist republic of sri lanka'],
+      'congo, democratic republic of': ['democratic republic of the congo', 'belgian congo', 'congo free state'],
+      'cote d\'ivoire': ['republic of cote d\'ivoire', 'republic of ivory coast', 'colony of ivory coast'],
+      czechoslovakia: ['czechoslovak socialist republic', 'czechoslovak republic'],
+      dahomey: ['republic of dahomey', 'french dahomey', 'people\'s republic of benin', 'republic of benin'],
+      'east timor': ['democratic republic of timor-leste', 'timor-leste'],
+      france: ['french republic', 'french third republic', 'french fourth republic'],
+      'french guyana': ['french guiana'],
+      gabon: ['gabonese republic'],
+      'german federal republic': ['federal republic of germany'],
+      germany: ['federal republic of germany', 'german empire', 'kingdom of prussia'],
+      greece: ['hellenic republic', 'kingdom of greece'],
+      hungary: ['hungarian people\'s republic', 'kingdom of hungary', 'hungary'],
+      'italy/sardinia': ['italian republic', 'kingdom of italy', 'kingdom of sardinia'],
+      'korea, people\'s republic of': ['democratic people\'s republic of korea'],
+      'korea, republic of': ['republic of korea'],
+      laos: ['lao people\'s democratic republic', 'kingdom of laos'],
+      lebanon: ['lebanese republic'],
+      libya: ['great socialist people\'s libyan arab jamahiriya', 'libyan arab republic', 'kingdom of libya', 'italian libya'],
+      macedonia: ['republic of north macedonia', 'republic of macedonia'],
+      mexico: ['united mexican states'],
+      mongolia: ['mongolian people\'s republic', 'mongolia'],
+      'new caledonia and dependencies': ['new caledonia', 'territory of new caledonia and dependencies'],
+      poland: ['polish people\'s republic', 'republic of poland', 'second polish republic'],
+      portugal: ['portuguese republic'],
+      romania: ['romanian people\'s republic', 'socialist republic of romania', 'kingdom of romania', 'romania'],
+      rumania: ['romanian people\'s republic', 'romania', 'socialist republic of romania', 'kingdom of romania'],
+      russia: year_frac < 1991.95
+        ? ['union of soviet socialist republics', 'russian soviet federative socialist republic', 'russian empire']
+        : ['russian federation'],
+      slovakia: ['slovak republic'],
+      somalia: ['somali democratic republic', 'trust territory of somaliland', 'italian somaliland'],
+      'sri lanka': ['republic of sri lanka', 'democratic socialist republic of sri lanka', 'ceylon', 'colony of ceylon'],
+      surinam: ['republic of suriname'],
+      swaziland: ['kingdom of eswatini', 'kingdom of swaziland'],
+      switzerland: ['swiss confederation'],
+      syria: ['syrian arab republic'],
+      taiwan: ['republic of china'],
+      togo: ['togolese republic'],
+      tunisia: ['republic of tunisia', 'kingdom of tunisia'],
+      turkey: year_frac >= 2022
+        ? ['republic of turkiye', 'republic of turkey']
+        : ['republic of turkey', 'ottoman empire'],
+      'upper volta': ['republic of upper volta'],
+      'vietnam, democratic republic of': ['socialist republic of vietnam', 'democratic republic of vietnam'],
+      'yemen, people\'s republic of': ['people\'s democratic republic of yemen'],
+    }
+    let norm_e = entity_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    let search_terms: string[] = [norm_e]
+    let stripped_e = norm_e.replace(/\s*\([^)]*\)/g, '').trim()
+    if (stripped_e && !search_terms.includes(stripped_e))
+      search_terms.push(stripped_e)
+    for (let pm of norm_e.matchAll(/\(([^)]+)\)/g)) {
+      let p_inner = pm[1].trim()
+      if (p_inner) {
+        let p_parts = p_inner.includes('/') ? p_inner.split('/') : [p_inner]
+        for (let p_part of p_parts) {
+          let p_clean = p_part.trim()
+          if (p_clean && !search_terms.includes(p_clean))
+            search_terms.push(p_clean)
+        }
+      }
+    }
+    let comma_match = stripped_e.match(/^([^,]+),\s*(.+)$/)
+    if (comma_match) {
+      let flipped = `${comma_match[2].trim()} ${comma_match[1].trim()}`
+      if (!search_terms.includes(flipped))
+        search_terms.push(flipped)
+    }
+    if (stripped_e.includes('/')) {
+      for (let part of stripped_e.split('/')) {
+        let p_clean = part.trim()
+        if (p_clean && !search_terms.includes(p_clean))
+          search_terms.push(p_clean)
+      }
+    }
+    for (let term of [...search_terms]) {
+      let mapped = cshapes_alias_map[term]
+      if (mapped) {
+        for (let m_term of mapped) {
+          if (!search_terms.includes(m_term))
+            search_terms.push(m_term)
+        }
+      }
+    }
+
+    clean_e = stripped_e
     candidates = []
 
-    let direct_matches = states_by_clean_name.get(clean_e)
-    if (direct_matches) {
-      for (let i = 0; i < direct_matches.length; i++) {
-        if (year_frac >= direct_matches[i].start_year && year_frac <= direct_matches[i].stop_year)
-          candidates.push(direct_matches[i])
+    for (let t_i = 0; t_i < search_terms.length; t_i++) {
+      let direct_matches = states_by_clean_name.get(search_terms[t_i])
+      if (direct_matches) {
+        for (let i = 0; i < direct_matches.length; i++) {
+          if (year_frac >= direct_matches[i].start_year && year_frac <= direct_matches[i].stop_year && !candidates.includes(direct_matches[i]))
+            candidates.push(direct_matches[i])
+        }
       }
     }
 
@@ -657,11 +789,30 @@ export let getStateCapitalInfo = function (
     if (!has_capital_candidate && clean_e.length >= 4) {
       for (let [s_name, list] of states_name_map.entries()) {
         let base_s = s_name.replace(/\(.*?\)/g, '').trim()
-        let is_match = (base_s.endsWith(' ' + clean_e) || base_s.startsWith(clean_e + ' '))
+        let is_match = search_terms.some((t_str) => t_str.length >= 4 && (base_s === t_str || base_s.endsWith(' ' + t_str) || base_s.startsWith(t_str + ' ')))
         if (is_match) {
           for (let x = 0; x < list.length; x++) {
-            if (year_frac >= list[x].start_year && year_frac <= list[x].stop_year)
+            if (year_frac >= list[x].start_year && year_frac <= list[x].stop_year && !candidates.includes(list[x]))
               candidates.push(list[x])
+          }
+        }
+      }
+    }
+
+    has_capital_candidate = candidates.some((c) => {
+      let info_c = state_capitals_data ? state_capitals_data[c.state_id] : undefined
+      return info_c && !info_c.acapital && info_c.timeline && info_c.timeline.length > 0
+    })
+
+    if (!has_capital_candidate) {
+      for (let t_i = 0; t_i < search_terms.length; t_i++) {
+        let direct_matches = states_by_clean_name.get(search_terms[t_i])
+        if (direct_matches) {
+          for (let i = 0; i < direct_matches.length; i++) {
+            if (year_frac >= direct_matches[i].start_year - 10 && year_frac <= direct_matches[i].stop_year + 10 && !candidates.includes(direct_matches[i])) {
+              candidates.push(direct_matches[i])
+              used_window_fallback = true
+            }
           }
         }
       }
@@ -678,9 +829,25 @@ export let getStateCapitalInfo = function (
 
         let a_state = get_state ? get_state(arg0_a.state_id) : null
         let b_state = get_state ? get_state(arg0_b.state_id) : null
-        let a_is_occ = (a_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
-        let b_is_occ = (b_state?.name || '').toLowerCase().includes('occupation') ? 1 : 0
-        return a_is_occ - b_is_occ
+        let a_name_l = (a_state?.name || '').toLowerCase()
+        let b_name_l = (b_state?.name || '').toLowerCase()
+        let isSubState = (s: string) => (
+          s.includes('occupation') ||
+          s.includes('autonomous') ||
+          s.includes('administration') ||
+          s.includes('interim') ||
+          s.includes('transitional') ||
+          s.includes('rebel') ||
+          s.includes('military')
+        ) ? 1 : 0
+        let a_sub = isSubState(a_name_l)
+        let b_sub = isSubState(b_name_l)
+        if (a_sub !== b_sub)
+          return a_sub - b_sub
+
+        let a_exact = search_terms.includes(a_name_l.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').trim()) ? 1 : 0
+        let b_exact = search_terms.includes(b_name_l.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').trim()) ? 1 : 0
+        return b_exact - a_exact
       })
 
       for (let k = 0; k < candidates.length; k++) {
@@ -765,7 +932,8 @@ export let getStateCapitalInfo = function (
         best_iv = iv
       }
     }
-    if (year_frac < best_iv.start_frac - 2 || year_frac > best_iv.stop_frac + 2) {
+    let tl_tol = used_window_fallback ? 10 : 2
+    if (year_frac < best_iv.start_frac - tl_tol || year_frac > best_iv.stop_frac + tl_tol) {
       res_info = { fill_color: fill_color, is_acapital: true, state_id: effective_state_id }
       capital_info_cache.set(cache_k, res_info)
       return res_info

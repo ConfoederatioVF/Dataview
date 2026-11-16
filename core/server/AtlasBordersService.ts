@@ -46,7 +46,7 @@ export interface HistoricalBordersResponse {
 
 //Bump whenever the cached border feature schema changes, to invalidate stale disk caches
 let all_cache_clearers: Array<() => void> = []
-let border_cache_version = 9
+let border_cache_version = 12
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let last_known_source_mtimes: Map<string, number> = new Map()

@@ -8,7 +8,7 @@ import { applyCityMetadata, applyStateCapitals, clearCityMetadataCache, resolveC
 import type { CityIndexEntry } from './stadester_types.ts'
 
 let datasets_cache = new Map<string, Record<string, CityIndexEntry>>()
-let INDEX_CACHE_VERSION = 3
+let INDEX_CACHE_VERSION = 5
 let spatial_grid_by_dataset = new Map<string, Map<string, string[]>>()
 
 export interface ResolvedDatasetSources {
@@ -475,7 +475,10 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
       }
 
       city_seq_id++
-      indexed_record[key] = {
+      let resolved_sources = Array.isArray(c.sources)
+        ? c.sources
+        : (typeof c.type === 'string' && c.type ? [c.type] : undefined)
+      let indexed_entry: CityIndexEntry = {
         area: c.area,
         colour: c.colour,
         coords: city_coords,
@@ -494,8 +497,12 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
         population: pop_obj,
         reconciled_name: clean_display_name,
         region: c.region,
+        sources: resolved_sources,
         years: pop_years,
       }
+      if (c.type !== undefined)
+        indexed_entry.type = c.type
+      indexed_record[key] = indexed_entry
     }
   }
 
@@ -532,6 +539,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
         '2010': 5200,
         '2020': 5700,
       },
+      sources: ['manual'],
       years: [1400, 1500, 1600, 1700, 1800, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020],
     }
   }
@@ -574,6 +582,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
         '2020': 680000,
       },
       region: 'eastasia',
+      sources: ['manual'],
       years: [1557, 1560, 1600, 1635, 1700, 1750, 1800, 1850, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020],
     }
   }
@@ -612,6 +621,7 @@ export function loadDataset (arg0_dataset_name?: string): Record<string, CityInd
         '2020': 35800,
       },
       region: 'europe',
+      sources: ['manual'],
       years: [1291, 1400, 1500, 1600, 1700, 1800, 1850, 1900, 1950, 1970, 1980, 1990, 2000, 2010, 2020],
     }
   }

@@ -1,15 +1,13 @@
 import fs from 'fs'
 import path from 'path'
 import { FilepathDefines } from './filepath_defines.ts'
-import { AtlasBordersService } from './AtlasBordersService.ts'
+import { clearStateCapitalsCache } from './stadester_capitals.ts'
 import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
+import { cleanCandidateCityString, isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import {
   computeHaversineDistanceKm,
-  getCityActiveCapitalRecord,
-  isCityCapitalAtYear as isCityCapitalAtYearFramework,
   normalizeCapitalNameStem,
   normalizeCityAlias,
-  normalizeCityKey,
   normalizeMetadataEntry,
   parseYearMonthDay,
   resolveHistoricalCityName,
@@ -17,393 +15,665 @@ import {
   type HistoricalNameRecord,
 } from '../framework/stadester/city_metadata_framework.ts'
 import {
-  getPrimaryCityNormKey,
-  isCityInsideStateBBox,
   mergeCityCapitalRecords,
   mergeCityOtherNames,
   type CityIndexEntry,
 } from './stadester_types.ts'
 
+export {
+  applyStateCapitals,
+  clearStateCapitalsCache,
+  getCityCapitalColorAtYear,
+  getStateById,
+  getStateCapitals,
+  isCityCapitalAtYear,
+  isStateAcapital,
+} from './stadester_capitals.ts'
+
 let city_metadata_cache_by_path = new Map<string, { entries: CityMetadataEntry[]; mtime_ms: number }>()
-let state_capitals_cache: Record<string, any> | null = null
-let states_by_id: Map<string | number, any> | null = null
+let SYNTHETIC_GHSL_EPOCHS = new Set<string>([
+  '1975.1.1',
+  '1980.1.1',
+  '1985.1.1',
+  '1990.1.1',
+  '1995.1.1',
+  '2000.1.1',
+  '2005.1.1',
+  '2010.1.1',
+  '2015.1.1',
+  '2020.1.1',
+  '2025.1.1',
+])
+
+interface AliasStemSet {
+  aliases: string[]
+  stems: string[]
+}
+
+interface BindingStateEntry {
+  has_modern_entry: boolean
+  has_name_match: boolean
+  has_primary_name_match: boolean
+  max_hn_year: number
+}
 
 /**
- * Clears all cached per-version city metadata entries from memory.
+ * Applies per-version city metadata to indexed cities.
+ *
+ * @param {Record<string, CityIndexEntry>} arg0_indexed_record
+ * @param {string} [arg1_dataset_name='stadester_2.0']
+ *
+ * @returns {void}
+ */
+export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndexEntry>, arg1_dataset_name?: string): void {
+  //Convert from parameters
+  let dataset_name = (arg1_dataset_name) ? arg1_dataset_name : getDefaultStadesterDatasetId()
+  let indexed = arg0_indexed_record
+
+  //Declare local instance variables
+  let all_keys = Object.keys(indexed)
+  let binding_state = new Map<string, BindingStateEntry>()
+  let city_alias_cache = new Map<string, AliasStemSet>()
+  let meta_list = loadCityMetadata(dataset_name)
+  let primary_alias_cache = new Map<string, AliasStemSet>()
+  let raw_city_name_by_key = new Map<string, string>()
+  let spatial_grid: Record<string, CityIndexEntry[]> = {}
+
+  //Guard clauses
+  if (!meta_list || meta_list.length === 0 || all_keys.length === 0)
+    return
+
+  //Function body
+  for (let x = 0; x < all_keys.length; x++) {
+    let city = indexed[all_keys[x]]
+    raw_city_name_by_key.set(city.key, city.name || '')
+    if (city.coords && Array.isArray(city.coords)) {
+      let bin_lat = Math.floor(city.coords[0])
+      let bin_lng = Math.floor(city.coords[1])
+      let bin_key = `${bin_lat},${bin_lng}`
+      if (!spatial_grid[bin_key])
+        spatial_grid[bin_key] = []
+      spatial_grid[bin_key].push(city)
+    }
+  }
+
+  let getCachedCityAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
+    let cache_k = arg0_city.key
+    let cached = city_alias_cache.get(cache_k)
+    if (cached)
+      return cached
+    let built = buildAliasSet(arg0_city.name, arg0_city.other_names)
+    city_alias_cache.set(cache_k, built)
+    return built
+  }
+
+  let getCachedPrimaryAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
+    let cache_k = arg0_city.key
+    let cached = primary_alias_cache.get(cache_k)
+    if (cached)
+      return cached
+    let built = buildPrimaryNameSet(arg0_city, raw_city_name_by_key.get(cache_k))
+    primary_alias_cache.set(cache_k, built)
+    return built
+  }
+
+  for (let i = 0; i < meta_list.length; i++) {
+    let best_alias_named_city: CityIndexEntry | null = null
+    let best_city: CityIndexEntry | null = null
+    let best_exact_city: CityIndexEntry | null = null
+    let best_meta_name_primary_city: CityIndexEntry | null = null
+    let best_primary_named_city: CityIndexEntry | null = null
+    let meta = meta_list[i]
+    let meta_alias_info = buildAliasSet(meta.name, (meta as any).other_names)
+    let meta_name_info = buildAliasSet(meta.name)
+    let min_alias_named_dist = 999999
+    let min_dist = 999999
+    let min_exact_dist = 999999
+    let min_meta_name_primary_dist = 999999
+    let min_primary_named_dist = 999999
+    let target_lat = meta.coords[1]
+    let target_lng = meta.coords[0]
+    let has_meta_name_primary_within_50km = false
+
+    if (meta.key && indexed[meta.key]) {
+      best_city = indexed[meta.key]
+      min_dist = 0
+    }
+
+    let center_lat = Math.floor(target_lat)
+    let center_lng = Math.floor(target_lng)
+
+    for (let d_lat = -1; d_lat <= 1; d_lat++) {
+      for (let d_lng = -1; d_lng <= 1; d_lng++) {
+        let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+        if (!cell)
+          continue
+
+        for (let c = 0; c < cell.length; c++) {
+          let candidate = cell[c]
+          let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
+          if (dist <= 0.1 && dist < min_exact_dist) {
+            min_exact_dist = dist
+            best_exact_city = candidate
+          }
+          if (dist <= 50) {
+            let cand_all = getCachedCityAliases(candidate)
+            let cand_primary = getCachedPrimaryAliases(candidate)
+            let meta_name_primary_hit = matchesAliasSet(meta_name_info, cand_primary)
+            let primary_hit = meta_name_primary_hit || matchesAliasSet(meta_alias_info, cand_primary)
+            let alias_only_hit = !primary_hit && matchesAliasSet(meta_alias_info, cand_all)
+
+            if (meta_name_primary_hit) {
+              has_meta_name_primary_within_50km = true
+              if (dist < min_meta_name_primary_dist) {
+                min_meta_name_primary_dist = dist
+                best_meta_name_primary_city = candidate
+              }
+            }
+            if (primary_hit && dist < min_primary_named_dist) {
+              min_primary_named_dist = dist
+              best_primary_named_city = candidate
+            } else if (alias_only_hit && dist < min_alias_named_dist) {
+              min_alias_named_dist = dist
+              best_alias_named_city = candidate
+            }
+          }
+        }
+      }
+    }
+
+    if (!best_city) {
+      if (best_meta_name_primary_city) {
+        best_city = best_meta_name_primary_city
+        min_dist = min_meta_name_primary_dist
+      } else if (best_primary_named_city) {
+        best_city = best_primary_named_city
+        min_dist = min_primary_named_dist
+      } else if (best_alias_named_city && !has_meta_name_primary_within_50km) {
+        best_city = best_alias_named_city
+        min_dist = min_alias_named_dist
+      } else if (best_exact_city) {
+        best_city = best_exact_city
+        min_dist = min_exact_dist
+      }
+    }
+
+    if (!best_city || min_dist > 50)
+      continue
+
+    let best_all_info = getCachedCityAliases(best_city)
+    let best_primary_info = getCachedPrimaryAliases(best_city)
+    let is_exact_coord_match = min_dist <= 0.1
+    let is_primary_name_match = matchesAliasSet(meta_alias_info, best_primary_info)
+    let is_alias_only_match = !is_primary_name_match && matchesAliasSet(meta_alias_info, best_all_info)
+    let is_name_match = is_primary_name_match || is_alias_only_match
+
+    if (!is_exact_coord_match && !is_name_match)
+      continue
+    if (is_alias_only_match && has_meta_name_primary_within_50km)
+      continue
+
+    let meta_max_year = -9999
+    for (let h = 0; h < (meta.historical_names || []).length; h++) {
+      let yf = meta.historical_names[h].year_frac
+      if (yf > meta_max_year)
+        meta_max_year = yf
+    }
+    for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
+      let yf = meta.capital_records![c_i].year_frac
+      if (yf > meta_max_year)
+        meta_max_year = yf
+    }
+
+    let meta_is_modern = meta_max_year >= 1700
+    let prev_binding = binding_state.get(best_city.key)
+
+    //Once a city is matched by primary name, block subsequent unrelated non-primary metadata entries even at <= 0.1 km
+    if (!is_name_match && prev_binding?.has_primary_name_match)
+      continue
+    if (!is_name_match && prev_binding?.has_name_match) {
+      if (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern))
+        continue
+    }
+
+    let is_best_corrupted = isCorruptedCityName(best_city.name || '')
+    let is_displaced_neighbour = !is_primary_name_match && Boolean(meta.name) &&
+      doesLabelMatchAnotherNearbyCity(best_city, meta.name!, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+    let is_synthetic_stub = isSyntheticGhslEpochStub(meta)
+
+    if (!is_name_match && is_displaced_neighbour)
+      continue
+
+    let can_overwrite_name = Boolean(
+      meta.name &&
+      !best_city.key.startsWith('ghsl-') &&
+      (is_exact_coord_match || min_dist <= 15) &&
+      (is_best_corrupted || (!is_alias_only_match && !is_synthetic_stub && !is_displaced_neighbour))
+    )
+    let should_set_name = false
+
+    if (can_overwrite_name) {
+      if (!prev_binding) {
+        should_set_name = true
+      } else if (prev_binding.has_primary_name_match && !is_primary_name_match) {
+        should_set_name = false
+      } else if (is_primary_name_match && !prev_binding.has_primary_name_match) {
+        should_set_name = true
+      } else if (is_name_match && !prev_binding.has_name_match) {
+        should_set_name = true
+      } else if (is_name_match && meta_max_year >= prev_binding.max_hn_year && !(prev_binding.has_modern_entry && meta_max_year < 1700)) {
+        should_set_name = true
+      }
+    }
+
+    let meta_extra_aliases: string[] = []
+    if (meta.name)
+      meta_extra_aliases.push(meta.name)
+    if (Array.isArray((meta as any).other_names))
+      meta_extra_aliases.push(...(meta as any).other_names)
+    if (meta.historical_names) {
+      for (let h = 0; h < meta.historical_names.length; h++)
+        meta_extra_aliases.push(meta.historical_names[h].name)
+    }
+
+    if (should_set_name && meta.name) {
+      if (
+        best_city.name &&
+        best_city.name !== meta.name &&
+        !isCorruptedCityName(best_city.name) &&
+        !doesLabelMatchAnotherNearbyCity(best_city, best_city.name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+      ) {
+        meta_extra_aliases.push(best_city.name)
+      }
+      best_city.name = meta.name
+      best_city.metadata_name = meta.name
+      city_alias_cache.delete(best_city.key)
+      primary_alias_cache.delete(best_city.key)
+    }
+
+    let allow_hist_merge = is_primary_name_match ||
+      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && (is_name_match || (!prev_binding?.has_name_match && !meta_is_modern)))
+    let allow_other_merge = is_primary_name_match ||
+      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && (is_name_match || !prev_binding?.has_name_match))
+
+    if (allow_other_merge) {
+      mergeCityOtherNames(best_city, meta_extra_aliases)
+      city_alias_cache.delete(best_city.key)
+    }
+
+    if (meta.historical_names && meta.historical_names.length > 0 && allow_hist_merge)
+      best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
+
+    binding_state.set(best_city.key, {
+      has_modern_entry: Boolean(prev_binding?.has_modern_entry || (is_name_match && meta_is_modern)),
+      has_name_match: Boolean(prev_binding?.has_name_match || is_name_match),
+      has_primary_name_match: Boolean(prev_binding?.has_primary_name_match || is_primary_name_match),
+      max_hn_year: Math.max(prev_binding?.max_hn_year ?? -9999, (is_primary_name_match || !prev_binding?.has_primary_name_match) ? meta_max_year : -9999),
+    })
+
+    if (!is_displaced_neighbour || is_primary_name_match)
+      mergeCityCapitalRecords(best_city, meta)
+
+    let refreshed_best_primary = getCachedPrimaryAliases(best_city)
+
+    for (let d_lat = -1; d_lat <= 1; d_lat++) {
+      for (let d_lng = -1; d_lng <= 1; d_lng++) {
+        let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+        if (!cell)
+          continue
+
+        for (let c = 0; c < cell.length; c++) {
+          let other = cell[c]
+          if (other.key === best_city.key)
+            continue
+
+          let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
+          if (dist > 25)
+            continue
+
+          let other_own_name = cleanCandidateCityString(String(other.name || '').split(';')[0])
+          let other_raw_name = cleanCandidateCityString(String(raw_city_name_by_key.get(other.key) || '').split(';')[0])
+          let other_own_info = buildAliasSet(
+            other_own_name,
+            (other_raw_name && other_raw_name !== other_own_name) ? [other_raw_name] : undefined
+          )
+
+          let is_era_counterpart = Boolean(
+            ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
+             (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
+            matchesAliasSet(other_own_info, refreshed_best_primary)
+          )
+
+          let is_agg_flag = Boolean(
+            other.is_agglomeration ||
+            /\(agglomeration\??\)/i.test(other.key || '') ||
+            /\(agglomeration\??\)/i.test(other.name || '')
+          )
+          let is_period_split = Boolean(
+            /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '') ||
+            /\(\d{3,4}[–-]\d{3,4}\)/.test(other.key || '')
+          )
+          let agg_of_info = other.is_agglomeration_of ? buildAliasSet(other.is_agglomeration_of) : null
+          let matches_best_primary = matchesAliasSet(other_own_info, refreshed_best_primary) ||
+            Boolean(agg_of_info && matchesAliasSet(agg_of_info, refreshed_best_primary))
+          let is_agg_or_period_counterpart = Boolean(
+            matches_best_primary &&
+            ((is_agg_flag && dist <= 25) || (is_period_split && dist <= 15))
+          )
+
+          if (!is_era_counterpart && !is_agg_or_period_counterpart)
+            continue
+
+          let prev_other = binding_state.get(other.key)
+          let other_extra_aliases = [...meta_extra_aliases]
+          let other_is_corrupted = isCorruptedCityName(other.name || '')
+          let can_rename_other = Boolean(
+            dist <= 15 &&
+            meta.name &&
+            !other.key.startsWith('ghsl-') &&
+            (other_is_corrupted || (!is_alias_only_match && !is_synthetic_stub)) &&
+            (!prev_other?.has_primary_name_match || is_primary_name_match) &&
+            (!prev_other || (meta_max_year >= prev_other.max_hn_year && !(prev_other.has_modern_entry && meta_max_year < 1700)))
+          )
+
+          if (can_rename_other && meta.name) {
+            if (other.name && other.name !== meta.name && !isCorruptedCityName(other.name))
+              other_extra_aliases.push(other.name)
+            other.name = meta.name
+            other.metadata_name = meta.name
+            primary_alias_cache.delete(other.key)
+          }
+
+          mergeCityOtherNames(other, other_extra_aliases)
+          city_alias_cache.delete(other.key)
+
+          if (meta.historical_names && meta.historical_names.length > 0 && (!prev_other?.has_primary_name_match || is_primary_name_match))
+            other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
+
+          binding_state.set(other.key, {
+            has_modern_entry: Boolean(prev_other?.has_modern_entry || meta_is_modern),
+            has_name_match: true,
+            has_primary_name_match: Boolean(prev_other?.has_primary_name_match || is_primary_name_match),
+            max_hn_year: Math.max(prev_other?.max_hn_year ?? -9999, meta_max_year),
+          })
+          mergeCityCapitalRecords(other, meta)
+        }
+      }
+    }
+  }
+
+  //Post-pass: ensure modern cities with post-1950 populations resolve to their latest modern metadata name
+  for (let i = 0; i < all_keys.length; i++) {
+    let city = indexed[all_keys[i]]
+    if (!city || city.key.startsWith('ghsl-'))
+      continue
+
+    if ((city.max_year ?? 0) >= 1950 && city.historical_names && city.historical_names.length > 0) {
+      let last_hn = city.historical_names[city.historical_names.length - 1]
+      let last_stem = normalizeCapitalNameStem(last_hn.name || '')
+      let name_stem = normalizeCapitalNameStem(city.name || '')
+
+      if (last_hn.name && !isCorruptedCityName(last_hn.name) && last_stem !== name_stem) {
+        let city_alias = normalizeCityAlias(city.name || '')
+        let has_earlier_match = city.historical_names.slice(0, -1).some((arg0_h) => {
+          let h_alias = normalizeCityAlias(arg0_h.name || '')
+          return normalizeCapitalNameStem(arg0_h.name || '') === name_stem ||
+            (Boolean(city_alias) && Boolean(h_alias) && h_alias === city_alias)
+        })
+        let raw_name = raw_city_name_by_key.get(city.key) || ''
+        let raw_alias = normalizeCityAlias(raw_name)
+        let last_alias = normalizeCityAlias(last_hn.name || '')
+        let raw_matched_last = Boolean(
+          (last_stem && normalizeCapitalNameStem(raw_name) === last_stem) ||
+          (last_alias && raw_alias && raw_alias === last_alias)
+        )
+
+        if (has_earlier_match || raw_matched_last) {
+          let old_name = city.name
+          if (
+            old_name &&
+            !isCorruptedCityName(old_name) &&
+            !doesLabelMatchAnotherNearbyCity(city, old_name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+          ) {
+            mergeCityOtherNames(city, [old_name])
+          }
+          city.name = last_hn.name
+        }
+      }
+    }
+
+    if (city.metadata_name || binding_state.has(city.key)) {
+      city.metadata_name = city.name
+      city.reconciled_name = city.name
+      city.ghsl_name = city.name
+    }
+  }
+
+  console.log(`[StadesterMetadata] Successfully bound ${meta_list.length} historical city metadata entries.`)
+}
+
+
+/**
+ * Builds normalised alias and stem arrays from a name and optional alias string/array.
+ *
+ * @param {string} [arg0_name]
+ * @param {string | string[]} [arg1_other]
+ *
+ * @returns {AliasStemSet}
+ */
+function buildAliasSet (arg0_name?: string, arg1_other?: string | string[]): AliasStemSet {
+  //Convert from parameters
+  let name = arg0_name
+  let other = arg1_other
+
+  //Declare local instance variables
+  let aliases: string[] = []
+  let raw_list: string[] = []
+  let stems: string[] = []
+
+  //Function body
+  if (name)
+    raw_list.push(name)
+  if (Array.isArray(other)) {
+    raw_list.push(...other)
+  } else if (typeof other === 'string') {
+    raw_list.push(other)
+  }
+
+  for (let i = 0; i < raw_list.length; i++) {
+    let a = normalizeCityAlias(raw_list[i] || '')
+    let s = normalizeCapitalNameStem(raw_list[i] || '')
+    if (a && !aliases.includes(a))
+      aliases.push(a)
+    if (s && !stems.includes(s))
+      stems.push(s)
+  }
+
+  //Return statement
+  return { aliases, stems }
+}
+
+
+/**
+ * Builds normalised alias and stem arrays solely from a city's primary name, pre-metadata name, and primary key stem.
+ *
+ * @param {CityIndexEntry} arg0_city
+ * @param {string} [arg1_raw_name]
+ *
+ * @returns {AliasStemSet}
+ */
+function buildPrimaryNameSet (arg0_city: CityIndexEntry, arg1_raw_name?: string): AliasStemSet {
+  //Convert from parameters
+  let city = arg0_city
+  let raw_name = arg1_raw_name
+
+  //Declare local instance variables
+  let candidates: string[] = []
+
+  //Function body
+  if (city.name) {
+    let primary_clean = cleanCandidateCityString(String(city.name).split(';')[0])
+    if (primary_clean)
+      candidates.push(primary_clean)
+  }
+  if (raw_name) {
+    let raw_clean = cleanCandidateCityString(String(raw_name).split(';')[0])
+    if (raw_clean)
+      candidates.push(raw_clean)
+  }
+  if (city.key) {
+    let stripped = String(city.key).replace(/^(stadester|ghsl|oxford)-/i, '')
+    let parts = stripped.split('-')
+    let city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
+    let key_primary = city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim()
+    if (key_primary && !/^\d+$/.test(key_primary))
+      candidates.push(key_primary)
+  }
+
+  //Return statement
+  return buildAliasSet(undefined, candidates)
+}
+
+
+/**
+ * Clears all cached per-version city metadata and state capital registries from memory.
  *
  * @returns {void}
  */
 export function clearCityMetadataCache (): void {
+  //Function body
   city_metadata_cache_by_path.clear()
+  clearStateCapitalsCache()
 }
 
 
 /**
- * Resolves the filesystem path to the per-version city_metadata.json file for a given Stadestér dataset.
+ * Checks whether a candidate displaced label matches another nearby city's primary name within the given radius.
  *
- * @param {string} [arg0_dataset_name='stadester_2.0']
- *
- * @returns {string}
- */
-export function resolveCityMetadataPath (arg0_dataset_name?: string): string {
-  //Convert from parameters
-  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
-
-  //Declare local instance variables
-  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
-  let configured = resolveStadesterVersionPaths(dataset_name)
-  let defines = FilepathDefines.get()
-  let filepaths = defines.filepaths || {}
-  let l_stad = (defines.root_folders && defines.root_folders.l_stad) ? defines.root_folders.l_stad : './data/stadester'
-  let versioned_path = path.join(l_stad, clean_stem, 'city_metadata.json')
-
-  //Function body
-  if (configured.metadata_path && fs.existsSync(configured.metadata_path))
-    return configured.metadata_path
-  if (configured.path) {
-    let version_dir = configured.path.endsWith('.json') ? path.dirname(configured.path) : configured.path
-    let derived_meta_path = path.join(version_dir, 'city_metadata.json')
-    if (fs.existsSync(derived_meta_path))
-      return derived_meta_path
-  }
-  if (fs.existsSync(versioned_path))
-    return versioned_path
-
-  let define_key = `${clean_stem.replace(/\./g, '_')}_metadata`
-  if (filepaths[define_key] && fs.existsSync(filepaths[define_key]))
-    return filepaths[define_key]
-
-  if (filepaths.stadester_metadata && fs.existsSync(filepaths.stadester_metadata))
-    return filepaths.stadester_metadata
-
-  //Return statement
-  return fs.existsSync(path.join(l_stad, 'city_metadata.json'))
-    ? path.join(l_stad, 'city_metadata.json')
-    : versioned_path
-}
-
-/**
- * Retrieves state metadata by state ID from the cached data/atlas/temp/states.json registry.
- *
- * @param {string | number} arg0_state_id
- *
- * @returns {any | null}
- */
-export function getStateById (arg0_state_id: string | number): any {
-  //Convert from parameters
-  let state_id = arg0_state_id
-
-  //Guard clauses
-  if (state_id === undefined || state_id === null)
-    return null
-
-  //Function body
-  if (!states_by_id) {
-    states_by_id = new Map()
-    let states_path = FilepathDefines.get().filepaths.atlas_states
-    if (fs.existsSync(states_path)) {
-      try {
-        let list = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
-        if (Array.isArray(list)) {
-          for (let i = 0; i < list.length; i++) {
-            let s = list[i]
-            if (s.start_date) {
-              s._start_frac = parseYearMonthDay(s.start_date).year_frac
-            } else {
-              s._start_frac = s.start_year !== undefined ? s.start_year : -99999
-            }
-            if (s.stop_date) {
-              s._stop_frac = parseYearMonthDay(s.stop_date).year_frac
-            } else {
-              s._stop_frac = s.stop_year !== undefined ? s.stop_year : 99999
-            }
-            states_by_id.set(s.state_id, s)
-            states_by_id.set(String(s.state_id), s)
-          }
-        }
-      } catch (arg0_err) {
-        console.warn('[StadesterMetadata] Failed to load states.json:', arg0_err)
-      }
-    }
-  }
-
-  //Return statement
-  return states_by_id.get(state_id) || states_by_id.get(String(state_id)) || null
-}
-
-
-/**
- * Retrieves the authoritative state_capitals.json mapping.
- *
- * @returns {Record<string, any>}
- */
-export function getStateCapitals (): Record<string, any> {
-  //Declare local instance variables
-  let file_path = FilepathDefines.get().filepaths.stadester_capitals
-
-  //Guard clauses
-  if (state_capitals_cache)
-    return state_capitals_cache
-
-  //Function body
-  if (fs.existsSync(file_path)) {
-    try {
-      state_capitals_cache = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
-    } catch {
-      state_capitals_cache = {}
-    }
-  } else {
-    state_capitals_cache = {}
-  }
-
-  //Return statement
-  return state_capitals_cache || {}
-}
-
-
-/**
- * Checks whether a state is marked as acapital in state_capitals.json.
- *
- * @param {string | number} arg0_state_id
+ * @param {CityIndexEntry} arg0_city
+ * @param {string} arg1_label
+ * @param {Record<string, CityIndexEntry[]>} arg2_spatial_grid
+ * @param {Map<string, string>} arg3_raw_city_name_by_key
+ * @param {Map<string, AliasStemSet>} arg4_primary_alias_cache
+ * @param {number} [arg5_radius_km=25]
  *
  * @returns {boolean}
  */
-export function isStateAcapital (arg0_state_id: string | number): boolean {
-  //Convert from parameters
-  let state_id = arg0_state_id
-
-  //Guard clauses
-  if (state_id === undefined || state_id === null)
-    return false
-
-  //Declare local instance variables
-  let sc = getStateCapitals()
-  let sid_str = String(state_id)
-
-  //Return statement
-  return Boolean(sc[sid_str]?.acapital)
-}
-
-
-/**
- * Evaluates whether a city was a capital at target historical year, validating state existence.
- *
- * @param {any} arg0_city
- * @param {number | string} [arg1_year]
- * @param {Set<number>} [arg2_active_state_ids]
- *
- * @returns {boolean}
- */
-export function isCityCapitalAtYear (
-  arg0_city: any,
-  arg1_year?: number | string,
-  arg2_active_state_ids?: Set<number>
+function doesLabelMatchAnotherNearbyCity (
+  arg0_city: CityIndexEntry,
+  arg1_label: string,
+  arg2_spatial_grid: Record<string, CityIndexEntry[]>,
+  arg3_raw_city_name_by_key: Map<string, string>,
+  arg4_primary_alias_cache: Map<string, AliasStemSet>,
+  arg5_radius_km: number = 25
 ): boolean {
   //Convert from parameters
-  let active_state_ids = arg2_active_state_ids
   let city = arg0_city
-  let year = arg1_year
+  let label = arg1_label
+  let primary_alias_cache = arg4_primary_alias_cache
+  let radius_km = arg5_radius_km
+  let raw_city_name_by_key = arg3_raw_city_name_by_key
+  let spatial_grid = arg2_spatial_grid
 
   //Guard clauses
-  if (!city)
+  if (!city || !city.coords || !label || isCorruptedCityName(label))
     return false
 
   //Declare local instance variables
-  if (!active_state_ids && (year !== undefined && year !== null)) {
-    let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
-    let num_mo = typeof year === 'string' ? parseYearMonthDay(year).month : undefined
-    let num_day = typeof year === 'string' ? parseYearMonthDay(year).day : undefined
-    active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
-  }
-
-  //Return statement
-  return isCityCapitalAtYearFramework(city, year, (arg0_sid, arg0_y_frac) => {
-    let sid_num = Number(arg0_sid)
-    let state = getStateById(arg0_sid)
-    if (!state)
-      return false
-    if (isStateAcapital(arg0_sid))
-      return false
-    let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
-    let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-    let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
-      (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
-    if (!is_time_valid)
-      return false
-    if (active_state_ids && active_state_ids.size > 0) {
-      if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
-        return false
-    }
-    if (!isCityInsideStateBBox(city, state, 3.5))
-      return false
-    return true
-  })
-}
-
-
-/**
- * Resolves the fill colour of the corresponding state for a capital city.
- *
- * @param {any} arg0_city
- * @param {number | string} [arg1_year]
- * @param {Set<number>} [arg2_active_state_ids]
- *
- * @returns {string | null} Hex fill colour or null
- */
-export function getCityCapitalColorAtYear (
-  arg0_city: any,
-  arg1_year?: number | string,
-  arg2_active_state_ids?: Set<number>
-): string | null {
-  //Convert from parameters
-  let active_state_ids = arg2_active_state_ids
-  let city = arg0_city
-  let year = arg1_year
-
-  //Guard clauses
-  if (!city)
-    return null
-
-  //Declare local instance variables
-  if (!active_state_ids && (year !== undefined && year !== null)) {
-    let num_yr = typeof year === 'number' ? Math.floor(year) : parseYearMonthDay(year).year
-    let num_mo = typeof year === 'string' ? parseYearMonthDay(year).month : undefined
-    let num_day = typeof year === 'string' ? parseYearMonthDay(year).day : undefined
-    active_state_ids = AtlasBordersService.getActiveStateIdsAtDate(num_yr, num_mo, num_day)
-  }
-
-  let cap_rec = getCityActiveCapitalRecord(city, year, (arg0_sid, arg0_y_frac) => {
-    let sid_num = Number(arg0_sid)
-    let state = getStateById(arg0_sid)
-    if (!state)
-      return false
-    let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
-    let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-    let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
-      (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
-    if (!is_time_valid)
-      return false
-    if (active_state_ids && active_state_ids.size > 0) {
-      if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
-        return false
-    }
-    if (!isCityInsideStateBBox(city, state, 3.5))
-      return false
-    return true
-  })
-
-  if (!cap_rec || !cap_rec.state_id)
-    return null
-
-  let state = getStateById(cap_rec.state_id)
-
-  //Return statement
-  return state?.fill_color || null
-}
-
-
-/**
- * Merges two historical name records chronologically, preserving rich multi-entry timelines.
- * Ensures that modern placeholder entries (e.g. single 1975 entries) never overwrite earlier historical names.
- *
- * @param {HistoricalNameRecord[]} [arg0_existing]
- * @param {HistoricalNameRecord[]} [arg1_incoming]
- *
- * @returns {HistoricalNameRecord[]}
- */
-export function mergeHistoricalNames (
-  arg0_existing?: HistoricalNameRecord[],
-  arg1_incoming?: HistoricalNameRecord[]
-): HistoricalNameRecord[] {
-  //Convert from parameters
-  let existing = arg0_existing
-  let incoming = arg1_incoming
-
-  //Guard clauses
-  if (!incoming || incoming.length === 0)
-    return existing || []
-  if (!existing || existing.length === 0)
-    return incoming
-
-  //Declare local instance variables
-  let all_records: HistoricalNameRecord[]
-  let existing_min_year = 9999
-  let incoming_min_year = 9999
-  let merged_timeline: HistoricalNameRecord[] = []
+  let center_lat = Math.floor(city.coords[0])
+  let center_lng = Math.floor(city.coords[1])
+  let label_set = buildAliasSet(label)
+  let self_raw = raw_city_name_by_key.get(city.key) || city.name || ''
+  let self_raw_set = buildAliasSet(cleanCandidateCityString(self_raw.split(';')[0]))
 
   //Function body
-  for (let i = 0; i < existing.length; i++) {
-    let y = (existing[i].year_frac !== undefined && existing[i].year_frac !== null)
-      ? existing[i].year_frac
-      : parseYearMonthDay(existing[i].date).year_frac
-    if (y < existing_min_year)
-      existing_min_year = y
-  }
-  for (let i = 0; i < incoming.length; i++) {
-    let y = (incoming[i].year_frac !== undefined && incoming[i].year_frac !== null)
-      ? incoming[i].year_frac
-      : parseYearMonthDay(incoming[i].date).year_frac
-    if (y < incoming_min_year)
-      incoming_min_year = y
-  }
+  if (label_set.aliases.length === 0 && label_set.stems.length === 0)
+    return false
 
-  if (existing.length > 1 && incoming.length === 1 && incoming_min_year >= 1900 && existing_min_year < 1900)
-    return existing
+  if (matchesAliasSet(label_set, self_raw_set))
+    return false
 
-  if (incoming.length > 1 && existing.length === 1 && existing_min_year >= 1900 && incoming_min_year < 1900)
-    return incoming
-
-  all_records = [...existing, ...incoming]
-  for (let i = 0; i < all_records.length; i++) {
-    if (all_records[i].year_frac === undefined || all_records[i].year_frac === null)
-      all_records[i].year_frac = parseYearMonthDay(all_records[i].date).year_frac
-  }
-  all_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
-
-  for (let x = 0; x < all_records.length; x++) {
-    let rec = all_records[x]
-    let last = merged_timeline[merged_timeline.length - 1]
-
-    if (last) {
-      if (Math.abs(rec.year_frac - last.year_frac) < 0.05) {
-        if (rec.date.length > last.date.length)
-          merged_timeline[merged_timeline.length - 1] = rec
+  for (let d_lat = -1; d_lat <= 1; d_lat++) {
+    for (let d_lng = -1; d_lng <= 1; d_lng++) {
+      let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+      if (!cell)
         continue
+
+      for (let i = 0; i < cell.length; i++) {
+        let other = cell[i]
+        if (!other || other.key === city.key || !other.coords)
+          continue
+
+        let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], city.coords[0], city.coords[1])
+        if (dist > radius_km)
+          continue
+
+        let other_primary = primary_alias_cache.get(other.key)
+        if (!other_primary) {
+          other_primary = buildPrimaryNameSet(other, raw_city_name_by_key.get(other.key))
+          primary_alias_cache.set(other.key, other_primary)
+        }
+        if (matchesAliasSet(label_set, other_primary))
+          return true
       }
-      if (last.name.toLowerCase().trim() === rec.name.toLowerCase().trim())
-        continue
     }
-
-    merged_timeline.push(rec)
   }
 
   //Return statement
-  return merged_timeline
+  return false
 }
 
 
 /**
- * Resolves a city's historical name at the specified year or date.
+ * Checks whether a date string is one of the 5-year GHSL epoch markers (1975.1.1 .. 2025.1.1).
  *
- * @param {CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[] }} arg0_city
- * @param {number | string} [arg1_year]
+ * @param {string} [arg0_date]
  *
- * @returns {string}
+ * @returns {boolean}
  */
-export function resolveCityNameAtYear (
-  arg0_city: CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[]; ghsl_name?: string; reconciled_name?: string },
-  arg1_year?: number | string
-): string {
+function isSyntheticGhslEpochDate (arg0_date?: string): boolean {
   //Convert from parameters
-  let city = arg0_city
-  let year = arg1_year
-
-  //Guard clauses
-  if (!city)
-    return ''
+  let date_str = String(arg0_date || '').trim()
 
   //Return statement
-  return resolveHistoricalCityName(city, year)
+  return SYNTHETIC_GHSL_EPOCHS.has(date_str)
+}
+
+
+/**
+ * Returns true when a metadata entry is a single-entry 5-year GHSL epoch stub with no capital records.
+ *
+ * @param {CityMetadataEntry | null | undefined} arg0_meta
+ *
+ * @returns {boolean}
+ */
+export function isSyntheticGhslEpochStub (arg0_meta: CityMetadataEntry | null | undefined): boolean {
+  //Convert from parameters
+  let meta = arg0_meta
+
+  //Declare local instance variables
+  let has_capital: boolean
+  let hn: HistoricalNameRecord[]
+
+  //Guard clauses
+  if (!meta)
+    return false
+
+  //Function body
+  hn = Array.isArray(meta.historical_names) ? meta.historical_names : []
+  if (hn.length !== 1)
+    return false
+
+  has_capital = Boolean(
+    (meta.capital && Object.keys(meta.capital).length > 0) ||
+    (meta.capitals && Object.keys(meta.capitals).length > 0) ||
+    (meta.capital_records && meta.capital_records.length > 0)
+  )
+  if (has_capital)
+    return false
+
+  //Return statement
+  return isSyntheticGhslEpochDate(hn[0]?.date)
 }
 
 
@@ -467,537 +737,176 @@ export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry
 
 
 /**
- * Applies per-version city metadata to indexed cities.
+ * Checks whether two AliasStemSet records share a normalised alias or stem (minimum stem length 3).
  *
- * @param {Record<string, CityIndexEntry>} arg0_indexed_record
- * @param {string} [arg1_dataset_name='stadester_2.0']
- * @returns {void}
+ * @param {AliasStemSet} arg0_source
+ * @param {AliasStemSet} arg1_target
+ *
+ * @returns {boolean}
  */
-export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndexEntry>, arg1_dataset_name?: string): void {
+function matchesAliasSet (arg0_source: AliasStemSet, arg1_target: AliasStemSet): boolean {
   //Convert from parameters
-  let indexed = arg0_indexed_record
-  let dataset_name = (arg1_dataset_name) ? arg1_dataset_name : getDefaultStadesterDatasetId()
+  let source = arg0_source
+  let target = arg1_target
 
-  //Declare local instance variables
-  let all_keys = Object.keys(indexed)
-  let binding_state = new Map<string, { has_modern_entry: boolean; has_name_match: boolean; max_hn_year: number }>()
-  let city_alias_cache = new Map<string, { aliases: string[]; stems: string[] }>()
-  let meta_list = loadCityMetadata(dataset_name)
-  let spatial_grid: Record<string, CityIndexEntry[]> = {}
-
-  //Guard clauses
-  if (!meta_list || meta_list.length === 0 || all_keys.length === 0)
-    return
-
-  //Function body
-  for (let x = 0; x < all_keys.length; x++) {
-    let city = indexed[all_keys[x]]
-    if (city.coords && Array.isArray(city.coords)) {
-      let bin_lat = Math.floor(city.coords[0])
-      let bin_lng = Math.floor(city.coords[1])
-      let bin_key = `${bin_lat},${bin_lng}`
-      if (!spatial_grid[bin_key])
-        spatial_grid[bin_key] = []
-      spatial_grid[bin_key].push(city)
-    }
-  }
-
-  let buildAliasSet = function (arg0_name?: string, arg1_other?: string | string[]): { aliases: string[]; stems: string[] } {
-    let raw_list: string[] = []
-    if (arg0_name)
-      raw_list.push(arg0_name)
-    if (Array.isArray(arg1_other)) {
-      raw_list.push(...arg1_other)
-    } else if (typeof arg1_other === 'string') {
-      raw_list.push(arg1_other)
-    }
-    let aliases: string[] = []
-    let stems: string[] = []
-    for (let i = 0; i < raw_list.length; i++) {
-      let a = normalizeCityAlias(raw_list[i] || '')
-      let s = normalizeCapitalNameStem(raw_list[i] || '')
-      if (a)
-        aliases.push(a)
-      if (s)
-        stems.push(s)
-    }
-    return { aliases, stems }
-  }
-
-  let getCachedCityAliases = function (arg0_city: CityIndexEntry): { aliases: string[]; stems: string[] } {
-    let cache_k = arg0_city.key
-    let cached = city_alias_cache.get(cache_k)
-    if (cached)
-      return cached
-    let built = buildAliasSet(arg0_city.name, arg0_city.other_names)
-    city_alias_cache.set(cache_k, built)
-    return built
-  }
-
-  for (let i = 0; i < meta_list.length; i++) {
-    let best_city: CityIndexEntry | null = null
-    let best_exact_city: CityIndexEntry | null = null
-    let best_named_city: CityIndexEntry | null = null
-    let meta = meta_list[i]
-    let min_dist = 999999
-    let min_exact_dist = 999999
-    let min_named_dist = 999999
-    let target_lat = meta.coords[1]
-    let target_lng = meta.coords[0]
-    let local_meta_name = normalizeCityAlias(meta.name || '')
-    let meta_alias_info = buildAliasSet(meta.name, (meta as any).other_names)
-    let meta_aliases = meta_alias_info.aliases
-    let meta_stems = meta_alias_info.stems
-
-    if (meta.key && indexed[meta.key]) {
-      best_city = indexed[meta.key]
-      min_dist = 0
-    }
-
-    if (!best_city) {
-      let center_lat = Math.floor(target_lat)
-      let center_lng = Math.floor(target_lng)
-
-      for (let d_lat = -1; d_lat <= 1; d_lat++) {
-        for (let d_lng = -1; d_lng <= 1; d_lng++) {
-          let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
-          if (cell) {
-            for (let c = 0; c < cell.length; c++) {
-              let candidate = cell[c]
-              let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
-              if (dist <= 0.1 && dist < min_exact_dist) {
-                min_exact_dist = dist
-                best_exact_city = candidate
-              }
-              if (dist <= 50 && dist < min_named_dist) {
-                let cand_info = getCachedCityAliases(candidate)
-                let alias_hit = meta_aliases.some((ma) => cand_info.aliases.includes(ma))
-                let stem_hit = meta_stems.some((ms) => ms.length >= 3 && cand_info.stems.includes(ms))
-                if (alias_hit || stem_hit) {
-                  min_named_dist = dist
-                  best_named_city = candidate
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (best_named_city) {
-        best_city = best_named_city
-        min_dist = min_named_dist
-      } else if (best_exact_city) {
-        best_city = best_exact_city
-        min_dist = min_exact_dist
-      }
-    }
-
-    if (best_city && min_dist <= 50) {
-      let is_exact_coord_match = min_dist <= 0.1
-      let local_best_name = normalizeCityAlias(best_city.name || '')
-      let best_info = getCachedCityAliases(best_city)
-      let is_name_match =
-        meta_aliases.some((ma) => best_info.aliases.includes(ma)) ||
-        meta_stems.some((ms) => ms.length >= 3 && best_info.stems.includes(ms))
-
-      if (!is_exact_coord_match && !is_name_match)
-        continue
-
-      let meta_max_year = -9999
-      for (let h = 0; h < (meta.historical_names || []).length; h++) {
-        let yf = meta.historical_names[h].year_frac
-        if (yf > meta_max_year)
-          meta_max_year = yf
-      }
-      for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
-        let yf = meta.capital_records![c_i].year_frac
-        if (yf > meta_max_year)
-          meta_max_year = yf
-      }
-      let meta_is_modern = meta_max_year >= 1700
-      let prev_binding = binding_state.get(best_city.key)
-
-      //Guard against secondary unrelated metadata (e.g. Vatican City at Roma coords, Barawa at Mogadishu coords, Lawdar at Aden coords)
-      if (!is_name_match && prev_binding?.has_name_match) {
-        if (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern))
-          continue
-      }
-
-      let meta_extra_aliases: string[] = []
-      if (meta.name)
-        meta_extra_aliases.push(meta.name)
-      if (Array.isArray((meta as any).other_names))
-        meta_extra_aliases.push(...(meta as any).other_names)
-      if (meta.historical_names) {
-        for (let h = 0; h < meta.historical_names.length; h++)
-          meta_extra_aliases.push(meta.historical_names[h].name)
-      }
-
-      let should_set_name = false
-      if ((is_exact_coord_match || min_dist <= 15) && meta.name && !best_city.key.startsWith('ghsl-')) {
-        if (!prev_binding) {
-          should_set_name = true
-        } else if (is_name_match && !prev_binding.has_name_match) {
-          should_set_name = true
-        } else if (is_name_match && meta_max_year >= prev_binding.max_hn_year && !(prev_binding.has_modern_entry && meta_max_year < 1700)) {
-          should_set_name = true
-        }
-      }
-
-      if (should_set_name && meta.name) {
-        if (best_city.name && best_city.name !== meta.name)
-          meta_extra_aliases.push(best_city.name)
-        best_city.name = meta.name
-        best_city.metadata_name = meta.name
-        city_alias_cache.delete(best_city.key)
-      }
-
-      if (is_name_match || !prev_binding?.has_name_match) {
-        mergeCityOtherNames(best_city, meta_extra_aliases)
-        city_alias_cache.delete(best_city.key)
-      }
-
-      if (meta.historical_names && meta.historical_names.length > 0 && (is_name_match || !prev_binding?.has_name_match || !meta_is_modern))
-        best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
-
-      binding_state.set(best_city.key, {
-        has_modern_entry: Boolean(prev_binding?.has_modern_entry || (is_name_match && meta_is_modern)),
-        has_name_match: Boolean(prev_binding?.has_name_match || is_name_match),
-        max_hn_year: Math.max(prev_binding?.max_hn_year ?? -9999, meta_max_year),
-      })
-
-      mergeCityCapitalRecords(best_city, meta)
-
-      let center_lat = Math.floor(target_lat)
-      let center_lng = Math.floor(target_lng)
-
-      for (let d_lat = -1; d_lat <= 1; d_lat++) {
-        for (let d_lng = -1; d_lng <= 1; d_lng++) {
-          let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
-          if (cell) {
-            for (let c = 0; c < cell.length; c++) {
-              let other = cell[c]
-              if (other.key === best_city.key)
-                continue
-
-              let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
-              if (dist <= 25) {
-                let other_info = getCachedCityAliases(other)
-
-                let is_era_counterpart =
-                  (best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
-                  (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))
-
-                let is_agg_counterpart = Boolean(
-                  (other.is_agglomeration && (other.is_agglomeration_of === local_best_name || other.is_agglomeration_of === local_meta_name))
-                )
-
-                let is_same_settlement_counterpart = Boolean(
-                  dist <= 15 &&
-                  (meta_aliases.some((ma) => other_info.aliases.includes(ma)) ||
-                   meta_stems.some((ms) => ms.length >= 3 && other_info.stems.includes(ms)))
-                )
-
-                if (!is_era_counterpart && !is_agg_counterpart && !is_same_settlement_counterpart)
-                  continue
-
-                let is_counterpart_name_match =
-                  is_agg_counterpart ||
-                  is_same_settlement_counterpart ||
-                  meta_aliases.some((ma) => other_info.aliases.includes(ma)) ||
-                  meta_stems.some((ms) => ms.length >= 3 && other_info.stems.includes(ms))
-                if (is_counterpart_name_match) {
-                  let prev_other = binding_state.get(other.key)
-                  let can_rename_other = Boolean(
-                    dist <= 15 &&
-                    meta.name &&
-                    !other.key.startsWith('ghsl-') &&
-                    (is_same_settlement_counterpart || /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '')) &&
-                    (!prev_other || (meta_max_year >= prev_other.max_hn_year && !(prev_other.has_modern_entry && meta_max_year < 1700)))
-                  )
-                  if (can_rename_other && meta.name) {
-                    if (other.name && other.name !== meta.name)
-                      meta_extra_aliases.push(other.name)
-                    other.name = meta.name
-                    other.metadata_name = meta.name
-                  }
-                  mergeCityOtherNames(other, meta_extra_aliases)
-                  city_alias_cache.delete(other.key)
-                  if (meta.historical_names && meta.historical_names.length > 0)
-                    other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
-                  binding_state.set(other.key, {
-                    has_modern_entry: Boolean(prev_other?.has_modern_entry || meta_is_modern),
-                    has_name_match: true,
-                    max_hn_year: Math.max(prev_other?.max_hn_year ?? -9999, meta_max_year),
-                  })
-                  mergeCityCapitalRecords(other, meta)
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  //Post-pass: ensure modern cities with post-1950 populations resolve to their latest modern metadata name rather than ancient/raw Populstat labels
-  for (let i = 0; i < all_keys.length; i++) {
-    let city = indexed[all_keys[i]]
-    if (!city || city.key.startsWith('ghsl-'))
-      continue
-    if ((city.max_year ?? 0) >= 1950 && city.historical_names && city.historical_names.length > 0) {
-      let last_hn = city.historical_names[city.historical_names.length - 1]
-      let name_stem = normalizeCapitalNameStem(city.name || '')
-      let has_ancient_match = city.historical_names.some((arg0_h) =>
-        arg0_h.year_frac < 1500 && normalizeCapitalNameStem(arg0_h.name) === name_stem
-      )
-      if (has_ancient_match && last_hn.year_frac >= 600 && normalizeCapitalNameStem(last_hn.name) !== name_stem) {
-        mergeCityOtherNames(city, [city.name])
-        city.name = last_hn.name
-      }
-    }
-    if (city.metadata_name || binding_state.has(city.key)) {
-      city.metadata_name = city.name
-      city.reconciled_name = city.name
-      city.ghsl_name = city.name
-    }
-  }
-
-  console.log(`[StadesterMetadata] Successfully bound ${meta_list.length} historical city metadata entries.`)
+  //Return statement
+  return source.aliases.some((arg0_a) => target.aliases.includes(arg0_a)) ||
+    source.stems.some((arg0_s) => arg0_s.length >= 3 && target.stems.includes(arg0_s))
 }
 
 
 /**
- * Binds authoritative state capital timelines from data/stadester/state_capitals.json directly to indexed cities.
+ * Merges two historical name records chronologically, preserving rich multi-entry timelines.
+ * Ensures that modern placeholder entries (e.g. single 5-year GHSL epoch stubs) never overwrite earlier historical names.
  *
- * @param {Record<string, CityIndexEntry>} arg0_indexed_record
+ * @param {HistoricalNameRecord[]} [arg0_existing]
+ * @param {HistoricalNameRecord[]} [arg1_incoming]
  *
- * @returns {void}
+ * @returns {HistoricalNameRecord[]}
  */
-export function applyStateCapitals (arg0_indexed_record: Record<string, CityIndexEntry>): void {
+export function mergeHistoricalNames (
+  arg0_existing?: HistoricalNameRecord[],
+  arg1_incoming?: HistoricalNameRecord[]
+): HistoricalNameRecord[] {
   //Convert from parameters
-  let indexed = arg0_indexed_record
-
-  //Declare local instance variables
-  let all_city_intervals: Array<[CityIndexEntry, Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }> ]>
-  let all_keys: string[]
-  let all_state_ids: string[]
-  let city_intervals = new Map<CityIndexEntry, Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }>>()
-  let file_path = FilepathDefines.get().filepaths.stadester_capitals
-  let name_country_to_city = new Map<string, CityIndexEntry[]>()
-  let norm_key_to_cities = new Map<string, CityIndexEntry[]>()
-  let state_capitals: Record<string, { acapital: boolean; timeline?: Array<{ city: string; key?: string; start: string; start_frac: number; stop: string; stop_frac: number }> }>
-  let updated_count = 0
+  let existing = arg0_existing
+  let incoming = arg1_incoming
 
   //Guard clauses
-  if (!fs.existsSync(file_path))
-    return
+  if (!incoming || incoming.length === 0)
+    return existing || []
+  if (!existing || existing.length === 0)
+    return incoming
+
+  //Declare local instance variables
+  let all_records: HistoricalNameRecord[]
+  let existing_min_year = 9999
+  let incoming_min_year = 9999
+  let is_existing_epoch_stub = existing.length === 1 && isSyntheticGhslEpochDate(existing[0]?.date)
+  let is_incoming_epoch_stub = incoming.length === 1 && isSyntheticGhslEpochDate(incoming[0]?.date)
+  let merged_timeline: HistoricalNameRecord[] = []
 
   //Function body
-  try {
-    state_capitals = JSON.parse(fs.readFileSync(file_path, 'utf-8'))
-    state_capitals_cache = state_capitals
-  } catch (arg0_err) {
-    console.warn('[StadesterMetadata] Failed to load state_capitals.json:', arg0_err)
-    return
+  for (let i = 0; i < existing.length; i++) {
+    let y = (existing[i].year_frac !== undefined && existing[i].year_frac !== null)
+      ? existing[i].year_frac
+      : parseYearMonthDay(existing[i].date).year_frac
+    if (y < existing_min_year)
+      existing_min_year = y
+  }
+  for (let i = 0; i < incoming.length; i++) {
+    let y = (incoming[i].year_frac !== undefined && incoming[i].year_frac !== null)
+      ? incoming[i].year_frac
+      : parseYearMonthDay(incoming[i].date).year_frac
+    if (y < incoming_min_year)
+      incoming_min_year = y
   }
 
-  all_keys = Object.keys(indexed)
+  if (is_incoming_epoch_stub && existing.length >= 1 && existing_min_year < incoming_min_year)
+    return existing
+  if (is_existing_epoch_stub && incoming.length >= 1 && incoming_min_year < existing_min_year)
+    return incoming
 
-  norm_key_to_cities = new Map()
-  for (let i = 0; i < all_keys.length; i++) {
-    let city = indexed[all_keys[i]]
-    let n_k = normalizeCityKey(all_keys[i])
-    if (!norm_key_to_cities.has(n_k))
-      norm_key_to_cities.set(n_k, [])
-    norm_key_to_cities.get(n_k)!.push(city)
+  if (existing.length > 1 && incoming.length === 1 && incoming_min_year >= 1900 && existing_min_year < 1900)
+    return existing
 
-    let primary_nk = getPrimaryCityNormKey(all_keys[i])
-    if (primary_nk && primary_nk !== n_k) {
-      if (!norm_key_to_cities.has(primary_nk))
-        norm_key_to_cities.set(primary_nk, [])
-      norm_key_to_cities.get(primary_nk)!.push(city)
-    }
+  if (incoming.length > 1 && existing.length === 1 && existing_min_year >= 1900 && incoming_min_year < 1900)
+    return incoming
 
-    let nc_key = `${(city.name || '').toLowerCase().trim()}|${(city.country || '').toLowerCase().trim()}`
-    if (!name_country_to_city.has(nc_key)) {
-      name_country_to_city.set(nc_key, [])
-    }
-    name_country_to_city.get(nc_key)!.push(city)
+  all_records = [...existing, ...incoming]
+  for (let i = 0; i < all_records.length; i++) {
+    if (all_records[i].year_frac === undefined || all_records[i].year_frac === null)
+      all_records[i].year_frac = parseYearMonthDay(all_records[i].date).year_frac
   }
+  all_records.sort((arg0_a, arg1_b) => arg0_a.year_frac - arg1_b.year_frac)
 
-  for (let x = 0; x < all_keys.length; x++) {
-    let city = indexed[all_keys[x]]
-    if (city.capital_records && city.capital_records.length > 0) {
-      let ivs: Array<{ is_authoritative?: boolean; start_date: string; start_frac: number; state_id: number; stop_date: string; stop_frac: number }> = []
-      for (let y = 0; y < city.capital_records.length; y++) {
-        let rec = city.capital_records[y]
-        if (rec.state_id !== null && rec.state_id !== undefined) {
-          let s_id_str = String(rec.state_id)
-          if (state_capitals[s_id_str]?.acapital)
-            continue
+  for (let x = 0; x < all_records.length; x++) {
+    let rec = all_records[x]
+    let last = merged_timeline[merged_timeline.length - 1]
 
-          let next_rec = (y + 1 < city.capital_records.length) ? city.capital_records[y + 1] : null
-          let stop_date = next_rec ? next_rec.date : '2026.1.1'
-          let stop_frac = next_rec ? next_rec.year_frac : 2026
-          ivs.push({
-            is_authoritative: false,
-            start_date: rec.date,
-            start_frac: rec.year_frac,
-            state_id: Number(rec.state_id),
-            stop_date: stop_date,
-            stop_frac: stop_frac,
-          })
-        }
-      }
-      if (ivs.length > 0) {
-        city_intervals.set(city, ivs)
-      }
-    }
-  }
-
-  all_state_ids = Object.keys(state_capitals)
-  for (let z = 0; z < all_state_ids.length; z++) {
-    let state_id = all_state_ids[z]
-    let sc_entry = state_capitals[state_id]
-    if (!sc_entry || sc_entry.acapital || !sc_entry.timeline || sc_entry.timeline.length === 0)
-      continue
-
-    let s_id_num = Number(state_id)
-
-    for (let a = 0; a < sc_entry.timeline.length; a++) {
-      let tl_item = sc_entry.timeline[a]
-      if (!tl_item.start)
+    if (last) {
+      if (Math.abs(rec.year_frac - last.year_frac) < 0.05) {
+        if (rec.date.length > last.date.length)
+          merged_timeline[merged_timeline.length - 1] = rec
         continue
-
-      let target_cities: CityIndexEntry[] = []
-
-      if (tl_item.key && indexed[tl_item.key])
-        target_cities.push(indexed[tl_item.key])
-
-      if (tl_item.key) {
-        let n_k = normalizeCityKey(tl_item.key)
-        let matches = norm_key_to_cities.get(n_k)
-        if (matches) {
-          for (let m = 0; m < matches.length; m++) {
-            if (!target_cities.includes(matches[m]))
-              target_cities.push(matches[m])
-          }
-        }
-        let primary_nk = getPrimaryCityNormKey(tl_item.key)
-        if (primary_nk) {
-          let primary_matches = norm_key_to_cities.get(primary_nk)
-          if (primary_matches) {
-            for (let m = 0; m < primary_matches.length; m++) {
-              if (!target_cities.includes(primary_matches[m]))
-                target_cities.push(primary_matches[m])
-            }
-          }
-        }
       }
-
-      if (target_cities.length === 0 && tl_item.city) {
-        let clean_c = tl_item.city.toLowerCase().trim()
-        for (let [nc, city_list] of name_country_to_city) {
-          if (nc.startsWith(`${clean_c}|`)) {
-            for (let m = 0; m < city_list.length; m++) {
-              if (!target_cities.includes(city_list[m]))
-                target_cities.push(city_list[m])
-            }
-          }
-        }
-      }
-
-      for (let tc = 0; tc < target_cities.length; tc++) {
-        let target_city = target_cities[tc]
-        let state = getStateById(s_id_num)
-        if (state && !isCityInsideStateBBox(target_city, state, 3.5))
-          continue
-
-        if (!city_intervals.has(target_city)) {
-          city_intervals.set(target_city, [])
-        }
-        let s_p = parseYearMonthDay(tl_item.start)
-        let e_p = tl_item.stop ? parseYearMonthDay(tl_item.stop) : { date: '2026.1.1', year_frac: 2026 }
-        city_intervals.get(target_city)!.push({
-          is_authoritative: true,
-          start_date: tl_item.start.trim(),
-          start_frac: tl_item.start_frac !== undefined ? tl_item.start_frac : s_p.year_frac,
-          state_id: s_id_num,
-          stop_date: tl_item.stop ? tl_item.stop.trim() : '2026.1.1',
-          stop_frac: tl_item.stop_frac !== undefined ? tl_item.stop_frac : e_p.year_frac,
-        })
-      }
+      if (last.name.toLowerCase().trim() === rec.name.toLowerCase().trim())
+        continue
     }
+
+    merged_timeline.push(rec)
   }
 
-  all_city_intervals = Array.from(city_intervals.entries())
-  for (let b = 0; b < all_city_intervals.length; b++) {
-    let city = all_city_intervals[b][0]
-    let intervals = all_city_intervals[b][1]
-    let pts: Array<{ date: string; year_frac: number }> = []
-    let seen_fracs = new Set<number>()
+  //Return statement
+  return merged_timeline
+}
 
-    for (let c = 0; c < intervals.length; c++) {
-      let iv = intervals[c]
-      if (!seen_fracs.has(iv.start_frac)) {
-        seen_fracs.add(iv.start_frac)
-        pts.push({ date: iv.start_date, year_frac: iv.start_frac })
-      }
-      if (!seen_fracs.has(iv.stop_frac)) {
-        seen_fracs.add(iv.stop_frac)
-        pts.push({ date: iv.stop_date, year_frac: iv.stop_frac })
-      }
-    }
 
-    pts.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+/**
+ * Resolves the filesystem path to the per-version city_metadata.json file for a given Stadestér dataset.
+ *
+ * @param {string} [arg0_dataset_name='stadester_2.0']
+ *
+ * @returns {string}
+ */
+export function resolveCityMetadataPath (arg0_dataset_name?: string): string {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
-    let cap_dict: Record<string, number | null> = {}
-    let prev_sid: number | null | undefined = undefined
+  //Declare local instance variables
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let configured = resolveStadesterVersionPaths(dataset_name)
+  let defines = FilepathDefines.get()
+  let filepaths = defines.filepaths || {}
+  let l_stad = (defines.root_folders && defines.root_folders.l_stad) ? defines.root_folders.l_stad : './data/stadester'
+  let versioned_path = path.join(l_stad, clean_stem, 'city_metadata.json')
 
-    for (let c = 0; c < pts.length; c++) {
-      let p = pts[c]
-      let sample_frac = p.year_frac >= 2026 ? 2026 : p.year_frac + 0.0001
-      let matching_ivs = intervals.filter((arg0_iv) => sample_frac >= arg0_iv.start_frac && (sample_frac <= arg0_iv.stop_frac || (arg0_iv.stop_frac >= 2026 && p.year_frac >= 2026)))
-      let active_iv: { is_authoritative?: boolean; start_frac?: number; state_id: number; stop_frac?: number } | null = null
-
-      if (matching_ivs.length > 0) {
-        let auth_ivs = matching_ivs.filter((arg0_iv) => arg0_iv.is_authoritative)
-        let candidates = auth_ivs.length > 0 ? auth_ivs : matching_ivs
-
-        candidates.sort((arg0_a, arg0_b) => {
-          let state_a = getStateById(arg0_a.state_id)
-          let state_b = getStateById(arg0_b.state_id)
-          let inside_a = state_a ? (isCityInsideStateBBox(city, state_a, 3.5) ? 1 : 0) : 1
-          let inside_b = state_b ? (isCityInsideStateBBox(city, state_b, 3.5) ? 1 : 0) : 1
-          if (inside_a !== inside_b)
-            return inside_b - inside_a
-
-          let dur_a = (arg0_a.stop_frac !== undefined && arg0_a.start_frac !== undefined) ? (arg0_a.stop_frac - arg0_a.start_frac) : 99999
-          let dur_b = (arg0_b.stop_frac !== undefined && arg0_b.start_frac !== undefined) ? (arg0_b.stop_frac - arg0_b.start_frac) : 99999
-          return dur_a - dur_b
-        })
-        active_iv = candidates[0]
-      }
-
-      let sid = active_iv ? active_iv.state_id : null
-      if (sid !== prev_sid) {
-        cap_dict[p.date] = sid
-        prev_sid = sid
-      }
-    }
-
-    city.capital = cap_dict as any
-    city.capital_records = Object.keys(cap_dict).map((arg0_dk) => {
-      let parsed = parseYearMonthDay(arg0_dk)
-      return {
-        date: arg0_dk,
-        state_id: cap_dict[arg0_dk],
-        year_frac: parsed.year_frac,
-      }
-    }).sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
-    updated_count++
+  //Function body
+  if (configured.metadata_path && fs.existsSync(configured.metadata_path))
+    return configured.metadata_path
+  if (configured.path) {
+    let version_dir = configured.path.endsWith('.json') ? path.dirname(configured.path) : configured.path
+    let derived_meta_path = path.join(version_dir, 'city_metadata.json')
+    if (fs.existsSync(derived_meta_path))
+      return derived_meta_path
   }
+  if (fs.existsSync(versioned_path))
+    return versioned_path
 
-  console.log(`[StadesterMetadata] Successfully bound authoritative state capitals to ${updated_count} cities.`)
+  let define_key = `${clean_stem.replace(/\./g, '_')}_metadata`
+  if (filepaths[define_key] && fs.existsSync(filepaths[define_key]))
+    return filepaths[define_key]
+
+  if (filepaths.stadester_metadata && fs.existsSync(filepaths.stadester_metadata))
+    return filepaths.stadester_metadata
+
+  //Return statement
+  return fs.existsSync(path.join(l_stad, 'city_metadata.json'))
+    ? path.join(l_stad, 'city_metadata.json')
+    : versioned_path
+}
+
+
+/**
+ * Resolves a city's historical name at the specified year or date.
+ *
+ * @param {CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[]; ghsl_name?: string; reconciled_name?: string }} arg0_city
+ * @param {number | string} [arg1_year]
+ *
+ * @returns {string}
+ */
+export function resolveCityNameAtYear (
+  arg0_city: CityIndexEntry | { name: string; historical_names?: HistoricalNameRecord[]; ghsl_name?: string; reconciled_name?: string },
+  arg1_year?: number | string
+): string {
+  //Convert from parameters
+  let city = arg0_city
+  let year = arg1_year
+
+  //Guard clauses
+  if (!city)
+    return ''
+
+  //Return statement
+  return resolveHistoricalCityName(city, year)
 }

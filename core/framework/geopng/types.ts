@@ -212,6 +212,7 @@ export interface CityFullRecord {
   'prov.'?: string
   region?: string
   rni?: Record<string, number>
+  sources?: string[]
   type?: string
 }
 

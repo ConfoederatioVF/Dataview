@@ -316,6 +316,7 @@ export let resolveHistoricalCityName = function (
   let default_name = ''
   let first_post_1975: HistoricalNameRecord | null = null
   let hist: HistoricalNameRecord[]
+  let is_ghsl_entry = false
   let latest_post_1975: HistoricalNameRecord | null = null
   let parsed: ParsedDateRecord
   let rec_frac: number
@@ -325,7 +326,8 @@ export let resolveHistoricalCityName = function (
   if (!city)
     return ''
 
-  if ((city as any)?.key && String((city as any).key).startsWith('ghsl-')) {
+  is_ghsl_entry = Boolean((city as any)?.key && String((city as any).key).startsWith('ghsl-'))
+  if (is_ghsl_entry) {
     default_name = (city as any)?.reconciled_name || (city as any)?.ghsl_name || city?.name || ''
   } else {
     default_name = (city as any)?.metadata_name || city?.name || (city as any)?.reconciled_name || (city as any)?.ghsl_name || ''
@@ -348,8 +350,8 @@ export let resolveHistoricalCityName = function (
   }
 
   //Function body
-  //1. Historical era (pre-1975AD): standard retrospective resolution
-  if (target_frac < 1975) {
+  //1. Continuous chronological step resolution for unified (non-ghsl-*) settlements across all years, and pre-1975 for legacy ghsl-*
+  if (!is_ghsl_entry || target_frac < 1975) {
     for (let i = hist.length - 1; i >= 0; i--) {
       rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
         ? hist[i].year_frac
@@ -366,7 +368,7 @@ export let resolveHistoricalCityName = function (
     return default_name
   }
 
-  //2. Modern era (>= 1975AD): bifurcated post-1975 resolution
+  //2. Legacy post-1975 bifurcated resolution (retained solely for 1.0/1.1 ghsl-* entries)
   for (let i = 0; i < hist.length; i++) {
     rec_frac = (hist[i].year_frac !== undefined && hist[i].year_frac !== null)
       ? hist[i].year_frac
@@ -391,7 +393,7 @@ export let resolveHistoricalCityName = function (
   if (first_post_1975 && active_1975_legacy)
     return active_1975_legacy.name
 
-  //Case 2C: No post-1975 changes exist; disregard pre-1975 historical names and return canonical modern name
+  //Case 2C: No post-1975 changes exist on legacy ghsl-* entry; return canonical modern name
   //Return statement
   return default_name
 }
@@ -501,6 +503,33 @@ export let isCityCapitalAtYear = function (
 }
 
 /**
+ * Reorders inverted trailing Arabic or French definite articles (`City, Al-` / `Havre, Le`) to prefix position.
+ *
+ * @param {string} arg0_text - City name string
+ *
+ * @returns {string}
+ */
+let normalizeInvertedArticle = function (arg0_text: string): string {
+  //Convert from parameters
+  let text = arg0_text
+
+  //Declare local instance variables
+  let inv_match: RegExpMatchArray | null
+
+  //Guard clauses
+  if (!text)
+    return ''
+
+  //Function body
+  inv_match = text.match(/^([^,]+),\s*(al|el|ad|ar|as|at|az|an|ash|le|la|les)-?$/i)
+  if (inv_match)
+    return `${inv_match[2]} ${inv_match[1]}`
+
+  //Return statement
+  return text
+}
+
+/**
  * Normalises a city name or capital label to a canonical stem for cross-script/transliteration matching.
  *
  * @param {string} arg0_name - City or capital name string
@@ -517,14 +546,12 @@ export let normalizeCapitalNameStem = function (arg0_name: string): string {
 
   //Declare local instance variables
   let base: string
-  let inv_match: RegExpMatchArray | null
   let stem: string
 
   //Function body
-  base = String(name).split(';')[0].replace(/\s*\([^)]*\)/g, '').replace(/\(s\)/gi, '').trim()
-  inv_match = base.match(/^([^,]+),\s*(al|el|ad|ar|as|at|az|an|ash)-?$/i)
-  if (inv_match)
-    base = `${inv_match[2]} ${inv_match[1]}`
+  base = normalizeInvertedArticle(
+    String(name).split(';')[0].replace(/\s*\([^)]*\)/g, '').replace(/\(s\)/gi, '').trim()
+  )
 
   stem = base
     .toLowerCase()
@@ -595,7 +622,6 @@ export let normalizePrimaryCityKey = function (arg0_key: string): string {
   //Declare local instance variables
   let city_part: string
   let country: string
-  let inv_match: RegExpMatchArray | null
   let parts: string[]
   let primary_city: string
   let stripped: string
@@ -605,11 +631,7 @@ export let normalizePrimaryCityKey = function (arg0_key: string): string {
   parts = stripped.split('-')
   country = parts.length > 1 ? parts[parts.length - 1] : ''
   city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
-  primary_city = city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim()
-
-  inv_match = primary_city.match(/^([^,]+),\s*(al|el|ad|ar|as|at|az|an|ash)-?$/i)
-  if (inv_match)
-    primary_city = `${inv_match[2]} ${inv_match[1]}`
+  primary_city = normalizeInvertedArticle(city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim())
 
   //Return statement
   return (primary_city + (country ? '-' + country : ''))
@@ -639,12 +661,17 @@ export let normalizeCityAlias = function (arg0_name: string): string {
   if (!name)
     return ''
 
+  //Declare local instance variables
+  let base: string
+
+  //Function body
+  base = normalizeInvertedArticle(String(name).replace(/\s*\([^)]*\)/g, '').trim())
+
   //Return statement
-  return name
+  return base
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/\s*\([^)]*\)/g, '')
     .replace(/[\.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()

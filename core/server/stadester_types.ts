@@ -96,6 +96,8 @@ export interface CityIndexEntry {
   population?: Record<string, number>
   reconciled_name?: string
   region?: string
+  sources?: string[]
+  type?: string
   years: number[]
 }
 

@@ -259,6 +259,25 @@ export function getCityByKey (
       merged_other_names = cp.other_names
     }
 
+    let raw_sources: string[] = []
+    if (Array.isArray(entry.sources)) {
+      for (let i = 0; i < entry.sources.length; i++)
+        raw_sources.push(entry.sources[i])
+    } else if (typeof entry.type === 'string' && entry.type) {
+      raw_sources.push(entry.type)
+    }
+    if (cp) {
+      if (Array.isArray(cp.sources)) {
+        for (let i = 0; i < cp.sources.length; i++)
+          raw_sources.push(cp.sources[i])
+      } else if (typeof cp.type === 'string' && cp.type) {
+        raw_sources.push(cp.type)
+      }
+    }
+    let merged_sources = raw_sources.length > 0
+      ? Array.from(new Set(raw_sources.map((arg0_s) => String(arg0_s || '').trim()).filter(Boolean)))
+      : undefined
+
     return {
       ...entry,
       area: merged_area,
@@ -275,6 +294,7 @@ export function getCityByKey (
       name: resolveCityNameAtYear(entry, effective_year),
       other_names: merged_other_names,
       population: merged_pop,
+      sources: merged_sources,
     }
   }
 

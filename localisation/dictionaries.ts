@@ -40,6 +40,9 @@ export interface LocalisationConfig {
     modePreviewTitle: string
     modeRebuildDesc: string
     modeRebuildTitle: string
+    orphanReclaimed?: string
+    portInUseError?: string
+    portInUseUnknown?: string
     portWait: string
     runningControls: string
     runningStats: string

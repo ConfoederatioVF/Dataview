@@ -17,6 +17,9 @@
   // Per-machine local state file (gitignored via *.local) storing locked-in mode and TUI preferences
   local_state_file: 'autorun.local',
 
+  // Per-machine lock file (gitignored via *.local) tracking the active supervisor and child PIDs
+  lock_file: 'autorun.lock.local',
+
   // Countdown duration before automatically booting a locked-in mode (seconds)
   lock_in_countdown_seconds: 3,
 
@@ -28,6 +31,9 @@
 
   // V8 heap limit for child Node/Vite processes (MB)
   max_old_space_size_mb: 16384,
+
+  // Maximum consecutive internal supervisor crash recoveries before autorun launcher stops
+  max_supervisor_restarts: 5,
 
   // Directory for temporary Node diagnostic crash reports (cleaned up automatically after inspection)
   oom_report_dir: 'tests',

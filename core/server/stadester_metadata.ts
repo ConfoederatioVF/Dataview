@@ -5,16 +5,23 @@ import { clearStateCapitalsCache } from './stadester_capitals.ts'
 import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
 import { cleanCandidateCityString, isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import {
+  buildAliasStemSet,
   computeHaversineDistanceKm,
+  isSyntheticGhslEpochDate,
+  isSyntheticGhslEpochStub,
+  matchesAliasStemSet,
   normalizeCapitalNameStem,
   normalizeCityAlias,
   normalizeMetadataEntry,
   parseYearMonthDay,
   resolveHistoricalCityName,
+  type AliasStemSet,
   type CityMetadataEntry,
   type HistoricalNameRecord,
 } from '../framework/stadester/city_metadata_framework.ts'
 import {
+  buildPrimaryCityNameSet,
+  doesLabelMatchAnotherNearbyCity,
   mergeCityCapitalRecords,
   mergeCityOtherNames,
   type CityIndexEntry,
@@ -29,26 +36,9 @@ export {
   isCityCapitalAtYear,
   isStateAcapital,
 } from './stadester_capitals.ts'
+export { isSyntheticGhslEpochStub }
 
 let city_metadata_cache_by_path = new Map<string, { entries: CityMetadataEntry[]; mtime_ms: number }>()
-let SYNTHETIC_GHSL_EPOCHS = new Set<string>([
-  '1975.1.1',
-  '1980.1.1',
-  '1985.1.1',
-  '1990.1.1',
-  '1995.1.1',
-  '2000.1.1',
-  '2005.1.1',
-  '2010.1.1',
-  '2015.1.1',
-  '2020.1.1',
-  '2025.1.1',
-])
-
-interface AliasStemSet {
-  aliases: string[]
-  stems: string[]
-}
 
 interface BindingStateEntry {
   has_modern_entry: boolean
@@ -88,9 +78,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     let city = indexed[all_keys[x]]
     raw_city_name_by_key.set(city.key, city.name || '')
     if (city.coords && Array.isArray(city.coords)) {
-      let bin_lat = Math.floor(city.coords[0])
-      let bin_lng = Math.floor(city.coords[1])
-      let bin_key = `${bin_lat},${bin_lng}`
+      let bin_key = `${Math.floor(city.coords[0])},${Math.floor(city.coords[1])}`
       if (!spatial_grid[bin_key])
         spatial_grid[bin_key] = []
       spatial_grid[bin_key].push(city)
@@ -98,22 +86,20 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
   }
 
   let getCachedCityAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
-    let cache_k = arg0_city.key
-    let cached = city_alias_cache.get(cache_k)
+    let cached = city_alias_cache.get(arg0_city.key)
     if (cached)
       return cached
-    let built = buildAliasSet(arg0_city.name, arg0_city.other_names)
-    city_alias_cache.set(cache_k, built)
+    let built = buildAliasStemSet(arg0_city.name, arg0_city.other_names)
+    city_alias_cache.set(arg0_city.key, built)
     return built
   }
 
   let getCachedPrimaryAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
-    let cache_k = arg0_city.key
-    let cached = primary_alias_cache.get(cache_k)
+    let cached = primary_alias_cache.get(arg0_city.key)
     if (cached)
       return cached
-    let built = buildPrimaryNameSet(arg0_city, raw_city_name_by_key.get(cache_k))
-    primary_alias_cache.set(cache_k, built)
+    let built = buildPrimaryCityNameSet(arg0_city, raw_city_name_by_key.get(arg0_city.key))
+    primary_alias_cache.set(arg0_city.key, built)
     return built
   }
 
@@ -124,8 +110,8 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     let best_meta_name_primary_city: CityIndexEntry | null = null
     let best_primary_named_city: CityIndexEntry | null = null
     let meta = meta_list[i]
-    let meta_alias_info = buildAliasSet(meta.name, (meta as any).other_names)
-    let meta_name_info = buildAliasSet(meta.name)
+    let meta_alias_info = buildAliasStemSet(meta.name, (meta as any).other_names)
+    let meta_name_info = buildAliasStemSet(meta.name)
     let min_alias_named_dist = 999999
     let min_dist = 999999
     let min_exact_dist = 999999
@@ -159,9 +145,9 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
           if (dist <= 50) {
             let cand_all = getCachedCityAliases(candidate)
             let cand_primary = getCachedPrimaryAliases(candidate)
-            let meta_name_primary_hit = matchesAliasSet(meta_name_info, cand_primary)
-            let primary_hit = meta_name_primary_hit || matchesAliasSet(meta_alias_info, cand_primary)
-            let alias_only_hit = !primary_hit && matchesAliasSet(meta_alias_info, cand_all)
+            let meta_name_primary_hit = matchesAliasStemSet(meta_name_info, cand_primary)
+            let primary_hit = meta_name_primary_hit || matchesAliasStemSet(meta_alias_info, cand_primary)
+            let alias_only_hit = !primary_hit && matchesAliasStemSet(meta_alias_info, cand_all)
 
             if (meta_name_primary_hit) {
               has_meta_name_primary_within_50km = true
@@ -204,37 +190,31 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     let best_all_info = getCachedCityAliases(best_city)
     let best_primary_info = getCachedPrimaryAliases(best_city)
     let is_exact_coord_match = min_dist <= 0.1
-    let is_primary_name_match = matchesAliasSet(meta_alias_info, best_primary_info)
-    let is_alias_only_match = !is_primary_name_match && matchesAliasSet(meta_alias_info, best_all_info)
+    let is_primary_name_match = matchesAliasStemSet(meta_alias_info, best_primary_info)
+    let is_alias_only_match = !is_primary_name_match && matchesAliasStemSet(meta_alias_info, best_all_info)
     let is_name_match = is_primary_name_match || is_alias_only_match
 
-    if (!is_exact_coord_match && !is_name_match)
-      continue
-    if (is_alias_only_match && has_meta_name_primary_within_50km)
+    if ((!is_exact_coord_match && !is_name_match) || (is_alias_only_match && has_meta_name_primary_within_50km))
       continue
 
     let meta_max_year = -9999
     for (let h = 0; h < (meta.historical_names || []).length; h++) {
-      let yf = meta.historical_names[h].year_frac
-      if (yf > meta_max_year)
-        meta_max_year = yf
+      if (meta.historical_names[h].year_frac > meta_max_year)
+        meta_max_year = meta.historical_names[h].year_frac
     }
     for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
-      let yf = meta.capital_records![c_i].year_frac
-      if (yf > meta_max_year)
-        meta_max_year = yf
+      if (meta.capital_records![c_i].year_frac > meta_max_year)
+        meta_max_year = meta.capital_records![c_i].year_frac
     }
 
     let meta_is_modern = meta_max_year >= 1700
     let prev_binding = binding_state.get(best_city.key)
 
-    //Once a city is matched by primary name, block subsequent unrelated non-primary metadata entries even at <= 0.1 km
+    //Once a city is matched by primary name, block subsequent unrelated non-primary entries even at <= 0.1 km
     if (!is_name_match && prev_binding?.has_primary_name_match)
       continue
-    if (!is_name_match && prev_binding?.has_name_match) {
-      if (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern))
-        continue
-    }
+    if (!is_name_match && prev_binding?.has_name_match && (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern)))
+      continue
 
     let is_best_corrupted = isCorruptedCityName(best_city.name || '')
     let is_displaced_neighbour = !is_primary_name_match && Boolean(meta.name) &&
@@ -315,6 +295,15 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
       mergeCityCapitalRecords(best_city, meta)
 
     let refreshed_best_primary = getCachedPrimaryAliases(best_city)
+    let is_best_agg = Boolean(
+      best_city.is_agglomeration ||
+      /\(agglomeration\??\)/i.test(best_city.key || '') ||
+      /\(agglomeration\??\)/i.test(best_city.name || '')
+    )
+    let is_best_period = Boolean(
+      /\(\d{3,4}[–-]\d{3,4}\)/.test(best_city.name || '') ||
+      /\(\d{3,4}[–-]\d{3,4}\)/.test(best_city.key || '')
+    )
 
     for (let d_lat = -1; d_lat <= 1; d_lat++) {
       for (let d_lng = -1; d_lng <= 1; d_lng++) {
@@ -333,7 +322,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
           let other_own_name = cleanCandidateCityString(String(other.name || '').split(';')[0])
           let other_raw_name = cleanCandidateCityString(String(raw_city_name_by_key.get(other.key) || '').split(';')[0])
-          let other_own_info = buildAliasSet(
+          let other_own_info = buildAliasStemSet(
             other_own_name,
             (other_raw_name && other_raw_name !== other_own_name) ? [other_raw_name] : undefined
           )
@@ -341,21 +330,23 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
           let is_era_counterpart = Boolean(
             ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
              (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
-            matchesAliasSet(other_own_info, refreshed_best_primary)
+            matchesAliasStemSet(other_own_info, refreshed_best_primary)
           )
 
           let is_agg_flag = Boolean(
+            is_best_agg ||
             other.is_agglomeration ||
             /\(agglomeration\??\)/i.test(other.key || '') ||
             /\(agglomeration\??\)/i.test(other.name || '')
           )
           let is_period_split = Boolean(
+            is_best_period ||
             /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '') ||
             /\(\d{3,4}[–-]\d{3,4}\)/.test(other.key || '')
           )
-          let agg_of_info = other.is_agglomeration_of ? buildAliasSet(other.is_agglomeration_of) : null
-          let matches_best_primary = matchesAliasSet(other_own_info, refreshed_best_primary) ||
-            Boolean(agg_of_info && matchesAliasSet(agg_of_info, refreshed_best_primary))
+          let agg_of_info = other.is_agglomeration_of ? buildAliasStemSet(other.is_agglomeration_of) : null
+          let matches_best_primary = matchesAliasStemSet(other_own_info, refreshed_best_primary) ||
+            Boolean(agg_of_info && matchesAliasStemSet(agg_of_info, refreshed_best_primary))
           let is_agg_or_period_counterpart = Boolean(
             matches_best_primary &&
             ((is_agg_flag && dist <= 25) || (is_period_split && dist <= 15))
@@ -454,88 +445,6 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
 
 /**
- * Builds normalised alias and stem arrays from a name and optional alias string/array.
- *
- * @param {string} [arg0_name]
- * @param {string | string[]} [arg1_other]
- *
- * @returns {AliasStemSet}
- */
-function buildAliasSet (arg0_name?: string, arg1_other?: string | string[]): AliasStemSet {
-  //Convert from parameters
-  let name = arg0_name
-  let other = arg1_other
-
-  //Declare local instance variables
-  let aliases: string[] = []
-  let raw_list: string[] = []
-  let stems: string[] = []
-
-  //Function body
-  if (name)
-    raw_list.push(name)
-  if (Array.isArray(other)) {
-    raw_list.push(...other)
-  } else if (typeof other === 'string') {
-    raw_list.push(other)
-  }
-
-  for (let i = 0; i < raw_list.length; i++) {
-    let a = normalizeCityAlias(raw_list[i] || '')
-    let s = normalizeCapitalNameStem(raw_list[i] || '')
-    if (a && !aliases.includes(a))
-      aliases.push(a)
-    if (s && !stems.includes(s))
-      stems.push(s)
-  }
-
-  //Return statement
-  return { aliases, stems }
-}
-
-
-/**
- * Builds normalised alias and stem arrays solely from a city's primary name, pre-metadata name, and primary key stem.
- *
- * @param {CityIndexEntry} arg0_city
- * @param {string} [arg1_raw_name]
- *
- * @returns {AliasStemSet}
- */
-function buildPrimaryNameSet (arg0_city: CityIndexEntry, arg1_raw_name?: string): AliasStemSet {
-  //Convert from parameters
-  let city = arg0_city
-  let raw_name = arg1_raw_name
-
-  //Declare local instance variables
-  let candidates: string[] = []
-
-  //Function body
-  if (city.name) {
-    let primary_clean = cleanCandidateCityString(String(city.name).split(';')[0])
-    if (primary_clean)
-      candidates.push(primary_clean)
-  }
-  if (raw_name) {
-    let raw_clean = cleanCandidateCityString(String(raw_name).split(';')[0])
-    if (raw_clean)
-      candidates.push(raw_clean)
-  }
-  if (city.key) {
-    let stripped = String(city.key).replace(/^(stadester|ghsl|oxford)-/i, '')
-    let parts = stripped.split('-')
-    let city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
-    let key_primary = city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim()
-    if (key_primary && !/^\d+$/.test(key_primary))
-      candidates.push(key_primary)
-  }
-
-  //Return statement
-  return buildAliasSet(undefined, candidates)
-}
-
-
-/**
  * Clears all cached per-version city metadata and state capital registries from memory.
  *
  * @returns {void}
@@ -544,136 +453,6 @@ export function clearCityMetadataCache (): void {
   //Function body
   city_metadata_cache_by_path.clear()
   clearStateCapitalsCache()
-}
-
-
-/**
- * Checks whether a candidate displaced label matches another nearby city's primary name within the given radius.
- *
- * @param {CityIndexEntry} arg0_city
- * @param {string} arg1_label
- * @param {Record<string, CityIndexEntry[]>} arg2_spatial_grid
- * @param {Map<string, string>} arg3_raw_city_name_by_key
- * @param {Map<string, AliasStemSet>} arg4_primary_alias_cache
- * @param {number} [arg5_radius_km=25]
- *
- * @returns {boolean}
- */
-function doesLabelMatchAnotherNearbyCity (
-  arg0_city: CityIndexEntry,
-  arg1_label: string,
-  arg2_spatial_grid: Record<string, CityIndexEntry[]>,
-  arg3_raw_city_name_by_key: Map<string, string>,
-  arg4_primary_alias_cache: Map<string, AliasStemSet>,
-  arg5_radius_km: number = 25
-): boolean {
-  //Convert from parameters
-  let city = arg0_city
-  let label = arg1_label
-  let primary_alias_cache = arg4_primary_alias_cache
-  let radius_km = arg5_radius_km
-  let raw_city_name_by_key = arg3_raw_city_name_by_key
-  let spatial_grid = arg2_spatial_grid
-
-  //Guard clauses
-  if (!city || !city.coords || !label || isCorruptedCityName(label))
-    return false
-
-  //Declare local instance variables
-  let center_lat = Math.floor(city.coords[0])
-  let center_lng = Math.floor(city.coords[1])
-  let label_set = buildAliasSet(label)
-  let self_raw = raw_city_name_by_key.get(city.key) || city.name || ''
-  let self_raw_set = buildAliasSet(cleanCandidateCityString(self_raw.split(';')[0]))
-
-  //Function body
-  if (label_set.aliases.length === 0 && label_set.stems.length === 0)
-    return false
-
-  if (matchesAliasSet(label_set, self_raw_set))
-    return false
-
-  for (let d_lat = -1; d_lat <= 1; d_lat++) {
-    for (let d_lng = -1; d_lng <= 1; d_lng++) {
-      let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
-      if (!cell)
-        continue
-
-      for (let i = 0; i < cell.length; i++) {
-        let other = cell[i]
-        if (!other || other.key === city.key || !other.coords)
-          continue
-
-        let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], city.coords[0], city.coords[1])
-        if (dist > radius_km)
-          continue
-
-        let other_primary = primary_alias_cache.get(other.key)
-        if (!other_primary) {
-          other_primary = buildPrimaryNameSet(other, raw_city_name_by_key.get(other.key))
-          primary_alias_cache.set(other.key, other_primary)
-        }
-        if (matchesAliasSet(label_set, other_primary))
-          return true
-      }
-    }
-  }
-
-  //Return statement
-  return false
-}
-
-
-/**
- * Checks whether a date string is one of the 5-year GHSL epoch markers (1975.1.1 .. 2025.1.1).
- *
- * @param {string} [arg0_date]
- *
- * @returns {boolean}
- */
-function isSyntheticGhslEpochDate (arg0_date?: string): boolean {
-  //Convert from parameters
-  let date_str = String(arg0_date || '').trim()
-
-  //Return statement
-  return SYNTHETIC_GHSL_EPOCHS.has(date_str)
-}
-
-
-/**
- * Returns true when a metadata entry is a single-entry 5-year GHSL epoch stub with no capital records.
- *
- * @param {CityMetadataEntry | null | undefined} arg0_meta
- *
- * @returns {boolean}
- */
-export function isSyntheticGhslEpochStub (arg0_meta: CityMetadataEntry | null | undefined): boolean {
-  //Convert from parameters
-  let meta = arg0_meta
-
-  //Declare local instance variables
-  let has_capital: boolean
-  let hn: HistoricalNameRecord[]
-
-  //Guard clauses
-  if (!meta)
-    return false
-
-  //Function body
-  hn = Array.isArray(meta.historical_names) ? meta.historical_names : []
-  if (hn.length !== 1)
-    return false
-
-  has_capital = Boolean(
-    (meta.capital && Object.keys(meta.capital).length > 0) ||
-    (meta.capitals && Object.keys(meta.capitals).length > 0) ||
-    (meta.capital_records && meta.capital_records.length > 0)
-  )
-  if (has_capital)
-    return false
-
-  //Return statement
-  return isSyntheticGhslEpochDate(hn[0]?.date)
 }
 
 
@@ -733,25 +512,6 @@ export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry
     cached_entry = city_metadata_cache_by_path.get(file_path)
     return cached_entry ? cached_entry.entries : []
   }
-}
-
-
-/**
- * Checks whether two AliasStemSet records share a normalised alias or stem (minimum stem length 3).
- *
- * @param {AliasStemSet} arg0_source
- * @param {AliasStemSet} arg1_target
- *
- * @returns {boolean}
- */
-function matchesAliasSet (arg0_source: AliasStemSet, arg1_target: AliasStemSet): boolean {
-  //Convert from parameters
-  let source = arg0_source
-  let target = arg1_target
-
-  //Return statement
-  return source.aliases.some((arg0_a) => target.aliases.includes(arg0_a)) ||
-    source.stems.some((arg0_s) => arg0_s.length >= 3 && target.stems.includes(arg0_s))
 }
 
 

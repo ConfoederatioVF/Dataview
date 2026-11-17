@@ -13,10 +13,12 @@ export interface AutorunConfig {
   healthy_uptime_reset_ms: number
   host: boolean
   local_state_file: string
+  lock_file: string
   lock_in_countdown_seconds: number
   lock_in_ctrl_c_confirm_ms: number
   max_backoff_ms: number
   max_old_space_size_mb: number
+  max_supervisor_restarts: number
   oom_report_dir: string
   port: number
   port_wait_timeout_ms: number
@@ -57,6 +59,9 @@ export interface AutorunDictionary {
   modePreviewTitle: string
   modeRebuildDesc: string
   modeRebuildTitle: string
+  orphanReclaimed: string
+  portInUseError: string
+  portInUseUnknown: string
   portWait: string
   runningControls: string
   runningStats: string
@@ -116,10 +121,12 @@ let DEFAULT_AUTORUN_CONFIG: AutorunConfig = {
   healthy_uptime_reset_ms: 30000,
   host: true,
   local_state_file: 'autorun.local',
+  lock_file: 'autorun.lock.local',
   lock_in_countdown_seconds: 3,
   lock_in_ctrl_c_confirm_ms: 3000,
   max_backoff_ms: 30000,
   max_old_space_size_mb: 16384,
+  max_supervisor_restarts: 5,
   oom_report_dir: 'tests',
   port: 15000,
   port_wait_timeout_ms: 10000,
@@ -160,6 +167,9 @@ let DEFAULT_AUTORUN_DICTIONARY: AutorunDictionary = {
   modePreviewTitle: 'Production Build Server',
   modeRebuildDesc: 'tsc + vite build -> preview',
   modeRebuildTitle: 'Rebuild Production',
+  orphanReclaimed: 'Stopped orphaned Dataview process tree (£1£) holding port £2£.',
+  portInUseError: 'TCP port £1£ is already in use (£2£). Stop the conflicting process and try again.',
+  portInUseUnknown: 'unknown process',
   portWait: 'Waiting for TCP port £1£ to release before restart...',
   runningControls: '[R] Restart  [L] Lock-In  [U] Unlock  [W] Watchdog  [O] Open URL  [S] Status  [M] Menu  [Q] Quit',
   runningStats: 'Restarts: £1£ total (£2£ OOM) • Started: £3£ GMT+0',

@@ -1,14 +1,19 @@
 import fs from 'fs'
 import { FilepathDefines } from './filepath_defines.ts'
+import { cleanCandidateCityString, isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import {
+  buildAliasStemSet,
+  computeHaversineDistanceKm,
+  matchesAliasStemSet,
   normalizePrimaryCityKey,
   parseYearMonthDay,
+  type AliasStemSet,
   type CapitalRecord,
   type CityMetadataEntry,
   type HistoricalNameRecord,
 } from '../framework/stadester/city_metadata_framework.ts'
 
-export type { CapitalRecord, CityMetadataEntry, HistoricalNameRecord }
+export type { AliasStemSet, CapitalRecord, CityMetadataEntry, HistoricalNameRecord }
 
 let bugged_cities_set: Set<string> | null = null
 let bugged_cities_mtime = 0
@@ -304,4 +309,122 @@ export function mergeCityOtherNames (arg0_city: CityIndexEntry, arg1_extra_names
 
   if (merged.length > 0)
     city.other_names = merged
+}
+
+
+/**
+ * Builds normalised alias and stem arrays solely from a city's primary name, pre-metadata name, and primary key stem.
+ *
+ * @param {CityIndexEntry} arg0_city
+ * @param {string} [arg1_raw_name]
+ *
+ * @returns {AliasStemSet}
+ */
+export function buildPrimaryCityNameSet (arg0_city: CityIndexEntry, arg1_raw_name?: string): AliasStemSet {
+  //Convert from parameters
+  let city = arg0_city
+  let raw_name = arg1_raw_name
+
+  //Declare local instance variables
+  let candidates: string[] = []
+
+  //Function body
+  if (city.name) {
+    let primary_clean = cleanCandidateCityString(String(city.name).split(';')[0])
+    if (primary_clean)
+      candidates.push(primary_clean)
+  }
+  if (raw_name) {
+    let raw_clean = cleanCandidateCityString(String(raw_name).split(';')[0])
+    if (raw_clean)
+      candidates.push(raw_clean)
+  }
+  if (city.key) {
+    let stripped = String(city.key).replace(/^(stadester|ghsl|oxford)-/i, '')
+    let parts = stripped.split('-')
+    let city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
+    let key_primary = city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim()
+    if (key_primary && !/^\d+$/.test(key_primary))
+      candidates.push(key_primary)
+  }
+
+  //Return statement
+  return buildAliasStemSet(undefined, candidates)
+}
+
+
+/**
+ * Checks whether a candidate displaced label matches another nearby city's primary name within the given radius.
+ *
+ * @param {CityIndexEntry} arg0_city
+ * @param {string} arg1_label
+ * @param {Record<string, CityIndexEntry[]>} arg2_spatial_grid
+ * @param {Map<string, string>} arg3_raw_city_name_by_key
+ * @param {Map<string, AliasStemSet>} arg4_primary_alias_cache
+ * @param {number} [arg5_radius_km=25]
+ *
+ * @returns {boolean}
+ */
+export function doesLabelMatchAnotherNearbyCity (
+  arg0_city: CityIndexEntry,
+  arg1_label: string,
+  arg2_spatial_grid: Record<string, CityIndexEntry[]>,
+  arg3_raw_city_name_by_key: Map<string, string>,
+  arg4_primary_alias_cache: Map<string, AliasStemSet>,
+  arg5_radius_km: number = 25
+): boolean {
+  //Convert from parameters
+  let city = arg0_city
+  let label = arg1_label
+  let primary_alias_cache = arg4_primary_alias_cache
+  let radius_km = arg5_radius_km
+  let raw_city_name_by_key = arg3_raw_city_name_by_key
+  let spatial_grid = arg2_spatial_grid
+
+  //Guard clauses
+  if (!city || !city.coords || !label || isCorruptedCityName(label))
+    return false
+
+  //Declare local instance variables
+  let center_lat = Math.floor(city.coords[0])
+  let center_lng = Math.floor(city.coords[1])
+  let label_set = buildAliasStemSet(label)
+  let self_raw = raw_city_name_by_key.get(city.key) || city.name || ''
+  let self_raw_set = buildAliasStemSet(cleanCandidateCityString(self_raw.split(';')[0]))
+
+  //Function body
+  if (label_set.aliases.length === 0 && label_set.stems.length === 0)
+    return false
+
+  if (matchesAliasStemSet(label_set, self_raw_set))
+    return false
+
+  for (let d_lat = -1; d_lat <= 1; d_lat++) {
+    for (let d_lng = -1; d_lng <= 1; d_lng++) {
+      let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+      if (!cell)
+        continue
+
+      for (let i = 0; i < cell.length; i++) {
+        let other = cell[i]
+        if (!other || other.key === city.key || !other.coords)
+          continue
+
+        let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], city.coords[0], city.coords[1])
+        if (dist > radius_km)
+          continue
+
+        let other_primary = primary_alias_cache.get(other.key)
+        if (!other_primary) {
+          other_primary = buildPrimaryCityNameSet(other, raw_city_name_by_key.get(other.key))
+          primary_alias_cache.set(other.key, other_primary)
+        }
+        if (matchesAliasStemSet(label_set, other_primary))
+          return true
+      }
+    }
+  }
+
+  //Return statement
+  return false
 }

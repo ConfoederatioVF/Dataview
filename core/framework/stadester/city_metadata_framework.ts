@@ -1,5 +1,10 @@
 import { UfDate } from '../utils/uf_date.ts'
 
+export interface AliasStemSet {
+  aliases: string[]
+  stems: string[]
+}
+
 export interface CapitalRecord {
   date: string
   state_id: number | string | null
@@ -29,6 +34,20 @@ export interface ParsedDateRecord {
   year: number
   year_frac: number
 }
+
+let SYNTHETIC_GHSL_EPOCHS = new Set<string>([
+  '1975.1.1',
+  '1980.1.1',
+  '1985.1.1',
+  '1990.1.1',
+  '1995.1.1',
+  '2000.1.1',
+  '2005.1.1',
+  '2010.1.1',
+  '2015.1.1',
+  '2020.1.1',
+  '2025.1.1',
+])
 
 /**
  * Computes great-circle distance in kilometres between two geographic coordinates using the Haversine formula.
@@ -672,10 +691,122 @@ export let normalizeCityAlias = function (arg0_name: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/[\.-]/g, ' ')
+    .replace(/[.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\bsaint\b/g, 'st')
     .replace(/\bfort\b/g, 'ft')
+}
+
+/**
+ * Builds normalised alias and stem arrays from a city name and optional alias string/array.
+ *
+ * @param {string} [arg0_name]
+ * @param {string | string[]} [arg1_other]
+ *
+ * @returns {AliasStemSet}
+ */
+export let buildAliasStemSet = function (
+  arg0_name?: string,
+  arg1_other?: string | string[]
+): AliasStemSet {
+  //Convert from parameters
+  let name = arg0_name
+  let other = arg1_other
+
+  //Declare local instance variables
+  let aliases: string[] = []
+  let raw_list: string[] = []
+  let stems: string[] = []
+
+  //Function body
+  if (name)
+    raw_list.push(name)
+  if (Array.isArray(other)) {
+    raw_list.push(...other)
+  } else if (typeof other === 'string') {
+    raw_list.push(other)
+  }
+
+  for (let i = 0; i < raw_list.length; i++) {
+    let a = normalizeCityAlias(raw_list[i] || '')
+    let s = normalizeCapitalNameStem(raw_list[i] || '')
+    if (a && !aliases.includes(a))
+      aliases.push(a)
+    if (s && !stems.includes(s))
+      stems.push(s)
+  }
+
+  //Return statement
+  return { aliases, stems }
+}
+
+/**
+ * Checks whether a date string is one of the 5-year GHSL epoch markers (1975.1.1 .. 2025.1.1).
+ *
+ * @param {string} [arg0_date]
+ *
+ * @returns {boolean}
+ */
+export let isSyntheticGhslEpochDate = function (arg0_date?: string): boolean {
+  //Convert from parameters
+  let date_str = String(arg0_date || '').trim()
+
+  //Return statement
+  return SYNTHETIC_GHSL_EPOCHS.has(date_str)
+}
+
+/**
+ * Returns true when a metadata entry is a single-entry 5-year GHSL epoch stub with no capital records.
+ *
+ * @param {CityMetadataEntry | null | undefined} arg0_meta
+ *
+ * @returns {boolean}
+ */
+export let isSyntheticGhslEpochStub = function (arg0_meta: CityMetadataEntry | null | undefined): boolean {
+  //Convert from parameters
+  let meta = arg0_meta
+
+  //Declare local instance variables
+  let has_capital: boolean
+  let hn: HistoricalNameRecord[]
+
+  //Guard clauses
+  if (!meta)
+    return false
+
+  //Function body
+  hn = Array.isArray(meta.historical_names) ? meta.historical_names : []
+  if (hn.length !== 1)
+    return false
+
+  has_capital = Boolean(
+    (meta.capital && Object.keys(meta.capital).length > 0) ||
+    (meta.capitals && Object.keys(meta.capitals).length > 0) ||
+    (meta.capital_records && meta.capital_records.length > 0)
+  )
+  if (has_capital)
+    return false
+
+  //Return statement
+  return isSyntheticGhslEpochDate(hn[0]?.date)
+}
+
+/**
+ * Checks whether two AliasStemSet records share a normalised alias or stem (minimum stem length 3).
+ *
+ * @param {AliasStemSet} arg0_source
+ * @param {AliasStemSet} arg1_target
+ *
+ * @returns {boolean}
+ */
+export let matchesAliasStemSet = function (arg0_source: AliasStemSet, arg1_target: AliasStemSet): boolean {
+  //Convert from parameters
+  let source = arg0_source
+  let target = arg1_target
+
+  //Return statement
+  return source.aliases.some((arg0_a) => target.aliases.includes(arg0_a)) ||
+    source.stems.some((arg0_s) => arg0_s.length >= 3 && target.stems.includes(arg0_s))
 }
 

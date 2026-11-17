@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { AutorunLockManager } from './AutorunLockManager.ts'
 import { AutorunProcessRunner, type ChildRunOutcome } from './AutorunProcessRunner.ts'
 import {
   AutorunTui,
@@ -13,6 +14,7 @@ import {
 } from './AutorunTui.ts'
 
 export interface AutorunCliOptions {
+  cleanup_orphan: boolean
   force_tui: boolean
   help: boolean
   locale: AutorunLocale | null
@@ -42,6 +44,7 @@ export class AutorunSupervisor {
   hotkey_handler: ((arg0_chunk: Buffer) => void) | null = null
   last_crash_summary = ''
   locale: AutorunLocale
+  lock_manager: AutorunLockManager
   locked_mode: ServerMode | null = null
   oom_restarts = 0
   open_browser: boolean
@@ -70,6 +73,10 @@ export class AutorunSupervisor {
     this.root_dir = root_dir
     this.config = config
     this.runner = new AutorunProcessRunner(root_dir, config)
+    this.lock_manager = new AutorunLockManager(root_dir, config, this.runner)
+    this.runner.on_child_pid_change = (arg0_pid: number | null) => {
+      this.lock_manager.setChildPid(arg0_pid)
+    }
     this.locale = saved_state.locale ? saved_state.locale : config.default_locale
     this.locked_mode = saved_state.locked_mode ? saved_state.locked_mode : null
     this.open_browser = saved_state.open_browser !== undefined
@@ -241,6 +248,7 @@ export class AutorunSupervisor {
 
     //Declare local instance variables
     let options: AutorunCliOptions = {
+      cleanup_orphan: false,
       force_tui: false,
       help: false,
       locale: null,
@@ -277,6 +285,8 @@ export class AutorunSupervisor {
         options.lock_in = true
       } else if (local_lower === '--unlock' || local_lower === '-u') {
         options.unlock = true
+      } else if (local_lower === '--cleanup-orphan') {
+        options.cleanup_orphan = true
       } else if (local_lower === '--resume') {
         options.resume = true
       } else if (local_lower === '--tui') {
@@ -411,6 +421,10 @@ export class AutorunSupervisor {
     let saved_state = AutorunTui.loadLocalState(this.root_dir, this.config.local_state_file)
 
     //Guard clauses
+    if (cli.cleanup_orphan) {
+      await this.lock_manager.cleanupDeadSupervisorOrphan()
+      return 0
+    }
     if (cli.help) {
       this.printHelp()
       return 0
@@ -418,56 +432,63 @@ export class AutorunSupervisor {
 
     //Function body
     this.runner.cleanupStaleOomReports()
+    await this.lock_manager.reclaimOrphanedProcesses(this.dict)
+    this.lock_manager.acquireLock()
 
-    if (cli.locale) {
-      this.locale = cli.locale
-      this.dict = AutorunTui.loadDictionary(this.root_dir, this.locale)
-    }
-    if (cli.open_browser !== null)
-      this.open_browser = cli.open_browser
-    if (cli.watchdog_policy)
-      this.watchdog_policy = cli.watchdog_policy
-    if (cli.unlock) {
-      this.locked_mode = null
-      this.persistPreferences()
-    }
-
-    if (cli.mode) {
-      next_mode = cli.mode
-      if (cli.lock_in) {
-        this.locked_mode = cli.mode
-        this.watchdog_policy = 'persistent'
-        this.persistPreferences(cli.mode)
+    try {
+      if (cli.locale) {
+        this.locale = cli.locale
+        this.dict = AutorunTui.loadDictionary(this.root_dir, this.locale)
       }
-    } else if (cli.resume) {
-      next_mode = this.locked_mode
-        ? this.locked_mode
-        : (saved_state.last_active_mode ? saved_state.last_active_mode : 'dev')
-    }
+      if (cli.open_browser !== null)
+        this.open_browser = cli.open_browser
+      if (cli.watchdog_policy)
+        this.watchdog_policy = cli.watchdog_policy
+      if (cli.unlock) {
+        this.locked_mode = null
+        this.persistPreferences()
+      }
 
-    for (let i = 0; i < 1000000; i++) {
-      if (!next_mode) {
-        next_mode = await this.runInteractiveMenu(menu_notice, cli.force_tui)
-        menu_notice = ''
-        cli.force_tui = false
-        if (!next_mode) {
-          process.stdout.write(`\n${this.dict.cleanExit}\n`)
-          return 0
+      if (cli.mode) {
+        next_mode = cli.mode
+        if (cli.lock_in) {
+          this.locked_mode = cli.mode
+          this.watchdog_policy = 'persistent'
+          this.persistPreferences(cli.mode)
         }
+      } else if (cli.resume) {
+        next_mode = this.locked_mode
+          ? this.locked_mode
+          : (saved_state.last_active_mode ? saved_state.last_active_mode : 'dev')
       }
 
-      let local_lock_session = Boolean(cli.lock_in || this.locked_mode === next_mode || cli.resume)
-      cli.lock_in = false
-      cli.resume = false
+      for (let i = 0; i < 1000000; i++) {
+        if (!next_mode) {
+          next_mode = await this.runInteractiveMenu(menu_notice, cli.force_tui)
+          menu_notice = ''
+          cli.force_tui = false
+          if (!next_mode) {
+            process.stdout.write(`\n${this.dict.cleanExit}\n`)
+            return 0
+          }
+        }
 
-      let local_transition = await this.runSupervisedMode(next_mode, local_lock_session)
-      if (local_transition.action === 'quit') {
-        process.stdout.write(`\n${this.dict.cleanExit}\n`)
-        return local_transition.exit_code
+        let local_lock_session = Boolean(cli.lock_in || this.locked_mode === next_mode || cli.resume)
+        cli.lock_in = false
+        cli.resume = false
+
+        let local_transition = await this.runSupervisedMode(next_mode, local_lock_session)
+        if (local_transition.action === 'quit') {
+          if (local_transition.exit_code === 0)
+            process.stdout.write(`\n${this.dict.cleanExit}\n`)
+          return local_transition.exit_code
+        }
+
+        menu_notice = local_transition.notice
+        next_mode = null
       }
-
-      menu_notice = local_transition.notice
-      next_mode = null
+    } finally {
+      this.lock_manager.releaseLock()
     }
 
     //Return statement
@@ -698,6 +719,7 @@ export class AutorunSupervisor {
     //Declare local instance variables
     let active_stage: ServerMode = initial_mode
     let is_interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY)
+    let port_reclaim_retried = false
 
     //Function body
     this.current_mode = initial_mode
@@ -740,7 +762,11 @@ export class AutorunSupervisor {
             continue
           }
         } else {
-          await this.waitForPortRelease(this.config.port, this.config.port_wait_timeout_ms)
+          let port_check = await this.lock_manager.ensurePortReadyForLaunch(
+            this.config.port,
+            this.dict,
+            () => this.getOperatorAction() !== 'none'
+          )
           let post_wait_action = this.getOperatorAction()
           if (post_wait_action === 'quit')
             return { action: 'quit', exit_code: 0, notice: '' }
@@ -748,6 +774,17 @@ export class AutorunSupervisor {
             return { action: 'menu', exit_code: 0, notice: '' }
           if (post_wait_action === 'restart')
             continue
+
+          if (!port_check.ready) {
+            let port_err = AutorunTui.formatString(this.dict.portInUseError, [
+              this.config.port,
+              port_check.blocked_by,
+            ])
+            process.stdout.write(`\n${AutorunTui.colourRed(`[ERROR] ${port_err}`)}\n`)
+            if (is_interactive)
+              return { action: 'menu', exit_code: 2, notice: port_err }
+            return { action: 'quit', exit_code: 2, notice: port_err }
+          }
 
           let should_open = Boolean(this.open_browser && !this.has_opened_browser)
           this.has_opened_browser = true
@@ -771,8 +808,23 @@ export class AutorunSupervisor {
           return { action: 'menu', exit_code: 0, notice: '' }
         if (post_run_action === 'restart') {
           this.total_restarts++
+          port_reclaim_retried = false
           continue
         }
+
+        if (outcome.is_port_in_use) {
+          if (!port_reclaim_retried && await this.lock_manager.reclaimOrphanedProcesses(this.dict)) {
+            port_reclaim_retried = true
+            continue
+          }
+          let port_owners = await this.lock_manager.describePortOwners(this.config.port, this.dict)
+          let port_err = AutorunTui.formatString(this.dict.portInUseError, [this.config.port, port_owners])
+          process.stdout.write(`\n${AutorunTui.colourRed(`[ERROR] ${port_err}`)}\n`)
+          if (is_interactive)
+            return { action: 'menu', exit_code: 2, notice: port_err }
+          return { action: 'quit', exit_code: 2, notice: port_err }
+        }
+        port_reclaim_retried = false
 
         if (outcome.duration_ms >= this.config.healthy_uptime_reset_ms)
           this.consecutive_crashes = 0
@@ -861,40 +913,6 @@ export class AutorunSupervisor {
       }, step_ms)
     })
   }
-
-
-  /**
-   * Waits until the target TCP port is released by any prior crashed process before respawning Vite.
-   *
-   * @param {number} arg0_port
-   * @param {number} arg1_timeout_ms
-   *
-   * @returns {Promise<void>}
-   */
-  async waitForPortRelease (arg0_port: number, arg1_timeout_ms: number): Promise<void> {
-    //Convert from parameters
-    let port = arg0_port
-    let timeout_ms = arg1_timeout_ms
-
-    //Declare local instance variables
-    let max_attempts = Math.max(1, Math.ceil(timeout_ms/250))
-    let printed_notice = false
-
-    //Function body
-    for (let i = 0; i < max_attempts; i++) {
-      if (this.getOperatorAction() !== 'none')
-        return
-      let is_free = await this.runner.isPortAvailable(port)
-      if (is_free)
-        return
-      if (!printed_notice) {
-        printed_notice = true
-        let msg = AutorunTui.formatString(this.dict.portWait, [port])
-        process.stdout.write(`[SUPERVISOR] ${msg}\n`)
-      }
-      await this.sleepMs(250)
-    }
-  }
 }
 
 
@@ -907,21 +925,57 @@ async function initAutorunSupervisor (): Promise<void> {
   //Declare local instance variables
   let current_file = fileURLToPath(import.meta.url)
   let root_dir = path.resolve(path.dirname(current_file), '../..')
+  let shutting_down = false
   let supervisor = new AutorunSupervisor(root_dir)
 
   //Function body
   let handleSignal = () => {
+    if (shutting_down)
+      return
+    shutting_down = true
     supervisor.operator_action = 'quit'
-    void supervisor.runner.terminateChildProcess().then(() => {
+    supervisor.lock_manager.releaseLock()
+
+    let safety_timer = setTimeout(() => {
+      supervisor.runner.terminateChildProcessSync()
       supervisor.detachInteractiveHotkeys()
+      process.exit(0)
+    }, 2500)
+    safety_timer.unref()
+
+    void supervisor.runner.terminateChildProcess().then(() => {
+      clearTimeout(safety_timer)
+      supervisor.detachInteractiveHotkeys()
+      supervisor.lock_manager.releaseLock()
       process.exit(0)
     })
   }
 
+  let handleFatalSupervisorError = (arg0_label: string, arg1_err: unknown) => {
+    console.error(`[AutorunSupervisor] ${arg0_label}:`, arg1_err)
+    supervisor.runner.terminateChildProcessSync()
+    supervisor.detachInteractiveHotkeys()
+    supervisor.lock_manager.releaseLock()
+    process.exit(75)
+  }
+
   process.on('SIGINT', handleSignal)
   process.on('SIGTERM', handleSignal)
+  process.on('SIGHUP', handleSignal)
+  process.on('SIGBREAK', handleSignal)
+  process.on('uncaughtException', (arg0_err) => {
+    handleFatalSupervisorError('Uncaught exception', arg0_err)
+  })
+  process.on('unhandledRejection', (arg0_reason) => {
+    handleFatalSupervisorError('Unhandled rejection', arg0_reason)
+  })
+  process.on('exit', () => {
+    supervisor.runner.terminateChildProcessSync()
+    supervisor.lock_manager.releaseLock()
+  })
 
   let exit_code = await supervisor.run(process.argv.slice(2))
+  supervisor.lock_manager.releaseLock()
   process.exit(exit_code)
 }
 

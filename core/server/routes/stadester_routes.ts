@@ -1,12 +1,15 @@
 import fs from 'fs'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { ParsedUrlQuery } from 'querystring'
-import { gzipSync } from 'node:zlib'
+import { promisify } from 'node:util'
+import { gzip as gzipCallback } from 'node:zlib'
 import { getDefaultStadesterDatasetId } from '../stadester_config_loader.ts'
+import { packBinaryCitiesResponse } from '../stadester_binary_queries.ts'
 import { StadesterService } from '../stadester_service.ts'
 import { AtlasBordersService } from '../AtlasBordersService.ts'
 
 let compressed_cities_cache = new Map<string, Buffer>()
+let gzipAsync = promisify(gzipCallback)
 
 /**
  * Clears compressed HTTP response caches for Stadestér city endpoints.
@@ -16,6 +19,42 @@ let compressed_cities_cache = new Map<string, Buffer>()
 export function clearCompressedCitiesCache (): void {
   //Function body
   compressed_cities_cache.clear()
+}
+
+
+/**
+ * Converts slippy tile indices (z, x, y) into a geographic bounding box [west, south, east, north] with small overlap margin.
+ *
+ * @param {number} arg0_z
+ * @param {number} arg1_x
+ * @param {number} arg2_y
+ *
+ * @returns {[number, number, number, number]}
+ */
+function tileToGeoBBox (arg0_z: number, arg1_x: number, arg2_y: number): [number, number, number, number] {
+  //Convert from parameters
+  let x = arg1_x
+  let y = arg2_y
+  let z = Math.max(0, Math.min(18, arg0_z))
+
+  //Declare local instance variables
+  let n = Math.pow(2, z)
+  let tile_lon = function (arg0_tx: number): number {
+    return (arg0_tx/n)*360 - 180
+  }
+  let tile_lat = function (arg0_ty: number): number {
+    let rad = Math.atan(Math.sinh(Math.PI*(1 - (2*arg0_ty)/n)))
+    return (rad*180)/Math.PI
+  }
+
+  //Function body
+  let west = Math.max(-180, tile_lon(x) - 0.5)
+  let east = Math.min(180, tile_lon(x + 1) + 0.5)
+  let north = Math.min(90, tile_lat(y) + 0.5)
+  let south = Math.max(-90, tile_lat(y + 1) - 0.5)
+
+  //Return statement
+  return [west, south, east, north]
 }
 
 export interface StadesterRouteContext {
@@ -116,6 +155,53 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
       let cache_key = `${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}`
       let supports_gzip = accept_encoding.includes('gzip')
 
+      if (format === 'bin') {
+        res.statusCode = 200
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Content-Type', 'application/octet-stream')
+
+        let bin_cache_key = `${cache_key}:${supports_gzip ? 'gz' : 'raw'}`
+        if (compressed_cities_cache.has(bin_cache_key)) {
+          let cached_buf = compressed_cities_cache.get(bin_cache_key)!
+          if (supports_gzip)
+            res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', cached_buf.length)
+          res.end(cached_buf)
+          return
+        }
+
+        let compact_payload = StadesterService.getCompactCitiesAtYear(dataset, year, {
+          bbox,
+          color_mode,
+          day,
+          max_cities,
+          min_pop,
+          month,
+        })
+        let bin_buf = packBinaryCitiesResponse(compact_payload)
+
+        if (supports_gzip) {
+          gzipAsync(bin_buf, { level: 5 }).then((arg0_compressed) => {
+            if (compressed_cities_cache.size >= 150) {
+              let oldest_key = compressed_cities_cache.keys().next().value
+              if (oldest_key)
+                compressed_cities_cache.delete(oldest_key)
+            }
+            compressed_cities_cache.set(bin_cache_key, arg0_compressed)
+            res.setHeader('Content-Encoding', 'gzip')
+            res.setHeader('Content-Length', arg0_compressed.length)
+            res.end(arg0_compressed)
+          }).catch(() => {
+            res.setHeader('Content-Length', bin_buf.length)
+            res.end(bin_buf)
+          })
+        } else {
+          res.setHeader('Content-Length', bin_buf.length)
+          res.end(bin_buf)
+        }
+        return
+      }
+
       if (format === 'compact') {
         res.statusCode = 200
         res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
@@ -138,23 +224,27 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
           month,
         })
         let json_str = JSON.stringify(compact_payload)
+        let raw_buf = Buffer.from(json_str, 'utf-8')
 
         if (supports_gzip) {
-          let compressed = gzipSync(Buffer.from(json_str, 'utf-8'), { level: 6 })
+          gzipAsync(raw_buf, { level: 5 }).then((arg0_compressed) => {
+            if (compressed_cities_cache.size >= 150) {
+              let oldest_key = compressed_cities_cache.keys().next().value
+              if (oldest_key)
+                compressed_cities_cache.delete(oldest_key)
+            }
+            compressed_cities_cache.set(cache_key, arg0_compressed)
 
-          if (compressed_cities_cache.size >= 150) {
-            let oldest_key = compressed_cities_cache.keys().next().value
-            if (oldest_key)
-              compressed_cities_cache.delete(oldest_key)
-          }
-          compressed_cities_cache.set(cache_key, compressed)
-
-          res.setHeader('Content-Encoding', 'gzip')
-          res.setHeader('Content-Length', compressed.length)
-          res.end(compressed)
+            res.setHeader('Content-Encoding', 'gzip')
+            res.setHeader('Content-Length', arg0_compressed.length)
+            res.end(arg0_compressed)
+          }).catch(() => {
+            res.setHeader('Content-Length', raw_buf.byteLength)
+            res.end(raw_buf)
+          })
         } else {
-          res.setHeader('Content-Length', Buffer.byteLength(json_str))
-          res.end(json_str)
+          res.setHeader('Content-Length', raw_buf.byteLength)
+          res.end(raw_buf)
         }
         return
       }
@@ -191,15 +281,20 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         dataset,
         year,
       })
+      let raw_buf = Buffer.from(json_str, 'utf-8')
 
       if (supports_gzip) {
-        let compressed = gzipSync(Buffer.from(json_str, 'utf-8'), { level: 6 })
-        res.setHeader('Content-Encoding', 'gzip')
-        res.setHeader('Content-Length', compressed.length)
-        res.end(compressed)
+        gzipAsync(raw_buf, { level: 5 }).then((arg0_compressed) => {
+          res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', arg0_compressed.length)
+          res.end(arg0_compressed)
+        }).catch(() => {
+          res.setHeader('Content-Length', raw_buf.byteLength)
+          res.end(raw_buf)
+        })
       } else {
-        res.setHeader('Content-Length', Buffer.byteLength(json_str))
-        res.end(json_str)
+        res.setHeader('Content-Length', raw_buf.byteLength)
+        res.end(raw_buf)
       }
       return
     } catch (arg0_err: any) {
@@ -207,6 +302,90 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
       res.statusCode = 500
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching cities' }))
+      return
+    }
+  }
+
+  //Route 13b: GET /api/stadester/tile (Spatial LOD tile query by slippy z/x/y or explicit bbox)
+  if (pathname === '/stadester/tile' || pathname === '/api/stadester/tile') {
+    let color_mode = (query.colorMode as 'growth' | 'population' | 'region' | 'continent') || 'growth'
+    let dataset = (query.dataset as string) || getDefaultStadesterDatasetId()
+    let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
+    let format = (query.format as string) || 'bin'
+    let max_cities = query.maxCities !== undefined ? parseInt(query.maxCities as string, 10) : 2500
+    let min_pop = query.minPop !== undefined ? Math.max(0.01, parseFloat(query.minPop as string)) : 0.01
+    let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
+    let raw_year = parseFloat(query.year as string)
+    let tile_x = parseInt(query.x as string, 10)
+    let tile_y = parseInt(query.y as string, 10)
+    let tile_z = parseInt(query.z as string, 10)
+    let year = Number.isNaN(raw_year) ? 1950 : raw_year
+    let bbox: [number, number, number, number] | undefined = undefined
+
+    if (query.bbox) {
+      let parts = String(query.bbox).split(',').map(Number)
+      if (parts.length === 4 && !parts.some(Number.isNaN))
+        bbox = [parts[0], parts[1], parts[2], parts[3]]
+    } else if (!Number.isNaN(tile_z) && !Number.isNaN(tile_x) && !Number.isNaN(tile_y)) {
+      bbox = tileToGeoBBox(tile_z, tile_x, tile_y)
+    }
+
+    try {
+      let accept_encoding = (req.headers['accept-encoding'] as string) || ''
+      let supports_gzip = accept_encoding.includes('gzip')
+      let tile_cache_key = `tile:${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}:${supports_gzip ? 'gz' : 'raw'}`
+
+      res.statusCode = 200
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+      res.setHeader('Content-Type', format === 'bin' ? 'application/octet-stream' : 'application/json')
+
+      if (compressed_cities_cache.has(tile_cache_key)) {
+        let cached_buf = compressed_cities_cache.get(tile_cache_key)!
+        if (supports_gzip)
+          res.setHeader('Content-Encoding', 'gzip')
+        res.setHeader('Content-Length', cached_buf.length)
+        res.end(cached_buf)
+        return
+      }
+
+      let compact_payload = StadesterService.getCompactCitiesAtYear(dataset, year, {
+        bbox,
+        color_mode,
+        day,
+        max_cities,
+        min_pop,
+        month,
+        preserve_capitals: true,
+      })
+      let out_buf = format === 'bin'
+        ? packBinaryCitiesResponse(compact_payload)
+        : Buffer.from(JSON.stringify(compact_payload), 'utf-8')
+
+      if (supports_gzip) {
+        gzipAsync(out_buf, { level: 5 }).then((arg0_compressed) => {
+          if (compressed_cities_cache.size >= 250) {
+            let oldest_key = compressed_cities_cache.keys().next().value
+            if (oldest_key)
+              compressed_cities_cache.delete(oldest_key)
+          }
+          compressed_cities_cache.set(tile_cache_key, arg0_compressed)
+          res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', arg0_compressed.length)
+          res.end(arg0_compressed)
+        }).catch(() => {
+          res.setHeader('Content-Length', out_buf.length)
+          res.end(out_buf)
+        })
+      } else {
+        res.setHeader('Content-Length', out_buf.length)
+        res.end(out_buf)
+      }
+      return
+    } catch (arg0_err: any) {
+      console.error('[ApiMiddleware] Error querying stadester tile:', arg0_err)
+      res.statusCode = 500
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching city tile' }))
       return
     }
   }

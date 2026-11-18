@@ -888,7 +888,7 @@ TIMELINE:
 STATE: [4066] Iroquois Confederacy (1451.1.1 -> 1794.11.11) [fill: #AEC76D]
 STATUS: CAPITAL
 TIMELINE:
-  1451.1.1 -> 1794.11.11: Onondaga [stadester-Onondaga-United States]
+  1451.1.1 -> 1794.11.11: Onondaga [stadester-Onondaga-New York]
 ---
 
 STATE: [4067] Jambi Sultanate (1451.1.1 -> 1905.1.1) [fill: #283C70]
@@ -3844,7 +3844,7 @@ TIMELINE:
 STATE: [4563] French Florida (1564.6.22 -> 1565.9.20) [fill: #B5ABCC]
 STATUS: CAPITAL
 TIMELINE:
-  1564.6.22 -> 1565.9.20: Fort Caroline [stadester-Fort-Caroline-United States]
+  1564.6.22 -> 1565.9.20: Fort Caroline [stadester-Fort Caroline-Florida]
 ---
 
 STATE: [4564] Sultanate of Bijapur, Sultanate of Ahmadnagar, Sultanate of Golconda and Sultanate of Bidar (Military Occupation) (1565.2.1 -> 1565.3.1) [fill: #AEC76D]

@@ -331,6 +331,11 @@ export function handleRasterBreakdown (arg0_context: RasterRouteContext): void {
         y: raw_y,
         year,
       }
+      if (breakdown_cache.size >= 100) {
+        let oldest_bk = breakdown_cache.keys().next().value
+        if (oldest_bk !== undefined)
+          breakdown_cache.delete(oldest_bk)
+      }
       breakdown_cache.set(cache_key, { mtime: effective_mtime, payload: result })
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
@@ -360,6 +365,11 @@ export function handleRasterBreakdown (arg0_context: RasterRouteContext): void {
         x: raw_x,
         y: raw_y,
         year,
+      }
+      if (breakdown_cache.size >= 100) {
+        let oldest_bk = breakdown_cache.keys().next().value
+        if (oldest_bk !== undefined)
+          breakdown_cache.delete(oldest_bk)
       }
       breakdown_cache.set(cache_key, { mtime: effective_mtime, payload: result })
       res.statusCode = 200

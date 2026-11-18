@@ -3564,7 +3564,7 @@ TIMELINE:
 STATE: [1898] Cahokia (601.1.1 -> 1301.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  601.1.1 -> 1301.1.1: Cahokia [stadester-Cahokia-United States]
+  601.1.1 -> 1301.1.1: Cahokia [stadester-Cahokia-Illinois]
 ---
 
 STATE: [1899] Connacht (601.1.1 -> 1462.1.1) [fill: #405F85]

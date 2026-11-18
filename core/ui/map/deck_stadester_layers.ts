@@ -3,6 +3,8 @@ import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import { projectEqualEarth } from '@framework/geopng/equal_earth.ts'
 import { getPaletteLUT } from '@framework/geopng/palettes'
 import type { CityPoint, ColorPalette, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
+import type { WorkerBinaryAttributes } from '@framework/stadester/stadester.worker.ts'
+import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import {
   getCapitalColorRgba,
@@ -231,6 +233,7 @@ export interface BuildStadesterCityLayersOptions {
   active_state_capitals_by_sid: Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>
   active_state_ids: Set<string>
   authoritative_capitals_by_city: Map<string, any>
+  binary_attributes?: WorkerBinaryAttributes
   effective_points: any[]
   hoveredCity?: CityPoint | null
   hovered_region?: string | null
@@ -239,6 +242,7 @@ export interface BuildStadesterCityLayersOptions {
   is_mobile: boolean
   onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
+  polity_features?: { by_name?: Map<string, any>; by_sid?: Map<string, any> }
   projection: ProjectionType
   reconciled_labels?: any[]
   selectedCityKey?: string | null
@@ -353,37 +357,60 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
           depthMask: false,
           depthTest: false,
         },
+        extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
       })
     )
   } else {
+    let use_binary_attrs = Boolean(
+      options.binary_attributes &&
+      !hovered_region &&
+      options.binary_attributes.length === sorted_city_points.length &&
+      options.binary_attributes.length > 0
+    )
+    let scatterplot_data: any = use_binary_attrs
+      ? {
+          attributes: {
+            getFillColor: { size: 4, value: options.binary_attributes!.fillColors },
+            getLineColor: { size: 4, value: options.binary_attributes!.lineColors },
+            getPosition: { size: 3, value: options.binary_attributes!.positions },
+            getRadius: { size: 1, value: options.binary_attributes!.radii },
+          },
+          length: options.binary_attributes!.length,
+        }
+      : sorted_city_points
+
     layers_array.push(
       new ScatterplotLayer({
         id: `stadester-cities-${projection}`,
-        data: sorted_city_points,
-        getPosition: (d: any) => d.position,
-        getRadius: (d: any) => d.pixelRadius,
-        getFillColor: (d: any) => {
-          if (isCityRegionHighlighted(d.region, hovered_region)) {
-            let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
-            let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
-            let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
-            return [r, g, b, Math.min(255, fill_alpha + 35)]
-          }
-          return [d.color[0], d.color[1], d.color[2], fill_alpha]
-        },
-        getLineColor: (d: any) => {
-          if (isCityRegionHighlighted(d.region, hovered_region)) {
-            let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
-            let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
-            let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
-            return [r, g, b, 255]
-          }
-          return [d.color[0], d.color[1], d.color[2], stroke_alpha]
-        },
-        updateTriggers: {
-          getFillColor: [hovered_region, fill_alpha],
-          getLineColor: [hovered_region, stroke_alpha],
-        },
+        data: scatterplot_data,
+        ...(use_binary_attrs
+          ? {}
+          : {
+              getPosition: (d: any) => d.position,
+              getRadius: (d: any) => d.pixelRadius,
+              getFillColor: (d: any) => {
+                if (isCityRegionHighlighted(d.region, hovered_region)) {
+                  let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
+                  let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
+                  let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
+                  return [r, g, b, Math.min(255, fill_alpha + 35)]
+                }
+                return [d.color[0], d.color[1], d.color[2], fill_alpha]
+              },
+              getLineColor: (d: any) => {
+                if (isCityRegionHighlighted(d.region, hovered_region)) {
+                  let r = Math.round(d.color[0] * 0.7 + 255 * 0.3)
+                  let g = Math.round(d.color[1] * 0.7 + 255 * 0.3)
+                  let b = Math.round(d.color[2] * 0.7 + 255 * 0.3)
+                  return [r, g, b, 255]
+                }
+                return [d.color[0], d.color[1], d.color[2], stroke_alpha]
+              },
+              updateTriggers: {
+                getFillColor: [hovered_region, fill_alpha],
+                getLineColor: [hovered_region, stroke_alpha],
+              },
+            }),
         getLineWidth: 1.5,
         lineWidthUnits: 'pixels',
         lineWidthMinPixels: 1.5,
@@ -400,9 +427,10 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         onClick: (info: any) => {
           if (is_drawing)
             return false
-          if (info.object && options.onSelectCity)
+          let picked_obj = info.object || (info.index >= 0 ? sorted_city_points[info.index] : null)
+          if (picked_obj && options.onSelectCity)
             options.onSelectCity(
-              info.object,
+              picked_obj,
               info.coordinate ? [info.coordinate[0], info.coordinate[1]] : undefined,
               info.x,
               info.y
@@ -412,14 +440,16 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         onHover: (info: any) => {
           if (is_drawing)
             return
+          let picked_obj = info.object || (info.index >= 0 ? sorted_city_points[info.index] : null)
           if (options.onHoverCity)
-            options.onHoverCity(info.object || null, info.x, info.y)
+            options.onHoverCity(picked_obj || null, info.x, info.y)
         },
         parameters: {
           cullMode: 'none',
           depthMask: false,
           depthTest: false,
         },
+        extensions: (projection === 'Globe') ? [new GlobeAntipodeCullExtension({ cullThreshold: -0.005 })] : [],
       })
     )
   }
@@ -515,7 +545,8 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
             active_state_ids,
             active_polity_names,
             authoritative_capitals_by_city,
-            active_capitals_list
+            active_capitals_list,
+            options.polity_features
           )
         }
 
@@ -555,22 +586,27 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
           getAlignmentBaseline: 'center',
           updateTriggers: {
             getColor: [
-              visible_label_cities,
               options.stadesterConfig?.showCapitals,
               options.stadesterConfig?.capitalColorMode,
               options.stadesterConfig?.capitalConstantColor,
+              options.reconciled_labels,
+              options.polity_features,
+              visible_label_cities,
             ],
             getUnderlineColor: [
-              visible_label_cities,
               options.stadesterConfig?.showCapitals,
               options.stadesterConfig?.showCapitalUnderlines,
               options.stadesterConfig?.capitalColorMode,
               options.stadesterConfig?.capitalConstantColor,
+              options.reconciled_labels,
+              options.polity_features,
+              visible_label_cities,
             ],
             isUnderlined: [
-              visible_label_cities,
               options.stadesterConfig?.showCapitals,
               options.stadesterConfig?.showCapitalUnderlines,
+              options.reconciled_labels,
+              visible_label_cities,
             ],
           },
           getPixelOffset: (d: any) => [d.pixelRadius + 8, 0],

@@ -137,13 +137,20 @@ export let resolveCapitalCityClick = function (arg0_options: ResolveCapitalCityO
     }
   }
 
+  let polygon_color = feature.properties?.polygonFill ||
+    feature.properties?.symbol?.polygonFill ||
+    feature.properties?.fill_color ||
+    feature.properties?.fillColor ||
+    feature.properties?.color
+
   if (target_city) {
+    let resolved_cap_color = polygon_color || target_city.capitalColor || (target_city as any).capital_color || '#FFDC00'
     let enriched_target: CityPoint = {
       ...target_city,
-      capitalColor: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
+      capitalColor: resolved_cap_color,
       capitalOf: target_city.capitalOf || target_city.capital_state_name || country_name,
       capitalStateId: target_city.capitalStateId || (target_city as any).capital_state_id || state_id,
-      capital_color: target_city.capitalColor || (target_city as any).capital_color || feature.properties?.fill_color || '#FFDC00',
+      capital_color: resolved_cap_color,
       capital_state_id: (target_city as any).capital_state_id || target_city.capitalStateId || state_id,
       capital_state_name: target_city.capital_state_name || target_city.capitalOf || country_name,
       isCapital: true,
@@ -172,11 +179,12 @@ export let resolveCapitalCityClick = function (arg0_options: ResolveCapitalCityO
     }
 
     if (cap_coords) {
+      let synth_init_color = polygon_color || '#FFDC00'
       let initial_synth_city: CityPoint = {
-        capitalColor: feature.properties?.fill_color || '#FFDC00',
+        capitalColor: synth_init_color,
         capitalOf: feature.properties?.name || country_name,
         capitalStateId: state_id,
-        capital_color: feature.properties?.fill_color || '#FFDC00',
+        capital_color: synth_init_color,
         capital_state_id: state_id,
         capital_state_name: feature.properties?.name || country_name,
         coords: [cap_coords[1], cap_coords[0]],
@@ -200,12 +208,13 @@ export let resolveCapitalCityClick = function (arg0_options: ResolveCapitalCityO
       .then((arg0_r) => (arg0_r.ok ? arg0_r.json() : null))
       .then((arg0_data) => {
         if (arg0_data && arg0_data.key) {
+          let resolved_fetched_color = polygon_color || arg0_data.capitalColor || arg0_data.capital_color || '#FFDC00'
           let synth_city: CityPoint = {
             area: arg0_data.area ? (typeof arg0_data.area === 'object' ? Object.values(arg0_data.area)[0] as number : arg0_data.area) : undefined,
-            capitalColor: arg0_data.capitalColor || arg0_data.capital_color || feature.properties?.fill_color || '#FFDC00',
+            capitalColor: resolved_fetched_color,
             capitalOf: arg0_data.capitalOf || arg0_data.capital_state_name || feature.properties?.name || country_name,
             capitalStateId: arg0_data.capitalStateId || arg0_data.capital_state_id || state_id,
-            capital_color: arg0_data.capital_color || arg0_data.capitalColor || feature.properties?.fill_color || '#FFDC00',
+            capital_color: resolved_fetched_color,
             capital_state_id: arg0_data.capital_state_id || arg0_data.capitalStateId || state_id,
             capital_state_name: arg0_data.capital_state_name || arg0_data.capitalOf || feature.properties?.name || country_name,
             coords: arg0_data.coords || [0, 0],

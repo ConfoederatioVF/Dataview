@@ -5,6 +5,7 @@ import {
   buildAliasStemSet,
   computeHaversineDistanceKm,
   matchesAliasStemSet,
+  normalizeCityKey,
   normalizePrimaryCityKey,
   parseYearMonthDay,
   type AliasStemSet,
@@ -162,14 +163,14 @@ export interface CityRenderPoint {
  *
  * @param {any} arg0_city
  * @param {any} arg1_state
- * @param {number} [arg2_tolerance_deg=2.0]
+ * @param {number} [arg2_tolerance_deg=0.75]
  *
  * @returns {boolean}
  */
 export function isCityInsideStateBBox (
   arg0_city: any,
   arg1_state: any,
-  arg2_tolerance_deg: number = 2.0
+  arg2_tolerance_deg: number = 0.75
 ): boolean {
   //Convert from parameters
   let city = arg0_city
@@ -209,12 +210,130 @@ export function isCityInsideStateBBox (
 
   let [minX, minY, maxX, maxY] = state.bbox
   let span = Math.max(Math.abs(maxX - minX), Math.abs(maxY - minY))
-  let effective_tol = span < 1.5 ? Math.min(tol, Math.max(0.5, span*1.5)) : tol
+  let effective_tol = span < 1.5 ? Math.min(tol, Math.max(0.25, span*0.75)) : tol
   if (c_lng < minX - effective_tol || c_lng > maxX + effective_tol || c_lat < minY - effective_tol || c_lat > maxY + effective_tol)
     return false
 
   //Return statement
   return true
+}
+
+
+/**
+ * Selects the single highest-confidence settlement from candidate matches for a state capital timeline entry,
+ * enforcing strict spatial containment and polity-country consistency so distant homonyms are never misallocated.
+ *
+ * @param {any[]} arg0_candidates
+ * @param {any} arg1_state
+ * @param {string} [arg2_tl_key]
+ * @param {number} [arg3_start_frac]
+ * @param {number} [arg4_stop_frac]
+ *
+ * @returns {any | null}
+ */
+export function selectBestCapitalCandidateForTimeline (
+  arg0_candidates: any[],
+  arg1_state: any,
+  arg2_tl_key?: string,
+  arg3_start_frac?: number,
+  arg4_stop_frac?: number
+): any | null {
+  //Convert from parameters
+  let candidates = arg0_candidates
+  let start_frac = arg3_start_frac
+  let state = arg1_state
+  let stop_frac = arg4_stop_frac
+  let tl_key = arg2_tl_key || ''
+
+  //Guard clauses
+  if (!candidates || candidates.length === 0)
+    return null
+
+  //Declare local instance variables
+  let best_city: any = null
+  let best_score = -Infinity
+  let has_bbox = Boolean(state?.bbox && Array.isArray(state.bbox) && state.bbox.length >= 4)
+  let mid_lat = has_bbox ? (state.bbox[1] + state.bbox[3])*0.5 : 0
+  let mid_lon = has_bbox ? (state.bbox[0] + state.bbox[2])*0.5 : 0
+  let norm_tl = tl_key ? normalizeCityKey(tl_key) : ''
+  let prim_tl = tl_key ? getPrimaryCityNormKey(tl_key) : ''
+  let state_name = (state?.name || '').toLowerCase().trim()
+  let tl_parts = tl_key ? tl_key.replace(/^(stadester|ghsl|oxford)-/i, '').split('-') : []
+  let tl_country = tl_parts.length > 1 ? tl_parts[tl_parts.length - 1].toLowerCase().trim() : ''
+  let umbrella_countries = new Set(['australia', 'canada', 'u.s.', 'united states', 'usa'])
+
+  //Function body
+  for (let i = 0; i < candidates.length; i++) {
+    let c = candidates[i]
+    if (!c)
+      continue
+
+    let c_key = String(c.key || '')
+    let c_norm = c_key ? normalizeCityKey(c_key) : ''
+    let c_prim = c_key ? getPrimaryCityNormKey(c_key) : ''
+    let is_exact_key = Boolean(tl_key && c_key === tl_key)
+    let is_prim_key = Boolean(
+      is_exact_key ||
+      (norm_tl && c_norm && norm_tl === c_norm) ||
+      (prim_tl && c_prim && prim_tl === c_prim)
+    )
+
+    if (state) {
+      let bbox_tol = is_prim_key ? 0.75 : 0.25
+      if (!isCityInsideStateBBox(c, state, bbox_tol))
+        continue
+    }
+
+    let c_country = String(c.country || '').toLowerCase().trim()
+    let is_country_match = Boolean(
+      (tl_country && c_country && c_country === tl_country) ||
+      (state_name && c_country && c_country.length >= 3 && state_name.includes(c_country))
+    )
+
+    if (!is_prim_key && tl_country && !umbrella_countries.has(tl_country) && c_country && !is_country_match)
+      continue
+
+    let score = 0
+    if (is_exact_key)
+      score += 1000000
+    else if (is_prim_key)
+      score += 800000
+
+    if (is_country_match)
+      score += 500000
+    if (state && isCityInsideStateBBox(c, state, 0.05))
+      score += 200000
+    if (!c_key.toLowerCase().includes('(agglomeration)') && !c.is_ghsl)
+      score += 50000
+    else if (!c_key.toLowerCase().includes('(agglomeration)'))
+      score += 25000
+
+    if (start_frac !== undefined && stop_frac !== undefined && c.min_year !== undefined && c.max_year !== undefined) {
+      if (c.max_year >= Math.floor(start_frac) && c.min_year <= Math.ceil(stop_frac))
+        score += 25000
+    }
+
+    let max_pop = typeof c.max_pop === 'number' ? c.max_pop : 0
+    if (max_pop === 0 && c.population && typeof c.population === 'object') {
+      let vals = Object.values(c.population) as number[]
+      for (let v = 0; v < vals.length; v++) {
+        if (typeof vals[v] === 'number' && vals[v] > max_pop)
+          max_pop = vals[v]
+      }
+    }
+    score += Math.min(10000, Math.round(Math.log10(Math.max(1, max_pop))*1500))
+
+    if (has_bbox && Array.isArray(c.coords) && c.coords.length >= 2)
+      score += Math.round(5000/(1 + Math.hypot(Number(c.coords[0]) - mid_lat, Number(c.coords[1]) - mid_lon)))
+
+    if (score > best_score) {
+      best_score = score
+      best_city = c
+    }
+  }
+
+  //Return statement
+  return best_city
 }
 
 
@@ -371,9 +490,11 @@ export function doesLabelMatchAnotherNearbyCity (
   arg2_spatial_grid: Record<string, CityIndexEntry[]>,
   arg3_raw_city_name_by_key: Map<string, string>,
   arg4_primary_alias_cache: Map<string, AliasStemSet>,
-  arg5_radius_km: number = 25
+  arg5_radius_km: number = 25,
+  arg6_cells_per_degree: number = 1
 ): boolean {
   //Convert from parameters
+  let cells_per_degree = arg6_cells_per_degree
   let city = arg0_city
   let label = arg1_label
   let primary_alias_cache = arg4_primary_alias_cache
@@ -386,8 +507,11 @@ export function doesLabelMatchAnotherNearbyCity (
     return false
 
   //Declare local instance variables
-  let center_lat = Math.floor(city.coords[0])
-  let center_lng = Math.floor(city.coords[1])
+  let cell_radius = Math.max(1, Math.ceil((radius_km/111.0)*cells_per_degree*1.5))
+  let center_lat = Math.floor(city.coords[0]*cells_per_degree)
+  let center_lng = Math.floor(city.coords[1]*cells_per_degree)
+  let deg_lat_bound = radius_km/111.0 + 0.02
+  let deg_lon_bound = radius_km/(111.0*Math.max(0.2, Math.cos((city.coords[0]*Math.PI)/180))) + 0.02
   let label_set = buildAliasStemSet(label)
   let self_raw = raw_city_name_by_key.get(city.key) || city.name || ''
   let self_raw_set = buildAliasStemSet(cleanCandidateCityString(self_raw.split(';')[0]))
@@ -399,8 +523,8 @@ export function doesLabelMatchAnotherNearbyCity (
   if (matchesAliasStemSet(label_set, self_raw_set))
     return false
 
-  for (let d_lat = -1; d_lat <= 1; d_lat++) {
-    for (let d_lng = -1; d_lng <= 1; d_lng++) {
+  for (let d_lat = -cell_radius; d_lat <= cell_radius; d_lat++) {
+    for (let d_lng = -cell_radius; d_lng <= cell_radius; d_lng++) {
       let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
       if (!cell)
         continue
@@ -408,6 +532,8 @@ export function doesLabelMatchAnotherNearbyCity (
       for (let i = 0; i < cell.length; i++) {
         let other = cell[i]
         if (!other || other.key === city.key || !other.coords)
+          continue
+        if (Math.abs(other.coords[0] - city.coords[0]) > deg_lat_bound || Math.abs(other.coords[1] - city.coords[1]) > deg_lon_bound)
           continue
 
         let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], city.coords[0], city.coords[1])

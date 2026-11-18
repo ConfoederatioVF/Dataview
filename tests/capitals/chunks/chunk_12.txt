@@ -54,7 +54,7 @@ TIMELINE:
 STATE: [7191] Erik the Red's Land (1931.7.10 -> 1933.4.5) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1931.7.10 -> 1933.4.5: Esztergom [stadester-Esztergom-Hungary]
+  1931.7.10 -> 1933.4.5: Myggbukta [stadester-Myggbukta-Greenland]
 ---
 
 STATE: [7192] Canada (1931.12.11 -> 2026.1.1) [fill: #283C70]
@@ -72,7 +72,7 @@ TIMELINE:
 STATE: [7194] Dominion of Newfoundland (1931.12.11 -> 1934.2.16) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1931.12.11 -> 1934.2.16: St. John's [stadester-St-Johns-Canada]
+  1931.12.11 -> 1934.2.16: St. John's [stadester-Saint John's-Canada]
 ---
 
 STATE: [7195] Union of South Africa (1931.12.11 -> 1961.5.31) [fill: #D1453B]
@@ -137,7 +137,7 @@ TIMELINE:
 STATE: [7205] Dominion of Newfoundland (1934.2.16 -> 1949.3.31) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1934.2.16 -> 1949.3.31: St. John's [stadester-St-Johns-Canada]
+  1934.2.16 -> 1949.3.31: St. John's [stadester-Saint John's-Canada]
 ---
 
 STATE: [7206] Kingdom of Saudi Arabia (Military Occupation) (1934.4.7 -> 1955.10.25) [fill: #E0A348]
@@ -452,7 +452,7 @@ TIMELINE:
 STATE: [7258] Greenland (Military Occupation) (1941.4.9 -> 1945.5.5) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1941.4.9 -> 1945.5.5: Nuuk [stadester-Nuuk-Greenland]
+  1941.4.9 -> 1945.5.5: Nuuk [stadester-Godthåb-Greenland]
 ---
 
 STATE: [7259] Independent State of Croatia (1941.4.10 -> 1943.9.8) [fill: #9CBED9]
@@ -1871,7 +1871,7 @@ REASON: Authentic joint Warsaw Pact military occupation forces in Czechoslovakia
 STATE: [7498] Republic of Equatorial Guinea (1968.10.12 -> 2026.1.1) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1968.10.12 -> 2026.1.1: Jambol [stadester-Jambol-Bulgaria]
+  1968.10.12 -> 2026.1.1: Malabo [stadester-Malabo-equagui]
 ---
 
 STATE: [7499] Hereroland (1969.1.1 -> 1989.6.1) [fill: #D1453B]
@@ -2440,7 +2440,7 @@ TIMELINE:
 STATE: [7595] Greenland (1979.5.1 -> 2026.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1979.5.1 -> 2026.1.1: Nuuk [stadester-Nuuk-Greenland]
+  1979.5.1 -> 2026.1.1: Nuuk [stadester-Godthåb-Greenland]
 ---
 
 STATE: [7596] Zimbabwe Rhodesia (1979.6.1 -> 1979.12.12) [fill: #405F85]

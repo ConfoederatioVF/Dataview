@@ -7,5 +7,38 @@
   // Downsampling aggregation method to preserve true totals: "sum" (area aggregation), "average", etc.
   downsampling_method: "sum",
   // Whether downsampling optimization is enabled
-  enabled: true
+  enabled: true,
+  // Strict RAM & CPU resource caps to prevent builds, compilers, and dev servers from saturating host frames
+  resource_limits: {
+    // Run heavy compiler processes at BelowNormal OS scheduling priority
+    compiler_below_normal_priority: true,
+    // Maximum V8 heap allocated to the Stadestér offline/CI compiler (MB)
+    compiler_max_heap_mb: 2048,
+    // Yield duration (ms) between shard compilations so desktop compositor & audio/UI threads keep scheduling
+    compiler_yield_ms: 15,
+    // Maximum worker threads used by oxlint
+    lint_max_threads: 2,
+    // Maximum V8 heap allocated to dev/preview/build server processes (MB)
+    server_max_heap_mb: 16384
+  },
+  // Stadestér multi-million settlement scaling & culling configuration
+  stadester_scaling: {
+    // Max parallel worker threads for Stage A shard compilation
+    compile_concurrency: 4,
+    // Use incremental binary columnar spatial-LOD cache instead of monolithic JSON index
+    enable_binary_store: true,
+    // Stream regional/local LOD tiles from server when zoomed past tile_fetch_zoom_threshold
+    enable_viewport_tiles: true,
+    // Multiplier on maxLabels to bound pre-projection label candidates
+    label_candidate_multiplier: 3,
+    // Screen-space collision hash cell width and height (pixels)
+    label_collision_cell_h: 32,
+    label_collision_cell_w: 72,
+    // Base global label population floor at zoom 0 (scaled down exponentially with zoom and era scale)
+    label_min_pop_base: 500000,
+    // Zoom threshold at which viewport tile streaming activates for large datasets
+    tile_fetch_zoom_threshold: 3.5,
+    // Max settlements returned per spatial tile request
+    tile_max_cities_per_tile: 2500
+  }
 }

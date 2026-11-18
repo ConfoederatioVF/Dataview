@@ -21,6 +21,7 @@ import { resetSmoothPinchState, syncDeckTouchState } from './smooth_controllers'
 import { useElevationSpikes } from './use_elevation_spikes'
 import { useCircleOverlay } from './use_circle_overlay'
 import { useDeckLayers } from './use_deck_layers'
+import { useStadesterViewportTiles } from './use_stadester_cities'
 import { useStadesterWorker } from '@framework/stadester/use_stadester_worker'
 import { useHistoricalBorders } from './use_historical_borders'
 import { HistoricalBorderDetailsPanel } from './historical_border_details_panel'
@@ -489,8 +490,18 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedCountry: selected_country,
   })
 
+  let effective_stadester_cities = useStadesterViewportTiles({
+    baseCities: stadester_cities || EMPTY_ARRAY,
+    config: stadester_config,
+    enabled: Boolean(stadester_config?.enabled),
+    isPlaying: is_playing,
+    projection,
+    viewState: proj_view_states[projection],
+    year: timeline_year || 1950,
+  })
+
   let worker_result = useStadesterWorker({
-    cities: stadester_cities || EMPTY_ARRAY,
+    cities: effective_stadester_cities,
     config: stadester_config,
     projection,
     viewState: proj_view_states[projection],
@@ -608,7 +619,8 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedCountry: selected_country,
     selectedHistoricalFeature: selected_historical_feature,
     showGraticule: show_graticule,
-    stadesterCities: stadester_cities,
+    stadesterBinaryAttributes: worker_result.binaryAttributes,
+    stadesterCities: effective_stadester_cities,
     stadesterConfig: stadester_config,
     stadesterLabels: worker_result.labels,
     stadesterPoints: worker_result.points,

@@ -1,8 +1,11 @@
 import fs from 'fs'
 import path from 'path'
+import { getOptimisationConfig } from '../../common/optimisation/optimisation.ts'
 import { isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
+import { readPackedString, type BinaryDatasetStore } from './stadester_binary_format.ts'
+import { clearBinaryStoreCache, loadBinaryStore } from './stadester_compiler.ts'
 import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
 import { applyCityMetadata, applyStateCapitals, clearCityMetadataCache, resolveCityMetadataPath } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
@@ -28,6 +31,31 @@ export function clearStadesterLoaderCache (): void {
   //Function body
   datasets_cache.clear()
   spatial_grid_by_dataset.clear()
+  clearBinaryStoreCache()
+}
+
+
+/**
+ * Returns the compiled binary columnar store for a dataset when enabled in optimisation.json5.
+ *
+ * @param {string} [arg0_dataset_name]
+ *
+ * @returns {BinaryDatasetStore | null}
+ */
+export function getBinaryDatasetStore (arg0_dataset_name?: string): BinaryDatasetStore | null {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+
+  //Declare local instance variables
+  let opt = getOptimisationConfig()
+  let scaling = opt.config?.stadester_scaling
+
+  //Guard clauses
+  if (scaling && scaling.enable_binary_store === false)
+    return null
+
+  //Return statement
+  return loadBinaryStore(dataset_name)
 }
 
 
@@ -301,12 +329,61 @@ export function ensureLiteCache (arg0_dataset_name?: string): string {
   if (!fs.existsSync(cache_dir))
     fs.mkdirSync(cache_dir, { recursive: true })
 
-  let indexed = loadDataset(clean_stem)
-  let all_keys = Object.keys(indexed)
+  let binary_store = getBinaryDatasetStore(clean_stem)
   let buffer: string[] = ['[']
   let buffer_len = 1
   let fd = fs.openSync(lite_file_path, 'w')
   let flush_threshold = 8*1024*1024
+
+  if (binary_store) {
+    try {
+      for (let i = 0; i < binary_store.count; i++) {
+        let key_str = readPackedString(binary_store.key_buf, binary_store.key_offsets, i)
+        let name_str = readPackedString(binary_store.name_buf, binary_store.name_offsets, i)
+        let country_str = readPackedString(binary_store.country_buf, binary_store.country_offsets, i)
+        let id_str = readPackedString(binary_store.id_buf, binary_store.id_offsets, i)
+        let other_str = readPackedString(binary_store.other_buf, binary_store.other_offsets, i)
+        let r_idx = binary_store.region_idx[i]
+        let reg_str = (r_idx !== 65535 && r_idx < binary_store.regions.length) ? binary_store.regions[r_idx] : undefined
+        let row_obj = {
+          _v2: i === 0 ? true : undefined,
+          coords: [binary_store.lat[i], binary_store.lon[i]],
+          country: country_str || undefined,
+          ghsl_name: name_str,
+          historical_names: binary_store.hist_names_by_idx.get(i),
+          id: id_str || key_str,
+          key: key_str,
+          max_pop: binary_store.max_pop[i],
+          max_year: binary_store.max_year[i],
+          metadata_name: name_str,
+          min_year: binary_store.min_year[i],
+          name: name_str,
+          other_names: other_str ? other_str.split('\x1f') : undefined,
+          reconciled_name: name_str,
+          region: reg_str,
+        }
+        let chunk = (i > 0 ? ',' : '') + JSON.stringify(row_obj)
+        buffer.push(chunk)
+        buffer_len += chunk.length
+        if (buffer_len >= flush_threshold) {
+          fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+          buffer = []
+          buffer_len = 0
+        }
+      }
+      buffer.push(']')
+      fs.writeSync(fd, buffer.join(''), null, 'utf-8')
+    } finally {
+      fs.closeSync(fd)
+    }
+
+    console.log(`[StadesterLoader] Pre-cached lightweight index (binary) for ${clean_stem}: ${lite_file_path} (${(fs.statSync(lite_file_path).size / (1024*1024)).toFixed(2)} MB)`)
+    //Return statement
+    return lite_file_path
+  }
+
+  let indexed = loadDataset(clean_stem)
+  let all_keys = Object.keys(indexed)
 
   try {
     for (let i = 0; i < all_keys.length; i++) {
@@ -752,5 +829,6 @@ export function getNearbyCityKeys (
 export function clearDatasetCache (): void {
   datasets_cache.clear()
   spatial_grid_by_dataset.clear()
+  clearBinaryStoreCache()
   clearCityMetadataCache()
 }

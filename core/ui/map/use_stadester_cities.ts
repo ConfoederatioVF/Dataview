@@ -30,6 +30,86 @@ export interface UseStadesterCitiesResult {
 }
 
 let in_flight_city_fetches = new Map<string, Promise<CityPoint[]>>()
+let text_decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null
+
+/**
+ * Unpacks a `STADWIRE` binary columnar response Buffer into `CityPoint[]`.
+ *
+ * @param {ArrayBuffer} arg0_buffer
+ *
+ * @returns {CityPoint[] | null}
+ */
+export function decodeBinaryCitiesWire (arg0_buffer: ArrayBuffer): CityPoint[] | null {
+  //Convert from parameters
+  let buffer = arg0_buffer
+
+  //Guard clauses
+  if (!buffer || buffer.byteLength < 16)
+    return null
+
+  //Declare local instance variables
+  let view = new DataView(buffer)
+  let magic = String.fromCharCode(
+    view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3),
+    view.getUint8(4), view.getUint8(5), view.getUint8(6), view.getUint8(7)
+  )
+
+  if (magic !== 'STADWIRE')
+    return null
+
+  //Function body
+  let count = view.getUint32(8, true)
+  let tail_len = view.getUint32(12, true)
+  let offset = 16
+  let coords = new Float32Array(buffer, offset, count * 2)
+  offset += count * 8
+  let pops = new Float32Array(buffer, offset, count)
+  offset += count * 4
+  let growth = new Float32Array(buffer, offset, count)
+  offset += count * 4
+  let capitals = new Uint8Array(buffer, offset, count)
+  offset += count
+  let state_ids_offset = offset
+  offset += count * 4
+
+  let tail_bytes = new Uint8Array(buffer, offset, tail_len)
+  let tail_str = text_decoder ? text_decoder.decode(tail_bytes) : ''
+  let strings_obj = JSON.parse(tail_str)
+  let city_list: CityPoint[] = []
+
+  for (let i = 0; i < count; i++) {
+    if (pops[i] < 0.01)
+      continue
+    let is_cap = Boolean(capitals[i])
+    let raw_sid = view.getInt32(state_ids_offset + i * 4, true)
+    let cap_state_id = raw_sid !== -1 ? raw_sid : undefined
+    let cap_color = strings_obj.capital_colors ? strings_obj.capital_colors[i] : undefined
+    let cap_name = strings_obj.capital_names ? (strings_obj.capital_names[i] || undefined) : undefined
+
+    city_list.push({
+      capitalColor: cap_color,
+      capitalOf: cap_name,
+      capitalStateId: cap_state_id,
+      capital_color: cap_color,
+      capital_state_id: cap_state_id,
+      capital_state_name: cap_name,
+      coords: [coords[i * 2], coords[i * 2 + 1]],
+      country: strings_obj.countries ? strings_obj.countries[i] : undefined,
+      growthRate: growth[i],
+      id: strings_obj.keys[i],
+      isCapital: is_cap,
+      is_capital: is_cap,
+      key: strings_obj.keys[i],
+      name: strings_obj.names[i],
+      other_names: (strings_obj.other_names && strings_obj.other_names[i]) ? strings_obj.other_names[i] : undefined,
+      population: pops[i],
+      region: strings_obj.regions ? strings_obj.regions[i] : undefined,
+    })
+  }
+
+  //Return statement
+  return city_list
+}
 
 /**
  * Fetches Stadester city points for a given dataset and year with in-flight deduplication and caching.
@@ -53,7 +133,8 @@ export async function fetchStadesterCitiesAsync (
   arg4_color_mode?: string,
   arg5_cache?: Map<string, CityPoint[]>,
   arg6_is_playing?: boolean,
-  arg7_performant_mode?: boolean
+  arg7_performant_mode?: boolean,
+  arg8_signal?: AbortSignal
 ): Promise<CityPoint[]> {
   //Convert from parameters
   let dataset = arg0_dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
@@ -64,6 +145,7 @@ export async function fetchStadesterCitiesAsync (
   let cache = arg5_cache
   let is_playing = Boolean(arg6_is_playing)
   let performant_mode = Boolean(arg7_performant_mode)
+  let signal = arg8_signal
 
   //Declare local instance variables
   let cache_key = `${dataset}:${year}:${min_pop}:${max_cities}:${color_mode}`
@@ -73,7 +155,7 @@ export async function fetchStadesterCitiesAsync (
   if (cache && cache.has(cache_key))
     return cache.get(cache_key)!
 
-  if (in_flight_city_fetches.has(cache_key))
+  if (!signal && in_flight_city_fetches.has(cache_key))
     return in_flight_city_fetches.get(cache_key)!
 
   //Function body
@@ -82,60 +164,69 @@ export async function fetchStadesterCitiesAsync (
       let url_params = new URLSearchParams({
         colorMode: color_mode,
         dataset,
-        format: 'compact',
+        format: 'bin',
         maxCities: String(max_cities),
         minPop: String(min_pop),
         year: String(year),
       })
 
-      let res = await fetch(`/api/stadester/cities.json?${url_params.toString()}`)
+      let res = await fetch(`/api/stadester/cities.json?${url_params.toString()}`, { signal })
       if (!res.ok)
         return []
 
-      let data = await res.json()
+      let content_type = res.headers.get('content-type') || ''
       let city_list: CityPoint[] = []
 
-      if (data.coords && data.keys) {
-        let count = data.count || data.keys.length
-        for (let i = 0; i < count; i++) {
-          if (data.pops[i] < 0.01)
-            continue
-          let is_cap = data.capitals ? Boolean(data.capitals[i]) : false
-          let cap_state_id = data.capital_state_ids ? (data.capital_state_ids[i] || undefined) : undefined
-          city_list.push({
-            capitalColor: data.capital_colors ? data.capital_colors[i] : undefined,
-            capitalOf: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
-            capitalStateId: cap_state_id,
-            capital_color: data.capital_colors ? data.capital_colors[i] : undefined,
-            capital_state_id: cap_state_id,
-            capital_state_name: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
-            coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
-            country: data.countries ? data.countries[i] : undefined,
-            growthRate: data.growth ? data.growth[i] : 0,
-            id: data.keys[i],
-            isCapital: is_cap,
-            is_capital: is_cap,
-            key: data.keys[i],
-            name: data.names[i],
-            other_names: (data.other_names && data.other_names[i]) ? data.other_names[i] : undefined,
-            population: data.pops[i],
-            region: data.regions ? data.regions[i] : undefined,
-          })
+      if (content_type.includes('application/octet-stream')) {
+        let ab = await res.arrayBuffer()
+        let decoded = decodeBinaryCitiesWire(ab)
+        if (decoded)
+          city_list = decoded
+      } else {
+        let data = await res.json()
+
+        if (data.coords && data.keys) {
+          let count = data.count || data.keys.length
+          for (let i = 0; i < count; i++) {
+            if (data.pops[i] < 0.01)
+              continue
+            let is_cap = data.capitals ? Boolean(data.capitals[i]) : false
+            let cap_state_id = data.capital_state_ids ? (data.capital_state_ids[i] || undefined) : undefined
+            city_list.push({
+              capitalColor: data.capital_colors ? data.capital_colors[i] : undefined,
+              capitalOf: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
+              capitalStateId: cap_state_id,
+              capital_color: data.capital_colors ? data.capital_colors[i] : undefined,
+              capital_state_id: cap_state_id,
+              capital_state_name: data.capital_names ? (data.capital_names[i] || undefined) : undefined,
+              coords: [data.coords[i * 2], data.coords[i * 2 + 1]],
+              country: data.countries ? data.countries[i] : undefined,
+              growthRate: data.growth ? data.growth[i] : 0,
+              id: data.keys[i],
+              isCapital: is_cap,
+              is_capital: is_cap,
+              key: data.keys[i],
+              name: data.names[i],
+              other_names: (data.other_names && data.other_names[i]) ? data.other_names[i] : undefined,
+              population: data.pops[i],
+              region: data.regions ? data.regions[i] : undefined,
+            })
+          }
+        } else if (Array.isArray(data.cities)) {
+          city_list = data.cities
+            .filter((arg0_c: any) => arg0_c && arg0_c.population >= 0.01)
+            .map((arg0_c: any) => ({
+              ...arg0_c,
+              capitalColor: arg0_c.capital_color || arg0_c.capitalColor || undefined,
+              capitalOf: arg0_c.capitalOf || arg0_c.capital_state_name || undefined,
+              capitalStateId: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
+              capital_color: arg0_c.capital_color || arg0_c.capitalColor || undefined,
+              capital_state_id: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
+              capital_state_name: arg0_c.capital_state_name || arg0_c.capitalOf || undefined,
+              isCapital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
+              is_capital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
+            }))
         }
-      } else if (Array.isArray(data.cities)) {
-        city_list = data.cities
-          .filter((arg0_c: any) => arg0_c && arg0_c.population >= 0.01)
-          .map((arg0_c: any) => ({
-            ...arg0_c,
-            capitalColor: arg0_c.capital_color || arg0_c.capitalColor || undefined,
-            capitalOf: arg0_c.capitalOf || arg0_c.capital_state_name || undefined,
-            capitalStateId: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
-            capital_color: arg0_c.capital_color || arg0_c.capitalColor || undefined,
-            capital_state_id: arg0_c.capital_state_id || arg0_c.capitalStateId || undefined,
-            capital_state_name: arg0_c.capital_state_name || arg0_c.capitalOf || undefined,
-            isCapital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
-            is_capital: Boolean(arg0_c.is_capital || arg0_c.isCapital),
-          }))
       }
 
       if (cache) {
@@ -151,7 +242,9 @@ export async function fetchStadesterCitiesAsync (
       }
 
       return city_list
-    } catch (arg0_err) {
+    } catch (arg0_err: any) {
+      if (arg0_err?.name === 'AbortError')
+        return []
       console.error('[fetchStadesterCitiesAsync] Error fetching cities:', arg0_err)
       return []
     } finally {
@@ -159,7 +252,8 @@ export async function fetchStadesterCitiesAsync (
     }
   })()
 
-  in_flight_city_fetches.set(cache_key, pending_promise)
+  if (!signal)
+    in_flight_city_fetches.set(cache_key, pending_promise)
 
   //Return statement
   return pending_promise
@@ -239,7 +333,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     let cache_key = `${dataset}:${rounded_year}:${min_pop}:${max_cities}:${color_mode}`
 
     let schedule_prefetch = function () {
-      if (!is_playing && !performant_mode) {
+      if (!is_playing && !performant_mode && max_cities <= 8000) {
         if (prefetch_timer)
           clearTimeout(prefetch_timer)
         prefetch_timer = setTimeout(() => {
@@ -263,10 +357,15 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
       }
     }
 
+    if (abort_controller_ref.current)
+      abort_controller_ref.current.abort()
+    let controller = new AbortController()
+    abort_controller_ref.current = controller
+
     set_is_loading(true)
     set_error(null)
 
-    fetchStadesterCitiesAsync(dataset, rounded_year, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode)
+    fetchStadesterCitiesAsync(dataset, rounded_year, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode, controller.signal)
       .then((arg0_list) => {
         if (!is_cancelled) {
           set_cities(arg0_list)
@@ -283,6 +382,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
 
     return () => {
       is_cancelled = true
+      controller.abort()
       if (prefetch_timer)
         clearTimeout(prefetch_timer)
     }
@@ -354,4 +454,161 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     setSelectedCity: set_selected_city,
     setSelectedCityKey: set_selected_city_key,
   }
+}
+
+
+/**
+ * Fetches and caches regional LOD tiles via `/api/stadester/tile` when zoomed in,
+ * merging local settlements with the global overview list.
+ *
+ * @param {{ baseCities: CityPoint[]; config?: StadesterConfig; enabled: boolean; isPlaying?: boolean; projection: string; viewState: any; year: number }} arg0_options
+ *
+ * @returns {CityPoint[]}
+ */
+export let useStadesterViewportTiles = function (arg0_options: {
+  baseCities: CityPoint[]
+  config?: StadesterConfig
+  enabled: boolean
+  isPlaying?: boolean
+  projection: string
+  viewState: any
+  year: number
+}): CityPoint[] {
+  //Convert from parameters
+  let options = arg0_options
+  let base_cities = options.baseCities
+  let cfg = options.config
+  let enabled = options.enabled
+  let is_playing = Boolean(options.isPlaying)
+  let projection = options.projection
+  let view_state = options.viewState
+  let year = Math.round(options.year || 1950)
+
+  //Declare local instance variables
+  let [merged_cities, set_merged_cities] = useState<CityPoint[]>(base_cities)
+  let tile_cache_ref = useRef<Map<string, CityPoint[]>>(new Map())
+
+  let dataset = cfg?.dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
+  let color_mode = cfg?.colorMode || 'growth'
+  let min_pop = (cfg?.minPop !== undefined) ? Math.max(0.01, cfg.minPop) : 0.01
+  let zoom = view_state?.zoom ?? 1.2
+  let is_cartesian = projection === 'EqualEarth' || projection === 'Equirectangular'
+  let norm_zoom = is_cartesian ? zoom - 1.2 : (projection === 'Globe' ? zoom - 1.65 : zoom)
+
+  useEffect(() => {
+    set_merged_cities(base_cities)
+  }, [base_cities])
+
+  useEffect(() => {
+    if (!enabled || is_playing || norm_zoom < 3.5 || !view_state || is_cartesian) {
+      set_merged_cities(base_cities)
+      return
+    }
+
+    let c_lat = view_state.latitude ?? 20
+    let c_lng = view_state.longitude ?? 0
+    let tile_z = Math.max(2, Math.min(5, Math.floor(norm_zoom) - 1))
+    let n = Math.pow(2, tile_z)
+    let lat_rad = (Math.max(-85, Math.min(85, c_lat))*Math.PI)/180
+    let cx = Math.floor(((c_lng + 180)/360)*n)
+    let cy = Math.floor(((1 - Math.log(Math.tan(lat_rad) + 1/Math.cos(lat_rad))/Math.PI)/2)*n)
+
+    let tile_coords: Array<[number, number]> = []
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        let tx = ((cx + dx) % n + n) % n
+        let ty = Math.max(0, Math.min(n - 1, cy + dy))
+        let exists = tile_coords.some((arg0_t) => arg0_t[0] === tx && arg0_t[1] === ty)
+        if (!exists)
+          tile_coords.push([tx, ty])
+      }
+    }
+
+    let is_cancelled = false
+    let controller = new AbortController()
+    let timer = setTimeout(() => {
+      let mergeFromTiles = function (): void {
+        let added_count = 0
+        let by_key = new Map<string, CityPoint>()
+        for (let i = 0; i < base_cities.length; i++)
+          by_key.set(base_cities[i].key, base_cities[i])
+
+        for (let i = 0; i < tile_coords.length; i++) {
+          let [tx, ty] = tile_coords[i]
+          let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
+          let t_list = tile_cache_ref.current.get(tk)
+          if (t_list) {
+            for (let x = 0; x < t_list.length; x++) {
+              if (!by_key.has(t_list[x].key)) {
+                by_key.set(t_list[x].key, t_list[x])
+                added_count++
+              }
+            }
+          }
+        }
+        if (!is_cancelled) {
+          if (added_count === 0)
+            set_merged_cities((arg0_prev) => arg0_prev === base_cities ? arg0_prev : base_cities)
+          else
+            set_merged_cities(Array.from(by_key.values()))
+        }
+      }
+
+      let missing = tile_coords.filter(([tx, ty]) => {
+        let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
+        return !tile_cache_ref.current.has(tk)
+      })
+
+      if (missing.length === 0) {
+        mergeFromTiles()
+        return
+      }
+
+      Promise.all(
+        missing.map(async ([tx, ty]) => {
+          let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
+          let params = new URLSearchParams({
+            colorMode: color_mode,
+            dataset,
+            format: 'bin',
+            maxCities: '2500',
+            minPop: String(min_pop),
+            x: String(tx),
+            y: String(ty),
+            year: String(year),
+            z: String(tile_z),
+          })
+          try {
+            let res = await fetch(`/api/stadester/tile?${params.toString()}`, { signal: controller.signal })
+            if (!res.ok)
+              return
+            let ab = await res.arrayBuffer()
+            let decoded = decodeBinaryCitiesWire(ab)
+            if (decoded) {
+              if (tile_cache_ref.current.size >= 80) {
+                let oldest = tile_cache_ref.current.keys().next().value
+                if (oldest)
+                  tile_cache_ref.current.delete(oldest)
+              }
+              tile_cache_ref.current.set(tk, decoded)
+            }
+          } catch {
+            //Ignore aborted/transient tile errors
+          }
+        })
+      ).then(() => {
+        if (!is_cancelled)
+          mergeFromTiles()
+      })
+    }, 150)
+
+    return () => {
+      is_cancelled = true
+      clearTimeout(timer)
+      controller.abort()
+    }
+  }, [enabled, is_playing, dataset, year, color_mode, min_pop, Math.floor(norm_zoom), Math.round((view_state?.latitude ?? 20)/5), Math.round((view_state?.longitude ?? 0)/5), projection, base_cities])
+
+  //Return statement
+  return merged_cities
 }

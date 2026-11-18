@@ -15,7 +15,8 @@ import {
   isStateAcapital,
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
-import { getSpatialGrid, loadDataset } from './stadester_loader.ts'
+import { getBinaryDatasetStore, getSpatialGrid, loadDataset } from './stadester_loader.ts'
+import { queryBinaryCityByKey } from './stadester_binary_queries.ts'
 import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 import { getAuthoritativeCapitalsAtYear } from './stadester_queries.ts'
 
@@ -149,6 +150,10 @@ export function getCityByKey (
   let clean_search_city: string = ''
   let enrichCity: (arg0_entry: CityIndexEntry) => any
   let found: CityIndexEntry | undefined
+  let binary_store = getBinaryDatasetStore(dataset_name)
+  if (binary_store)
+    return queryBinaryCityByKey(binary_store, dataset_name, city_key, year, month, day, options)
+
   let indexed = loadDataset(dataset_name)
   let key_city: string = ''
   let key_country: string = ''
@@ -189,7 +194,7 @@ export function getCityByKey (
         if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
           return false
       }
-      if (!isCityInsideStateBBox(entry, state, 3.5))
+      if (!isCityInsideStateBBox(entry, state, 0.75))
         return false
       return true
     })

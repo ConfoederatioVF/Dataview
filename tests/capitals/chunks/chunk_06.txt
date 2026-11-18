@@ -1317,7 +1317,7 @@ TIMELINE:
 STATE: [3482] Greenland (1262.1.1 -> 1541.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1262.1.1 -> 1541.1.1: Gardar [stadester-Gardar-Greenland]
+  1262.1.1 -> 1541.1.1: Garðar [stadester-Garðar-Greenland]
 ---
 
 STATE: [3483] Despotate of the Morea (1263.1.1 -> 1453.5.29) [fill: #AD2845]
@@ -1828,7 +1828,7 @@ TIMELINE:
 STATE: [3567] Bailiwick of Jersey (1291.1.1 -> 1603.3.24) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1291.1.1 -> 1603.3.24: Saint Helier [stadester-Saint Helier-United Kingdom]
+  1291.1.1 -> 1603.3.24: Saint Helier [stadester-Saint Helier-Jersey]
 ---
 
 STATE: [3568] Beylik of Menteshe (1291.1.1 -> 1415.1.1) [fill: #B37B50]

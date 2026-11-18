@@ -36,6 +36,7 @@ import {
 } from './deck_layers'
 import { ElevationSpikePoint } from './use_elevation_spikes'
 import { CirclePixelPoint } from './use_circle_overlay'
+import type { WorkerBinaryAttributes } from '@framework/stadester/stadester.worker.ts'
 import {
   buildStadesterCityLayers,
   buildStadesterCityPoints,
@@ -114,6 +115,7 @@ export interface UseDeckLayersParams {
   selectedCountry?: CountryFeature | null
   selectedHistoricalFeature?: HistoricalBorderFeature | null
   showGraticule: boolean
+  stadesterBinaryAttributes?: WorkerBinaryAttributes
   stadesterCities?: CityPoint[]
   stadesterConfig?: StadesterConfig
   stadesterLabels?: any[]
@@ -188,6 +190,8 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     let active_polity_names = new Set<string>()
     let active_state_capitals_by_sid = new Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>()
     let active_state_ids = new Set<string>()
+    let polity_features_by_name = new Map<string, any>()
+    let polity_features_by_sid = new Map<string, any>()
 
     if (options.historicalBordersData && options.historicalBordersData.features) {
       for (let i = 0; i < options.historicalBordersData.features.length; i++) {
@@ -196,32 +200,63 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
         if (!p)
           continue
 
+        let polity_color = p.polygonFill ||
+          p.symbol?.polygonFill ||
+          p.fill_color ||
+          p.fillColor ||
+          p.color ||
+          p.symbol?.fillColor ||
+          p.symbol?.strokeColor ||
+          p.strokeColor
         let s_id = p.state_id !== undefined ? String(p.state_id) : (p.id !== undefined ? String(p.id) : undefined)
+        let feat_bbox = (feat as any).bbox || p.bbox
+        let feat_area = p.area !== undefined ? Number(p.area) : 0
+        if (!feat_area && feat_bbox && Array.isArray(feat_bbox) && feat_bbox.length >= 4)
+          feat_area = Math.max(0, (feat_bbox[2] - feat_bbox[0])*(feat_bbox[3] - feat_bbox[1]))
 
-        if (s_id)
+        let feat_meta = {
+          area: feat_area,
+          bbox: feat_bbox,
+          color: polity_color,
+          geometry: feat.geometry,
+          polity_name: p.name,
+          state_id: p.state_id ?? p.id,
+        }
+
+        if (s_id) {
           active_state_ids.add(s_id)
-        if (p.state_id !== undefined)
-          active_state_ids.add(String(p.state_id))
-        if (p.id !== undefined)
-          active_state_ids.add(String(p.id))
-        if (p.name)
-          active_polity_names.add(p.name.toLowerCase().trim())
-        if (p.name_long)
-          active_polity_names.add(p.name_long.toLowerCase().trim())
+          if (!polity_features_by_sid.has(s_id) || feat_area > (polity_features_by_sid.get(s_id)?.area || 0))
+            polity_features_by_sid.set(s_id, feat_meta)
+        }
+        if (p.state_id !== undefined) {
+          let raw_sid = String(p.state_id)
+          active_state_ids.add(raw_sid)
+          if (!polity_features_by_sid.has(raw_sid) || feat_area > (polity_features_by_sid.get(raw_sid)?.area || 0))
+            polity_features_by_sid.set(raw_sid, feat_meta)
+        }
+        if (p.id !== undefined) {
+          let raw_id = String(p.id)
+          active_state_ids.add(raw_id)
+          if (!polity_features_by_sid.has(raw_id) || feat_area > (polity_features_by_sid.get(raw_id)?.area || 0))
+            polity_features_by_sid.set(raw_id, feat_meta)
+        }
+        if (p.name) {
+          let nl = p.name.toLowerCase().trim()
+          active_polity_names.add(nl)
+          if (!polity_features_by_name.has(nl) || feat_area > (polity_features_by_name.get(nl)?.area || 0))
+            polity_features_by_name.set(nl, feat_meta)
+        }
+        if (p.name_long) {
+          let nll = p.name_long.toLowerCase().trim()
+          active_polity_names.add(nll)
+          if (!polity_features_by_name.has(nll) || feat_area > (polity_features_by_name.get(nll)?.area || 0))
+            polity_features_by_name.set(nll, feat_meta)
+        }
 
         if (p.is_acapital) {
           if (s_id)
             acapital_state_ids.add(s_id)
         } else if (p.capname || p.capkey || p.cap_coords || (p.caplong !== undefined && p.caplat !== undefined)) {
-          let polity_color = p.polygonFill ||
-            p.symbol?.polygonFill ||
-            p.fill_color ||
-            p.fillColor ||
-            p.color ||
-            p.symbol?.fillColor ||
-            p.symbol?.strokeColor ||
-            p.strokeColor
-
           let cap_lat: number | undefined
           let cap_lon: number | undefined
           if (p.cap_coords && Array.isArray(p.cap_coords) && p.cap_coords.length >= 2) {
@@ -232,19 +267,14 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
             cap_lat = Number(p.caplat)
           }
 
-          let feat_area = p.area !== undefined ? Number(p.area) : 0
-          if (!feat_area && (feat as any).bbox) {
-            let b = (feat as any).bbox
-            feat_area = Math.max(0, (b[2] - b[0])*(b[3] - b[1]))
-          }
-
           let cap_entry = {
             area: feat_area,
-            bbox: (feat as any).bbox || p.bbox,
+            bbox: feat_bbox,
             cap_coords: (cap_lon !== undefined && cap_lat !== undefined) ? [cap_lon, cap_lat] as [number, number] : undefined,
             capkey: p.capkey,
             capname: p.capname,
             color: polity_color,
+            geometry: feat.geometry,
             polity_name: p.name,
             state_id: p.state_id,
           }
@@ -296,16 +326,56 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       active_polity_names,
       active_state_capitals_by_sid,
       active_state_ids,
+      polity_features: {
+        by_name: polity_features_by_name,
+        by_sid: polity_features_by_sid,
+      },
     }
   }, [options.historicalBordersData])
+
+  let capital_source_points = (stadester_cities && stadester_cities.length > 0) ? stadester_cities : effective_points
 
   let authoritative_capitals_by_city = useMemo(() => {
     return buildAuthoritativeCapitalsByCity(
       border_lookup.active_capitals_list,
-      effective_points,
+      capital_source_points,
       options.timelineYear
     )
-  }, [border_lookup.active_capitals_list, effective_points, options.timelineYear])
+  }, [border_lookup.active_capitals_list, capital_source_points, options.timelineYear])
+
+  let reconciled_capital_patch_map = useMemo(() => {
+    let patch_map = new Map<string, any>()
+    if (!capital_source_points || capital_source_points.length === 0)
+      return patch_map
+    if (
+      border_lookup.active_capitals_by_key.size === 0 &&
+      border_lookup.active_capitals_by_name.size === 0 &&
+      border_lookup.active_capitals_list.length === 0 &&
+      border_lookup.acapital_state_ids.size === 0 &&
+      border_lookup.active_state_ids.size === 0
+    ) {
+      return patch_map
+    }
+
+    let reconciled_all = reconcileCitiesWithAuthoritativeBorders(
+      capital_source_points,
+      border_lookup.active_capitals_by_key,
+      border_lookup.active_capitals_by_name,
+      border_lookup.acapital_state_ids,
+      border_lookup.active_state_capitals_by_sid,
+      border_lookup.active_state_ids,
+      border_lookup.active_polity_names,
+      authoritative_capitals_by_city,
+      border_lookup.active_capitals_list,
+      border_lookup.polity_features
+    )
+    for (let i = 0; i < reconciled_all.length; i++) {
+      let c = reconciled_all[i]
+      if (c && c.key)
+        patch_map.set(c.key, c)
+    }
+    return patch_map
+  }, [capital_source_points, border_lookup, authoritative_capitals_by_city])
 
   let reconciled_stadester_labels = useMemo(() => {
     if (!is_cities_enabled || !is_labels_visible || !options.stadesterLabels || options.stadesterLabels.length === 0)
@@ -332,17 +402,61 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       border_lookup.acapital_state_ids.size > 0 ||
       border_lookup.active_state_ids.size > 0
     ) {
-      visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
-        visible_label_cities,
-        border_lookup.active_capitals_by_key,
-        border_lookup.active_capitals_by_name,
-        border_lookup.acapital_state_ids,
-        border_lookup.active_state_capitals_by_sid,
-        border_lookup.active_state_ids,
-        border_lookup.active_polity_names,
-        authoritative_capitals_by_city,
-        border_lookup.active_capitals_list
-      )
+      if (reconciled_capital_patch_map.size > 0) {
+        let missing_indices: number[] = []
+        let missing_items: any[] = []
+        let patched_labels = new Array(visible_label_cities.length)
+
+        for (let i = 0; i < visible_label_cities.length; i++) {
+          let lbl = visible_label_cities[i]
+          let patched = lbl.key ? reconciled_capital_patch_map.get(lbl.key) : undefined
+          if (patched) {
+            patched_labels[i] = {
+              ...lbl,
+              capitalColor: patched.capitalColor,
+              capitalOf: patched.capitalOf,
+              capitalStateId: patched.capitalStateId,
+              capital_color: patched.capital_color,
+              capital_state_id: patched.capital_state_id,
+              capital_state_name: patched.capital_state_name,
+              isCapital: patched.isCapital,
+              is_capital: patched.is_capital,
+            }
+          } else {
+            missing_indices.push(i)
+            missing_items.push(lbl)
+          }
+        }
+
+        if (missing_items.length > 0) {
+          let reconciled_missing = reconcileCitiesWithAuthoritativeBorders(
+            missing_items,
+            border_lookup.active_capitals_by_key,
+            border_lookup.active_capitals_by_name,
+            border_lookup.acapital_state_ids,
+            border_lookup.active_state_capitals_by_sid,
+            border_lookup.active_state_ids,
+            border_lookup.active_polity_names,
+            authoritative_capitals_by_city,
+            border_lookup.active_capitals_list
+          )
+          for (let i = 0; i < missing_indices.length; i++)
+            patched_labels[missing_indices[i]] = reconciled_missing[i]
+        }
+        visible_label_cities = patched_labels
+      } else {
+        visible_label_cities = reconcileCitiesWithAuthoritativeBorders(
+          visible_label_cities,
+          border_lookup.active_capitals_by_key,
+          border_lookup.active_capitals_by_name,
+          border_lookup.acapital_state_ids,
+          border_lookup.active_state_capitals_by_sid,
+          border_lookup.active_state_ids,
+          border_lookup.active_polity_names,
+          authoritative_capitals_by_city,
+          border_lookup.active_capitals_list
+        )
+      }
     }
 
     visible_label_cities.sort((arg0_a: any, arg0_b: any) => {
@@ -359,6 +473,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     projection,
     border_lookup,
     authoritative_capitals_by_city,
+    reconciled_capital_patch_map,
   ])
 
   //Return statement
@@ -736,6 +851,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       active_state_capitals_by_sid: border_lookup.active_state_capitals_by_sid,
       active_state_ids: border_lookup.active_state_ids,
       authoritative_capitals_by_city,
+      binary_attributes: options.stadesterBinaryAttributes,
       effective_points,
       hovered_region: hovered_city_region,
       is_cartesian,
@@ -743,6 +859,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       is_mobile,
       onHoverCity: options.onHoverCity,
       onSelectCity: options.onSelectCity,
+      polity_features: border_lookup.polity_features,
       projection,
       reconciled_labels: reconciled_stadester_labels,
       selectedCityKey: options.selectedCityKey,
@@ -779,6 +896,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     options.countriesMode,
     options.hoveredCountry,
     effective_points,
+    options.stadesterBinaryAttributes,
     reconciled_stadester_labels,
     border_lookup,
     authoritative_capitals_by_city,

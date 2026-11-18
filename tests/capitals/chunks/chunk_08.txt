@@ -119,7 +119,7 @@ TIMELINE:
 STATE: [4590] Powhatan Confederacy (1575.1.1 -> 1677.5.28) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1575.1.1 -> 1677.5.28: Werowocomoco [stadester-Werowocomoco-United States]
+  1575.1.1 -> 1677.5.28: Werowocomoco [stadester-Werowocomoco-Virginia]
 ---
 
 STATE: [4591] Colony of Angola (1576.1.1 -> 1951.10.20) [fill: #90A16A]
@@ -269,7 +269,7 @@ TIMELINE:
 STATE: [4615] English North America (1584.1.1 -> 1603.3.24) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1584.1.1 -> 1603.3.24: Roanoke [stadester-Roanoke-Virginia]
+  1584.1.1 -> 1603.3.24: Roanoke Island [stadester-Roanoke Island-North Carolina]
 ---
 
 STATE: [4616] Jhabua State (1585.1.1 -> 1901.1.1) [fill: #E0A348]
@@ -292,7 +292,7 @@ TIMELINE:
 STATE: [4619] Roanoke Colony (1586.1.1 -> 1591.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1586.1.1 -> 1591.1.1: Barru [stadester-Barru-Indonesia]
+  1586.1.1 -> 1591.1.1: Roanoke Island [stadester-Roanoke Island-North Carolina]
 ---
 
 STATE: [4620] Cooch Behar State (1587.1.1 -> 1601.1.1) [fill: #95C0C2]
@@ -680,7 +680,7 @@ TIMELINE:
 STATE: [4683] Bailiwick of Jersey (1603.3.24 -> 2026.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1945.5.9 -> 2026.1.1: Saint Helier [stadester-Saint Helier-United Kingdom]
+  1603.3.24 -> 2026.1.1: Saint Helier [stadester-Saint Helier-Jersey]
 ---
 
 STATE: [4684] British North America (1603.3.24 -> 1908.1.1) [fill: #EBBCC5]
@@ -789,13 +789,13 @@ TIMELINE:
 STATE: [4702] Popham Colony (1607.5.4 -> 1609.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1607.5.4 -> 1609.1.1: Fort St. George [stadester-Portland-Maine]
+  1607.5.4 -> 1609.1.1: Fort St. George [stadester-Fort St. George-Maine]
 ---
 
 STATE: [4703] Colony of Virginia (1607.5.14 -> 1776.12.23) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1607.5.14 -> 1699.1.1: Jamestown [stadester-Richmond-Virginia]
+  1607.5.14 -> 1699.1.1: Jamestown [stadester-Jamestown-Virginia]
   1699.1.1 -> 1776.12.23: Williamsburg [stadester-Williamsburg-Virginia]
 ---
 
@@ -830,7 +830,8 @@ TIMELINE:
 STATE: [4709] Bermuda (1610.1.1 -> 2026.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1776.7.4 -> 2026.1.1: Hamilton [stadester-Hamilton-Bermuda]
+  1610.1.1 -> 1815.1.1: St. George's [stadester-Saint George-Bermuda]
+  1815.1.1 -> 2026.1.1: Hamilton [stadester-Hamilton-Bermuda]
 ---
 
 STATE: [4710] Kishangarh State (1610.1.1 -> 1818.3.26) [fill: #AD2845]
@@ -842,7 +843,7 @@ TIMELINE:
 STATE: [4711] Sagadahoc Colony (1610.1.1 -> 1665.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1610.1.1 -> 1665.1.1: Sagadahoc [stadester-Portland-Maine]
+  1610.1.1 -> 1665.1.1: Sagadahoc [stadester-Sagadahoc-Maine]
 ---
 
 STATE: [4712] Sambas Sultanate (1610.1.1 -> 1820.1.1) [fill: #E0C25E]
@@ -1023,7 +1024,7 @@ REASON: Saxon military occupation administration in wartime theater
 STATE: [4742] Colony of New Plymouth (1620.12.21 -> 1692.5.14) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1620.12.21 -> 1692.5.14: Plymouth [stadester-Plymouth-United States]
+  1620.12.21 -> 1692.5.14: Plymouth [stadester-Plymouth-Massachusetts]
 ---
 
 STATE: [4743] Bima Sultanate (1621.1.1 -> 1669.12.8) [fill: #283C70]
@@ -1112,7 +1113,7 @@ TIMELINE:
 STATE: [4757] Province of Maine (1622.8.10 -> 1693.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1622.8.10 -> 1693.1.1: York [stadester-Portland-Maine]
+  1622.8.10 -> 1693.1.1: York [stadester-York-Maine]
 ---
 
 STATE: [4758] Catholic League (1622.9.1 -> 1648.5.15) [fill: #405F85]
@@ -1129,7 +1130,7 @@ TIMELINE:
 STATE: [4760] Wessagusset Colony (1623.1.1 -> 1624.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1623.1.1 -> 1624.1.1: Weymouth [stadester-Boston-Massachusetts]
+  1623.1.1 -> 1624.1.1: Weymouth [stadester-Weymouth-Massachusetts]
 ---
 
 STATE: [4761] Colony of Saint Christopher (1624.1.1 -> 1883.1.1) [fill: #EBBCC5]
@@ -1300,13 +1301,13 @@ TIMELINE:
 STATE: [4789] Nova Scotia (1630.1.1 -> 1632.3.29) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1630.1.1 -> 1632.3.29: Port-Royal [stadester-Port-Royal-Canada]
+  1630.1.1 -> 1632.3.29: Annapolis Royal [stadester-Annapolis Royal-Canada]
 ---
 
 STATE: [4790] Province of New Hampshire (1630.1.1 -> 1776.7.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1630.1.1 -> 1776.7.4: Portsmouth [stadester-Portland-Maine]
+  1630.1.1 -> 1776.7.4: Portsmouth [stadester-Portsmouth-New Hampshire]
 ---
 
 STATE: [4791] Shahpura State (1630.1.1 -> 1801.1.1) [fill: #E0A348]
@@ -1360,7 +1361,7 @@ TIMELINE:
 STATE: [4799] Massachusetts Bay Colony (1631.1.1 -> 1691.10.7) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1631.1.1 -> 1691.10.7: Boston [stadester-Boston-United States]
+  1631.1.1 -> 1691.10.7: Boston [stadester-Boston-Massachusetts]
 ---
 
 STATE: [4800] Saint-Christophe (1631.1.1 -> 1702.7.16) [fill: #B5ABCC]
@@ -1415,7 +1416,7 @@ TIMELINE:
 STATE: [4808] Province of Maryland (1632.6.20 -> 1776.7.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1632.6.20 -> 1694.1.1: St. Mary's City [stadester-Annapolis-Maryland]
+  1632.6.20 -> 1694.1.1: St. Mary's City [stadester-St. Mary's City-Maryland]
   1694.1.1 -> 1776.7.4: Annapolis [stadester-Annapolis-Maryland]
 ---
 
@@ -1480,7 +1481,7 @@ REASON: French commercial proprietary company governing scattered Antillean isla
 STATE: [4819] Saybrook Colony (1636.1.1 -> 1645.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1636.1.1 -> 1645.1.1: Old Saybrook [stadester-New Haven-Connecticut]
+  1636.1.1 -> 1645.1.1: Old Saybrook [stadester-Old Saybrook-Connecticut]
 ---
 
 STATE: [4820] Sonepur State (1636.1.1 -> 1826.12.13) [fill: #B5ABCC]
@@ -1534,7 +1535,7 @@ TIMELINE:
 STATE: [4828] Providence Plantations (1637.1.1 -> 1663.7.8) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1637.1.1 -> 1663.7.8: Providence [stadester-Providence-United States]
+  1637.1.1 -> 1663.7.8: Providence [stadester-Providence-Rhode Island]
 ---
 
 STATE: [4829] Samka State (1637.1.1 -> 1886.1.1) [fill: #E0C25E]
@@ -1558,7 +1559,7 @@ TIMELINE:
 STATE: [4832] Pocasset (1638.1.1 -> 1663.7.8) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1638.1.1 -> 1663.7.8: Portsmouth [stadester-Providence-Rhode Island]
+  1638.1.1 -> 1663.7.8: Portsmouth [stadester-Portsmouth-Rhode Island]
 ---
 
 STATE: [4833] Valtellina (1638.1.1 -> 1639.9.3) [fill: #E0A348]
@@ -1613,7 +1614,7 @@ TIMELINE:
 STATE: [4841] Newport (1640.1.1 -> 1663.7.8) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1640.1.1 -> 1663.7.8: Newport [stadester-Providence-Rhode Island]
+  1640.1.1 -> 1663.7.8: Newport [stadester-Newport-Rhode Island]
 ---
 
 STATE: [4842] Colony of Saba (1640.5.1 -> 1954.12.15) [fill: #E0A348]
@@ -2359,7 +2360,7 @@ TIMELINE:
 STATE: [4966] Delaware Colony (1665.1.1 -> 1776.7.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1665.1.1 -> 1776.7.4: New Castle [stadester-New Castle-Pennsylvania]
+  1665.1.1 -> 1776.7.4: New Castle [stadester-New Castle-Delaware]
 ---
 
 STATE: [4967] Duchy of Massa and Carrara (1665.1.1 -> 1830.1.1) [fill: #B37B50]
@@ -2371,7 +2372,7 @@ TIMELINE:
 STATE: [4968] Province of New Jersey (1665.1.1 -> 1776.7.4) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1665.1.1 -> 1776.7.4: Perth Amboy [stadester-Trenton-New Jersey]
+  1665.1.1 -> 1776.7.4: Perth Amboy [stadester-Perth Amboy-New Jersey]
 ---
 
 STATE: [4969] Province of New York (1665.1.1 -> 1776.7.4) [fill: #EBBCC5]
@@ -2574,7 +2575,7 @@ TIMELINE:
 STATE: [5002] Province of East Jersey (1675.1.1 -> 1703.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1675.1.1 -> 1703.1.1: Perth Amboy [stadester-Trenton-New Jersey]
+  1675.1.1 -> 1703.1.1: Perth Amboy [stadester-Perth Amboy-New Jersey]
 ---
 
 STATE: [5003] Province of West Jersey (1675.1.1 -> 1703.1.1) [fill: #9CBED9]
@@ -3698,13 +3699,13 @@ TIMELINE:
 STATE: [5191] Province of North Carolina (1712.1.24 -> 1776.12.23) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1712.1.24 -> 1776.12.23: New Bern (North Carolina) [stadester-New-Bern--North-Carolina--United States]
+  1712.1.24 -> 1776.12.23: New Bern [stadester-New Bern-North Carolina]
 ---
 
 STATE: [5192] Province of South Carolina (1712.1.24 -> 1776.12.23) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1712.1.24 -> 1776.12.23: Charleston [stadester-Charleston-United States]
+  1712.1.24 -> 1776.12.23: Charleston [stadester-Charleston-South Carolina]
 ---
 
 STATE: [5193] Kingdom of Poland and the Grand Duchy of Lithuania, Denmark-Norway and Tsardom of Russia (Military Occupation) (1712.6.1 -> 1720.7.14) [fill: #CF658F]

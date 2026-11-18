@@ -3,9 +3,11 @@ import {
   normalizeCityKey,
   normalizePrimaryCityKey,
 } from '../../framework/stadester/city_metadata_framework.ts'
+import { stripBracketedPostfixes } from '../../framework/stadester/city_name_framework.ts'
 
 /**
- * Returns the short display label for a city by extracting the first word prior to semicolons or commas.
+ * Returns the short display label for a city by extracting the first word prior to semicolons or commas,
+ * stripping any parenthetical or square-bracketed postfixes first.
  *
  * @param {string} arg0_name
  *
@@ -20,11 +22,149 @@ export function getShortCityLabel (arg0_name: string): string {
     return ''
 
   //Function body
-  let before_semi = name.split(';')[0].trim()
+  let before_semi = stripBracketedPostfixes(name.split(';')[0].trim())
   let first_word = before_semi.split(/[\s,]+/)[0].trim()
 
   //Return statement
   return first_word || before_semi
+}
+
+
+/**
+ * Ray-casting point-in-polygon ring containment test.
+ *
+ * @param {number} arg0_lon
+ * @param {number} arg1_lat
+ * @param {number[][]} arg2_ring
+ *
+ * @returns {boolean}
+ */
+function isPointInRing (arg0_lon: number, arg1_lat: number, arg2_ring: number[][]): boolean {
+  //Convert from parameters
+  let lat = arg1_lat
+  let lon = arg0_lon
+  let ring = arg2_ring
+
+  //Declare local instance variables
+  let inside = false
+
+  //Guard clauses
+  if (!ring || ring.length < 3)
+    return false
+
+  //Function body
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    let xi = ring[i][0]
+    let yi = ring[i][1]
+    let xj = ring[j][0]
+    let yj = ring[j][1]
+    if (((yi > lat) !== (yj > lat)) && (lon < ((xj - xi)*(lat - yi))/((yj - yi) || 1e-12) + xi))
+      inside = !inside
+  }
+
+  //Return statement
+  return inside
+}
+
+
+/**
+ * Checks whether a single coordinate is inside a GeoJSON Polygon or MultiPolygon geometry.
+ *
+ * @param {number} arg0_lon
+ * @param {number} arg1_lat
+ * @param {any} arg2_geometry
+ *
+ * @returns {boolean}
+ */
+function isPointInGeoJsonGeometry (arg0_lon: number, arg1_lat: number, arg2_geometry: any): boolean {
+  //Convert from parameters
+  let geometry = arg2_geometry
+  let lat = arg1_lat
+  let lon = arg0_lon
+
+  //Guard clauses
+  if (!geometry || !geometry.type || !geometry.coordinates)
+    return true
+
+  //Function body
+  let checkPolygonCoords = function (arg0_rings: number[][][]): boolean {
+    if (!arg0_rings || arg0_rings.length === 0 || !isPointInRing(lon, lat, arg0_rings[0]))
+      return false
+    for (let h = 1; h < arg0_rings.length; h++) {
+      if (isPointInRing(lon, lat, arg0_rings[h]))
+        return false
+    }
+    return true
+  }
+
+  if (geometry.type === 'Polygon') {
+    return checkPolygonCoords(geometry.coordinates)
+  } else if (geometry.type === 'MultiPolygon') {
+    for (let p = 0; p < geometry.coordinates.length; p++) {
+      if (checkPolygonCoords(geometry.coordinates[p]))
+        return true
+    }
+    return false
+  }
+
+  //Return statement
+  return true
+}
+
+
+/**
+ * Checks whether a city coordinate lies inside (or within tight coastal grace of) a border feature's
+ * GeoJSON polygon and bounding box.
+ *
+ * @param {number} arg0_lon
+ * @param {number} arg1_lat
+ * @param {number[]} [arg2_bbox]
+ * @param {any} [arg3_geometry]
+ * @param {number} [arg4_tol=0.35]
+ *
+ * @returns {boolean}
+ */
+export function isCityInsideBorderFeature (
+  arg0_lon: number,
+  arg1_lat: number,
+  arg2_bbox?: number[],
+  arg3_geometry?: any,
+  arg4_tol: number = 0.35
+): boolean {
+  //Convert from parameters
+  let bbox = arg2_bbox
+  let geometry = arg3_geometry
+  let lat = arg1_lat
+  let lon = arg0_lon
+  let tol = arg4_tol
+
+  //Guard clauses
+  if (!Number.isFinite(lon) || !Number.isFinite(lat))
+    return false
+
+  //Function body
+  if (bbox && Array.isArray(bbox) && bbox.length >= 4) {
+    let span = Math.max(Math.abs(bbox[2] - bbox[0]), Math.abs(bbox[3] - bbox[1]))
+    let effective_pad = span < 1.5 ? Math.min(tol, Math.max(0.2, span*0.5)) : tol
+    if (lon < bbox[0] - effective_pad || lon > bbox[2] + effective_pad || lat < bbox[1] - effective_pad || lat > bbox[3] + effective_pad)
+      return false
+  }
+
+  if (geometry && geometry.coordinates) {
+    if (isPointInGeoJsonGeometry(lon, lat, geometry))
+      return true
+    //Allow tight 0.14 deg coastal/border-simplification probe around coastline vertices
+    let r = Math.min(0.14, tol)
+    let offsets: Array<[number, number]> = [[r, 0], [-r, 0], [0, r], [0, -r], [r, r], [r, -r], [-r, r], [-r, -r]]
+    for (let k = 0; k < offsets.length; k++) {
+      if (isPointInGeoJsonGeometry(lon + offsets[k][0], lat + offsets[k][1], geometry))
+        return true
+    }
+    return false
+  }
+
+  //Return statement
+  return true
 }
 
 
@@ -269,12 +409,8 @@ export function buildAuthoritativeCapitalsByCity (
       if (dist > 0.25)
         continue
 
-      if (cap.bbox) {
-        let span = Math.max(Math.abs(cap.bbox[2] - cap.bbox[0]), Math.abs(cap.bbox[3] - cap.bbox[1]))
-        let pad = span < 1.5 ? Math.min(1.0, Math.max(0.5, span*1.5)) : 1.0
-        if (c_lon < cap.bbox[0] - pad || c_lon > cap.bbox[2] + pad || c_lat < cap.bbox[1] - pad || c_lat > cap.bbox[3] + pad)
-          continue
-      }
+      if (!isCityInsideBorderFeature(c_lon, c_lat, cap.bbox, cap.geometry, 0.35))
+        continue
 
       let score = 0
       let clean_c_key = normalizeCityKey(c.key || '')
@@ -374,6 +510,7 @@ export function buildAuthoritativeCapitalsByCity (
  * @param {Set<string>} [arg6_active_polity_names] - Polity names active in current historical borders
  * @param {Map<string, any>} [arg7_authoritative_capitals_by_city] - Pre-matched authoritative capitals by city key/id
  * @param {Array<any>} [arg8_active_capitals_list] - Authoritative active capitals list with coordinates
+ * @param {{ by_name?: Map<string, any>; by_sid?: Map<string, any> }} [arg9_polity_features] - Live polygon metadata keyed by state ID and polity name
  *
  * @returns {any} Reconciled city object
  */
@@ -386,7 +523,8 @@ export function reconcileCapitalWithAuthoritativeBorders (
   arg5_active_state_ids?: Set<string>,
   arg6_active_polity_names?: Set<string>,
   arg7_authoritative_capitals_by_city?: Map<string, any>,
-  arg8_active_capitals_list?: Array<any>
+  arg8_active_capitals_list?: Array<any>,
+  arg9_polity_features?: { by_name?: Map<string, any>; by_sid?: Map<string, any> }
 ): any {
   //Convert from parameters
   let acapital_state_ids = arg3_acapital_state_ids
@@ -397,6 +535,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
   let capitals_by_key = arg1_capitals_by_key
   let capitals_by_name = arg2_capitals_by_name
   let city = arg0_city
+  let polity_features = arg9_polity_features
   let state_capitals_by_sid = arg4_state_capitals_by_sid
 
   //Guard clauses
@@ -426,7 +565,7 @@ export function reconcileCapitalWithAuthoritativeBorders (
   let match: any = null
   let match_capkey: string
   let match_polity: string
-  let pad: number = 3.5
+  let pad: number = 0.35
   let polity_name_lower: string
   let resolved_color: any
   let sid_str = city.capitalStateId !== undefined ? String(city.capitalStateId) : (city.capital_state_id !== undefined ? String(city.capital_state_id) : undefined)
@@ -514,17 +653,9 @@ export function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  if (match && match.bbox && c_lon !== undefined && c_lat !== undefined) {
-    let span = Math.max(Math.abs(match.bbox[2] - match.bbox[0]), Math.abs(match.bbox[3] - match.bbox[1]))
-    let effective_pad = span < 1.5 ? Math.min(pad, Math.max(0.5, span*1.5)) : pad
-    if (
-      c_lon < match.bbox[0] - effective_pad ||
-      c_lon > match.bbox[2] + effective_pad ||
-      c_lat < match.bbox[1] - effective_pad ||
-      c_lat > match.bbox[3] + effective_pad
-    ) {
+  if (match && c_lon !== undefined && c_lat !== undefined && (match.bbox || match.geometry)) {
+    if (!isCityInsideBorderFeature(c_lon, c_lat, match.bbox, match.geometry, pad))
       match = null
-    }
   }
 
   if (match) {
@@ -549,11 +680,13 @@ export function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  //4. If matched with authoritative capital, ensure isCapital is true with enriched metadata
+  //4. If matched with authoritative capital, ensure isCapital is true with enriched metadata & live polygon colour
   if (match) {
-    resolved_color = (match.color && match.color !== '#FFDC00')
-      ? match.color
-      : (city.capitalColor || city.capital_color || match.color || '#FFDC00')
+    let match_sid_str = match.state_id !== undefined ? String(match.state_id) : sid_str
+    let match_polity_l = (match.polity_name || '').toLowerCase().trim()
+    let live_feat = (match_sid_str ? polity_features?.by_sid?.get(match_sid_str) : undefined) ||
+      (match_polity_l ? polity_features?.by_name?.get(match_polity_l) : undefined)
+    resolved_color = match.color || live_feat?.color || city.capitalColor || city.capital_color || '#FFDC00'
     return {
       ...city,
       capitalColor: resolved_color,
@@ -567,11 +700,10 @@ export function reconcileCapitalWithAuthoritativeBorders (
     }
   }
 
-  //5. If city claims isCapital but its polity no longer exists or has another authoritative capital:
+  //5. If city claims isCapital: verify polity existence, containment, and inherit live polygon colour
   if (city.isCapital || city.is_capital) {
-    //Verify that the claimed polity exists at this point in time
+    polity_name_lower = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
     if (active_state_ids && active_state_ids.size > 0) {
-      polity_name_lower = (city.capitalOf || city.capital_state_name || '').toLowerCase().trim()
       has_polity_by_id = Boolean(sid_str && active_state_ids.has(sid_str))
       has_polity_by_name = Boolean(polity_name_lower && active_polity_names && active_polity_names.has(polity_name_lower))
       if (!has_polity_by_name && active_polity_names && city.country) {
@@ -641,6 +773,33 @@ export function reconcileCapitalWithAuthoritativeBorders (
         }
       }
     }
+
+    let live_feat = (sid_str ? polity_features?.by_sid?.get(sid_str) : undefined) ||
+      (polity_name_lower ? polity_features?.by_name?.get(polity_name_lower) : undefined)
+    if (live_feat) {
+      if (c_lon !== undefined && c_lat !== undefined && (live_feat.bbox || live_feat.geometry)) {
+        if (!isCityInsideBorderFeature(c_lon, c_lat, live_feat.bbox, live_feat.geometry, pad)) {
+          return {
+            ...city,
+            capitalColor: undefined,
+            capital_color: undefined,
+            capitalOf: undefined,
+            capitalStateId: undefined,
+            capital_state_id: undefined,
+            capital_state_name: undefined,
+            isCapital: false,
+            is_capital: false,
+          }
+        }
+      }
+      if (live_feat.color && (city.capitalColor !== live_feat.color || city.capital_color !== live_feat.color)) {
+        return {
+          ...city,
+          capitalColor: live_feat.color,
+          capital_color: live_feat.color,
+        }
+      }
+    }
   }
 
   //Return statement
@@ -675,7 +834,8 @@ export function reconcileCitiesWithAuthoritativeBorders (
   arg5_active_state_ids?: Set<string>,
   arg6_active_polity_names?: Set<string>,
   arg7_authoritative_capitals_by_city?: Map<string, any>,
-  arg8_active_capitals_list?: Array<any>
+  arg8_active_capitals_list?: Array<any>,
+  arg9_polity_features?: { by_name?: Map<string, any>; by_sid?: Map<string, any> }
 ): any[] {
   //Convert from parameters
   let acapital_state_ids = arg3_acapital_state_ids
@@ -686,6 +846,7 @@ export function reconcileCitiesWithAuthoritativeBorders (
   let capitals_by_key = arg1_capitals_by_key
   let capitals_by_name = arg2_capitals_by_name
   let cities = arg0_cities
+  let polity_features = arg9_polity_features
   let state_capitals_by_sid = arg4_state_capitals_by_sid
 
   //Guard clauses
@@ -711,7 +872,8 @@ export function reconcileCitiesWithAuthoritativeBorders (
       active_state_ids,
       active_polity_names,
       authoritative_capitals_by_city,
-      active_capitals_list
+      active_capitals_list,
+      polity_features
     )
     reconciled.push(r)
   }
@@ -801,6 +963,69 @@ export function reconcileCitiesWithAuthoritativeBorders (
           if (same_polity)
             suppressed_capital_indices.add(idx)
         }
+      }
+    }
+  }
+
+  //2b. Polity-level deduplication: guarantee at most one capital city per state/polity
+  let by_polity_uid = new Map<string, number[]>()
+  for (let i = 0; i < reconciled.length; i++) {
+    let c = reconciled[i]
+    if (!c || (!c.isCapital && !c.is_capital) || suppressed_capital_indices.has(i))
+      continue
+    let c_sid = c.capitalStateId ?? c.capital_state_id
+    let c_polity = (c.capitalOf || c.capital_state_name || '').toLowerCase().trim()
+    let uid = (c_sid !== undefined && c_sid !== null && String(c_sid).length > 0)
+      ? `sid:${String(c_sid)}`
+      : (c_polity ? `name:${c_polity}` : '')
+    if (!uid)
+      continue
+    if (!by_polity_uid.has(uid))
+      by_polity_uid.set(uid, [])
+    by_polity_uid.get(uid)!.push(i)
+  }
+
+  for (let [, group] of by_polity_uid) {
+    if (group.length <= 1)
+      continue
+    let best_group_idx = group[0]
+    let best_group_score = -Infinity
+
+    for (let g = 0; g < group.length; g++) {
+      let idx = group[g]
+      let c = reconciled[idx]
+      let c_sid = c.capitalStateId ?? c.capital_state_id
+      let sid_str = (c_sid !== undefined && c_sid !== null) ? String(c_sid) : ''
+      let p_name = (c.capitalOf || c.capital_state_name || '').toLowerCase().trim()
+      let c_country = (c.country || '').toLowerCase().trim()
+      let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : (c.position ? c.position[1] : undefined)))
+      let c_lon = c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : (c.position ? c.position[0] : undefined)))
+      let live_feat = (sid_str ? polity_features?.by_sid?.get(sid_str) : undefined) ||
+        (p_name ? polity_features?.by_name?.get(p_name) : undefined)
+
+      let sc = 0
+      if (assigned_capital_indices.has(idx))
+        sc += 1000000
+      if (live_feat && c_lon !== undefined && c_lat !== undefined && isCityInsideBorderFeature(c_lon, c_lat, live_feat.bbox, live_feat.geometry, 0.35))
+        sc += 500000
+      if (c_country && p_name && (p_name.includes(c_country) || c_country.includes(p_name)))
+        sc += 200000
+      if (!String(c.key || '').toLowerCase().includes('(agglomeration)'))
+        sc += 50000
+      let pop_val = typeof c.population === 'number' ? c.population : 0
+      sc += Math.min(20000, Math.round(Math.log10(Math.max(1, pop_val))*3000))
+
+      if (sc > best_group_score) {
+        best_group_score = sc
+        best_group_idx = idx
+      }
+    }
+
+    for (let g = 0; g < group.length; g++) {
+      let idx = group[g]
+      if (idx !== best_group_idx) {
+        assigned_capital_indices.delete(idx)
+        suppressed_capital_indices.add(idx)
       }
     }
   }

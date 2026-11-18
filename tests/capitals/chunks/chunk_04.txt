@@ -2546,7 +2546,7 @@ TIMELINE:
 STATE: [2380] Norse Settlements in Greenland (986.1.1 -> 1262.1.1) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  986.1.1 -> 1262.1.1: Brattahlid [stadester-Brattahlid-Greenland]
+  986.1.1 -> 1262.1.1: Brattahlíð [stadester-Brattahlíð-Greenland]
 ---
 
 STATE: [2381] Prince-Bishopric of Liège (986.1.1 -> 1794.12.28) [fill: #D1453B]
@@ -2636,7 +2636,7 @@ TIMELINE:
 STATE: [2394] Vinland (991.1.1 -> 1051.1.1) [fill: #B37B50]
 STATUS: CAPITAL
 TIMELINE:
-  991.1.1 -> 1051.1.1: L'Anse aux Meadows [stadester-Anse-aux-Meadows-Canada]
+  991.1.1 -> 1051.1.1: L'Anse aux Meadows [stadester-L'Anse aux Meadows-Canada]
 ---
 
 STATE: [2395] County of Chiny (993.1.1 -> 1379.1.1) [fill: #CF658F]

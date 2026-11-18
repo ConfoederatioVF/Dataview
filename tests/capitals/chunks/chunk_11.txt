@@ -71,10 +71,10 @@ TIMELINE:
 STATE: [6541] Territory of Arizona (1863.2.24 -> 1912.2.14) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1863.2.24 -> 1864.5.18: Fort Whipple [stadester-Prescott-United States]
-  1864.5.18 -> 1867.11.1: Prescott [stadester-Prescott-United States]
-  1867.11.1 -> 1877.1.1: Tucson [stadester-Tucson-United States]
-  1877.1.1 -> 1889.2.4: Prescott [stadester-Prescott-United States]
+  1863.2.24 -> 1864.5.18: Fort Whipple [stadester-Prescott-Arizona]
+  1864.5.18 -> 1867.11.1: Prescott [stadester-Prescott-Arizona]
+  1867.11.1 -> 1877.1.1: Tucson [stadester-Tucson-Arizona]
+  1877.1.1 -> 1889.2.4: Prescott [stadester-Prescott-Arizona]
   1889.2.4 -> 1912.2.14: Phoenix [stadester-Phoenix-Arizona]
 ---
 
@@ -82,7 +82,7 @@ STATE: [6542] Territory of Idaho (1863.3.3 -> 1890.7.3) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
   1863.3.3 -> 1864.12.24: Lewiston [stadester-Lewiston-Idaho]
-  1864.12.24 -> 1890.7.3: Boise [ghsl-Boise; Meridian-United States]
+  1864.12.24 -> 1890.7.3: Boise [stadester-Boise City-Idaho]
 ---
 
 STATE: [6543] United States of Colombia (1863.5.8 -> 1886.8.8) [fill: #283C70]
@@ -137,7 +137,7 @@ STATE: [6551] Territory of Montana (1864.5.26 -> 1889.11.8) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
   1864.5.26 -> 1865.2.7: Bannack [stadester-Butte-Montana]
-  1865.2.7 -> 1875.1.1: Virginia City [stadester-Helena-Montana]
+  1865.2.7 -> 1875.1.1: Virginia City [stadester-Virginia City-Montana]
   1875.1.1 -> 1889.11.8: Helena [stadester-Helena-Montana]
 ---
 
@@ -323,7 +323,7 @@ TIMELINE:
 STATE: [6583] Republic of Manitobah (1868.1.1 -> 1870.5.12) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1868.1.1 -> 1870.5.12: Portage la Prairie [stadester-Portage-la-Prairie-Canada]
+  1868.1.1 -> 1870.5.12: Portage la Prairie [stadester-Portage la Prairie-Canada]
 ---
 
 STATE: [6584] Imperial Faction (1868.1.31 -> 1868.11.7) [fill: #95C0C2]
@@ -340,7 +340,7 @@ TIMELINE:
 STATE: [6586] Territory of Wyoming (1868.7.25 -> 1890.7.10) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1868.7.25 -> 1890.7.10: Cheyenne [stadester-Cheyenne-United States]
+  1868.7.25 -> 1890.7.10: Cheyenne [stadester-Cheyenne-Wyoming]
 ---
 
 STATE: [6587] Cuban Rebels (1868.10.13 -> 1959.1.2) [fill: #4E825E]
@@ -2295,7 +2295,7 @@ TIMELINE:
 STATE: [6916] Dominion of Newfoundland (1908.1.1 -> 1931.12.11) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1908.1.1 -> 1931.12.11: St. John's [stadester-St-Johns-Canada]
+  1908.1.1 -> 1931.12.11: St. John's [stadester-Saint John's-Canada]
 ---
 
 STATE: [6917] Kingdom of Bulgaria (1908.10.5 -> 1944.9.9) [fill: #95C0C2]

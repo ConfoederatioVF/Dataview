@@ -19,9 +19,14 @@ import {
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
 import {
+  getBinaryDatasetStore,
   getNearbyCityKeys,
   loadDataset,
 } from './stadester_loader.ts'
+import {
+  getBinaryAuthoritativeCapitalsAtYear,
+  queryBinaryCitiesAtYear,
+} from './stadester_binary_queries.ts'
 import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 
 export let _cache_authoritative_capitals_by_year = new Map<string, Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>>()
@@ -231,14 +236,28 @@ export function getAuthoritativeCapitalsAtYear (
   let year = arg1_year !== undefined ? Math.floor(arg1_year) : 1950
 
   //Declare local instance variables
+  let binary_store = getBinaryDatasetStore(dataset_name)
   let borders: any
   let cache_key = `${dataset_name}:${year}:${month}:${day}:${border_dataset}`
   let capitals_by_city = new Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>()
-  let indexed = loadDataset(dataset_name)
+  let indexed: Record<string, CityIndexEntry>
 
   //Guard clauses
   if (_cache_authoritative_capitals_by_year.has(cache_key))
     return _cache_authoritative_capitals_by_year.get(cache_key)!
+
+  if (binary_store) {
+    capitals_by_city = getBinaryAuthoritativeCapitalsAtYear(binary_store, year, month, day, border_dataset)
+    if (_cache_authoritative_capitals_by_year.size >= 100) {
+      let oldest_cap_key = _cache_authoritative_capitals_by_year.keys().next().value
+      if (oldest_cap_key !== undefined)
+        _cache_authoritative_capitals_by_year.delete(oldest_cap_key)
+    }
+    _cache_authoritative_capitals_by_year.set(cache_key, capitals_by_city)
+    return capitals_by_city
+  }
+
+  indexed = loadDataset(dataset_name)
 
   //Function body
   try {
@@ -470,20 +489,46 @@ export function getCitiesAtYear (
   //Declare local instance variables
   let active_state_ids: Set<number>
   let all_city_keys: string[]
+  let binary_store = getBinaryDatasetStore(dataset_name)
   let bugged_set: Set<string>
   let cache_key = `${dataset_name}:${target_year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}:${options.preserve_capitals !== false}`
-  let cshapes_capitals_by_city_key = new Map<string, { color?: string; name?: string; state_id?: number | string }>()
-  let indexed = loadDataset(dataset_name)
+  let cshapes_capitals_by_city_key = new Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>()
+  let indexed: Record<string, CityIndexEntry>
   let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
   let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
   let result_cities: CityRenderPoint[] = []
 
   //Guard clauses
-  if (!indexed || Object.keys(indexed).length === 0)
-    return []
-
   if (_cache_cities_at_year.has(cache_key))
     return _cache_cities_at_year.get(cache_key)!
+
+  if (binary_store) {
+    if (binary_store.count === 0)
+      return []
+
+    cshapes_capitals_by_city_key = getAuthoritativeCapitalsAtYear(
+      dataset_name,
+      target_year,
+      options.month,
+      options.day,
+      options.dataset || 'defacto_borders'
+    )
+    result_cities = queryBinaryCitiesAtYear(binary_store, dataset_name, target_year, options, cshapes_capitals_by_city_key)
+
+    if (_cache_cities_at_year.size >= 100) {
+      let oldest_key = _cache_cities_at_year.keys().next().value
+      if (oldest_key !== undefined)
+        _cache_cities_at_year.delete(oldest_key)
+    }
+    _cache_cities_at_year.set(cache_key, result_cities)
+
+    //Return statement
+    return result_cities
+  }
+
+  indexed = loadDataset(dataset_name)
+  if (!indexed || Object.keys(indexed).length === 0)
+    return []
 
   //Function body
   active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
@@ -640,7 +685,7 @@ export function getCitiesAtYear (
         if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
           return false
       }
-      if (!isCityInsideStateBBox(city, state, 3.5))
+      if (!isCityInsideStateBBox(city, state, 0.75))
         return false
       return true
     })

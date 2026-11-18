@@ -10,6 +10,7 @@ import {
 import {
   getPrimaryCityNormKey,
   isCityInsideStateBBox,
+  selectBestCapitalCandidateForTimeline,
   type CityIndexEntry,
 } from './stadester_types.ts'
 
@@ -68,10 +69,30 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
       norm_key_to_cities.get(primary_nk)!.push(city)
     }
 
-    let nc_key = `${(city.name || '').toLowerCase().trim()}|${(city.country || '').toLowerCase().trim()}`
+    let c_country_l = (city.country || '').toLowerCase().trim()
+    let nc_key = `${(city.name || '').toLowerCase().trim()}|${c_country_l}`
     if (!name_country_to_city.has(nc_key))
       name_country_to_city.set(nc_key, [])
     name_country_to_city.get(nc_key)!.push(city)
+
+    if (Array.isArray(city.other_names)) {
+      for (let x = 0; x < city.other_names.length; x++) {
+        let on_nc: string = `${String(city.other_names[x] || '').toLowerCase().trim()}|${c_country_l}`
+        if (!name_country_to_city.has(on_nc))
+          name_country_to_city.set(on_nc, [])
+        if (!name_country_to_city.get(on_nc)!.includes(city))
+          name_country_to_city.get(on_nc)!.push(city)
+      }
+    }
+    if (Array.isArray(city.historical_names)) {
+      for (let x = 0; x < city.historical_names.length; x++) {
+        let hn_nc: string = `${String(city.historical_names[x]?.name || '').toLowerCase().trim()}|${c_country_l}`
+        if (!name_country_to_city.has(hn_nc))
+          name_country_to_city.set(hn_nc, [])
+        if (!name_country_to_city.get(hn_nc)!.includes(city))
+          name_country_to_city.get(hn_nc)!.push(city)
+      }
+    }
   }
 
   for (let x = 0; x < all_keys.length; x++) {
@@ -82,7 +103,10 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
         let rec = city.capital_records[y]
         if (rec.state_id !== null && rec.state_id !== undefined) {
           let s_id_str = String(rec.state_id)
-          if (state_capitals[s_id_str]?.acapital)
+          if (state_capitals[s_id_str])
+            continue
+          let rec_state = getStateById(Number(rec.state_id))
+          if (rec_state && !isCityInsideStateBBox(city, rec_state, 0.75))
             continue
 
           let next_rec = (y + 1 < city.capital_records.length) ? city.capital_records[y + 1] : null
@@ -98,6 +122,8 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
           })
         }
       }
+      city.capital = {}
+      city.capital_records = []
       if (ivs.length > 0)
         city_intervals.set(city, ivs)
     }
@@ -111,6 +137,7 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
       continue
 
     let s_id_num = Number(state_id)
+    let state = getStateById(s_id_num)
 
     for (let a = 0; a < sc_entry.timeline.length; a++) {
       let tl_item = sc_entry.timeline[a]
@@ -155,23 +182,28 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
         }
       }
 
-      for (let tc = 0; tc < target_cities.length; tc++) {
-        let target_city = target_cities[tc]
-        let state = getStateById(s_id_num)
-        if (state && !isCityInsideStateBBox(target_city, state, 3.5))
-          continue
+      let s_p = parseYearMonthDay(tl_item.start)
+      let e_p = tl_item.stop ? parseYearMonthDay(tl_item.stop) : { date: '2026.1.1', year_frac: 2026 }
+      let start_frac_val = tl_item.start_frac !== undefined ? tl_item.start_frac : s_p.year_frac
+      let stop_frac_val = tl_item.stop_frac !== undefined ? tl_item.stop_frac : e_p.year_frac
+      let best_city = selectBestCapitalCandidateForTimeline(
+        target_cities,
+        state,
+        tl_item.key,
+        start_frac_val,
+        stop_frac_val
+      )
 
-        if (!city_intervals.has(target_city))
-          city_intervals.set(target_city, [])
-        let s_p = parseYearMonthDay(tl_item.start)
-        let e_p = tl_item.stop ? parseYearMonthDay(tl_item.stop) : { date: '2026.1.1', year_frac: 2026 }
-        city_intervals.get(target_city)!.push({
+      if (best_city) {
+        if (!city_intervals.has(best_city))
+          city_intervals.set(best_city, [])
+        city_intervals.get(best_city)!.push({
           is_authoritative: true,
           start_date: tl_item.start.trim(),
-          start_frac: tl_item.start_frac !== undefined ? tl_item.start_frac : s_p.year_frac,
+          start_frac: start_frac_val,
           state_id: s_id_num,
           stop_date: tl_item.stop ? tl_item.stop.trim() : '2026.1.1',
-          stop_frac: tl_item.stop_frac !== undefined ? tl_item.stop_frac : e_p.year_frac,
+          stop_frac: stop_frac_val,
         })
       }
     }
@@ -214,8 +246,8 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
         candidates.sort((arg0_a, arg1_b) => {
           let state_a = getStateById(arg0_a.state_id)
           let state_b = getStateById(arg1_b.state_id)
-          let inside_a = state_a ? (isCityInsideStateBBox(city, state_a, 3.5) ? 1 : 0) : 1
-          let inside_b = state_b ? (isCityInsideStateBBox(city, state_b, 3.5) ? 1 : 0) : 1
+          let inside_a = state_a ? (isCityInsideStateBBox(city, state_a, 0.75) ? 1 : 0) : 1
+          let inside_b = state_b ? (isCityInsideStateBBox(city, state_b, 0.75) ? 1 : 0) : 1
           if (inside_a !== inside_b)
             return inside_b - inside_a
 
@@ -505,7 +537,7 @@ function isStateValidForCapitalAtYear (
     if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && year_frac >= 1975))
       return false
   }
-  if (!isCityInsideStateBBox(city, state, 3.5))
+  if (!isCityInsideStateBBox(city, state, 0.75))
     return false
 
   //Return statement

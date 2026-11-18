@@ -162,7 +162,7 @@ TIMELINE:
 STATE: [5903] Illinois Territory (1809.3.1 -> 1818.12.3) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1809.3.1 -> 1818.12.3: Kaskaskia [stadester-Kaskaskia-United States]
+  1809.3.1 -> 1818.12.3: Kaskaskia [stadester-Kaskaskia-Illinois]
 ---
 
 STATE: [5904] Austrian Empire (Military Occupation) (1809.3.5 -> 1815.5.23) [fill: #AEC76D]
@@ -263,7 +263,7 @@ TIMELINE:
 STATE: [5920] United Provinces of the Río de la Plata (1810.5.25 -> 1831.1.4) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1810.5.25 -> 1831.1.4: Ciudad de Nuestra Señora Buenos Aires [stadester-Buenos Aires-Argentina]
+  1810.5.25 -> 1831.1.4: Buenos Aires [stadester-Buenos Aires-Argentina]
 ---
 
 STATE: [5921] Principality of Guria (1810.6.19 -> 1829.9.2) [fill: #D1453B]
@@ -292,7 +292,7 @@ TIMELINE:
 STATE: [5925] Republic of West Florida (1810.9.26 -> 1810.12.10) [fill: #CF658F]
 STATUS: CAPITAL
 TIMELINE:
-  1810.9.26 -> 1810.12.10: St. Francisville [stadester-St-Francisville-United States]
+  1810.9.26 -> 1810.12.10: St. Francisville [stadester-St. Francisville-Louisiana]
 ---
 
 STATE: [5926] Crown Colony of Mauritius (1810.12.3 -> 1968.3.12) [fill: #EBBCC5]
@@ -493,7 +493,7 @@ TIMELINE:
 STATE: [5959] Territory of Missouri (1812.6.4 -> 1821.8.10) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1812.6.4 -> 1821.8.10: St. Louis [ghsl-St. Louis-United States]
+  1812.6.4 -> 1821.8.10: St. Louis [stadester-Saint Louis-Missouri]
 ---
 
 STATE: [5960] Bhaisaunda State (1813.1.1 -> 1948.1.1) [fill: #EBBCC5]
@@ -651,7 +651,7 @@ REASON: Allied armies of the Sixth Coalition invading northeastern France in 181
 STATE: [5986] Greenland (1814.1.14 -> 1954.1.1) [fill: #9CBED9]
 STATUS: CAPITAL
 TIMELINE:
-  1814.1.14 -> 1954.1.1: Nuuk [stadester-Nuuk-Greenland]
+  1814.1.14 -> 1954.1.1: Nuuk [stadester-Godthåb-Greenland]
 ---
 
 STATE: [5987] Principality of Elba (1814.4.14 -> 1815.6.9) [fill: #90A16A]
@@ -967,7 +967,7 @@ TIMELINE:
 STATE: [6039] Alabama Territory (1817.3.3 -> 1819.12.14) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1817.3.3 -> 1819.12.14: St. Stephens [stadester-St.-Stephens-United States]
+  1817.3.3 -> 1819.12.14: St. Stephens [stadester-St. Stephens-Alabama]
 ---
 
 STATE: [6040] Principality of Serbia (1817.7.26 -> 1867.4.18) [fill: #4E825E]
@@ -1211,8 +1211,10 @@ TIMELINE:
 ---
 
 STATE: [6080] Oregon Country (1819.2.22 -> 1846.6.15) [fill: #AD2845]
-STATUS: ACAPITAL
-REASON: Joint Oregon Country condominium of the United States and Great Britain without a centralized civil capital
+STATUS: CAPITAL
+TIMELINE:
+  1819.2.22 -> 1825.3.19: Astoria [stadester-Astoria-Oregon]
+  1825.3.19 -> 1846.6.15: Fort Vancouver [stadester-Fort Vancouver-Washington]
 ---
 
 STATE: [6081] United Provinces of the Río de la Plata (Military Occupation) (1819.4.25 -> 1827.1.1) [fill: #CF658F]
@@ -1301,7 +1303,7 @@ TIMELINE:
 STATE: [6095] Territory of Arkansas (1820.4.21 -> 1836.6.15) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1820.4.21 -> 1836.6.15: Little Rock (Arkansas Territory) [stadester-Little-Rock--Arkansas-Territory--United States]
+  1820.4.21 -> 1836.6.15: Little Rock [stadester-Little Rock-Arkansas]
 ---
 
 STATE: [6096] Liberating Expedition of Peru (1820.9.7 -> 1821.7.21) [fill: #AEC76D]
@@ -2077,8 +2079,9 @@ REASON: Wartime alliance of Alajuela, Heredia, and San José during the Costa Ri
 ---
 
 STATE: [6226] Provisional Government of Texas (1835.10.2 -> 1836.3.2) [fill: #EBBCC5]
-STATUS: ACAPITAL
-REASON: Provisional revolutionary army of Texian colonists before formal declaration of independence
+STATUS: CAPITAL
+TIMELINE:
+  1835.10.2 -> 1836.3.2: San Felipe [stadester-San Felipe-Texas]
 ---
 
 STATE: [6227] Mexican Republic (1835.10.23 -> 1846.8.22) [fill: #687FAD]
@@ -2143,7 +2146,10 @@ TIMELINE:
 STATE: [6237] Republic of Texas (1836.3.2 -> 1845.12.29) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1836.3.2 -> 1845.12.29: Austin [stadester-Austin-United States]
+  1836.3.2 -> 1836.10.3: Washington-on-the-Brazos [stadester-Washington-on-the-Brazos-Texas]
+  1836.10.3 -> 1837.4.19: Columbia [stadester-West Columbia-Texas]
+  1837.4.19 -> 1839.10.14: Houston [stadester-Houston-Texas]
+  1839.10.14 -> 1845.12.29: Austin [stadester-Austin-Texas]
 ---
 
 STATE: [6238] Territory of Wisconsin (1836.7.3 -> 1848.5.29) [fill: #944481]
@@ -2219,7 +2225,7 @@ TIMELINE:
 STATE: [6250] Republic of Canada (1837.12.17 -> 1838.12.4) [fill: #283C70]
 STATUS: CAPITAL
 TIMELINE:
-  1837.12.17 -> 1838.12.4: Navy Island [stadester-Navy-Island-Canada]
+  1837.12.17 -> 1838.12.4: Navy Island [stadester-Navy Island-Canada]
 ---
 
 STATE: [6251] Republic of Nicaragua (1838.5.31 -> 2026.1.1) [fill: #405F85]
@@ -2363,7 +2369,7 @@ TIMELINE:
 STATE: [6274] Republic of the Rio Grande (1840.1.17 -> 1840.11.6) [fill: #AD2845]
 STATUS: CAPITAL
 TIMELINE:
-  1840.1.17 -> 1840.11.6: Laredo [ghsl-Laredo-United States]
+  1840.1.17 -> 1840.11.6: Laredo [stadester-Laredo-Texas]
 ---
 
 STATE: [6275] Republic of Natalia (1840.1.29 -> 1843.5.4) [fill: #AD2845]
@@ -2642,7 +2648,7 @@ REASON: Mexican centralist army occupying rebellious regional departments
 STATE: [6321] California Republic (1846.6.14 -> 1846.7.9) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1846.6.14 -> 1846.7.9: Sonoma [stadester-Sonoma-United States]
+  1846.6.14 -> 1846.7.9: Sonoma [stadester-Sonoma-California]
 ---
 
 STATE: [6322] United Mexican States (1846.8.22 -> 1867.6.19) [fill: #687FAD]
@@ -2782,7 +2788,7 @@ TIMELINE:
 STATE: [6345] Territory of Oregon (1848.8.14 -> 1859.2.14) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1848.8.14 -> 1859.2.14: Salem [stadester-Salem-Oregon]
+  1848.8.14 -> 1859.2.14: Salem [stadester-Salem-United States]
 ---
 
 STATE: [6346] Garibaldi's Volunteers (1848.8.15 -> 1860.10.26) [fill: #95C0C2]
@@ -2886,7 +2892,7 @@ REASON: Anglo-French joint military occupation of Beijing and Tianjin
 STATE: [6363] Territory of Utah (1850.9.9 -> 1896.1.4) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1850.9.9 -> 1896.1.4: Salt Lake City [stadester-Salt-Lake-City-United States]
+  1850.9.9 -> 1896.1.4: Salt Lake City [stadester-Salt Lake City-Utah]
 ---
 
 STATE: [6364] Territory of New Mexico (1850.12.3 -> 1912.1.6) [fill: #944481]
@@ -3347,7 +3353,7 @@ REASON: Zulu impis military operational raiding zone during the Mfecane
 STATE: [6441] Territory of Washington (1853.3.2 -> 1889.11.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1853.3.2 -> 1889.11.1: Olympia [stadester-Olympia-United States]
+  1853.3.2 -> 1889.11.1: Olympia [stadester-Olympia-Washington]
 ---
 
 STATE: [6442] Principality of Moldavia (Military Occupation) (1853.6.1 -> 1854.7.25) [fill: #D1453B]
@@ -3703,7 +3709,7 @@ TIMELINE:
 STATE: [6501] State of South Carolina (1860.12.20 -> 1861.2.4) [fill: #D1453B]
 STATUS: CAPITAL
 TIMELINE:
-  1860.12.20 -> 1861.2.4: Columbia [stadester-Columbia-United States]
+  1860.12.20 -> 1861.2.4: Columbia [stadester-Columbia-South Carolina]
 ---
 
 STATE: [6502] Colony of Rivières du Sud (1861.1.1 -> 1891.12.17) [fill: #B5ABCC]
@@ -3781,7 +3787,7 @@ TIMELINE:
 STATE: [6514] State of Texas (1861.2.1 -> 1861.3.2) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1861.2.1 -> 1861.3.2: Austin [stadester-Austin-United States]
+  1861.2.1 -> 1861.3.2: Austin [stadester-Austin-Texas]
 ---
 
 STATE: [6515] Confederate States of America (1861.2.4 -> 1865.5.13) [fill: #8C5A37]
@@ -3805,8 +3811,8 @@ TIMELINE:
 STATE: [6518] Territory of Dakota (1861.3.2 -> 1889.11.2) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1861.3.2 -> 1883.6.2: Yankton [stadester-Yankton-United States]
-  1883.6.2 -> 1889.11.2: Bismarck [stadester-Bismarck-United States]
+  1861.3.2 -> 1883.6.2: Yankton [stadester-Yankton-South Dakota]
+  1883.6.2 -> 1889.11.2: Bismarck [stadester-Bismarck-North Dakota]
 ---
 
 STATE: [6519] Territory of Nevada (1861.3.2 -> 1864.10.31) [fill: #944481]
@@ -3832,7 +3838,7 @@ TIMELINE:
 STATE: [6522] Commonwealth of Virginia (1861.4.17 -> 1861.5.7) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1861.4.17 -> 1861.5.7: Richmond [stadester-Richmond-United States]
+  1861.4.17 -> 1861.5.7: Richmond [stadester-Richmond-Virginia]
 ---
 
 STATE: [6523] State of Arkansas (1861.5.6 -> 1861.5.20) [fill: #CF658F]
@@ -3849,7 +3855,7 @@ REASON: Confederate state military expeditionary force under Sterling Price oper
 STATE: [6525] State of North Carolina (1861.5.20 -> 1861.5.21) [fill: #4E825E]
 STATUS: CAPITAL
 TIMELINE:
-  1861.5.20 -> 1861.5.21: Raleigh [stadester-Raleigh-United States]
+  1861.5.20 -> 1861.5.21: Raleigh [stadester-Raleigh-North Carolina]
 ---
 
 STATE: [6526] French Concession in Tianjin (1861.5.29 -> 1943.4.19) [fill: #B5ABCC]
@@ -3866,7 +3872,7 @@ TIMELINE:
 STATE: [6528] State of Tennessee (1861.6.8 -> 1861.7.2) [fill: #95C0C2]
 STATUS: CAPITAL
 TIMELINE:
-  1861.6.8 -> 1861.7.2: Nashville [stadester-Nashville-United States]
+  1861.6.8 -> 1861.7.2: Nashville [stadester-Nashville-Davidson-Tennessee]
 ---
 
 STATE: [6529] Colony of Lagos (1861.8.6 -> 1906.3.1) [fill: #EBBCC5]

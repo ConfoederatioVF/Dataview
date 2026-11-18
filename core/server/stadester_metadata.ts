@@ -73,12 +73,14 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
   if (!meta_list || meta_list.length === 0 || all_keys.length === 0)
     return
 
+  let cells_per_degree = 4
+
   //Function body
   for (let x = 0; x < all_keys.length; x++) {
     let city = indexed[all_keys[x]]
     raw_city_name_by_key.set(city.key, city.name || '')
     if (city.coords && Array.isArray(city.coords)) {
-      let bin_key = `${Math.floor(city.coords[0])},${Math.floor(city.coords[1])}`
+      let bin_key = `${Math.floor(city.coords[0]*cells_per_degree)},${Math.floor(city.coords[1]*cells_per_degree)}`
       if (!spatial_grid[bin_key])
         spatial_grid[bin_key] = []
       spatial_grid[bin_key].push(city)
@@ -126,17 +128,25 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
       min_dist = 0
     }
 
-    let center_lat = Math.floor(target_lat)
-    let center_lng = Math.floor(target_lng)
+    let center_lat = Math.floor(target_lat*cells_per_degree)
+    let center_lng = Math.floor(target_lng*cells_per_degree)
+    let deg_lat_bound_50 = 50/111.0 + 0.02
+    let deg_lon_bound_50 = 50/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
+    let cell_radius_50 = Math.max(1, Math.ceil(deg_lon_bound_50*cells_per_degree))
+    let cell_radius_lat_50 = Math.max(1, Math.ceil(deg_lat_bound_50*cells_per_degree))
 
-    for (let d_lat = -1; d_lat <= 1; d_lat++) {
-      for (let d_lng = -1; d_lng <= 1; d_lng++) {
+    for (let d_lat = -cell_radius_lat_50; d_lat <= cell_radius_lat_50; d_lat++) {
+      for (let d_lng = -cell_radius_50; d_lng <= cell_radius_50; d_lng++) {
         let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
         if (!cell)
           continue
 
         for (let c = 0; c < cell.length; c++) {
           let candidate = cell[c]
+          if (!candidate.coords)
+            continue
+          if (Math.abs(candidate.coords[0] - target_lat) > deg_lat_bound_50 || Math.abs(candidate.coords[1] - target_lng) > deg_lon_bound_50)
+            continue
           let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
           if (dist <= 0.1 && dist < min_exact_dist) {
             min_exact_dist = dist
@@ -218,17 +228,22 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
 
     let is_best_corrupted = isCorruptedCityName(best_city.name || '')
     let is_displaced_neighbour = !is_primary_name_match && Boolean(meta.name) &&
-      doesLabelMatchAnotherNearbyCity(best_city, meta.name!, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+      doesLabelMatchAnotherNearbyCity(best_city, meta.name!, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
     let is_synthetic_stub = isSyntheticGhslEpochStub(meta)
 
     if (!is_name_match && is_displaced_neighbour)
       continue
 
+    let best_pop = best_city.population || {}
+    let best_pop_years = Object.keys(best_pop).map(Number).filter((arg0_y) => Number.isFinite(arg0_y) && Number(best_pop[arg0_y]) > 0)
+    let best_is_active_modern = best_pop_years.some((arg0_y) => arg0_y >= 1950)
     let can_overwrite_name = Boolean(
       meta.name &&
       !best_city.key.startsWith('ghsl-') &&
-      (is_exact_coord_match || min_dist <= 15) &&
-      (is_best_corrupted || (!is_alias_only_match && !is_synthetic_stub && !is_displaced_neighbour))
+      (
+        (is_primary_name_match && (is_exact_coord_match || min_dist <= 15) && !is_synthetic_stub) ||
+        (!is_primary_name_match && min_dist <= 1.0 && is_best_corrupted)
+      )
     )
     let should_set_name = false
 
@@ -261,7 +276,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
         best_city.name &&
         best_city.name !== meta.name &&
         !isCorruptedCityName(best_city.name) &&
-        !doesLabelMatchAnotherNearbyCity(best_city, best_city.name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+        !doesLabelMatchAnotherNearbyCity(best_city, best_city.name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
       ) {
         meta_extra_aliases.push(best_city.name)
       }
@@ -272,7 +287,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
     }
 
     let allow_hist_merge = is_primary_name_match ||
-      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && (is_name_match || (!prev_binding?.has_name_match && !meta_is_modern)))
+      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && !best_is_active_modern && (is_name_match || (!prev_binding?.has_name_match && !meta_is_modern)))
     let allow_other_merge = is_primary_name_match ||
       (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && (is_name_match || !prev_binding?.has_name_match))
 
@@ -305,15 +320,22 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
       /\(\d{3,4}[–-]\d{3,4}\)/.test(best_city.key || '')
     )
 
-    for (let d_lat = -1; d_lat <= 1; d_lat++) {
-      for (let d_lng = -1; d_lng <= 1; d_lng++) {
+    let deg_lat_bound_25 = 25/111.0 + 0.02
+    let deg_lon_bound_25 = 25/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
+    let cell_radius_lat_25 = Math.max(1, Math.ceil(deg_lat_bound_25*cells_per_degree))
+    let cell_radius_lon_25 = Math.max(1, Math.ceil(deg_lon_bound_25*cells_per_degree))
+
+    for (let d_lat = -cell_radius_lat_25; d_lat <= cell_radius_lat_25; d_lat++) {
+      for (let d_lng = -cell_radius_lon_25; d_lng <= cell_radius_lon_25; d_lng++) {
         let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
         if (!cell)
           continue
 
         for (let c = 0; c < cell.length; c++) {
           let other = cell[c]
-          if (other.key === best_city.key)
+          if (other.key === best_city.key || !other.coords)
+            continue
+          if (Math.abs(other.coords[0] - target_lat) > deg_lat_bound_25 || Math.abs(other.coords[1] - target_lng) > deg_lon_bound_25)
             continue
 
           let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
@@ -424,7 +446,7 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
           if (
             old_name &&
             !isCorruptedCityName(old_name) &&
-            !doesLabelMatchAnotherNearbyCity(city, old_name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25)
+            !doesLabelMatchAnotherNearbyCity(city, old_name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
           ) {
             mergeCityOtherNames(city, [old_name])
           }

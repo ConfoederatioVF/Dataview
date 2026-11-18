@@ -7,6 +7,7 @@ export type ServerMode = 'preview' | 'dev' | 'rebuild'
 export type WatchdogPolicy = 'persistent' | 'oom' | 'once'
 
 export interface AutorunConfig {
+  below_normal_priority?: boolean
   default_locale: AutorunLocale
   default_open_browser: boolean
   default_watchdog_policy: WatchdogPolicy
@@ -23,6 +24,7 @@ export interface AutorunConfig {
   port: number
   port_wait_timeout_ms: number
   restart_delay_ms: number
+  uv_threadpool_size?: number
 }
 
 export interface AutorunDictionary {
@@ -115,6 +117,7 @@ export interface RunningBannerState {
 }
 
 let DEFAULT_AUTORUN_CONFIG: AutorunConfig = {
+  below_normal_priority: false,
   default_locale: 'en-GB',
   default_open_browser: true,
   default_watchdog_policy: 'persistent',
@@ -131,6 +134,7 @@ let DEFAULT_AUTORUN_CONFIG: AutorunConfig = {
   port: 15000,
   port_wait_timeout_ms: 10000,
   restart_delay_ms: 2000,
+  uv_threadpool_size: 4,
 }
 
 let DEFAULT_AUTORUN_DICTIONARY: AutorunDictionary = {

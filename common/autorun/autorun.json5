@@ -1,4 +1,7 @@
 {
+  // Schedule child Node/Vite processes at BelowNormal priority to preserve foreground desktop frame rates
+  below_normal_priority: false,
+
   // Default TUI localisation ('en-GB', 'fr', 'de')
   default_locale: 'en-GB',
 
@@ -46,4 +49,7 @@
 
   // Base delay before first auto-restart on crash (ms)
   restart_delay_ms: 2000,
+
+  // Libuv threadpool cap for child Node/Vite I/O & zlib threads
+  uv_threadpool_size: 4,
 }

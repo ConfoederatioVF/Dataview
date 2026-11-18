@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { CityPoint, StadesterConfig, ProjectionType } from '@framework/geopng/types.ts'
 import type {
+  WorkerBinaryAttributes,
   WorkerInMessage,
   WorkerOutMessage,
   WorkerProcessedPoint,
@@ -16,6 +17,7 @@ export interface UseStadesterWorkerParams {
 }
 
 export interface UseStadesterWorkerResult {
+  binaryAttributes?: WorkerBinaryAttributes
   isCalculating: boolean
   labels: WorkerPlacedLabel[]
   points: WorkerProcessedPoint[]
@@ -38,6 +40,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
   let year = options.year
 
   //Declare local instance variables
+  let binary_attributes: WorkerBinaryAttributes | undefined
   let debounce_timer_ref = useRef<any>(null)
   let is_calculating: boolean
   let labels: WorkerPlacedLabel[]
@@ -48,6 +51,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
   let last_projection_ref = useRef<ProjectionType>(projection)
   let points: WorkerProcessedPoint[]
   let req_id_ref = useRef<number>(0)
+  let set_binary_attributes: React.Dispatch<React.SetStateAction<WorkerBinaryAttributes | undefined>>
   let set_is_calculating: React.Dispatch<React.SetStateAction<boolean>>
   let set_labels: React.Dispatch<React.SetStateAction<WorkerPlacedLabel[]>>
   let set_points: React.Dispatch<React.SetStateAction<WorkerProcessedPoint[]>>
@@ -56,6 +60,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
   //Function body
   ;[points, set_points] = useState<WorkerProcessedPoint[]>([])
   ;[labels, set_labels] = useState<WorkerPlacedLabel[]>([])
+  ;[binary_attributes, set_binary_attributes] = useState<WorkerBinaryAttributes | undefined>(undefined)
   ;[is_calculating, set_is_calculating] = useState<boolean>(false)
 
   //1. Initialise worker
@@ -73,7 +78,10 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
 
         if (msg.reqId === req_id_ref.current) {
           if (msg.type === 'LAYOUT_RESULT') {
-            set_points(msg.points)
+            if (msg.pointsChanged) {
+              set_points(msg.points || [])
+              set_binary_attributes(msg.binaryAttributes)
+            }
             set_labels(msg.labels)
             set_is_calculating(false)
           } else if (msg.type === 'LAYOUT_ERROR') {
@@ -124,11 +132,13 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       last_projection_ref.current = projection
       set_points([])
       set_labels([])
+      set_binary_attributes(undefined)
     }
 
     if (!config?.enabled || cities.length === 0) {
       set_points([])
       set_labels([])
+      set_binary_attributes(undefined)
       set_is_calculating(false)
       last_dispatched_cities_ref.current = null
       return
@@ -147,6 +157,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       config.heuristicCulling !== undefined ? Boolean(config.heuristicCulling) : true,
       config.labelCollision !== false,
       config.largeCityContrast ?? 1.0,
+      config.opacity ?? 0.7,
       config.showLabels !== false,
       projection,
     ])
@@ -180,7 +191,8 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       last_dispatched_cities_ref.current = cities
       last_dispatched_year_ref.current = year
       last_dispatched_opts_key_ref.current = opts_key
-      set_is_calculating(true)
+      if (is_non_view_change)
+        set_is_calculating(true)
 
       worker_ref.current?.postMessage({
         bubbleSize: config.bubbleSize ?? 1.0,
@@ -194,6 +206,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         isMobile: Boolean(window_w < 768),
         labelCollision: config.labelCollision !== false,
         largeCityContrast: config.largeCityContrast ?? 1.0,
+        opacity: (config.opacity !== undefined) ? config.opacity : 0.7,
         projection,
         reqId: current_req_id,
         showLabels: config.showLabels !== false,
@@ -242,6 +255,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     config?.filled,
     config?.labelCollision,
     config?.largeCityContrast,
+    config?.opacity,
     config?.showLabels,
     projection,
     view_state,
@@ -249,6 +263,7 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
 
   //Return statement
   return {
+    binaryAttributes: binary_attributes,
     isCalculating: is_calculating,
     labels,
     points,

@@ -81,7 +81,51 @@ export let isSubordinateDistrictName = function (arg0_name: string): boolean {
 }
 
 /**
- * Cleans a candidate city string by stripping parenthetical notes and dataset prefixes.
+ * Strips parenthetical `(...)` and square-bracketed `[...]` postfixes and annotations from a city name.
+ *
+ * @param {string} arg0_name
+ *
+ * @returns {string}
+ */
+export let stripBracketedPostfixes = function (arg0_name: string): string {
+  //Convert from parameters
+  let name = arg0_name
+
+  //Guard clauses
+  if (!name)
+    return ''
+
+  //Declare local instance variables
+  let cleaned = String(name)
+  let had_unclosed = false
+  let prev: string
+
+  //Function body
+  for (let i = 0; i < 6; i++) {
+    prev = cleaned
+    cleaned = cleaned.replace(/\s*(?:\([^()]*\)|\[[^[\]]*\])/g, '')
+    if (cleaned === prev)
+      break
+  }
+
+  if (/[([]/.test(cleaned)) {
+    let stripped_unclosed = cleaned.replace(/\s*[([]+[^)\]]*$/, '')
+    if (stripped_unclosed !== cleaned) {
+      had_unclosed = true
+      cleaned = stripped_unclosed
+    }
+  }
+
+  cleaned = cleaned.trim()
+  if (had_unclosed)
+    cleaned = cleaned.replace(/,\s*$/, '').trim()
+
+  //Return statement
+  return cleaned
+}
+
+/**
+ * Cleans a candidate city string by stripping bracketed postfixes and dataset prefixes.
  *
  * @param {string} arg0_name
  *
@@ -96,7 +140,7 @@ export let cleanCandidateCityString = function (arg0_name: string): string {
     return ''
 
   //Function body
-  let cleaned = name.replace(/\s*\([^)]*\)/g, '').trim()
+  let cleaned = stripBracketedPostfixes(name)
   cleaned = cleaned.replace(/^ghsl-/, '').replace(/^stadester-/, '').replace(/^oxford-/, '').trim()
   cleaned = cleaned.replace(/^-/, '').trim()
 

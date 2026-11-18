@@ -1,4 +1,5 @@
 import { UfDate } from '../utils/uf_date.ts'
+import { stripBracketedPostfixes } from './city_name_framework.ts'
 
 export interface AliasStemSet {
   aliases: string[]
@@ -569,7 +570,7 @@ export let normalizeCapitalNameStem = function (arg0_name: string): string {
 
   //Function body
   base = normalizeInvertedArticle(
-    String(name).split(';')[0].replace(/\s*\([^)]*\)/g, '').replace(/\(s\)/gi, '').trim()
+    stripBracketedPostfixes(String(name).split(';')[0].replace(/\(s\)/gi, '').trim())
   )
 
   stem = base
@@ -612,9 +613,7 @@ export let normalizeCityKey = function (arg0_key: string): string {
     return ''
 
   //Return statement
-  return key
-    .replace(/^(stadester|ghsl|oxford)-/i, '')
-    .replace(/\s*\([^)]*\)/g, '')
+  return stripBracketedPostfixes(key.replace(/^(stadester|ghsl|oxford)-/i, ''))
     .replace(/['’‘`´^ʻʼʾʿ]/g, '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -650,7 +649,7 @@ export let normalizePrimaryCityKey = function (arg0_key: string): string {
   parts = stripped.split('-')
   country = parts.length > 1 ? parts[parts.length - 1] : ''
   city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
-  primary_city = normalizeInvertedArticle(city_part.split(';')[0].replace(/\s*\([^)]*\)/g, '').trim())
+  primary_city = normalizeInvertedArticle(stripBracketedPostfixes(city_part.split(';')[0]))
 
   //Return statement
   return (primary_city + (country ? '-' + country : ''))
@@ -684,7 +683,7 @@ export let normalizeCityAlias = function (arg0_name: string): string {
   let base: string
 
   //Function body
-  base = normalizeInvertedArticle(String(name).replace(/\s*\([^)]*\)/g, '').trim())
+  base = normalizeInvertedArticle(stripBracketedPostfixes(String(name)))
 
   //Return statement
   return base

@@ -1,6 +1,7 @@
 import { spawn, spawnSync, type ChildProcess } from 'child_process'
 import fs from 'fs'
 import net from 'net'
+import os from 'os'
 import path from 'path'
 import { AutorunTui, type AutorunConfig, type AutorunDictionary } from './AutorunTui.ts'
 
@@ -750,6 +751,7 @@ export class AutorunProcessRunner {
         ...process.env,
         FORCE_COLOR: process.env.NO_COLOR !== undefined ? '0' : '1',
         NODE_OPTIONS: `--max-old-space-size=${this.config.max_old_space_size_mb}`,
+        UV_THREADPOOL_SIZE: String(this.config.uv_threadpool_size || 4),
       }
       let full_node_args: string[] = [
         `--max-old-space-size=${this.config.max_old_space_size_mb}`,
@@ -777,6 +779,12 @@ export class AutorunProcessRunner {
         env: child_env,
         stdio: ['ignore', 'pipe', 'pipe'],
       })
+
+      if (this.config.below_normal_priority && child.pid) {
+        try {
+          os.setPriority(child.pid, os.constants.priority.PRIORITY_BELOW_NORMAL)
+        } catch {}
+      }
 
       this.active_child = child
       this.child_started_ms = start_ms

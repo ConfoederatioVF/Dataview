@@ -29,9 +29,34 @@ export interface HistoricalBordersResponse {
 let all_cache_clearers: Array<() => void> = []
 let border_cache_version = 13
 let cached_active_state_ids: Map<string, Set<number>> = new Map()
+let cached_fallback_capitals: Record<string, any> | null = null
+let cached_fallback_states: any[] | null = null
+let in_memory_meta_lru: Map<string, any[]> = new Map()
 let in_memory_slice_lru: Map<string, HistoricalBorderFeature[]> = new Map()
 let last_known_source_mtimes: Map<string, number> = new Map()
-let max_lru_entries = 60
+let max_lru_entries = 24
+let max_meta_lru_entries = 120
+
+/**
+ * Inserts a lightweight border metadata frame into the bounded LRU cache.
+ *
+ * @param {string} arg0_key
+ * @param {any[]} arg1_features
+ *
+ * @returns {void}
+ */
+function setBoundedMetaLru (arg0_key: string, arg1_features: any[]): void {
+  if (in_memory_meta_lru.has(arg0_key))
+    in_memory_meta_lru.delete(arg0_key)
+  while (in_memory_meta_lru.size >= max_meta_lru_entries) {
+    let oldest = in_memory_meta_lru.keys().next().value
+    if (oldest !== undefined)
+      in_memory_meta_lru.delete(oldest)
+    else
+      break
+  }
+  in_memory_meta_lru.set(arg0_key, arg1_features)
+}
 
 /**
  * Registers an external cache clearer to run when AtlasBordersService.clearCache() is called.
@@ -137,7 +162,7 @@ export class AtlasBordersService {
       return cached_active_state_ids.get(cache_key)!
 
     //Function body
-    let borders_res = AtlasBordersService.getBordersAtYear(year, {
+    let borders_res = AtlasBordersService.getBordersMetadataAtYear(year, {
       dataset: 'defacto_borders',
       day,
       month,
@@ -493,6 +518,22 @@ export class AtlasBordersService {
           year: target_year,
         }
         fs.writeFileSync(disk_cache_path, JSON.stringify(payload_to_cache))
+
+        let meta_features = features.map((arg0_f) => ({
+          bbox: arg0_f.bbox,
+          id: arg0_f.id,
+          properties: arg0_f.properties,
+        }))
+        let meta_cache_path = path.join(dataset_paths.cacheDir, `borders_meta_${dataset}_${target_year}.json`)
+        fs.writeFileSync(meta_cache_path, JSON.stringify({
+          date: UfDate.formatDate(target_date_obj),
+          features: meta_features,
+          source_mtime,
+          timestamp: target_ts,
+          v: border_cache_version,
+          year: target_year,
+        }))
+        setBoundedMetaLru(lru_key, meta_features)
       } catch {
         //Ignore write errors
       }
@@ -508,6 +549,184 @@ export class AtlasBordersService {
       timestamp: target_ts,
       year: target_year,
     }
+  }
+
+  /**
+   * Returns lightweight property + bbox metadata for active borders at a given year without
+   * parsing multi-megabyte GeoJSON polygon geometries or loading 599 MB .naissance files unnecessarily.
+   *
+   * @param {number} arg0_year
+   * @param {Object} [arg1_options]
+   *
+   * @returns {{ features: Array<{ bbox?: number[]; id?: any; properties: Record<string, any> }>; year: number }}
+   */
+  static getBordersMetadataAtYear (
+    arg0_year: number,
+    arg1_options?: {
+      dataset?: string
+      day?: number
+      month?: number
+    }
+  ): { features: Array<{ bbox?: number[]; id?: any; properties: Record<string, any> }>; year: number } {
+    //Convert from parameters
+    let options = arg1_options || {}
+    let target_year = arg0_year
+    let dataset = normaliseBorderDatasetId(options.dataset, 'dejure_borders')
+    let target_day = options.day
+    let target_month = options.month
+
+    //Declare local instance variables
+    let dataset_paths = AtlasBordersService.getDatasetPaths()
+    let target_date_obj: UfDateObject
+
+    //Function body
+    if (target_day !== undefined && target_month !== undefined) {
+      target_date_obj = {
+        day: target_day,
+        hour: 0,
+        minute: 0,
+        month: target_month,
+        year: (target_year < 0 ? Math.ceil(target_year) : Math.floor(target_year)),
+      }
+    } else if (target_year !== Math.floor(target_year)) {
+      target_date_obj = UfDate.fromFractionalYear(target_year)
+    } else {
+      target_date_obj = {
+        day: 1,
+        hour: 0,
+        minute: 0,
+        month: 1,
+        year: target_year,
+      }
+    }
+
+    let yr = target_date_obj.year
+    let lru_key = `${dataset}_${yr}_${target_date_obj.month}_${target_date_obj.day}_all`
+
+    if (in_memory_meta_lru.has(lru_key))
+      return { features: in_memory_meta_lru.get(lru_key)!, year: yr }
+
+    if (in_memory_slice_lru.has(lru_key)) {
+      let full = in_memory_slice_lru.get(lru_key)!
+      let meta = full.map((arg0_f) => ({ bbox: arg0_f.bbox, id: arg0_f.id, properties: arg0_f.properties }))
+      setBoundedMetaLru(lru_key, meta)
+      return { features: meta, year: yr }
+    }
+
+    let is_whole_year = Boolean(target_date_obj.day === 1 && target_date_obj.month === 1 && Number.isInteger(arg0_year))
+    let meta_cache_path = path.join(dataset_paths.cacheDir, `borders_meta_${dataset}_${yr}.json`)
+    let full_cache_path = path.join(dataset_paths.cacheDir, `borders_${dataset}_${yr}.json`)
+
+    if (is_whole_year && fs.existsSync(meta_cache_path)) {
+      try {
+        let parsed = JSON.parse(fs.readFileSync(meta_cache_path, 'utf-8'))
+        if (parsed && parsed.v === border_cache_version && Array.isArray(parsed.features)) {
+          setBoundedMetaLru(lru_key, parsed.features)
+          return { features: parsed.features, year: yr }
+        }
+      } catch {
+        //Ignore malformed metadata cache
+      }
+    }
+
+    if (is_whole_year && fs.existsSync(full_cache_path)) {
+      try {
+        let parsed_full = JSON.parse(fs.readFileSync(full_cache_path, 'utf-8'))
+        if (parsed_full && parsed_full.v === border_cache_version && Array.isArray(parsed_full.features)) {
+          let meta_features = parsed_full.features.map((arg0_f: any) => ({
+            bbox: arg0_f.bbox,
+            id: arg0_f.id,
+            properties: arg0_f.properties,
+          }))
+          try {
+            fs.writeFileSync(meta_cache_path, JSON.stringify({
+              date: parsed_full.date,
+              features: meta_features,
+              source_mtime: parsed_full.source_mtime,
+              timestamp: parsed_full.timestamp,
+              v: border_cache_version,
+              year: yr,
+            }))
+          } catch {
+            //Ignore write errors
+          }
+          setBoundedMetaLru(lru_key, meta_features)
+          return { features: meta_features, year: yr }
+        }
+      } catch {
+        //Ignore malformed full cache
+      }
+    }
+
+    //Fallback: synthesise lightweight metadata from states.json + state_capitals.json without loading 599 MB .naissance
+    let states_path = FilepathDefines.get().filepaths.atlas_states
+    let capitals_path = FilepathDefines.get().filepaths.stadester_capitals
+    let synth_features: Array<{ bbox?: number[]; id?: any; properties: Record<string, any> }> = []
+
+    if (fs.existsSync(states_path)) {
+      try {
+        if (!cached_fallback_states)
+          cached_fallback_states = JSON.parse(fs.readFileSync(states_path, 'utf-8'))
+        if (!cached_fallback_capitals) {
+          cached_fallback_capitals = fs.existsSync(capitals_path)
+            ? JSON.parse(fs.readFileSync(capitals_path, 'utf-8'))
+            : {}
+        }
+        let states_list: any[] = cached_fallback_states!
+        let state_caps: Record<string, any> = cached_fallback_capitals!
+        let target_frac = UfDate.toFractionalYear(target_date_obj)
+
+        for (let i = 0; i < states_list.length; i++) {
+          let s = states_list[i]
+          let start_y = s.start_year ?? -99999
+          let stop_y = s.stop_year ?? 99999
+          if (yr < start_y || yr > stop_y)
+            continue
+
+          let sid = s.state_id
+          let sc = sid !== undefined ? state_caps[String(sid)] : null
+          let cap_name: string | undefined = undefined
+          let cap_key: string | undefined = undefined
+          let cap_coords: [number, number] | undefined = undefined
+
+          if (sc && !sc.acapital && Array.isArray(sc.timeline)) {
+            for (let x = 0; x < sc.timeline.length; x++) {
+              let tl = sc.timeline[x]
+              let sf = tl.start_frac ?? -99999
+              let ef = tl.stop_frac ?? 99999
+              if (target_frac >= sf && target_frac <= ef) {
+                cap_name = tl.city
+                cap_key = tl.key
+                if (Array.isArray(tl.coords) && tl.coords.length >= 2)
+                  cap_coords = [tl.coords[1], tl.coords[0]]
+                break
+              }
+            }
+          }
+
+          synth_features.push({
+            bbox: s.bbox,
+            id: sid,
+            properties: {
+              cap_coords,
+              capkey: cap_key,
+              capname: cap_name,
+              fill_color: s.fill_color,
+              is_acapital: Boolean(sc?.acapital),
+              name: s.name,
+              state_id: sid,
+            },
+          })
+        }
+      } catch {
+        //Ignore fallback error
+      }
+    }
+
+    setBoundedMetaLru(lru_key, synth_features)
+
+    //Return statement
+    return { features: synth_features, year: yr }
   }
 
   /**
@@ -741,9 +960,12 @@ export class AtlasBordersService {
     //Function body
     AtlasBordersService.states_by_id = null
     cached_active_state_ids.clear()
+    cached_fallback_capitals = null
+    cached_fallback_states = null
     clearAtlasConfigCache()
     clearCityResolverCache()
     clearNaissanceCache()
+    in_memory_meta_lru.clear()
     in_memory_slice_lru.clear()
     last_known_source_mtimes.clear()
 
@@ -780,6 +1002,10 @@ export class AtlasBordersService {
     let source_path = arg1_source_path
 
     //Function body
+    for (let key of in_memory_meta_lru.keys()) {
+      if (key.startsWith(`${dataset}_`))
+        in_memory_meta_lru.delete(key)
+    }
     for (let key of in_memory_slice_lru.keys()) {
       if (key.startsWith(`${dataset}_`))
         in_memory_slice_lru.delete(key)
@@ -951,7 +1177,11 @@ export class AtlasBordersService {
           continue
 
         let file_path = path.join(cache_dir, f)
-        let parts = f.replace(/^borders_/, '').replace(/\.json$/, '').split('_')
+        let is_meta_file = f.startsWith('borders_meta_')
+        let stripped = is_meta_file
+          ? f.replace(/^borders_meta_/, '')
+          : f.replace(/^borders_/, '')
+        let parts = stripped.replace(/\.json$/, '').split('_')
         let file_year = parts.length > 1 ? Number(parts[parts.length - 1]) : undefined
         let ds = parts.slice(0, parts.length - 1).join('_')
 

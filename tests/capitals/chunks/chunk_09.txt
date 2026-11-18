@@ -176,7 +176,7 @@ TIMELINE:
 STATE: [5252] Greenland (1728.8.29 -> 1814.1.14) [fill: #90A16A]
 STATUS: CAPITAL
 TIMELINE:
-  1728.8.29 -> 1814.1.14: Nuuk [stadester-Nuuk-Greenland]
+  1728.8.29 -> 1814.1.14: Nuuk [stadester-Godthåb-Greenland]
 ---
 
 STATE: [5253] Dewas State (1729.1.1 -> 1802.1.1) [fill: #E0C25E]
@@ -1224,7 +1224,7 @@ TIMELINE:
 STATE: [5428] Province of East Florida (1763.2.10 -> 1783.1.20) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1763.2.10 -> 1783.1.20: St. Augustine [stadester-Jacksonville-Florida]
+  1763.2.10 -> 1783.1.20: St. Augustine [stadester-St. Augustine-Florida]
 ---
 
 STATE: [5429] Province of West Florida (1763.2.10 -> 1783.1.20) [fill: #EBBCC5]
@@ -1538,7 +1538,7 @@ TIMELINE:
 STATE: [5482] Transylvania Colony (1775.3.17 -> 1779.1.1) [fill: #EBBCC5]
 STATUS: CAPITAL
 TIMELINE:
-  1775.3.17 -> 1779.1.1: Boonesborough [stadester-Frankfort-Kentucky]
+  1775.3.17 -> 1779.1.1: Boonesborough [stadester-Boonesborough-Kentucky]
 ---
 
 STATE: [5483] United Colonies (1775.4.20 -> 1776.7.4) [fill: #944481]
@@ -1562,17 +1562,17 @@ TIMELINE:
 STATE: [5486] United States of America (1776.7.4 -> 2026.1.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1776.7.4 -> 1776.12.12: Philadelphia [stadester-Philadelphia-United States]
-  1776.12.20 -> 1777.3.4: Baltimore [stadester-Baltimore-United States]
-  1777.3.5 -> 1777.9.18: Philadelphia [stadester-Philadelphia-United States]
-  1777.9.27 -> 1777.9.27: Lancaster [stadester-Lancaster-United States]
-  1777.9.30 -> 1778.6.27: York [stadester-York-United States]
-  1778.7.2 -> 1783.6.21: Philadelphia [stadester-Philadelphia-United States]
-  1783.6.30 -> 1783.11.4: Princeton [stadester-Princeton-United States]
-  1783.11.26 -> 1784.8.19: Annapolis [stadester-Annapolis-United States]
-  1784.11.1 -> 1784.12.24: Trenton [stadester-Trenton-United States]
-  1785.1.11 -> 1790.8.12: New York [stadester-New-York-United States]
-  1790.12.6 -> 1800.5.14: Philadelphia [stadester-Philadelphia-United States]
+  1776.7.4 -> 1776.12.12: Philadelphia [stadester-Philadelphia-Pennsylvania]
+  1776.12.20 -> 1777.3.4: Baltimore [stadester-Baltimore-Maryland]
+  1777.3.5 -> 1777.9.18: Philadelphia [stadester-Philadelphia-Pennsylvania]
+  1777.9.27 -> 1777.9.27: Lancaster [stadester-Lancaster-Pennsylvania]
+  1777.9.30 -> 1778.6.27: York [stadester-York-Pennsylvania]
+  1778.7.2 -> 1783.6.21: Philadelphia [stadester-Philadelphia-Pennsylvania]
+  1783.6.30 -> 1783.11.4: Princeton [stadester-Princeton-New Jersey]
+  1783.11.26 -> 1784.8.19: Annapolis [stadester-Annapolis-Maryland]
+  1784.11.1 -> 1784.12.24: Trenton [stadester-Trenton-New Jersey]
+  1785.1.11 -> 1790.8.12: New York [stadester-New York-New York]
+  1790.12.6 -> 1800.5.14: Philadelphia [stadester-Philadelphia-Pennsylvania]
   1800.11.17 -> 2026.1.1: Washington [stadester-Washington-United States]
 ---
 
@@ -1613,7 +1613,7 @@ TIMELINE:
 STATE: [5493] State of Vermont (1778.1.1 -> 1791.3.4) [fill: #E0C25E]
 STATUS: CAPITAL
 TIMELINE:
-  1778.1.1 -> 1791.3.4: Windsor [stadester-windsor-vermont-united states]
+  1778.1.1 -> 1791.3.4: Windsor [stadester-Windsor-Vermont]
 ---
 
 STATE: [5494] Colony of Río Muni (1778.3.11 -> 1927.1.1) [fill: #E0C25E]
@@ -1869,7 +1869,7 @@ TIMELINE:
 STATE: [5536] Territory Northwest of the River Ohio (1787.7.13 -> 1803.3.1) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1787.7.13 -> 1803.3.1: Chillicothe [stadester-Chillicothe-United States]
+  1787.7.13 -> 1803.3.1: Chillicothe [stadester-Chillicothe-Ohio]
 ---
 
 STATE: [5537] Colony and Protectorate of Sierra Leone (1788.1.1 -> 1961.4.27) [fill: #EBBCC5]
@@ -2086,7 +2086,7 @@ TIMELINE:
 STATE: [5573] Cherokee Nation (1794.11.7 -> 1861.12.31) [fill: #405F85]
 STATUS: CAPITAL
 TIMELINE:
-  1794.11.7 -> 1861.12.31: New Echota [stadester-New-Echota-United States]
+  1794.11.7 -> 1861.12.31: New Echota [stadester-New Echota-Georgia]
 ---
 
 STATE: [5574] Bonebela (1795.1.1 -> 1901.1.1) [fill: #687FAD]
@@ -2426,8 +2426,8 @@ TIMELINE:
 STATE: [5630] Indiana Territory (1800.7.4 -> 1816.12.11) [fill: #687FAD]
 STATUS: CAPITAL
 TIMELINE:
-  1800.7.4 -> 1813.5.1: Vincennes [stadester-Vincennes-United States]
-  1813.5.1 -> 1816.12.11: Corydon [stadester-Corydon-United States]
+  1800.7.4 -> 1813.5.1: Vincennes [stadester-Vincennes-Indiana]
+  1813.5.1 -> 1816.12.11: Corydon [stadester-Corydon-Indiana]
 ---
 
 STATE: [5631] Malta Protectorate (1800.9.4 -> 1813.7.23) [fill: #EBBCC5]
@@ -3428,7 +3428,7 @@ TIMELINE:
 STATE: [5797] Territory of Louisiana (1803.12.20 -> 1812.6.4) [fill: #944481]
 STATUS: CAPITAL
 TIMELINE:
-  1803.12.20 -> 1812.6.4: St. Louis [ghsl-St. Louis-United States]
+  1803.12.20 -> 1812.6.4: St. Louis [stadester-Saint Louis-Missouri]
 ---
 
 STATE: [5798] Athgarh State (1804.1.1 -> 1950.1.1) [fill: #EBBCC5]

@@ -1,5 +1,5 @@
 import type { StadesterDisplayOptions } from '@framework/geopng/types.ts'
-import { getPrimaryCityName, isCorruptedCityName } from './city_name_framework.ts'
+import { getPrimaryCityName, isCorruptedCityName, stripBracketedPostfixes } from './city_name_framework.ts'
 
 /**
  * Counts the number of diacritical or non-ASCII characters in a given string.
@@ -55,7 +55,7 @@ export let normalizeForComparison = function (arg0_str: string): string {
 
 /**
  * Picks the optimal candidate city display name based on dataset display options.
- * Disqualifies unknown unicode characters (\uFFFD), removes parenthetical notes,
+ * Disqualifies unknown unicode characters (\uFFFD), removes parenthetical () and square-bracketed [] postfixes,
  * and prioritises authentic native diacritics unless prefer_least_diacritics is true.
  *
  * @param {string} arg0_name
@@ -93,7 +93,7 @@ export let pickBestCityDisplayName = function (
   if (!name)
     return ''
 
-  clean_direct_name = strip_parentheses ? name.replace(/\s*\([^)]*\)/g, '').trim() : name.trim()
+  clean_direct_name = strip_parentheses ? stripBracketedPostfixes(name) : name.trim()
   has_other_names = (Array.isArray(other_names) && other_names.length > 0) || (typeof other_names === 'string' && other_names.trim().length > 0)
 
   if (!name.includes(';') && !has_other_names && clean_direct_name && !isCorruptedCityName(clean_direct_name))
@@ -107,7 +107,7 @@ export let pickBestCityDisplayName = function (
     if (!candidate)
       continue
     if (strip_parentheses)
-      candidate = candidate.replace(/\s*\([^)]*\)/g, '').trim()
+      candidate = stripBracketedPostfixes(candidate)
     if (!candidate)
       continue
     if (skip_unknown_unicode && isCorruptedCityName(candidate))
@@ -137,7 +137,7 @@ export let pickBestCityDisplayName = function (
     if (!candidate)
       continue
     if (strip_parentheses)
-      candidate = candidate.replace(/\s*\([^)]*\)/g, '').trim()
+      candidate = stripBracketedPostfixes(candidate)
     if (!candidate)
       continue
     if (skip_unknown_unicode && isCorruptedCityName(candidate))
@@ -170,7 +170,7 @@ export let pickBestCityDisplayName = function (
   }
 
   if (candidates.length === 0)
-    return strip_parentheses ? name.replace(/\s*\([^)]*\)/g, '').trim() : name
+    return strip_parentheses ? stripBracketedPostfixes(name) : name
 
   //3. Select candidate: if prefer_least_diacritics is explicitly enabled, sort by fewest diacritics
   // while preserving original order on ties; otherwise keep authentic accented equivalent matching base_norm.
@@ -220,5 +220,6 @@ export let pickBestCityDisplayName = function (
   if (chosen && !isCorruptedCityName(chosen))
     return chosen
 
-  return getPrimaryCityName(name)
+  let fallback = getPrimaryCityName(name)
+  return strip_parentheses ? stripBracketedPostfixes(fallback) : fallback
 }

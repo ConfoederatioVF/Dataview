@@ -34,6 +34,7 @@ export interface ZoomThresholds {
   bubbleMinPop: number
   labelMinPop: number
   maxBubbles: number
+  maxLabelCandidates: number
   maxLabels: number
 }
 
@@ -149,23 +150,51 @@ export function getZoomPopulationThreshold (
   arg0_zoom: number,
   arg1_projection?: string,
   arg2_window_w?: number,
-  arg3_window_h?: number
+  arg3_window_h?: number,
+  arg4_year?: number,
+  arg5_label_min_pop_base?: number,
+  arg6_candidate_mult?: number
 ): ZoomThresholds {
   //Convert from parameters
+  let candidate_mult = (arg6_candidate_mult !== undefined) ? arg6_candidate_mult : 3
+  let label_min_pop_base = (arg5_label_min_pop_base !== undefined) ? arg5_label_min_pop_base : 500000
   let projection = (arg1_projection) ? arg1_projection : 'Mercator'
   let window_h = (arg3_window_h !== undefined) ? arg3_window_h : 1080
   let window_w = (arg2_window_w !== undefined) ? arg2_window_w : 1920
+  let year = (arg4_year !== undefined) ? arg4_year : 1950
   let zoom = arg0_zoom
 
   //Declare local instance variables
+  let era_scale = getEraScale(year)
+  let is_cartesian = (projection === 'EqualEarth' || projection === 'Equirectangular')
+  let is_globe = (projection === 'Globe')
+  let label_min_pop: number
   let max_bubbles = computeScreenCityCapacity(zoom, window_w, projection, window_h)
   let max_labels = Math.min(500, Math.max(20, Math.round(max_bubbles * 0.10)))
+  let norm_zoom: number
+
+  //Function body
+  if (is_cartesian) {
+    norm_zoom = zoom - 1.2
+  } else if (is_globe) {
+    norm_zoom = zoom - 1.65
+  } else {
+    norm_zoom = zoom
+  }
+
+  if (norm_zoom >= 6.5) {
+    label_min_pop = 0.01
+  } else {
+    let decay = Math.pow(0.28, Math.max(0, norm_zoom - 0.8))
+    label_min_pop = Math.max(0.01, Math.round(label_min_pop_base * decay * era_scale))
+  }
 
   //Return statement
   return {
     bubbleMinPop: 0.01,
-    labelMinPop: 0.01,
+    labelMinPop: label_min_pop,
     maxBubbles: max_bubbles,
+    maxLabelCandidates: Math.max(max_labels, Math.round(max_labels * candidate_mult)),
     maxLabels: max_labels,
   }
 }

@@ -2,10 +2,32 @@ import fs from 'fs'
 import path from 'path'
 import JSON5 from 'json5'
 
+export interface ResourceLimitsConfig {
+  compiler_below_normal_priority?: boolean
+  compiler_max_heap_mb?: number
+  compiler_yield_ms?: number
+  lint_max_threads?: number
+  server_max_heap_mb?: number
+}
+
+export interface StadesterScalingConfig {
+  compile_concurrency?: number
+  enable_binary_store?: boolean
+  enable_viewport_tiles?: boolean
+  label_candidate_multiplier?: number
+  label_collision_cell_h?: number
+  label_collision_cell_w?: number
+  label_min_pop_base?: number
+  tile_fetch_zoom_threshold?: number
+  tile_max_cities_per_tile?: number
+}
+
 export interface OptimisationConfig {
   downsampling_method?: 'average' | 'sum'
   downsampling_resolution?: [number, number]
   enabled?: boolean
+  resource_limits?: ResourceLimitsConfig
+  stadester_scaling?: StadesterScalingConfig
 }
 
 export interface OptimisationInfo {
@@ -15,10 +37,32 @@ export interface OptimisationInfo {
   width: number
 }
 
+export let DEFAULT_RESOURCE_LIMITS_CONFIG: Required<ResourceLimitsConfig> = {
+  compiler_below_normal_priority: true,
+  compiler_max_heap_mb: 2048,
+  compiler_yield_ms: 15,
+  lint_max_threads: 2,
+  server_max_heap_mb: 16384,
+}
+
+export let DEFAULT_STADESTER_SCALING_CONFIG: Required<StadesterScalingConfig> = {
+  compile_concurrency: 4,
+  enable_binary_store: true,
+  enable_viewport_tiles: true,
+  label_candidate_multiplier: 3,
+  label_collision_cell_h: 32,
+  label_collision_cell_w: 72,
+  label_min_pop_base: 500000,
+  tile_fetch_zoom_threshold: 3.5,
+  tile_max_cities_per_tile: 2500,
+}
+
 export let DEFAULT_OPTIMISATION_CONFIG: OptimisationConfig = {
   downsampling_method: 'sum',
   downsampling_resolution: [1920, 1080],
   enabled: true,
+  resource_limits: DEFAULT_RESOURCE_LIMITS_CONFIG,
+  stadester_scaling: DEFAULT_STADESTER_SCALING_CONFIG,
 }
 
 let cached_mtime = 0

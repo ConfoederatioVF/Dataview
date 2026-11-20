@@ -10,7 +10,7 @@ import { FilepathDefines } from './filepath_defines.ts'
 import {
   clearNaissanceCache, defacto_borders_slices, getNaissanceFileMtime,
   type HistoricalBorderFeature, type HistoricalBorderKeyframe, isNaissanceCacheStale,
-  loadCShapes, loadNaissance, type NaissanceEntityRecord, parseNaissanceKeyframes, sliceNaissanceEntities,
+  loadNaissance, type NaissanceEntityRecord, parseNaissanceKeyframes, sliceNaissanceEntities,
 } from './atlas_naissance_loader.ts'
 
 export type { AtlasDatasetPaths, HistoricalBorderFeature, HistoricalBorderKeyframe }
@@ -20,7 +20,7 @@ export interface HistoricalBordersResponse {
   date?: string
   domain: [number, number]
   features: HistoricalBorderFeature[]
-  source: 'cshapes' | 'naissance'
+  source: 'naissance'
   timestamp?: number
   year: number
 }
@@ -98,15 +98,6 @@ export class AtlasBordersService {
    */
   static getDatasetPaths (): AtlasDatasetPaths {
     return getAtlasDatasetPaths()
-  }
-
-  /**
-   * Loads and indexes CShapes-2.0.geojson in memory on first access.
-   *
-   * @returns {any[]}
-   */
-  static loadCShapes (): any[] {
-    return loadCShapes(AtlasBordersService.getDatasetPaths().cshapesPath)
   }
 
   /**
@@ -241,7 +232,7 @@ export class AtlasBordersService {
       }
 
       if (clean_state_id !== undefined) {
-        let clean_f_id = String(f.id || '').replace(/^naissance_/, '').replace('detailed_', '').replace('defacto_', '').replace('cshapes_', '')
+        let clean_f_id = String(f.id || '').replace(/^naissance_/, '').replace('detailed_', '').replace('defacto_', '')
         let clean_p_id = String(f.properties?.id || '').replace(/^naissance_/, '')
         let p_state_id = (f.properties?.state_id !== undefined) ? String(f.properties.state_id) : ''
 
@@ -361,7 +352,7 @@ export class AtlasBordersService {
     let is_dejure = Boolean(dataset_paths.dejureDatasets[dataset])
     let is_whole_year_query: boolean
     let lru_key: string
-    let source: 'cshapes' | 'naissance'
+    let source: 'naissance'
     let source_mtime: number
     let target_date_obj: UfDateObject
     let target_ts: number
@@ -796,10 +787,9 @@ export class AtlasBordersService {
    */
   static getEntityDetails (arg0_id: string): any {
     //Convert from parameters
-    let target_id = arg0_id.replace(/^(naissance_|cshapes_|detailed_|defacto_)/, '')
+    let target_id = arg0_id.replace(/^(naissance_|detailed_|defacto_)/, '')
 
     //Declare local instance variables
-    let cshapes = AtlasBordersService.loadCShapes()
     let dataset_paths = AtlasBordersService.getDatasetPaths()
     let default_entities = AtlasBordersService.loadNaissance()
     let search_entity_maps = [default_entities]
@@ -843,36 +833,6 @@ export class AtlasBordersService {
           source: 'naissance',
           totalKeyframes: keyframes_detail.length,
         }
-      }
-    }
-
-    let numeric_gw = parseInt(target_id, 10)
-    let matching_features = cshapes.filter(
-      (arg0_f) => arg0_f.properties.gwcode === numeric_gw || arg0_f.properties.cntry_name.toLowerCase() === target_id.toLowerCase()
-    )
-
-    if (matching_features.length > 0) {
-      let keyframes_detail = matching_features.map((arg0_f) => ({
-        area: arg0_f.properties.area,
-        capname: arg0_f.properties.capname,
-        date: arg0_f.properties.gwsdate,
-        endDate: arg0_f.properties.gwedate,
-        endYear: arg0_f.properties.gweyear,
-        startDate: arg0_f.properties.gwsdate,
-        startYear: arg0_f.properties.gwsyear,
-        year: arg0_f.properties.gwsyear,
-      }))
-
-      keyframes_detail.sort((arg0_a, arg0_b) => arg0_a.year - arg0_b.year)
-
-      //Return statement
-      return {
-        gwcode: matching_features[0].properties.gwcode,
-        id: target_id,
-        keyframes: keyframes_detail,
-        name: matching_features[0].properties.cntry_name,
-        source: 'cshapes',
-        totalKeyframes: keyframes_detail.length,
       }
     }
 

@@ -13,11 +13,14 @@ export interface ResourceLimitsConfig {
 export interface StadesterScalingConfig {
   compile_concurrency?: number
   enable_binary_store?: boolean
+  enable_progressive_streaming?: boolean
   enable_viewport_tiles?: boolean
   label_candidate_multiplier?: number
   label_collision_cell_h?: number
   label_collision_cell_w?: number
   label_min_pop_base?: number
+  stream_chunk_size?: number
+  stream_initial_chunk_size?: number
   tile_fetch_zoom_threshold?: number
   tile_max_cities_per_tile?: number
 }
@@ -48,11 +51,14 @@ export let DEFAULT_RESOURCE_LIMITS_CONFIG: Required<ResourceLimitsConfig> = {
 export let DEFAULT_STADESTER_SCALING_CONFIG: Required<StadesterScalingConfig> = {
   compile_concurrency: 4,
   enable_binary_store: true,
+  enable_progressive_streaming: true,
   enable_viewport_tiles: true,
   label_candidate_multiplier: 3,
   label_collision_cell_h: 32,
   label_collision_cell_w: 72,
   label_min_pop_base: 500000,
+  stream_chunk_size: 3000,
+  stream_initial_chunk_size: 400,
   tile_fetch_zoom_threshold: 3.5,
   tile_max_cities_per_tile: 2500,
 }

@@ -1,10 +1,8 @@
-import { projectEqualEarth } from '../geopng/equal_earth'
-import { SmoothGlobeViewport } from './SmoothGlobeViewport'
+import { projectEqualEarth } from '../geopng/equal_earth.ts'
+import { SmoothGlobeViewport } from './SmoothGlobeViewport.ts'
 import {
-  computeScreenCityCapacity,
   computeViewportBoundingBox,
   getZoomPopulationThreshold,
-  isGlobePointVisible,
   projectGlobeCoordinates,
   projectMercatorCoordinates,
 } from './stadester_heuristics.ts'
@@ -78,6 +76,11 @@ export interface WorkerBinaryAttributes {
 export type WorkerInMessage =
   | {
       cities: WorkerCityInput[]
+      type: 'APPEND_DATA'
+      year: number
+    }
+  | {
+      cities: WorkerCityInput[]
       type: 'SET_DATA'
       year: number
     }
@@ -116,17 +119,33 @@ export type WorkerOutMessage =
       type: 'LAYOUT_ERROR'
     }
 
+let FINE_COLS = 180
+let FINE_ROWS = 90
+let FINE_CELLS = 16200
+let MACRO_COLS = 36
+let MACRO_CELLS = 648
+
+let cached_data_version = -1
+let cached_display_opts_key = ''
 let cached_point_key = ''
 let cached_points: WorkerProcessedPoint[] = []
+let cached_pt_by_city_idx: Array<WorkerProcessedPoint | undefined> = []
 let cached_sorted_label_candidates: WorkerProcessedPoint[] = []
+let cached_sorted_labels_ready = false
 let cap_rgba_cache = new Map<string, [number, number, number, number] | undefined>()
-let cached_display_opts_key = ''
-let city_grid = new Map<number, number[]>()
 let current_cities: WorkerCityInput[] = []
 let current_year = 1950
 let data_version = 0
 let short_name_cache = new WeakMap<WorkerCityInput, string>()
+let worker_fine_has_cap = new Uint8Array(FINE_CELLS)
+let worker_fine_lens = new Uint32Array(FINE_CELLS)
+let worker_fine_max_pop = new Float64Array(FINE_CELLS)
+let worker_fine_offs = new Uint32Array(FINE_CELLS)
+let worker_grid_indices = new Uint32Array(0)
 let worker_lut_cache = new Map<string, Uint8Array>()
+let worker_macro_counts = new Uint32Array(MACRO_CELLS)
+let worker_macro_has_cap = new Uint8Array(MACRO_CELLS)
+let worker_macro_max_pop = new Float64Array(MACRO_CELLS)
 
 let parseHexColorToRgba = function (
   arg0_hex?: string | [number, number, number, number],
@@ -364,110 +383,26 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let [w, s, east_bound, n] = bbox
 
       let contrast = (large_city_contrast !== undefined) ? large_city_contrast : 1.0
-      let zoom_bucket = Math.round(zoom * 4)
-      let can_use_static_points = current_cities.length <= 25000
-      let static_point_key = can_use_static_points
-        ? `${data_version}:${color_mode}:${msg.growthPalette}:${b_scale}:${contrast}:${circle_opacity}:${Boolean(is_mobile)}:${projection}:${zoom_bucket}:${Boolean(is_heuristic_culling)}:${opts_key}`
-        : ''
+      let zoom_bucket = Math.round(zoom*4)
+      let static_point_key = `${data_version}:${color_mode}:${msg.growthPalette}:${b_scale}:${contrast}:${circle_opacity}:${Boolean(is_mobile)}:${projection}:${zoom_bucket}:${opts_key}`
       let points_changed = true
       let processed_points: WorkerProcessedPoint[] = []
-      let label_candidates: WorkerProcessedPoint[] = []
-      let zoom_factor = Math.max(1.0, Math.min(1.8, 1.0 + (is_cartesian ? (zoom - 2.8) * 0.12 : (is_globe ? (zoom - 3.0) * 0.08 : (zoom - 1.2) * 0.08))))
+      let zoom_factor = Math.max(1.0, Math.min(1.8, 1.0 + (is_cartesian ? (zoom - 2.8)*0.12 : (is_globe ? (zoom - 3.0)*0.08 : (zoom - 1.2)*0.08))))
 
-      if (can_use_static_points && static_point_key === cached_point_key && cached_points.length > 0) {
+      if (static_point_key === cached_point_key && cached_data_version === data_version) {
         points_changed = false
         processed_points = cached_points
-        label_candidates = cached_sorted_label_candidates
       } else {
-        let selected_cities: WorkerCityInput[]
-        let visible_cities: WorkerCityInput[] = []
+        // 1-3. Build Deck.gl scatterplot points for ALL valid settlements (zero dot capacity culling)
+        cached_pt_by_city_idx = new Array(current_cities.length)
 
-        let acceptCandidate = function (arg0_c: WorkerCityInput): void {
-          let c = arg0_c
+        for (let i = 0; i < current_cities.length; i++) {
+          let c = current_cities[i]
           if (!c || !c.coords || !Number.isFinite(c.coords[0]) || !Number.isFinite(c.coords[1]))
-            return
-          let c_lat = c.coords[0]
-          let c_lon = c.coords[1]
-
-          if (!can_use_static_points) {
-            if (is_globe) {
-              if (!isGlobePointVisible(c_lon, c_lat, view_state, -0.005, globe_viewport))
-                return
-            } else {
-              if (w <= east_bound) {
-                if (c_lon < w || c_lon > east_bound || c_lat < s || c_lat > n)
-                  return
-              } else {
-                if ((c_lon < w && c_lon > east_bound) || c_lat < s || c_lat > n)
-                  return
-              }
-            }
-          }
-
+            continue
           if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
-            return
+            continue
 
-          visible_cities.push(c)
-        }
-
-        // 1. Gather cities (all cities when cached <= 25k for zero-reupload panning, else 2-deg spatial grid)
-        if (can_use_static_points) {
-          for (let i = 0; i < current_cities.length; i++)
-            acceptCandidate(current_cities[i])
-        } else {
-          let lon_span = (w <= east_bound) ? (east_bound - w) : ((180 - w) + (east_bound + 180))
-          let lat_span = n - s
-          let use_grid = city_grid.size > 0 && current_cities.length > 2000 && (lon_span < 300 || lat_span < 150)
-
-          if (use_grid) {
-            let min_cy = Math.max(0, Math.min(89, Math.floor((s + 90)/2)))
-            let max_cy = Math.max(0, Math.min(89, Math.floor((n + 90)/2)))
-            let lon_ranges: Array<[number, number]> = (w <= east_bound)
-              ? [[Math.max(0, Math.floor((w + 180)/2)), Math.min(179, Math.floor((east_bound + 180)/2))]]
-              : [[Math.max(0, Math.floor((w + 180)/2)), 179], [0, Math.min(179, Math.floor((east_bound + 180)/2))]]
-
-            for (let cy = min_cy; cy <= max_cy; cy++) {
-              for (let r = 0; r < lon_ranges.length; r++) {
-                for (let cx = lon_ranges[r][0]; cx <= lon_ranges[r][1]; cx++) {
-                  let cell = city_grid.get(cy*180 + cx)
-                  if (!cell)
-                    continue
-                  for (let k = 0; k < cell.length; k++)
-                    acceptCandidate(current_cities[cell[k]])
-                }
-              }
-            }
-          } else {
-            for (let i = 0; i < current_cities.length; i++)
-              acceptCandidate(current_cities[i])
-          }
-        }
-
-        // 2. Capacity-based heuristic culling when not using static point cache
-        selected_cities = visible_cities
-
-        if (!can_use_static_points && is_heuristic_culling) {
-          let max_capacity = computeScreenCityCapacity(zoom, window_w, projection, window_h)
-
-          if (visible_cities.length > max_capacity) {
-            visible_cities.sort((arg0_a, arg0_b) => {
-              let a_cap = arg0_a.isCapital ? 1 : 0
-              let b_cap = arg0_b.isCapital ? 1 : 0
-              if (a_cap !== b_cap)
-                return b_cap - a_cap
-
-              let a_pop = (arg0_a.population !== undefined && !isNaN(arg0_a.population)) ? arg0_a.population : 0
-              let b_pop = (arg0_b.population !== undefined && !isNaN(arg0_b.population)) ? arg0_b.population : 0
-              return b_pop - a_pop
-            })
-
-            selected_cities = visible_cities.slice(0, max_capacity)
-          }
-        }
-
-        // 3. Process Deck.gl point data for the selected cities
-        for (let i = 0; i < selected_cities.length; i++) {
-          let c = selected_cities[i]
           let c_lat = c.coords[0]
           let c_lon = c.coords[1]
           let is_cap = Boolean(c.isCapital)
@@ -486,9 +421,9 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             continue
 
           let mobile_scale = is_mobile ? 0.70 : 1.0
-          let min_radius = (is_mobile ? 2.0 : 3.25) * b_scale * Math.min(1.4, zoom_factor)
-          let pop_scaled = Math.pow(Math.max(0, c.population) / 100000, 0.5 * contrast) * 3.6 * b_scale * mobile_scale
-          let pixel_radius = Math.max(min_radius, Math.min(is_mobile ? 32.0 : 65.0, (min_radius + pop_scaled) * zoom_factor))
+          let min_radius = (is_mobile ? 2.0 : 3.25)*b_scale*Math.min(1.4, zoom_factor)
+          let pop_scaled = Math.pow(Math.max(0, c.population)/100000, 0.5*contrast)*3.6*b_scale*mobile_scale
+          let pixel_radius = Math.max(min_radius, Math.min(is_mobile ? 32.0 : 65.0, (min_radius + pop_scaled)*zoom_factor))
 
           if (color_mode === 'growth') {
             let g_rate = (c.growthRate !== undefined) ? c.growthRate : 0
@@ -525,6 +460,7 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             shortName: getCachedShortCityName(c, display_options),
           }
 
+          cached_pt_by_city_idx[i] = pt
           processed_points.push(pt)
         }
 
@@ -540,29 +476,126 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
           return a_rad - b_rad
         })
 
-        label_candidates = [...processed_points].sort((arg0_a, arg0_b) => {
-          if (arg0_a.isCapital && !arg0_b.isCapital)
-            return -1
-          if (!arg0_a.isCapital && arg0_b.isCapital)
-            return 1
-          return arg0_b.population - arg0_a.population
-        })
-
-        if (can_use_static_points) {
-          cached_point_key = static_point_key
-          cached_points = processed_points
-          cached_sorted_label_candidates = label_candidates
-        }
+        cached_data_version = data_version
+        cached_point_key = static_point_key
+        cached_points = processed_points
+        cached_sorted_label_candidates = []
+        cached_sorted_labels_ready = false
       }
 
-      // 4. Heuristic pre-culling + O(1) spatial hash label collision
+      // 4. Hierarchical 2-level spatial pruning + heuristic culling + O(1) collision grid for city labels only
       let placed_labels: WorkerPlacedLabel[] = []
 
-      if (is_labels_visible && label_candidates.length > 0) {
-        let apply_pop_floor = is_heuristic_culling && label_candidates.length > thresholds.maxLabels && thresholds.labelMinPop > 1
+      if (is_labels_visible && processed_points.length > 0) {
+        let active_label_candidates: WorkerProcessedPoint[]
+        let apply_pop_floor = false
+        let lat_span = n - s
+        let lon_span = (w <= east_bound) ? (east_bound - w) : ((180 - w) + (east_bound + 180))
+        let use_spatial_labels = (!is_globe && current_cities.length > 1000 && worker_grid_indices.length > 0 && (lon_span < 180 || lat_span < 120))
+
+        if (use_spatial_labels) {
+          let intersecting_macro_cities = 0
+          let lon_ranges: Array<[number, number]> = (w <= east_bound)
+            ? [[Math.max(0, Math.min(FINE_COLS - 1, Math.floor((w + 180)/2))), Math.max(0, Math.min(FINE_COLS - 1, Math.floor((east_bound + 180)/2)))]]
+            : [[Math.max(0, Math.min(FINE_COLS - 1, Math.floor((w + 180)/2))), FINE_COLS - 1], [0, Math.max(0, Math.min(FINE_COLS - 1, Math.floor((east_bound + 180)/2)))]]
+          let min_cy = Math.max(0, Math.min(FINE_ROWS - 1, Math.floor((s + 90)/2)))
+          let max_cy = Math.max(0, Math.min(FINE_ROWS - 1, Math.floor((n + 90)/2)))
+          let min_my = Math.floor(min_cy/5)
+          let max_my = Math.floor(max_cy/5)
+
+          for (let my = min_my; my <= max_my; my++) {
+            for (let r = 0; r < lon_ranges.length; r++) {
+              let min_mx = Math.floor(lon_ranges[r][0]/5)
+              let max_mx = Math.floor(lon_ranges[r][1]/5)
+              for (let mx = min_mx; mx <= max_mx; mx++)
+                intersecting_macro_cities += worker_macro_counts[my*MACRO_COLS + mx]
+            }
+          }
+
+          active_label_candidates = []
+          apply_pop_floor = Boolean(is_heuristic_culling && intersecting_macro_cities > thresholds.maxLabels && thresholds.labelMinPop > 1)
+
+          for (let my = min_my; my <= max_my; my++) {
+            let fy_start = Math.max(min_cy, my*5)
+            let fy_end = Math.min(max_cy, my*5 + 4)
+
+            for (let r = 0; r < lon_ranges.length; r++) {
+              let r_cx_min = lon_ranges[r][0]
+              let r_cx_max = lon_ranges[r][1]
+              let min_mx = Math.floor(r_cx_min/5)
+              let max_mx = Math.floor(r_cx_max/5)
+
+              for (let mx = min_mx; mx <= max_mx; mx++) {
+                let mid = my*MACRO_COLS + mx
+                if (worker_macro_counts[mid] === 0)
+                  continue
+                if (apply_pop_floor && worker_macro_has_cap[mid] === 0 && worker_macro_max_pop[mid] < thresholds.labelMinPop)
+                  continue
+
+                let fx_start = Math.max(r_cx_min, mx*5)
+                let fx_end = Math.min(r_cx_max, mx*5 + 4)
+
+                for (let cy = fy_start; cy <= fy_end; cy++) {
+                  for (let cx = fx_start; cx <= fx_end; cx++) {
+                    let fid = cy*FINE_COLS + cx
+                    let f_len = worker_fine_lens[fid]
+                    if (f_len === 0)
+                      continue
+                    if (apply_pop_floor && worker_fine_has_cap[fid] === 0 && worker_fine_max_pop[fid] < thresholds.labelMinPop)
+                      continue
+
+                    let f_off = worker_fine_offs[fid]
+                    for (let k = 0; k < f_len; k++) {
+                      let pt = cached_pt_by_city_idx[worker_grid_indices[f_off + k]]
+                      if (!pt)
+                        continue
+                      //Fine cell buckets store capitals first then descending population
+                      if (apply_pop_floor && !pt.isCapital && pt.population < thresholds.labelMinPop)
+                        break
+
+                      let c_lat = pt.coords ? pt.coords[0] : pt.position[1]
+                      let c_lon = pt.coords ? pt.coords[1] : pt.position[0]
+                      if (w <= east_bound) {
+                        if (c_lon < w || c_lon > east_bound || c_lat < s || c_lat > n)
+                          continue
+                      } else {
+                        if ((c_lon < w && c_lon > east_bound) || c_lat < s || c_lat > n)
+                          continue
+                      }
+
+                      active_label_candidates.push(pt)
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          active_label_candidates.sort((arg0_a, arg0_b) => {
+            if (arg0_a.isCapital && !arg0_b.isCapital)
+              return -1
+            if (!arg0_a.isCapital && arg0_b.isCapital)
+              return 1
+            return arg0_b.population - arg0_a.population
+          })
+        } else {
+          if (!cached_sorted_labels_ready) {
+            cached_sorted_label_candidates = [...processed_points].sort((arg0_a, arg0_b) => {
+              if (arg0_a.isCapital && !arg0_b.isCapital)
+                return -1
+              if (!arg0_a.isCapital && arg0_b.isCapital)
+                return 1
+              return arg0_b.population - arg0_a.population
+            })
+            cached_sorted_labels_ready = true
+          }
+          active_label_candidates = cached_sorted_label_candidates
+          apply_pop_floor = Boolean(is_heuristic_culling && active_label_candidates.length > thresholds.maxLabels && thresholds.labelMinPop > 1)
+        }
+
         let max_candidates = is_heuristic_culling
-          ? Math.min(label_candidates.length, thresholds.maxLabelCandidates)
-          : label_candidates.length
+          ? Math.min(active_label_candidates.length, thresholds.maxLabelCandidates)
+          : active_label_candidates.length
 
         let cell_h = 32
         let cell_w = 72
@@ -571,23 +604,26 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
         let scale = Math.pow(2, zoom)
         let scanned = 0
 
-        for (let i = 0; i < label_candidates.length && scanned < max_candidates; i++) {
-          let cand = label_candidates[i]
-          let c_lat = cand.coords ? cand.coords[0] : cand.position[1]
-          let c_lon = cand.coords ? cand.coords[1] : cand.position[0]
+        for (let i = 0; i < active_label_candidates.length && scanned < max_candidates; i++) {
+          let cand = active_label_candidates[i]
 
-          if (!is_globe) {
-            if (w <= east_bound) {
-              if (c_lon < w || c_lon > east_bound || c_lat < s || c_lat > n)
-                continue
-            } else {
-              if ((c_lon < w && c_lon > east_bound) || c_lat < s || c_lat > n)
-                continue
+          if (!use_spatial_labels) {
+            let c_lat = cand.coords ? cand.coords[0] : cand.position[1]
+            let c_lon = cand.coords ? cand.coords[1] : cand.position[0]
+
+            if (!is_globe) {
+              if (w <= east_bound) {
+                if (c_lon < w || c_lon > east_bound || c_lat < s || c_lat > n)
+                  continue
+              } else {
+                if ((c_lon < w && c_lon > east_bound) || c_lat < s || c_lat > n)
+                  continue
+              }
             }
-          }
 
-          if (apply_pop_floor && !cand.isCapital && cand.population < thresholds.labelMinPop)
-            continue
+            if (apply_pop_floor && !cand.isCapital && cand.population < thresholds.labelMinPop)
+              continue
+          }
 
           scanned++
 
@@ -771,6 +807,99 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
     }
 }
 
+/**
+ * Rebuilds the dense 2-level spatial index (10°x10° macro blocks and 2°x2° fine cells) over `current_cities`.
+ */
+function rebuildWorkerSpatialGrid (): void {
+  //Declare local instance variables
+  let cursors = new Uint32Array(FINE_CELLS)
+  let n_cities = current_cities.length
+  let running_offset = 0
+  let valid_count = 0
+
+  //Function body
+  worker_fine_has_cap.fill(0)
+  worker_fine_lens.fill(0)
+  worker_fine_max_pop.fill(0)
+  worker_fine_offs.fill(0)
+  worker_macro_counts.fill(0)
+  worker_macro_has_cap.fill(0)
+  worker_macro_max_pop.fill(0)
+
+  if (n_cities === 0) {
+    worker_grid_indices = new Uint32Array(0)
+    return
+  }
+
+  for (let i = 0; i < n_cities; i++) {
+    let c = current_cities[i]
+    if (!c || !c.coords || !Number.isFinite(c.coords[0]) || !Number.isFinite(c.coords[1]))
+      continue
+    if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
+      continue
+
+    let cx = Math.max(0, Math.min(FINE_COLS - 1, Math.floor((c.coords[1] + 180)/2)))
+    let cy = Math.max(0, Math.min(FINE_ROWS - 1, Math.floor((c.coords[0] + 90)/2)))
+    let fid = cy*FINE_COLS + cx
+    let mid = Math.floor(cy/5)*MACRO_COLS + Math.floor(cx/5)
+
+    worker_fine_lens[fid]++
+    worker_macro_counts[mid]++
+    valid_count++
+
+    if (c.population > worker_fine_max_pop[fid])
+      worker_fine_max_pop[fid] = c.population
+    if (c.population > worker_macro_max_pop[mid])
+      worker_macro_max_pop[mid] = c.population
+    if (c.isCapital) {
+      worker_fine_has_cap[fid] = 1
+      worker_macro_has_cap[mid] = 1
+    }
+  }
+
+  for (let i = 0; i < FINE_CELLS; i++) {
+    worker_fine_offs[i] = running_offset
+    cursors[i] = running_offset
+    running_offset += worker_fine_lens[i]
+  }
+
+  worker_grid_indices = new Uint32Array(valid_count)
+
+  for (let i = 0; i < n_cities; i++) {
+    let c = current_cities[i]
+    if (!c || !c.coords || !Number.isFinite(c.coords[0]) || !Number.isFinite(c.coords[1]))
+      continue
+    if (c.population === undefined || c.population === null || isNaN(c.population) || c.population < 0.01)
+      continue
+
+    let cx = Math.max(0, Math.min(FINE_COLS - 1, Math.floor((c.coords[1] + 180)/2)))
+    let cy = Math.max(0, Math.min(FINE_ROWS - 1, Math.floor((c.coords[0] + 90)/2)))
+    let fid = cy*FINE_COLS + cx
+
+    worker_grid_indices[cursors[fid]++] = i
+  }
+
+  //Ensure every fine cell with capitals orders capitals before non-capitals while keeping descending population
+  for (let i = 0; i < FINE_CELLS; i++) {
+    let f_len = worker_fine_lens[i]
+    if (f_len <= 1 || worker_fine_has_cap[i] === 0)
+      continue
+
+    let f_off = worker_fine_offs[i]
+    let bucket = worker_grid_indices.subarray(f_off, f_off + f_len)
+    bucket.sort((arg0_a, arg0_b) => {
+      let a_city = current_cities[arg0_a]
+      let b_city = current_cities[arg0_b]
+      let a_cap = a_city.isCapital ? 1 : 0
+      let b_cap = b_city.isCapital ? 1 : 0
+      if (a_cap !== b_cap)
+        return b_cap - a_cap
+
+      return (b_city.population || 0) - (a_city.population || 0)
+    })
+  }
+}
+
 self.onmessage = function (arg0_e: MessageEvent<WorkerInMessage>) {
   //Convert from parameters
   let e = arg0_e
@@ -784,32 +913,43 @@ self.onmessage = function (arg0_e: MessageEvent<WorkerInMessage>) {
 
   //Function body
   if (msg.type === 'SET_DATA') {
-    let cities_arr = Array.isArray(msg.cities) ? msg.cities : []
+    let cities_arr = Array.isArray(msg.cities) ? [...msg.cities] : []
     cities_arr.sort((arg0_a, arg0_b) => (arg0_b.population || 0) - (arg0_a.population || 0))
     current_cities = cities_arr
     current_year = msg.year
     data_version++
+    cached_data_version = -1
     cached_point_key = ''
     cached_points = []
+    cached_pt_by_city_idx = []
     cached_sorted_label_candidates = []
+    cached_sorted_labels_ready = false
     short_name_cache = new WeakMap<WorkerCityInput, string>()
     cap_rgba_cache.clear()
-    city_grid.clear()
+    rebuildWorkerSpatialGrid()
+    return
+  }
 
-    for (let i = 0; i < cities_arr.length; i++) {
-      let c = cities_arr[i]
-      if (!c || !c.coords)
-        continue
-      let cx = Math.max(0, Math.min(179, Math.floor((c.coords[1] + 180)/2)))
-      let cy = Math.max(0, Math.min(89, Math.floor((c.coords[0] + 90)/2)))
-      let cell_key = cy*180 + cx
-      let bucket = city_grid.get(cell_key)
-      if (!bucket) {
-        bucket = []
-        city_grid.set(cell_key, bucket)
-      }
-      bucket.push(i)
-    }
+  if (msg.type === 'APPEND_DATA') {
+    if (msg.year !== current_year)
+      return
+
+    let delta_arr = Array.isArray(msg.cities) ? msg.cities : []
+    if (delta_arr.length === 0)
+      return
+
+    for (let i = 0; i < delta_arr.length; i++)
+      current_cities.push(delta_arr[i])
+
+    current_cities.sort((arg0_a, arg0_b) => (arg0_b.population || 0) - (arg0_a.population || 0))
+    data_version++
+    cached_data_version = -1
+    cached_point_key = ''
+    cached_points = []
+    cached_pt_by_city_idx = []
+    cached_sorted_label_candidates = []
+    cached_sorted_labels_ready = false
+    rebuildWorkerSpatialGrid()
     return
   }
 

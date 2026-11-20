@@ -36,6 +36,7 @@ import {
   getCitiesAtYear,
   getCompactCitiesAtYear,
   getLargestCitiesAtYear,
+  streamCompactBinaryCitiesAtYear,
 } from './stadester_queries.ts'
 import { getCityByKey } from './stadester_search.ts'
 
@@ -76,4 +77,5 @@ export let StadesterService = {
   loadStateCapitals: getStateCapitals,
   resolveCityMetadataPath,
   resolveCityNameAtYear,
+  streamCompactBinaryCitiesAtYear,
 }

@@ -134,7 +134,8 @@ export async function fetchStadesterCitiesAsync (
   arg5_cache?: Map<string, CityPoint[]>,
   arg6_is_playing?: boolean,
   arg7_performant_mode?: boolean,
-  arg8_signal?: AbortSignal
+  arg8_signal?: AbortSignal,
+  arg9_on_progress?: (arg0_cities: CityPoint[], arg1_is_done: boolean) => void
 ): Promise<CityPoint[]> {
   //Convert from parameters
   let dataset = arg0_dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
@@ -144,6 +145,7 @@ export async function fetchStadesterCitiesAsync (
   let color_mode = arg4_color_mode || 'growth'
   let cache = arg5_cache
   let is_playing = Boolean(arg6_is_playing)
+  let on_progress = arg9_on_progress
   let performant_mode = Boolean(arg7_performant_mode)
   let signal = arg8_signal
 
@@ -155,7 +157,7 @@ export async function fetchStadesterCitiesAsync (
   if (cache && cache.has(cache_key))
     return cache.get(cache_key)!
 
-  if (!signal && in_flight_city_fetches.has(cache_key))
+  if (!signal && !on_progress && in_flight_city_fetches.has(cache_key))
     return in_flight_city_fetches.get(cache_key)!
 
   //Function body
@@ -169,15 +171,65 @@ export async function fetchStadesterCitiesAsync (
         minPop: String(min_pop),
         year: String(year),
       })
+      if (on_progress)
+        url_params.set('stream', '1')
 
       let res = await fetch(`/api/stadester/cities.json?${url_params.toString()}`, { signal })
       if (!res.ok)
         return []
 
       let content_type = res.headers.get('content-type') || ''
+      let is_bin_stream = res.headers.get('x-stadwire-stream') === '1'
       let city_list: CityPoint[] = []
 
-      if (content_type.includes('application/octet-stream')) {
+      if (content_type.includes('application/octet-stream') && is_bin_stream && res.body) {
+        let reader = res.body.getReader()
+        let buf = new Uint8Array(0)
+        let pending_count = 0
+
+        for (;;) {
+          let read_res = await reader.read()
+          let value = read_res.value
+          if (value && value.byteLength > 0) {
+            if (buf.byteLength === 0) {
+              buf = value
+            } else {
+              let combined = new Uint8Array(buf.byteLength + value.byteLength)
+              combined.set(buf, 0)
+              combined.set(value, buf.byteLength)
+              buf = combined
+            }
+
+            let cursor = 0
+            let decoded_any = false
+            while (cursor + 4 <= buf.byteLength) {
+              let frame_view = new DataView(buf.buffer, buf.byteOffset + cursor, 4)
+              let frame_len = frame_view.getUint32(0, true)
+              if (cursor + 4 + frame_len > buf.byteLength)
+                break
+              let frame_ab = buf.slice(cursor + 4, cursor + 4 + frame_len).buffer
+              let chunk_cities = decodeBinaryCitiesWire(frame_ab)
+              cursor += 4 + frame_len
+              if (chunk_cities && chunk_cities.length > 0) {
+                for (let k = 0; k < chunk_cities.length; k++)
+                  city_list.push(chunk_cities[k])
+                pending_count += chunk_cities.length
+                decoded_any = true
+              }
+            }
+            if (cursor > 0)
+              buf = cursor < buf.byteLength ? buf.slice(cursor) : new Uint8Array(0)
+
+            if (decoded_any && on_progress && pending_count > 0 && !signal?.aborted) {
+              on_progress([...city_list], Boolean(read_res.done))
+              pending_count = 0
+            }
+          }
+
+          if (read_res.done)
+            break
+        }
+      } else if (content_type.includes('application/octet-stream')) {
         let ab = await res.arrayBuffer()
         let decoded = decodeBinaryCitiesWire(ab)
         if (decoded)
@@ -252,7 +304,7 @@ export async function fetchStadesterCitiesAsync (
     }
   })()
 
-  if (!signal)
+  if (!signal && !on_progress)
     in_flight_city_fetches.set(cache_key, pending_promise)
 
   //Return statement
@@ -365,7 +417,23 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     set_is_loading(true)
     set_error(null)
 
-    fetchStadesterCitiesAsync(dataset, rounded_year, min_pop, max_cities, color_mode, client_cache_ref.current, is_playing, performant_mode, controller.signal)
+    fetchStadesterCitiesAsync(
+      dataset,
+      rounded_year,
+      min_pop,
+      max_cities,
+      color_mode,
+      client_cache_ref.current,
+      is_playing,
+      performant_mode,
+      controller.signal,
+      (arg0_partial_cities) => {
+        if (!is_cancelled) {
+          set_cities(arg0_partial_cities)
+          set_is_loading(false)
+        }
+      }
+    )
       .then((arg0_list) => {
         if (!is_cancelled) {
           set_cities(arg0_list)

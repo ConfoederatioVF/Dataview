@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import type { ParsedUrlQuery } from 'querystring'
 import { promisify } from 'node:util'
 import { gzip as gzipCallback } from 'node:zlib'
+import { DEFAULT_STADESTER_SCALING_CONFIG, getOptimisationConfig } from '../../../common/optimisation/optimisation.ts'
 import { getDefaultStadesterDatasetId } from '../stadester_config_loader.ts'
 import { packBinaryCitiesResponse } from '../stadester_binary_queries.ts'
 import { StadesterService } from '../stadester_service.ts'
@@ -159,6 +160,44 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         res.statusCode = 200
         res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
         res.setHeader('Content-Type', 'application/octet-stream')
+
+        if (is_streaming) {
+          let opt_scaling = getOptimisationConfig().config?.stadester_scaling || DEFAULT_STADESTER_SCALING_CONFIG
+          let initial_chunk_sz = opt_scaling.stream_initial_chunk_size ?? DEFAULT_STADESTER_SCALING_CONFIG.stream_initial_chunk_size
+          let chunk_sz = opt_scaling.stream_chunk_size ?? DEFAULT_STADESTER_SCALING_CONFIG.stream_chunk_size
+          let aborted = false
+          req.on('close', () => {
+            aborted = true
+          })
+
+          res.setHeader('Transfer-Encoding', 'chunked')
+          res.setHeader('X-Stadwire-Stream', '1')
+
+          StadesterService.streamCompactBinaryCitiesAtYear(
+            dataset,
+            year,
+            { bbox, color_mode, day, max_cities, min_pop, month },
+            initial_chunk_sz,
+            chunk_sz,
+            (arg0_wire_buf) => {
+              if (aborted || res.destroyed || res.writableEnded)
+                return
+              let len_hdr = Buffer.allocUnsafe(4)
+              len_hdr.writeUInt32LE(arg0_wire_buf.length, 0)
+              res.write(len_hdr)
+              res.write(arg0_wire_buf)
+            },
+            () => aborted || res.destroyed || res.writableEnded
+          ).then(() => {
+            if (!res.destroyed && !res.writableEnded)
+              res.end()
+          }).catch((arg0_err) => {
+            console.error('[ApiMiddleware] Binary stream error:', arg0_err)
+            if (!res.destroyed && !res.writableEnded)
+              res.end()
+          })
+          return
+        }
 
         let bin_cache_key = `${cache_key}:${supports_gzip ? 'gz' : 'raw'}`
         if (compressed_cities_cache.has(bin_cache_key)) {

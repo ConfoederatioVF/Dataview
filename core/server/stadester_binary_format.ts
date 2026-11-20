@@ -1,8 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 
-export let BINARY_FORMAT_VERSION = 1
+export let BINARY_FORMAT_VERSION = 2
 export let BINARY_MAGIC = 'STADBIN1'
+export let FINE_GRID_CELLS = 16200
+export let FINE_GRID_COLS = 180
+export let FINE_GRID_ROWS = 90
+export let MACRO_GRID_CELLS = 648
+export let MACRO_GRID_COLS = 36
+export let MACRO_GRID_ROWS = 18
 export let SHARD_BIN_MAGIC = 'STADSHD1'
 
 export interface BinaryBuildManifest {
@@ -31,7 +37,6 @@ export interface BinaryDatasetStore {
   cap_records_by_idx: Map<number, Array<{ date: string; state_id: number | string | null; year_frac: number }>>
   capital_city_indices: Uint32Array
   cell_city_indices: Uint32Array
-  cell_map: Map<number, { length: number; offset: number }>
   count: number
   counterpart_idx: Int32Array
   country_buf: Buffer
@@ -39,6 +44,9 @@ export interface BinaryDatasetStore {
   dataset_dir: string
   detail_len: Uint32Array
   detail_offset: Float64Array
+  fine_lens: Uint32Array
+  fine_max_pop: Float32Array
+  fine_offs: Uint32Array
   flags: Uint8Array
   hash_bucket_heads: Int32Array
   hash_entry_city: Uint32Array
@@ -52,6 +60,8 @@ export interface BinaryDatasetStore {
   key_offsets: Uint32Array
   lat: Float32Array
   lon: Float32Array
+  macro_counts: Uint32Array
+  macro_max_pop: Float32Array
   max_pop: Float32Array
   max_year: Int16Array
   min_year: Int16Array

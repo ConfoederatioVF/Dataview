@@ -749,7 +749,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     for (let i = 0; i < circle_layers.length; i++)
       layers_array.push(circle_layers[i])
 
-    //6. Historical Statistical Borders (CShapes-2.0 & atlas_dejure.naissance)
+    //6. Historical Statistical Borders (atlas_dejure.naissance & atlas_defacto.naissance)
     is_historical_hovered_selected = Boolean(
       options.hoveredHistoricalFeature && effective_selected_array.some((arg0_c: any) => {
         let hf = options.hoveredHistoricalFeature!

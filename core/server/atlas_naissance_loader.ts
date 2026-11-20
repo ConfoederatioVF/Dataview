@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { getStateCapitalInfo } from './atlas_city_resolver.ts'
 import { computeGeometryBBox, cullAndSimplifyGeometry } from './atlas_geometry_utils.ts'
-import { FilepathDefines } from './filepath_defines.ts'
 import { UfDate } from '../framework/utils/uf_date.ts'
 
 export interface HistoricalBorderKeyframe {
@@ -33,7 +32,6 @@ export interface HistoricalBorderFeature {
     capname?: string
     cow?: number | string
     cow_id?: number | string
-    cshapes_id?: number | string
     date?: string
     dejure?: boolean
     description?: string | string[]
@@ -80,9 +78,6 @@ export let defacto_borders_slices = [
   { domain: [1991, 2026], file: '8.2026.1.1.naissance' },
 ]
 
-let cached_cshapes_data: any = null
-let cached_cshapes_features: any[] = null as unknown as any[]
-let cached_cshapes_keyframes_by_gwcode: Map<number, HistoricalBorderKeyframe[]> = new Map()
 let cached_naissance_entities_by_path: Map<string, Map<string, NaissanceEntityRecord>> = new Map()
 let cached_naissance_mtimes: Map<string, number> = new Map()
 
@@ -125,15 +120,6 @@ export let isNaissanceCacheStale = function (arg0_file_path: string): boolean {
 
   //Return statement
   return fs.statSync(file_path).mtimeMs !== cached_naissance_mtimes.get(file_path)
-}
-
-/**
- * Returns pre-indexed CShapes keyframes by GW code.
- *
- * @returns {Map<number, HistoricalBorderKeyframe[]>}
- */
-export let getCShapesKeyframesByGwcode = function (): Map<number, HistoricalBorderKeyframe[]> {
-  return cached_cshapes_keyframes_by_gwcode
 }
 
 /**
@@ -184,103 +170,6 @@ export let getEntityKeyframesSummary = function (arg0_ent: NaissanceEntityRecord
 
   //Return statement
   return keyframes_summary
-}
-
-
-/**
- * Loads and indexes CShapes-2.0.geojson in memory on first access.
- *
- * @param {string} [arg0_cshapes_path]
- *
- * @returns {any[]}
- */
-export let loadCShapes = function (arg0_cshapes_path?: string): any[] {
-  //Guard clauses
-  if (cached_cshapes_features)
-    return cached_cshapes_features
-
-  //Declare local instance variables
-  let file_path = arg0_cshapes_path || FilepathDefines.get().filepaths.atlas_cshapes
-
-  //Guard clauses
-  if (!fs.existsSync(file_path)) {
-    console.warn(`[AtlasBordersService] CShapes file not found: ${file_path}`)
-    cached_cshapes_features = []
-    return cached_cshapes_features
-  }
-
-  //Function body
-  try {
-    console.log(`[AtlasBordersService] Loading and indexing CShapes-2.0.geojson...`)
-    let raw = fs.readFileSync(file_path, 'utf-8')
-    cached_cshapes_data = JSON.parse(raw)
-    cached_cshapes_features = cached_cshapes_data.features || []
-
-    for (let i = 0; i < cached_cshapes_features.length; i++) {
-      let feat = cached_cshapes_features[i]
-      if (feat.geometry)
-        feat.geometry = cullAndSimplifyGeometry(feat.geometry, 0.012)
-    }
-
-    cached_cshapes_keyframes_by_gwcode = new Map()
-    for (let i = 0; i < cached_cshapes_features.length; i++) {
-      let feat = cached_cshapes_features[i]
-      let p = feat.properties
-      let s_day = p.gwsday || 1
-      let s_month = p.gwsmonth || 1
-      let s_year = p.gwsyear
-      let e_day = p.gweday || 1
-      let e_month = p.gwemonth || 1
-      let e_year = p.gweyear
-
-      feat._start_ts = UfDate.getTimestamp({
-        day: s_day,
-        hour: 0,
-        minute: 0,
-        month: s_month,
-        year: s_year,
-      })
-      feat._end_ts = UfDate.getTimestamp({
-        day: e_day,
-        hour: 23,
-        minute: 59,
-        month: e_month,
-        year: e_year,
-      })
-
-      let gw = p.gwcode
-      if (gw !== undefined) {
-        if (!cached_cshapes_keyframes_by_gwcode.has(gw))
-          cached_cshapes_keyframes_by_gwcode.set(gw, [])
-        let list = cached_cshapes_keyframes_by_gwcode.get(gw)!
-        let formatted_date = UfDate.formatDate({
-          day: s_day,
-          month: s_month,
-          year: s_year,
-        })
-        list.push({
-          date: formatted_date,
-          day: s_day,
-          label: `Boundary keyframe (${s_year}-${e_year})`,
-          month: s_month,
-          timestamp: feat._start_ts,
-          year: s_year,
-        })
-      }
-    }
-
-    for (let list of cached_cshapes_keyframes_by_gwcode.values()) {
-      list.sort((arg0_a, arg0_b) => (arg0_a.timestamp || 0) - (arg0_b.timestamp || 0))
-    }
-
-    console.log(`[AtlasBordersService] Successfully indexed ${cached_cshapes_features.length} CShapes features across ${cached_cshapes_keyframes_by_gwcode.size} nations.`)
-  } catch (arg0_err) {
-    console.error('[AtlasBordersService] Failed to load CShapes-2.0.geojson:', arg0_err)
-    cached_cshapes_features = []
-  }
-
-  //Return statement
-  return cached_cshapes_features
 }
 
 
@@ -582,7 +471,7 @@ export let loadNaissance = function (arg0_file_path: string): Map<string, Naissa
 
 
 /**
- * Clears in-memory CShapes and Naissance caches, optionally targeting a specific file.
+ * Clears in-memory Naissance caches, optionally targeting a specific file.
  *
  * @param {string} [arg0_file_path]
  *
@@ -599,9 +488,6 @@ export let clearNaissanceCache = function (arg0_file_path?: string): void {
     return
   }
 
-  cached_cshapes_data = null
-  cached_cshapes_features = null as unknown as any[]
-  cached_cshapes_keyframes_by_gwcode.clear()
   cached_naissance_entities_by_path.clear()
   cached_naissance_mtimes.clear()
 }
@@ -731,14 +617,13 @@ export let sliceNaissanceEntities = function (
         color: feat_fill,
         cow: current_props.cow || current_props.cow_code,
         cow_id: current_props.cow_id || current_props.cow || current_props.cow_code,
-        cshapes_id: current_props.cshapes_id || current_props.cshapes || current_props.gwcode,
         date: UfDate.formatDate(resolved_date_obj),
         dejure: is_dejure,
         description: current_props.description || current_props.descriptions || ent.description || ent.metadata?.description,
         fillColor: feat_fill,
         fill_color: feat_fill,
         flags: current_props.flags,
-        gwcode: current_props.gwcode || current_props.cshapes_id || current_props.cshapes,
+        gwcode: current_props.gwcode,
         id: ent_id,
         is_acapital: cap_info.is_acapital,
         iso_a3: entity_name,

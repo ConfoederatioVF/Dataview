@@ -13,7 +13,7 @@ export interface HistoricalBordersLayerOptions {
     count?: number
     date?: string
     features: HistoricalBorderFeature[]
-    source?: 'cshapes' | 'naissance' | null
+    source?: 'naissance' | null
     tag?: string
     type: 'FeatureCollection'
     year?: number
@@ -55,7 +55,7 @@ function parseHexToRgba (arg0_hex: string, arg1_alpha: number = 255): [number, n
 let cached_layer_data_map: WeakMap<object, Map<string, any[]>> = new WeakMap()
 
 /**
- * Builds deck.gl GeoJsonLayers rendering temporally sliced historical borders from CShapes-2.0 and atlas_dejure.naissance.
+ * Builds deck.gl GeoJsonLayers rendering temporally sliced historical borders from atlas_dejure.naissance and atlas_defacto.naissance.
  * Memoises transformed geometries and isolates hover and selection into lightweight overlay layers for optimal FPS.
  *
  * @param {HistoricalBordersLayerOptions} arg0_options

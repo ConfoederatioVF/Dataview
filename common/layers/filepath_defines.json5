@@ -36,7 +36,6 @@
     vitals: "${h2}/births_deaths_OLS/",
   },
   filepaths: {
-    atlas_cshapes: "${l_atlas}/CShapes-2.0.geojson",
     atlas_defacto: "${l_atlas}/atlas_defacto.naissance",
     atlas_dejure: "${l_atlas}/atlas_dejure.naissance",
     atlas_legacy: "${l_atlas}/atlas.naissance",

@@ -157,7 +157,7 @@ export let setPolityKeyframesCollapsed = function (arg0_collapsed: boolean): voi
 
 /**
  * Historical country details panel displaying temporally sliced attributes,
- * SVEA/CShapes keyframe timelines, and regional raster statistics.
+ * SVEA keyframe timelines, and regional raster statistics.
  * Anchored to the map click location with sidebar collision avoidance.
  *
  * @param {HistoricalBorderDetailsPanelProps} arg0_props
@@ -240,7 +240,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
       return
 
     let is_cancelled = false
-    let clean_id = current_id.replace(/^(naissance_|detailed_|defacto_|cshapes_)/, '')
+    let clean_id = current_id.replace(/^(naissance_|detailed_|defacto_)/, '')
     fetch(`/api/atlas/entity?id=${encodeURIComponent(clean_id)}`)
       .then((arg0_res) => (arg0_res.ok ? arg0_res.json() : null))
       .then((arg0_data) => {
@@ -436,9 +436,7 @@ export let HistoricalBorderDetailsPanel: React.FC<HistoricalBorderDetailsPanelPr
     polity_description = JSON.stringify(raw_description)
   }
 
-  if (feature.id?.toString().startsWith('cshapes')) {
-    source_label = 'CShapes-2.0'
-  } else if (feature.id?.toString().startsWith('defacto')) {
+  if (feature.id?.toString().startsWith('defacto')) {
     source_label = 'atlas_defacto.naissance'
   } else {
     source_label = 'atlas_dejure.naissance'

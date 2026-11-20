@@ -17,7 +17,7 @@ export interface HistoricalBordersHookResult {
   domain: [number, number] | null
   error: string | null
   isLoading: boolean
-  source: 'cshapes' | 'naissance' | null
+  source: 'naissance' | null
   year: number
 }
 
@@ -85,7 +85,7 @@ export let fetchHistoricalBordersAsync = async function (
     count?: number
     date?: string
     features: HistoricalBorderFeature[]
-    source?: 'cshapes' | 'naissance' | null
+    source?: 'naissance' | null
     tag?: string
     type: 'FeatureCollection'
     year?: number
@@ -119,7 +119,7 @@ export let fetchHistoricalBordersAsync = async function (
 }
 
 /**
- * Hook to asynchronously fetch and cache historical borders from CShapes-2.0 and atlas_dejure.naissance.
+ * Hook to asynchronously fetch and cache historical borders from atlas_dejure.naissance and atlas_defacto.naissance.
  * Operates a single-in-flight background queue during timelapse playback to prevent network saturation,
  * whilst providing instant responsive updates on playback stop and timeline scrubbing.
  *
@@ -202,9 +202,9 @@ export let useHistoricalBorders = function (
   let set_domain: React.Dispatch<React.SetStateAction<[number, number] | null>>
   let set_error: React.Dispatch<React.SetStateAction<string | null>>
   let set_is_loading: React.Dispatch<React.SetStateAction<boolean>>
-  let set_source: React.Dispatch<React.SetStateAction<'cshapes' | 'naissance' | null>>
+  let set_source: React.Dispatch<React.SetStateAction<'naissance' | null>>
   let snap_to_keyframes = Boolean(options.snapToKeyframes)
-  let source: 'cshapes' | 'naissance' | null
+  let source: 'naissance' | null
   let was_playing_ref = useRef<boolean>(is_playing)
 
   //Function body
@@ -220,7 +220,7 @@ export let useHistoricalBorders = function (
   ;[domain, set_domain] = useState<[number, number] | null>(null)
   ;[error, set_error] = useState<string | null>(null)
   ;[is_loading, set_is_loading] = useState<boolean>(false)
-  ;[source, set_source] = useState<'cshapes' | 'naissance' | null>(null)
+  ;[source, set_source] = useState<'naissance' | null>(null)
 
   is_active =
     enabled ||

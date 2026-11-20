@@ -49,6 +49,9 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
   let last_dispatched_opts_key_ref = useRef<string>('')
   let last_dispatched_year_ref = useRef<number>(year)
   let last_projection_ref = useRef<ProjectionType>(projection)
+  let last_sent_cities_ref = useRef<CityPoint[]>([])
+  let last_sent_enabled_ref = useRef<boolean>(false)
+  let last_sent_year_ref = useRef<number>(year)
   let points: WorkerProcessedPoint[]
   let req_id_ref = useRef<number>(0)
   let set_binary_attributes: React.Dispatch<React.SetStateAction<WorkerBinaryAttributes | undefined>>
@@ -105,12 +108,14 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     }
   }, [])
 
-  //2. Update dataset on year/cities change
+  //2. Update dataset on year/cities change (incremental APPEND_DATA when progressively streamed/tiled)
   useEffect(() => {
     if (!worker_ref.current)
       return
 
     if (!config?.enabled) {
+      last_sent_cities_ref.current = []
+      last_sent_enabled_ref.current = false
       worker_ref.current.postMessage({
         cities: [],
         type: 'SET_DATA',
@@ -119,6 +124,30 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       return
     }
 
+    let prev = last_sent_cities_ref.current
+    let can_append = Boolean(
+      last_sent_enabled_ref.current &&
+      last_sent_year_ref.current === year &&
+      prev.length > 0 &&
+      cities.length > prev.length &&
+      cities[0]?.key === prev[0]?.key &&
+      cities[prev.length - 1]?.key === prev[prev.length - 1]?.key
+    )
+
+    if (can_append) {
+      let delta = cities.slice(prev.length)
+      last_sent_cities_ref.current = cities
+      worker_ref.current.postMessage({
+        cities: delta as any,
+        type: 'APPEND_DATA',
+        year,
+      } as WorkerInMessage)
+      return
+    }
+
+    last_sent_cities_ref.current = cities
+    last_sent_enabled_ref.current = true
+    last_sent_year_ref.current = year
     worker_ref.current.postMessage({
       cities: cities as any,
       type: 'SET_DATA',

@@ -36,11 +36,16 @@ import {
 import {
   BINARY_FORMAT_VERSION,
   BINARY_MAGIC,
+  FINE_GRID_CELLS,
+  FINE_GRID_COLS,
+  FINE_GRID_ROWS,
   FLAG_HAS_CAPITALS,
   FLAG_HAS_COLOUR,
   FLAG_HAS_HIST_NAMES,
   FLAG_IS_BUGGED,
   FLAG_IS_GHSL,
+  MACRO_GRID_CELLS,
+  MACRO_GRID_COLS,
   SHARD_BIN_MAGIC,
   fnv1a32,
   getSpatialCellKey2Deg,
@@ -1003,20 +1008,35 @@ function buildGlobalBinaryIndex (
     counterpart_arr[i] = best_idx
   }
 
-  //Flatten 2-deg spatial cells
-  let cell_keys_list: number[] = []
-  let cell_offs_list: number[] = []
-  let cell_lens_list: number[] = []
+  //Flatten dense 2-level hierarchical spatial index (10-deg macro blocks + 2-deg fine cells in row-major order)
+  let fine_offs = new Uint32Array(FINE_GRID_CELLS)
+  let fine_lens = new Uint32Array(FINE_GRID_CELLS)
+  let fine_max_pop = new Float32Array(FINE_GRID_CELLS)
+  let macro_counts = new Uint32Array(MACRO_GRID_CELLS)
+  let macro_max_pop = new Float32Array(MACRO_GRID_CELLS)
   let total_cell_entries = count
   let cell_city_indices = new Uint32Array(total_cell_entries)
   let cell_cursor = 0
 
-  for (let [ck, bucket] of cell_buckets) {
-    cell_keys_list.push(ck)
-    cell_offs_list.push(cell_cursor)
-    cell_lens_list.push(bucket.length)
-    for (let i = 0; i < bucket.length; i++)
-      cell_city_indices[cell_cursor++] = bucket[i]
+  for (let cy = 0; cy < FINE_GRID_ROWS; cy++) {
+    let my = Math.floor(cy/5)
+    for (let cx = 0; cx < FINE_GRID_COLS; cx++) {
+      let cid = cy*FINE_GRID_COLS + cx
+      let bucket = cell_buckets.get(cid)
+      if (!bucket || bucket.length === 0)
+        continue
+      let mx = Math.floor(cx/5)
+      let mid = my*MACRO_GRID_COLS + mx
+      let top_mp = entries[bucket[0]].max_pop
+      fine_offs[cid] = cell_cursor
+      fine_lens[cid] = bucket.length
+      fine_max_pop[cid] = top_mp
+      macro_counts[mid] += bucket.length
+      if (top_mp > macro_max_pop[mid])
+        macro_max_pop[mid] = top_mp
+      for (let i = 0; i < bucket.length; i++)
+        cell_city_indices[cell_cursor++] = bucket[i]
+    }
   }
 
   //Build O(1) FNV-1a search hash table for key, bare_key, norm_key, primary_key, id, and NFD name
@@ -1122,9 +1142,11 @@ function buildGlobalBinaryIndex (
       { data: packed_ids.buf, name: 'id_buf' },
       { data: packed_others.offsets, name: 'other_off' },
       { data: packed_others.buf, name: 'other_buf' },
-      { data: new Int32Array(cell_keys_list), name: 'cell_keys' },
-      { data: new Uint32Array(cell_offs_list), name: 'cell_offs' },
-      { data: new Uint32Array(cell_lens_list), name: 'cell_lens' },
+      { data: fine_offs, name: 'fine_offs' },
+      { data: fine_lens, name: 'fine_lens' },
+      { data: fine_max_pop, name: 'fine_max_pop' },
+      { data: macro_counts, name: 'macro_counts' },
+      { data: macro_max_pop, name: 'macro_max_pop' },
       { data: cell_city_indices, name: 'cell_city_indices' },
       { data: hash_bucket_heads, name: 'hash_bucket_heads' },
       { data: hash_entry_hashes, name: 'hash_entry_hashes' },
@@ -1531,7 +1553,7 @@ export function compileStadesterDataset (
   if (!options.force && fs.existsSync(manifest_path)) {
     try {
       let parsed = JSON.parse(fs.readFileSync(manifest_path, 'utf-8'))
-      if (parsed && parsed.version === BINARY_FORMAT_VERSION)
+      if (parsed && typeof parsed.shards === 'object')
         prev_manifest = parsed
     } catch {
       prev_manifest = null
@@ -1588,6 +1610,7 @@ export function compileStadesterDataset (
     options.relink ||
     compiled_shards > 0 ||
     !prev_manifest ||
+    prev_manifest.version !== BINARY_FORMAT_VERSION ||
     prev_manifest.metadata_sig !== meta_sig ||
     prev_manifest.capitals_sig !== cap_sig ||
     prev_manifest.bugged_sig !== bugged_sig ||
@@ -1668,13 +1691,6 @@ function readBinaryStoreFromDisk (
     let loaded = readSectionedBinaryFile(hot_index_path, BINARY_MAGIC)
     let sec = loaded.sections
     let meta = loaded.meta
-    let cell_keys = toTypedArray(sec.get('cell_keys')!, Int32Array, 4)
-    let cell_offs = toTypedArray(sec.get('cell_offs')!, Uint32Array, 4)
-    let cell_lens = toTypedArray(sec.get('cell_lens')!, Uint32Array, 4)
-    let cell_map = new Map<number, { length: number; offset: number }>()
-    for (let i = 0; i < cell_keys.length; i++)
-      cell_map.set(cell_keys[i], { length: cell_lens[i], offset: cell_offs[i] })
-
     let sparse_obj = JSON.parse(sec.get('sparse_json')!.toString('utf8'))
     let cap_records_by_idx = new Map<number, CapitalRecord[]>(sparse_obj.cap_meta || [])
     let hist_names_by_idx = new Map<number, HistoricalNameRecord[]>(sparse_obj.hist_meta || [])
@@ -1684,7 +1700,6 @@ function readBinaryStoreFromDisk (
       cap_records_by_idx,
       capital_city_indices: toTypedArray(sec.get('capital_city_indices')!, Uint32Array, 4),
       cell_city_indices: toTypedArray(sec.get('cell_city_indices')!, Uint32Array, 4),
-      cell_map,
       count: Number(meta.count || 0),
       counterpart_idx: toTypedArray(sec.get('counterpart_idx')!, Int32Array, 4),
       country_buf: sec.get('country_buf')!,
@@ -1692,6 +1707,9 @@ function readBinaryStoreFromDisk (
       dataset_dir: dataset_cache_dir,
       detail_len: toTypedArray(sec.get('detail_len')!, Uint32Array, 4),
       detail_offset: toTypedArray(sec.get('detail_offset')!, Float64Array, 8),
+      fine_lens: toTypedArray(sec.get('fine_lens')!, Uint32Array, 4),
+      fine_max_pop: toTypedArray(sec.get('fine_max_pop')!, Float32Array, 4),
+      fine_offs: toTypedArray(sec.get('fine_offs')!, Uint32Array, 4),
       flags: sec.get('flags')!,
       hash_bucket_heads: toTypedArray(sec.get('hash_bucket_heads')!, Int32Array, 4),
       hash_entry_city: toTypedArray(sec.get('hash_entry_city')!, Uint32Array, 4),
@@ -1705,6 +1723,8 @@ function readBinaryStoreFromDisk (
       key_offsets: toTypedArray(sec.get('key_off')!, Uint32Array, 4),
       lat: toTypedArray(sec.get('lat')!, Float32Array, 4),
       lon: toTypedArray(sec.get('lon')!, Float32Array, 4),
+      macro_counts: toTypedArray(sec.get('macro_counts')!, Uint32Array, 4),
+      macro_max_pop: toTypedArray(sec.get('macro_max_pop')!, Float32Array, 4),
       max_pop: toTypedArray(sec.get('max_pop')!, Float32Array, 4),
       max_year: toTypedArray(sec.get('max_year')!, Int16Array, 2),
       min_year: toTypedArray(sec.get('min_year')!, Int16Array, 2),

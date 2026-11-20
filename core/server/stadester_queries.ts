@@ -24,8 +24,10 @@ import {
   loadDataset,
 } from './stadester_loader.ts'
 import {
+  buildCompactPayloadFromCities,
   getBinaryAuthoritativeCapitalsAtYear,
   queryBinaryCitiesAtYear,
+  streamBinaryCitiesAtYear,
 } from './stadester_binary_queries.ts'
 import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 
@@ -864,21 +866,8 @@ export function getCompactCitiesAtYear (
 
   //Declare local instance variables
   let cache_key = `${dataset_name}:${year}:${options.month !== undefined ? options.month : 1}:${options.day !== undefined ? options.day : 1}:${options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01}:${options.max_cities !== undefined ? options.max_cities : 4000}:${options.bbox ? options.bbox.join(',') : ''}:${options.color_mode || 'growth'}`
-  let capital_colors: (string | null)[]
-  let capital_names: (string | null)[]
-  let capital_state_ids: (number | null)[]
-  let capitals: number[]
   let cities: CityRenderPoint[]
-  let coords: number[]
-  let countries: (string | undefined)[]
-  let growth: number[]
-  let keys: string[]
-  let len: number
-  let names: string[]
-  let other_names: (string[] | null)[]
   let payload: CompactCitiesPayload
-  let pops: number[]
-  let regions: (string | undefined)[]
 
   //Guard clauses
   if (_cache_compact_cities.has(cache_key))
@@ -886,71 +875,7 @@ export function getCompactCitiesAtYear (
 
   //Function body
   cities = getCitiesAtYear(dataset_name, year, options)
-  len = cities.length
-  capital_colors = new Array(len)
-  capital_names = new Array(len)
-  capital_state_ids = new Array(len)
-  capitals = new Array(len)
-  coords = new Array(len * 2)
-  countries = new Array(len)
-  growth = new Array(len)
-  keys = new Array(len)
-  names = new Array(len)
-  other_names = new Array(len)
-  pops = new Array(len)
-  regions = new Array(len)
-
-  for (let i = 0; i < len; i++) {
-    let c = cities[i]
-    let compact_aliases: string[] = []
-    let seen_alias = new Set<string>()
-    keys[i] = c.key
-    names[i] = getPrimaryCityName(c.name, c.population)
-    seen_alias.add(names[i].toLowerCase().trim())
-
-    if (Array.isArray(c.other_names)) {
-      for (let x = 0; x < c.other_names.length && compact_aliases.length < 8; x++) {
-        let on = String(c.other_names[x] || '').trim()
-        let on_l = on.toLowerCase()
-        if (on && !seen_alias.has(on_l)) {
-          seen_alias.add(on_l)
-          compact_aliases.push(on)
-        }
-      }
-    } else if (typeof c.other_names === 'string' && c.other_names.trim()) {
-      let on = c.other_names.trim()
-      if (!seen_alias.has(on.toLowerCase()))
-        compact_aliases.push(on)
-    }
-
-    countries[i] = c.country
-    coords[i * 2] = c.coords[0]
-    coords[i * 2 + 1] = c.coords[1]
-    other_names[i] = compact_aliases.length > 0 ? compact_aliases : null
-    pops[i] = c.population
-    growth[i] = c.growthRate !== undefined ? Math.round(c.growthRate * 10000) / 10000 : 0
-    regions[i] = c.region
-    capitals[i] = c.is_capital ? 1 : 0
-    capital_colors[i] = c.capital_color || null
-    capital_names[i] = c.capitalOf || c.capital_state_name || null
-    capital_state_ids[i] = (c.capital_state_id !== undefined && c.capital_state_id !== null) ? Number(c.capital_state_id) : null
-  }
-
-  payload = {
-    capitals,
-    capital_colors,
-    capital_names,
-    capital_state_ids,
-    coords,
-    count: len,
-    countries,
-    growth,
-    keys,
-    names,
-    other_names,
-    pops,
-    regions,
-  }
+  payload = buildCompactPayloadFromCities(cities)
 
   if (_cache_compact_cities.size >= 100) {
     let oldest_key = _cache_compact_cities.keys().next().value
@@ -961,4 +886,94 @@ export function getCompactCitiesAtYear (
 
   //Return statement
   return payload
+}
+
+
+/**
+ * Progressively streams compact binary `STADWIRE` city chunks from the binary store
+ * (active capitals and largest settlements first), falling back to a single chunk for legacy JSON stores.
+ *
+ * @param {string} arg0_dataset_name
+ * @param {number} arg1_year
+ * @param {StadesterQueryOptions} arg2_options
+ * @param {number} arg3_initial_chunk_size
+ * @param {number} arg4_chunk_size
+ * @param {(arg0_wire_buf: Buffer, arg1_chunk_idx: number) => void} arg5_on_chunk
+ * @param {() => boolean} [arg6_should_abort]
+ *
+ * @returns {Promise<number>} Total cities streamed
+ */
+export async function streamCompactBinaryCitiesAtYear (
+  arg0_dataset_name: string | undefined,
+  arg1_year: number,
+  arg2_options: StadesterQueryOptions,
+  arg3_initial_chunk_size: number,
+  arg4_chunk_size: number,
+  arg5_on_chunk: (arg0_wire_buf: Buffer, arg1_chunk_idx: number) => void,
+  arg6_should_abort?: () => boolean
+): Promise<number> {
+  //Convert from parameters
+  let chunk_size = arg4_chunk_size
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+  let initial_chunk_size = arg3_initial_chunk_size
+  let on_chunk = arg5_on_chunk
+  let options = (arg2_options) ? arg2_options : {}
+  let should_abort = arg6_should_abort
+  let target_year = arg1_year
+
+  //Declare local instance variables
+  let binary_store = getBinaryDatasetStore(dataset_name)
+
+  //Guard clauses
+  if (should_abort && should_abort())
+    return 0
+
+  //Function body
+  if (binary_store && binary_store.count > 0) {
+    let auth_capitals = getAuthoritativeCapitalsAtYear(
+      dataset_name,
+      target_year,
+      options.month,
+      options.day,
+      options.dataset || 'defacto_borders'
+    )
+    return await streamBinaryCitiesAtYear(
+      binary_store,
+      dataset_name,
+      target_year,
+      options,
+      auth_capitals,
+      initial_chunk_size,
+      chunk_size,
+      on_chunk,
+      should_abort
+    )
+  }
+
+  let compact_payload = getCompactCitiesAtYear(dataset_name, target_year, options)
+  let cities_count = compact_payload.count || compact_payload.keys.length
+  if (should_abort && should_abort())
+    return 0
+
+  let cities = getCitiesAtYear(dataset_name, target_year, options)
+  let cursor = 0
+  let chunk_idx = 0
+  let first_end = Math.min(cities.length, Math.max(100, initial_chunk_size))
+  let first_payload = buildCompactPayloadFromCities(cities.slice(0, first_end))
+  let { packBinaryCitiesResponse } = await import('./stadester_binary_queries.ts')
+  on_chunk(packBinaryCitiesResponse(first_payload), chunk_idx++)
+  cursor = first_end
+
+  while (cursor < cities.length) {
+    await new Promise<void>((arg0_resolve) => setImmediate(arg0_resolve))
+    if (should_abort && should_abort())
+      return cursor
+    let end = Math.min(cities.length, cursor + Math.max(200, chunk_size))
+    let batch_payload = buildCompactPayloadFromCities(cities.slice(cursor, end))
+    on_chunk(packBinaryCitiesResponse(batch_payload), chunk_idx++)
+    cursor = end
+  }
+
+  //Return statement
+  return cities_count
 }

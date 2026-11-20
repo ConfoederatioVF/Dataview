@@ -1,6 +1,7 @@
 import path from 'path'
 import { AtlasBordersService } from './AtlasBordersService.ts'
 import {
+  getPrimaryCityName,
   isBuggedCityName,
 } from '../framework/stadester/city_name_framework.ts'
 import {
@@ -23,10 +24,13 @@ import {
   isStateAcapital,
 } from './stadester_metadata.ts'
 import {
+  FINE_GRID_COLS,
+  FINE_GRID_ROWS,
   FLAG_HAS_CAPITALS,
   FLAG_HAS_HIST_NAMES,
   FLAG_IS_BUGGED,
   FLAG_IS_GHSL,
+  MACRO_GRID_COLS,
   fnv1a32,
   readDetailPackRecord,
   readPackedString,
@@ -291,20 +295,23 @@ export function getNearbyBinaryCityIndices (
   let store = arg0_store
 
   //Declare local instance variables
-  let max_cx = Math.min(179, Math.floor((lon + radius + 180)/2))
-  let max_cy = Math.min(89, Math.floor((lat + radius + 90)/2))
+  let max_cx = Math.min(FINE_GRID_COLS - 1, Math.floor((lon + radius + 180)/2))
+  let max_cy = Math.min(FINE_GRID_ROWS - 1, Math.floor((lat + radius + 90)/2))
   let min_cx = Math.max(0, Math.floor((lon - radius + 180)/2))
   let min_cy = Math.max(0, Math.floor((lat - radius + 90)/2))
   let out: number[] = []
 
   //Function body
   for (let cy = min_cy; cy <= max_cy; cy++) {
+    let row_off = cy*FINE_GRID_COLS
     for (let cx = min_cx; cx <= max_cx; cx++) {
-      let span = store.cell_map.get(cy*180 + cx)
-      if (!span)
+      let cid = row_off + cx
+      let len = store.fine_lens[cid]
+      if (len === 0)
         continue
-      for (let i = 0; i < span.length; i++) {
-        let idx = store.cell_city_indices[span.offset + i]
+      let off = store.fine_offs[cid]
+      for (let i = 0; i < len; i++) {
+        let idx = store.cell_city_indices[off + i]
         if (Math.abs(store.lat[idx] - lat) <= radius && Math.abs(store.lon[idx] - lon) <= radius)
           out.push(idx)
       }
@@ -573,29 +580,35 @@ export function getBinaryAuthoritativeCapitalsAtYear (
 
 
 /**
- * Evaluates active cities at a year using the binary TypedArray store with spatial cell pruning
- * and early max_pop cutoff for global top-K queries.
+ * Internal planner for year-based binary settlement queries: executes numeric candidate selection
+ * over the 2-level spatial hierarchy and returns a lazy per-city string hydration function.
  *
  * @param {BinaryDatasetStore} arg0_store
- * @param {string} arg1_dataset_name
- * @param {number} arg2_year
- * @param {StadesterQueryOptions} arg3_options
- * @param {Map<string, { area?: number; city_idx?: number; color: string; name?: string; state_id?: number | string }>} arg4_auth_capitals
+ * @param {number} arg1_year
+ * @param {StadesterQueryOptions} arg2_options
+ * @param {Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>} arg3_auth_capitals
  *
- * @returns {CityRenderPoint[]}
+ * @returns {{ cap_candidates: number[]; cap_pops: number[]; heap_idxs: number[]; heap_pops: number[]; hydrateCity: (arg0_idx: number, arg1_pop: number) => CityRenderPoint | null; max_cities: number; preserve_capitals: boolean }}
  */
-export function queryBinaryCitiesAtYear (
+function createBinaryYearQueryExecutor (
   arg0_store: BinaryDatasetStore,
-  _arg1_dataset_name: string,
-  arg2_year: number,
-  arg3_options: StadesterQueryOptions,
-  arg4_auth_capitals: Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>
-): CityRenderPoint[] {
+  arg1_year: number,
+  arg2_options: StadesterQueryOptions,
+  arg3_auth_capitals: Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>
+): {
+  cap_candidates: number[]
+  cap_pops: number[]
+  heap_idxs: number[]
+  heap_pops: number[]
+  hydrateCity: (arg0_idx: number, arg1_pop: number) => CityRenderPoint | null
+  max_cities: number
+  preserve_capitals: boolean
+} {
   //Convert from parameters
-  let auth_capitals = arg4_auth_capitals
-  let options = arg3_options
+  let auth_capitals = arg3_auth_capitals
+  let options = arg2_options
   let store = arg0_store
-  let target_year = arg2_year
+  let target_year = arg1_year
 
   //Declare local instance variables
   let active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
@@ -609,7 +622,6 @@ export function queryBinaryCitiesAtYear (
   let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
   let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
   let preserve_capitals = options.preserve_capitals !== false
-  let result_cities: CityRenderPoint[] = []
   let state_lookup_cache = new Map<string | number, any>()
 
   let getCachedState = function (arg0_sid: string | number): any {
@@ -743,28 +755,57 @@ export function queryBinaryCitiesAtYear (
       checkNumericCandidate(idx)
   }
 
-  //1b. Scan spatial cells (when bbox given) or global sorted max_pop order with early break
+  //1b. Scan 2-level spatial hierarchy (10-deg macro blocks -> 2-deg fine cells) or global sorted max_pop order
   if (bbox) {
-    let min_cy = Math.max(0, Math.min(89, Math.floor((bbox[1] + 90)/2)))
-    let max_cy = Math.max(0, Math.min(89, Math.floor((bbox[3] + 90)/2)))
+    let min_cy = Math.max(0, Math.min(FINE_GRID_ROWS - 1, Math.floor((bbox[1] + 90)/2)))
+    let max_cy = Math.max(0, Math.min(FINE_GRID_ROWS - 1, Math.floor((bbox[3] + 90)/2)))
     let west = bbox[0]
     let east = bbox[2]
     let lon_ranges: Array<[number, number]> = west <= east
-      ? [[Math.max(0, Math.floor((west + 180)/2)), Math.min(179, Math.floor((east + 180)/2))]]
-      : [[Math.max(0, Math.floor((west + 180)/2)), 179], [0, Math.min(179, Math.floor((east + 180)/2))]]
+      ? [[Math.max(0, Math.floor((west + 180)/2)), Math.min(FINE_GRID_COLS - 1, Math.floor((east + 180)/2))]]
+      : [[Math.max(0, Math.floor((west + 180)/2)), FINE_GRID_COLS - 1], [0, Math.min(FINE_GRID_COLS - 1, Math.floor((east + 180)/2))]]
 
-    for (let cy = min_cy; cy <= max_cy; cy++) {
+    let min_my = Math.floor(min_cy/5)
+    let max_my = Math.floor(max_cy/5)
+
+    for (let my = min_my; my <= max_my; my++) {
+      let cy_lo = Math.max(min_cy, my*5)
+      let cy_hi = Math.min(max_cy, my*5 + 4)
+
       for (let r = 0; r < lon_ranges.length; r++) {
-        for (let cx = lon_ranges[r][0]; cx <= lon_ranges[r][1]; cx++) {
-          let span = store.cell_map.get(cy*180 + cx)
-          if (!span)
+        let range_cx0 = lon_ranges[r][0]
+        let range_cx1 = lon_ranges[r][1]
+        let min_mx = Math.floor(range_cx0/5)
+        let max_mx = Math.floor(range_cx1/5)
+
+        for (let mx = min_mx; mx <= max_mx; mx++) {
+          let mid = my*MACRO_GRID_COLS + mx
+          if (store.macro_counts[mid] === 0)
             continue
-          let cell_cutoff = (max_cities > 0 && heap_idxs.length >= max_cities) ? Math.max(min_pop, heap_pops[0]) : min_pop
-          for (let i = 0; i < span.length; i++) {
-            let idx = store.cell_city_indices[span.offset + i]
-            if (store.max_pop[idx] < cell_cutoff)
-              break
-            checkNumericCandidate(idx)
+          let macro_cutoff = (max_cities > 0 && heap_idxs.length >= max_cities) ? Math.max(min_pop, heap_pops[0]) : min_pop
+          if (store.macro_max_pop[mid] < macro_cutoff)
+            continue
+
+          let cx_lo = Math.max(range_cx0, mx*5)
+          let cx_hi = Math.min(range_cx1, mx*5 + 4)
+          for (let cy = cy_lo; cy <= cy_hi; cy++) {
+            let row_off = cy*FINE_GRID_COLS
+            for (let cx = cx_lo; cx <= cx_hi; cx++) {
+              let cid = row_off + cx
+              let cell_len = store.fine_lens[cid]
+              if (cell_len === 0)
+                continue
+              let cell_cutoff = (max_cities > 0 && heap_idxs.length >= max_cities) ? Math.max(min_pop, heap_pops[0]) : min_pop
+              if (store.fine_max_pop[cid] < cell_cutoff)
+                continue
+              let cell_off = store.fine_offs[cid]
+              for (let i = 0; i < cell_len; i++) {
+                let idx = store.cell_city_indices[cell_off + i]
+                if (store.max_pop[idx] < cell_cutoff)
+                  break
+                checkNumericCandidate(idx)
+              }
+            }
           }
         }
       }
@@ -780,8 +821,8 @@ export function queryBinaryCitiesAtYear (
     }
   }
 
-  //Pass 2: Hydrate strings, growth, historical names, and active capital status ONLY for selected indices
-  let hydrateWinner = function (arg0_idx: number, arg1_pop: number): void {
+  //Pass 2 helper: Hydrate strings, growth, historical names, and active capital status ONLY for selected indices
+  let hydrateCity = function (arg0_idx: number, arg1_pop: number): CityRenderPoint | null {
     let idx = arg0_idx
     let pop = arg1_pop
     let c_lat = store.lat[idx]
@@ -818,7 +859,7 @@ export function queryBinaryCitiesAtYear (
     let cap_state = cap_rec?.state_id ? getCachedState(cap_rec.state_id) : null
     let is_capital_val = Boolean(cs_cap || (cap_rec && cap_state))
     if (!is_capital_val && pop < min_pop)
-      return
+      return null
 
     let growth_rate = computeBinaryGrowthRate(store, idx, target_year)
     let c_country = readPackedString(store.country_buf, store.country_offsets, idx)
@@ -872,7 +913,7 @@ export function queryBinaryCitiesAtYear (
       resolved_name = resolveHistoricalCityName({ historical_names: hist_recs, key: c_key, name: c_name } as any, resolved_date)
     }
 
-    result_cities.push({
+    return {
       capital_color: cap_color_val || undefined,
       capital_state_id: cap_state_id,
       capital_state_name: polity_name,
@@ -890,13 +931,143 @@ export function queryBinaryCitiesAtYear (
       other_names: c_other_str ? c_other_str.split('\x1f') : undefined,
       population: pop,
       region: c_region,
-    })
+    }
   }
 
-  for (let i = 0; i < cap_candidates.length; i++)
-    hydrateWinner(cap_candidates[i], cap_pops[i])
-  for (let i = 0; i < heap_idxs.length; i++)
-    hydrateWinner(heap_idxs[i], heap_pops[i])
+  return {
+    cap_candidates,
+    cap_pops,
+    heap_idxs,
+    heap_pops,
+    hydrateCity,
+    max_cities,
+    preserve_capitals,
+  }
+}
+
+
+/**
+ * Packs an array of CityRenderPoints into the columnar CompactCitiesPayload structure.
+ *
+ * @param {CityRenderPoint[]} arg0_cities
+ *
+ * @returns {CompactCitiesPayload}
+ */
+export function buildCompactPayloadFromCities (
+  arg0_cities: CityRenderPoint[]
+): CompactCitiesPayload {
+  //Convert from parameters
+  let cities = arg0_cities
+
+  //Declare local instance variables
+  let n = cities.length
+  let capital_colors: (string | null)[] = new Array(n)
+  let capital_names: (string | null)[] = new Array(n)
+  let capital_state_ids: (number | null)[] = new Array(n)
+  let capitals: number[] = new Array(n)
+  let coords: number[] = new Array(n*2)
+  let countries: (string | undefined)[] = new Array(n)
+  let growth: number[] = new Array(n)
+  let keys: string[] = new Array(n)
+  let names: string[] = new Array(n)
+  let other_names: (string[] | null)[] = new Array(n)
+  let pops: number[] = new Array(n)
+  let regions: (string | undefined)[] = new Array(n)
+
+  //Function body
+  for (let i = 0; i < n; i++) {
+    let c = cities[i]
+    let compact_aliases: string[] = []
+    let seen_alias = new Set<string>()
+    keys[i] = c.key
+    names[i] = getPrimaryCityName(c.name, c.population)
+    seen_alias.add(names[i].toLowerCase().trim())
+
+    if (Array.isArray(c.other_names)) {
+      for (let x = 0; x < c.other_names.length && compact_aliases.length < 8; x++) {
+        let on = String(c.other_names[x] || '').trim()
+        let on_l = on.toLowerCase()
+        if (on && !seen_alias.has(on_l)) {
+          seen_alias.add(on_l)
+          compact_aliases.push(on)
+        }
+      }
+    } else if (typeof c.other_names === 'string' && c.other_names.trim()) {
+      let on = c.other_names.trim()
+      if (!seen_alias.has(on.toLowerCase()))
+        compact_aliases.push(on)
+    }
+
+    countries[i] = c.country
+    coords[i*2] = c.coords[0]
+    coords[i*2 + 1] = c.coords[1]
+    other_names[i] = compact_aliases.length > 0 ? compact_aliases : null
+    pops[i] = c.population
+    growth[i] = c.growthRate !== undefined ? Math.round(c.growthRate*10000)/10000 : 0
+    regions[i] = c.region
+    capitals[i] = (c.isCapital || c.is_capital) ? 1 : 0
+    capital_colors[i] = c.capital_color || null
+    capital_names[i] = c.capitalOf || c.capital_state_name || null
+    capital_state_ids[i] = (c.capital_state_id !== undefined && c.capital_state_id !== null) ? Number(c.capital_state_id) : null
+  }
+
+  //Return statement
+  return {
+    capital_colors,
+    capital_names,
+    capital_state_ids,
+    capitals,
+    coords,
+    count: n,
+    countries,
+    growth,
+    keys,
+    names,
+    other_names,
+    pops,
+    regions,
+  }
+}
+
+
+/**
+ * Evaluates active cities at a year using the binary TypedArray store with 2-level spatial pruning
+ * and early max_pop cutoff for global top-K queries.
+ *
+ * @param {BinaryDatasetStore} arg0_store
+ * @param {string} arg1_dataset_name
+ * @param {number} arg2_year
+ * @param {StadesterQueryOptions} arg3_options
+ * @param {Map<string, { area?: number; city_idx?: number; color: string; name?: string; state_id?: number | string }>} arg4_auth_capitals
+ *
+ * @returns {CityRenderPoint[]}
+ */
+export function queryBinaryCitiesAtYear (
+  arg0_store: BinaryDatasetStore,
+  _arg1_dataset_name: string,
+  arg2_year: number,
+  arg3_options: StadesterQueryOptions,
+  arg4_auth_capitals: Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>
+): CityRenderPoint[] {
+  //Convert from parameters
+  let plan = createBinaryYearQueryExecutor(arg0_store, arg2_year, arg3_options, arg4_auth_capitals)
+
+  //Declare local instance variables
+  let max_cities = plan.max_cities
+  let preserve_capitals = plan.preserve_capitals
+  let result_cities: CityRenderPoint[] = []
+
+  //Function body
+  for (let i = 0; i < plan.cap_candidates.length; i++) {
+    let hydrated = plan.hydrateCity(plan.cap_candidates[i], plan.cap_pops[i])
+    if (hydrated)
+      result_cities.push(hydrated)
+  }
+  for (let i = 0; i < plan.heap_idxs.length; i++) {
+    let hydrated = plan.hydrateCity(plan.heap_idxs[i], plan.heap_pops[i])
+    if (hydrated)
+      result_cities.push(hydrated)
+  }
 
   result_cities.sort((arg0_a, arg1_b) => arg1_b.population - arg0_a.population)
 
@@ -926,6 +1097,141 @@ export function queryBinaryCitiesAtYear (
 
   //Return statement
   return result_cities
+}
+
+
+/**
+ * Progressively hydrates and streams binary `STADWIRE` city chunks ordered by importance
+ * (active capitals and top settlements first), yielding between chunks and supporting cancellation.
+ *
+ * @param {BinaryDatasetStore} arg0_store
+ * @param {string} arg1_dataset_name
+ * @param {number} arg2_year
+ * @param {StadesterQueryOptions} arg3_options
+ * @param {Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>} arg4_auth_capitals
+ * @param {number} arg5_initial_chunk_size
+ * @param {number} arg6_chunk_size
+ * @param {(arg0_packet_buf: Buffer, arg1_chunk_idx: number) => void} arg7_on_chunk
+ * @param {() => boolean} [arg8_should_abort]
+ *
+ * @returns {Promise<number>} Total cities streamed
+ */
+export async function streamBinaryCitiesAtYear (
+  arg0_store: BinaryDatasetStore,
+  _arg1_dataset_name: string,
+  arg2_year: number,
+  arg3_options: StadesterQueryOptions,
+  arg4_auth_capitals: Map<string, { area?: number; city_idx?: number; color?: string; name?: string; state_id?: number | string }>,
+  arg5_initial_chunk_size: number,
+  arg6_chunk_size: number,
+  arg7_on_chunk: (arg0_packet_buf: Buffer, arg1_chunk_idx: number) => void,
+  arg8_should_abort?: () => boolean
+): Promise<number> {
+  //Convert from parameters
+  let auth_capitals = arg4_auth_capitals
+  let chunk_size = Math.max(200, arg6_chunk_size)
+  let initial_chunk_size = Math.max(100, arg5_initial_chunk_size)
+  let on_chunk = arg7_on_chunk
+  let options = arg3_options
+  let should_abort = arg8_should_abort
+  let store = arg0_store
+  let target_year = arg2_year
+
+  //Guard clauses
+  if (should_abort && should_abort())
+    return 0
+
+  //Declare local instance variables
+  let chunk_idx = 0
+  let plan = createBinaryYearQueryExecutor(store, target_year, options, auth_capitals)
+  let total_budget = plan.max_cities > 0 ? plan.max_cities : (plan.cap_candidates.length + plan.heap_idxs.length)
+  let total_streamed = 0
+
+  //Function body
+  //Rank non-capital numeric candidates descending by population BEFORE string hydration
+  let heap_order: Array<{ idx: number; pop: number }> = []
+  for (let i = 0; i < plan.heap_idxs.length; i++)
+    heap_order.push({ idx: plan.heap_idxs[i], pop: plan.heap_pops[i] })
+  heap_order.sort((arg0_a, arg1_b) => arg1_b.pop - arg0_a.pop)
+
+  //Hydrate active capitals + potential capitals first, filtering non-capitals cleanly back or emitting active ones
+  let active_capitals: CityRenderPoint[] = []
+  let force_preserve_capitals = (plan.max_cities <= 0 || plan.preserve_capitals)
+  let inactive_caps: Array<{ idx: number; pop: number }> = []
+  for (let i = 0; i < plan.cap_candidates.length; i++) {
+    if (should_abort && should_abort())
+      return total_streamed
+    let hydrated = plan.hydrateCity(plan.cap_candidates[i], plan.cap_pops[i])
+    if (hydrated) {
+      if (hydrated.isCapital && force_preserve_capitals)
+        active_capitals.push(hydrated)
+      else if (hydrated.population >= (options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01))
+        inactive_caps.push({ idx: plan.cap_candidates[i], pop: plan.cap_pops[i] })
+    }
+  }
+  active_capitals.sort((arg0_a, arg1_b) => arg1_b.population - arg0_a.population)
+
+  if (inactive_caps.length > 0) {
+    for (let i = 0; i < inactive_caps.length; i++)
+      heap_order.push(inactive_caps[i])
+    heap_order.sort((arg0_a, arg1_b) => arg1_b.pop - arg0_a.pop)
+  }
+
+  let cap_emit_list = (plan.max_cities > 0 && !plan.preserve_capitals)
+    ? []
+    : (plan.max_cities > 0 ? active_capitals.slice(0, plan.max_cities) : active_capitals)
+  let remaining_budget = Math.max(0, total_budget - cap_emit_list.length)
+  let non_cap_limit = Math.min(heap_order.length, remaining_budget)
+
+  //Chunk 0: emit active capitals + top largest cities up to initial_chunk_size (never starve first paint)
+  let first_batch: CityRenderPoint[] = [...cap_emit_list]
+  let first_non_cap_count = first_batch.length < initial_chunk_size
+    ? Math.min(non_cap_limit, initial_chunk_size - first_batch.length)
+    : Math.min(non_cap_limit, 150)
+
+  let cursor = 0
+  while (cursor < first_non_cap_count) {
+    let item = heap_order[cursor++]
+    let hydrated = plan.hydrateCity(item.idx, item.pop)
+    if (hydrated)
+      first_batch.push(hydrated)
+  }
+  first_batch.sort((arg0_a, arg1_b) => arg1_b.population - arg0_a.population)
+
+  if (should_abort && should_abort())
+    return total_streamed
+
+  if (first_batch.length > 0 || non_cap_limit === 0) {
+    let payload0 = buildCompactPayloadFromCities(first_batch)
+    let wire0 = packBinaryCitiesResponse(payload0)
+    on_chunk(wire0, chunk_idx++)
+    total_streamed += first_batch.length
+  }
+
+  //Subsequent progressive chunks yielded cleanly between event-loop turns
+  while (cursor < non_cap_limit) {
+    await new Promise<void>((arg0_resolve) => setImmediate(arg0_resolve))
+    if (should_abort && should_abort())
+      return total_streamed
+
+    let end_cursor = Math.min(non_cap_limit, cursor + chunk_size)
+    let batch: CityRenderPoint[] = []
+    while (cursor < end_cursor) {
+      let item = heap_order[cursor++]
+      let hydrated = plan.hydrateCity(item.idx, item.pop)
+      if (hydrated)
+        batch.push(hydrated)
+    }
+    if (batch.length > 0) {
+      let payload_k = buildCompactPayloadFromCities(batch)
+      let wire_k = packBinaryCitiesResponse(payload_k)
+      on_chunk(wire_k, chunk_idx++)
+      total_streamed += batch.length
+    }
+  }
+
+  //Return statement
+  return total_streamed
 }
 
 

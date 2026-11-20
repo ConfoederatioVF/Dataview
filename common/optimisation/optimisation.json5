@@ -27,6 +27,8 @@
     compile_concurrency: 4,
     // Use incremental binary columnar spatial-LOD cache instead of monolithic JSON index
     enable_binary_store: true,
+    // Stream settlement binary chunks progressively from server (top cities first, then batches)
+    enable_progressive_streaming: true,
     // Stream regional/local LOD tiles from server when zoomed past tile_fetch_zoom_threshold
     enable_viewport_tiles: true,
     // Multiplier on maxLabels to bound pre-projection label candidates
@@ -36,6 +38,10 @@
     label_collision_cell_w: 72,
     // Base global label population floor at zoom 0 (scaled down exponentially with zoom and era scale)
     label_min_pop_base: 500000,
+    // Subsequent settlement batch size per progressive HTTP chunk
+    stream_chunk_size: 3000,
+    // Initial priority settlement batch size flushed immediately to client
+    stream_initial_chunk_size: 400,
     // Zoom threshold at which viewport tile streaming activates for large datasets
     tile_fetch_zoom_threshold: 3.5,
     // Max settlements returned per spatial tile request

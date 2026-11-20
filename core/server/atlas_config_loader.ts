@@ -5,7 +5,6 @@ import { FilepathDefines } from './filepath_defines.ts'
 
 export interface AtlasDatasetPaths {
   cacheDir: string
-  cshapesPath: string
   defactoNaissancePath: string
   dejureDatasets: Record<string, boolean>
   dejureNaissancePath: string
@@ -43,7 +42,6 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
   let atlas_config_path = path.join(FilepathDefines.getProjectRoot(), 'common/layers/atlas.json5')
   let atlas_data_dir = defines.root_folders.l_atlas
   let cache_dir = path.join(atlas_data_dir, 'cache')
-  let cshapes_path = defines.filepaths.atlas_cshapes
   let defacto_naissance_path = defines.filepaths.atlas_defacto
   let dejure_datasets: Record<string, boolean> = {
     defacto_borders: false,
@@ -103,12 +101,8 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
         for (let i = 0; i < simp_fps.length; i++) {
           let fp = simp_fps[i]
           let p = fp.path || fp
-          if (typeof p === 'string') {
-            if (p.endsWith('.geojson') || fp.type === 'vector.geojson' || p.toLowerCase().includes('cshapes')) {
-              cshapes_path = resolveToken(p)
-            } else if (p.endsWith('.naissance') || fp.type === 'vector.naissance') {
-              dejure_naissance_path = resolveToken(p)
-            }
+          if (typeof p === 'string' && (p.endsWith('.naissance') || fp.type === 'vector.naissance')) {
+            dejure_naissance_path = resolveToken(p)
           }
         }
       }
@@ -136,7 +130,6 @@ export let getAtlasDatasetPaths = function (): AtlasDatasetPaths {
 
   cached_dataset_paths = {
     cacheDir: cache_dir,
-    cshapesPath: cshapes_path,
     defactoNaissancePath: defacto_naissance_path,
     dejureDatasets: dejure_datasets,
     dejureNaissancePath: dejure_naissance_path,

@@ -181,6 +181,8 @@ export let App: React.FC = function () {
     maxCities: 4000,
     minPop: 0.01,
     opacity: 0.7,
+    populationPalette: 'Plasma',
+    regionPalette: 'Default',
     showCapitals: true,
     showCapitalUnderlines: true,
     showLabels: true,

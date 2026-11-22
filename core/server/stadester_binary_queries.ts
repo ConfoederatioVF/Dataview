@@ -1181,7 +1181,7 @@ export async function streamBinaryCitiesAtYear (
     ? []
     : (plan.max_cities > 0 ? active_capitals.slice(0, plan.max_cities) : active_capitals)
   let remaining_budget = Math.max(0, total_budget - cap_emit_list.length)
-  let non_cap_limit = Math.min(heap_order.length, remaining_budget)
+  let non_cap_limit = plan.max_cities > 0 ? Math.min(heap_order.length, remaining_budget) : heap_order.length
 
   //Chunk 0: emit active capitals + top largest cities up to initial_chunk_size (never starve first paint)
   let first_batch: CityRenderPoint[] = [...cap_emit_list]

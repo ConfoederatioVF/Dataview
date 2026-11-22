@@ -1,5 +1,6 @@
 import { projectEqualEarth } from '../geopng/equal_earth.ts'
 import { SmoothGlobeViewport } from './SmoothGlobeViewport.ts'
+import { getGrowthRgb, getPopRgb, resolveRegionColorRgb } from './stadester_colours.ts'
 import {
   computeViewportBoundingBox,
   getZoomPopulationThreshold,
@@ -95,7 +96,9 @@ export type WorkerInMessage =
       labelCollision: boolean
       largeCityContrast?: number
       opacity?: number
+      populationPalette?: string
       projection: string
+      regionPalette?: string
       reqId: number
       showLabels: boolean
       type: 'LAYOUT_VIEWPORT'
@@ -142,7 +145,6 @@ let worker_fine_lens = new Uint32Array(FINE_CELLS)
 let worker_fine_max_pop = new Float64Array(FINE_CELLS)
 let worker_fine_offs = new Uint32Array(FINE_CELLS)
 let worker_grid_indices = new Uint32Array(0)
-let worker_lut_cache = new Map<string, Uint8Array>()
 let worker_macro_counts = new Uint32Array(MACRO_CELLS)
 let worker_macro_has_cap = new Uint8Array(MACRO_CELLS)
 let worker_macro_max_pop = new Float64Array(MACRO_CELLS)
@@ -179,132 +181,8 @@ let parseHexColorToRgba = function (
   return parsed
 }
 
-let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
-  [0.08, [232, 121, 249]],
-  [0.06, [239, 68, 68]],
-  [0.03, [251, 146, 60]],
-  [0.01, [253, 224, 71]],
-  [0.00, [198, 219, 85]],
-  [-0.02, [69, 207, 119]],
-  [-0.04, [72, 156, 240]],
-  [-0.05, [93, 96, 226]],
-]
-
-let REGION_COLOR_MAP: Record<string, [number, number, number]> = {
-  africa: [249, 115, 22],
-  central_asia: [168, 85, 247],
-  eastasia: [239, 68, 68],
-  eastern_europe_and_russia: [59, 130, 246],
-  europe: [99, 102, 241],
-  indian_subcontinent: [236, 72, 153],
-  latin_america: [16, 185, 129],
-  maghreb_egypt: [234, 179, 8],
-  middle_east: [217, 119, 6],
-  northern_america: [14, 165, 233],
-  oceania: [20, 184, 166],
-  south_asia: [236, 72, 153],
-  southeast_asia: [139, 92, 246],
-  sub_saharan_africa: [249, 115, 22],
-}
-
-function resolveRegionColorRgb (arg0_region?: string, arg1_coords?: [number, number]): [number, number, number] {
-  //Convert from parameters
-  let coords = arg1_coords
-  let reg = (arg0_region || '').toLowerCase().trim()
-
-  //Guard clauses
-  if (reg && REGION_COLOR_MAP[reg])
-    return REGION_COLOR_MAP[reg]
-
-  if (coords && Array.isArray(coords) && coords.length >= 2) {
-    let lat = coords[0]
-    let lon = coords[1]
-
-    if (lat < -10 && lon > 110)
-      return REGION_COLOR_MAP.oceania
-    if (lat > 18 && lon >= 98 && lon <= 150)
-      return REGION_COLOR_MAP.eastasia
-    if (lat > 0 && lat <= 25 && lon >= 90 && lon < 150)
-      return REGION_COLOR_MAP.southeast_asia
-    if (lat > 5 && lat < 38 && lon > 60 && lon < 90)
-      return REGION_COLOR_MAP.indian_subcontinent
-    if (lat > 40 && lon >= 30 && lon <= 180)
-      return REGION_COLOR_MAP.eastern_europe_and_russia
-    if (lat > 35 && lat < 72 && lon > -15 && lon < 30)
-      return REGION_COLOR_MAP.europe
-    if (lat > 15 && lat <= 36 && lon > 25 && lon < 60)
-      return REGION_COLOR_MAP.middle_east
-    if (lat > 20 && lat <= 37 && lon > -18 && lon < 35)
-      return REGION_COLOR_MAP.maghreb_egypt
-    if (lat <= 20 && lon > -20 && lon < 55)
-      return REGION_COLOR_MAP.sub_saharan_africa
-    if (lat > 15 && lon > -170 && lon < -50)
-      return REGION_COLOR_MAP.northern_america
-    if (lat <= 15 && lon > -120 && lon < -30)
-      return REGION_COLOR_MAP.latin_america
-  }
-
-  //Return statement
-  return [239, 68, 68]
-}
-
-import { getPaletteLUT } from '../geopng/palettes'
-import { ColorPalette, StadesterDisplayOptions } from '@framework/geopng/types.ts'
+import { StadesterDisplayOptions } from '@framework/geopng/types.ts'
 import { pickBestCityDisplayName } from './stadester_utils.ts'
-
-function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
-  //Convert from parameters
-  let palette = (arg1_palette) ? arg1_palette : 'Rainbow'
-  let r = arg0_rate
-
-  if (palette !== 'Rainbow') {
-    try {
-      let lut = worker_lut_cache.get(palette)
-      if (!lut) {
-        lut = getPaletteLUT(palette as ColorPalette)
-        worker_lut_cache.set(palette, lut)
-      }
-      let norm_t = Math.max(0, Math.min(1, (r - (-0.05)) / (0.08 - (-0.05))))
-      let lut_idx = Math.min(255, Math.max(0, Math.round(norm_t * 255)))
-      return [lut[lut_idx * 3], lut[lut_idx * 3 + 1], lut[lut_idx * 3 + 2]]
-    } catch (_err) {
-      //Fallback to rainbow
-    }
-  }
-
-  if (r >= RAINBOW_GROWTH_STOPS[0][0])
-    return RAINBOW_GROWTH_STOPS[0][1]
-
-  let last_idx = RAINBOW_GROWTH_STOPS.length - 1
-  if (r <= RAINBOW_GROWTH_STOPS[last_idx][0])
-    return RAINBOW_GROWTH_STOPS[last_idx][1]
-
-  for (let i = 0; i < last_idx; i++) {
-    let hi = RAINBOW_GROWTH_STOPS[i][0]
-    let lo = RAINBOW_GROWTH_STOPS[i + 1][0]
-    if (r <= hi && r >= lo) {
-      let t = (hi === lo) ? 0 : (r - lo) / (hi - lo)
-      let c_hi = RAINBOW_GROWTH_STOPS[i][1]
-      let c_lo = RAINBOW_GROWTH_STOPS[i + 1][1]
-      return [
-        Math.round(c_lo[0] + t * (c_hi[0] - c_lo[0])),
-        Math.round(c_lo[1] + t * (c_hi[1] - c_lo[1])),
-        Math.round(c_lo[2] + t * (c_hi[2] - c_lo[2])),
-      ]
-    }
-  }
-
-  return RAINBOW_GROWTH_STOPS[4][1]
-}
-
-function getPopRgb (arg0_pop: number): [number, number, number] {
-  let p = Math.max(1, arg0_pop)
-  let t = Math.max(0, Math.min(1, (Math.log10(p) - 3.7) / 3.6))
-  let r = Math.round(Math.min(255, 13 + t * 240))
-  let g = Math.round(Math.min(255, 8 + t * 210))
-  let b = Math.round(Math.max(0, 135 - t * 100))
-  return [r, g, b]
-}
 
 function getShortCityLabel (arg0_name: string): string {
   if (!arg0_name)
@@ -383,8 +261,10 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
       let [w, s, east_bound, n] = bbox
 
       let contrast = (large_city_contrast !== undefined) ? large_city_contrast : 1.0
+      let population_palette = msg.populationPalette || 'Plasma'
+      let region_palette = msg.regionPalette || 'Default'
       let zoom_bucket = Math.round(zoom*4)
-      let static_point_key = `${data_version}:${color_mode}:${msg.growthPalette}:${b_scale}:${contrast}:${circle_opacity}:${Boolean(is_mobile)}:${projection}:${zoom_bucket}:${opts_key}`
+      let static_point_key = `${data_version}:${color_mode}:${msg.growthPalette}:${population_palette}:${region_palette}:${b_scale}:${contrast}:${circle_opacity}:${Boolean(is_mobile)}:${projection}:${zoom_bucket}:${opts_key}`
       let points_changed = true
       let processed_points: WorkerProcessedPoint[] = []
       let zoom_factor = Math.max(1.0, Math.min(1.8, 1.0 + (is_cartesian ? (zoom - 2.8)*0.12 : (is_globe ? (zoom - 3.0)*0.08 : (zoom - 1.2)*0.08))))
@@ -430,10 +310,10 @@ function processViewportLayout (arg0_msg: WorkerInMessage & { type: 'LAYOUT_VIEW
             let g_rgb = getGrowthRgb(g_rate, msg.growthPalette)
             fill_color = [g_rgb[0], g_rgb[1], g_rgb[2], 220]
           } else if (color_mode === 'population') {
-            let p_rgb = getPopRgb(c.population)
+            let p_rgb = getPopRgb(c.population, population_palette)
             fill_color = [p_rgb[0], p_rgb[1], p_rgb[2], 220]
           } else if (color_mode === 'region' || color_mode === 'continent') {
-            let reg_rgb = resolveRegionColorRgb(c.region, [c_lat, c_lon])
+            let reg_rgb = resolveRegionColorRgb(c.region, [c_lat, c_lon], region_palette)
             fill_color = [reg_rgb[0], reg_rgb[1], reg_rgb[2], 220]
           }
 

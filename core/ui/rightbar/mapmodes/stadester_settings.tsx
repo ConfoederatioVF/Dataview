@@ -1,5 +1,6 @@
 import React from 'react'
-import { StadesterConfig, StadesterColorMode, StadesterDatasetId } from '@framework/geopng/types.ts'
+import { StadesterConfig, StadesterDatasetId } from '@framework/geopng/types.ts'
+import { REGION_DEFAULT_GRADIENT } from '@framework/stadester/stadester_colours.ts'
 import {
   getAvailableStadesterVersions,
   resolveDefaultStadesterDataset,
@@ -21,7 +22,7 @@ export interface StadesterSettingsProps {
 }
 
 let MIN_POP_PRESETS = [
-  { label: 'All', value: 0.01 },
+  { label: 'All', value: 0 },
   { label: '5k+', value: 5000 },
   { label: '10k+', value: 10000 },
   { label: '50k+', value: 50000 },
@@ -36,7 +37,7 @@ let MAX_CITIES_PRESETS = [
   { label: '2,000', value: 2000 },
   { label: '4,000', value: 4000 },
   { label: '8,000', value: 8000 },
-  { label: 'All', value: 50000 },
+  { label: 'All', value: 0 },
 ]
 
 /**
@@ -65,6 +66,12 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
   let min_pop = config.minPop
   let show_labels = config.showLabels
   let { locale, t } = useLocalisation()
+
+  let is_all_max = max_cities <= 0
+  let is_region_mode = color_mode === 'region' || color_mode === 'continent'
+  let active_palette = is_region_mode
+    ? (config.regionPalette || 'Default')
+    : (color_mode === 'population' ? (config.populationPalette || 'Plasma') : (config.growthPalette || 'Rainbow'))
 
   //Function body
   //Return statement
@@ -222,19 +229,27 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
         </div>
       </div>
 
-      {/* Growth Colourscheme Selector (active when Growth Rate is selected) */}
-      {color_mode === 'growth' && (
-        <D3ColorPaletteSelector
-          label={t.sidebar.visualisation.colorPalette}
-          value={config.growthPalette || 'Rainbow'}
-          onChange={(arg0_pal: any) =>
-            on_change_config((arg0_prev) => ({
-              ...arg0_prev,
-              growthPalette: arg0_pal,
-            }))
-          }
-        />
-      )}
+      {/* Colourscheme Selector (Growth Rate, Population, and Region) */}
+      <D3ColorPaletteSelector
+        defaultOption={is_region_mode ? {
+          gradient: REGION_DEFAULT_GRADIENT,
+          id: 'Default',
+          name: t.mapmodes.stadester.defaultRegionPalette || 'Categorical (Default)',
+          onSelect: () =>
+            on_change_config((arg0_prev) => ({ ...arg0_prev, regionPalette: 'Default' })),
+        } : undefined}
+        label={t.sidebar.visualisation.colorPalette}
+        value={active_palette}
+        onChange={(arg0_pal) =>
+          on_change_config((arg0_prev) => {
+            if (is_region_mode)
+              return { ...arg0_prev, regionPalette: arg0_pal }
+            if (color_mode === 'population')
+              return { ...arg0_prev, populationPalette: arg0_pal }
+            return { ...arg0_prev, growthPalette: arg0_pal }
+          })
+        }
+      />
 
       {/* Population Threshold (minPop) Slider & Number Input */}
       <div className="space-y-1.5">
@@ -243,12 +258,13 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           <div className="flex items-center gap-1 font-mono">
             <input
               type="number"
-              min={0.01}
+              min={0}
               max={10000000}
               step={1000}
-              value={min_pop <= 0.01 ? 0.01 : min_pop}
+              value={min_pop <= 0.01 ? 0 : min_pop}
               onChange={(arg0_e) => {
-                let v = Math.max(0.01, parseFloat(arg0_e.target.value) || 0.01)
+                let parsed = parseFloat(arg0_e.target.value)
+                let v = Number.isFinite(parsed) ? Math.max(0, parsed) : 0
                 on_change_config((arg0_prev) => ({ ...arg0_prev, minPop: v }))
               }}
               className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-xs font-mono text-foreground"
@@ -256,19 +272,19 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
           </div>
         </div>
         <Slider
-          value={[Math.min(1000000, Math.max(0, min_pop))]}
+          value={[Math.min(1000000, Math.max(0, min_pop <= 0.01 ? 0 : min_pop))]}
           min={0}
           max={500000}
           step={5000}
           onValueChange={(arg0_vals: number[]) => {
-            let next_val = arg0_vals[0] <= 0 ? 0.01 : arg0_vals[0]
+            let next_val = arg0_vals[0] <= 0 ? 0 : arg0_vals[0]
             on_change_config((arg0_prev) => ({ ...arg0_prev, minPop: next_val }))
           }}
         />
         {/* Preset chips for Min Pop */}
         <div className="flex items-center gap-1 flex-wrap pt-0.5">
           {MIN_POP_PRESETS.map((arg0_preset) => {
-            let is_sel = (arg0_preset.value === 0.01 && (min_pop === 0 || min_pop <= 0.01)) || min_pop === arg0_preset.value
+            let is_sel = (arg0_preset.value === 0 && min_pop <= 0.01) || min_pop === arg0_preset.value
             return (
               <button
                 key={arg0_preset.value}
@@ -288,27 +304,42 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
         </div>
       </div>
 
-      {/* Max Cities Limit Slider & Number Input */}
+      {/* Max Cities Limit Slider & Number/Text Input */}
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[11px]">
           <span className="text-muted-foreground">{t.mapmodes.stadester.maxSettlements || t.mapmodes.stadester.maxCities || 'Max Settlements Displayed'}</span>
           <div className="flex items-center gap-1 font-mono">
-            <input
-              type="number"
-              min={100}
-              max={50000}
-              step={100}
-              value={max_cities >= 50000 ? 50000 : max_cities}
-              onChange={(arg0_e) => {
-                let v = Math.max(10, parseInt(arg0_e.target.value, 10) || 100)
-                on_change_config((arg0_prev) => ({ ...arg0_prev, maxCities: v }))
-              }}
-              className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-xs font-mono text-foreground"
-            />
+            {is_all_max ? (
+              <input
+                type="text"
+                value="All"
+                onChange={(arg0_e) => {
+                  let digits = arg0_e.target.value.replace(/[^\d]/g, '')
+                  if (!digits)
+                    return
+                  let v = Math.max(10, parseInt(digits, 10) || 100)
+                  on_change_config((arg0_prev) => ({ ...arg0_prev, maxCities: v }))
+                }}
+                className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-xs font-mono text-foreground"
+              />
+            ) : (
+              <input
+                type="number"
+                min={100}
+                step={100}
+                value={max_cities}
+                onChange={(arg0_e) => {
+                  let parsed = parseInt(arg0_e.target.value, 10)
+                  let v = Number.isNaN(parsed) ? 100 : Math.max(10, parsed)
+                  on_change_config((arg0_prev) => ({ ...arg0_prev, maxCities: v }))
+                }}
+                className="w-16 h-5 px-1 bg-background border border-input rounded-none text-right text-xs font-mono text-foreground"
+              />
+            )}
           </div>
         </div>
         <Slider
-          value={[Math.min(10000, max_cities)]}
+          value={[is_all_max ? 10000 : Math.min(10000, max_cities)]}
           min={100}
           max={10000}
           step={100}
@@ -319,7 +350,7 @@ export let StadesterSettings: React.FC<StadesterSettingsProps> = function (arg0_
         {/* Preset chips for Max Cities */}
         <div className="flex items-center gap-1 flex-wrap pt-0.5">
           {MAX_CITIES_PRESETS.map((arg0_preset) => {
-            let is_sel = max_cities === arg0_preset.value
+            let is_sel = (arg0_preset.value === 0) ? is_all_max : (max_cities === arg0_preset.value)
             return (
               <button
                 key={arg0_preset.value}

@@ -144,7 +144,8 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let dataset = (query.dataset as string) || getDefaultStadesterDatasetId()
     let format = (query.format as string) || 'standard'
     let is_streaming = query.stream === '1' || query.stream === 'true'
-    let max_cities = query.maxCities !== undefined ? parseInt(query.maxCities as string, 10) : 4000
+    let parsed_max = query.maxCities !== undefined ? parseInt(query.maxCities as string, 10) : 4000
+    let max_cities = Number.isNaN(parsed_max) ? 4000 : parsed_max
     let min_pop = query.minPop !== undefined ? Math.max(0.01, parseFloat(query.minPop as string)) : 0.01
     let raw_year = parseFloat(query.year as string)
     let year = Number.isNaN(raw_year) ? 1950 : raw_year

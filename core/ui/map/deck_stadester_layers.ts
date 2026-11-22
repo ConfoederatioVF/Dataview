@@ -1,91 +1,20 @@
 import { COORDINATE_SYSTEM } from '@deck.gl/core'
 import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import { projectEqualEarth } from '@framework/geopng/equal_earth.ts'
-import { getPaletteLUT } from '@framework/geopng/palettes'
-import type { CityPoint, ColorPalette, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
+import { getGrowthRgb, getPopRgb, resolveRegionColorRgb } from '@framework/stadester/stadester_colours.ts'
+import type { CityPoint, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
 import type { WorkerBinaryAttributes } from '@framework/stadester/stadester.worker.ts'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import {
   getCapitalColorRgba,
-  hexToRgb,
-  resolveRegionColorHex,
 } from './deck_layer_palette_utils'
 import {
   getShortCityLabel,
   reconcileCitiesWithAuthoritativeBorders,
 } from './deck_capital_reconciliation.ts'
 
-let growth_lut_cache = new Map<string, Uint8Array>()
-let RAINBOW_GROWTH_STOPS: Array<[number, [number, number, number]]> = [
-  [0.08, [232, 121, 249]],
-  [0.06, [239, 68, 68]],
-  [0.03, [251, 146, 60]],
-  [0.01, [253, 224, 71]],
-  [0.00, [198, 219, 85]],
-  [-0.02, [69, 207, 119]],
-  [-0.04, [72, 156, 240]],
-  [-0.05, [93, 96, 226]],
-]
-
-/**
- * Computes RGB colour for an annual city growth rate using cached numeric LUT/stops.
- *
- * @param {number} arg0_rate
- * @param {string} [arg1_palette='Rainbow']
- *
- * @returns {[number, number, number]}
- */
-export function getGrowthRgb (arg0_rate: number, arg1_palette?: string): [number, number, number] {
-  //Convert from parameters
-  let palette = (arg1_palette) ? arg1_palette : 'Rainbow'
-  let r = arg0_rate
-
-  //Guard clauses
-  if (!Number.isFinite(r))
-    return [160, 160, 160]
-
-  //Function body
-  if (palette !== 'Rainbow') {
-    try {
-      let lut = growth_lut_cache.get(palette)
-      if (!lut) {
-        lut = getPaletteLUT(palette as ColorPalette)
-        growth_lut_cache.set(palette, lut)
-      }
-      let norm_t = Math.max(0, Math.min(1, (r - (-0.05))/(0.08 - (-0.05))))
-      let lut_idx = Math.min(255, Math.max(0, Math.round(norm_t*255)))
-      return [lut[lut_idx*3], lut[lut_idx*3 + 1], lut[lut_idx*3 + 2]]
-    } catch {
-      //Fallback to Rainbow stops
-    }
-  }
-
-  if (r >= RAINBOW_GROWTH_STOPS[0][0])
-    return RAINBOW_GROWTH_STOPS[0][1]
-
-  let last_idx = RAINBOW_GROWTH_STOPS.length - 1
-  if (r <= RAINBOW_GROWTH_STOPS[last_idx][0])
-    return RAINBOW_GROWTH_STOPS[last_idx][1]
-
-  for (let i = 0; i < last_idx; i++) {
-    let hi = RAINBOW_GROWTH_STOPS[i][0]
-    let lo = RAINBOW_GROWTH_STOPS[i + 1][0]
-    if (r <= hi && r >= lo) {
-      let t = (hi === lo) ? 0 : (r - lo)/(hi - lo)
-      let c_hi = RAINBOW_GROWTH_STOPS[i][1]
-      let c_lo = RAINBOW_GROWTH_STOPS[i + 1][1]
-      return [
-        Math.round(c_lo[0] + t*(c_hi[0] - c_lo[0])),
-        Math.round(c_lo[1] + t*(c_hi[1] - c_lo[1])),
-        Math.round(c_lo[2] + t*(c_hi[2] - c_lo[2])),
-      ]
-    }
-  }
-
-  //Return statement
-  return RAINBOW_GROWTH_STOPS[4][1]
-}
+export { getGrowthRgb, getPopRgb }
 
 /**
  * Checks whether a city region matches the currently hovered region string.
@@ -112,29 +41,15 @@ function isCityRegionHighlighted (arg0_city_region: string | undefined, arg1_hov
 }
 
 
-export function getPopRgb (arg0_pop: number): [number, number, number] {
-  //Convert from parameters
-  let pop = arg0_pop
-
-  //Function body
-  let p = Math.max(1, pop)
-  let t = Math.max(0, Math.min(1, (Math.log10(p) - 3.7)/3.6))
-  let r = Math.round(Math.min(255, 13 + t*240))
-  let g = Math.round(Math.min(255, 8 + t*210))
-  let b = Math.round(Math.max(0, 135 - t*100))
-
-  //Return statement
-  return [r, g, b]
-}
-
-
 export interface BuildStadesterPointsOptions {
   b_scale: number
   color_mode: string
   growth_palette: string
   is_cities_enabled: boolean
   is_mobile: boolean
+  population_palette?: string
   projection: ProjectionType
+  region_palette?: string
   stadester_cities?: CityPoint[]
 }
 
@@ -152,7 +67,9 @@ export function buildStadesterCityPoints (arg0_options: BuildStadesterPointsOpti
   let growth_palette = arg0_options.growth_palette
   let is_cities_enabled = arg0_options.is_cities_enabled
   let is_mobile = arg0_options.is_mobile
+  let population_palette = arg0_options.population_palette || 'Plasma'
   let projection = arg0_options.projection
+  let region_palette = arg0_options.region_palette || 'Default'
   let stadester_cities = arg0_options.stadester_cities
 
   //Guard clauses
@@ -185,11 +102,10 @@ export function buildStadesterCityPoints (arg0_options: BuildStadesterPointsOpti
       let growth_rgb = getGrowthRgb(growth_rate, growth_palette)
       fill_color = [growth_rgb[0], growth_rgb[1], growth_rgb[2], 220]
     } else if (color_mode === 'population') {
-      let pop_rgb = getPopRgb(city.population)
+      let pop_rgb = getPopRgb(city.population, population_palette)
       fill_color = [pop_rgb[0], pop_rgb[1], pop_rgb[2], 220]
     } else if (color_mode === 'region' || color_mode === 'continent') {
-      let reg_hex = resolveRegionColorHex(city.region, [c_lat, c_lon])
-      let reg_rgb = hexToRgb(reg_hex)
+      let reg_rgb = resolveRegionColorRgb(city.region, [c_lat, c_lon], region_palette)
       fill_color = [reg_rgb[0], reg_rgb[1], reg_rgb[2], 220]
     }
 

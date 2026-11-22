@@ -141,6 +141,8 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   let b_scale = (options.stadesterConfig?.bubbleSize !== undefined) ? options.stadesterConfig.bubbleSize : 1
   let color_mode = options.stadesterConfig?.colorMode || 'growth'
   let growth_palette = options.stadesterConfig?.growthPalette || 'Rainbow'
+  let population_palette = options.stadesterConfig?.populationPalette || 'Plasma'
+  let region_palette = options.stadesterConfig?.regionPalette || 'Default'
   let hovered_city_region = (color_mode === 'region' || color_mode === 'continent')
     ? (options.hoveredCity?.region ? options.hoveredCity.region.toLowerCase().trim() : null)
     : null
@@ -164,7 +166,9 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       growth_palette,
       is_cities_enabled,
       is_mobile,
+      population_palette,
       projection,
+      region_palette,
       stadester_cities,
     })
   }, [
@@ -175,7 +179,9 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     color_mode,
     growth_palette,
     is_mobile,
+    population_palette,
     projection,
+    region_palette,
   ])
 
   let effective_points = is_worker_points_matching_proj

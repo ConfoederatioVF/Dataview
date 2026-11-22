@@ -385,7 +385,7 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     let cache_key = `${dataset}:${rounded_year}:${min_pop}:${max_cities}:${color_mode}`
 
     let schedule_prefetch = function () {
-      if (!is_playing && !performant_mode && max_cities <= 8000) {
+      if (!is_playing && !performant_mode && max_cities > 0 && max_cities <= 8000) {
         if (prefetch_timer)
           clearTimeout(prefetch_timer)
         prefetch_timer = setTimeout(() => {

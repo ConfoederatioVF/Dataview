@@ -362,6 +362,7 @@ export interface LocalisationConfig {
       countryColour: string
       customColour: string
       datasetVersion: string
+      defaultRegionPalette: string
       fill: string
       growth: string
       growthPalette: string
@@ -607,8 +608,6 @@ export interface LocalisationConfig {
       value: string
     }
     stadesterLegend: {
-      annualCompoundGrowth: string
-      citiesCount: string
       collapseLegend: string
       displaying: string
       expandLegend: string
@@ -622,14 +621,12 @@ export interface LocalisationConfig {
       metricRegion: string
       noLabels: string
       outline: string
-      radiusPropPop: string
       regionalCategoricalPalette: string
-      regionalDistribution: string
       settlements: string
+      settlementsCount: string
       small: string
       stable: string
       surge: string
-      urbanPopulationTotals: string
     }
   }
 }

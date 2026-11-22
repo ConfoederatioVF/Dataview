@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { StadesterConfig } from '@framework/geopng/types.ts'
+import { ColorPalette, StadesterConfig } from '@framework/geopng/types.ts'
+import { getPaletteCssGradient } from '@framework/geopng/palettes.ts'
+import { RAINBOW_GROWTH_GRADIENT, resolveRegionChipColours } from '@framework/stadester/stadester_colours.ts'
 import { resolveDefaultStadesterDataset, resolveStadesterVersionLabel } from '@framework/stadester/stadester_versions.ts'
 import { STADESTER_CONFIG } from '@common'
 import { Icon } from '@ui/components/icon'
@@ -13,24 +15,9 @@ export interface StadesterLegendCardProps {
   width?: number | string
 }
 
-let REGION_CHIPS = [
-  { name: 'Sub-Saharan Africa', colour: '#f97316' },
-  { name: 'Maghreb & Egypt', colour: '#eab308' },
-  { name: 'Middle East', colour: '#d97706' },
-  { name: 'Central Asia', colour: '#a855f7' },
-  { name: 'Indian Subcontinent', colour: '#ec4899' },
-  { name: 'East Asia', colour: '#ef4444' },
-  { name: 'Southeast Asia', colour: '#8b5cf6' },
-  { name: 'Europe', colour: '#6366f1' },
-  { name: 'E. Europe & Russia', colour: '#3b82f6' },
-  { name: 'N. America', colour: '#0ea5e9' },
-  { name: 'Latin America', colour: '#10b981' },
-  { name: 'Oceania', colour: '#14b8a6' },
-]
-
 /**
  * Information card displayed beneath the main colourbar whenever Stadestér Historical Settlements is toggled on.
- * Informs the user of what metric is displaying, active colour scheme, gradient scale stops, and bubble sizing parameters.
+ * Informs the user of what metric is displaying, active colour scheme, gradient scale stops, and visibility state.
  * Supports minimising via a chevron button, and defaults to minimised on mobile devices.
  *
  * @param {StadesterLegendCardProps} arg0_props
@@ -49,7 +36,6 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
   let width = props.width ?? 336
 
   //Declare local instance variables
-  let bubble_size = (config.bubbleSize !== undefined) ? config.bubbleSize : 1
   let colour_mode = config.colorMode || 'growth'
   let dataset_id = resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester, config.dataset)
   let dataset_version: string
@@ -60,16 +46,18 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
   let is_halo = config.halo !== false && !config.filled
   let [is_minimised, set_is_minimised] = useState<boolean>(() => is_mobile)
   let localisation: ReturnType<typeof useLocalisation>
-  let metric_subtitle: string
   let metric_title: string
-  let palette_label: string
+  let population_palette = config.populationPalette || 'Plasma'
   let prev_is_mobile_ref = useRef(is_mobile)
+  let region_chips: Array<{ colour: string; key: string; name: string }>
+  let region_palette = config.regionPalette || 'Default'
   let t: ReturnType<typeof useLocalisation>['t']
 
   //Function body
   localisation = useLocalisation()
   dataset_version = resolveStadesterVersionLabel(dataset_id, STADESTER_CONFIG?.stadester?.versions, localisation.locale)
   format = localisation.format
+  region_chips = resolveRegionChipColours(region_palette)
   t = localisation.t
 
   useEffect(() => {
@@ -82,18 +70,14 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
 
   if (colour_mode === 'growth') {
     metric_title = t.mapPanels.stadesterLegend.metricGrowth
-    metric_subtitle = t.mapPanels.stadesterLegend.annualCompoundGrowth
-    palette_label = `${growth_palette} (Heat / Cool Spectrum)`
-    gradient_style = 'linear-gradient(to right, rgb(93, 96, 226), rgb(72, 156, 240), rgb(69, 207, 119), rgb(198, 219, 85), rgb(253, 224, 71), rgb(251, 146, 60), rgb(239, 68, 68), rgb(232, 121, 249))'
+    gradient_style = (growth_palette === 'Rainbow')
+      ? RAINBOW_GROWTH_GRADIENT
+      : getPaletteCssGradient(growth_palette as ColorPalette)
   } else if (colour_mode === 'population') {
     metric_title = t.mapPanels.stadesterLegend.metricPopulation
-    metric_subtitle = t.mapPanels.stadesterLegend.urbanPopulationTotals
-    palette_label = t.mapPanels.stadesterLegend.logarithmicScale
-    gradient_style = 'linear-gradient(to right, rgb(13, 8, 135), rgb(80, 18, 170), rgb(140, 41, 129), rgb(200, 72, 73), rgb(245, 125, 21), rgb(240, 249, 33))'
+    gradient_style = getPaletteCssGradient(population_palette as ColorPalette)
   } else {
     metric_title = t.mapPanels.stadesterLegend.metricRegion
-    metric_subtitle = t.mapPanels.stadesterLegend.regionalDistribution
-    palette_label = t.mapPanels.stadesterLegend.regionalCategoricalPalette
     gradient_style = ''
   }
 
@@ -137,7 +121,7 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
         <div className="flex items-center gap-2 shrink-0">
           {settlement_count !== undefined && (
             <span className="text-white text-[11px] font-mono shrink-0">
-              {format(t.mapPanels.stadesterLegend.citiesCount, settlement_count.toLocaleString('de-DE'))}
+              {format(t.mapPanels.stadesterLegend.settlementsCount, settlement_count.toLocaleString('de-DE'))}
             </span>
           )}
           <button
@@ -159,21 +143,21 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
       {!is_minimised && (
         <>
           {/* Metric Display Information */}
-          <div className="flex flex-col gap-0.5 mb-2">
-            <div className="flex items-center justify-between gap-1 text-[11px]">
+          <div className="flex items-center justify-between gap-2 mb-2 text-[11px]">
+            <div className="flex items-center gap-1.5 min-w-0 shrink-0">
               <span className="text-muted-foreground">{t.mapPanels.stadesterLegend.displaying}</span>
-              <span className="font-semibold text-white truncate text-right">{metric_title}</span>
+              <span className="text-[10px] text-white/90 font-mono">
+                {is_halo ? t.mapPanels.stadesterLegend.outline : t.mapPanels.stadesterLegend.fill} &bull; {config.showLabels ? t.mapPanels.stadesterLegend.labelsActive : t.mapPanels.stadesterLegend.noLabels}
+              </span>
             </div>
-            <p className="text-[10px] text-muted-foreground/80 font-light leading-tight">
-              {metric_subtitle}
-            </p>
+            <span className="font-semibold text-white truncate text-right">{metric_title}</span>
           </div>
 
           {/* Colour Scheme Information & Gradient Bar */}
-          <div className="space-y-1 mb-2">
+          <div className="space-y-1">
             {colour_mode === 'region' || colour_mode === 'continent' ? (
               <div className="flex flex-wrap gap-1 pt-0.5">
-                {REGION_CHIPS.map((chip) => {
+                {region_chips.map((chip) => {
                   let is_active = Boolean(
                     hovered_city?.region && (
                       chip.name.toLowerCase().includes(hovered_city.region.toLowerCase()) ||
@@ -227,14 +211,6 @@ export let StadesterLegendCard: React.FC<StadesterLegendCardProps> = React.memo(
                 )}
               </div>
             )}
-          </div>
-
-          {/* Bubble Geometry & Collision Status Footer */}
-          <div className="pt-1.5 border-t border-border/40 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-            <span>{format(t.mapPanels.stadesterLegend.radiusPropPop, bubble_size.toFixed(2))}</span>
-            <span className="text-white">
-              {is_halo ? t.mapPanels.stadesterLegend.outline : t.mapPanels.stadesterLegend.fill} &bull; {config.showLabels ? t.mapPanels.stadesterLegend.labelsActive : t.mapPanels.stadesterLegend.noLabels}
-            </span>
           </div>
         </>
       )}

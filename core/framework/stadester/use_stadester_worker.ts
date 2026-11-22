@@ -177,11 +177,15 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
       return
 
     let growth_palette = config.growthPalette || 'Rainbow'
+    let population_palette = config.populationPalette || 'Plasma'
+    let region_palette = config.regionPalette || 'Default'
     let opts_key = JSON.stringify([
       config.bubbleSize ?? 1.0,
       config.colorMode || 'growth',
       config.display_options || null,
       growth_palette,
+      population_palette,
+      region_palette,
       config.halo !== false && !config.filled,
       config.heuristicCulling !== undefined ? Boolean(config.heuristicCulling) : true,
       config.labelCollision !== false,
@@ -236,7 +240,9 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
         labelCollision: config.labelCollision !== false,
         largeCityContrast: config.largeCityContrast ?? 1.0,
         opacity: (config.opacity !== undefined) ? config.opacity : 0.7,
+        populationPalette: population_palette,
         projection,
+        regionPalette: region_palette,
         reqId: current_req_id,
         showLabels: config.showLabels !== false,
         type: 'LAYOUT_VIEWPORT',
@@ -285,6 +291,8 @@ export function useStadesterWorker (arg0_options: UseStadesterWorkerParams): Use
     config?.labelCollision,
     config?.largeCityContrast,
     config?.opacity,
+    config?.populationPalette,
+    config?.regionPalette,
     config?.showLabels,
     projection,
     view_state,

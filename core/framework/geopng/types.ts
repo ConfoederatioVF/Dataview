@@ -118,7 +118,11 @@ export interface StadesterDisplayOptions {
   mobile_heuristic_culling?: boolean
   mobileHeuristicCulling?: boolean
   opacity?: number
+  population_palette?: string
+  populationPalette?: string
   prefer_least_diacritics?: boolean
+  region_palette?: string
+  regionPalette?: string
   show_capitals?: boolean
   showCapitals?: boolean
   show_capital_underlines?: boolean
@@ -147,6 +151,8 @@ export interface StadesterConfig {
   maxCities: number
   minPop: number
   opacity?: number
+  populationPalette?: string
+  regionPalette?: string
   showCapitals?: boolean
   showCapitalUnderlines?: boolean
   showLabels: boolean

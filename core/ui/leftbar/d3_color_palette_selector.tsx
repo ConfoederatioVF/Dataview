@@ -5,9 +5,17 @@ import { Icon } from '@ui/components/icon'
 import { Label } from '@ui/components/label'
 import { useLocalisation } from '@localisation'
 
+export interface D3ColorPaletteDefaultOption {
+  gradient: string
+  id: string
+  name: string
+  onSelect?: () => void
+}
+
 export interface D3ColorPaletteSelectorProps {
   className?: string
   compact?: boolean
+  defaultOption?: D3ColorPaletteDefaultOption
   disabled?: boolean
   invert?: boolean
   label?: string
@@ -32,13 +40,14 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
   let { t } = useLocalisation()
   let class_name = props.className || ''
   let compact = Boolean(props.compact)
+  let default_option = props.defaultOption
   let disabled = Boolean(props.disabled)
   let invert = Boolean(props.invert)
   let label = props.label ?? t.sidebar.visualisation.colorPalette
   let on_change = props.onChange
   let on_invert_change = props.onInvertChange
   let show_invert = Boolean(props.showInvert)
-  let value = (props.value as ColorPalette) || 'Plasma'
+  let value = props.value || 'Plasma'
 
   //Declare local instance variables
   let filtered_palettes: typeof D3_COLOR_SCHEMES
@@ -77,6 +86,16 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
     )
   }, [search_query])
 
+  let is_default_selected = Boolean(default_option && value === default_option.id)
+  let show_default_in_list = Boolean(
+    default_option &&
+    (!search_query.trim() || default_option.name.toLowerCase().includes(search_query.toLowerCase().trim()))
+  )
+  let trigger_gradient = is_default_selected
+    ? default_option!.gradient
+    : getPaletteCssGradient(value as ColorPalette, invert)
+  let trigger_label = is_default_selected ? default_option!.name : value
+
   //Return statement
   return (
     <div className={`space-y-1.5 relative ${class_name}`} ref={picker_ref}>
@@ -107,9 +126,9 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div
             className="w-16 h-3.5 rounded-none shrink-0 border border-border/50 shadow-2xs"
-            style={{ background: getPaletteCssGradient(value, invert) }}
+            style={{ background: trigger_gradient }}
           />
-          <span className="truncate font-medium text-foreground">{value}</span>
+          <span className="truncate font-medium text-foreground">{trigger_label}</span>
         </div>
         <Icon name={is_open ? 'expand_less' : 'expand_more'} className="ml-1 text-muted-foreground text-sm" />
       </button>
@@ -131,6 +150,33 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
 
           {/* Palette List */}
           <div className="max-h-56 overflow-y-auto p-1 space-y-0.5 custom-scrollbar">
+            {show_default_in_list && default_option && (
+              <button
+                key={default_option.id}
+                type="button"
+                onClick={() => {
+                  if (default_option.onSelect)
+                    default_option.onSelect()
+                  else
+                    on_change(default_option.id as ColorPalette)
+                  set_is_open(false)
+                }}
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-none text-left transition-colors cursor-pointer ${
+                  is_default_selected
+                    ? 'bg-primary/20 text-primary font-bold shadow-xs'
+                    : 'hover:bg-muted text-foreground'
+                }`}
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div
+                    className="w-14 h-3 rounded-none shrink-0 border border-border/50 shadow-2xs"
+                    style={{ background: default_option.gradient }}
+                  />
+                  <span className="truncate">{default_option.name}</span>
+                </div>
+                {is_default_selected && <Icon name="check" className="text-primary text-xs shrink-0 ml-1" />}
+              </button>
+            )}
             {filtered_palettes.map((arg0_scheme) => {
               let is_active = value === arg0_scheme.id
               return (
@@ -158,7 +204,7 @@ export let D3ColorPaletteSelector: React.FC<D3ColorPaletteSelectorProps> = funct
                 </button>
               )
             })}
-            {filtered_palettes.length === 0 && (
+            {filtered_palettes.length === 0 && !show_default_in_list && (
               <div className="p-2 text-center text-muted-foreground text-[11px]">
                 {t.mapmodes.noResults}
               </div>

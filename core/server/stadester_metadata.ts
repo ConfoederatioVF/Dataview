@@ -479,22 +479,208 @@ export function clearCityMetadataCache (): void {
 
 
 /**
- * Loads and normalises city metadata from the resolved per-version city_metadata.json into memory.
+ * Resolves the filesystem path to a partitioned `city_metadata/city_metadata_manifest.json` if present.
  *
  * @param {string} [arg0_dataset_name='stadester_2.0']
  *
- * @returns {CityMetadataEntry[]}
+ * @returns {string | null}
  */
-export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry[] {
+export function resolveCityMetadataManifestPath (arg0_dataset_name?: string): string | null {
   //Convert from parameters
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
 
   //Declare local instance variables
+  let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
+  let configured = resolveStadesterVersionPaths(dataset_name)
+  let defines = FilepathDefines.get()
+  let l_stad = (defines.root_folders && defines.root_folders.l_stad) ? defines.root_folders.l_stad : './data/stadester'
+  let candidates: string[] = []
+
+  //Function body
+  if (configured.path) {
+    let base_dir = configured.path.endsWith('.json') ? path.dirname(configured.path) : configured.path
+    candidates.push(path.join(base_dir, 'city_metadata', 'city_metadata_manifest.json'))
+  }
+  candidates.push(path.join(l_stad, clean_stem, 'city_metadata', 'city_metadata_manifest.json'))
+
+  for (let i = 0; i < candidates.length; i++) {
+    if (fs.existsSync(candidates[i]))
+      return candidates[i]
+  }
+
+  //Return statement
+  return null
+}
+
+
+/**
+ * Computes the latest modification timestamp across partitioned `city_metadata/` shards (or monolithic `city_metadata.json`).
+ *
+ * @param {string} [arg0_dataset_name='stadester_2.0']
+ * @param {string[]} [arg1_region_keys]
+ *
+ * @returns {number}
+ */
+export function getCityMetadataMaxMtimeMs (arg0_dataset_name?: string, arg1_region_keys?: string[]): number {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+  let region_filter = Array.isArray(arg1_region_keys) && arg1_region_keys.length > 0
+    ? new Set(arg1_region_keys.map((arg0_k) => arg0_k.toUpperCase()))
+    : null
+
+  //Declare local instance variables
+  let man_path = resolveCityMetadataManifestPath(dataset_name)
+  let max_mtime = 0
+
+  //Function body
+  if (man_path && fs.existsSync(man_path)) {
+    try {
+      let man_dir = path.dirname(man_path)
+      let man = JSON.parse(fs.readFileSync(man_path, 'utf-8'))
+      let shards = Array.isArray(man.shards) ? man.shards : []
+      for (let i = 0; i < shards.length; i++) {
+        let sh = shards[i]
+        let is_cap = sh.key === 'CAPITALS' || sh.file === '00_capitals.json'
+        if (region_filter && !is_cap && !region_filter.has(String(sh.key || '').toUpperCase()) && sh.key !== 'UNASSIGNED')
+          continue
+        let sp = path.join(man_dir, sh.file)
+        if (fs.existsSync(sp)) {
+          let mt = fs.statSync(sp).mtimeMs
+          if (mt > max_mtime)
+            max_mtime = mt
+        }
+      }
+      return max_mtime
+    } catch {}
+  }
+
+  let mono_path = resolveCityMetadataPath(dataset_name)
+  if (fs.existsSync(mono_path))
+    max_mtime = fs.statSync(mono_path).mtimeMs
+
+  //Return statement
+  return max_mtime
+}
+
+
+/**
+ * Computes a deterministic signature string across partitioned `city_metadata/` shards (or monolithic `city_metadata.json`).
+ *
+ * @param {string} [arg0_dataset_name='stadester_2.0']
+ * @param {string[]} [arg1_region_keys]
+ *
+ * @returns {string}
+ */
+export function getCityMetadataSignature (arg0_dataset_name?: string, arg1_region_keys?: string[]): string {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+  let region_filter = Array.isArray(arg1_region_keys) && arg1_region_keys.length > 0
+    ? new Set(arg1_region_keys.map((arg0_k) => arg0_k.toUpperCase()))
+    : null
+
+  //Declare local instance variables
+  let man_path = resolveCityMetadataManifestPath(dataset_name)
+
+  //Function body
+  if (man_path && fs.existsSync(man_path)) {
+    try {
+      let man_dir = path.dirname(man_path)
+      let man = JSON.parse(fs.readFileSync(man_path, 'utf-8'))
+      let shards = Array.isArray(man.shards) ? man.shards : []
+      let parts: string[] = []
+      for (let i = 0; i < shards.length; i++) {
+        let sh = shards[i]
+        let is_cap = sh.key === 'CAPITALS' || sh.file === '00_capitals.json'
+        if (region_filter && !is_cap && !region_filter.has(String(sh.key || '').toUpperCase()) && sh.key !== 'UNASSIGNED')
+          continue
+        let sp = path.join(man_dir, sh.file)
+        if (fs.existsSync(sp)) {
+          let st = fs.statSync(sp)
+          parts.push(`${sh.file}:${st.size}:${Math.round(st.mtimeMs)}`)
+        }
+      }
+      return `partitioned:${parts.join('|')}`
+    } catch {}
+  }
+
+  let mono_path = resolveCityMetadataPath(dataset_name)
+  if (!fs.existsSync(mono_path))
+    return 'missing'
+  let st = fs.statSync(mono_path)
+
+  //Return statement
+  return `${st.size}:${Math.round(st.mtimeMs)}`
+}
+
+
+/**
+ * Loads and normalises city metadata from partitioned `city_metadata/` (`00_capitals.json` Priority Tier 0 first,
+ * then regional shards) or falls back to legacy per-version `city_metadata.json`.
+ *
+ * @param {string} [arg0_dataset_name='stadester_2.0']
+ * @param {string[]} [arg1_region_keys]
+ *
+ * @returns {CityMetadataEntry[]}
+ */
+export function loadCityMetadata (arg0_dataset_name?: string, arg1_region_keys?: string[]): CityMetadataEntry[] {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+  let region_keys = Array.isArray(arg1_region_keys) && arg1_region_keys.length > 0
+    ? arg1_region_keys.map((arg0_k) => arg0_k.toUpperCase()).sort()
+    : null
+
+  //Declare local instance variables
   let cached_entry: { entries: CityMetadataEntry[]; mtime_ms: number } | undefined
-  let file_path = resolveCityMetadataPath(dataset_name)
+  let man_path = resolveCityMetadataManifestPath(dataset_name)
   let normalized_list: CityMetadataEntry[] = []
 
-  //Guard clauses
+  //Function body
+  if (man_path && fs.existsSync(man_path)) {
+    let cache_key = `${man_path}|${region_keys ? region_keys.join(',') : '*'}`
+    let max_mtime = getCityMetadataMaxMtimeMs(dataset_name, region_keys || undefined)
+    cached_entry = city_metadata_cache_by_path.get(cache_key)
+    if (cached_entry && max_mtime <= cached_entry.mtime_ms)
+      return cached_entry.entries
+
+    try {
+      let man_dir = path.dirname(man_path)
+      let man = JSON.parse(fs.readFileSync(man_path, 'utf-8'))
+      let shards = Array.isArray(man.shards) ? [...man.shards] : []
+      let region_set = region_keys ? new Set(region_keys) : null
+
+      //Load Priority Tier 0 (`00_capitals.json`) FIRST so capitals always bind names + capital timelines atomically
+      shards.sort((arg0_a: any, arg1_b: any) => Number(arg0_a.tier ?? 1) - Number(arg1_b.tier ?? 1))
+
+      for (let s = 0; s < shards.length; s++) {
+        let sh = shards[s]
+        let is_cap = sh.key === 'CAPITALS' || sh.file === '00_capitals.json'
+        if (region_set && !is_cap && !region_set.has(String(sh.key || '').toUpperCase()) && sh.key !== 'UNASSIGNED')
+          continue
+        let sp = path.join(man_dir, sh.file)
+        if (!fs.existsSync(sp))
+          continue
+        let raw_arr = JSON.parse(fs.readFileSync(sp, 'utf-8'))
+        if (Array.isArray(raw_arr)) {
+          for (let i = 0; i < raw_arr.length; i++) {
+            let item = normalizeMetadataEntry(raw_arr[i])
+            if (item)
+              normalized_list.push(item)
+          }
+        }
+      }
+
+      city_metadata_cache_by_path.set(cache_key, {
+        entries: normalized_list,
+        mtime_ms: max_mtime,
+      })
+      console.log(`[StadesterMetadata] Loaded ${normalized_list.length} partitioned city metadata entries from ${man_dir} (00_capitals Priority Tier 0 first)`)
+      return normalized_list
+    } catch (arg0_err) {
+      console.warn(`[StadesterMetadata] Failed to load partitioned manifest ${man_path}, falling back:`, arg0_err)
+    }
+  }
+
+  let file_path = resolveCityMetadataPath(dataset_name)
   if (!fs.existsSync(file_path))
     return []
 
@@ -504,7 +690,6 @@ export function loadCityMetadata (arg0_dataset_name?: string): CityMetadataEntry
     if (cached_entry && stats.mtimeMs <= cached_entry.mtime_ms)
       return cached_entry.entries
 
-    //Function body
     let content = fs.readFileSync(file_path, 'utf-8')
     let raw_json = JSON.parse(content)
 

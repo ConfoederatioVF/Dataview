@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 bin
 data/*
+data/stadester/stadester_2.0
 !data/baked_global_*.json
 !data/stadester/
 data/stadester/*.csv

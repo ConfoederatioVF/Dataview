@@ -21,7 +21,7 @@ import { FilepathDefines } from './filepath_defines.ts'
 import { loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
 import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 import { resolveDatasetSourceFiles } from './stadester_loader.ts'
-import { getStateById, getStateCapitals, loadCityMetadata, resolveCityMetadataPath } from './stadester_metadata.ts'
+import { getCityMetadataSignature, getStateById, getStateCapitals, loadCityMetadata } from './stadester_metadata.ts'
 import {
   buildPrimaryCityNameSet,
   doesLabelMatchAnotherNearbyCity,
@@ -1512,22 +1512,25 @@ function applyCompilerResourceLimits (): { compiler_max_heap_mb: number; compile
 
 /**
  * Incrementally compiles a Stadestér dataset into binary per-shard packs and a global TypedArray store.
+ * When `only_project` is supplied, only dirty shards belonging to that macro-region are recompiled;
+ * unmodified regional shard caches (e.g. CENTAUR) remain completely untouched on disk.
  *
  * @param {string} [arg0_dataset_name]
- * @param {{ force?: boolean; relink?: boolean }} [arg1_options]
+ * @param {{ force?: boolean; only_project?: string; relink?: boolean }} [arg1_options]
  *
- * @returns {{ compiled_shards: number; duration_ms: number; hot_index_path: string; total_entries: number }}
+ * @returns {{ compiled_shards: number; duration_ms: number; hot_index_path: string; skipped_shards: number; total_entries: number }}
  */
 export function compileStadesterDataset (
   arg0_dataset_name?: string,
-  arg1_options?: { force?: boolean; relink?: boolean }
-): { compiled_shards: number; duration_ms: number; hot_index_path: string; total_entries: number } {
+  arg1_options?: { force?: boolean; only_project?: string; relink?: boolean }
+): { compiled_shards: number; duration_ms: number; hot_index_path: string; skipped_shards: number; total_entries: number } {
   //Convert from parameters
   let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
   let options = (arg1_options) ? arg1_options : {}
 
   //Declare local instance variables
   let bugged_path = FilepathDefines.get().filepaths.stadester_bugged_cities
+  let cache_manifest_path: string
   let cache_root = FilepathDefines.get().root_folders.l_stad_cache
   let cap_path = FilepathDefines.get().filepaths.stadester_capitals
   let clean_stem = dataset_name.endsWith('.json') ? dataset_name.slice(0, -5) : dataset_name
@@ -1535,12 +1538,16 @@ export function compileStadesterDataset (
   let dataset_cache_dir = path.join(cache_root, clean_stem)
   let hot_index_path = path.join(dataset_cache_dir, 'hot_index.bin')
   let manifest_path = path.join(dataset_cache_dir, 'build_manifest.json')
-  let meta_path = resolveCityMetadataPath(clean_stem)
+  let only_project_key = options.only_project ? String(options.only_project).trim().toUpperCase() : ''
   let prev_manifest: BinaryBuildManifest | null = null
   let resource_limits = applyCompilerResourceLimits()
   let shards_dir = path.join(dataset_cache_dir, 'shards')
+  let skipped_shards = 0
   let source_info = resolveDatasetSourceFiles(clean_stem)
   let t_start = Date.now()
+  let target_project_files: Set<string> | null = null
+
+  cache_manifest_path = path.join(dataset_cache_dir, 'cache_manifest.json')
 
   //Guard clauses
   if (source_info.files.length === 0)
@@ -1549,6 +1556,20 @@ export function compileStadesterDataset (
   //Function body
   if (!fs.existsSync(shards_dir))
     fs.mkdirSync(shards_dir, { recursive: true })
+
+  //Resolve target project shard files when --only-project is specified so untouched namespaces never churn
+  if (only_project_key && source_info.is_partitioned && source_info.manifest_path && fs.existsSync(source_info.manifest_path)) {
+    try {
+      let sman = JSON.parse(fs.readFileSync(source_info.manifest_path, 'utf-8'))
+      let regs = Array.isArray(sman.regions) ? sman.regions : []
+      for (let i = 0; i < regs.length; i++) {
+        if (String(regs[i].key || '').toUpperCase() === only_project_key && Array.isArray(regs[i].files)) {
+          target_project_files = new Set(regs[i].files.map((arg0_f: string) => path.basename(arg0_f, path.extname(arg0_f))))
+          break
+        }
+      }
+    } catch {}
+  }
 
   if (!options.force && fs.existsSync(manifest_path)) {
     try {
@@ -1573,36 +1594,42 @@ export function compileStadesterDataset (
     let idx_path = path.join(shards_dir, idx_rel)
     let detail_path = path.join(shards_dir, detail_rel)
     let prev_entry = prev_manifest?.shards?.[base_slug]
+    let has_cached_pair = fs.existsSync(idx_path) && fs.existsSync(detail_path)
+    let is_excluded_by_project_scope = Boolean(target_project_files && !target_project_files.has(base_slug) && has_cached_pair)
     let is_shard_fresh = Boolean(
-      !options.force &&
-      prev_entry &&
-      prev_entry.size === st.size &&
-      Math.round(prev_entry.mtime_ms) === Math.round(st.mtimeMs) &&
-      fs.existsSync(idx_path) &&
-      fs.existsSync(detail_path)
+      is_excluded_by_project_scope ||
+      (
+        !options.force &&
+        prev_entry &&
+        prev_entry.size === st.size &&
+        Math.round(prev_entry.mtime_ms) === Math.round(st.mtimeMs) &&
+        has_cached_pair
+      )
     )
 
     if (!is_shard_fresh) {
       let shard_count = compileRawShardToBinary(src_file, idx_path, detail_path)
       compiled_shards++
-      console.log(`[StadesterCompiler] Compiled shard ${base_slug} (${shard_count} cities)`)
+      console.log(`[StadesterCompiler] Compiled dirty shard ${base_slug} (${shard_count} cities)`)
 
       let heap_used_mb = process.memoryUsage().heapUsed/(1024*1024)
       if (heap_used_mb > resource_limits.compiler_max_heap_mb*0.75 && typeof globalThis.gc === 'function')
         globalThis.gc()
       yieldCompilerThread(resource_limits.compiler_yield_ms)
+    } else {
+      skipped_shards++
     }
 
     next_shards[base_slug] = {
       detail_file: detail_rel,
       idx_file: idx_rel,
-      mtime_ms: st.mtimeMs,
-      size: st.size,
+      mtime_ms: is_excluded_by_project_scope && prev_entry ? prev_entry.mtime_ms : st.mtimeMs,
+      size: is_excluded_by_project_scope && prev_entry ? prev_entry.size : st.size,
     }
     shard_artifacts.push({ detail_path, idx_path })
   }
 
-  let meta_sig = getFileSignature(meta_path)
+  let meta_sig = getCityMetadataSignature(clean_stem)
   let cap_sig = getFileSignature(cap_path)
   let bugged_sig = getFileSignature(bugged_path)
   let needs_stage_b = Boolean(
@@ -1623,7 +1650,7 @@ export function compileStadesterDataset (
     try {
       buildGlobalBinaryIndex(clean_stem, dataset_cache_dir, shard_artifacts)
       binary_store_cache.delete(clean_stem)
-      meta_sig = getFileSignature(meta_path)
+      meta_sig = getCityMetadataSignature(clean_stem)
       cap_sig = getFileSignature(cap_path)
       bugged_sig = getFileSignature(bugged_path)
     } finally {
@@ -1644,10 +1671,20 @@ export function compileStadesterDataset (
     version: BINARY_FORMAT_VERSION,
   }
   fs.writeFileSync(manifest_path, JSON.stringify(new_manifest, null, 2), 'utf-8')
+  fs.writeFileSync(cache_manifest_path, JSON.stringify({
+    capitals_sig: cap_sig,
+    compiled_shards,
+    metadata_sig: meta_sig,
+    only_project: only_project_key || null,
+    shards: next_shards,
+    skipped_shards,
+    updated_at: new_manifest.compiled_at,
+    version: BINARY_FORMAT_VERSION,
+  }, null, 2), 'utf-8')
 
   let duration_ms = Date.now() - t_start
   if (compiled_shards > 0 || needs_stage_b) {
-    console.log(`[StadesterCompiler] Built binary store for ${clean_stem}: ${total_entries} cities, ${compiled_shards} dirty shards in ${duration_ms}ms`)
+    console.log(`[StadesterCompiler] Built binary store for ${clean_stem}: ${total_entries} cities, ${compiled_shards} dirty / ${skipped_shards} skipped shards in ${duration_ms}ms`)
   }
 
   //Return statement
@@ -1655,6 +1692,7 @@ export function compileStadesterDataset (
     compiled_shards,
     duration_ms,
     hot_index_path,
+    skipped_shards,
     total_entries,
   }
 }
@@ -1798,7 +1836,7 @@ export function isBinaryDatasetFresh (arg0_dataset_name?: string): boolean {
         return false
     }
 
-    let meta_sig = getFileSignature(resolveCityMetadataPath(clean_stem))
+    let meta_sig = getCityMetadataSignature(clean_stem)
     let cap_sig = getFileSignature(FilepathDefines.get().filepaths.stadester_capitals)
     let bugged_sig = getFileSignature(FilepathDefines.get().filepaths.stadester_bugged_cities)
 

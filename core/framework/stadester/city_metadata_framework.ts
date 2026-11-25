@@ -24,6 +24,7 @@ export interface CityMetadataEntry {
   capital_records?: CapitalRecord[]
   coords: [number, number] // [lng, lat] as per specification
   historical_names: HistoricalNameRecord[]
+  is_capital_tier?: boolean
   key?: string
   name?: string
   other_names?: string | string[]
@@ -224,6 +225,34 @@ export let normalizeMetadataEntry = function (
   hist_names.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
   capital_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
 
+  //Derive canonical display name from latest historical name when compact `[lng, lat]` + `names` records omit top-level `name`
+  if (!entry_name && hist_names.length > 0)
+    entry_name = hist_names[hist_names.length - 1].name
+
+  //Case-insensitively deduplicate other_names and drop exact repeats of canonical name or historical_names
+  let dedup_other: string[] | undefined = undefined
+  let raw_other_source = raw.other_names || raw.names_other
+  if (raw_other_source) {
+    let raw_other_arr = Array.isArray(raw_other_source) ? raw_other_source : [raw_other_source]
+    let excl_low = new Set<string>()
+    if (entry_name)
+      excl_low.add(entry_name.trim().toLowerCase())
+    for (let i = 0; i < hist_names.length; i++)
+      excl_low.add(hist_names[i].name.trim().toLowerCase())
+    let seen_other = new Set<string>()
+    let clean_other: string[] = []
+    for (let i = 0; i < raw_other_arr.length; i++) {
+      let s = String(raw_other_arr[i] || '').trim()
+      let low = s.toLowerCase()
+      if (!s || excl_low.has(low) || seen_other.has(low))
+        continue
+      seen_other.add(low)
+      clean_other.push(s)
+    }
+    if (clean_other.length > 0)
+      dedup_other = clean_other
+  }
+
   //Return statement
   return {
     capital: capital_dict,
@@ -231,9 +260,10 @@ export let normalizeMetadataEntry = function (
     capital_records: capital_records,
     coords: candidate_coords,
     historical_names: hist_names,
+    is_capital_tier: Boolean(raw.is_capital_tier || raw.cap || capital_records.length > 0),
     key: raw.key || entry_key,
     name: entry_name,
-    other_names: raw.other_names || raw.names_other,
+    other_names: dedup_other,
   }
 }
 

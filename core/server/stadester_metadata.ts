@@ -11,7 +11,6 @@ import {
   isSyntheticGhslEpochStub,
   matchesAliasStemSet,
   normalizeCapitalNameStem,
-  normalizeCityAlias,
   normalizeMetadataEntry,
   parseYearMonthDay,
   resolveHistoricalCityName,
@@ -41,14 +40,377 @@ export { isSyntheticGhslEpochStub }
 let city_metadata_cache_by_path = new Map<string, { entries: CityMetadataEntry[]; mtime_ms: number }>()
 
 interface BindingStateEntry {
+  dist_km: number
   has_modern_entry: boolean
   has_name_match: boolean
   has_primary_name_match: boolean
+  is_capital_locked: boolean
   max_hn_year: number
 }
 
 /**
- * Applies per-version city metadata to indexed cities.
+ * Drops `city_metadata/` overlay points (`00_capitals.json` Tier 0 first, then regional shards) directly onto
+ * the nearest underlying settlement points. Eliminates fragile key/50 km homonym name overrides, locks Tier-0
+ * capital identities onto their nearest underlying city proper, and simplifies overlapping histories at `[lng, lat]`.
+ *
+ * @param {any[]} arg0_entries
+ * @param {string} [arg1_dataset_name='stadester_2.0']
+ * @param {{ key_lookup?: (arg0_key: string) => any }} [arg2_options]
+ *
+ * @returns {number} Number of overlay points processed
+ */
+export function bindCityMetadataOverlay (
+  arg0_entries: any[],
+  arg1_dataset_name?: string,
+  arg2_options?: { key_lookup?: (arg0_key: string) => any }
+): number {
+  //Convert from parameters
+  let dataset_name = (arg1_dataset_name) ? arg1_dataset_name : getDefaultStadesterDatasetId()
+  let entries = arg0_entries
+  let options = (arg2_options) ? arg2_options : {}
+
+  //Declare local instance variables
+  let binding_state = new Map<string, BindingStateEntry>()
+  let cells_per_degree = 4
+  let city_alias_cache = new Map<string, AliasStemSet>()
+  let dense_cluster_km = 2.5
+  let meta_list = loadCityMetadata(dataset_name)
+  let primary_alias_cache = new Map<string, AliasStemSet>()
+  let raw_city_name_by_key = new Map<string, string>()
+  let spatial_grid: Record<string, any[]> = {}
+
+  //Guard clauses
+  if (!meta_list || meta_list.length === 0 || !entries || entries.length === 0)
+    return 0
+
+  //Function body
+  for (let i = 0; i < entries.length; i++) {
+    let city = entries[i]
+    if (!city || !city.key)
+      continue
+    raw_city_name_by_key.set(city.key, city.name || '')
+    if (city.coords && Array.isArray(city.coords) && city.coords.length >= 2) {
+      let bin_key = `${Math.floor(city.coords[0]*cells_per_degree)},${Math.floor(city.coords[1]*cells_per_degree)}`
+      if (!spatial_grid[bin_key])
+        spatial_grid[bin_key] = []
+      spatial_grid[bin_key].push(city)
+    }
+  }
+
+  let getCachedCityAliases = function (arg0_city: any): AliasStemSet {
+    let cached = city_alias_cache.get(arg0_city.key)
+    if (cached)
+      return cached
+    let built = buildAliasStemSet(arg0_city.name, arg0_city.other_names)
+    city_alias_cache.set(arg0_city.key, built)
+    return built
+  }
+
+  let getCachedPrimaryAliases = function (arg0_city: any): AliasStemSet {
+    let cached = primary_alias_cache.get(arg0_city.key)
+    if (cached)
+      return cached
+    let built = buildPrimaryCityNameSet(arg0_city, raw_city_name_by_key.get(arg0_city.key))
+    primary_alias_cache.set(arg0_city.key, built)
+    return built
+  }
+
+  let isMetroShell = function (arg0_city: any): boolean {
+    return Boolean(
+      arg0_city.is_agglomeration ||
+      /\(agglomeration\??\)|\(metro\)/i.test(String(arg0_city.key || '')) ||
+      /\(agglomeration\??\)|\(metro\)/i.test(String(arg0_city.name || ''))
+    )
+  }
+
+  for (let i = 0; i < meta_list.length; i++) {
+    let meta = meta_list[i]
+    let target_lat = meta.coords[1]
+    let target_lng = meta.coords[0]
+    let is_cap_meta = Boolean(meta.is_capital_tier || (meta.capital_records && meta.capital_records.length > 0))
+    let max_radius_km = is_cap_meta ? 15.0 : 10.0
+
+    let meta_alias_info = buildAliasStemSet(meta.name, (meta as any).other_names)
+    let meta_name_info = buildAliasStemSet(meta.name)
+    let best_city: any = null
+    let min_dist = 999999
+
+    //Check direct key ONLY when spatially proximate (prevents cross-continent teleportation on key reuse)
+    if (meta.key && options.key_lookup) {
+      let keyed_cand = options.key_lookup(meta.key)
+      if (keyed_cand && Array.isArray(keyed_cand.coords) && keyed_cand.coords.length >= 2) {
+        let kd = computeHaversineDistanceKm(keyed_cand.coords[0], keyed_cand.coords[1], target_lat, target_lng)
+        if (kd <= max_radius_km) {
+          best_city = keyed_cand
+          min_dist = kd
+        }
+      }
+    }
+
+    let center_lat = Math.floor(target_lat*cells_per_degree)
+    let center_lng = Math.floor(target_lng*cells_per_degree)
+    let deg_lat_bound = max_radius_km/111.0 + 0.02
+    let deg_lon_bound = max_radius_km/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
+    let cell_radius_lat = Math.max(1, Math.ceil(deg_lat_bound*cells_per_degree))
+    let cell_radius_lon = Math.max(1, Math.ceil(deg_lon_bound*cells_per_degree))
+
+    let best_close_named: any = null
+    let best_close_named_dist = 999999
+    let best_close_any: any = null
+    let best_close_any_dist = 999999
+    let best_regional_named: any = null
+    let best_regional_named_dist = 999999
+
+    if (!best_city) {
+      for (let d_lat = -cell_radius_lat; d_lat <= cell_radius_lat; d_lat++) {
+        for (let d_lng = -cell_radius_lon; d_lng <= cell_radius_lon; d_lng++) {
+          let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+          if (!cell)
+            continue
+
+          for (let c = 0; c < cell.length; c++) {
+            let cand = cell[c]
+            if (!cand.coords)
+              continue
+            if (Math.abs(cand.coords[0] - target_lat) > deg_lat_bound || Math.abs(cand.coords[1] - target_lng) > deg_lon_bound)
+              continue
+
+            let dist = computeHaversineDistanceKm(cand.coords[0], cand.coords[1], target_lat, target_lng)
+            if (dist > max_radius_km)
+              continue
+
+            // Prefer persistent city_proper over metro agglomeration shells at the same coordinate
+            let metro_pen = isMetroShell(cand) ? 2.0 : 0.0
+            let eff_dist = dist + metro_pen
+            let cand_primary = getCachedPrimaryAliases(cand)
+            let cand_all = getCachedCityAliases(cand)
+            let name_hit = matchesAliasStemSet(meta_name_info, cand_primary) ||
+              matchesAliasStemSet(meta_alias_info, cand_primary) ||
+              matchesAliasStemSet(meta_alias_info, cand_all)
+
+            if (dist <= dense_cluster_km) {
+              if (name_hit && eff_dist < best_close_named_dist) {
+                best_close_named_dist = eff_dist
+                best_close_named = cand
+              }
+              if (eff_dist < best_close_any_dist) {
+                best_close_any_dist = eff_dist
+                best_close_any = cand
+              }
+            } else if (name_hit && eff_dist < best_regional_named_dist) {
+              best_regional_named_dist = eff_dist
+              best_regional_named = cand
+            } else if (is_cap_meta && eff_dist < best_close_any_dist) {
+              best_close_any_dist = eff_dist
+              best_close_any = cand
+            }
+          }
+        }
+      }
+
+      if (best_close_named) {
+        best_city = best_close_named
+        min_dist = computeHaversineDistanceKm(best_city.coords[0], best_city.coords[1], target_lat, target_lng)
+      } else if (best_close_any && computeHaversineDistanceKm(best_close_any.coords[0], best_close_any.coords[1], target_lat, target_lng) <= dense_cluster_km) {
+        best_city = best_close_any
+        min_dist = computeHaversineDistanceKm(best_city.coords[0], best_city.coords[1], target_lat, target_lng)
+      } else if (best_regional_named) {
+        best_city = best_regional_named
+        min_dist = computeHaversineDistanceKm(best_city.coords[0], best_city.coords[1], target_lat, target_lng)
+      } else if (is_cap_meta && best_close_any) {
+        best_city = best_close_any
+        min_dist = computeHaversineDistanceKm(best_city.coords[0], best_city.coords[1], target_lat, target_lng)
+      }
+    }
+
+    if (!best_city || min_dist > max_radius_km)
+      continue
+
+    let prev_binding = binding_state.get(best_city.key)
+    let best_primary_info = getCachedPrimaryAliases(best_city)
+    let best_all_info = getCachedCityAliases(best_city)
+    let is_primary_name_match = matchesAliasStemSet(meta_alias_info, best_primary_info)
+    let is_name_match = is_primary_name_match || matchesAliasStemSet(meta_alias_info, best_all_info)
+    let is_synthetic_stub = isSyntheticGhslEpochStub(meta)
+
+    // Tier-0 Capital Lock:
+    // 1. Non-capital overlay points NEVER overwrite a capital-locked settlement's name, history, or capitals.
+    // 2. A farther neighbouring Tier-0 capital (e.g. Chalcedon 4,5 km from Istanbul, Letopolis 12 km from Cairo)
+    //    NEVER hijacks an already-locked closer capital unless it matches the same city name or is strictly closer.
+    if (prev_binding?.is_capital_locked) {
+      if (!is_cap_meta) {
+        if (is_name_match && Array.isArray((meta as any).other_names))
+          mergeCityOtherNames(best_city, (meta as any).other_names)
+        continue
+      }
+      let is_strictly_closer_cap = min_dist + 0.5 < prev_binding.dist_km
+      if (!is_name_match && !is_strictly_closer_cap)
+        continue
+    }
+
+    let meta_max_year = -9999
+    for (let h = 0; h < (meta.historical_names || []).length; h++) {
+      if (meta.historical_names[h].year_frac > meta_max_year)
+        meta_max_year = meta.historical_names[h].year_frac
+    }
+    for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
+      if (meta.capital_records![c_i].year_frac > meta_max_year)
+        meta_max_year = meta.capital_records![c_i].year_frac
+    }
+    let meta_is_modern = meta_max_year >= 1700
+    let is_ghsl_city = Boolean(best_city.is_ghsl || String(best_city.key || '').startsWith('ghsl-'))
+    let is_displaced_neighbour = !is_cap_meta && !is_primary_name_match && Boolean(meta.name) &&
+      doesLabelMatchAnotherNearbyCity(best_city, meta.name!, spatial_grid, raw_city_name_by_key, primary_alias_cache, 15, cells_per_degree)
+
+    if (is_displaced_neighbour)
+      continue
+
+    // Nearest-point overlay application: Tier-0 capitals enforce capital city name (Structural Rule #3),
+    // respecting existing closer Tier-0 capital locks (strictly closer or same-city primary match wins)
+    let should_set_name = false
+    if (meta.name && !is_ghsl_city && !is_synthetic_stub) {
+      if (is_cap_meta) {
+        if (!prev_binding?.is_capital_locked || min_dist + 0.5 < prev_binding.dist_km)
+          should_set_name = true
+      } else if (!prev_binding) {
+        should_set_name = min_dist <= dense_cluster_km || is_name_match || isCorruptedCityName(best_city.name || '')
+      } else if (!prev_binding.is_capital_locked) {
+        if (is_primary_name_match && !prev_binding.has_primary_name_match)
+          should_set_name = true
+        else if (min_dist < prev_binding.dist_km && meta_max_year >= prev_binding.max_hn_year)
+          should_set_name = true
+      }
+    }
+
+    let meta_extra_aliases: string[] = []
+    if (Array.isArray((meta as any).other_names))
+      meta_extra_aliases.push(...(meta as any).other_names)
+
+    if (should_set_name && meta.name) {
+      if (
+        best_city.name &&
+        best_city.name.toLowerCase() !== meta.name.toLowerCase() &&
+        !isCorruptedCityName(best_city.name) &&
+        !doesLabelMatchAnotherNearbyCity(best_city, best_city.name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 15, cells_per_degree)
+      ) {
+        meta_extra_aliases.push(best_city.name)
+      }
+      best_city.name = meta.name
+      best_city.metadata_name = meta.name
+      city_alias_cache.delete(best_city.key)
+      primary_alias_cache.delete(best_city.key)
+    }
+
+    if (meta_extra_aliases.length > 0) {
+      mergeCityOtherNames(best_city, meta_extra_aliases)
+      city_alias_cache.delete(best_city.key)
+    }
+
+    if (meta.historical_names && meta.historical_names.length > 0) {
+      if (is_cap_meta && !prev_binding?.is_capital_locked)
+        best_city.historical_names = mergeHistoricalNames(meta.historical_names, best_city.historical_names)
+      else
+        best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
+    }
+
+    binding_state.set(best_city.key, {
+      dist_km: Math.min(prev_binding?.dist_km ?? 999999, min_dist),
+      has_modern_entry: Boolean(prev_binding?.has_modern_entry || meta_is_modern),
+      has_name_match: Boolean(prev_binding?.has_name_match || is_name_match),
+      has_primary_name_match: Boolean(prev_binding?.has_primary_name_match || is_primary_name_match),
+      is_capital_locked: Boolean(prev_binding?.is_capital_locked || is_cap_meta),
+      max_hn_year: Math.max(prev_binding?.max_hn_year ?? -9999, meta_max_year),
+    })
+
+    if (is_cap_meta || !is_displaced_neighbour)
+      mergeCityCapitalRecords(best_city, meta)
+
+    // Propagate bound metadata to co-located era/agglomeration counterparts (stadester <-> ghsl) within 15 km
+    let refreshed_best_primary = getCachedPrimaryAliases(best_city)
+    let is_best_agg = isMetroShell(best_city)
+    let deg_lat_15 = 15/111.0 + 0.02
+    let deg_lon_15 = 15/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
+    let rad_lat_15 = Math.max(1, Math.ceil(deg_lat_15*cells_per_degree))
+    let rad_lon_15 = Math.max(1, Math.ceil(deg_lon_15*cells_per_degree))
+
+    for (let d_lat = -rad_lat_15; d_lat <= rad_lat_15; d_lat++) {
+      for (let d_lng = -rad_lon_15; d_lng <= rad_lon_15; d_lng++) {
+        let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+        if (!cell)
+          continue
+        for (let c = 0; c < cell.length; c++) {
+          let other = cell[c]
+          if (other.key === best_city.key || !other.coords)
+            continue
+          let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
+          if (dist > 15)
+            continue
+
+          let other_own_name = cleanCandidateCityString(String(other.name || '').split(';')[0])
+          let other_own_info = buildAliasStemSet(other_own_name)
+          let is_era_cp = Boolean(
+            ((String(best_city.key).startsWith('stadester-') && String(other.key).startsWith('ghsl-')) ||
+             (String(best_city.key).startsWith('ghsl-') && String(other.key).startsWith('stadester-'))) &&
+            matchesAliasStemSet(other_own_info, refreshed_best_primary)
+          )
+          let is_agg_cp = Boolean((is_best_agg || isMetroShell(other)) && matchesAliasStemSet(other_own_info, refreshed_best_primary))
+          if (!is_era_cp && !is_agg_cp)
+            continue
+
+          let prev_other = binding_state.get(other.key)
+          if (prev_other?.is_capital_locked && !is_cap_meta)
+            continue
+          if (meta.historical_names && meta.historical_names.length > 0)
+            other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
+          if (meta_extra_aliases.length > 0)
+            mergeCityOtherNames(other, meta_extra_aliases)
+          mergeCityCapitalRecords(other, meta)
+        }
+      }
+    }
+  }
+
+  // Post-pass: ensure active modern settlements resolve to their latest historical name & clean duplicate aliases
+  for (let i = 0; i < entries.length; i++) {
+    let city = entries[i]
+    if (!city || city.is_ghsl || String(city.key || '').startsWith('ghsl-'))
+      continue
+
+    let bstate = binding_state.get(city.key)
+    if (!bstate?.is_capital_locked && (city.max_year ?? 0) >= 1950 && city.historical_names && city.historical_names.length > 0) {
+      let last_hn = city.historical_names[city.historical_names.length - 1]
+      if (last_hn.name && !isCorruptedCityName(last_hn.name)) {
+        let last_stem = normalizeCapitalNameStem(last_hn.name)
+        let name_stem = normalizeCapitalNameStem(city.name || '')
+        if (last_stem && name_stem && last_stem !== name_stem) {
+          let has_earlier = city.historical_names.slice(0, -1).some((arg0_h: HistoricalNameRecord) =>
+            normalizeCapitalNameStem(arg0_h.name || '') === name_stem
+          )
+          if (has_earlier) {
+            if (city.name && !isCorruptedCityName(city.name))
+              mergeCityOtherNames(city, [city.name])
+            city.name = last_hn.name
+          }
+        }
+      }
+    }
+
+    if (city.metadata_name || bstate) {
+      city.metadata_name = city.name
+      if ('reconciled_name' in city)
+        city.reconciled_name = city.name
+      if ('ghsl_name' in city)
+        city.ghsl_name = city.name
+    }
+  }
+
+  //Return statement
+  return meta_list.length
+}
+
+
+/**
+ * Applies per-version city metadata to indexed cities via the unified nearest-point spatial overlay engine.
  *
  * @param {Record<string, CityIndexEntry>} arg0_indexed_record
  * @param {string} [arg1_dataset_name='stadester_2.0']
@@ -61,408 +423,18 @@ export function applyCityMetadata (arg0_indexed_record: Record<string, CityIndex
   let indexed = arg0_indexed_record
 
   //Declare local instance variables
-  let all_keys = Object.keys(indexed)
-  let binding_state = new Map<string, BindingStateEntry>()
-  let city_alias_cache = new Map<string, AliasStemSet>()
-  let meta_list = loadCityMetadata(dataset_name)
-  let primary_alias_cache = new Map<string, AliasStemSet>()
-  let raw_city_name_by_key = new Map<string, string>()
-  let spatial_grid: Record<string, CityIndexEntry[]> = {}
+  let entries = Object.values(indexed)
 
   //Guard clauses
-  if (!meta_list || meta_list.length === 0 || all_keys.length === 0)
+  if (entries.length === 0)
     return
 
-  let cells_per_degree = 4
-
   //Function body
-  for (let x = 0; x < all_keys.length; x++) {
-    let city = indexed[all_keys[x]]
-    raw_city_name_by_key.set(city.key, city.name || '')
-    if (city.coords && Array.isArray(city.coords)) {
-      let bin_key = `${Math.floor(city.coords[0]*cells_per_degree)},${Math.floor(city.coords[1]*cells_per_degree)}`
-      if (!spatial_grid[bin_key])
-        spatial_grid[bin_key] = []
-      spatial_grid[bin_key].push(city)
-    }
-  }
+  let bound_count = bindCityMetadataOverlay(entries, dataset_name, {
+    key_lookup: (arg0_k: string) => indexed[arg0_k],
+  })
 
-  let getCachedCityAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
-    let cached = city_alias_cache.get(arg0_city.key)
-    if (cached)
-      return cached
-    let built = buildAliasStemSet(arg0_city.name, arg0_city.other_names)
-    city_alias_cache.set(arg0_city.key, built)
-    return built
-  }
-
-  let getCachedPrimaryAliases = function (arg0_city: CityIndexEntry): AliasStemSet {
-    let cached = primary_alias_cache.get(arg0_city.key)
-    if (cached)
-      return cached
-    let built = buildPrimaryCityNameSet(arg0_city, raw_city_name_by_key.get(arg0_city.key))
-    primary_alias_cache.set(arg0_city.key, built)
-    return built
-  }
-
-  for (let i = 0; i < meta_list.length; i++) {
-    let best_alias_named_city: CityIndexEntry | null = null
-    let best_city: CityIndexEntry | null = null
-    let best_exact_city: CityIndexEntry | null = null
-    let best_meta_name_primary_city: CityIndexEntry | null = null
-    let best_primary_named_city: CityIndexEntry | null = null
-    let meta = meta_list[i]
-    let meta_alias_info = buildAliasStemSet(meta.name, (meta as any).other_names)
-    let meta_name_info = buildAliasStemSet(meta.name)
-    let min_alias_named_dist = 999999
-    let min_dist = 999999
-    let min_exact_dist = 999999
-    let min_meta_name_primary_dist = 999999
-    let min_primary_named_dist = 999999
-    let target_lat = meta.coords[1]
-    let target_lng = meta.coords[0]
-    let has_meta_name_primary_within_50km = false
-
-    if (meta.key && indexed[meta.key]) {
-      best_city = indexed[meta.key]
-      min_dist = 0
-    }
-
-    let center_lat = Math.floor(target_lat*cells_per_degree)
-    let center_lng = Math.floor(target_lng*cells_per_degree)
-    let deg_lat_bound_50 = 50/111.0 + 0.02
-    let deg_lon_bound_50 = 50/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
-    let cell_radius_50 = Math.max(1, Math.ceil(deg_lon_bound_50*cells_per_degree))
-    let cell_radius_lat_50 = Math.max(1, Math.ceil(deg_lat_bound_50*cells_per_degree))
-
-    for (let d_lat = -cell_radius_lat_50; d_lat <= cell_radius_lat_50; d_lat++) {
-      for (let d_lng = -cell_radius_50; d_lng <= cell_radius_50; d_lng++) {
-        let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
-        if (!cell)
-          continue
-
-        for (let c = 0; c < cell.length; c++) {
-          let candidate = cell[c]
-          if (!candidate.coords)
-            continue
-          if (Math.abs(candidate.coords[0] - target_lat) > deg_lat_bound_50 || Math.abs(candidate.coords[1] - target_lng) > deg_lon_bound_50)
-            continue
-          let dist = computeHaversineDistanceKm(candidate.coords[0], candidate.coords[1], target_lat, target_lng)
-          if (dist <= 0.1 && dist < min_exact_dist) {
-            min_exact_dist = dist
-            best_exact_city = candidate
-          }
-          if (dist <= 50) {
-            let cand_all = getCachedCityAliases(candidate)
-            let cand_primary = getCachedPrimaryAliases(candidate)
-            let meta_name_primary_hit = matchesAliasStemSet(meta_name_info, cand_primary)
-            let primary_hit = meta_name_primary_hit || matchesAliasStemSet(meta_alias_info, cand_primary)
-            let alias_only_hit = !primary_hit && matchesAliasStemSet(meta_alias_info, cand_all)
-
-            if (meta_name_primary_hit) {
-              has_meta_name_primary_within_50km = true
-              if (dist < min_meta_name_primary_dist) {
-                min_meta_name_primary_dist = dist
-                best_meta_name_primary_city = candidate
-              }
-            }
-            if (primary_hit && dist < min_primary_named_dist) {
-              min_primary_named_dist = dist
-              best_primary_named_city = candidate
-            } else if (alias_only_hit && dist < min_alias_named_dist) {
-              min_alias_named_dist = dist
-              best_alias_named_city = candidate
-            }
-          }
-        }
-      }
-    }
-
-    if (!best_city) {
-      if (best_meta_name_primary_city) {
-        best_city = best_meta_name_primary_city
-        min_dist = min_meta_name_primary_dist
-      } else if (best_primary_named_city) {
-        best_city = best_primary_named_city
-        min_dist = min_primary_named_dist
-      } else if (best_alias_named_city && !has_meta_name_primary_within_50km) {
-        best_city = best_alias_named_city
-        min_dist = min_alias_named_dist
-      } else if (best_exact_city) {
-        best_city = best_exact_city
-        min_dist = min_exact_dist
-      }
-    }
-
-    if (!best_city || min_dist > 50)
-      continue
-
-    let best_all_info = getCachedCityAliases(best_city)
-    let best_primary_info = getCachedPrimaryAliases(best_city)
-    let is_exact_coord_match = min_dist <= 0.1
-    let is_primary_name_match = matchesAliasStemSet(meta_alias_info, best_primary_info)
-    let is_alias_only_match = !is_primary_name_match && matchesAliasStemSet(meta_alias_info, best_all_info)
-    let is_name_match = is_primary_name_match || is_alias_only_match
-
-    if ((!is_exact_coord_match && !is_name_match) || (is_alias_only_match && has_meta_name_primary_within_50km))
-      continue
-
-    let meta_max_year = -9999
-    for (let h = 0; h < (meta.historical_names || []).length; h++) {
-      if (meta.historical_names[h].year_frac > meta_max_year)
-        meta_max_year = meta.historical_names[h].year_frac
-    }
-    for (let c_i = 0; c_i < (meta.capital_records || []).length; c_i++) {
-      if (meta.capital_records![c_i].year_frac > meta_max_year)
-        meta_max_year = meta.capital_records![c_i].year_frac
-    }
-
-    let meta_is_modern = meta_max_year >= 1700
-    let prev_binding = binding_state.get(best_city.key)
-
-    //Once a city is matched by primary name, block subsequent unrelated non-primary entries even at <= 0.1 km
-    if (!is_name_match && prev_binding?.has_primary_name_match)
-      continue
-    if (!is_name_match && prev_binding?.has_name_match && (meta_max_year < -9000 || (prev_binding.has_modern_entry && meta_is_modern)))
-      continue
-
-    let is_best_corrupted = isCorruptedCityName(best_city.name || '')
-    let is_displaced_neighbour = !is_primary_name_match && Boolean(meta.name) &&
-      doesLabelMatchAnotherNearbyCity(best_city, meta.name!, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
-    let is_synthetic_stub = isSyntheticGhslEpochStub(meta)
-
-    if (!is_name_match && is_displaced_neighbour)
-      continue
-
-    let best_pop = best_city.population || {}
-    let best_pop_years = Object.keys(best_pop).map(Number).filter((arg0_y) => Number.isFinite(arg0_y) && Number(best_pop[arg0_y]) > 0)
-    let best_is_active_modern = best_pop_years.some((arg0_y) => arg0_y >= 1950)
-    let can_overwrite_name = Boolean(
-      meta.name &&
-      !best_city.key.startsWith('ghsl-') &&
-      (
-        (is_primary_name_match && (is_exact_coord_match || min_dist <= 15) && !is_synthetic_stub) ||
-        (!is_primary_name_match && min_dist <= 1.0 && is_best_corrupted)
-      )
-    )
-    let should_set_name = false
-
-    if (can_overwrite_name) {
-      if (!prev_binding) {
-        should_set_name = true
-      } else if (prev_binding.has_primary_name_match && !is_primary_name_match) {
-        should_set_name = false
-      } else if (is_primary_name_match && !prev_binding.has_primary_name_match) {
-        should_set_name = true
-      } else if (is_name_match && !prev_binding.has_name_match) {
-        should_set_name = true
-      } else if (is_name_match && meta_max_year >= prev_binding.max_hn_year && !(prev_binding.has_modern_entry && meta_max_year < 1700)) {
-        should_set_name = true
-      }
-    }
-
-    let meta_extra_aliases: string[] = []
-    if (meta.name)
-      meta_extra_aliases.push(meta.name)
-    if (Array.isArray((meta as any).other_names))
-      meta_extra_aliases.push(...(meta as any).other_names)
-    if (meta.historical_names) {
-      for (let h = 0; h < meta.historical_names.length; h++)
-        meta_extra_aliases.push(meta.historical_names[h].name)
-    }
-
-    if (should_set_name && meta.name) {
-      if (
-        best_city.name &&
-        best_city.name !== meta.name &&
-        !isCorruptedCityName(best_city.name) &&
-        !doesLabelMatchAnotherNearbyCity(best_city, best_city.name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
-      ) {
-        meta_extra_aliases.push(best_city.name)
-      }
-      best_city.name = meta.name
-      best_city.metadata_name = meta.name
-      city_alias_cache.delete(best_city.key)
-      primary_alias_cache.delete(best_city.key)
-    }
-
-    let allow_hist_merge = is_primary_name_match ||
-      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && !best_is_active_modern && (is_name_match || (!prev_binding?.has_name_match && !meta_is_modern)))
-    let allow_other_merge = is_primary_name_match ||
-      (!prev_binding?.has_primary_name_match && !is_displaced_neighbour && (is_name_match || !prev_binding?.has_name_match))
-
-    if (allow_other_merge) {
-      mergeCityOtherNames(best_city, meta_extra_aliases)
-      city_alias_cache.delete(best_city.key)
-    }
-
-    if (meta.historical_names && meta.historical_names.length > 0 && allow_hist_merge)
-      best_city.historical_names = mergeHistoricalNames(best_city.historical_names, meta.historical_names)
-
-    binding_state.set(best_city.key, {
-      has_modern_entry: Boolean(prev_binding?.has_modern_entry || (is_name_match && meta_is_modern)),
-      has_name_match: Boolean(prev_binding?.has_name_match || is_name_match),
-      has_primary_name_match: Boolean(prev_binding?.has_primary_name_match || is_primary_name_match),
-      max_hn_year: Math.max(prev_binding?.max_hn_year ?? -9999, (is_primary_name_match || !prev_binding?.has_primary_name_match) ? meta_max_year : -9999),
-    })
-
-    if (!is_displaced_neighbour || is_primary_name_match)
-      mergeCityCapitalRecords(best_city, meta)
-
-    let refreshed_best_primary = getCachedPrimaryAliases(best_city)
-    let is_best_agg = Boolean(
-      best_city.is_agglomeration ||
-      /\(agglomeration\??\)/i.test(best_city.key || '') ||
-      /\(agglomeration\??\)/i.test(best_city.name || '')
-    )
-    let is_best_period = Boolean(
-      /\(\d{3,4}[–-]\d{3,4}\)/.test(best_city.name || '') ||
-      /\(\d{3,4}[–-]\d{3,4}\)/.test(best_city.key || '')
-    )
-
-    let deg_lat_bound_25 = 25/111.0 + 0.02
-    let deg_lon_bound_25 = 25/(111.0*Math.max(0.2, Math.cos((target_lat*Math.PI)/180))) + 0.02
-    let cell_radius_lat_25 = Math.max(1, Math.ceil(deg_lat_bound_25*cells_per_degree))
-    let cell_radius_lon_25 = Math.max(1, Math.ceil(deg_lon_bound_25*cells_per_degree))
-
-    for (let d_lat = -cell_radius_lat_25; d_lat <= cell_radius_lat_25; d_lat++) {
-      for (let d_lng = -cell_radius_lon_25; d_lng <= cell_radius_lon_25; d_lng++) {
-        let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
-        if (!cell)
-          continue
-
-        for (let c = 0; c < cell.length; c++) {
-          let other = cell[c]
-          if (other.key === best_city.key || !other.coords)
-            continue
-          if (Math.abs(other.coords[0] - target_lat) > deg_lat_bound_25 || Math.abs(other.coords[1] - target_lng) > deg_lon_bound_25)
-            continue
-
-          let dist = computeHaversineDistanceKm(other.coords[0], other.coords[1], target_lat, target_lng)
-          if (dist > 25)
-            continue
-
-          let other_own_name = cleanCandidateCityString(String(other.name || '').split(';')[0])
-          let other_raw_name = cleanCandidateCityString(String(raw_city_name_by_key.get(other.key) || '').split(';')[0])
-          let other_own_info = buildAliasStemSet(
-            other_own_name,
-            (other_raw_name && other_raw_name !== other_own_name) ? [other_raw_name] : undefined
-          )
-
-          let is_era_counterpart = Boolean(
-            ((best_city.key.startsWith('stadester-') && other.key.startsWith('ghsl-')) ||
-             (best_city.key.startsWith('ghsl-') && other.key.startsWith('stadester-'))) &&
-            matchesAliasStemSet(other_own_info, refreshed_best_primary)
-          )
-
-          let is_agg_flag = Boolean(
-            is_best_agg ||
-            other.is_agglomeration ||
-            /\(agglomeration\??\)/i.test(other.key || '') ||
-            /\(agglomeration\??\)/i.test(other.name || '')
-          )
-          let is_period_split = Boolean(
-            is_best_period ||
-            /\(\d{3,4}[–-]\d{3,4}\)/.test(other.name || '') ||
-            /\(\d{3,4}[–-]\d{3,4}\)/.test(other.key || '')
-          )
-          let agg_of_info = other.is_agglomeration_of ? buildAliasStemSet(other.is_agglomeration_of) : null
-          let matches_best_primary = matchesAliasStemSet(other_own_info, refreshed_best_primary) ||
-            Boolean(agg_of_info && matchesAliasStemSet(agg_of_info, refreshed_best_primary))
-          let is_agg_or_period_counterpart = Boolean(
-            matches_best_primary &&
-            ((is_agg_flag && dist <= 25) || (is_period_split && dist <= 15))
-          )
-
-          if (!is_era_counterpart && !is_agg_or_period_counterpart)
-            continue
-
-          let prev_other = binding_state.get(other.key)
-          let other_extra_aliases = [...meta_extra_aliases]
-          let other_is_corrupted = isCorruptedCityName(other.name || '')
-          let can_rename_other = Boolean(
-            dist <= 15 &&
-            meta.name &&
-            !other.key.startsWith('ghsl-') &&
-            (other_is_corrupted || (!is_alias_only_match && !is_synthetic_stub)) &&
-            (!prev_other?.has_primary_name_match || is_primary_name_match) &&
-            (!prev_other || (meta_max_year >= prev_other.max_hn_year && !(prev_other.has_modern_entry && meta_max_year < 1700)))
-          )
-
-          if (can_rename_other && meta.name) {
-            if (other.name && other.name !== meta.name && !isCorruptedCityName(other.name))
-              other_extra_aliases.push(other.name)
-            other.name = meta.name
-            other.metadata_name = meta.name
-            primary_alias_cache.delete(other.key)
-          }
-
-          mergeCityOtherNames(other, other_extra_aliases)
-          city_alias_cache.delete(other.key)
-
-          if (meta.historical_names && meta.historical_names.length > 0 && (!prev_other?.has_primary_name_match || is_primary_name_match))
-            other.historical_names = mergeHistoricalNames(other.historical_names, meta.historical_names)
-
-          binding_state.set(other.key, {
-            has_modern_entry: Boolean(prev_other?.has_modern_entry || meta_is_modern),
-            has_name_match: true,
-            has_primary_name_match: Boolean(prev_other?.has_primary_name_match || is_primary_name_match),
-            max_hn_year: Math.max(prev_other?.max_hn_year ?? -9999, meta_max_year),
-          })
-          mergeCityCapitalRecords(other, meta)
-        }
-      }
-    }
-  }
-
-  //Post-pass: ensure modern cities with post-1950 populations resolve to their latest modern metadata name
-  for (let i = 0; i < all_keys.length; i++) {
-    let city = indexed[all_keys[i]]
-    if (!city || city.key.startsWith('ghsl-'))
-      continue
-
-    if ((city.max_year ?? 0) >= 1950 && city.historical_names && city.historical_names.length > 0) {
-      let last_hn = city.historical_names[city.historical_names.length - 1]
-      let last_stem = normalizeCapitalNameStem(last_hn.name || '')
-      let name_stem = normalizeCapitalNameStem(city.name || '')
-
-      if (last_hn.name && !isCorruptedCityName(last_hn.name) && last_stem !== name_stem) {
-        let city_alias = normalizeCityAlias(city.name || '')
-        let has_earlier_match = city.historical_names.slice(0, -1).some((arg0_h) => {
-          let h_alias = normalizeCityAlias(arg0_h.name || '')
-          return normalizeCapitalNameStem(arg0_h.name || '') === name_stem ||
-            (Boolean(city_alias) && Boolean(h_alias) && h_alias === city_alias)
-        })
-        let raw_name = raw_city_name_by_key.get(city.key) || ''
-        let raw_alias = normalizeCityAlias(raw_name)
-        let last_alias = normalizeCityAlias(last_hn.name || '')
-        let raw_matched_last = Boolean(
-          (last_stem && normalizeCapitalNameStem(raw_name) === last_stem) ||
-          (last_alias && raw_alias && raw_alias === last_alias)
-        )
-
-        if (has_earlier_match || raw_matched_last) {
-          let old_name = city.name
-          if (
-            old_name &&
-            !isCorruptedCityName(old_name) &&
-            !doesLabelMatchAnotherNearbyCity(city, old_name, spatial_grid, raw_city_name_by_key, primary_alias_cache, 25, cells_per_degree)
-          ) {
-            mergeCityOtherNames(city, [old_name])
-          }
-          city.name = last_hn.name
-        }
-      }
-    }
-
-    if (city.metadata_name || binding_state.has(city.key)) {
-      city.metadata_name = city.name
-      city.reconciled_name = city.name
-      city.ghsl_name = city.name
-    }
-  }
-
-  console.log(`[StadesterMetadata] Successfully bound ${meta_list.length} historical city metadata entries.`)
+  console.log(`[StadesterMetadata] Dropped ${bound_count} spatial overlay metadata points onto ${entries.length} settlements.`)
 }
 
 
@@ -663,8 +635,11 @@ export function loadCityMetadata (arg0_dataset_name?: string, arg1_region_keys?:
         if (Array.isArray(raw_arr)) {
           for (let i = 0; i < raw_arr.length; i++) {
             let item = normalizeMetadataEntry(raw_arr[i])
-            if (item)
+            if (item) {
+              if (is_cap)
+                item.is_capital_tier = true
               normalized_list.push(item)
+            }
           }
         }
       }

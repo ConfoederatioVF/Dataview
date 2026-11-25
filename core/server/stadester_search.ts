@@ -388,6 +388,11 @@ export function getCityByKey (
       e_meta_lower === stripped_key
     ) {
       is_match = true
+    } else if (Array.isArray(entry.historical_names) && entry.historical_names.some((arg0_hn) => {
+      let hn_low = String(arg0_hn?.name || '').trim().toLowerCase()
+      return Boolean(hn_low && (hn_low === city_key_lower || hn_low === stripped_key || hn_low === key_city.toLowerCase()))
+    })) {
+      is_match = true
     } else if (entry.other_names && Array.isArray(entry.other_names)) {
       if (entry.other_names.some((arg0_on: string) => {
         let on_clean = arg0_on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()

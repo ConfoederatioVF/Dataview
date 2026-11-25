@@ -398,36 +398,49 @@ export function mergeCityOtherNames (arg0_city: CityIndexEntry, arg1_extra_names
   let extra_names = arg1_extra_names
 
   //Declare local instance variables
+  let best_by_low = new Map<string, string>()
+  let excluded_low = new Set<string>()
   let existing_arr: string[] = []
   let merged: string[] = []
-  let seen_lower = new Set<string>()
+  let order: string[] = []
+  let scoreCase = function (arg0_str: string): number {
+    let has_upper = /[A-Z\u00C0-\u00DE]/.test(arg0_str)
+    let has_lower = /[a-z\u00DF-\u00FF]/.test(arg0_str)
+    let has_diacritic = /[\u00C0-\u024F]/.test(arg0_str)
+    return (has_upper && has_lower ? 4 : (has_upper ? 1 : 2)) + (has_diacritic ? 1 : 0)
+  }
 
   //Function body
+  if (city.name)
+    excluded_low.add(String(city.name).trim().toLowerCase())
+
   if (Array.isArray(city.other_names)) {
     existing_arr = city.other_names
   } else if (typeof city.other_names === 'string' && city.other_names.trim()) {
     existing_arr = [city.other_names]
   }
 
-  for (let i = 0; i < existing_arr.length; i++) {
-    let clean = String(existing_arr[i] || '').trim()
+  let all_inputs = existing_arr.concat(extra_names)
+  for (let i = 0; i < all_inputs.length; i++) {
+    let clean = String(all_inputs[i] || '').trim()
     let low = clean.toLowerCase()
-    if (clean && !seen_lower.has(low)) {
-      seen_lower.add(low)
-      merged.push(clean)
-    }
-  }
-  for (let i = 0; i < extra_names.length; i++) {
-    let clean = String(extra_names[i] || '').trim()
-    let low = clean.toLowerCase()
-    if (clean && !seen_lower.has(low)) {
-      seen_lower.add(low)
-      merged.push(clean)
+    if (!clean || excluded_low.has(low))
+      continue
+    if (!best_by_low.has(low)) {
+      best_by_low.set(low, clean)
+      order.push(low)
+    } else if (scoreCase(clean) > scoreCase(best_by_low.get(low)!)) {
+      best_by_low.set(low, clean)
     }
   }
 
+  for (let i = 0; i < order.length; i++)
+    merged.push(best_by_low.get(order[i])!)
+
   if (merged.length > 0)
     city.other_names = merged
+  else
+    delete city.other_names
 }
 
 

@@ -111,8 +111,8 @@ export let normalizeMetadataEntry = function (
 
   //Declare local instance variables
   let candidate_coords: [number, number] | null = null
-  let capital_dict: Record<string, number | string> = {}
-  let capital_records: CapitalRecord[] = []
+  let capital_dict: Record<string, number | string | null> | undefined = undefined
+  let capital_records: CapitalRecord[] | undefined = undefined
   let entry_name: string = ''
   let hist_names: HistoricalNameRecord[] = []
   let raw_capital: any
@@ -125,19 +125,19 @@ export let normalizeMetadataEntry = function (
   //Function body
   //1. Extract [lng, lat] coordinates
   if (Array.isArray(raw.coords) && raw.coords.length >= 2) {
-    let num0 = parseFloat(raw.coords[0])
-    let num1 = parseFloat(raw.coords[1])
-    if (!isNaN(num0) && !isNaN(num1))
+    let num0 = typeof raw.coords[0] === 'number' ? raw.coords[0] : parseFloat(raw.coords[0])
+    let num1 = typeof raw.coords[1] === 'number' ? raw.coords[1] : parseFloat(raw.coords[1])
+    if (Number.isFinite(num0) && Number.isFinite(num1))
       candidate_coords = [num0, num1]
   } else if (raw.lng !== undefined && raw.lat !== undefined) {
-    let num_lng = parseFloat(raw.lng)
-    let num_lat = parseFloat(raw.lat)
-    if (!isNaN(num_lng) && !isNaN(num_lat))
+    let num_lng = typeof raw.lng === 'number' ? raw.lng : parseFloat(raw.lng)
+    let num_lat = typeof raw.lat === 'number' ? raw.lat : parseFloat(raw.lat)
+    if (Number.isFinite(num_lng) && Number.isFinite(num_lat))
       candidate_coords = [num_lng, num_lat]
   } else if (raw.lon !== undefined && raw.lat !== undefined) {
-    let num_lon = parseFloat(raw.lon)
-    let num_lat = parseFloat(raw.lat)
-    if (!isNaN(num_lon) && !isNaN(num_lat))
+    let num_lon = typeof raw.lon === 'number' ? raw.lon : parseFloat(raw.lon)
+    let num_lat = typeof raw.lat === 'number' ? raw.lat : parseFloat(raw.lat)
+    if (Number.isFinite(num_lon) && Number.isFinite(num_lat))
       candidate_coords = [num_lon, num_lat]
   }
 
@@ -182,10 +182,12 @@ export let normalizeMetadataEntry = function (
     }
   }
 
-  //4. Extract capital dictionary
+  //4. Extract capital dictionary only when present
   raw_capital = raw.capital || raw.capitals
 
-  if (Array.isArray(raw_capital)) {
+  if (Array.isArray(raw_capital) && raw_capital.length > 0) {
+    capital_dict = {}
+    capital_records = []
     for (let i = 0; i < raw_capital.length; i++) {
       let item = raw_capital[i]
       if (item && typeof item === 'object') {
@@ -206,24 +208,30 @@ export let normalizeMetadataEntry = function (
     }
   } else if (raw_capital && typeof raw_capital === 'object') {
     let cap_keys = Object.keys(raw_capital)
-    for (let i = 0; i < cap_keys.length; i++) {
-      let d_key = cap_keys[i]
-      let s_val = raw_capital[d_key]
-      let parsed_date = parseYearMonthDay(d_key)
-      let date_clean = d_key.trim()
-      let state_target = (s_val !== undefined && s_val !== null) ? s_val : null
-      capital_dict[date_clean] = state_target
-      capital_records.push({
-        date: date_clean,
-        state_id: state_target,
-        year_frac: parsed_date.year_frac,
-      })
+    if (cap_keys.length > 0) {
+      capital_dict = {}
+      capital_records = []
+      for (let i = 0; i < cap_keys.length; i++) {
+        let d_key = cap_keys[i]
+        let s_val = raw_capital[d_key]
+        let parsed_date = parseYearMonthDay(d_key)
+        let date_clean = d_key.trim()
+        let state_target = (s_val !== undefined && s_val !== null) ? s_val : null
+        capital_dict[date_clean] = state_target
+        capital_records.push({
+          date: date_clean,
+          state_id: state_target,
+          year_frac: parsed_date.year_frac,
+        })
+      }
     }
   }
 
-  //Sort historical name transitions chronologically by fractional year
-  hist_names.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
-  capital_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+  //Sort historical name and capital transitions chronologically only when multi-entry
+  if (hist_names.length > 1)
+    hist_names.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
+  if (capital_records && capital_records.length > 1)
+    capital_records.sort((arg0_a, arg0_b) => arg0_a.year_frac - arg0_b.year_frac)
 
   //Derive canonical display name from latest historical name when compact `[lng, lat]` + `names` records omit top-level `name`
   if (!entry_name && hist_names.length > 0)
@@ -234,23 +242,25 @@ export let normalizeMetadataEntry = function (
   let raw_other_source = raw.other_names || raw.names_other
   if (raw_other_source) {
     let raw_other_arr = Array.isArray(raw_other_source) ? raw_other_source : [raw_other_source]
-    let excl_low = new Set<string>()
-    if (entry_name)
-      excl_low.add(entry_name.trim().toLowerCase())
-    for (let i = 0; i < hist_names.length; i++)
-      excl_low.add(hist_names[i].name.trim().toLowerCase())
-    let seen_other = new Set<string>()
-    let clean_other: string[] = []
-    for (let i = 0; i < raw_other_arr.length; i++) {
-      let s = String(raw_other_arr[i] || '').trim()
-      let low = s.toLowerCase()
-      if (!s || excl_low.has(low) || seen_other.has(low))
-        continue
-      seen_other.add(low)
-      clean_other.push(s)
+    if (raw_other_arr.length > 0) {
+      let excl_low = new Set<string>()
+      if (entry_name)
+        excl_low.add(entry_name.trim().toLowerCase())
+      for (let i = 0; i < hist_names.length; i++)
+        excl_low.add(hist_names[i].name.trim().toLowerCase())
+      let seen_other = new Set<string>()
+      let clean_other: string[] = []
+      for (let i = 0; i < raw_other_arr.length; i++) {
+        let s = String(raw_other_arr[i] || '').trim()
+        let low = s.toLowerCase()
+        if (!s || excl_low.has(low) || seen_other.has(low))
+          continue
+        seen_other.add(low)
+        clean_other.push(s)
+      }
+      if (clean_other.length > 0)
+        dedup_other = clean_other
     }
-    if (clean_other.length > 0)
-      dedup_other = clean_other
   }
 
   //Return statement
@@ -260,7 +270,7 @@ export let normalizeMetadataEntry = function (
     capital_records: capital_records,
     coords: candidate_coords,
     historical_names: hist_names,
-    is_capital_tier: Boolean(raw.is_capital_tier || raw.cap || capital_records.length > 0),
+    is_capital_tier: Boolean(raw.is_capital_tier || raw.cap || (capital_records && capital_records.length > 0)),
     key: raw.key || entry_key,
     name: entry_name,
     other_names: dedup_other,
@@ -303,6 +313,20 @@ export let parseYearMonthDay = function (arg0_date_val: string | number): Parsed
 
   //Function body
   raw_str = String(date_val).trim()
+  //Fast-path canonical YYYY.1.1 / -YYYY.1.1 integer dates (avoids UfDate allocations across 581k metadata entries)
+  if (raw_str.endsWith('.1.1')) {
+    let yr_part = raw_str.slice(0, -4)
+    if (/^-?\d+$/.test(yr_part)) {
+      year_val = parseInt(yr_part, 10)
+      return {
+        day: 1,
+        month: 1,
+        year: year_val,
+        year_frac: year_val,
+      }
+    }
+  }
+
   if (raw_str.startsWith('-')) {
     is_negative = true
     clean_str = raw_str.slice(1).trim()
@@ -329,11 +353,15 @@ export let parseYearMonthDay = function (arg0_date_val: string | number): Parsed
       day_val = parsed_day
   }
 
-  year_frac = UfDate.toFractionalYear({
-    day: day_val,
-    month: month_val,
-    year: year_val,
-  })
+  if (month_val === 1 && day_val === 1) {
+    year_frac = year_val
+  } else {
+    year_frac = UfDate.toFractionalYear({
+      day: day_val,
+      month: month_val,
+      year: year_val,
+    })
+  }
 
   //Return statement
   return {
@@ -603,14 +631,18 @@ export let normalizeCapitalNameStem = function (arg0_name: string): string {
     stripBracketedPostfixes(String(name).split(';')[0].replace(/\(s\)/gi, '').trim())
   )
 
-  stem = base
-    .toLowerCase()
-    .replace(/ł/g, 'l')
-    .replace(/đ/g, 'd')
-    .replace(/ø/g, 'o')
-    .replace(/ß/g, 'ss')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  stem = base.toLowerCase()
+  if (/[^\u0020-\u007E]/.test(stem)) {
+    stem = stem
+      .replace(/ł/g, 'l')
+      .replace(/đ/g, 'd')
+      .replace(/ø/g, 'o')
+      .replace(/ß/g, 'ss')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  }
+
+  stem = stem
     .replace(/['’‘`´^ʻʼʾʿ]/g, '')
     .replace(/[-_.,/]+/g, ' ')
     .replace(/\s+/g, ' ')
@@ -642,13 +674,16 @@ export let normalizeCityKey = function (arg0_key: string): string {
   if (!key)
     return ''
 
+  //Declare local instance variables
+  let out: string
+
+  //Function body
+  out = stripBracketedPostfixes(key.replace(/^(stadester|ghsl|oxford)-/i, '')).replace(/['’‘`´^ʻʼʾʿ]/g, '')
+  if (/[^\u0020-\u007E]/.test(out))
+    out = out.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
   //Return statement
-  return stripBracketedPostfixes(key.replace(/^(stadester|ghsl|oxford)-/i, ''))
-    .replace(/['’‘`´^ʻʼʾʿ]/g, '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
+  return out.toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
 /**
@@ -669,6 +704,7 @@ export let normalizePrimaryCityKey = function (arg0_key: string): string {
 
   //Declare local instance variables
   let city_part: string
+  let combined: string
   let country: string
   let parts: string[]
   let primary_city: string
@@ -680,18 +716,23 @@ export let normalizePrimaryCityKey = function (arg0_key: string): string {
   country = parts.length > 1 ? parts[parts.length - 1] : ''
   city_part = parts.length > 1 ? parts.slice(0, parts.length - 1).join('-') : stripped
   primary_city = normalizeInvertedArticle(stripBracketedPostfixes(city_part.split(';')[0]))
+  combined = (primary_city + (country ? '-' + country : '')).toLowerCase()
+
+  if (/[^\u0020-\u007E]/.test(combined)) {
+    combined = combined
+      .replace(/ł/g, 'l')
+      .replace(/đ/g, 'd')
+      .replace(/ø/g, 'o')
+      .replace(/ß/g, 'ss')
+      .replace(/['’‘`´^ʻʼʾʿ]/g, '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  } else {
+    combined = combined.replace(/['`^]/g, '')
+  }
 
   //Return statement
-  return (primary_city + (country ? '-' + country : ''))
-    .toLowerCase()
-    .replace(/ł/g, 'l')
-    .replace(/đ/g, 'd')
-    .replace(/ø/g, 'o')
-    .replace(/ß/g, 'ss')
-    .replace(/['’‘`´^ʻʼʾʿ]/g, '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '')
+  return combined.replace(/[^a-z0-9]/g, '')
 }
 
 /**
@@ -714,11 +755,11 @@ export let normalizeCityAlias = function (arg0_name: string): string {
 
   //Function body
   base = normalizeInvertedArticle(stripBracketedPostfixes(String(name)))
+  if (/[^\u0020-\u007E]/.test(base))
+    base = base.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
   //Return statement
   return base
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[.-]/g, ' ')
     .replace(/\s+/g, ' ')

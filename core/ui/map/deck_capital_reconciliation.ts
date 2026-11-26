@@ -264,26 +264,14 @@ export function buildAuthoritativeCapitalsByCity (
 
   //Declare local instance variables
   let authoritative_capitals_by_city = new Map<string, any>()
-  let pts_by_key = new Map<string, number>()
-  let pts_by_name = new Map<string, number[]>()
-  let pts_grid = new Map<string, number[]>()
+  let pts_grid = new Map<number, number[]>()
 
   //Guard clauses
   if (!active_capitals_list || active_capitals_list.length === 0 || !effective_points || effective_points.length === 0)
     return authoritative_capitals_by_city
 
   //Function body
-  let addPointName = function (arg0_nm: string, arg1_idx: number): void {
-    if (!arg0_nm)
-      return
-    let arr = pts_by_name.get(arg0_nm)
-    if (!arr) {
-      arr = []
-      pts_by_name.set(arg0_nm, arr)
-    }
-    arr.push(arg1_idx)
-  }
-
+  //Index city coordinates into 1-deg integer grid (all valid matches require dist <= 0.25 from cap_coords)
   for (let i = 0; i < effective_points.length; i++) {
     let c = effective_points[i]
     let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
@@ -291,99 +279,39 @@ export function buildAuthoritativeCapitalsByCity (
     if (c_lat === undefined || c_lon === undefined)
       continue
 
-    let cell = `${Math.floor(c_lon)}_${Math.floor(c_lat)}`
-    let b = pts_grid.get(cell)
+    let cell_key = (Math.floor(c_lat) + 256)*1024 + (Math.floor(c_lon) + 512)
+    let b = pts_grid.get(cell_key)
     if (!b) {
       b = []
-      pts_grid.set(cell, b)
+      pts_grid.set(cell_key, b)
     }
     b.push(i)
-
-    if (c.key) {
-      pts_by_key.set(c.key, i)
-      let clean_k = normalizeCityKey(c.key)
-      let prim_k = normalizePrimaryCityKey(c.key)
-      if (clean_k)
-        pts_by_key.set(clean_k, i)
-      if (prim_k)
-        pts_by_key.set(prim_k, i)
-    }
-    if (c.id) {
-      pts_by_key.set(String(c.id), i)
-      let clean_id = normalizeCityKey(String(c.id))
-      let prim_id = normalizePrimaryCityKey(String(c.id))
-      if (clean_id)
-        pts_by_key.set(clean_id, i)
-      if (prim_id)
-        pts_by_key.set(prim_id, i)
-    }
-
-    if (c.name) {
-      let c_name_lower = c.name.toLowerCase().trim()
-      let c_name_nfd = c_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      let c_stem = normalizeCapitalNameStem(c.name)
-      addPointName(c_name_lower, i)
-      addPointName(c_name_nfd, i)
-      addPointName(c_stem, i)
-    }
-    if (c.shortName)
-      addPointName(normalizeCapitalNameStem(c.shortName), i)
-
-    if (Array.isArray(c.other_names)) {
-      for (let x = 0; x < c.other_names.length; x++) {
-        let on = String(c.other_names[x] || '')
-        let on_clean = on.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
-        let on_nfd = on_clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        addPointName(on_clean, i)
-        addPointName(on_nfd, i)
-        addPointName(normalizeCapitalNameStem(on), i)
-      }
-    }
   }
 
   for (let i = 0; i < active_capitals_list.length; i++) {
     let cap = active_capitals_list[i]
+    if (!cap || !cap.cap_coords)
+      continue
     let best_city: any = null
     let best_score = -1
-    let candidate_indices = new Set<number>()
+    let candidate_indices: number[] = []
 
-    if (cap.cap_coords) {
-      let min_cx = Math.floor(cap.cap_coords[0] - 0.25)
-      let max_cx = Math.floor(cap.cap_coords[0] + 0.25)
-      let min_cy = Math.floor(cap.cap_coords[1] - 0.25)
-      let max_cy = Math.floor(cap.cap_coords[1] + 0.25)
+    let min_cx = Math.floor(cap.cap_coords[0] - 0.25)
+    let max_cx = Math.floor(cap.cap_coords[0] + 0.25)
+    let min_cy = Math.floor(cap.cap_coords[1] - 0.25)
+    let max_cy = Math.floor(cap.cap_coords[1] + 0.25)
 
-      for (let x = min_cx; x <= max_cx; x++) {
-        for (let y = min_cy; y <= max_cy; y++) {
-          let bucket = pts_grid.get(`${x}_${y}`)
-          if (bucket) {
-            for (let z = 0; z < bucket.length; z++)
-              candidate_indices.add(bucket[z])
-          }
+    for (let x = min_cx; x <= max_cx; x++) {
+      for (let y = min_cy; y <= max_cy; y++) {
+        let bucket = pts_grid.get((y + 256)*1024 + (x + 512))
+        if (bucket) {
+          for (let z = 0; z < bucket.length; z++)
+            candidate_indices.push(bucket[z])
         }
       }
     }
 
-    if (cap.capkey) {
-      let idx = pts_by_key.get(cap.capkey) ?? pts_by_key.get(normalizeCityKey(cap.capkey)) ?? pts_by_key.get(normalizePrimaryCityKey(cap.capkey))
-      if (idx !== undefined)
-        candidate_indices.add(idx)
-    }
-
-    if (cap.capname) {
-      let cap_name_lower = cap.capname.toLowerCase().trim()
-      let cap_name_nfd = cap_name_lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      let cap_stem = normalizeCapitalNameStem(cap.capname)
-      for (let nm of [cap_name_lower, cap_name_nfd, cap_stem]) {
-        let list = nm ? pts_by_name.get(nm) : undefined
-        if (list) {
-          for (let x = 0; x < list.length; x++)
-            candidate_indices.add(list[x])
-        }
-      }
-    }
-
-    let all_candidates = Array.from(candidate_indices)
+    let all_candidates = candidate_indices
     for (let x = 0; x < all_candidates.length; x++) {
       let c = effective_points[all_candidates[x]]
       let c_lat = c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : undefined))
@@ -860,9 +788,70 @@ export function reconcileCitiesWithAuthoritativeBorders (
   let suppressed_capital_indices = new Set<number>()
 
   //Function body
-  //1. First pass: run baseline authoritative reconciliation on each individual city
+  //0. Pre-index 1-deg cells adjacent to designated capital coordinates so distant non-capitals bypass Pass 1 regex work
+  let cap_coord_cells = new Set<number>()
+  let has_coordless_cap = false
+  if (active_capitals_list && active_capitals_list.length > 0) {
+    for (let i = 0; i < active_capitals_list.length; i++) {
+      let cap = active_capitals_list[i]
+      if (!cap)
+        continue
+      if (!cap.cap_coords) {
+        has_coordless_cap = true
+        continue
+      }
+      let min_gy = Math.floor(cap.cap_coords[1] - proximity_radius)
+      let max_gy = Math.floor(cap.cap_coords[1] + proximity_radius)
+      let min_gx = Math.floor(cap.cap_coords[0] - proximity_radius)
+      let max_gx = Math.floor(cap.cap_coords[0] + proximity_radius)
+      for (let gy = min_gy; gy <= max_gy; gy++) {
+        for (let gx = min_gx; gx <= max_gx; gx++)
+          cap_coord_cells.add((gy + 256)*1024 + (gx + 512))
+      }
+    }
+  } else if (capitals_by_key.size > 0 || capitals_by_name.size > 0) {
+    has_coordless_cap = true
+  }
+
+  //1. First pass: run baseline authoritative reconciliation on capitals and capital-adjacent cities only
+  let rec_lats = new Float64Array(cities.length)
+  let rec_lons = new Float64Array(cities.length)
+  let rec_valid = new Uint8Array(cities.length)
+  let reconciled_grid = new Map<number, number[]>()
+
   for (let i = 0; i < cities.length; i++) {
     let c = cities[i]
+    let c_lat = c ? (c.rawCoords ? c.rawCoords[1] : (c.lat !== undefined ? c.lat : (c.coords ? c.coords[0] : (c.position ? c.position[1] : undefined)))) : undefined
+    let c_lon = c ? (c.rawCoords ? c.rawCoords[0] : (c.lon !== undefined ? c.lon : (c.coords ? c.coords[1] : (c.position ? c.position[0] : undefined)))) : undefined
+    let g_key = 0
+    if (c_lat !== undefined && c_lon !== undefined) {
+      rec_lats[i] = c_lat
+      rec_lons[i] = c_lon
+      rec_valid[i] = 1
+      g_key = (Math.floor(c_lat) + 256)*1024 + (Math.floor(c_lon) + 512)
+      let bucket = reconciled_grid.get(g_key)
+      if (!bucket) {
+        bucket = []
+        reconciled_grid.set(g_key, bucket)
+      }
+      bucket.push(i)
+    }
+
+    let can_skip_pass1 = Boolean(
+      c &&
+      !has_coordless_cap &&
+      !c.isCapital &&
+      !c.is_capital &&
+      rec_valid[i] === 1 &&
+      !cap_coord_cells.has(g_key) &&
+      !(authoritative_capitals_by_city && ((c.key && authoritative_capitals_by_city.has(c.key)) || (c.id && authoritative_capitals_by_city.has(String(c.id)))))
+    )
+
+    if (can_skip_pass1) {
+      reconciled.push(c)
+      continue
+    }
+
     let r = reconcileCapitalWithAuthoritativeBorders(
       c,
       capitals_by_key,
@@ -878,7 +867,8 @@ export function reconcileCitiesWithAuthoritativeBorders (
     reconciled.push(r)
   }
 
-  //2. Spatial resolution: for each designated capital point, assign only the single matching city and never transfer capital status to an unculled neighbour
+  //2. Spatial resolution via 1-deg integer spatial grid: O(M + N) instead of O(M*N)
+
   if (active_capitals_list && active_capitals_list.length > 0) {
     for (let i = 0; i < active_capitals_list.length; i++) {
       let cap = active_capitals_list[i]
@@ -894,43 +884,55 @@ export function reconcileCitiesWithAuthoritativeBorders (
       let closest_index: number = -1
       let nearby_indices: number[] = []
 
-      for (let x = 0; x < reconciled.length; x++) {
-        let city = reconciled[x]
-        let c_lat = city.rawCoords ? city.rawCoords[1] : (city.lat !== undefined ? city.lat : (city.coords ? city.coords[0] : (city.position ? city.position[1] : undefined)))
-        let c_lon = city.rawCoords ? city.rawCoords[0] : (city.lon !== undefined ? city.lon : (city.coords ? city.coords[1] : (city.position ? city.position[0] : undefined)))
-        if (c_lat === undefined || c_lon === undefined)
-          continue
+      let min_gy = Math.floor(cap_lat - proximity_radius)
+      let max_gy = Math.floor(cap_lat + proximity_radius)
+      let min_gx = Math.floor(cap_lon - proximity_radius)
+      let max_gx = Math.floor(cap_lon + proximity_radius)
 
-        let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
-        if (dist <= proximity_radius) {
-          nearby_indices.push(x)
+      for (let gy = min_gy; gy <= max_gy; gy++) {
+        for (let gx = min_gx; gx <= max_gx; gx++) {
+          let bucket = reconciled_grid.get((gy + 256)*1024 + (gx + 512))
+          if (!bucket)
+            continue
 
-          let clean_city_key = normalizeCityKey(city.key || '')
-          let prim_city_key = normalizePrimaryCityKey(city.key || '')
-          let is_key_match = Boolean(
-            (cap.capkey && (city.key === cap.capkey || String(city.id) === cap.capkey)) ||
-            (clean_cap_key && clean_city_key && clean_cap_key === clean_city_key) ||
-            (prim_cap_key && prim_city_key && prim_cap_key === prim_city_key)
-          )
-          let is_name_match = doesCityMatchCapitalName(city, cap.capname)
-          let c_sid = city.capitalStateId ?? city.capital_state_id
-          let is_state_match = Boolean(cap.state_id !== undefined && c_sid !== undefined && String(c_sid) === String(cap.state_id) && dist <= 0.25)
-          let c_country_l = (city.country || '').toLowerCase().trim()
-          let p_name_l = (cap.polity_name || '').toLowerCase().trim()
-          let is_ghsl_coord = Boolean(
-            cap.capkey?.startsWith('ghsl-') &&
-            dist <= 0.12 &&
-            c_country_l &&
-            p_name_l &&
-            (p_name_l.includes(c_country_l) || c_country_l.includes(p_name_l))
-          )
-          let is_exact_coord = dist <= 0.01 || is_ghsl_coord || is_state_match
+          for (let b = 0; b < bucket.length; b++) {
+            let x = bucket[b]
+            let c_lat = rec_lats[x]
+            let c_lon = rec_lons[x]
+            let dist = Math.hypot(c_lon - cap_lon, c_lat - cap_lat)
+            if (dist > proximity_radius)
+              continue
 
-          if (is_key_match || is_name_match || is_exact_coord) {
-            let cand_score = (is_key_match ? 100000 : 0) + (is_name_match ? 80000 : 0) + (is_state_match ? 20000 : 0) - Math.round(dist * 10000)
-            if (cand_score > closest_score) {
-              closest_score = cand_score
-              closest_index = x
+            let city = reconciled[x]
+            nearby_indices.push(x)
+
+            let clean_city_key = normalizeCityKey(city.key || '')
+            let prim_city_key = normalizePrimaryCityKey(city.key || '')
+            let is_key_match = Boolean(
+              (cap.capkey && (city.key === cap.capkey || String(city.id) === cap.capkey)) ||
+              (clean_cap_key && clean_city_key && clean_cap_key === clean_city_key) ||
+              (prim_cap_key && prim_city_key && prim_cap_key === prim_city_key)
+            )
+            let is_name_match = doesCityMatchCapitalName(city, cap.capname)
+            let c_sid = city.capitalStateId ?? city.capital_state_id
+            let is_state_match = Boolean(cap.state_id !== undefined && c_sid !== undefined && String(c_sid) === String(cap.state_id) && dist <= 0.25)
+            let c_country_l = (city.country || '').toLowerCase().trim()
+            let p_name_l = (cap.polity_name || '').toLowerCase().trim()
+            let is_ghsl_coord = Boolean(
+              cap.capkey?.startsWith('ghsl-') &&
+              dist <= 0.12 &&
+              c_country_l &&
+              p_name_l &&
+              (p_name_l.includes(c_country_l) || c_country_l.includes(p_name_l))
+            )
+            let is_exact_coord = dist <= 0.01 || is_ghsl_coord || is_state_match
+
+            if (is_key_match || is_name_match || is_exact_coord) {
+              let cand_score = (is_key_match ? 100000 : 0) + (is_name_match ? 80000 : 0) + (is_state_match ? 20000 : 0) - Math.round(dist*10000)
+              if (cand_score > closest_score) {
+                closest_score = cand_score
+                closest_index = x
+              }
             }
           }
         }
@@ -1030,49 +1032,69 @@ export function reconcileCitiesWithAuthoritativeBorders (
     }
   }
 
-  //3. Clustering suppression: ensure no multiple capitals within proximity radius of each other
+  //3. Clustering suppression via 1-deg spatial grid over surviving capitals only
+  let active_cap_grid = new Map<number, number[]>()
+  let active_cap_indices: number[] = []
   for (let i = 0; i < reconciled.length; i++) {
     let c1 = reconciled[i]
-    if (!c1.isCapital && !c1.is_capital)
+    if (!rec_valid[i] || (!c1.isCapital && !c1.is_capital) || suppressed_capital_indices.has(i))
       continue
+    active_cap_indices.push(i)
+    let g_key = (Math.floor(rec_lats[i]) + 256)*1024 + (Math.floor(rec_lons[i]) + 512)
+    let bucket = active_cap_grid.get(g_key)
+    if (!bucket) {
+      bucket = []
+      active_cap_grid.set(g_key, bucket)
+    }
+    bucket.push(i)
+  }
+
+  for (let a = 0; a < active_cap_indices.length; a++) {
+    let i = active_cap_indices[a]
     if (suppressed_capital_indices.has(i))
       continue
+    let c1 = reconciled[i]
+    let c1_lat = rec_lats[i]
+    let c1_lon = rec_lons[i]
+    let min_gy = Math.floor(c1_lat - proximity_radius)
+    let max_gy = Math.floor(c1_lat + proximity_radius)
+    let min_gx = Math.floor(c1_lon - proximity_radius)
+    let max_gx = Math.floor(c1_lon + proximity_radius)
 
-    let c1_lat = c1.rawCoords ? c1.rawCoords[1] : (c1.lat !== undefined ? c1.lat : (c1.coords ? c1.coords[0] : (c1.position ? c1.position[1] : undefined)))
-    let c1_lon = c1.rawCoords ? c1.rawCoords[0] : (c1.lon !== undefined ? c1.lon : (c1.coords ? c1.coords[1] : (c1.position ? c1.position[0] : undefined)))
-    if (c1_lat === undefined || c1_lon === undefined)
-      continue
-
-    for (let j = i + 1; j < reconciled.length; j++) {
-      let c2 = reconciled[j]
-      if (!c2.isCapital && !c2.is_capital)
-        continue
-      if (suppressed_capital_indices.has(j))
-        continue
-
-      let c2_lat = c2.rawCoords ? c2.rawCoords[1] : (c2.lat !== undefined ? c2.lat : (c2.coords ? c2.coords[0] : (c2.position ? c2.position[1] : undefined)))
-      let c2_lon = c2.rawCoords ? c2.rawCoords[0] : (c2.lon !== undefined ? c2.lon : (c2.coords ? c2.coords[1] : (c2.position ? c2.position[0] : undefined)))
-      if (c2_lat === undefined || c2_lon === undefined)
-        continue
-
-      let d = Math.hypot(c1_lon - c2_lon, c1_lat - c2_lat)
-      if (d <= proximity_radius) {
-        //If one is assigned by explicit designated capital point, suppress the other
-        if (assigned_capital_indices.has(i) && !assigned_capital_indices.has(j)) {
-          suppressed_capital_indices.add(j)
-        } else if (!assigned_capital_indices.has(i) && assigned_capital_indices.has(j)) {
-          suppressed_capital_indices.add(i)
-        } else {
-          //Otherwise suppress the one with smaller population
-          let pop1 = typeof c1.population === 'number' ? c1.population : 0
-          let pop2 = typeof c2.population === 'number' ? c2.population : 0
-          if (pop1 >= pop2) {
-            suppressed_capital_indices.add(j)
-          } else {
-            suppressed_capital_indices.add(i)
+    for (let gy = min_gy; gy <= max_gy; gy++) {
+      for (let gx = min_gx; gx <= max_gx; gx++) {
+        let bucket = active_cap_grid.get((gy + 256)*1024 + (gx + 512))
+        if (!bucket)
+          continue
+        for (let b = 0; b < bucket.length; b++) {
+          let j = bucket[b]
+          if (j <= i || suppressed_capital_indices.has(j))
+            continue
+          let d = Math.hypot(c1_lon - rec_lons[j], c1_lat - rec_lats[j])
+          if (d <= proximity_radius) {
+            let c2 = reconciled[j]
+            if (assigned_capital_indices.has(i) && !assigned_capital_indices.has(j)) {
+              suppressed_capital_indices.add(j)
+            } else if (!assigned_capital_indices.has(i) && assigned_capital_indices.has(j)) {
+              suppressed_capital_indices.add(i)
+              break
+            } else {
+              let pop1 = typeof c1.population === 'number' ? c1.population : 0
+              let pop2 = typeof c2.population === 'number' ? c2.population : 0
+              if (pop1 >= pop2) {
+                suppressed_capital_indices.add(j)
+              } else {
+                suppressed_capital_indices.add(i)
+                break
+              }
+            }
           }
         }
+        if (suppressed_capital_indices.has(i))
+          break
       }
+      if (suppressed_capital_indices.has(i))
+        break
     }
   }
 

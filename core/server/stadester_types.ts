@@ -486,21 +486,40 @@ export function buildPrimaryCityNameSet (arg0_city: CityIndexEntry, arg1_raw_nam
 
 
 /**
+ * Packs a signed integer `(lat_bin, lng_bin)` spatial grid coordinate into a single collision-free number key.
+ *
+ * @param {number} arg0_lat_bin
+ * @param {number} arg1_lng_bin
+ *
+ * @returns {number}
+ */
+export function packSpatialGridKey (arg0_lat_bin: number, arg1_lng_bin: number): number {
+  //Convert from parameters
+  let lat_bin = arg0_lat_bin
+  let lng_bin = arg1_lng_bin
+
+  //Return statement
+  return (lat_bin + 4096)*8192 + (lng_bin + 4096)
+}
+
+
+/**
  * Checks whether a candidate displaced label matches another nearby city's primary name within the given radius.
  *
  * @param {CityIndexEntry} arg0_city
  * @param {string} arg1_label
- * @param {Record<string, CityIndexEntry[]>} arg2_spatial_grid
+ * @param {Record<string, CityIndexEntry[]> | Map<number, CityIndexEntry[]>} arg2_spatial_grid
  * @param {Map<string, string>} arg3_raw_city_name_by_key
  * @param {Map<string, AliasStemSet>} arg4_primary_alias_cache
  * @param {number} [arg5_radius_km=25]
+ * @param {number} [arg6_cells_per_degree=1]
  *
  * @returns {boolean}
  */
 export function doesLabelMatchAnotherNearbyCity (
   arg0_city: CityIndexEntry,
   arg1_label: string,
-  arg2_spatial_grid: Record<string, CityIndexEntry[]>,
+  arg2_spatial_grid: Record<string, CityIndexEntry[]> | Map<number, CityIndexEntry[]>,
   arg3_raw_city_name_by_key: Map<string, string>,
   arg4_primary_alias_cache: Map<string, AliasStemSet>,
   arg5_radius_km: number = 25,
@@ -525,6 +544,7 @@ export function doesLabelMatchAnotherNearbyCity (
   let center_lng = Math.floor(city.coords[1]*cells_per_degree)
   let deg_lat_bound = radius_km/111.0 + 0.02
   let deg_lon_bound = radius_km/(111.0*Math.max(0.2, Math.cos((city.coords[0]*Math.PI)/180))) + 0.02
+  let is_map_grid = spatial_grid instanceof Map
   let label_set = buildAliasStemSet(label)
   let self_raw = raw_city_name_by_key.get(city.key) || city.name || ''
   let self_raw_set = buildAliasStemSet(cleanCandidateCityString(self_raw.split(';')[0]))
@@ -538,7 +558,9 @@ export function doesLabelMatchAnotherNearbyCity (
 
   for (let d_lat = -cell_radius; d_lat <= cell_radius; d_lat++) {
     for (let d_lng = -cell_radius; d_lng <= cell_radius; d_lng++) {
-      let cell = spatial_grid[`${center_lat + d_lat},${center_lng + d_lng}`]
+      let cell = is_map_grid
+        ? (spatial_grid as Map<number, CityIndexEntry[]>).get(packSpatialGridKey(center_lat + d_lat, center_lng + d_lng))
+        : (spatial_grid as Record<string, CityIndexEntry[]>)[`${center_lat + d_lat},${center_lng + d_lng}`]
       if (!cell)
         continue
 

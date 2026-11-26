@@ -11,6 +11,7 @@ export interface ResourceLimitsConfig {
 }
 
 export interface StadesterScalingConfig {
+  background_recompile?: boolean
   compile_concurrency?: number
   enable_binary_store?: boolean
   enable_progressive_streaming?: boolean
@@ -21,8 +22,12 @@ export interface StadesterScalingConfig {
   label_min_pop_base?: number
   stream_chunk_size?: number
   stream_initial_chunk_size?: number
+  stream_min_cities_threshold?: number
   tile_fetch_zoom_threshold?: number
   tile_max_cities_per_tile?: number
+  timeseries_log_thin_rel_tol?: number
+  worker_chunk_coalesce_ms?: number
+  worker_defer_during_interaction_ms?: number
 }
 
 export interface OptimisationConfig {
@@ -49,6 +54,7 @@ export let DEFAULT_RESOURCE_LIMITS_CONFIG: Required<ResourceLimitsConfig> = {
 }
 
 export let DEFAULT_STADESTER_SCALING_CONFIG: Required<StadesterScalingConfig> = {
+  background_recompile: true,
   compile_concurrency: 4,
   enable_binary_store: true,
   enable_progressive_streaming: true,
@@ -59,8 +65,12 @@ export let DEFAULT_STADESTER_SCALING_CONFIG: Required<StadesterScalingConfig> = 
   label_min_pop_base: 500000,
   stream_chunk_size: 3000,
   stream_initial_chunk_size: 400,
+  stream_min_cities_threshold: 4001,
   tile_fetch_zoom_threshold: 3.5,
   tile_max_cities_per_tile: 2500,
+  timeseries_log_thin_rel_tol: 0.0025,
+  worker_chunk_coalesce_ms: 120,
+  worker_defer_during_interaction_ms: 250,
 }
 
 export let DEFAULT_OPTIMISATION_CONFIG: OptimisationConfig = {

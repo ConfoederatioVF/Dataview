@@ -4,8 +4,19 @@ import { getOptimisationConfig } from '../../common/optimisation/optimisation.ts
 import { isCorruptedCityName } from '../framework/stadester/city_name_framework.ts'
 import { FilepathDefines } from './filepath_defines.ts'
 import { indexHistoricalCities, loadGhslCsvNames, resolveCityDisplayName } from './ghsl_resolver.ts'
-import { readPackedString, thinTimeSeries, type BinaryDatasetStore } from './stadester_binary_format.ts'
-import { clearBinaryStoreCache, compileStadesterDataset, loadBinaryStore } from './stadester_compiler.ts'
+import {
+  getBinaryCityHistoricalNames,
+  readPackedString,
+  thinTimeSeries,
+  type BinaryDatasetStore,
+} from './stadester_binary_format.ts'
+import {
+  clearBinaryStoreCache,
+  compileStadesterDataset,
+  loadBinaryStore,
+  loadBinaryStoreAsync,
+  type BinaryStoreLoadResult,
+} from './stadester_compiler.ts'
 import { getDefaultStadesterDatasetId, resolveStadesterVersionPaths } from './stadester_config_loader.ts'
 import { applyCityMetadata, applyStateCapitals, clearCityMetadataCache, getCityMetadataMaxMtimeMs } from './stadester_metadata.ts'
 import type { CityIndexEntry } from './stadester_types.ts'
@@ -56,6 +67,31 @@ export function getBinaryDatasetStore (arg0_dataset_name?: string): BinaryDatase
 
   //Return statement
   return loadBinaryStore(dataset_name)
+}
+
+
+/**
+ * Asynchronously returns the compiled binary columnar store for a dataset without blocking the event loop,
+ * serving stale v3 caches while refreshing in a background worker thread when configured.
+ *
+ * @param {string} [arg0_dataset_name]
+ *
+ * @returns {Promise<BinaryStoreLoadResult>}
+ */
+export async function getBinaryDatasetStoreAsync (arg0_dataset_name?: string): Promise<BinaryStoreLoadResult> {
+  //Convert from parameters
+  let dataset_name = (arg0_dataset_name) ? arg0_dataset_name : getDefaultStadesterDatasetId()
+
+  //Declare local instance variables
+  let opt = getOptimisationConfig()
+  let scaling = opt.config?.stadester_scaling
+
+  //Guard clauses
+  if (scaling && scaling.enable_binary_store === false)
+    return { cache_status: 'hit', store: null }
+
+  //Return statement
+  return await loadBinaryStoreAsync(dataset_name)
 }
 
 
@@ -363,7 +399,7 @@ export function ensureLiteCache (arg0_dataset_name?: string, arg1_options?: { on
           coords: [binary_store.lat[i], binary_store.lon[i]],
           country: country_str || undefined,
           ghsl_name: name_str,
-          historical_names: binary_store.hist_names_by_idx.get(i),
+          historical_names: getBinaryCityHistoricalNames(binary_store, i),
           id: id_str || key_str,
           key: key_str,
           max_pop: binary_store.max_pop[i],

@@ -24,9 +24,14 @@ import {
   resolveCityMetadataPath,
   resolveCityNameAtYear,
 } from './stadester_metadata.ts'
-import { compileStadesterDataset } from './stadester_compiler.ts'
+import {
+  compileStadesterDataset,
+  compileStadesterDatasetAsync,
+  registerBinaryStoreSwapListener,
+} from './stadester_compiler.ts'
 import {
   ensureLiteCache,
+  getBinaryDatasetStoreAsync,
   getDatasetFilePath,
   getNearbyCityKeys,
   getSpatialGrid,
@@ -36,6 +41,7 @@ import {
   _cache_authoritative_capitals_by_year,
   _cache_cities_at_year,
   _cache_compact_cities,
+  clearStadesterQueryCaches,
   getAuthoritativeCapitalsAtYear,
   getCitiesAtYear,
   getCompactCitiesAtYear,
@@ -64,9 +70,12 @@ export let StadesterService = {
   applyCityMetadata,
   applyStateCapitals,
   clearCityMetadataCache,
+  clearStadesterQueryCaches,
   compileStadesterDataset,
+  compileStadesterDatasetAsync,
   ensureLiteCache,
   getAuthoritativeCapitalsAtYear,
+  getBinaryDatasetStoreAsync,
   getCitiesAtYear,
   getCityByKey,
   getCityMetadataMaxMtimeMs,
@@ -82,6 +91,7 @@ export let StadesterService = {
   loadCityMetadata,
   loadDataset,
   loadStateCapitals: getStateCapitals,
+  registerBinaryStoreSwapListener,
   resolveCityMetadataManifestPath,
   resolveCityMetadataPath,
   resolveCityNameAtYear,

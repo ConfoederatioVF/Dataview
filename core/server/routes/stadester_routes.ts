@@ -13,14 +13,37 @@ let compressed_cities_cache = new Map<string, Buffer>()
 let gzipAsync = promisify(gzipCallback)
 
 /**
- * Clears compressed HTTP response caches for Stadestér city endpoints.
+ * Clears compressed HTTP response caches for Stadestér city endpoints, optionally scoped to one dataset stem.
+ *
+ * @param {string} [arg0_dataset_stem]
  *
  * @returns {void}
  */
-export function clearCompressedCitiesCache (): void {
+export function clearCompressedCitiesCache (arg0_dataset_stem?: string): void {
+  //Convert from parameters
+  let dataset_stem = (arg0_dataset_stem) ? arg0_dataset_stem : ''
+
   //Function body
-  compressed_cities_cache.clear()
+  if (!dataset_stem) {
+    compressed_cities_cache.clear()
+    return
+  }
+
+  let clean_stem = dataset_stem.endsWith('.json') ? dataset_stem.slice(0, -5) : dataset_stem
+  let p1 = `${clean_stem}:`
+  let p2 = `${clean_stem}.json:`
+  let t1 = `tile:${clean_stem}:`
+  let t2 = `tile:${clean_stem}.json:`
+
+  for (let key of compressed_cities_cache.keys()) {
+    if (key.startsWith(p1) || key.startsWith(p2) || key.startsWith(t1) || key.startsWith(t2))
+      compressed_cities_cache.delete(key)
+  }
 }
+
+StadesterService.registerBinaryStoreSwapListener((arg0_dataset_stem) => {
+  clearCompressedCitiesCache(arg0_dataset_stem)
+})
 
 
 /**
@@ -152,18 +175,39 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let day = query.day !== undefined ? parseInt(query.day as string, 10) : undefined
     let month = query.month !== undefined ? parseInt(query.month as string, 10) : undefined
 
-    try {
-      let accept_encoding = (req.headers['accept-encoding'] as string) || ''
-      let cache_key = `${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}`
-      let supports_gzip = accept_encoding.includes('gzip')
+    let accept_encoding = (req.headers['accept-encoding'] as string) || ''
+    let cache_key = `${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}`
+    let supports_gzip = accept_encoding.includes('gzip')
+
+    StadesterService.getBinaryDatasetStoreAsync(dataset).then((arg0_load_res) => {
+      if (res.destroyed || res.writableEnded)
+        return
+
+      let cache_control_hdr = arg0_load_res.cache_status === 'stale-revalidating'
+        ? 'no-cache'
+        : 'public, max-age=86400, stale-while-revalidate=604800'
+      res.setHeader('X-Stadester-Cache', arg0_load_res.cache_status)
 
       if (format === 'bin') {
         res.statusCode = 200
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Cache-Control', cache_control_hdr)
         res.setHeader('Content-Type', 'application/octet-stream')
 
-        if (is_streaming) {
-          let opt_scaling = getOptimisationConfig().config?.stadester_scaling || DEFAULT_STADESTER_SCALING_CONFIG
+        let bin_cache_key = `${cache_key}:${supports_gzip ? 'gz' : 'raw'}`
+        if (compressed_cities_cache.has(bin_cache_key)) {
+          let cached_buf = compressed_cities_cache.get(bin_cache_key)!
+          if (supports_gzip)
+            res.setHeader('Content-Encoding', 'gzip')
+          res.setHeader('Content-Length', cached_buf.length)
+          res.end(cached_buf)
+          return
+        }
+
+        let opt_scaling = getOptimisationConfig().config?.stadester_scaling || DEFAULT_STADESTER_SCALING_CONFIG
+        let stream_threshold = opt_scaling.stream_min_cities_threshold ?? DEFAULT_STADESTER_SCALING_CONFIG.stream_min_cities_threshold
+        let use_multi_chunk_stream = is_streaming && (max_cities === 0 || max_cities >= stream_threshold)
+
+        if (use_multi_chunk_stream) {
           let initial_chunk_sz = opt_scaling.stream_initial_chunk_size ?? DEFAULT_STADESTER_SCALING_CONFIG.stream_initial_chunk_size
           let chunk_sz = opt_scaling.stream_chunk_size ?? DEFAULT_STADESTER_SCALING_CONFIG.stream_chunk_size
           let aborted = false
@@ -200,16 +244,6 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
           return
         }
 
-        let bin_cache_key = `${cache_key}:${supports_gzip ? 'gz' : 'raw'}`
-        if (compressed_cities_cache.has(bin_cache_key)) {
-          let cached_buf = compressed_cities_cache.get(bin_cache_key)!
-          if (supports_gzip)
-            res.setHeader('Content-Encoding', 'gzip')
-          res.setHeader('Content-Length', cached_buf.length)
-          res.end(cached_buf)
-          return
-        }
-
         let compact_payload = StadesterService.getCompactCitiesAtYear(dataset, year, {
           bbox,
           color_mode,
@@ -222,20 +256,34 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
         if (supports_gzip) {
           gzipAsync(bin_buf, { level: 5 }).then((arg0_compressed) => {
+            if (arg0_load_res.cache_status !== 'stale-revalidating') {
+              if (compressed_cities_cache.size >= 150) {
+                let oldest_key = compressed_cities_cache.keys().next().value
+                if (oldest_key)
+                  compressed_cities_cache.delete(oldest_key)
+              }
+              compressed_cities_cache.set(bin_cache_key, arg0_compressed)
+            }
+            if (!res.destroyed && !res.writableEnded) {
+              res.setHeader('Content-Encoding', 'gzip')
+              res.setHeader('Content-Length', arg0_compressed.length)
+              res.end(arg0_compressed)
+            }
+          }).catch(() => {
+            if (!res.destroyed && !res.writableEnded) {
+              res.setHeader('Content-Length', bin_buf.length)
+              res.end(bin_buf)
+            }
+          })
+        } else {
+          if (arg0_load_res.cache_status !== 'stale-revalidating') {
             if (compressed_cities_cache.size >= 150) {
               let oldest_key = compressed_cities_cache.keys().next().value
               if (oldest_key)
                 compressed_cities_cache.delete(oldest_key)
             }
-            compressed_cities_cache.set(bin_cache_key, arg0_compressed)
-            res.setHeader('Content-Encoding', 'gzip')
-            res.setHeader('Content-Length', arg0_compressed.length)
-            res.end(arg0_compressed)
-          }).catch(() => {
-            res.setHeader('Content-Length', bin_buf.length)
-            res.end(bin_buf)
-          })
-        } else {
+            compressed_cities_cache.set(bin_cache_key, bin_buf)
+          }
           res.setHeader('Content-Length', bin_buf.length)
           res.end(bin_buf)
         }
@@ -244,7 +292,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
       if (format === 'compact') {
         res.statusCode = 200
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+        res.setHeader('Cache-Control', cache_control_hdr)
         res.setHeader('Content-Type', 'application/json')
 
         if (supports_gzip && compressed_cities_cache.has(cache_key)) {
@@ -268,19 +316,24 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
         if (supports_gzip) {
           gzipAsync(raw_buf, { level: 5 }).then((arg0_compressed) => {
-            if (compressed_cities_cache.size >= 150) {
-              let oldest_key = compressed_cities_cache.keys().next().value
-              if (oldest_key)
-                compressed_cities_cache.delete(oldest_key)
+            if (arg0_load_res.cache_status !== 'stale-revalidating') {
+              if (compressed_cities_cache.size >= 150) {
+                let oldest_key = compressed_cities_cache.keys().next().value
+                if (oldest_key)
+                  compressed_cities_cache.delete(oldest_key)
+              }
+              compressed_cities_cache.set(cache_key, arg0_compressed)
             }
-            compressed_cities_cache.set(cache_key, arg0_compressed)
-
-            res.setHeader('Content-Encoding', 'gzip')
-            res.setHeader('Content-Length', arg0_compressed.length)
-            res.end(arg0_compressed)
+            if (!res.destroyed && !res.writableEnded) {
+              res.setHeader('Content-Encoding', 'gzip')
+              res.setHeader('Content-Length', arg0_compressed.length)
+              res.end(arg0_compressed)
+            }
           }).catch(() => {
-            res.setHeader('Content-Length', raw_buf.byteLength)
-            res.end(raw_buf)
+            if (!res.destroyed && !res.writableEnded) {
+              res.setHeader('Content-Length', raw_buf.byteLength)
+              res.end(raw_buf)
+            }
           })
         } else {
           res.setHeader('Content-Length', raw_buf.byteLength)
@@ -313,7 +366,7 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         return
       }
 
-      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+      res.setHeader('Cache-Control', cache_control_hdr)
 
       let json_str = JSON.stringify({
         cities,
@@ -325,25 +378,30 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
       if (supports_gzip) {
         gzipAsync(raw_buf, { level: 5 }).then((arg0_compressed) => {
-          res.setHeader('Content-Encoding', 'gzip')
-          res.setHeader('Content-Length', arg0_compressed.length)
-          res.end(arg0_compressed)
+          if (!res.destroyed && !res.writableEnded) {
+            res.setHeader('Content-Encoding', 'gzip')
+            res.setHeader('Content-Length', arg0_compressed.length)
+            res.end(arg0_compressed)
+          }
         }).catch(() => {
-          res.setHeader('Content-Length', raw_buf.byteLength)
-          res.end(raw_buf)
+          if (!res.destroyed && !res.writableEnded) {
+            res.setHeader('Content-Length', raw_buf.byteLength)
+            res.end(raw_buf)
+          }
         })
       } else {
         res.setHeader('Content-Length', raw_buf.byteLength)
         res.end(raw_buf)
       }
-      return
-    } catch (arg0_err: any) {
+    }).catch((arg0_err: any) => {
       console.error('[ApiMiddleware] Error querying stadester cities:', arg0_err)
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching cities' }))
-      return
-    }
+      if (!res.destroyed && !res.writableEnded) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching cities' }))
+      }
+    })
+    return
   }
 
   //Route 13b: GET /api/stadester/tile (Spatial LOD tile query by slippy z/x/y or explicit bbox)
@@ -370,14 +428,21 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
       bbox = tileToGeoBBox(tile_z, tile_x, tile_y)
     }
 
-    try {
-      let accept_encoding = (req.headers['accept-encoding'] as string) || ''
-      let supports_gzip = accept_encoding.includes('gzip')
-      let tile_cache_key = `tile:${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}:${supports_gzip ? 'gz' : 'raw'}`
+    let accept_encoding = (req.headers['accept-encoding'] as string) || ''
+    let supports_gzip = accept_encoding.includes('gzip')
+    let tile_cache_key = `tile:${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}:${format}:${bbox ? bbox.join(',') : ''}:${supports_gzip ? 'gz' : 'raw'}`
 
+    StadesterService.getBinaryDatasetStoreAsync(dataset).then((arg0_load_res) => {
+      if (res.destroyed || res.writableEnded)
+        return
+
+      let cache_control_hdr = arg0_load_res.cache_status === 'stale-revalidating'
+        ? 'no-cache'
+        : 'public, max-age=86400, stale-while-revalidate=604800'
       res.statusCode = 200
-      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800')
+      res.setHeader('Cache-Control', cache_control_hdr)
       res.setHeader('Content-Type', format === 'bin' ? 'application/octet-stream' : 'application/json')
+      res.setHeader('X-Stadester-Cache', arg0_load_res.cache_status)
 
       if (compressed_cities_cache.has(tile_cache_key)) {
         let cached_buf = compressed_cities_cache.get(tile_cache_key)!
@@ -403,31 +468,38 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
 
       if (supports_gzip) {
         gzipAsync(out_buf, { level: 5 }).then((arg0_compressed) => {
-          if (compressed_cities_cache.size >= 250) {
-            let oldest_key = compressed_cities_cache.keys().next().value
-            if (oldest_key)
-              compressed_cities_cache.delete(oldest_key)
+          if (arg0_load_res.cache_status !== 'stale-revalidating') {
+            if (compressed_cities_cache.size >= 250) {
+              let oldest_key = compressed_cities_cache.keys().next().value
+              if (oldest_key)
+                compressed_cities_cache.delete(oldest_key)
+            }
+            compressed_cities_cache.set(tile_cache_key, arg0_compressed)
           }
-          compressed_cities_cache.set(tile_cache_key, arg0_compressed)
-          res.setHeader('Content-Encoding', 'gzip')
-          res.setHeader('Content-Length', arg0_compressed.length)
-          res.end(arg0_compressed)
+          if (!res.destroyed && !res.writableEnded) {
+            res.setHeader('Content-Encoding', 'gzip')
+            res.setHeader('Content-Length', arg0_compressed.length)
+            res.end(arg0_compressed)
+          }
         }).catch(() => {
-          res.setHeader('Content-Length', out_buf.length)
-          res.end(out_buf)
+          if (!res.destroyed && !res.writableEnded) {
+            res.setHeader('Content-Length', out_buf.length)
+            res.end(out_buf)
+          }
         })
       } else {
         res.setHeader('Content-Length', out_buf.length)
         res.end(out_buf)
       }
-      return
-    } catch (arg0_err: any) {
+    }).catch((arg0_err: any) => {
       console.error('[ApiMiddleware] Error querying stadester tile:', arg0_err)
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching city tile' }))
-      return
-    }
+      if (!res.destroyed && !res.writableEnded) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching city tile' }))
+      }
+    })
+    return
   }
 
   //Route 14: GET /api/stadester/city (Full historical details for one city)
@@ -459,7 +531,11 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
       return
     }
 
-    try {
+    StadesterService.getBinaryDatasetStoreAsync(dataset).then((arg0_load_res) => {
+      if (res.destroyed || res.writableEnded)
+        return
+
+      res.setHeader('X-Stadester-Cache', arg0_load_res.cache_status)
       let city_options = { coords, country, name: city_name, state_id }
       let city = city_key ? StadesterService.getCityByKey(dataset, city_key, year, month, day, city_options) : null
       if (!city && city_name) {
@@ -481,14 +557,15 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
       res.setHeader('Pragma', 'no-cache')
       res.setHeader('Expires', '0')
       res.end(JSON.stringify(city))
-      return
-    } catch (arg0_err: any) {
+    }).catch((arg0_err: any) => {
       console.error('[ApiMiddleware] Error retrieving city details:', arg0_err)
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching city details' }))
-      return
-    }
+      if (!res.destroyed && !res.writableEnded) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching city details' }))
+      }
+    })
+    return
   }
 
   //Route 15: GET /api/stadester/largest (Ranked largest cities at year)
@@ -498,7 +575,11 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
     let raw_year = parseFloat(query.year as string)
     let year = Number.isNaN(raw_year) ? 1950 : raw_year
 
-    try {
+    StadesterService.getBinaryDatasetStoreAsync(dataset).then((arg0_load_res) => {
+      if (res.destroyed || res.writableEnded)
+        return
+
+      res.setHeader('X-Stadester-Cache', arg0_load_res.cache_status)
       let largest = StadesterService.getLargestCitiesAtYear(dataset, year, limit)
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
@@ -508,14 +589,15 @@ export function handleStadesterRoute (arg0_context: StadesterRouteContext): void
         limit,
         year,
       }))
-      return
-    } catch (arg0_err: any) {
+    }).catch((arg0_err: any) => {
       console.error('[ApiMiddleware] Error fetching largest cities:', arg0_err)
-      res.statusCode = 500
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching largest cities' }))
-      return
-    }
+      if (!res.destroyed && !res.writableEnded) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: arg0_err?.message || 'Error fetching largest cities' }))
+      }
+    })
+    return
   }
 
   //Return statement

@@ -21,9 +21,9 @@ import { createHistoricalBordersDeckLayer } from './use_historical_borders_layer
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import type { HistoricalBorderFeature } from '@server/AtlasBordersService'
 import {
-  normalizeCapitalNameStem,
-  normalizePrimaryCityKey,
-} from '@framework/stadester/city_metadata_framework.ts'
+  buildBorderLookup,
+  type BorderLookup,
+} from '@framework/stadester/stadester_wire_decoder.ts'
 import {
   buildAuthoritativeCapitalsByCity,
   reconcileCitiesWithAuthoritativeBorders,
@@ -36,7 +36,11 @@ import {
 } from './deck_layers'
 import { ElevationSpikePoint } from './use_elevation_spikes'
 import { CirclePixelPoint } from './use_circle_overlay'
-import type { WorkerBinaryAttributes } from '@framework/stadester/stadester.worker.ts'
+import type {
+  WorkerBinaryAttributes,
+  WorkerPickTable,
+  WorkerProcessedPoint,
+} from '@framework/stadester/stadester.worker.ts'
 import {
   buildStadesterCityLayers,
   buildStadesterCityPoints,
@@ -49,6 +53,8 @@ import {
   buildDrawnPolygonLayer,
   buildElevationSpikesLayer,
 } from './deck_vector_and_draw_layers.ts'
+
+let EMPTY_STADESTER_ARRAY: any[] = []
 
 //Basemaps driven by MAP_CONFIG (config/map.json5)
 let esri_basemap_urls_obj: Record<string, string> = {}
@@ -119,7 +125,10 @@ export interface UseDeckLayersParams {
   stadesterCities?: CityPoint[]
   stadesterConfig?: StadesterConfig
   stadesterLabels?: any[]
+  stadesterPickTable?: WorkerPickTable
   stadesterPoints?: any[]
+  stadesterReconciledInWorker?: boolean
+  stadesterSelectedCityPoint?: WorkerProcessedPoint | null
   timelineYear?: number
   viewState?: any
   viewport?: any
@@ -151,10 +160,16 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   let is_mobile = Boolean(options.isMobile)
   let projection = options.projection
   let stadester_cities = options.stadesterCities
+  let is_worker_binary_ready = Boolean(
+    options.stadesterBinaryAttributes &&
+    options.stadesterBinaryAttributes.length > 0 &&
+    !hovered_city_region
+  )
   let is_worker_points_matching_proj = Boolean(
-    options.stadesterPoints &&
-    options.stadesterPoints.length > 0 &&
-    (!options.stadesterPoints[0]?.projection || options.stadesterPoints[0]?.projection === projection)
+    (options.stadesterPoints &&
+      options.stadesterPoints.length > 0 &&
+      (!options.stadesterPoints[0]?.projection || options.stadesterPoints[0]?.projection === projection)) ||
+    is_worker_binary_ready
   )
 
   let stadester_points_data = useMemo(() => {
@@ -185,172 +200,33 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   ])
 
   let effective_points = is_worker_points_matching_proj
-    ? options.stadesterPoints!
+    ? (options.stadesterPoints || EMPTY_STADESTER_ARRAY)
     : stadester_points_data
 
-  let border_lookup = useMemo(() => {
-    let acapital_state_ids = new Set<string>()
-    let active_capitals_by_key = new Map<string, any>()
-    let active_capitals_by_name = new Map<string, any>()
-    let active_capitals_list: any[] = []
-    let active_polity_names = new Set<string>()
-    let active_state_capitals_by_sid = new Map<string, { cap_coords?: [number, number]; capkey?: string; capname?: string }>()
-    let active_state_ids = new Set<string>()
-    let polity_features_by_name = new Map<string, any>()
-    let polity_features_by_sid = new Map<string, any>()
+  let is_reconciled_in_worker = Boolean(options.stadesterReconciledInWorker)
 
-    if (options.historicalBordersData && options.historicalBordersData.features) {
-      for (let i = 0; i < options.historicalBordersData.features.length; i++) {
-        let feat = options.historicalBordersData.features[i]
-        let p = feat.properties
-        if (!p)
-          continue
-
-        let polity_color = p.polygonFill ||
-          p.symbol?.polygonFill ||
-          p.fill_color ||
-          p.fillColor ||
-          p.color ||
-          p.symbol?.fillColor ||
-          p.symbol?.strokeColor ||
-          p.strokeColor
-        let s_id = p.state_id !== undefined ? String(p.state_id) : (p.id !== undefined ? String(p.id) : undefined)
-        let feat_bbox = (feat as any).bbox || p.bbox
-        let feat_area = p.area !== undefined ? Number(p.area) : 0
-        if (!feat_area && feat_bbox && Array.isArray(feat_bbox) && feat_bbox.length >= 4)
-          feat_area = Math.max(0, (feat_bbox[2] - feat_bbox[0])*(feat_bbox[3] - feat_bbox[1]))
-
-        let feat_meta = {
-          area: feat_area,
-          bbox: feat_bbox,
-          color: polity_color,
-          geometry: feat.geometry,
-          polity_name: p.name,
-          state_id: p.state_id ?? p.id,
-        }
-
-        if (s_id) {
-          active_state_ids.add(s_id)
-          if (!polity_features_by_sid.has(s_id) || feat_area > (polity_features_by_sid.get(s_id)?.area || 0))
-            polity_features_by_sid.set(s_id, feat_meta)
-        }
-        if (p.state_id !== undefined) {
-          let raw_sid = String(p.state_id)
-          active_state_ids.add(raw_sid)
-          if (!polity_features_by_sid.has(raw_sid) || feat_area > (polity_features_by_sid.get(raw_sid)?.area || 0))
-            polity_features_by_sid.set(raw_sid, feat_meta)
-        }
-        if (p.id !== undefined) {
-          let raw_id = String(p.id)
-          active_state_ids.add(raw_id)
-          if (!polity_features_by_sid.has(raw_id) || feat_area > (polity_features_by_sid.get(raw_id)?.area || 0))
-            polity_features_by_sid.set(raw_id, feat_meta)
-        }
-        if (p.name) {
-          let nl = p.name.toLowerCase().trim()
-          active_polity_names.add(nl)
-          if (!polity_features_by_name.has(nl) || feat_area > (polity_features_by_name.get(nl)?.area || 0))
-            polity_features_by_name.set(nl, feat_meta)
-        }
-        if (p.name_long) {
-          let nll = p.name_long.toLowerCase().trim()
-          active_polity_names.add(nll)
-          if (!polity_features_by_name.has(nll) || feat_area > (polity_features_by_name.get(nll)?.area || 0))
-            polity_features_by_name.set(nll, feat_meta)
-        }
-
-        if (p.is_acapital) {
-          if (s_id)
-            acapital_state_ids.add(s_id)
-        } else if (p.capname || p.capkey || p.cap_coords || (p.caplong !== undefined && p.caplat !== undefined)) {
-          let cap_lat: number | undefined
-          let cap_lon: number | undefined
-          if (p.cap_coords && Array.isArray(p.cap_coords) && p.cap_coords.length >= 2) {
-            cap_lon = p.cap_coords[0]
-            cap_lat = p.cap_coords[1]
-          } else if (p.caplong !== undefined && p.caplat !== undefined) {
-            cap_lon = Number(p.caplong)
-            cap_lat = Number(p.caplat)
-          }
-
-          let cap_entry = {
-            area: feat_area,
-            bbox: feat_bbox,
-            cap_coords: (cap_lon !== undefined && cap_lat !== undefined) ? [cap_lon, cap_lat] as [number, number] : undefined,
-            capkey: p.capkey,
-            capname: p.capname,
-            color: polity_color,
-            geometry: feat.geometry,
-            polity_name: p.name,
-            state_id: p.state_id,
-          }
-
-          active_capitals_list.push(cap_entry)
-
-          if (s_id)
-            active_state_capitals_by_sid.set(s_id, {
-              cap_coords: cap_entry.cap_coords,
-              capkey: p.capkey,
-              capname: p.capname,
-            })
-
-          if (p.capkey) {
-            let existing_k = active_capitals_by_key.get(p.capkey)
-            let prim_k = normalizePrimaryCityKey(p.capkey)
-            if (!existing_k || (cap_entry.area > (existing_k.area || 0))) {
-              active_capitals_by_key.set(p.capkey, cap_entry)
-              active_capitals_by_key.set(p.capkey.toLowerCase().trim(), cap_entry)
-              if (prim_k)
-                active_capitals_by_key.set(prim_k, cap_entry)
-            }
-          }
-          if (p.capname) {
-            let names = p.capname.split(/[,/]/).map((s: string) => s.trim().toLowerCase()).filter(Boolean)
-            for (let n of names) {
-              let existing_n = active_capitals_by_name.get(n)
-              if (!existing_n || (cap_entry.area > (existing_n.area || 0))) {
-                active_capitals_by_name.set(n, cap_entry)
-                let n_nfd = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                let n_clean = n_nfd.replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().replace(/^(al-|ar-|ash-|az-|an-|at-|ad-|el-|er-)/, '').replace(/h$/, '')
-                let n_stem = normalizeCapitalNameStem(n)
-                if (n_clean)
-                  active_capitals_by_name.set(n_clean, cap_entry)
-                if (n_stem)
-                  active_capitals_by_name.set(n_stem, cap_entry)
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return {
-      acapital_state_ids,
-      active_capitals_by_key,
-      active_capitals_by_name,
-      active_capitals_list,
-      active_polity_names,
-      active_state_capitals_by_sid,
-      active_state_ids,
-      polity_features: {
-        by_name: polity_features_by_name,
-        by_sid: polity_features_by_sid,
-      },
-    }
-  }, [options.historicalBordersData])
+  let border_lookup = useMemo((): BorderLookup => {
+    if (is_reconciled_in_worker)
+      return buildBorderLookup()
+    return buildBorderLookup(options.historicalBordersData?.features)
+  }, [is_reconciled_in_worker, options.historicalBordersData])
 
   let capital_source_points = (stadester_cities && stadester_cities.length > 0) ? stadester_cities : effective_points
 
   let authoritative_capitals_by_city = useMemo(() => {
+    if (is_reconciled_in_worker)
+      return new Map<string, any>()
     return buildAuthoritativeCapitalsByCity(
       border_lookup.active_capitals_list,
       capital_source_points,
       options.timelineYear
     )
-  }, [border_lookup.active_capitals_list, capital_source_points, options.timelineYear])
+  }, [is_reconciled_in_worker, border_lookup.active_capitals_list, capital_source_points, options.timelineYear])
 
   let reconciled_capital_patch_map = useMemo(() => {
     let patch_map = new Map<string, any>()
+    if (is_reconciled_in_worker)
+      return patch_map
     if (!capital_source_points || capital_source_points.length === 0)
       return patch_map
     if (
@@ -381,13 +257,15 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
         patch_map.set(c.key, c)
     }
     return patch_map
-  }, [capital_source_points, border_lookup, authoritative_capitals_by_city])
+  }, [is_reconciled_in_worker, capital_source_points, border_lookup, authoritative_capitals_by_city])
 
   let reconciled_stadester_labels = useMemo(() => {
     if (!is_cities_enabled || !is_labels_visible || !options.stadesterLabels || options.stadesterLabels.length === 0)
       return []
     if (options.stadesterLabels[0]?.projection && options.stadesterLabels[0].projection !== projection)
       return []
+    if (is_reconciled_in_worker)
+      return options.stadesterLabels
 
     let visible_label_cities = options.stadesterLabels.filter((arg0_c: any) =>
       arg0_c &&
@@ -475,6 +353,7 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
   }, [
     is_cities_enabled,
     is_labels_visible,
+    is_reconciled_in_worker,
     options.stadesterLabels,
     projection,
     border_lookup,
@@ -865,10 +744,12 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
       is_mobile,
       onHoverCity: options.onHoverCity,
       onSelectCity: options.onSelectCity,
+      pick_table: options.stadesterPickTable,
       polity_features: border_lookup.polity_features,
       projection,
       reconciled_labels: reconciled_stadester_labels,
       selectedCityKey: options.selectedCityKey,
+      selected_city_point: options.stadesterSelectedCityPoint,
       stadesterConfig: options.stadesterConfig,
       stadesterLabels: options.stadesterLabels,
     })
@@ -903,6 +784,8 @@ export function useDeckLayers (arg0_options: UseDeckLayersParams): any[] {
     options.hoveredCountry,
     effective_points,
     options.stadesterBinaryAttributes,
+    options.stadesterPickTable,
+    options.stadesterSelectedCityPoint,
     reconciled_stadester_labels,
     border_lookup,
     authoritative_capitals_by_city,

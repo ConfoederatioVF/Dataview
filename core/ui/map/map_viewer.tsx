@@ -21,7 +21,6 @@ import { resetSmoothPinchState, syncDeckTouchState } from './smooth_controllers'
 import { useElevationSpikes } from './use_elevation_spikes'
 import { useCircleOverlay } from './use_circle_overlay'
 import { useDeckLayers } from './use_deck_layers'
-import { useStadesterViewportTiles } from './use_stadester_cities'
 import { useStadesterWorker } from '@framework/stadester/use_stadester_worker'
 import { useHistoricalBorders } from './use_historical_borders'
 import { HistoricalBorderDetailsPanel } from './historical_border_details_panel'
@@ -490,20 +489,21 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedCountry: selected_country,
   })
 
-  let effective_stadester_cities = useStadesterViewportTiles({
-    baseCities: stadester_cities || EMPTY_ARRAY,
-    config: stadester_config,
-    enabled: Boolean(stadester_config?.enabled),
-    isPlaying: is_playing,
-    projection,
-    viewState: proj_view_states[projection],
-    year: timeline_year || 1950,
-  })
+  let active_borders_for_stadester = is_historical_borders_active ? historical_borders_result.bordersData : null
+  let hovered_city_region = (stadester_config?.colorMode === 'region' || stadester_config?.colorMode === 'continent')
+    ? (hovered_city?.region ? hovered_city.region.toLowerCase().trim() : null)
+    : null
 
   let worker_result = useStadesterWorker({
-    cities: effective_stadester_cities,
+    bordersData: active_borders_for_stadester,
+    cities: stadester_cities || EMPTY_ARRAY,
     config: stadester_config,
+    enableViewportStreaming: true,
+    hoveredRegion: hovered_city_region,
+    isInteractingRef: is_interacting_ref,
+    isPlaying: is_playing,
     projection,
+    selectedCityKey: selected_city_key,
     viewState: proj_view_states[projection],
     year: timeline_year || 1950,
   })
@@ -620,10 +620,13 @@ export let MapViewer: React.FC<MapViewerProps> = function (arg0_props: MapViewer
     selectedHistoricalFeature: selected_historical_feature,
     showGraticule: show_graticule,
     stadesterBinaryAttributes: worker_result.binaryAttributes,
-    stadesterCities: effective_stadester_cities,
+    stadesterCities: stadester_cities || EMPTY_ARRAY,
     stadesterConfig: stadester_config,
     stadesterLabels: worker_result.labels,
+    stadesterPickTable: worker_result.pickTable,
     stadesterPoints: worker_result.points,
+    stadesterReconciledInWorker: worker_result.reconciledInWorker,
+    stadesterSelectedCityPoint: worker_result.selectedCityPoint,
     timelineYear: timeline_year || 1950,
   })
 

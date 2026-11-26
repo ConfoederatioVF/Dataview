@@ -1,7 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { CLIENT_STADESTER_SCALING } from '../../../common/optimisation/stadester_scaling_client.ts'
 import { CityPoint, CityFullRecord, StadesterConfig, StadesterDatasetId } from '@framework/geopng/types.ts'
+import { computeViewportBoundingBox } from '@framework/stadester/stadester_heuristics.ts'
 import { resolveDefaultStadesterDataset } from '@framework/stadester/stadester_versions.ts'
+import {
+  buildCappedViewportCities,
+  decodeBinaryCitiesWire,
+  getBBoxLonSpan,
+  isGeoBBoxContained,
+  scaleGeoBBox,
+} from '@framework/stadester/stadester_wire_decoder.ts'
 import { STADESTER_CONFIG } from '@common'
+
+export { decodeBinaryCitiesWire }
 
 export interface UseStadesterCitiesParams {
   colorMode?: 'growth' | 'population' | 'continent'
@@ -30,86 +41,6 @@ export interface UseStadesterCitiesResult {
 }
 
 let in_flight_city_fetches = new Map<string, Promise<CityPoint[]>>()
-let text_decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null
-
-/**
- * Unpacks a `STADWIRE` binary columnar response Buffer into `CityPoint[]`.
- *
- * @param {ArrayBuffer} arg0_buffer
- *
- * @returns {CityPoint[] | null}
- */
-export function decodeBinaryCitiesWire (arg0_buffer: ArrayBuffer): CityPoint[] | null {
-  //Convert from parameters
-  let buffer = arg0_buffer
-
-  //Guard clauses
-  if (!buffer || buffer.byteLength < 16)
-    return null
-
-  //Declare local instance variables
-  let view = new DataView(buffer)
-  let magic = String.fromCharCode(
-    view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3),
-    view.getUint8(4), view.getUint8(5), view.getUint8(6), view.getUint8(7)
-  )
-
-  if (magic !== 'STADWIRE')
-    return null
-
-  //Function body
-  let count = view.getUint32(8, true)
-  let tail_len = view.getUint32(12, true)
-  let offset = 16
-  let coords = new Float32Array(buffer, offset, count * 2)
-  offset += count * 8
-  let pops = new Float32Array(buffer, offset, count)
-  offset += count * 4
-  let growth = new Float32Array(buffer, offset, count)
-  offset += count * 4
-  let capitals = new Uint8Array(buffer, offset, count)
-  offset += count
-  let state_ids_offset = offset
-  offset += count * 4
-
-  let tail_bytes = new Uint8Array(buffer, offset, tail_len)
-  let tail_str = text_decoder ? text_decoder.decode(tail_bytes) : ''
-  let strings_obj = JSON.parse(tail_str)
-  let city_list: CityPoint[] = []
-
-  for (let i = 0; i < count; i++) {
-    if (pops[i] < 0.01)
-      continue
-    let is_cap = Boolean(capitals[i])
-    let raw_sid = view.getInt32(state_ids_offset + i * 4, true)
-    let cap_state_id = raw_sid !== -1 ? raw_sid : undefined
-    let cap_color = strings_obj.capital_colors ? strings_obj.capital_colors[i] : undefined
-    let cap_name = strings_obj.capital_names ? (strings_obj.capital_names[i] || undefined) : undefined
-
-    city_list.push({
-      capitalColor: cap_color,
-      capitalOf: cap_name,
-      capitalStateId: cap_state_id,
-      capital_color: cap_color,
-      capital_state_id: cap_state_id,
-      capital_state_name: cap_name,
-      coords: [coords[i * 2], coords[i * 2 + 1]],
-      country: strings_obj.countries ? strings_obj.countries[i] : undefined,
-      growthRate: growth[i],
-      id: strings_obj.keys[i],
-      isCapital: is_cap,
-      is_capital: is_cap,
-      key: strings_obj.keys[i],
-      name: strings_obj.names[i],
-      other_names: (strings_obj.other_names && strings_obj.other_names[i]) ? strings_obj.other_names[i] : undefined,
-      population: pops[i],
-      region: strings_obj.regions ? strings_obj.regions[i] : undefined,
-    })
-  }
-
-  //Return statement
-  return city_list
-}
 
 /**
  * Fetches Stadester city points for a given dataset and year with in-flight deduplication and caching.
@@ -122,6 +53,9 @@ export function decodeBinaryCitiesWire (arg0_buffer: ArrayBuffer): CityPoint[] |
  * @param {Map<string, CityPoint[]>} [arg5_cache]
  * @param {boolean} [arg6_is_playing]
  * @param {boolean} [arg7_performant_mode]
+ * @param {AbortSignal} [arg8_signal]
+ * @param {(arg0_cities: CityPoint[], arg1_is_done: boolean) => void} [arg9_on_progress]
+ * @param {[number, number, number, number]} [arg10_bbox]
  *
  * @returns {Promise<CityPoint[]>}
  */
@@ -135,9 +69,11 @@ export async function fetchStadesterCitiesAsync (
   arg6_is_playing?: boolean,
   arg7_performant_mode?: boolean,
   arg8_signal?: AbortSignal,
-  arg9_on_progress?: (arg0_cities: CityPoint[], arg1_is_done: boolean) => void
+  arg9_on_progress?: (arg0_cities: CityPoint[], arg1_is_done: boolean) => void,
+  arg10_bbox?: [number, number, number, number]
 ): Promise<CityPoint[]> {
   //Convert from parameters
+  let bbox = arg10_bbox
   let dataset = arg0_dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
   let year = arg1_year
   let min_pop = (arg2_min_pop !== undefined) ? Math.max(0.01, arg2_min_pop) : 0.01
@@ -150,7 +86,10 @@ export async function fetchStadesterCitiesAsync (
   let signal = arg8_signal
 
   //Declare local instance variables
-  let cache_key = `${dataset}:${year}:${min_pop}:${max_cities}:${color_mode}`
+  let bbox_param = bbox ? bbox.map((arg0_v) => arg0_v.toFixed(3)).join(',') : ''
+  let cache_key = bbox_param
+    ? `${dataset}:${year}:${min_pop}:${max_cities}:${color_mode}:${bbox_param}`
+    : `${dataset}:${year}:${min_pop}:${max_cities}:${color_mode}`
   let pending_promise: Promise<CityPoint[]>
 
   //Guard clauses
@@ -171,6 +110,8 @@ export async function fetchStadesterCitiesAsync (
         minPop: String(min_pop),
         year: String(year),
       })
+      if (bbox_param)
+        url_params.set('bbox', bbox_param)
       if (on_progress)
         url_params.set('stream', '1')
 
@@ -281,7 +222,7 @@ export async function fetchStadesterCitiesAsync (
         }
       }
 
-      if (cache) {
+      if (cache && !signal?.aborted) {
         let max_cache_size = (performant_mode || is_playing) ? 5 : 15
         while (cache.size >= max_cache_size) {
           let first_key = cache.keys().next().value
@@ -417,6 +358,11 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
     set_is_loading(true)
     set_error(null)
 
+    let stream_threshold = CLIENT_STADESTER_SCALING.stream_min_cities_threshold
+    let use_stream_progress = CLIENT_STADESTER_SCALING.enable_progressive_streaming &&
+      (max_cities === 0 || max_cities >= stream_threshold)
+    let last_progress_count = -1
+
     fetchStadesterCitiesAsync(
       dataset,
       rounded_year,
@@ -427,16 +373,20 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
       is_playing,
       performant_mode,
       controller.signal,
-      (arg0_partial_cities) => {
-        if (!is_cancelled) {
-          set_cities(arg0_partial_cities)
-          set_is_loading(false)
-        }
-      }
+      use_stream_progress
+        ? (arg0_partial_cities) => {
+            if (!is_cancelled) {
+              last_progress_count = arg0_partial_cities.length
+              set_cities(arg0_partial_cities)
+              set_is_loading(false)
+            }
+          }
+        : undefined
     )
       .then((arg0_list) => {
         if (!is_cancelled) {
-          set_cities(arg0_list)
+          if (last_progress_count !== arg0_list.length)
+            set_cities(arg0_list)
           set_is_loading(false)
           schedule_prefetch()
         }
@@ -525,9 +475,16 @@ export let useStadesterCities = function (arg0_options: UseStadesterCitiesParams
 }
 
 
+interface CachedViewportBBoxEntry {
+  bbox: [number, number, number, number]
+  cities: CityPoint[]
+  meta_key: string
+  zoom: number
+}
+
 /**
- * Fetches and caches regional LOD tiles via `/api/stadester/tile` when zoomed in,
- * merging local settlements with the global overview list.
+ * Streams a unified viewport bounding box query via `/api/stadester/cities.json` when zoomed in,
+ * loading up to `config.maxCities` settlements by largest population first without tile boundary clipping.
  *
  * @param {{ baseCities: CityPoint[]; config?: StadesterConfig; enabled: boolean; isPlaying?: boolean; projection: string; viewState: any; year: number }} arg0_options
  *
@@ -553,129 +510,192 @@ export let useStadesterViewportTiles = function (arg0_options: {
   let year = Math.round(options.year || 1950)
 
   //Declare local instance variables
-  let [merged_cities, set_merged_cities] = useState<CityPoint[]>(base_cities)
-  let tile_cache_ref = useRef<Map<string, CityPoint[]>>(new Map())
-
-  let dataset = cfg?.dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
+  let abort_ref = useRef<AbortController | null>(null)
+  let base_cities_ref = useRef<CityPoint[]>(base_cities)
   let color_mode = cfg?.colorMode || 'growth'
-  let min_pop = (cfg?.minPop !== undefined) ? Math.max(0.01, cfg.minPop) : 0.01
-  let zoom = view_state?.zoom ?? 1.2
+  let dataset = cfg?.dataset || resolveDefaultStadesterDataset(STADESTER_CONFIG?.stadester)
+  let in_flight_ref = useRef<{ bbox: [number, number, number, number]; meta_key: string; zoom: number } | null>(null)
   let is_cartesian = projection === 'EqualEarth' || projection === 'Equirectangular'
+  let loaded_state_ref = useRef<CachedViewportBBoxEntry | null>(null)
+  let max_cities = (cfg?.maxCities !== undefined) ? cfg.maxCities : 4000
+  let [merged_cities, set_merged_cities] = useState<CityPoint[]>(base_cities)
+  let min_pop = (cfg?.minPop !== undefined) ? Math.max(0.01, cfg.minPop) : 0.01
+  let meta_key = `${dataset}:${year}:${color_mode}:${min_pop}:${max_cities}`
+  let timer_ref = useRef<any>(null)
+  let viewport_cache_ref = useRef<CachedViewportBBoxEntry[]>([])
+  let zoom = view_state?.zoom ?? (projection === 'Globe' ? 3 : 1.2)
   let norm_zoom = is_cartesian ? zoom - 1.2 : (projection === 'Globe' ? zoom - 1.65 : zoom)
+  let is_viewport_active = Boolean(enabled && !is_playing && max_cities > 0 && norm_zoom >= 3.5 && view_state)
 
-  useEffect(() => {
-    set_merged_cities(base_cities)
-  }, [base_cities])
+  let cancelPendingViewportFetch = useCallback(function () {
+    if (timer_ref.current) {
+      clearTimeout(timer_ref.current)
+      timer_ref.current = null
+    }
+    if (abort_ref.current) {
+      abort_ref.current.abort()
+      abort_ref.current = null
+    }
+    in_flight_ref.current = null
+  }, [])
 
+  //Cleanup on unmount
   useEffect(() => {
-    if (!enabled || is_playing || norm_zoom < 3.5 || !view_state || is_cartesian) {
+    return () => {
+      cancelPendingViewportFetch()
+    }
+  }, [cancelPendingViewportFetch])
+
+  //Keep merged_cities synced with base_cities without aborting active viewport streams or re-allocating on pan
+  useEffect(() => {
+    base_cities_ref.current = base_cities
+    if (!is_viewport_active) {
       set_merged_cities(base_cities)
       return
     }
+    let loaded = loaded_state_ref.current
+    if (loaded && loaded.meta_key === meta_key) {
+      if (max_cities > 0 && loaded.cities.length >= max_cities)
+        return
+      set_merged_cities(buildCappedViewportCities(loaded.cities, base_cities, max_cities))
+    } else {
+      set_merged_cities(base_cities)
+    }
+  }, [base_cities, is_viewport_active, max_cities, meta_key])
 
-    let c_lat = view_state.latitude ?? 20
-    let c_lng = view_state.longitude ?? 0
-    let tile_z = Math.max(2, Math.min(5, Math.floor(norm_zoom) - 1))
-    let n = Math.pow(2, tile_z)
-    let lat_rad = (Math.max(-85, Math.min(85, c_lat))*Math.PI)/180
-    let cx = Math.floor(((c_lng + 180)/360)*n)
-    let cy = Math.floor(((1 - Math.log(Math.tan(lat_rad) + 1/Math.cos(lat_rad))/Math.PI)/2)*n)
-
-    let tile_coords: Array<[number, number]> = []
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        let tx = ((cx + dx) % n + n) % n
-        let ty = Math.max(0, Math.min(n - 1, cy + dy))
-        let exists = tile_coords.some((arg0_t) => arg0_t[0] === tx && arg0_t[1] === ty)
-        if (!exists)
-          tile_coords.push([tx, ty])
-      }
+  //Spatial viewport streaming over a unified padded bounding box
+  useEffect(() => {
+    if (!is_viewport_active) {
+      cancelPendingViewportFetch()
+      loaded_state_ref.current = null
+      return
     }
 
-    let is_cancelled = false
-    let controller = new AbortController()
-    let timer = setTimeout(() => {
-      let mergeFromTiles = function (): void {
-        let added_count = 0
-        let by_key = new Map<string, CityPoint>()
-        for (let i = 0; i < base_cities.length; i++)
-          by_key.set(base_cities[i].key, base_cities[i])
+    let window_w = (typeof window !== 'undefined') ? window.innerWidth : 1920
+    let window_h = (typeof window !== 'undefined') ? window.innerHeight : 1080
+    let raw_bbox = computeViewportBoundingBox(view_state, projection, window_w, window_h)
+    let raw_lon_span = getBBoxLonSpan(raw_bbox[0], raw_bbox[2])
+    let raw_lat_span = raw_bbox[3] - raw_bbox[1]
 
-        for (let i = 0; i < tile_coords.length; i++) {
-          let [tx, ty] = tile_coords[i]
-          let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
-          let t_list = tile_cache_ref.current.get(tk)
-          if (t_list) {
-            for (let x = 0; x < t_list.length; x++) {
-              if (!by_key.has(t_list[x].key)) {
-                by_key.set(t_list[x].key, t_list[x])
-                added_count++
-              }
-            }
-          }
-        }
-        if (!is_cancelled) {
-          if (added_count === 0)
-            set_merged_cities((arg0_prev) => arg0_prev === base_cities ? arg0_prev : base_cities)
-          else
-            set_merged_cities(Array.from(by_key.values()))
-        }
-      }
+    if (raw_lon_span >= 180 && raw_lat_span >= 120) {
+      cancelPendingViewportFetch()
+      loaded_state_ref.current = null
+      set_merged_cities(base_cities_ref.current)
+      return
+    }
 
-      let missing = tile_coords.filter(([tx, ty]) => {
-        let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
-        return !tile_cache_ref.current.has(tk)
-      })
+    let inner_bbox = scaleGeoBBox(raw_bbox, 0.8)
+    let loaded = loaded_state_ref.current
+    if (
+      loaded &&
+      loaded.meta_key === meta_key &&
+      Math.abs(norm_zoom - loaded.zoom) < 0.5 &&
+      isGeoBBoxContained(inner_bbox, loaded.bbox)
+    ) {
+      return
+    }
 
-      if (missing.length === 0) {
-        mergeFromTiles()
+    //Check LRU viewport cache before scheduling a network stream
+    for (let i = viewport_cache_ref.current.length - 1; i >= 0; i--) {
+      let entry = viewport_cache_ref.current[i]
+      if (
+        entry.meta_key === meta_key &&
+        Math.abs(norm_zoom - entry.zoom) < 0.5 &&
+        isGeoBBoxContained(inner_bbox, entry.bbox)
+      ) {
+        cancelPendingViewportFetch()
+        loaded_state_ref.current = entry
+        set_merged_cities(buildCappedViewportCities(entry.cities, base_cities_ref.current, max_cities))
         return
       }
-
-      Promise.all(
-        missing.map(async ([tx, ty]) => {
-          let tk = `${dataset}:${year}:${color_mode}:${min_pop}:${tile_z}/${tx}/${ty}`
-          let params = new URLSearchParams({
-            colorMode: color_mode,
-            dataset,
-            format: 'bin',
-            maxCities: '2500',
-            minPop: String(min_pop),
-            x: String(tx),
-            y: String(ty),
-            year: String(year),
-            z: String(tile_z),
-          })
-          try {
-            let res = await fetch(`/api/stadester/tile?${params.toString()}`, { signal: controller.signal })
-            if (!res.ok)
-              return
-            let ab = await res.arrayBuffer()
-            let decoded = decodeBinaryCitiesWire(ab)
-            if (decoded) {
-              if (tile_cache_ref.current.size >= 80) {
-                let oldest = tile_cache_ref.current.keys().next().value
-                if (oldest)
-                  tile_cache_ref.current.delete(oldest)
-              }
-              tile_cache_ref.current.set(tk, decoded)
-            }
-          } catch {
-            //Ignore aborted/transient tile errors
-          }
-        })
-      ).then(() => {
-        if (!is_cancelled)
-          mergeFromTiles()
-      })
-    }, 150)
-
-    return () => {
-      is_cancelled = true
-      clearTimeout(timer)
-      controller.abort()
     }
-  }, [enabled, is_playing, dataset, year, color_mode, min_pop, Math.floor(norm_zoom), Math.round((view_state?.latitude ?? 20)/5), Math.round((view_state?.longitude ?? 0)/5), projection, base_cities])
+
+    //Keep current in-flight fetch alive if it still covers the viewport
+    let inflight = in_flight_ref.current
+    if (
+      inflight &&
+      inflight.meta_key === meta_key &&
+      Math.abs(norm_zoom - inflight.zoom) < 0.5 &&
+      isGeoBBoxContained(inner_bbox, inflight.bbox)
+    ) {
+      return
+    }
+
+    cancelPendingViewportFetch()
+
+    let fetch_bbox = scaleGeoBBox(raw_bbox, 1.2)
+    let controller = new AbortController()
+    abort_ref.current = controller
+    in_flight_ref.current = {
+      bbox: fetch_bbox,
+      meta_key,
+      zoom: norm_zoom,
+    }
+
+    timer_ref.current = setTimeout(() => {
+      timer_ref.current = null
+      if (controller.signal.aborted)
+        return
+
+      fetchStadesterCitiesAsync(
+        dataset,
+        year,
+        min_pop,
+        max_cities,
+        color_mode,
+        undefined,
+        is_playing,
+        false,
+        controller.signal,
+        (arg0_partial_cities) => {
+          if (controller.signal.aborted)
+            return
+          let partial_entry: CachedViewportBBoxEntry = {
+            bbox: fetch_bbox,
+            cities: arg0_partial_cities,
+            meta_key,
+            zoom: norm_zoom,
+          }
+          loaded_state_ref.current = partial_entry
+          set_merged_cities(buildCappedViewportCities(arg0_partial_cities, base_cities_ref.current, max_cities))
+        },
+        fetch_bbox
+      )
+        .then((arg0_final_cities) => {
+          if (controller.signal.aborted)
+            return
+          in_flight_ref.current = null
+          let final_entry: CachedViewportBBoxEntry = {
+            bbox: fetch_bbox,
+            cities: arg0_final_cities,
+            meta_key,
+            zoom: norm_zoom,
+          }
+          if (viewport_cache_ref.current.length >= 25)
+            viewport_cache_ref.current.shift()
+          viewport_cache_ref.current.push(final_entry)
+          loaded_state_ref.current = final_entry
+          set_merged_cities(buildCappedViewportCities(arg0_final_cities, base_cities_ref.current, max_cities))
+        })
+        .catch(() => {
+          if (!controller.signal.aborted)
+            in_flight_ref.current = null
+        })
+    }, 120)
+  }, [
+    cancelPendingViewportFetch,
+    color_mode,
+    dataset,
+    is_playing,
+    is_viewport_active,
+    max_cities,
+    meta_key,
+    min_pop,
+    norm_zoom,
+    projection,
+    view_state,
+    year,
+  ])
 
   //Return statement
   return merged_cities

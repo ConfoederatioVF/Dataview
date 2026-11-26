@@ -32,8 +32,14 @@ import {
   FLAG_IS_GHSL,
   MACRO_GRID_COLS,
   fnv1a32,
+  getActiveBinaryCapitalStateId,
+  getBinaryCityCapitalRecords,
+  getBinaryCityHistoricalNames,
+  getEraBandIndex,
+  hasBinaryCityCapitalState,
   readDetailPackRecord,
   readPackedString,
+  resolveBinaryCityNameAtFrac,
   type BinaryDatasetStore,
 } from './stadester_binary_format.ts'
 
@@ -432,7 +438,7 @@ export function getBinaryAuthoritativeCapitalsAtYear (
         let c_id = readPackedString(store.id_buf, store.id_offsets, idx)
         let c_name = readPackedString(store.name_buf, store.name_offsets, idx)
         let c_country = readPackedString(store.country_buf, store.country_offsets, idx)
-        let c_cap_recs = store.cap_records_by_idx.get(idx)
+        let has_cap_recs = (store.flags[idx] & FLAG_HAS_CAPITALS) !== 0
 
         let score = 0
         let c_prim_key = normalizePrimaryCityKey(c_key)
@@ -442,8 +448,9 @@ export function getBinaryAuthoritativeCapitalsAtYear (
           (c_key === p.capkey || c_id === p.capkey || (c_prim_key && p_prim_key && c_prim_key === p_prim_key))
         )
         let is_state_match = Boolean(
+          has_cap_recs &&
           p.state_id !== undefined &&
-          c_cap_recs?.some((arg0_rec) => String(arg0_rec.state_id) === String(p.state_id))
+          hasBinaryCityCapitalState(store, idx, p.state_id)
         )
         if (is_key_match)
           score += 200000
@@ -474,10 +481,11 @@ export function getBinaryAuthoritativeCapitalsAtYear (
           } else {
             let other_str = readPackedString(store.other_buf, store.other_offsets, idx)
             let alias_pool: string[] = other_str ? other_str.split('\x1f') : []
-            let hist_recs = store.hist_names_by_idx.get(idx)
-            if (hist_recs) {
-              for (let h = 0; h < hist_recs.length; h++)
-                alias_pool.push(hist_recs[h].name)
+            let hist_len = store.hist_city_len[idx]
+            if (hist_len > 0) {
+              let hist_off = store.hist_city_off[idx]
+              for (let h = 0; h < hist_len; h++)
+                alias_pool.push(readPackedString(store.hist_name_buf, store.hist_name_off, hist_off + h))
             }
             is_name_match = alias_pool.some((arg0_on) => {
               let on_clean = String(arg0_on || '').replace(/\(.*?\)/g, '').replace(/\(s\)/gi, '').trim().toLowerCase()
@@ -515,7 +523,7 @@ export function getBinaryAuthoritativeCapitalsAtYear (
           score += 25000
         if (year >= min_yr && year <= max_yr)
           score += 15000
-        if (c_cap_recs && c_cap_recs.length > 0)
+        if (has_cap_recs)
           score += 10000
         if (!c_key.includes('agglomeration'))
           score += 5000
@@ -611,6 +619,7 @@ function createBinaryYearQueryExecutor (
   let target_year = arg1_year
 
   //Declare local instance variables
+  let active_cap_sid_by_idx = new Map<number, number>()
   let active_state_ids = options.active_state_ids || AtlasBordersService.getActiveStateIdsAtDate(
     Math.floor(target_year),
     options.month,
@@ -618,9 +627,13 @@ function createBinaryYearQueryExecutor (
   )
   let auth_city_idx_set = new Set<number>()
   let bbox = options.bbox
+  let cap_target_frac = target_year
   let count = store.count
   let max_cities = options.max_cities !== undefined ? options.max_cities : 4000
   let min_pop = options.min_pop !== undefined ? Math.max(0.01, options.min_pop) : 0.01
+  let name_target_frac = (options.month !== undefined || options.day !== undefined)
+    ? parseYearMonthDay(`${Math.floor(target_year)}.${options.month || 1}.${options.day || 1}`).year_frac
+    : target_year
   let preserve_capitals = options.preserve_capitals !== false
   let state_lookup_cache = new Map<string | number, any>()
 
@@ -630,6 +643,40 @@ function createBinaryYearQueryExecutor (
     let st = getStateById(arg0_sid)
     state_lookup_cache.set(arg0_sid, st)
     return st
+  }
+
+  //Zero-allocation active-capital evaluator backed by flat v3 capital columns and memoised per query
+  let resolveActiveCapStateId = function (arg0_idx: number): number | null {
+    let idx = arg0_idx
+    if ((store.flags[idx] & FLAG_HAS_CAPITALS) === 0)
+      return null
+    if (active_cap_sid_by_idx.has(idx)) {
+      let cached_sid = active_cap_sid_by_idx.get(idx)!
+      return cached_sid !== -1 ? cached_sid : null
+    }
+    let c_lat = store.lat[idx]
+    let c_lon = store.lon[idx]
+    let found_sid = getActiveBinaryCapitalStateId(store, idx, cap_target_frac, (arg0_sid, arg1_y_frac) => {
+      let state = getCachedState(arg0_sid)
+      if (!state || isStateAcapital(arg0_sid))
+        return false
+      let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
+      let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
+      let is_time_valid = (arg1_y_frac >= start_bound && arg1_y_frac <= stop_bound) ||
+        (Math.floor(arg1_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg1_y_frac) <= (state.stop_year ?? 99999))
+      if (!is_time_valid)
+        return false
+      if (active_state_ids && active_state_ids.size > 0) {
+        if (!active_state_ids.has(arg0_sid) && !state.is_contemporary && !(state.stop_year >= 2020 && arg1_y_frac >= 1975))
+          return false
+      }
+      if (!isCityInsideStateBBox({ lat: c_lat, lon: c_lon }, state, 0.75))
+        return false
+      return true
+    })
+    let resolved_sid = (found_sid !== null && getCachedState(found_sid)) ? found_sid : -1
+    active_cap_sid_by_idx.set(idx, resolved_sid)
+    return resolved_sid !== -1 ? resolved_sid : null
   }
 
   //Pre-collect authoritative capital indices in O(K_auth)
@@ -699,7 +746,7 @@ function createBinaryYearQueryExecutor (
 
   let checkNumericCandidate = function (arg0_idx: number): void {
     let idx = arg0_idx
-    if ((store.flags[idx] & FLAG_IS_BUGGED) !== 0 || store.pop_len[idx] === 0)
+    if (cap_seen.has(idx) || (store.flags[idx] & FLAG_IS_BUGGED) !== 0 || store.pop_len[idx] === 0)
       return
 
     let c_lat = store.lat[idx]
@@ -731,26 +778,27 @@ function createBinaryYearQueryExecutor (
         return
     }
 
-    let has_cap_flag = is_auth_cap || (store.flags[idx] & FLAG_HAS_CAPITALS) !== 0
-    if (has_cap_flag) {
-      if (!cap_seen.has(idx)) {
-        cap_seen.add(idx)
-        cap_candidates.push(idx)
-        cap_pops.push(pop)
-      }
+    let is_active_cap = is_auth_cap || ((store.flags[idx] & FLAG_HAS_CAPITALS) !== 0 && resolveActiveCapStateId(idx) !== null)
+    if (is_active_cap && preserve_capitals) {
+      cap_seen.add(idx)
+      cap_candidates.push(idx)
+      cap_pops.push(pop)
       return
     }
 
-    if (pop < min_pop)
+    if (!is_active_cap && pop < min_pop)
       return
 
     heapPush(idx, pop)
   }
 
-  //1a. Evaluate potential capitals first when preserve_capitals is enabled
+  //1a. Pre-filter genuinely active capitals in Pass 1 so inactive historical capitals skip Pass 2 hydration
   if (preserve_capitals) {
-    for (let i = 0; i < store.capital_city_indices.length; i++)
-      checkNumericCandidate(store.capital_city_indices[i])
+    for (let i = 0; i < store.capital_city_indices.length; i++) {
+      let cap_idx = store.capital_city_indices[i]
+      if (auth_city_idx_set.has(cap_idx) || resolveActiveCapStateId(cap_idx) !== null)
+        checkNumericCandidate(cap_idx)
+    }
     for (let idx of auth_city_idx_set)
       checkNumericCandidate(idx)
   }
@@ -811,13 +859,29 @@ function createBinaryYearQueryExecutor (
       }
     }
   } else {
-    for (let i = 0; i < count; i++) {
-      let mp = store.max_pop[i]
-      if (mp < min_pop)
-        break
-      if (max_cities > 0 && heap_idxs.length >= max_cities && mp <= heap_pops[0])
-        break
-      checkNumericCandidate(i)
+    let era_idx = getEraBandIndex(target_year)
+    if (era_idx >= 0 && store.era_band_offs && store.era_band_offs.length > era_idx + 1) {
+      let band_start = store.era_band_offs[era_idx]
+      let band_end = store.era_band_offs[era_idx + 1]
+      let band_idxs = store.era_city_indices
+      let band_pops = store.era_band_max_pop
+      for (let i = band_start; i < band_end; i++) {
+        let mp = band_pops[i]
+        if (mp < min_pop)
+          break
+        if (max_cities > 0 && heap_idxs.length >= max_cities && mp <= heap_pops[0])
+          break
+        checkNumericCandidate(band_idxs[i])
+      }
+    } else {
+      for (let i = 0; i < count; i++) {
+        let mp = store.max_pop[i]
+        if (mp < min_pop)
+          break
+        if (max_cities > 0 && heap_idxs.length >= max_cities && mp <= heap_pops[0])
+          break
+        checkNumericCandidate(i)
+      }
     }
   }
 
@@ -830,34 +894,9 @@ function createBinaryYearQueryExecutor (
     let c_key = readPackedString(store.key_buf, store.key_offsets, idx)
     let cs_cap = auth_capitals.get(c_key)
 
-    let cap_rec = null
-    if ((store.flags[idx] & FLAG_HAS_CAPITALS) !== 0) {
-      let recs = store.cap_records_by_idx.get(idx)
-      if (recs && recs.length > 0) {
-        cap_rec = getCityActiveCapitalRecord({ capital_records: recs }, target_year, (arg0_sid, arg0_y_frac) => {
-          let sid_num = Number(arg0_sid)
-          let state = getCachedState(arg0_sid)
-          if (!state || isStateAcapital(arg0_sid))
-            return false
-          let start_bound = state._start_frac !== undefined ? state._start_frac : (state.start_year !== undefined ? state.start_year : -99999)
-          let stop_bound = state._stop_frac !== undefined ? state._stop_frac : (state.stop_year !== undefined ? state.stop_year : 99999)
-          let is_time_valid = (arg0_y_frac >= start_bound && arg0_y_frac <= stop_bound) ||
-            (Math.floor(arg0_y_frac) >= (state.start_year ?? -99999) && Math.floor(arg0_y_frac) <= (state.stop_year ?? 99999))
-          if (!is_time_valid)
-            return false
-          if (active_state_ids && active_state_ids.size > 0) {
-            if (!active_state_ids.has(sid_num) && !state.is_contemporary && !(state.stop_year >= 2020 && arg0_y_frac >= 1975))
-              return false
-          }
-          if (!isCityInsideStateBBox({ coords: [c_lat, c_lon], key: c_key }, state, 0.75))
-            return false
-          return true
-        })
-      }
-    }
-
-    let cap_state = cap_rec?.state_id ? getCachedState(cap_rec.state_id) : null
-    let is_capital_val = Boolean(cs_cap || (cap_rec && cap_state))
+    let active_cap_sid = resolveActiveCapStateId(idx)
+    let cap_state = active_cap_sid !== null ? getCachedState(active_cap_sid) : null
+    let is_capital_val = Boolean(cs_cap || cap_state)
     if (!is_capital_val && pop < min_pop)
       return null
 
@@ -872,10 +911,10 @@ function createBinaryYearQueryExecutor (
     let cap_color_val = (cs_cap?.color && cs_cap.color !== '#FFDC00')
       ? cs_cap.color
       : (cap_state?.fill_color || cs_cap?.color || null)
-    let cap_state_id = cs_cap?.state_id || cap_rec?.state_id || undefined
+    let cap_state_id = cs_cap?.state_id || (active_cap_sid ?? undefined)
     let polity_name = cs_cap?.name || cap_state?.name || undefined
 
-    if (cs_cap && cap_state && String(cs_cap.state_id) !== String(cap_rec?.state_id)) {
+    if (cs_cap && cap_state && String(cs_cap.state_id) !== String(active_cap_sid)) {
       let city_country = c_country.toLowerCase().trim()
       let cs_name = (cs_cap.name || '').toLowerCase().trim()
       let cs_state = cs_cap.state_id !== undefined ? getCachedState(cs_cap.state_id) : null
@@ -887,7 +926,7 @@ function createBinaryYearQueryExecutor (
 
       if (state_matches && !cs_matches) {
         cap_color_val = cap_state.fill_color || cap_color_val
-        cap_state_id = cap_rec?.state_id ?? undefined
+        cap_state_id = active_cap_sid ?? undefined
         polity_name = cap_state.name
       } else if (!state_matches && cs_matches) {
         cap_color_val = (cs_cap.color && cs_cap.color !== '#FFDC00') ? cs_cap.color : (cs_state?.fill_color || cap_color_val)
@@ -895,7 +934,7 @@ function createBinaryYearQueryExecutor (
         polity_name = cs_cap.name
       } else if (state_bbox_area > cs_bbox_area) {
         cap_color_val = cap_state.fill_color || cap_color_val
-        cap_state_id = cap_rec?.state_id ?? undefined
+        cap_state_id = active_cap_sid ?? undefined
         polity_name = cap_state.name
       } else {
         cap_color_val = (cs_cap.color && cs_cap.color !== '#FFDC00') ? cs_cap.color : (cs_state?.fill_color || cap_color_val)
@@ -904,14 +943,9 @@ function createBinaryYearQueryExecutor (
       }
     }
 
-    let resolved_name = c_name
-    let hist_recs = (store.flags[idx] & FLAG_HAS_HIST_NAMES) !== 0 ? store.hist_names_by_idx.get(idx) : undefined
-    if (hist_recs && hist_recs.length > 0) {
-      let resolved_date = (options.month !== undefined || options.day !== undefined)
-        ? `${Math.floor(target_year)}.${options.month || 1}.${options.day || 1}`
-        : target_year
-      resolved_name = resolveHistoricalCityName({ historical_names: hist_recs, key: c_key, name: c_name } as any, resolved_date)
-    }
+    let resolved_name = (store.flags[idx] & FLAG_HAS_HIST_NAMES) !== 0
+      ? resolveBinaryCityNameAtFrac(store, idx, c_name, name_target_frac)
+      : c_name
 
     return {
       capital_color: cap_color_val || undefined,
@@ -921,7 +955,6 @@ function createBinaryYearQueryExecutor (
       coords: [c_lat, c_lon],
       country: c_country || undefined,
       growthRate: growth_rate,
-      historical_names: hist_recs,
       id: c_id || c_key,
       is_capital: is_capital_val,
       isCapital: is_capital_val,
@@ -1470,10 +1503,10 @@ export function queryBinaryCityByKey (
 
     detail.name = name_str || detail.name
     detail.metadata_name = name_str
-    let cap_recs = store.cap_records_by_idx.get(idx)
+    let cap_recs = getBinaryCityCapitalRecords(store, idx)
     if (cap_recs)
       detail.capital_records = cap_recs
-    let hist_recs = store.hist_names_by_idx.get(idx)
+    let hist_recs = getBinaryCityHistoricalNames(store, idx)
     if (hist_recs)
       detail.historical_names = hist_recs
     return detail

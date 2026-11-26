@@ -23,6 +23,8 @@
   },
   // Stadestér multi-million settlement scaling & culling configuration
   stadester_scaling: {
+    // Serve existing stale hot_index.bin immediately while recompiling updates in a background worker
+    background_recompile: true,
     // Max parallel worker threads for Stage A shard compilation
     compile_concurrency: 4,
     // Use incremental binary columnar spatial-LOD cache instead of monolithic JSON index
@@ -42,9 +44,17 @@
     stream_chunk_size: 3000,
     // Initial priority settlement batch size flushed immediately to client
     stream_initial_chunk_size: 400,
+    // Minimum max_cities budget required to use multi-chunk HTTP streaming (smaller requests use cached gzipped single frame)
+    stream_min_cities_threshold: 4001,
     // Zoom threshold at which viewport tile streaming activates for large datasets
     tile_fetch_zoom_threshold: 3.5,
     // Max settlements returned per spatial tile request
-    tile_max_cities_per_tile: 2500
+    tile_max_cities_per_tile: 2500,
+    // Relative log-linear thinning tolerance for binary hot_index.bin population curves (detail packs retain exact records)
+    timeseries_log_thin_rel_tol: 0.0025,
+    // Minimum interval (ms) between intermediate worker layout commits during spatial chunk streaming
+    worker_chunk_coalesce_ms: 120,
+    // Max deferral window (ms) for background spatial chunk GPU commits while actively panning or zooming
+    worker_defer_during_interaction_ms: 250
   }
 }

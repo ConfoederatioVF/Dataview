@@ -252,11 +252,13 @@ export function computeViewportBoundingBox (
 
     if (projection === 'EqualEarth') {
       let ne = invertEqualEarth(max_x, max_y)
+      let nw = invertEqualEarth(min_x, max_y)
+      let se = invertEqualEarth(max_x, min_y)
       let sw = invertEqualEarth(min_x, min_y)
-      west = Math.max(-180, sw[0])
-      south = Math.max(-90, sw[1])
-      east = Math.min(180, ne[0])
-      north = Math.min(90, ne[1])
+      west = Math.max(-180, Math.min(sw[0], nw[0]))
+      south = Math.max(-90, Math.min(sw[1], se[1]))
+      east = Math.min(180, Math.max(ne[0], se[0]))
+      north = Math.min(90, Math.max(ne[1], nw[1]))
     } else {
       west = Math.max(-180, min_x)
       south = Math.max(-90, min_y)

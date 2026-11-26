@@ -14,6 +14,7 @@ import {
   type CityIndexEntry,
 } from './stadester_types.ts'
 
+let acapital_state_ids_cache: Set<string | number> | null = null
 let state_capitals_cache: Record<string, any> | null = null
 let states_by_id: Map<string | number, any> | null = null
 
@@ -288,6 +289,7 @@ export function applyStateCapitals (arg0_indexed_record: Record<string, CityInde
  */
 export function clearStateCapitalsCache (): void {
   //Function body
+  acapital_state_ids_cache = null
   state_capitals_cache = null
   states_by_id = null
 }
@@ -400,12 +402,12 @@ export function getStateById (arg0_state_id: string | number): any {
  * @returns {Record<string, any>}
  */
 export function getStateCapitals (): Record<string, any> {
-  //Declare local instance variables
-  let file_path = FilepathDefines.get().filepaths.stadester_capitals
-
   //Guard clauses
   if (state_capitals_cache)
     return state_capitals_cache
+
+  //Declare local instance variables
+  let file_path = FilepathDefines.get().filepaths.stadester_capitals
 
   //Function body
   if (fs.existsSync(file_path)) {
@@ -416,6 +418,18 @@ export function getStateCapitals (): Record<string, any> {
     }
   } else {
     state_capitals_cache = {}
+  }
+
+  acapital_state_ids_cache = new Set<string | number>()
+  let all_sids = Object.keys(state_capitals_cache || {})
+  for (let i = 0; i < all_sids.length; i++) {
+    let sid_str = all_sids[i]
+    if (state_capitals_cache?.[sid_str]?.acapital) {
+      acapital_state_ids_cache.add(sid_str)
+      let sid_num = Number(sid_str)
+      if (Number.isFinite(sid_num))
+        acapital_state_ids_cache.add(sid_num)
+    }
   }
 
   //Return statement
@@ -478,12 +492,12 @@ export function isStateAcapital (arg0_state_id: string | number): boolean {
   if (state_id === undefined || state_id === null)
     return false
 
-  //Declare local instance variables
-  let sc = getStateCapitals()
-  let sid_str = String(state_id)
+  //Function body
+  if (!acapital_state_ids_cache)
+    getStateCapitals()
 
   //Return statement
-  return Boolean(sc[sid_str]?.acapital)
+  return Boolean(acapital_state_ids_cache && acapital_state_ids_cache.has(state_id))
 }
 
 

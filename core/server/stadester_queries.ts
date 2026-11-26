@@ -20,9 +20,11 @@ import {
 } from './stadester_metadata.ts'
 import {
   getBinaryDatasetStore,
+  getBinaryDatasetStoreAsync,
   getNearbyCityKeys,
   loadDataset,
 } from './stadester_loader.ts'
+import { registerBinaryStoreSwapListener } from './stadester_compiler.ts'
 import {
   buildCompactPayloadFromCities,
   getBinaryAuthoritativeCapitalsAtYear,
@@ -34,6 +36,48 @@ import { getDefaultStadesterDatasetId } from './stadester_config_loader.ts'
 export let _cache_authoritative_capitals_by_year = new Map<string, Map<string, { area?: number; color: string; name?: string; state_id?: number | string }>>()
 export let _cache_cities_at_year = new Map<string, CityRenderPoint[]>()
 export let _cache_compact_cities = new Map<string, CompactCitiesPayload>()
+
+
+/**
+ * Evicts cached query responses for a specific dataset stem, or all datasets when omitted.
+ *
+ * @param {string} [arg0_dataset_stem]
+ *
+ * @returns {void}
+ */
+export function clearStadesterQueryCaches (arg0_dataset_stem?: string): void {
+  //Convert from parameters
+  let dataset_stem = (arg0_dataset_stem) ? arg0_dataset_stem : ''
+
+  //Function body
+  if (!dataset_stem) {
+    _cache_authoritative_capitals_by_year.clear()
+    _cache_cities_at_year.clear()
+    _cache_compact_cities.clear()
+    return
+  }
+
+  let clean_stem = dataset_stem.endsWith('.json') ? dataset_stem.slice(0, -5) : dataset_stem
+  let prefix = `${clean_stem}:`
+  let prefix_json = `${clean_stem}.json:`
+
+  for (let key of _cache_authoritative_capitals_by_year.keys()) {
+    if (key.startsWith(prefix) || key.startsWith(prefix_json))
+      _cache_authoritative_capitals_by_year.delete(key)
+  }
+  for (let key of _cache_cities_at_year.keys()) {
+    if (key.startsWith(prefix) || key.startsWith(prefix_json))
+      _cache_cities_at_year.delete(key)
+  }
+  for (let key of _cache_compact_cities.keys()) {
+    if (key.startsWith(prefix) || key.startsWith(prefix_json))
+      _cache_compact_cities.delete(key)
+  }
+}
+
+registerBinaryStoreSwapListener((arg0_dataset_stem) => {
+  clearStadesterQueryCaches(arg0_dataset_stem)
+})
 
 /**
  * Binary-searches sorted ascending years for the first index whose value is >= target_year.
@@ -922,7 +966,8 @@ export async function streamCompactBinaryCitiesAtYear (
   let target_year = arg1_year
 
   //Declare local instance variables
-  let binary_store = getBinaryDatasetStore(dataset_name)
+  let load_res = await getBinaryDatasetStoreAsync(dataset_name)
+  let binary_store = load_res.store
 
   //Guard clauses
   if (should_abort && should_abort())

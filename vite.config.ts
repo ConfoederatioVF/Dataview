@@ -15,6 +15,7 @@ import { clearCompressedCitiesCache } from './core/server/routes/stadester_route
 import { clearStadesterConfigCache } from './core/server/stadester_config_loader.ts'
 import { clearStadesterLoaderCache } from './core/server/stadester_loader.ts'
 import { clearCityMetadataCache } from './core/server/stadester_metadata.ts'
+import { clearStadesterQueryCaches } from './core/server/stadester_queries.ts'
 
 let atlas_file_mtimes = new Map<string, number>()
 let dataview_hot_timeouts = new Map<string, NodeJS.Timeout>()
@@ -329,14 +330,18 @@ function handleDataviewHotUpdate (arg0_file: string, arg1_server: any): any[] | 
     if (normalized_file.includes('/common/layers/')) {
       try {
         let config_dir = path.resolve(import.meta.dirname, './common')
+        let is_stadester_cfg = normalized_file.endsWith('/stadester.json5') || normalized_file.endsWith('/filepath_defines.json5')
 
         FilepathDefines.clearCache()
         clearAtlasConfigCache()
         clearCompressedBordersCache()
-        clearStadesterConfigCache()
-        clearStadesterLoaderCache()
-        clearCityMetadataCache()
-        clearCompressedCitiesCache()
+        if (is_stadester_cfg) {
+          clearStadesterConfigCache()
+          clearStadesterLoaderCache()
+          clearStadesterQueryCaches()
+          clearCityMetadataCache()
+          clearCompressedCitiesCache()
+        }
         refreshRasterBmpPaths(config_dir)
 
         let registry = loadAndParseLayers(config_dir)

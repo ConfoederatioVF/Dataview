@@ -3,7 +3,11 @@ import { ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import { projectEqualEarth } from '@framework/geopng/equal_earth.ts'
 import { getGrowthRgb, getPopRgb, resolveRegionColorRgb } from '@framework/stadester/stadester_colours.ts'
 import type { CityPoint, ProjectionType, StadesterConfig } from '@framework/geopng/types.ts'
-import type { WorkerBinaryAttributes } from '@framework/stadester/stadester.worker.ts'
+import type {
+  WorkerBinaryAttributes,
+  WorkerPickTable,
+  WorkerProcessedPoint,
+} from '@framework/stadester/stadester.worker.ts'
 import { GlobeAntipodeCullExtension } from './layers/GlobeAntipodeCullExtension'
 import { UnderlinedTextLayer } from './underlined_text_layer'
 import {
@@ -140,6 +144,63 @@ export function buildStadesterCityPoints (arg0_options: BuildStadesterPointsOpti
 }
 
 
+/**
+ * Constructs a `CityPoint` on demand from a worker pick table or pre-built points array for hover/click picking.
+ *
+ * @param {number} arg0_index
+ * @param {any[]} arg1_points
+ * @param {WorkerPickTable} [arg2_pick_table]
+ *
+ * @returns {CityPoint | null}
+ */
+function resolvePickedCity (
+  arg0_index: number,
+  arg1_points: any[],
+  arg2_pick_table?: WorkerPickTable
+): CityPoint | null {
+  //Convert from parameters
+  let index = arg0_index
+  let pick_table = arg2_pick_table
+  let points = arg1_points
+
+  //Guard clauses
+  if (index < 0)
+    return null
+  if (points && index < points.length)
+    return points[index]
+  if (!pick_table || index >= pick_table.keys.length)
+    return null
+
+  //Declare local instance variables
+  let cap_color = pick_table.capitalColors[index] || undefined
+  let cap_of = pick_table.capitalOfs[index] || undefined
+  let is_cap = Boolean(pick_table.isCapitals[index])
+  let raw_sid = pick_table.capitalStateIds[index]
+  let cap_sid = raw_sid !== -1 ? raw_sid : undefined
+  let key_str = pick_table.keys[index]
+
+  //Return statement
+  return {
+    capitalColor: cap_color,
+    capitalOf: cap_of,
+    capitalStateId: cap_sid,
+    capital_color: cap_color,
+    capital_state_id: cap_sid,
+    capital_state_name: cap_of,
+    coords: [pick_table.lats[index], pick_table.lons[index]],
+    country: pick_table.countries[index] || undefined,
+    growthRate: pick_table.growthRates[index],
+    id: key_str,
+    isCapital: is_cap,
+    is_capital: is_cap,
+    key: key_str,
+    name: pick_table.names[index],
+    population: pick_table.populations[index],
+    region: pick_table.regions[index] || undefined,
+  }
+}
+
+
 export interface BuildStadesterCityLayersOptions {
   acapital_state_ids: Set<string>
   active_capitals_by_key: Map<string, any>
@@ -158,10 +219,12 @@ export interface BuildStadesterCityLayersOptions {
   is_mobile: boolean
   onHoverCity?: (city: CityPoint | null, x?: number, y?: number) => void
   onSelectCity?: (city: CityPoint, coord?: [number, number], screen_x?: number, screen_y?: number) => void
+  pick_table?: WorkerPickTable
   polity_features?: { by_name?: Map<string, any>; by_sid?: Map<string, any> }
   projection: ProjectionType
   reconciled_labels?: any[]
   selectedCityKey?: string | null
+  selected_city_point?: WorkerProcessedPoint | null
   stadesterConfig?: StadesterConfig
   stadesterLabels?: any[]
 }
@@ -198,7 +261,9 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
   let sorted_city_points: any[]
 
   //Guard clauses
-  if (!options.stadesterConfig?.enabled || !effective_points || effective_points.length === 0)
+  let has_binary_points = Boolean(options.binary_attributes && options.binary_attributes.length > 0)
+  let has_object_points = Boolean(effective_points && effective_points.length > 0)
+  if (!options.stadesterConfig?.enabled || (!has_binary_points && !has_object_points))
     return []
 
   //Function body
@@ -280,8 +345,8 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
     let use_binary_attrs = Boolean(
       options.binary_attributes &&
       !hovered_region &&
-      options.binary_attributes.length === sorted_city_points.length &&
-      options.binary_attributes.length > 0
+      options.binary_attributes.length > 0 &&
+      (sorted_city_points.length === 0 || options.binary_attributes.length === sorted_city_points.length)
     )
     let scatterplot_data: any = use_binary_attrs
       ? {
@@ -343,7 +408,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         onClick: (info: any) => {
           if (is_drawing)
             return false
-          let picked_obj = info.object || (info.index >= 0 ? sorted_city_points[info.index] : null)
+          let picked_obj = info.object || resolvePickedCity(info.index, sorted_city_points, options.pick_table)
           if (picked_obj && options.onSelectCity)
             options.onSelectCity(
               picked_obj,
@@ -356,7 +421,7 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
         onHover: (info: any) => {
           if (is_drawing)
             return
-          let picked_obj = info.object || (info.index >= 0 ? sorted_city_points[info.index] : null)
+          let picked_obj = info.object || resolvePickedCity(info.index, sorted_city_points, options.pick_table)
           if (options.onHoverCity)
             options.onHoverCity(picked_obj || null, info.x, info.y)
         },
@@ -372,7 +437,9 @@ export function buildStadesterCityLayers (arg0_options: BuildStadesterCityLayers
 
   // City selection highlight ring
   if (options.selectedCityKey) {
-    let selected_city_item = effective_points.find((c: any) => c.key === options.selectedCityKey)
+    let selected_city_item = options.selected_city_point ||
+      effective_points.find((arg0_c: any) => arg0_c.key === options.selectedCityKey) ||
+      (options.reconciled_labels ? options.reconciled_labels.find((arg0_c: any) => arg0_c.key === options.selectedCityKey) : undefined)
     if (selected_city_item) {
       if (is_firefox) {
         layers_array.push(
